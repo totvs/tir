@@ -5,11 +5,11 @@ except ImportError:
     from distutils.core import setup
 
 config = {
-    'description': 'My Project',
-    'author': 'My Name',
-    'url': 'URL to get it at.',
-    'download_url': 'Where to download it.',
-    'author_email': 'My email.',
+    'description': 'CAWebHelper',
+    'author': 'TOTVS Automation Team',
+    'url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
+    'download_url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
+    'author_email': 'squad.automacaoprotheus@totvs.com.br',
     'version': '0.1',
     'install_requires': [
         'beautifulsoup4==4.6.0',
