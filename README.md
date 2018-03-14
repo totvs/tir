@@ -47,7 +47,7 @@ test_helper.TearDown()
 
 #Documentation
 
-This project has a docs folder with Sphinx(http://www.sphinx-doc.org/en/master/) files.
+This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 The documents can be built by running the following command inside the docs folder:
 ```
 make html
