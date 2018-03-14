@@ -1,1 +1,60 @@
-#Contributing
+# Contributing
+
+In order to contribute to our project, be sure to take your time and read this document. It's a guide of an effective and easy way of how contribution should be done. 
+
+## _issues_ list
+
+The _issues_ list is the preferred place to [report bugs](#reporting-bugs), [request features](#feature-requests) and [send _pull requests_](#pull-requests)
+
+## Reporting bugs
+
+A bug is a _demonstrable problem_ that is caused by the code in this repository. A well written bug report can help us identify the problem and solve it in a quick and effective way.
+
+How to report bugs:
+
+1. **Look for the _issue_** &mdash; check wether the _issue_ is already identified and reported or not.
+
+2. **Check if the _issue_ is already fixed** &mdash; try to reproduce the bug using the latest `master` or development _branch_.
+
+3. **Isolate the problem** &mdash; create a [reduced test case](http://css-tricks.com/reduced-test-cases/).
+
+A good bug report must contain all needed information to identify and solve its problem. It's advised to write in the most detailed way, including information about your environment, how to reproduce the bug, what browser, operational systems, databases, component versions are being used, what results you are expecting, etc. All these details will help the developers to identify and solve the reported bug.
+
+E.g:
+
+> A short title and a descriptive example of the problem
+>
+> A description of the problem and the environment details that it occurs. If possible, write the steps to reproduce the problem:
+>
+> 1. First step
+> 2. Second step
+> 3. Other steps and etc.
+>
+> `<url>` - a url to the reduced test case
+>
+> Any information you desire to share that is relevant for the problem's solution. Code lines, possible solutions and opinions about the issue can be written here.
+
+## Feature Requests
+
+Requesting features is a great way to suggest ideas to the project. If your idea has the same objective and is in the scope of the project, then it's possible that it can be implemented. Include as much information as possible and explain us why it is relevant to the project.
+
+## Pull Requests
+
+_Pull requests_ are really helpful. They must be in the project's scope and avoid unrelated _commits_.
+
+**Ask us first** before starting to work on a _pull request_ of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
+
+The methods must have docstrings describing its functionality. e.g.:
+
+```python
+def hello_word(self):
+    '''
+    This method prints Hello World on the screen.
+    '''
+    print("Hello World")
+```
+
+The pull request must follow the code conventions (identation, comments, naming) that are currently being used.
+
+
+**IMPORTANT**: When you submit any change you agree that your changes are now under the same license as the project itself.
