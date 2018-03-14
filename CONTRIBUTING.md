@@ -2,19 +2,19 @@
 
 In order to contribute to our project, be sure to take your time and read this document. It's a guide of an effective and easy way of how contribution should be done. 
 
-## _issues_ list
+## Issues list
 
-The _issues_ list is the preferred place to [report bugs](#reporting-bugs), [request features](#feature-requests) and [send _pull requests_](#pull-requests)
+The issues list is the preferred place to [report bugs](#reporting-bugs), [request features](#feature-requests) and send [pull requests](#pull-requests)
 
 ## Reporting bugs
 
-A bug is a _demonstrable problem_ that is caused by the code in this repository. A well written bug report can help us identify the problem and solve it in a quick and effective way.
+A bug is a demonstrable problem that is caused by the code in this repository. A well written bug report can help us identify the problem and solve it in a quick and effective way.
 
 How to report bugs:
 
-1. **Look for the _issue_** &mdash; check wether the _issue_ is already identified and reported or not.
+1. **Look for the _issue_** &mdash; check wether the issue is already identified and reported or not.
 
-2. **Check if the _issue_ is already fixed** &mdash; try to reproduce the bug using the latest `master` or development _branch_.
+2. **Check if the _issue_ is already fixed** &mdash; try to reproduce the bug using the latest `master` or development branch.
 
 3. **Isolate the problem** &mdash; create a [reduced test case](http://css-tricks.com/reduced-test-cases/).
 
@@ -40,9 +40,9 @@ Requesting features is a great way to suggest ideas to the project. If your idea
 
 ## Pull Requests
 
-_Pull requests_ are really helpful. They must be in the project's scope and avoid unrelated _commits_.
+Pull requests are really helpful. They must be in the project's scope and avoid unrelated commits.
 
-**Ask us first** before starting to work on a _pull request_ of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
+**Ask us first** before starting to work on a pull request of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
 
 The methods must have docstrings describing its functionality. e.g.:
 
