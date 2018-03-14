@@ -52,7 +52,7 @@ The documents can be built by running the following command inside the docs fold
 ```
 make html
 ```
-This will generate a documentation website inside ~cabwenhelper/docs/build/html/index.html, which you can open in any browser and find the description of every method.
+This will generate a documentation website inside ~/docs/build/html/index.html, which you can open in any browser and find the description of every method.
 
 
 #Contributing
