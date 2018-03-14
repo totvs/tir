@@ -578,6 +578,13 @@ class CAWebHelper(unittest.TestCase):
                     RetId = self.caLang(soup, tag, cClass)
                     if RetId:
                         break
+
+                elif 'indice' in args1 or seek == 'placeHolder':
+                    RetId = self.caSearch(seek, soup, 'div', cClass, args1, args2)
+                    if self.consolelog:
+                        print('caSearch')
+                    if RetId:
+                        break
                 
                 else:
                     RetId = self.cabutton(seek, soup, tag, cClass, args1, args2)
@@ -771,7 +778,7 @@ class CAWebHelper(unittest.TestCase):
                 elif args1 == 'indice':
                     if cClass == 'tpanel':
                         if line.contents:
-                            self.recursivecall(seek, line.contents)
+                            self.seek_content(seek, line.contents)
                             if self.idcomp:
                                 RetId = self.idcomp
                                 break
@@ -878,7 +885,7 @@ class CAWebHelper(unittest.TestCase):
         
         return(RetId)
 
-    def recursivecall(self, seek, contents, line=''):
+    def seek_content(self, seek, contents, line=''):
         try:
             if not self.idcomp:
                 if not contents:
@@ -895,14 +902,14 @@ class CAWebHelper(unittest.TestCase):
                     else:
                         for line in contents:
                             try:
-                                self.recursivecall(seek, line.contents, line)
+                                self.seek_content(seek, line.contents, line)
                             except Exception:
                                 pass
                     return    
                 else:
                     for line in contents:
                         try:
-                            self.recursivecall(seek, line.contents, line)
+                            self.seek_content(seek, line.contents, line)
                         except Exception:
                             pass
                 return                
@@ -1010,8 +1017,115 @@ class CAWebHelper(unittest.TestCase):
 
         return(language)
 
+    def caSearch(self, seek, soup, tag, cClass, args1, args2):
+        """
+        Método que busca o indice informado pelo usuário e efetua o preenchimento da chave no campo pesquisa do browse.
+        """
+        RetId = ''
+        self.idcomp = ''
+        tradiobuttons = []
 
-    def SearchBrowse(self, descricao='', chave='', placeholder='', indice=False):
+        if args2 == 'detail':
+            if args1 == 'indicedefault':
+                #lista = self.search_next_soup(seek, soup)
+                lista = soup.find_all("ul", class_=("tmenupopup"))
+                for line in lista:
+                    if "active" in line.attrs['class']:
+                        if line.select(".tradiobutton"):
+                            tradiobutton = line.find_all(class_='tradiobutton')
+                            Id = tradiobutton[0].attrs['id']
+                            break
+            else:
+                lista = soup.find_all('div', class_=(cClass))
+                for line in lista:
+                    if seek in line.text:
+                        Id = line.attrs['id']
+                        break
+        else:
+            if args2:
+                lista = self.search_next_soup(args2, soup)
+            else:  
+                lista = soup.find_all('div', class_=(cClass))
+
+            #Coleto o Id do campo pesquisa correspondente
+            for line in lista:
+                if cClass == 'tpanel':
+                    if line.contents:
+                        self.seek_content(seek, line.contents)
+                        if self.idcomp:
+                            RetId = self.idcomp
+                            break
+
+                #Busca o campo para preenchimento da chave de busca
+                if seek == 'placeHolder':                    
+                    self.seek_content(seek, line.contents)
+                    if self.idcomp:
+                        RetId = self.idcomp
+                        break
+
+            return(RetId)
+        pass
+
+        #Seleciona o botão correspondente a descrição do indice    
+        if cClass == 'tradiobutton':
+            elem = self.driver.find_elements(By.ID, Id)
+            radioitens = elem[0].find_elements(By.CLASS_NAME, 'tradiobuttonitem')
+            if args1 == 'indicedefault':
+                item = radioitens[0]
+                if item.tag_name == 'div':
+                    item = item.find_elements(By.TAG_NAME, 'input')[0]
+                    RetId = True
+            else:
+                for item in radioitens:
+                    if seek.strip() in item.text:
+                        if item.tag_name == 'div':
+                            item = item.find_elements(By.TAG_NAME, 'input')[0]
+                            RetId = True
+            self.DoubleClick(item)
+            return RetId
+
+        #Busca pelo primeiro indice de busca
+        elif seek == 'indicedefault':
+            RetId = line.contents[0].attrs['id']
+            
+    def search_next_soup(self, seek, soup):
+        """
+        Retorna uma lista baseada no texto informado pelo usuário.
+        """
+        text = ''
+        next_ = ''
+
+        text = soup.find_all('div')
+
+        for x in text:
+            if seek == x.text:
+                next_ = x.find_all_next('div')
+                break
+        return next_
+
+    def get_zindex_position(self, list_, order=''):
+        zindex = 0
+        Id = ''
+        zindex_list = []
+
+        for line in list_:
+            zindex_content = line.attrs["style"].split("z-index:")[1].split(";")[0].strip()
+            try:
+                if zindex_content not  in zindex_list:
+                    zindex_list.append(zindex_content)
+                #zindex_list.append(int(line.attrs("style").split("z-index:")[1].split(";")[0].strip()))
+            except:
+                pass
+        
+        if order == 'ascending':
+            zindex = sorted(zindex_list, key=int)
+        elif order == 'descending':
+            zindex = sorted(zindex_list, key=int, reverse=True)
+
+        return zindex[0]
+
+
+    def SearchBrowse(self, descricao='', chave='', indice=False, placeholder=''):
         '''
         Mètodo que pesquisa o registro no browse com base no indice informado.
         '''
@@ -1021,32 +1135,27 @@ class CAWebHelper(unittest.TestCase):
         if not Ret:
             self.savebtn = ''
             #Caso solicite para alterar o indice
-            if indice:
-                #Faz a busca do icone para clique e seleção do indice.
-                Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
-                if Id:
-                    element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
-                    if self.rota == 'SetRotina' or self.rota == 'EDAPP':
-                        self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
-                        self.rota = ''         
-                    self.Click(element)
-                    #seleciona a busca do indice baseado na descrição ex: Filial+numero
-                    Id = self.SetScrap(descricao, 'div', 'tradiobutton', 'indice', 'detail')
-                    if Id:
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
-                        self.placeHolder(placeholder, chave)
+            #if indice:
+            #Faz a busca do icone para clique e seleção do indice.
+            Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice', placeholder)
+            if Id:
+                element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
+                if self.rota == 'SetRotina' or self.rota == 'EDAPP':
+                    self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
+                    self.rota = ''
+                self.Click(element)
+                #seleciona a busca do indice baseado na descrição ex: Filial+numero
+                if indice:
+                    self.SetScrap(descricao, 'div', 'tradiobutton', 'indice', 'detail')
                 else:
-                    self.proximo = False
-                pass
+                    self.SetScrap(placeholder, 'div', 'tradiobutton', 'indicedefault', 'detail')
+                self.placeHolder(placeholder, chave)
             else:
-                #Fazer a pesquisa pelo indice padrão
-                Id = self.SetScrap('indicedefault', 'div', 'tradiobutton', 'indice', 'detail')
-                if Id:
-                    self.placeHolder(placeholder, chave)
+                self.proximo = False
+            pass
 
     def placeHolder(self, placeholder='', chave=''):
-        Id = self.SetScrap('placeHolder', 'div', 'tget', placeholder)
+        Id = self.SetScrap('placeHolder', 'div', 'tget', args2=placeholder)
         if Id:
             element = self.driver.find_element_by_id(Id)
             self.Click(element)
