@@ -1,6 +1,6 @@
 #CAWebHelper
 
-##What it is?
+##What is it?
 
 CAWebHelper is a Python module used to create test scripts for the Protheus web interface. With it, you are able to easily create and execute test suites and test cases for Protheus routines.
 
@@ -44,3 +44,8 @@ test_helper.AssertTrue()
 
 test_helper.TearDown()
 ```
+
+
+#Contributing
+
+In order to contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
