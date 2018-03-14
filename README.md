@@ -45,6 +45,15 @@ test_helper.AssertTrue()
 test_helper.TearDown()
 ```
 
+#Documentation
+
+This project has a docs folder with Sphinx(http://www.sphinx-doc.org/en/master/) files.
+The documents can be built by running the following command inside the docs folder:
+```
+make html
+```
+This will generate a documentation website inside ~cabwenhelper/docs/build/html/index.html, which you can open in any browser and find the description of every method.
+
 
 #Contributing
 
