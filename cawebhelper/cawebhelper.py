@@ -302,9 +302,9 @@ class CAWebHelper(unittest.TestCase):
             self.proximo = False
         self.rota = 'SetRotina'
 
-    def SetEnchoice(self, campo='', valor='', cClass='', args='', visibility='', Id='', disabled=False, tries=100):
+    def set_enchoice(self, campo='', valor='', cClass='', args='', visibility='', Id='', disabled=False, tries=100):
         '''
-        Método que preenche a Enchoice
+         Method that fills the enchoice.
         '''
         if tries == 10:
             self.numberOfTries = 0
@@ -381,12 +381,12 @@ class CAWebHelper(unittest.TestCase):
                 if resultado.lower() != str(valor).strip().lower() and not self.passfield and not self.valtype == 'N': #TODO AJUSTAR ESTE PONTO.
                     if self.elementDisabled:
                         self.numberOfTries += 1
-                        self.SetEnchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
+                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
                     else:
-                        self.SetEnchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
+                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
                 elif self.passfield:
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
-                        self.SetEnchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
+                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
 
     def SelectCombo(self, Id, valor):
         """
@@ -1239,7 +1239,7 @@ class CAWebHelper(unittest.TestCase):
         #time.sleep(1)
         self.elementDisabled = False
         if cabitem == "aCab":
-            self.SetEnchoice(campo, valor, '', 'Enchoice', '', '', disabled)
+            self.set_enchoice(campo, valor, '', 'Enchoice', '', '', disabled)
         elif cabitem == "aItens":
             # identifica nova linha quando executado através do metodo UTCheckResult
             if chknewline and self.CpoNewLine == campo:
@@ -1799,7 +1799,7 @@ class CAWebHelper(unittest.TestCase):
         value = ''
         
         if cabitem == 'aCab':
-            Id = self.SetEnchoice(campo=field, args='Enchoice')
+            Id = self.set_enchoice(campo=field, args='Enchoice')
             value = self.get_web_value(Id)
         elif cabitem == 'aItens':
             self.gridcpousr.append([field, '', 0])
