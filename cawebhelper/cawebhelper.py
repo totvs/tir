@@ -1214,11 +1214,11 @@ class CAWebHelper(unittest.TestCase):
         self.config.branch = branch
         self.config.module = module
 
-        self.ProgramaInicial(initial_program)
-
         if not self.config.valid_language:
             self.config.language = self.SetScrap("language", "html")
             self.language = LanguagePack(self.config.language)
+
+        self.ProgramaInicial(initial_program)
 
         self.Usuario()
         self.Ambiente()
