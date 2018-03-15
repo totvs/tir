@@ -1023,7 +1023,6 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
-        tradiobuttons = []
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1105,7 +1104,6 @@ class CAWebHelper(unittest.TestCase):
 
     def get_zindex_position(self, list_, order=''):
         zindex = 0
-        Id = ''
         zindex_list = []
 
         for line in list_:
@@ -1319,7 +1317,7 @@ class CAWebHelper(unittest.TestCase):
 
             
             #caminho do arquivo csv(SX3)
-            path = "c:\\sx3.csv"
+            path = os.path.join(os.path.dirname(__file__), r'data\\sx3.csv')
             #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv. 
             data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False, 
                             index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Título', None], low_memory=False)
