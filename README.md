@@ -13,6 +13,18 @@ After cloning this repository, *double click on "install.cmd"* or if you have *m
 make install
 ```
 
+##Config file
+
+The environment must be configured through a *config.json* file. 
+You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of CAWebhelper class initialization.
+```python
+#To use the config file in the same workspace directory
+test_helper = CAWebHelper()
+
+#To use a custom path for your config.json
+test_helper = CAWebHelper("C:\PATH_HERE\config.json")
+```
+
 ##Usage:
 After the module is installed, you could just import it on your Test Case. 
 See the following example: 

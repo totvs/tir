@@ -1,0 +1,8 @@
+{
+    "Url": "http://localhost:9096/",
+    "Browser": "Firefox",
+    "Environment": "ENVIRONMENT_NAME",
+    "Language": "pt-br",
+    "User": "ADMIN",
+    "Password": ""
+}
