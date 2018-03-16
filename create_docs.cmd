@@ -9,13 +9,12 @@ echo Installing Sphinx HTML Theme...
 echo -------------------------
 pip install sphinx-rtd-theme
 echo -------------------------
-echo Cleaning Documentation...
-echo -------------------------
-docs/make.bat clean
-echo -------------------------
 echo Creating Documentation...
 echo -------------------------
-docs/make.bat html
+cd docs
+call make.bat clean
+call make.bat html
+cd ..
 echo ------------------------------------------------------------------------------------
 echo Documentation created successfully! Website located at ./docs/build/html/index.html
 echo ------------------------------------------------------------------------------------
