@@ -347,7 +347,7 @@ class CAWebHelper(unittest.TestCase):
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
                             
-                        reg = (r"@. [1-9.]+")
+                        reg = (r"@. [1-9.-]+")
                         mask = element.get_attribute("picture")
                         valsub = self.RegexValue(valor)
 
@@ -1454,7 +1454,7 @@ class CAWebHelper(unittest.TestCase):
                         if Id:
                             self.lenvalorweb = len(self.get_web_value(Id))
 
-                            reg = (r"@. [1-9.]+")
+                            reg = (r"@. [1-9.-]+")
                             mask = element.get_attribute("picture")
 
                         
