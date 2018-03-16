@@ -342,7 +342,7 @@ class CAWebHelper(unittest.TestCase):
                 self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
                 try:
                     if self.classe == 'tcombobox':
-                        self.SelectCombo(Id, valor)
+                        self.select_combo(Id, valor)
                     else:
                         time.sleep(1)
                         self.DoubleClick(element)
@@ -391,7 +391,7 @@ class CAWebHelper(unittest.TestCase):
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
 
-    def SelectCombo(self, Id, valor):
+    def select_combo(self, Id, valor):
         """
         Retorna a lista do combobox através do select do DOM.
         """
@@ -1451,7 +1451,7 @@ class CAWebHelper(unittest.TestCase):
                         if not Id:
                             Id = self.SetScrap(campo,'div','tcombobox', args1='caSeek')
                             if Id:
-                                valorcombo = self.SelectCombo(Id, valor)
+                                valorcombo = self.select_combo(Id, valor)
                                 if valorcombo[0:len(valor)] == valor:
                                     return False
                         if Id:
