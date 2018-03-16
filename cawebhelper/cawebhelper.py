@@ -49,7 +49,8 @@ class CAWebHelper(unittest.TestCase):
         self.Table = []
         self.lenbutton = []
         self.idwizard = []
-
+        
+        self.close_element = ''
         self.date = ''
         self.rota = ''       
         self.CpoNewLine = ''
@@ -258,12 +259,14 @@ class CAWebHelper(unittest.TestCase):
                 if Ret:
                     self.advpl = True
                     self.cClass = 'tgetdados'
+                    self.close_element = self.driver.find_element_by_id(Ret)
                 if not Ret:
                     Ret = self.SetScrap(self.language.close,"div","tbrowsebutton",'wait','',0,'',3)#Procuro botão de fechar advpl mvc
                     if Ret:
                         self.advpl = False
                         self.cClass = 'tgrid'
                         self.IdClose = Ret
+                        self.close_element = self.driver.find_element_by_id(Ret)
             return Ret
 
     def wait_browse(self,searchMsg=True):
@@ -1673,6 +1676,11 @@ class CAWebHelper(unittest.TestCase):
             self.scroll_to_element(element)
             actions.click()
             actions.perform()
+    
+    def move_element(self, element):
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element)
+        actions.perform()
 
     def DoubleClick(self, element):
         try:
@@ -1994,6 +2002,8 @@ class CAWebHelper(unittest.TestCase):
         Método que efetua o clique na aba
         ''' 
         self.rota = "ClickFolder"
+        if self.close_element:
+            self.move_element(self.close_element) # Retira o ToolTip dos elementos focados.
         self.wait_enchoice()
         #self.advpl = False
         if self.VldData():
@@ -2006,7 +2016,7 @@ class CAWebHelper(unittest.TestCase):
             
             self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
             self.Click(element)
-
+    
     def ClickBox(self, labels):
         '''
         Método que efetua o clique no checkbox
