@@ -1262,8 +1262,7 @@ class CAWebHelper(unittest.TestCase):
         """   
         Ret = self.wait_browse(False)
         if not Ret:
-            element = self.driver.find_element_by_class_name("tmodaldialog.twidget")
-            self.SendKeys(element, Keys.CONTROL)#element.send_keys(Keys.CONTROL)
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish,searchMsg=False)
     
     def TearDown(self):
