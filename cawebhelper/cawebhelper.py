@@ -1766,7 +1766,7 @@ class CAWebHelper(unittest.TestCase):
 
         for menuitem in menuitens:
             menu = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#{}".format(menu.get_attribute("id")))))
-            self.WaitElementsLoad("#{} .tmenuitem".format(menu.get_attribute("id")))
+            self.wait_elements_load("#{} .tmenuitem".format(menu.get_attribute("id")))
             subMenuElements = menu.find_elements(By.CSS_SELECTOR, ".tmenuitem")
             submenu = ""   
             for child in subMenuElements:
@@ -1793,7 +1793,7 @@ class CAWebHelper(unittest.TestCase):
         else:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
 
-    def WaitElementsLoad(self, selector):
+    def wait_elements_load(self, selector):
         '''
         Wait for elements defined by the CSS Selector to be present on the screen
         '''
@@ -1845,7 +1845,7 @@ class CAWebHelper(unittest.TestCase):
     def set_log_info(self):
         self.log.initial_time = time.time()
         self.SetLateralMenu(self.language.menu_about)
-        self.WaitElementsLoad(".tmodaldialog")
+        self.wait_elements_load(".tmodaldialog")
 
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
