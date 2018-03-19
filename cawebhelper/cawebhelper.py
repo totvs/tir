@@ -49,7 +49,8 @@ class CAWebHelper(unittest.TestCase):
         self.Table = []
         self.lenbutton = []
         self.idwizard = []
-
+        
+        self.close_element = ''
         self.date = ''
         self.rota = ''       
         self.CpoNewLine = ''
@@ -258,12 +259,14 @@ class CAWebHelper(unittest.TestCase):
                 if Ret:
                     self.advpl = True
                     self.cClass = 'tgetdados'
+                    self.close_element = self.driver.find_element_by_id(Ret)
                 if not Ret:
                     Ret = self.SetScrap(self.language.close,"div","tbrowsebutton",'wait','',0,'',3)#Procuro botão de fechar advpl mvc
                     if Ret:
                         self.advpl = False
                         self.cClass = 'tgrid'
                         self.IdClose = Ret
+                        self.close_element = self.driver.find_element_by_id(Ret)
             return Ret
 
     def wait_browse(self,searchMsg=True):
@@ -339,7 +342,7 @@ class CAWebHelper(unittest.TestCase):
                 self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
                 try:
                     if self.classe == 'tcombobox':
-                        self.SelectCombo(Id, valor)
+                        self.select_combo(Id, valor)
                     else:
                         time.sleep(1)
                         self.DoubleClick(element)
@@ -387,7 +390,7 @@ class CAWebHelper(unittest.TestCase):
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
 
-    def SelectCombo(self, Id, valor):
+    def select_combo(self, Id, valor):
         """
         Retorna a lista do combobox através do select do DOM.
         """
@@ -1246,8 +1249,7 @@ class CAWebHelper(unittest.TestCase):
         """   
         Ret = self.wait_browse(False)
         if not Ret:
-            element = self.driver.find_element_by_class_name("tmodaldialog.twidget")
-            self.SendKeys(element, Keys.CONTROL)#element.send_keys(Keys.CONTROL)
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish,searchMsg=False)
     
     def TearDown(self):
@@ -1435,7 +1437,7 @@ class CAWebHelper(unittest.TestCase):
                         if not Id:
                             Id = self.SetScrap(campo,'div','tcombobox', args1='caSeek')
                             if Id:
-                                valorcombo = self.SelectCombo(Id, valor)
+                                valorcombo = self.select_combo(Id, valor)
                                 if valorcombo[0:len(valor)] == valor:
                                     return False
                         if Id:
@@ -1661,6 +1663,11 @@ class CAWebHelper(unittest.TestCase):
             self.scroll_to_element(element)
             actions.click()
             actions.perform()
+    
+    def move_element(self, element):
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element)
+        actions.perform()
 
     def DoubleClick(self, element):
         try:
@@ -1747,7 +1754,7 @@ class CAWebHelper(unittest.TestCase):
 
         for menuitem in menuitens:
             menu = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#{}".format(menu.get_attribute("id")))))
-            self.WaitElementsLoad("#{} .tmenuitem".format(menu.get_attribute("id")))
+            self.wait_elements_load("#{} .tmenuitem".format(menu.get_attribute("id")))
             subMenuElements = menu.find_elements(By.CSS_SELECTOR, ".tmenuitem")
             submenu = ""   
             for child in subMenuElements:
@@ -1774,7 +1781,7 @@ class CAWebHelper(unittest.TestCase):
         else:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
 
-    def WaitElementsLoad(self, selector):
+    def wait_elements_load(self, selector):
         '''
         Wait for elements defined by the CSS Selector to be present on the screen
         '''
@@ -1826,7 +1833,7 @@ class CAWebHelper(unittest.TestCase):
     def set_log_info(self):
         self.log.initial_time = time.time()
         self.SetLateralMenu(self.language.menu_about)
-        self.WaitElementsLoad(".tmodaldialog")
+        self.wait_elements_load(".tmodaldialog")
 
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
@@ -1982,6 +1989,8 @@ class CAWebHelper(unittest.TestCase):
         Método que efetua o clique na aba
         ''' 
         self.rota = "ClickFolder"
+        if self.close_element:
+            self.move_element(self.close_element) # Retira o ToolTip dos elementos focados.
         self.wait_enchoice()
         #self.advpl = False
         if self.VldData():
@@ -1994,7 +2003,7 @@ class CAWebHelper(unittest.TestCase):
             
             self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
             self.Click(element)
-
+    
     def ClickBox(self, labels):
         '''
         Método que efetua o clique no checkbox
