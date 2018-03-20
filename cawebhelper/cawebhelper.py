@@ -1167,9 +1167,9 @@ class CAWebHelper(unittest.TestCase):
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
-            time.sleep(1)
-            self.DoubleClick(element)
-            self.SendKeys(element, Keys.BACK_SPACE)
+            #time.sleep(1)
+            #self.DoubleClick(element)
+            #self.SendKeys(element, Keys.BACK_SPACE)
             return True
 
     # VISAO 3 - Tela inicial
