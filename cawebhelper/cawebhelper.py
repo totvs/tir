@@ -778,32 +778,6 @@ class CAWebHelper(unittest.TestCase):
                         self.valtype = line.contents[0]['valuetype']
                     break
 
-                elif args1 == 'indice':
-                    if cClass == 'tpanel':
-                        if line.contents:
-                            self.seek_content(seek, line.contents)
-                            if self.idcomp:
-                                RetId = self.idcomp
-                                break
-
-                    #Seleciona o botão correspondente a descrição do indice    
-                    elif cClass == 'tradiobutton':
-                        if seek in line.text:
-                            RetId = line.contents[0].attrs['id']
-                            break
-
-                        #Busca pelo primeiro indice de busca
-                        elif seek == 'indicedefault':
-                            RetId = line.contents[0].attrs['id']
-                            break
-                #Busca o campo para preenchimento da chave de busca
-                elif seek == 'placeHolder':
-                    if seek in line.contents[0].attrs['class'][0]:
-                        RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        self.LastIdBtn.append(RetId)
-                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
-
                 elif seek == self.language.search:
                     if seek in line.previous and line.attrs['name'] == args1:
                         RetId = line.attrs['id']
@@ -1059,11 +1033,23 @@ class CAWebHelper(unittest.TestCase):
                             break
 
                 #Busca o campo para preenchimento da chave de busca
+                """
                 if seek == 'placeHolder':                    
                     self.seek_content(seek, line.contents)
                     if self.idcomp:
                         RetId = self.idcomp
                         break
+
+                """
+                #Busca o campo para preenchimento da chave de busca
+                try:
+                    if seek in line.contents[0].attrs['class'][0]:
+                        RetId = line.attrs['id']
+                        self.classe = line.attrs['class'][0]
+                        self.LastIdBtn.append(RetId)
+                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
+                except Exception as error:
+                    pass
 
             return(RetId)
         pass
@@ -1159,7 +1145,7 @@ class CAWebHelper(unittest.TestCase):
         Id = self.SetScrap('placeHolder', 'div', 'tget', args2=placeholder)
         if Id:
             element = self.driver.find_element_by_id(Id)
-            self.Click(element)
+            self.DoubleClick(element)
             self.SendKeys(element, chave)
             time.sleep(1)
             self.Click(element)
@@ -1935,7 +1921,7 @@ class CAWebHelper(unittest.TestCase):
             if self.consolelog:
                 print(error)
             self.Restart()
-            self.assertTrue(False)
+            self.assertTrue(False) 
 
 
     def SetFilial(self, filial):
