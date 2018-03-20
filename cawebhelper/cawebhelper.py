@@ -32,7 +32,7 @@ class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
         if config_path == "":
             config_path = sys.path[0] + r"\\config.json"
-        self.config = ConfigLoader(config_path)                
+        self.config = ConfigLoader(config_path)      
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -1491,6 +1491,7 @@ class CAWebHelper(unittest.TestCase):
                     print(valorweb)
                 if self.check_mask(element):
                     valorweb = self.apply_mask(valorweb)
+                    valorusr = self.apply_mask(valorusr)
                 if type(valorweb) is str:
                     valorweb = valorweb[0:len(str(valorusr))]
             if args1 != 'input':
@@ -2044,6 +2045,9 @@ class CAWebHelper(unittest.TestCase):
                             self.SendKeys(elements_list[index], Keys.ENTER)
 
     def check_mask(self, element):
+        """
+        Checks wether the element has a numeric mask.
+        """
         reg = (r"@. [1-9.-]+")
         mask = element.get_attribute("picture")
         if mask is None:
