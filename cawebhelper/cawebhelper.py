@@ -2048,7 +2048,7 @@ class CAWebHelper(unittest.TestCase):
         """
         Checks wether the element has a numeric mask.
         """
-        reg = (r"@. [1-9.-]+")
+        reg = (r"@. [1-9.-/]+")
         mask = element.get_attribute("picture")
         if mask is None:
             child = element.find_elements(By.CSS_SELECTOR, "input")
