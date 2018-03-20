@@ -1048,7 +1048,7 @@ class CAWebHelper(unittest.TestCase):
                         self.classe = line.attrs['class'][0]
                         self.LastIdBtn.append(RetId)
                         RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
-                except Exception as error:
+                except:
                     pass
 
             return(RetId)
