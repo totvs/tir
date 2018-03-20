@@ -22,6 +22,7 @@ class LanguagePack:
         self.save = languagepack["Save"]
         self.close = languagepack["Close"]
         self.exit = languagepack["Exit"]
+        self.leave_page = languagepack["Leave Page"]
         self.enter = languagepack["Enter"]
         self.finish = languagepack["Finish"]
         self.details = languagepack["Details"]
@@ -86,6 +87,7 @@ class LanguagePack:
             "Save": "Salvar",
             "Close": "Fechar",
             "Exit": "Sair",
+            "Leave Page": "Sair da página",
             "Enter": "Entrar",
             "Finish": "Finalizar",
             "Details": "Detalhes",
