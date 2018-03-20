@@ -700,13 +700,27 @@ class CAWebHelper(unittest.TestCase):
     def SetButtonTooltip(self, seek, soup, tag, cClass):
         '''
         Identifica o ID do Botão sem Rótulo/Texto.
-        Botão com identificação via Tooltip
+        Via Tooltip ou via Nome da Imagem.
         '''
         tooltip = ''
+        tooltipID = ''
+
         tooltipID = soup.find_all('div', text=seek)
 
-        if tooltipID[0].text == seek:
-            tooltip = tooltipID[0].attrs['id'][8:12]
+        try: # Encontra o botão via nome da imagem
+            if not tooltipID or tooltipID[1]:
+                lista = soup.find_all(tag, class_=('tbutton'))
+                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.ajuda: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.add: 'bmpincluir.png', self.language.view: 'bmpvisual.png','Editar': 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+                button = menuItens[seek]
+
+                for line in lista:
+                    if button in line.contents[1]['style']:
+                        tooltip = line.attrs['id'][4:8]
+                        break
+        except: # Encontra o botão via Tooltip
+            if tooltipID[0].text == seek:
+                    tooltip = tooltipID[0].attrs['id'][8:12]
+        
         return(tooltip)
 
     def cainput(self, seek, soup, tag, cClass, args1='', args2='', args3=0, args4='', args5=''):
