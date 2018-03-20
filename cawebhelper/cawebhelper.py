@@ -1145,7 +1145,7 @@ class CAWebHelper(unittest.TestCase):
         Id = self.SetScrap('placeHolder', 'div', 'tget', args2=placeholder)
         if Id:
             element = self.driver.find_element_by_id(Id)
-            self.DoubleClick(element)
+            self.Click(element)
             self.SendKeys(element, chave)
             time.sleep(1)
             self.Click(element)
