@@ -32,7 +32,7 @@ class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
         if config_path == "":
             config_path = sys.path[0] + r"\\config.json"
-        self.config = ConfigLoader(config_path)                
+        self.config = ConfigLoader(config_path)      
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -319,7 +319,7 @@ class CAWebHelper(unittest.TestCase):
             self.rota = "SetEnchoice"
             
             underline = (r'\w+(_)')#Se o campo conter "_"
-            valsub = self.RegexValue(valor)
+            valsub = self.apply_mask(valor)
 
             if not Id:
                 match = re.search(underline, campo)
@@ -350,12 +350,11 @@ class CAWebHelper(unittest.TestCase):
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
                             
-                        reg = (r"@. [1-9.]+")
-                        mask = element.get_attribute("picture")
-                        valsub = self.RegexValue(valor)
+                        valsub = self.apply_mask(valor)
 
-                        if valsub != valor and ((mask is not None) and (re.search(reg, mask))):
+                        if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
+                            valor = valsub
                         else:
                             self.SendKeys(element, valor)
 
@@ -403,18 +402,6 @@ class CAWebHelper(unittest.TestCase):
                 break
         if not self.elementDisabled:       
             combo.select_by_visible_text(valor)
-        return valor
-
-    def RegexValue(self, valor):
-        """
-        Recebe o valor do campo e se houver caracter especial faz a remoção.
-        """
-        caracter = (r'[.-]')#Se p valor conter determinados caracteres.
-        if valor[0:4] != 'http':
-            match = re.search(caracter, valor)
-            if match:
-                valor = re.sub(caracter, '', valor)
-
         return valor
 
     def SetGrid(self, ChkResult=0):
@@ -1415,7 +1402,7 @@ class CAWebHelper(unittest.TestCase):
             # A celula esta posicionada conforme a variavel 'coluna' indicou !
             else:
             '''
-            valsub = self.RegexValue(valor)
+            valsub = self.apply_mask(valor)
             if self.lastColweb != coluna:
                 return True
             else:
@@ -1455,13 +1442,9 @@ class CAWebHelper(unittest.TestCase):
                                     return False
                         if Id:
                             self.lenvalorweb = len(self.get_web_value(Id))
-
-                            reg = (r"@. [1-9.]+")
-                            mask = element.get_attribute("picture")
-
-                        
+                       
                             time.sleep(1)
-                            if valsub != valor and ((mask is not None) and (re.search(reg, mask))):
+                            if valsub != valor and self.check_mask(element):
                                 self.SendKeys(element, valsub)#element.send_keys(valsub)
                             else:
                                 self.SendKeys(element, valor)#element.send_keys(valor)
@@ -1495,14 +1478,17 @@ class CAWebHelper(unittest.TestCase):
                 Id = self.SetScrap(valorusr, '','tsay twidget dict-tsay align-left transparent','caHelp')
         if cabitem != 'aItens':
             if Id:
+                element = self.driver.find_element_by_id(Id)
                 if args1 != 'input':
-                    element = self.driver.find_element_by_id(Id)
                     self.Click(element)
                 valorweb = self.get_web_value(Id)
                 self.lenvalorweb = len(valorweb)
                 valorweb = valorweb.strip()
                 if self.consolelog and valorweb != '':
                     print(valorweb)
+                if self.check_mask(element):
+                    valorweb = self.apply_mask(valorweb)
+                    valorusr = self.apply_mask(valorusr)
                 if type(valorweb) is str:
                     valorweb = valorweb[0:len(str(valorusr))]
             if args1 != 'input':
@@ -2054,4 +2040,28 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-                            
+
+    def check_mask(self, element):
+        """
+        Checks wether the element has a numeric mask.
+        """
+        reg = (r"(@. )?[1-9.\/-]+")
+        mask = element.get_attribute("picture")
+        if mask is None:
+            child = element.find_elements(By.CSS_SELECTOR, "input")
+            if child:
+                mask = child[0].get_attribute("picture")
+            
+        return (mask != "" and mask is not None and (re.search(reg, mask)))
+
+    def apply_mask(self, string):
+        """
+        Removes special characters from received string.
+        """
+        caracter = (r'[.\/-]')
+        if string[0:4] != 'http':
+            match = re.search(caracter, string)
+            if match:
+                string = re.sub(caracter, '', string)
+
+        return string
