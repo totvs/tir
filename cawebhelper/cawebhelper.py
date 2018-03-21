@@ -1442,12 +1442,9 @@ class CAWebHelper(unittest.TestCase):
                                     return False
                         if Id:
                             self.lenvalorweb = len(self.get_web_value(Id))
-
-                            reg = (r"@. [1-9.-]+")
-                            mask = element.get_attribute("picture")
-                        
+                       
                             time.sleep(1)
-                            if valsub != valor and ((mask is not None) and (re.search(reg, mask))):
+                            if valsub != valor and self.check_mask(element):
                                 self.SendKeys(element, valsub)#element.send_keys(valsub)
                             else:
                                 self.SendKeys(element, valor)#element.send_keys(valor)
@@ -2048,7 +2045,7 @@ class CAWebHelper(unittest.TestCase):
         """
         Checks wether the element has a numeric mask.
         """
-        reg = (r"@. [1-9.-/]+")
+        reg = (r"(@. )?[1-9.\/-]+")
         mask = element.get_attribute("picture")
         if mask is None:
             child = element.find_elements(By.CSS_SELECTOR, "input")
@@ -2061,7 +2058,7 @@ class CAWebHelper(unittest.TestCase):
         """
         Removes special characters from received string.
         """
-        caracter = (r'[.-]')
+        caracter = (r'[.\/-]')
         if string[0:4] != 'http':
             match = re.search(caracter, string)
             if match:
