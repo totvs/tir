@@ -488,8 +488,6 @@ class CAWebHelper(unittest.TestCase):
         rows = []
         xlabel = ''
 
-
-
         for tr in soup.find_all('tr'):
 
             cols = []
@@ -1138,6 +1136,7 @@ class CAWebHelper(unittest.TestCase):
                 else:
                     self.SetScrap(placeholder, 'div', 'tradiobutton', 'indicedefault', 'detail')
                 self.placeHolder(placeholder, chave)
+                # self.data_check(descricao,chave)
             else:
                 self.proximo = False
             pass
@@ -1520,6 +1519,7 @@ class CAWebHelper(unittest.TestCase):
                 valorweb = valorweb[1]
         else:
             valorweb = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('value')
+            self.elementDisabled = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('disabled') != None
         return valorweb       
 
     def LogResult(self, field, user_value, captured_value, call_grid=False, disabled_field=False):
@@ -1644,7 +1644,7 @@ class CAWebHelper(unittest.TestCase):
         self.driver.save_screenshot( self.GetFunction() +".png")
         self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
         self.savebtn = ''
-        self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
+        self.Click(self.close_element)
         if not self.advpl:
             self.SetButton(self.language.leave_page,cClass='tbutton',searchMsg=False)
         self.log.new_line(False, message)
