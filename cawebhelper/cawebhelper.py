@@ -386,11 +386,16 @@ class CAWebHelper(unittest.TestCase):
                         self.numberOfTries += 1
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
                     else:
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
                 elif self.passfield:
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
-
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
     def select_combo(self, Id, valor):
         """
         Retorna a lista do combobox através do select do DOM.
@@ -2054,4 +2059,10 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
+
+    def log_error(self, message, new_log_line=True):
+        if new_log_line:
+            self.log.new_line(False, message)
+        self.log.save_file()
+        self.assertTrue(False, message)
                             
