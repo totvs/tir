@@ -1068,15 +1068,16 @@ class CAWebHelper(unittest.TestCase):
                 item = radioitens[0]
                 if item.tag_name == 'div':
                     element = item.find_elements(By.TAG_NAME, 'input')[0]
+                    self.DoubleClick(element)
                     RetId = True
             else:
                 for item in radioitens:
                     if seek.strip() in item.text:
                         if item.tag_name == 'div':
                             element = item.find_elements(By.TAG_NAME, 'input')[0]
+                            self.DoubleClick(element)
                             RetId = True
                             break
-            self.DoubleClick(element)
             return RetId
 
         #Busca pelo primeiro indice de busca
@@ -1161,9 +1162,9 @@ class CAWebHelper(unittest.TestCase):
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
-            #time.sleep(1)
-            #self.DoubleClick(element)
-            #self.SendKeys(element, Keys.BACK_SPACE)
+            time.sleep(1)
+            self.DoubleClick(element)
+            self.SendKeys(element, Keys.BACK_SPACE)
             return True
 
     # VISAO 3 - Tela inicial
