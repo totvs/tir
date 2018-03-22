@@ -861,7 +861,7 @@ class CAWebHelper(unittest.TestCase):
                                     if RetId:# IF/Break responsavel pela parada do FOR, quando é encontrado o ID do campo
                                         break 
                                 #preenche atributos do campo da enchoice
-                        elif seek in line.attrs['name']:
+                        elif list(filter(bool, line.attrs["name"].split('M->')))[0] == seek:
                             RetId = line.attrs['id']
                             self.classe = line.attrs['class'][0]
                             if not self.classe == 'tcombobox':
