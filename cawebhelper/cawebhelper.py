@@ -1075,7 +1075,7 @@ class CAWebHelper(unittest.TestCase):
             if args1 == 'indicedefault':
                 item = radioitens[0]
                 if item.tag_name == 'div':
-                    item = item.find_elements(By.TAG_NAME, 'input')[0]
+                    element = item.find_elements(By.TAG_NAME, 'input')[0]
                     RetId = True
             else:
                 for item in radioitens:
