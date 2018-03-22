@@ -1076,15 +1076,16 @@ class CAWebHelper(unittest.TestCase):
                 item = radioitens[0]
                 if item.tag_name == 'div':
                     element = item.find_elements(By.TAG_NAME, 'input')[0]
+                    self.DoubleClick(element)
                     RetId = True
             else:
                 for item in radioitens:
                     if seek.strip() in item.text:
                         if item.tag_name == 'div':
                             element = item.find_elements(By.TAG_NAME, 'input')[0]
+                            self.DoubleClick(element)
                             RetId = True
                             break
-            self.DoubleClick(element)
             return RetId
 
         #Busca pelo primeiro indice de busca
