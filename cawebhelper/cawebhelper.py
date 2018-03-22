@@ -315,6 +315,7 @@ class CAWebHelper(unittest.TestCase):
             	print("Element is Disabled")
             self.LogResult(field=campo, user_value=disabled, captured_value=True, disabled_field=True)
             self.log.save_file()
+            self.Restart()
             self.assertTrue(False, self.create_message(['', campo],enum.MessageType.DISABLED))
         else:
             tries += 1
