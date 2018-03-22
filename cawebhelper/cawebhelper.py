@@ -314,6 +314,8 @@ class CAWebHelper(unittest.TestCase):
             if self.elementDisabled and self.consolelog:
             	print("Element is Disabled")
             self.LogResult(field=campo, user_value=disabled, captured_value=True, disabled_field=True)
+            self.log.save_file()
+            self.assertTrue(False, self.create_message(['', campo],enum.MessageType.DISABLED))
         else:
             tries += 1
             self.rota = "SetEnchoice"
