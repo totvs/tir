@@ -86,16 +86,13 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-
-<<<<<<< HEAD
-    def set_prog_inic(self, initial_program):
-=======
+        
         self.camposCache = dict()
         self.parametro = ''
         self.backupSetup = dict()
 
     def set_prog_inic(self, initial_program='SIGAADV'):
->>>>>>> ADVPRWEB-60
+
         '''
         Method that defines the program to be started
         '''
