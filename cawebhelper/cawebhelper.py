@@ -87,7 +87,15 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
+<<<<<<< HEAD
     def set_prog_inic(self, initial_program):
+=======
+        self.camposCache = dict()
+        self.parametro = ''
+        self.backupSetup = dict()
+
+    def set_prog_inic(self, initial_program='SIGAADV'):
+>>>>>>> ADVPRWEB-60
         '''
         Method that defines the program to be started
         '''
@@ -1211,6 +1219,7 @@ class CAWebHelper(unittest.TestCase):
         Preenche as telas de programa inicial, usuario e ambiente.
         """
         #seta atributos do ambiente
+        self.config.initialprog = initial_program
         self.config.date = date
         self.config.group = group
         self.config.branch = branch
@@ -1219,6 +1228,9 @@ class CAWebHelper(unittest.TestCase):
         if not self.config.valid_language:
             self.config.language = self.SetScrap("language", "html")
             self.language = LanguagePack(self.config.language)
+        
+        if self.backupSetup == {}:
+            self.backupSetup = { 'progini': self.config.initialprog, 'data': self.config.date, 'grupo': self.config.group, 'filial': self.config.branch }
 
         self.ProgramaInicial(initial_program)
 
@@ -2084,3 +2096,91 @@ class CAWebHelper(unittest.TestCase):
             self.log.new_line(False, message)
         self.log.save_file()
         self.assertTrue(False, message)
+    
+    def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
+        
+        self.idwizard = []
+        self.LogOff()
+
+        self.parametro = parametro
+
+        #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
+        
+        # Escolhe a opção do Menu Lateral
+        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # Clica no botão/icone pesquisar
+        self.SetButton("Pesquisar")
+
+        # Preenche o campo de Pesquisa
+        self.UTSetValue("aCab", "Procurar por:", parametro)
+
+        # Confirma a busca
+        self.SetButton("Buscar")
+
+        # Clica no botão/icone Editar
+        self.SetButton("Editar")
+
+        # Faz a captura dos elementos dos campos
+        time.sleep(5)
+        content = self.driver.page_source
+        soup = BeautifulSoup(content,"html.parser")
+
+        backup_idwizard = self.idwizard[:]
+
+        menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+
+        for line in menuCampos:
+           RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+           cache = self.get_web_value(RetId)
+           self.lencache = len(cache)
+           cache = cache.strip()
+           menuCampos[line] = cache
+
+        self.camposCache = menuCampos
+        self.idwizard = backup_idwizard
+
+        
+        # Altero os parametros
+        self.UTSetValue("aCab", "Filial", set_filial)
+        self.UTSetValue("aCab", "Cont. Por", cont_por)
+        self.UTSetValue("aCab", "Cont. Ing", cont_ing)
+        self.UTSetValue("aCab", "Cont. Esp", cont_esp)
+        
+        # Confirma a gravação de Edição
+        self.SetButton("Salvar")
+        self.LogOff()
+
+        self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
+        self.UTProgram(self.rotina)
+
+    def RestoreParameters( self ):
+        '''
+        '''
+        self.idwizard = []
+        self.LogOff()
+
+        self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        
+        # Escolhe a opção do Menu Lateral
+        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # Clica no botão/icone pesquisar
+        self.SetButton("Pesquisar")
+
+         # Preenche o campo de Pesquisa
+        self.UTSetValue("aCab", "Procurar por:", self.parametro)
+
+        # Confirma a busca
+        self.SetButton("Buscar")
+
+        # Clica no botão/icone Editar
+        self.SetButton("Editar")
+
+        for line in self.camposCache:
+            self.UTSetValue("aCab", line, self.camposCache[line])
+            
+        # Confirma a gravação de Edição
+        self.SetButton("Salvar")
+                            
