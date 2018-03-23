@@ -1014,6 +1014,7 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
+        element = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1045,16 +1046,7 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-
-                #Busca o campo para preenchimento da chave de busca
-                """
-                if seek == 'placeHolder':                    
-                    self.seek_content(seek, line.contents)
-                    if self.idcomp:
-                        RetId = self.idcomp
-                        break
-
-                """
+                            
                 #Busca o campo para preenchimento da chave de busca
                 try:
                     if seek in line.contents[0].attrs['class'][0]:
