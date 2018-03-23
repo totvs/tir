@@ -64,7 +64,8 @@ class CAWebHelper(unittest.TestCase):
         self.IdClose = ''
         self.grid_value = ''
         self.grid_class = ''
-
+        self.initial_program = 'SIGAADV'
+        
         self.language = LanguagePack(self.config.language) if self.config.language else ""
 
         self.lineGrid = 0
@@ -86,15 +87,17 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-    def set_prog_inic(self, initial_program='SIGAADV'):
+    def set_prog_inic(self, initial_program):
         '''
         Method that defines the program to be started
         '''
+        if initial_program:
+            self.initial_program = initial_program
         try:
             Id = self.SetScrap('inputStartProg', 'div', '')
             element = self.driver.find_element_by_id(Id)
             element.clear()
-            self.SendKeys(element, initial_program)
+            self.SendKeys(element, self.initial_program)
         except:
             self.proximo = False
 
