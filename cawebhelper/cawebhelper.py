@@ -1541,24 +1541,18 @@ class CAWebHelper(unittest.TestCase):
         Log the result of comparison between user value and captured value
         '''
         txtaux = ""
-        result = True
         message = ""
         if call_grid:
             txtaux = 'Item: %s - ' %str(self.lineGrid + 1)
 
         if disabled_field and not user_value:
             message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
-            result = False
         elif disabled_field and user_value:
             message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
         elif user_value != captured_value and not disabled_field:
             message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
-            result = False
-        else:
-            message = self.create_message([txtaux, field])
-
-        self.log.new_line(result, message)
-        self.validate_field(field, user_value, captured_value)
+        
+        self.validate_field(field, user_value, captured_value, message)
 
     def ChangeEnvironment(self):
         """
@@ -1818,22 +1812,33 @@ class CAWebHelper(unittest.TestCase):
 
         return value
 
-    def validate_field(self, field, user_value, captured_value):
+    def validate_field(self, field, user_value, captured_value, message):
         '''
         Validates and stores field in the self.invalid_fields array if the values are different.
         '''
         if str(user_value).strip() != str(captured_value).strip():
-            self.invalid_fields.append([field, user_value, captured_value])
+            self.invalid_fields.append(message)
 
     def assert_result(self, expected):
         expected_assert = expected
         msg = "Passed"
-
-        self.log.save_file()
+        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("CT")[1]
+        log_message = ""
+        log_message += stack + " -"
 
         if self.invalid_fields:
             expected = not expected
-            msg = (self.create_message([self.invalid_fields[0][0], self.invalid_fields[0][1], self.invalid_fields[0][2]], enum.MessageType.ASSERTERROR))
+            
+            for field_msg in self.invalid_fields:
+                log_message += (" " + field_msg)
+
+            msg = log_message
+
+            self.log.new_line(False, log_message)
+        else:
+            self.log.new_line(True, "")
+
+        self.log.save_file()
 
         self.invalid_fields = []
         print(msg)
