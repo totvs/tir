@@ -691,13 +691,27 @@ class CAWebHelper(unittest.TestCase):
     def SetButtonTooltip(self, seek, soup, tag, cClass):
         '''
         Identifica o ID do Botão sem Rótulo/Texto.
-        Botão com identificação via Tooltip
+        Via Tooltip ou via Nome da Imagem.
         '''
         tooltip = ''
+        tooltipID = ''
+
         tooltipID = soup.find_all('div', text=seek)
 
-        if tooltipID[0].text == seek:
-            tooltip = tooltipID[0].attrs['id'][8:12]
+        try: # Encontra o botão via nome da imagem
+            if not tooltipID or tooltipID[1]:
+                lista = soup.find_all(tag, class_=('tbutton'))
+                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.ajuda: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.add: 'bmpincluir.png', self.language.view: 'bmpvisual.png','Editar': 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+                button = menuItens[seek]
+
+                for line in lista:
+                    if button in line.contents[1]['style']:
+                        tooltip = line.attrs['id'][4:8]
+                        break
+        except: # Encontra o botão via Tooltip
+            if tooltipID[0].text == seek:
+                    tooltip = tooltipID[0].attrs['id'][8:12]
+        
         return(tooltip)
 
     def cainput(self, seek, soup, tag, cClass, args1='', args2='', args3=0, args4='', args5=''):
@@ -768,32 +782,6 @@ class CAWebHelper(unittest.TestCase):
                     if not self.classe == 'tcombobox':
                         self.valtype = line.contents[0]['valuetype']
                     break
-
-                elif args1 == 'indice':
-                    if cClass == 'tpanel':
-                        if line.contents:
-                            self.seek_content(seek, line.contents)
-                            if self.idcomp:
-                                RetId = self.idcomp
-                                break
-
-                    #Seleciona o botão correspondente a descrição do indice    
-                    elif cClass == 'tradiobutton':
-                        if seek in line.text:
-                            RetId = line.contents[0].attrs['id']
-                            break
-
-                        #Busca pelo primeiro indice de busca
-                        elif seek == 'indicedefault':
-                            RetId = line.contents[0].attrs['id']
-                            break
-                #Busca o campo para preenchimento da chave de busca
-                elif seek == 'placeHolder':
-                    if seek in line.contents[0].attrs['class'][0]:
-                        RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        self.LastIdBtn.append(RetId)
-                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
 
                 elif seek == self.language.search:
                     if seek in line.previous and line.attrs['name'] == args1:
@@ -1017,6 +1005,7 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
+        element = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1048,13 +1037,16 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-
+                            
                 #Busca o campo para preenchimento da chave de busca
-                if seek == 'placeHolder':                    
-                    self.seek_content(seek, line.contents)
-                    if self.idcomp:
-                        RetId = self.idcomp
-                        break
+                try:
+                    if seek in line.contents[0].attrs['class'][0]:
+                        RetId = line.attrs['id']
+                        self.classe = line.attrs['class'][0]
+                        self.LastIdBtn.append(RetId)
+                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
+                except:
+                    pass
 
             return(RetId)
         pass
@@ -1066,15 +1058,17 @@ class CAWebHelper(unittest.TestCase):
             if args1 == 'indicedefault':
                 item = radioitens[0]
                 if item.tag_name == 'div':
-                    item = item.find_elements(By.TAG_NAME, 'input')[0]
+                    element = item.find_elements(By.TAG_NAME, 'input')[0]
+                    self.DoubleClick(element)
                     RetId = True
             else:
                 for item in radioitens:
                     if seek.strip() in item.text:
                         if item.tag_name == 'div':
-                            item = item.find_elements(By.TAG_NAME, 'input')[0]
+                            element = item.find_elements(By.TAG_NAME, 'input')[0]
+                            self.DoubleClick(element)
                             RetId = True
-            self.DoubleClick(item)
+                            break
             return RetId
 
         #Busca pelo primeiro indice de busca
@@ -1926,7 +1920,7 @@ class CAWebHelper(unittest.TestCase):
             if self.consolelog:
                 print(error)
             self.Restart()
-            self.assertTrue(False)
+            self.assertTrue(False) 
 
 
     def SetFilial(self, filial):
