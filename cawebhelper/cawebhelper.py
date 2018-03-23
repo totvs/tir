@@ -1165,7 +1165,7 @@ class CAWebHelper(unittest.TestCase):
             return True
 
     # VISAO 3 - Tela inicial
-    def ProgramaInicial(self, initial_program="SIGAADV", environment=""):
+    def ProgramaInicial(self, initial_program="", environment=""):
         self.set_prog_inic(initial_program)
         self.set_enviroment()
         self.SetButton('Ok', 'startParameters', '', 60, 'button', 'tbutton')
@@ -1199,7 +1199,7 @@ class CAWebHelper(unittest.TestCase):
 
             self.SetButton(label,'','',60,'button','tbutton')
 
-    def Setup(self, initial_program='SIGAADV', date='', group='99', branch='01', module=''):
+    def Setup(self, initial_program, date='', group='99', branch='01', module=''):
         """
         Preenche as telas de programa inicial, usuario e ambiente.
         """
