@@ -64,7 +64,8 @@ class CAWebHelper(unittest.TestCase):
         self.IdClose = ''
         self.grid_value = ''
         self.grid_class = ''
-
+        self.initial_program = 'SIGAADV'
+        
         self.language = LanguagePack(self.config.language) if self.config.language else ""
 
         self.lineGrid = 0
@@ -86,15 +87,17 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-    def set_prog_inic(self, initial_program='SIGAADV'):
+    def set_prog_inic(self, initial_program):
         '''
         Method that defines the program to be started
         '''
+        if initial_program:
+            self.initial_program = initial_program
         try:
             Id = self.SetScrap('inputStartProg', 'div', '')
             element = self.driver.find_element_by_id(Id)
             element.clear()
-            self.SendKeys(element, initial_program)
+            self.SendKeys(element, self.initial_program)
         except:
             self.proximo = False
 
@@ -314,6 +317,9 @@ class CAWebHelper(unittest.TestCase):
             if self.elementDisabled and self.consolelog:
             	print("Element is Disabled")
             self.LogResult(field=campo, user_value=disabled, captured_value=True, disabled_field=True)
+            self.log.save_file()
+            self.Restart()
+            self.assertTrue(False, self.create_message(['', campo],enum.MessageType.DISABLED))
         else:
             tries += 1
             self.rota = "SetEnchoice"
@@ -385,11 +391,16 @@ class CAWebHelper(unittest.TestCase):
                         self.numberOfTries += 1
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
                     else:
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
                 elif self.passfield:
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
-
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
     def select_combo(self, Id, valor):
         """
         Retorna a lista do combobox através do select do DOM.
@@ -487,8 +498,6 @@ class CAWebHelper(unittest.TestCase):
         soup = BeautifulSoup(divstring,"html.parser") 
         rows = []
         xlabel = ''
-
-
 
         for tr in soup.find_all('tr'):
 
@@ -687,13 +696,27 @@ class CAWebHelper(unittest.TestCase):
     def SetButtonTooltip(self, seek, soup, tag, cClass):
         '''
         Identifica o ID do Botão sem Rótulo/Texto.
-        Botão com identificação via Tooltip
+        Via Tooltip ou via Nome da Imagem.
         '''
         tooltip = ''
+        tooltipID = ''
+
         tooltipID = soup.find_all('div', text=seek)
 
-        if tooltipID[0].text == seek:
-            tooltip = tooltipID[0].attrs['id'][8:12]
+        try: # Encontra o botão via nome da imagem
+            if not tooltipID or tooltipID[1]:
+                lista = soup.find_all(tag, class_=('tbutton'))
+                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.ajuda: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.add: 'bmpincluir.png', self.language.view: 'bmpvisual.png','Editar': 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+                button = menuItens[seek]
+
+                for line in lista:
+                    if button in line.contents[1]['style']:
+                        tooltip = line.attrs['id'][4:8]
+                        break
+        except: # Encontra o botão via Tooltip
+            if tooltipID[0].text == seek:
+                    tooltip = tooltipID[0].attrs['id'][8:12]
+        
         return(tooltip)
 
     def cainput(self, seek, soup, tag, cClass, args1='', args2='', args3=0, args4='', args5=''):
@@ -764,32 +787,6 @@ class CAWebHelper(unittest.TestCase):
                     if not self.classe == 'tcombobox':
                         self.valtype = line.contents[0]['valuetype']
                     break
-
-                elif args1 == 'indice':
-                    if cClass == 'tpanel':
-                        if line.contents:
-                            self.seek_content(seek, line.contents)
-                            if self.idcomp:
-                                RetId = self.idcomp
-                                break
-
-                    #Seleciona o botão correspondente a descrição do indice    
-                    elif cClass == 'tradiobutton':
-                        if seek in line.text:
-                            RetId = line.contents[0].attrs['id']
-                            break
-
-                        #Busca pelo primeiro indice de busca
-                        elif seek == 'indicedefault':
-                            RetId = line.contents[0].attrs['id']
-                            break
-                #Busca o campo para preenchimento da chave de busca
-                elif seek == 'placeHolder':
-                    if seek in line.contents[0].attrs['class'][0]:
-                        RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        self.LastIdBtn.append(RetId)
-                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
 
                 elif seek == self.language.search:
                     if seek in line.previous and line.attrs['name'] == args1:
@@ -1013,6 +1010,7 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
+        element = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1044,13 +1042,16 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-
+                            
                 #Busca o campo para preenchimento da chave de busca
-                if seek == 'placeHolder':                    
-                    self.seek_content(seek, line.contents)
-                    if self.idcomp:
-                        RetId = self.idcomp
-                        break
+                try:
+                    if seek in line.contents[0].attrs['class'][0]:
+                        RetId = line.attrs['id']
+                        self.classe = line.attrs['class'][0]
+                        self.LastIdBtn.append(RetId)
+                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
+                except:
+                    pass
 
             return(RetId)
         pass
@@ -1062,15 +1063,17 @@ class CAWebHelper(unittest.TestCase):
             if args1 == 'indicedefault':
                 item = radioitens[0]
                 if item.tag_name == 'div':
-                    item = item.find_elements(By.TAG_NAME, 'input')[0]
+                    element = item.find_elements(By.TAG_NAME, 'input')[0]
+                    self.DoubleClick(element)
                     RetId = True
             else:
                 for item in radioitens:
                     if seek.strip() in item.text:
                         if item.tag_name == 'div':
-                            item = item.find_elements(By.TAG_NAME, 'input')[0]
+                            element = item.find_elements(By.TAG_NAME, 'input')[0]
+                            self.DoubleClick(element)
                             RetId = True
-            self.DoubleClick(item)
+                            break
             return RetId
 
         #Busca pelo primeiro indice de busca
@@ -1138,6 +1141,7 @@ class CAWebHelper(unittest.TestCase):
                 else:
                     self.SetScrap(placeholder, 'div', 'tradiobutton', 'indicedefault', 'detail')
                 self.placeHolder(placeholder, chave)
+                # self.data_check(descricao,chave)
             else:
                 self.proximo = False
             pass
@@ -1160,7 +1164,7 @@ class CAWebHelper(unittest.TestCase):
             return True
 
     # VISAO 3 - Tela inicial
-    def ProgramaInicial(self, initial_program="SIGAADV", environment=""):
+    def ProgramaInicial(self, initial_program="", environment=""):
         self.set_prog_inic(initial_program)
         self.set_enviroment()
         self.SetButton('Ok', 'startParameters', '', 60, 'button', 'tbutton')
@@ -1194,7 +1198,7 @@ class CAWebHelper(unittest.TestCase):
 
             self.SetButton(label,'','',60,'button','tbutton')
 
-    def Setup(self, initial_program='SIGAADV', date='', group='99', branch='01', module=''):
+    def Setup(self, initial_program, date='', group='99', branch='01', module=''):
         """
         Preenche as telas de programa inicial, usuario e ambiente.
         """
@@ -1520,6 +1524,7 @@ class CAWebHelper(unittest.TestCase):
                 valorweb = valorweb[1]
         else:
             valorweb = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('value')
+            self.elementDisabled = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('disabled') != None
         return valorweb       
 
     def LogResult(self, field, user_value, captured_value, call_grid=False, disabled_field=False):
@@ -1644,7 +1649,7 @@ class CAWebHelper(unittest.TestCase):
         self.driver.save_screenshot( self.GetFunction() +".png")
         self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
         self.savebtn = ''
-        self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
+        self.Click(self.close_element)
         if not self.advpl:
             self.SetButton(self.language.leave_page,cClass='tbutton',searchMsg=False)
         self.log.new_line(False, message)
@@ -1920,7 +1925,7 @@ class CAWebHelper(unittest.TestCase):
             if self.consolelog:
                 print(error)
             self.Restart()
-            self.assertTrue(False)
+            self.assertTrue(False) 
 
 
     def SetFilial(self, filial):
@@ -2040,7 +2045,7 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-
+                        
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2065,3 +2070,9 @@ class CAWebHelper(unittest.TestCase):
                 string = re.sub(caracter, '', string)
 
         return string
+
+    def log_error(self, message, new_log_line=True):
+        if new_log_line:
+            self.log.new_line(False, message)
+        self.log.save_file()
+        self.assertTrue(False, message)

@@ -28,6 +28,15 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
+        self.copy = languagepack['Copy']
+        self.cut = languagepack['Cut']
+        self.paste = languagepack["Paste"]
+        self.calculator = languagepack["Calculator"]
+        self.spool = languagepack['Spool']
+        self.ajuda = languagepack['Ajuda']
+        self.folders = languagepack['Folders']
+        self.generate_differential_file = languagepack['Generate Differential File']
+        self.filter = languagepack['Filter']
         self.menu_about = languagepack["Menu About"]
 
         self.error_log = languagepack["Error Log"]
@@ -93,6 +102,15 @@ class LanguagePack:
             "Details": "Detalhes",
             "Search": "Pesquisar",
             "Ok": "Ok",
+            "Copy": "Copiar",
+            "Cut": "Recortar",
+            "Paste": "Colar",
+            "Calculator": "Calculadora",
+            "Spool": "Spool",
+            "Ajuda": "Ajuda",
+            "Folders": 'Pastas',
+            "Generate Differential File": "Gerar Arquivo Diferencial",
+            "Filter": "Filtrar",
 			"Menu About": "Ajuda > Sobre",
             "Error Log": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais clique em detalhes",
             "Error Log Print": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais verifique print efetuado da tela",
