@@ -1015,6 +1015,7 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
+        element = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1046,16 +1047,7 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-
-                #Busca o campo para preenchimento da chave de busca
-                """
-                if seek == 'placeHolder':                    
-                    self.seek_content(seek, line.contents)
-                    if self.idcomp:
-                        RetId = self.idcomp
-                        break
-
-                """
+                            
                 #Busca o campo para preenchimento da chave de busca
                 try:
                     if seek in line.contents[0].attrs['class'][0]:
@@ -1144,6 +1136,7 @@ class CAWebHelper(unittest.TestCase):
             Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice', placeholder)
             if Id:
                 element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
+                self.wait_until_clickable(element)
                 if self.rota == 'SetRotina' or self.rota == 'EDAPP':
                     self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
                     self.rota = ''
@@ -1168,6 +1161,7 @@ class CAWebHelper(unittest.TestCase):
             time.sleep(1)
             self.Click(element)
             time.sleep(1)
+            self.SendKeys(element, Keys.ENTER)
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
@@ -1175,6 +1169,17 @@ class CAWebHelper(unittest.TestCase):
             self.DoubleClick(element)
             self.SendKeys(element, Keys.BACK_SPACE)
             return True
+
+    def wait_until_clickable(self, element):
+    
+        while True:
+            try:
+                element.click()
+                break
+            except:
+                pass
+                print("Waiting...")
+                time.sleep(3)
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
@@ -2070,7 +2075,7 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-
+                            
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
