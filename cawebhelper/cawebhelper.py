@@ -1173,7 +1173,7 @@ class CAWebHelper(unittest.TestCase):
                 break
             except:
                 pass
-                print("Aguardando...")
+                print("Waiting...")
                 time.sleep(3)
 
     # VISAO 3 - Tela inicial
