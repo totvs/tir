@@ -1131,6 +1131,7 @@ class CAWebHelper(unittest.TestCase):
             Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice', placeholder)
             if Id:
                 element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
+                self.wait_until_clickable(element)
                 if self.rota == 'SetRotina' or self.rota == 'EDAPP':
                     self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
                     self.rota = ''
@@ -1155,6 +1156,7 @@ class CAWebHelper(unittest.TestCase):
             time.sleep(1)
             self.Click(element)
             time.sleep(1)
+            self.SendKeys(element, Keys.ENTER)
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
@@ -1162,6 +1164,17 @@ class CAWebHelper(unittest.TestCase):
             self.DoubleClick(element)
             self.SendKeys(element, Keys.BACK_SPACE)
             return True
+
+    def wait_until_clickable(self, element):
+    
+        while True:
+            try:
+                element.click()
+                break
+            except:
+                pass
+                print("Aguardando...")
+                time.sleep(3)
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
