@@ -2068,12 +2068,7 @@ class CAWebHelper(unittest.TestCase):
         
         self.idwizard = []
         self.LogOff()
-
-        parametro=''
-        set_filial='' 
-        cont_por='' 
-        cont_ing=''
-        cont_esp=''
+        parametro = ''
 
         self.parametro = parametro
 
@@ -2088,9 +2083,9 @@ class CAWebHelper(unittest.TestCase):
 
         array = arrayParameters
 
-        for line in array:
+        for arrayLine in array:
             # Preenche o campo de Pesquisa
-            self.UTSetValue("aCab", "Procurar por:", line[0])
+            self.UTSetValue("aCab", "Procurar por:", arrayLine[0])
 
             # Confirma a busca
             self.SetButton("Buscar")
@@ -2119,10 +2114,10 @@ class CAWebHelper(unittest.TestCase):
 
 
             # Altero os parametros
-            self.UTSetValue("aCab", "Filial", line[1])
-            self.UTSetValue("aCab", "Cont. Por", line[2])
-            self.UTSetValue("aCab", "Cont. Ing", line[3])
-            self.UTSetValue("aCab", "Cont. Esp", line[4])
+            self.UTSetValue("aCab", "Filial", arrayLine[1])
+            self.UTSetValue("aCab", "Cont. Por", arrayLine[2])
+            self.UTSetValue("aCab", "Cont. Ing", arrayLine[3])
+            self.UTSetValue("aCab", "Cont. Esp", arrayLine[4])
 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
