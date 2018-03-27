@@ -277,20 +277,16 @@ class CAWebHelper(unittest.TestCase):
                         self.close_element = self.driver.find_element_by_id(Ret)
             return Ret
 
+   
     def wait_browse(self,searchMsg=True):
         Ret = ''
         tag = 'button'
         endTime =   time.time() + 60
-        while True:
-            Ret = self.SetScrap(self.language.cancel,tag,"tbrowsebutton",'wait','',0,'',3,searchMsg)#Procuro botão de cancelar advpl antigo
-            if not Ret:
-                Ret = self.SetScrap(self.language.close,tag,"tbrowsebutton",'wait','',0,'',3,searchMsg)#Procuro botão de fechar advpl mvc
-            if not Ret:
-                break
+        while not Ret:
+            Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
             if time.time() > endTime:
                 self.assertTrue(False, 'Tempo de espera para exibir os elementos do Browse excedido.')
         return Ret
-
 
     def SetRotina(self):
         '''
@@ -1136,7 +1132,7 @@ class CAWebHelper(unittest.TestCase):
         self.btnenchoice = True
         Ret = self.wait_browse() #Verifica se já efetuou o fechamento da tela
 
-        if not Ret:
+        if Ret:
             self.savebtn = ''
             #Caso solicite para alterar o indice
             #if indice:
@@ -1245,6 +1241,7 @@ class CAWebHelper(unittest.TestCase):
         """
         self.rotina = rotina
         self.SetRotina()
+        self.wait_browse()
     
     def UTSetValue(self, cabitem, campo, valor, linha=0, chknewline=False, disabled=False):
         """
@@ -1272,7 +1269,7 @@ class CAWebHelper(unittest.TestCase):
         Efetua logOff do sistema
         """   
         Ret = self.wait_browse(False)
-        if not Ret:
+        if Ret:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish,searchMsg=False)
     
@@ -1787,7 +1784,6 @@ class CAWebHelper(unittest.TestCase):
                 print(response) #Send to Better Log
                 self.assertTrue(False, response)        
 
-        self.wait_browse()
 
     def scroll_to_element(self, element):
         '''
@@ -1882,31 +1878,31 @@ class CAWebHelper(unittest.TestCase):
 
         self.SetButton(self.language.close)
 
-    def SetButton(self, button, args1='', args2='', args3=60, tag='div', cClass='tbrowsebutton',searchMsg = True):
+    def SetButton(self, button, args1='wait', args2='', args3=10, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
         Método que efetua o clique nos botão da interface
         '''
         try:
             Ret = ''
+            Id  = ''
             if self.VldData():
                 if (button.lower() == self.language.Ok.lower()) and args1 != 'startParameters':
                     Id = self.SetScrap(button, tag, '', 'btnok') 
                     if Id:
                         element = self.driver.find_element_by_id(Id)
                         self.Click(element)
-                elif button == self.language.delete:
-                    Id = self.SetScrap(button, tag, cClass, 'wait','', '', '', 5,searchMsg)
-                    if not Id:
-                        Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', 5)
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
-                        if Id:
-                            self.SetItemMen(self.language.delete, '', 'menuitem')
-                    else:
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
                 else:
-                    Id = self.SetScrap(button, tag, cClass, args1,'', '', '', args3,searchMsg)
+                #while not Id:
+                    Id = self.SetScrap(button, tag, cClass, args1,''    , ''     , ''      , args3   ,searchMsg)
+                    if not Id:
+                        Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
+                        element = self.driver.find_element_by_id(Id)
+                        self.Click(element)
+                #        if self.element_exists(By.CSS_SELECTOR, cClass, '' ,button ):
+                        if Id:
+                            self.SetItemMen(button, '', 'menuitem')
+                #        else:
+                #            self.Click(element)
                     if Id:
                         if button == self.language.confirm or button == self.language.save:
                             self.savebtn = button
@@ -1914,26 +1910,18 @@ class CAWebHelper(unittest.TestCase):
                             element = self.driver.find_element_by_class_name(Id)
                         else:
                             element = self.driver.find_element_by_id(Id)
-                        if not self.browse and button == self.language.other_actions and self.advpl:#Somente entra quando for o segundo botão Outras Ações
-                            Ret = self.SetScrap(self.language.cancel,"div","tbrowsebutton", '', '', '', '', 10)#Aguardo os elementos da Enchoice
-                            if Ret:
-                                Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
-                                if Id:
-                                    element = self.driver.find_element_by_id(Id)
                         time.sleep(3)
                         self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
                         self.Click(element)
-                        if button == self.language.other_actions: # TRATAR QND FOR NA ENCHOICE
-                            self.SetItemMen(args1, args2, 'menuitem')
-                        elif button == self.language.add:
+                        
+                        if button == self.language.add:
                             self.browse = False
-                            if args1 != '':#se for botão incluir com subitens
+                            if args1 != '' and args1 != 'wait':#se for botão incluir com subitens
                                 self.advpl = False
                                 Id = self.SetScrap(args1, 'li', 'tmenupopupitem')
                                 if Id:
                                     element = self.driver.find_element_by_id(Id)
                                     self.Click(element)
-                            #usar este trecho no novo método de filial self.SetButton('OK','','',60,'div','tbutton')
                         elif button == self.language.edit or button == self.language.view: # caso não seja outras ações do Browse.
                             self.browse = False
                     else:
@@ -2194,7 +2182,7 @@ class CAWebHelper(unittest.TestCase):
         This method closes the last open modal in the screen.
         '''
         modals = self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog")
-        if modals:
+        if modals and (self.element_exists(By.CSS_SELECTOR, ".tmodaldialog .tbrowsebutton")):
             modals.sort(key=lambda x: x.get_attribute("style").split("z-index:")[1].split(";")[0], reverse=True)
             close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
             if close_button:
