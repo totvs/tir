@@ -3,7 +3,6 @@ title CAWebHelper installer
 echo -------------------------
 echo Building project...
 echo -------------------------
-python setup.py build
 python setup.py sdist
 echo -------------------------
 echo Terminating possible open driver instances
