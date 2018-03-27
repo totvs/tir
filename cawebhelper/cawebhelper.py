@@ -1175,7 +1175,6 @@ class CAWebHelper(unittest.TestCase):
         while True:
             try:
                 element.click()
-                break
                 return True
             except:
                 pass
