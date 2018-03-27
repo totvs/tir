@@ -2086,49 +2086,50 @@ class CAWebHelper(unittest.TestCase):
         # Clica no botão/icone pesquisar
         self.SetButton("Pesquisar")
 
-        array = dict()
         array = arrayParameters
+        contador = 0
+
 
         for line in array:
             print(line)          
 
-        # Preenche o campo de Pesquisa
-        self.UTSetValue("aCab", "Procurar por:", "CNTA")
+            # Preenche o campo de Pesquisa
+            self.UTSetValue("aCab", "Procurar por:", line[contador][0])
 
-        # Confirma a busca
-        self.SetButton("Buscar")
+            # Confirma a busca
+            self.SetButton("Buscar")
 
-        # Clica no botão/icone Editar
-        self.SetButton("Editar")
+            # Clica no botão/icone Editar
+            self.SetButton("Editar")
 
-        # Faz a captura dos elementos dos campos
-        time.sleep(5)
-        content = self.driver.page_source
-        soup = BeautifulSoup(content,"html.parser")
+            # Faz a captura dos elementos dos campos
+            time.sleep(5)
+            content = self.driver.page_source
+            soup = BeautifulSoup(content,"html.parser")
 
-        backup_idwizard = self.idwizard[:]
+            backup_idwizard = self.idwizard[:]
 
-        menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+            menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
-        for line in menuCampos:
-            RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-            cache = self.get_web_value(RetId)
-            self.lencache = len(cache)
-            cache = cache.strip()
-            menuCampos[line] = cache
+            for line in menuCampos:
+                RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+                cache = self.get_web_value(RetId)
+                self.lencache = len(cache)
+                cache = cache.strip()
+                menuCampos[line] = cache
 
-        self.camposCache = menuCampos
-        self.idwizard = backup_idwizard
+            self.camposCache = menuCampos
+            self.idwizard = backup_idwizard
 
 
-        # Altero os parametros
-        self.UTSetValue("aCab", "Filial", set_filial)
-        self.UTSetValue("aCab", "Cont. Por", cont_por)
-        self.UTSetValue("aCab", "Cont. Ing", cont_ing)
-        self.UTSetValue("aCab", "Cont. Esp", cont_esp)
+            # Altero os parametros
+            self.UTSetValue("aCab", "Filial", set_filial)
+            self.UTSetValue("aCab", "Cont. Por", cont_por)
+            self.UTSetValue("aCab", "Cont. Ing", cont_ing)
+            self.UTSetValue("aCab", "Cont. Esp", cont_esp)
 
-        # Confirma a gravação de Edição
-        self.SetButton("Salvar")
+            # Confirma a gravação de Edição
+            self.SetButton("Salvar")
         self.LogOff()
 
         self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
