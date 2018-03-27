@@ -2212,7 +2212,4 @@ class CAWebHelper(unittest.TestCase):
             close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
             if close_button:
                 self.Click(close_button[0])
-                            
-
-        self.assertTrue(False, message)
 
