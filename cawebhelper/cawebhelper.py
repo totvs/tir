@@ -2082,11 +2082,7 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-<<<<<<< HEAD
-                            
-=======
-                        
->>>>>>> ADVPRWEB-56
+
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2116,7 +2112,7 @@ class CAWebHelper(unittest.TestCase):
         if new_log_line:
             self.log.new_line(False, message)
         self.log.save_file()
-<<<<<<< HEAD
+
         self.assertTrue(False, message)
     
     def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
@@ -2217,6 +2213,6 @@ class CAWebHelper(unittest.TestCase):
             if close_button:
                 self.Click(close_button[0])
                             
-=======
+
         self.assertTrue(False, message)
->>>>>>> ADVPRWEB-56
+
