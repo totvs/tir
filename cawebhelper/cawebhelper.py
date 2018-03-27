@@ -1171,14 +1171,17 @@ class CAWebHelper(unittest.TestCase):
             return True
 
     def wait_until_clickable(self, element):
-    
+        """
+        Wait until element to be clickable
+        """
+        if self.consolelog:
+            print("Waiting...")
         while True:
             try:
                 element.click()
                 break
             except:
                 pass
-                print("Waiting...")
                 time.sleep(3)
 
     # VISAO 3 - Tela inicial
