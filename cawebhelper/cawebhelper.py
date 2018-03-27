@@ -2089,7 +2089,7 @@ class CAWebHelper(unittest.TestCase):
         array = dict()
         array = arrayParameters
 
-        for line in arrayParameters:
+        for line in array:
             print(line)          
 
         # Preenche o campo de Pesquisa
