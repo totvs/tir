@@ -2094,7 +2094,7 @@ class CAWebHelper(unittest.TestCase):
             print(line)          
 
             # Preenche o campo de Pesquisa
-            self.UTSetValue("aCab", "Procurar por:", line[contador][0])
+            self.UTSetValue("aCab", "Procurar por:", line[0])
 
             # Confirma a busca
             self.SetButton("Buscar")
@@ -2123,10 +2123,10 @@ class CAWebHelper(unittest.TestCase):
 
 
             # Altero os parametros
-            self.UTSetValue("aCab", "Filial", set_filial)
-            self.UTSetValue("aCab", "Cont. Por", cont_por)
-            self.UTSetValue("aCab", "Cont. Ing", cont_ing)
-            self.UTSetValue("aCab", "Cont. Esp", cont_esp)
+            self.UTSetValue("aCab", "Filial", line[1])
+            self.UTSetValue("aCab", "Cont. Por", line[2])
+            self.UTSetValue("aCab", "Cont. Ing", line[3])
+            self.UTSetValue("aCab", "Cont. Esp", line[4])
 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
