@@ -91,8 +91,12 @@ class CAWebHelper(unittest.TestCase):
         self.parametro = ''
         self.backupSetup = dict()
 
+<<<<<<< HEAD
     def set_prog_inic(self, initial_program='SIGAADV'):
 
+=======
+    def set_prog_inic(self, initial_program):
+>>>>>>> ADVPRWEB-56
         '''
         Method that defines the program to be started
         '''
@@ -711,7 +715,7 @@ class CAWebHelper(unittest.TestCase):
         try: # Encontra o botão via nome da imagem
             if not tooltipID or tooltipID[1]:
                 lista = soup.find_all(tag, class_=('tbutton'))
-                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.ajuda: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.add: 'bmpincluir.png', self.language.view: 'bmpvisual.png','Editar': 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.help: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.include: 'bmpincluir.png', self.language.visualizar: 'bmpvisual.png',self.language.editar: 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
                 button = menuItens[seek]
 
                 for line in lista:
@@ -2075,7 +2079,11 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
+<<<<<<< HEAD
                             
+=======
+                        
+>>>>>>> ADVPRWEB-56
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2105,6 +2113,7 @@ class CAWebHelper(unittest.TestCase):
         if new_log_line:
             self.log.new_line(False, message)
         self.log.save_file()
+<<<<<<< HEAD
         self.assertTrue(False, message)
     
     def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
@@ -2205,3 +2214,6 @@ class CAWebHelper(unittest.TestCase):
             if close_button:
                 self.Click(close_button[0])
                             
+=======
+        self.assertTrue(False, message)
+>>>>>>> ADVPRWEB-56
