@@ -2084,6 +2084,9 @@ class CAWebHelper(unittest.TestCase):
         array = arrayParameters
 
         for arrayLine in array:
+
+            backup_idwizard = self.idwizard[:]
+            
             # Preenche o campo de Pesquisa
             self.UTSetValue("aCab", "Procurar por:", arrayLine[0])
 
@@ -2097,8 +2100,6 @@ class CAWebHelper(unittest.TestCase):
             time.sleep(5)
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
-
-            backup_idwizard = self.idwizard[:]
 
             menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
