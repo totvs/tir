@@ -2087,12 +2087,8 @@ class CAWebHelper(unittest.TestCase):
         self.SetButton("Pesquisar")
 
         array = arrayParameters
-        contador = 0
-
 
         for line in array:
-            print(line)          
-
             # Preenche o campo de Pesquisa
             self.UTSetValue("aCab", "Procurar por:", line[0])
 
