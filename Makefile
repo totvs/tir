@@ -1,7 +1,4 @@
-init:
-	pip install -r requirements.txt
-
 install:
 	python setup.py build
-	python setup.py install
-	
+	python setup.py sdist
+	pip install -U dist/cawebhelper-0.1.tar.gz
