@@ -2063,24 +2063,37 @@ class CAWebHelper(unittest.TestCase):
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
     
-    def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
+    #def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
+    def SetParameters( self, arrayParameters ):
         
         self.idwizard = []
         self.LogOff()
+
+        parametro=''
+        set_filial='' 
+        cont_por='' 
+        cont_ing=''
+        cont_esp=''
 
         self.parametro = parametro
 
         #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
-        
+
         # Escolhe a opção do Menu Lateral
         self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
 
         # Clica no botão/icone pesquisar
         self.SetButton("Pesquisar")
 
+        array = dict()
+        array = arrayParameters
+
+        for line in arrayParameters:
+            print(line)          
+
         # Preenche o campo de Pesquisa
-        self.UTSetValue("aCab", "Procurar por:", parametro)
+        self.UTSetValue("aCab", "Procurar por:", "CNTA")
 
         # Confirma a busca
         self.SetButton("Buscar")
@@ -2098,22 +2111,22 @@ class CAWebHelper(unittest.TestCase):
         menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
         for line in menuCampos:
-           RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-           cache = self.get_web_value(RetId)
-           self.lencache = len(cache)
-           cache = cache.strip()
-           menuCampos[line] = cache
+            RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+            cache = self.get_web_value(RetId)
+            self.lencache = len(cache)
+            cache = cache.strip()
+            menuCampos[line] = cache
 
         self.camposCache = menuCampos
         self.idwizard = backup_idwizard
 
-        
+
         # Altero os parametros
         self.UTSetValue("aCab", "Filial", set_filial)
         self.UTSetValue("aCab", "Cont. Por", cont_por)
         self.UTSetValue("aCab", "Cont. Ing", cont_ing)
         self.UTSetValue("aCab", "Cont. Esp", cont_esp)
-        
+
         # Confirma a gravação de Edição
         self.SetButton("Salvar")
         self.LogOff()
