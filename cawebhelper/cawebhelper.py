@@ -1918,9 +1918,10 @@ class CAWebHelper(unittest.TestCase):
                             self.browse = False
                     else:
                         self.proximo = False
-            if button == self.language.edit or button == self.language.view or button == self.language.delete:
-                self.wait_enchoice()
-                self.btnenchoice = True
+            if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
+                if not self.element_exists(By.CSS_SELECTOR, ".ui-dialog"):
+                    self.wait_enchoice()
+                    self.btnenchoice = True
         except ValueError as error:
             if self.consolelog:
                 print(error)
