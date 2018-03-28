@@ -2087,7 +2087,7 @@ class CAWebHelper(unittest.TestCase):
 
         for arrayLine in array:
 
-            self.idwizard = backup_idwizard[:]
+            self.idwizard = backup_idwizard
 
             # Preenche o campo de Pesquisa
             self.UTSetValue("aCab", "Procurar por:", arrayLine[0])
