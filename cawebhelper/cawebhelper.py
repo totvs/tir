@@ -1933,9 +1933,10 @@ class CAWebHelper(unittest.TestCase):
                             self.browse = False
                     else:
                         self.proximo = False
-            if button == self.language.edit or button == self.language.view or button == self.language.delete:
-                self.wait_enchoice()
-                self.btnenchoice = True
+            if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
+                if not self.element_exists(By.CSS_SELECTOR, ".ui-dialog"):
+                    self.wait_enchoice()
+                    self.btnenchoice = True
         except ValueError as error:
             if self.consolelog:
                 print(error)
@@ -2065,7 +2066,6 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2095,7 +2095,6 @@ class CAWebHelper(unittest.TestCase):
         if new_log_line:
             self.log.new_line(False, message)
         self.log.save_file()
-
         self.assertTrue(False, message)
     
     def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
