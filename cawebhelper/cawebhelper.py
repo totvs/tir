@@ -1131,11 +1131,12 @@ class CAWebHelper(unittest.TestCase):
             Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice', placeholder)
             if Id:
                 element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
-                self.wait_until_clickable(element)
+                return_wait = self.wait_until_clickable(element)
                 if self.rota == 'SetRotina' or self.rota == 'EDAPP':
                     self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
                     self.rota = ''
-                self.Click(element)
+                if not return_wait:
+                    self.Click(element)
                 #seleciona a busca do indice baseado na descrição ex: Filial+numero
                 if indice:
                     self.SetScrap(descricao, 'div', 'tradiobutton', 'indice', 'detail')
@@ -1174,7 +1175,7 @@ class CAWebHelper(unittest.TestCase):
         while True:
             try:
                 element.click()
-                break
+                return True
             except:
                 pass
                 time.sleep(3)
