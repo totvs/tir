@@ -86,7 +86,7 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-        self.camposCache = dict()
+        self.camposCache = []
         self.parametro = ''
         self.backupSetup = dict()
 
@@ -2110,7 +2110,7 @@ class CAWebHelper(unittest.TestCase):
                 cache = cache.strip()
                 menuCampos[line] = cache
 
-            self.camposCache = menuCampos
+            self.camposCache.append( menuCampos )
             self.idwizard = backup_idwizard[:]
 
 
