@@ -32,7 +32,7 @@ class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
         if config_path == "":
             config_path = sys.path[0] + r"\\config.json"
-        self.config = ConfigLoader(config_path)                
+        self.config = ConfigLoader(config_path)      
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -64,7 +64,8 @@ class CAWebHelper(unittest.TestCase):
         self.IdClose = ''
         self.grid_value = ''
         self.grid_class = ''
-
+        self.initial_program = 'SIGAADV'
+        
         self.language = LanguagePack(self.config.language) if self.config.language else ""
 
         self.lineGrid = 0
@@ -86,15 +87,17 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-    def set_prog_inic(self, initial_program='SIGAADV'):
+    def set_prog_inic(self, initial_program):
         '''
         Method that defines the program to be started
         '''
+        if initial_program:
+            self.initial_program = initial_program
         try:
             Id = self.SetScrap('inputStartProg', 'div', '')
             element = self.driver.find_element_by_id(Id)
             element.clear()
-            self.SendKeys(element, initial_program)
+            self.SendKeys(element, self.initial_program)
         except:
             self.proximo = False
 
@@ -314,12 +317,15 @@ class CAWebHelper(unittest.TestCase):
             if self.elementDisabled and self.consolelog:
             	print("Element is Disabled")
             self.LogResult(field=campo, user_value=disabled, captured_value=True, disabled_field=True)
+            self.log.save_file()
+            self.Restart()
+            self.assertTrue(False, self.create_message(['', campo],enum.MessageType.DISABLED))
         else:
             tries += 1
             self.rota = "SetEnchoice"
             
             underline = (r'\w+(_)')#Se o campo conter "_"
-            valsub = self.RegexValue(valor)
+            valsub = self.apply_mask(valor)
 
             if not Id:
                 match = re.search(underline, campo)
@@ -350,12 +356,11 @@ class CAWebHelper(unittest.TestCase):
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
                             
-                        reg = (r"@. [1-9.]+")
-                        mask = element.get_attribute("picture")
-                        valsub = self.RegexValue(valor)
+                        valsub = self.apply_mask(valor)
 
-                        if valsub != valor and ((mask is not None) and (re.search(reg, mask))):
+                        if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
+                            valor = valsub
                         else:
                             self.SendKeys(element, valor)
 
@@ -386,11 +391,16 @@ class CAWebHelper(unittest.TestCase):
                         self.numberOfTries += 1
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
                     else:
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
                 elif self.passfield:
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
-                        self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled)
-
+                        if tries < 103:
+                            self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
+                        else:
+                            self.log_error("Error trying to input value")
     def select_combo(self, Id, valor):
         """
         Retorna a lista do combobox através do select do DOM.
@@ -403,18 +413,6 @@ class CAWebHelper(unittest.TestCase):
                 break
         if not self.elementDisabled:       
             combo.select_by_visible_text(valor)
-        return valor
-
-    def RegexValue(self, valor):
-        """
-        Recebe o valor do campo e se houver caracter especial faz a remoção.
-        """
-        caracter = (r'[.-]')#Se p valor conter determinados caracteres.
-        if valor[0:4] != 'http':
-            match = re.search(caracter, valor)
-            if match:
-                valor = re.sub(caracter, '', valor)
-
         return valor
 
     def SetGrid(self, ChkResult=0):
@@ -500,8 +498,6 @@ class CAWebHelper(unittest.TestCase):
         soup = BeautifulSoup(divstring,"html.parser") 
         rows = []
         xlabel = ''
-
-
 
         for tr in soup.find_all('tr'):
 
@@ -862,7 +858,7 @@ class CAWebHelper(unittest.TestCase):
                                     if RetId:# IF/Break responsavel pela parada do FOR, quando é encontrado o ID do campo
                                         break 
                                 #preenche atributos do campo da enchoice
-                        elif seek in line.attrs['name']:
+                        elif list(filter(bool, line.attrs["name"].split('->')))[1] == seek:
                             RetId = line.attrs['id']
                             self.classe = line.attrs['class'][0]
                             if not self.classe == 'tcombobox':
@@ -1014,6 +1010,7 @@ class CAWebHelper(unittest.TestCase):
         """
         RetId = ''
         self.idcomp = ''
+        element = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1045,16 +1042,7 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-
-                #Busca o campo para preenchimento da chave de busca
-                """
-                if seek == 'placeHolder':                    
-                    self.seek_content(seek, line.contents)
-                    if self.idcomp:
-                        RetId = self.idcomp
-                        break
-
-                """
+                            
                 #Busca o campo para preenchimento da chave de busca
                 try:
                     if seek in line.contents[0].attrs['class'][0]:
@@ -1075,15 +1063,17 @@ class CAWebHelper(unittest.TestCase):
             if args1 == 'indicedefault':
                 item = radioitens[0]
                 if item.tag_name == 'div':
-                    item = item.find_elements(By.TAG_NAME, 'input')[0]
+                    element = item.find_elements(By.TAG_NAME, 'input')[0]
+                    self.DoubleClick(element)
                     RetId = True
             else:
                 for item in radioitens:
                     if seek.strip() in item.text:
                         if item.tag_name == 'div':
-                            item = item.find_elements(By.TAG_NAME, 'input')[0]
+                            element = item.find_elements(By.TAG_NAME, 'input')[0]
+                            self.DoubleClick(element)
                             RetId = True
-            self.DoubleClick(item)
+                            break
             return RetId
 
         #Busca pelo primeiro indice de busca
@@ -1151,6 +1141,7 @@ class CAWebHelper(unittest.TestCase):
                 else:
                     self.SetScrap(placeholder, 'div', 'tradiobutton', 'indicedefault', 'detail')
                 self.placeHolder(placeholder, chave)
+                # self.data_check(descricao,chave)
             else:
                 self.proximo = False
             pass
@@ -1167,13 +1158,13 @@ class CAWebHelper(unittest.TestCase):
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
-            #time.sleep(1)
-            #self.DoubleClick(element)
-            #self.SendKeys(element, Keys.BACK_SPACE)
+            time.sleep(1)
+            self.DoubleClick(element)
+            self.SendKeys(element, Keys.BACK_SPACE)
             return True
 
     # VISAO 3 - Tela inicial
-    def ProgramaInicial(self, initial_program="SIGAADV", environment=""):
+    def ProgramaInicial(self, initial_program="", environment=""):
         self.set_prog_inic(initial_program)
         self.set_enviroment()
         self.SetButton('Ok', 'startParameters', '', 60, 'button', 'tbutton')
@@ -1207,7 +1198,7 @@ class CAWebHelper(unittest.TestCase):
 
             self.SetButton(label,'','',60,'button','tbutton')
 
-    def Setup(self, initial_program='SIGAADV', date='', group='99', branch='01', module=''):
+    def Setup(self, initial_program, date='', group='99', branch='01', module=''):
         """
         Preenche as telas de programa inicial, usuario e ambiente.
         """
@@ -1418,7 +1409,7 @@ class CAWebHelper(unittest.TestCase):
             # A celula esta posicionada conforme a variavel 'coluna' indicou !
             else:
             '''
-            valsub = self.RegexValue(valor)
+            valsub = self.apply_mask(valor)
             if self.lastColweb != coluna:
                 return True
             else:
@@ -1458,13 +1449,9 @@ class CAWebHelper(unittest.TestCase):
                                     return False
                         if Id:
                             self.lenvalorweb = len(self.get_web_value(Id))
-
-                            reg = (r"@. [1-9.]+")
-                            mask = element.get_attribute("picture")
-
-                        
+                       
                             time.sleep(1)
-                            if valsub != valor and ((mask is not None) and (re.search(reg, mask))):
+                            if valsub != valor and self.check_mask(element):
                                 self.SendKeys(element, valsub)#element.send_keys(valsub)
                             else:
                                 self.SendKeys(element, valor)#element.send_keys(valor)
@@ -1498,14 +1485,17 @@ class CAWebHelper(unittest.TestCase):
                 Id = self.SetScrap(valorusr, '','tsay twidget dict-tsay align-left transparent','caHelp')
         if cabitem != 'aItens':
             if Id:
+                element = self.driver.find_element_by_id(Id)
                 if args1 != 'input':
-                    element = self.driver.find_element_by_id(Id)
                     self.Click(element)
                 valorweb = self.get_web_value(Id)
                 self.lenvalorweb = len(valorweb)
                 valorweb = valorweb.strip()
                 if self.consolelog and valorweb != '':
                     print(valorweb)
+                if self.check_mask(element):
+                    valorweb = self.apply_mask(valorweb)
+                    valorusr = self.apply_mask(valorusr)
                 if type(valorweb) is str:
                     valorweb = valorweb[0:len(str(valorusr))]
             if args1 != 'input':
@@ -1537,6 +1527,7 @@ class CAWebHelper(unittest.TestCase):
                 valorweb = valorweb[1]
         else:
             valorweb = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('value')
+            self.elementDisabled = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('disabled') != None
         return valorweb       
 
     def LogResult(self, field, user_value, captured_value, call_grid=False, disabled_field=False):
@@ -1661,7 +1652,7 @@ class CAWebHelper(unittest.TestCase):
         self.driver.save_screenshot( self.GetFunction() +".png")
         self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
         self.savebtn = ''
-        self.SetButton(self.language.close,cClass='tbutton',searchMsg=False)
+        self.Click(self.close_element)
         if not self.advpl:
             self.SetButton(self.language.leave_page,cClass='tbutton',searchMsg=False)
         self.log.new_line(False, message)
@@ -2069,3 +2060,33 @@ class CAWebHelper(unittest.TestCase):
             if close_button:
                 self.Click(close_button[0])
                             
+    def check_mask(self, element):
+        """
+        Checks wether the element has a numeric mask.
+        """
+        reg = (r"(@. )?[1-9.\/-]+")
+        mask = element.get_attribute("picture")
+        if mask is None:
+            child = element.find_elements(By.CSS_SELECTOR, "input")
+            if child:
+                mask = child[0].get_attribute("picture")
+            
+        return (mask != "" and mask is not None and (re.search(reg, mask)))
+
+    def apply_mask(self, string):
+        """
+        Removes special characters from received string.
+        """
+        caracter = (r'[.\/-]')
+        if string[0:4] != 'http':
+            match = re.search(caracter, string)
+            if match:
+                string = re.sub(caracter, '', string)
+
+        return string
+
+    def log_error(self, message, new_log_line=True):
+        if new_log_line:
+            self.log.new_line(False, message)
+        self.log.save_file()
+        self.assertTrue(False, message)
