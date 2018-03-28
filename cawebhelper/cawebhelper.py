@@ -2087,8 +2087,6 @@ class CAWebHelper(unittest.TestCase):
 
         for arrayLine in array:
 
-            self.idwizard = backup_idwizard[:]
-
             # Preenche o campo de Pesquisa
             self.UTSetValue("aCab", "Procurar por:", arrayLine[0])
 
@@ -2124,6 +2122,7 @@ class CAWebHelper(unittest.TestCase):
 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
+            self.idwizard = backup_idwizard[:]
         self.LogOff()
 
         self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
