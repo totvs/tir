@@ -27,6 +27,7 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
+import cawebhelper.jquery_support as jq
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -86,6 +87,7 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
+        jq.inject_jquery(self.driver)
 
     def set_prog_inic(self, initial_program):
         '''
@@ -355,12 +357,14 @@ class CAWebHelper(unittest.TestCase):
                         if self.valtype != 'N':
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
-                            
+                                                        
                         valsub = self.apply_mask(valor)
 
                         if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
                             valor = valsub
+                        elif (self.valtype == "N"):
+                            jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
                         else:
                             self.SendKeys(element, valor)
 
