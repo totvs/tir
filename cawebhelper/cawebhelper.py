@@ -2068,9 +2068,6 @@ class CAWebHelper(unittest.TestCase):
         
         self.idwizard = []
         self.LogOff()
-        parametro = ''
-
-        self.parametro = parametro
 
         #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
