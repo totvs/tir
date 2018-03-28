@@ -2141,7 +2141,7 @@ class CAWebHelper(unittest.TestCase):
 
         for line in self.camposCache:
             # Preenche o campo de Pesquisa
-            self.UTSetValue("aCab", "Procurar por:", self.parametro)
+            self.UTSetValue("aCab", "Procurar por:", self.camposCache[line][0])
 
             # Confirma a busca
             self.SetButton("Buscar")
