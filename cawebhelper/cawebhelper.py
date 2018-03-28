@@ -2113,7 +2113,7 @@ class CAWebHelper(unittest.TestCase):
                 menuCampos[line] = cache
 
             self.camposCache = menuCampos
-            self.idwizard = backup_idwizard
+            self.idwizard = backup_idwizard[:]
 
 
             # Altero os parametros
