@@ -2139,7 +2139,7 @@ class CAWebHelper(unittest.TestCase):
 
         for line in self.camposCache:
             # Preenche o campo de Pesquisa
-            self.UTSetValue("aCab", "Procurar por:", self.camposCache[line][0])
+            self.UTSetValue("aCab", "Procurar por:", line['Procurar por:'])
 
             # Confirma a busca
             self.SetButton("Buscar")
@@ -2147,8 +2147,9 @@ class CAWebHelper(unittest.TestCase):
             # Clica no botão/icone Editar
             self.SetButton("Editar")
 
-            for line in self.camposCache:
-                self.UTSetValue("aCab", line, self.camposCache[line])
+            #self.UTSetValue("aCab", line, line['Cont. Por'])
+            #self.UTSetValue("aCab", "Procurar por:", line['Procurar por:'])
+
                 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
