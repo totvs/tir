@@ -27,6 +27,7 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
+import cawebhelper.jquery_support as jq
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -86,10 +87,7 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-        
-        self.camposCache = dict()
-        self.parametro = ''
-        self.backupSetup = dict()
+        jq.inject_jquery(self.driver)
 
     def set_prog_inic(self, initial_program):
         '''
@@ -279,7 +277,6 @@ class CAWebHelper(unittest.TestCase):
    
     def wait_browse(self,searchMsg=True):
         Ret = ''
-        tag = 'button'
         endTime =   time.time() + 60
         while not Ret:
             Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
@@ -355,12 +352,14 @@ class CAWebHelper(unittest.TestCase):
                         if self.valtype != 'N':
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
-                            
+                                                        
                         valsub = self.apply_mask(valor)
 
                         if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
                             valor = valsub
+                        elif (self.valtype == "N"):
+                            jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
                         else:
                             self.SendKeys(element, valor)
 
@@ -648,6 +647,8 @@ class CAWebHelper(unittest.TestCase):
             
         if not lista and not RetId:
             lista = soup.find_all(tag)
+
+        lista = self.zindex_sort(lista,True)
 
         for line in lista:
             try:#faço uma tentativa pois caso não esteja verificando o mesmo nivel pode dar erro.
@@ -1115,6 +1116,16 @@ class CAWebHelper(unittest.TestCase):
 
         return zindex[0]
 
+    def zindex_sort (self, elements, reverse=False):
+        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        return elements
+        
+    def search_zindex(self,element):
+        zindex = 0
+        if "style" in element.attrs and "z-index:" in element.attrs['style']:
+            zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
+        
+        return zindex
 
     def SearchBrowse(self, descricao='', chave='', indice=False, placeholder=''):
         '''
@@ -1900,17 +1911,13 @@ class CAWebHelper(unittest.TestCase):
                         element = self.driver.find_element_by_id(Id)
                         self.Click(element)
                 else:
-                #while not Id:
                     Id = self.SetScrap(button, tag, cClass, args1,''    , ''     , ''      , args3   ,searchMsg)
                     if not Id:
                         Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
                         element = self.driver.find_element_by_id(Id)
                         self.Click(element)
-                #        if self.element_exists(By.CSS_SELECTOR, cClass, '' ,button ):
                         if Id:
                             self.SetItemMen(button, '', 'menuitem')
-                #        else:
-                #            self.Click(element)
                     if Id:
                         if button == self.language.confirm or button == self.language.save:
                             self.savebtn = button
@@ -2067,6 +2074,18 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
+
+    def close_modal(self):
+        '''
+        This method closes the last open modal in the screen.
+        '''
+        modals = self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog")
+        if modals and self.element_exists(By.CSS_SELECTOR, ".tmodaldialog .tbrowsebutton"):
+            modals.sort(key=lambda x: x.get_attribute("style").split("z-index:")[1].split(";")[0], reverse=True)
+            close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
+            if close_button:
+                self.Click(close_button[0])
+                            
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2093,105 +2112,17 @@ class CAWebHelper(unittest.TestCase):
         return string
 
     def log_error(self, message, new_log_line=True):
+        """
+        Finishes execution of test case with an error and creates the log information for that test.
+        """
         if new_log_line:
             self.log.new_line(False, message)
         self.log.save_file()
         self.assertTrue(False, message)
-    
-    def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
-        
-        self.idwizard = []
-        self.LogOff()
 
-        self.parametro = parametro
-
-        #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
-        
-        # Escolhe a opção do Menu Lateral
-        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
-
-        # Clica no botão/icone pesquisar
-        self.SetButton("Pesquisar")
-
-        # Preenche o campo de Pesquisa
-        self.UTSetValue("aCab", "Procurar por:", parametro)
-
-        # Confirma a busca
-        self.SetButton("Buscar")
-
-        # Clica no botão/icone Editar
-        self.SetButton("Editar")
-
-        # Faz a captura dos elementos dos campos
-        time.sleep(5)
-        content = self.driver.page_source
-        soup = BeautifulSoup(content,"html.parser")
-
-        backup_idwizard = self.idwizard[:]
-
-        menuCampos = { 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
-
-        for line in menuCampos:
-           RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-           cache = self.get_web_value(RetId)
-           self.lencache = len(cache)
-           cache = cache.strip()
-           menuCampos[line] = cache
-
-        self.camposCache = menuCampos
-        self.idwizard = backup_idwizard
-
-        
-        # Altero os parametros
-        self.UTSetValue("aCab", "Filial", set_filial)
-        self.UTSetValue("aCab", "Cont. Por", cont_por)
-        self.UTSetValue("aCab", "Cont. Ing", cont_ing)
-        self.UTSetValue("aCab", "Cont. Esp", cont_esp)
-        
-        # Confirma a gravação de Edição
-        self.SetButton("Salvar")
-        self.LogOff()
-
-        self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        self.UTProgram(self.rotina)
-
-    def RestoreParameters( self ):
-        '''
-        '''
-        self.idwizard = []
-        self.LogOff()
-
-        self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        
-        # Escolhe a opção do Menu Lateral
-        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
-
-        # Clica no botão/icone pesquisar
-        self.SetButton("Pesquisar")
-
-         # Preenche o campo de Pesquisa
-        self.UTSetValue("aCab", "Procurar por:", self.parametro)
-
-        # Confirma a busca
-        self.SetButton("Buscar")
-
-        # Clica no botão/icone Editar
-        self.SetButton("Editar")
-
-        for line in self.camposCache:
-            self.UTSetValue("aCab", line, self.camposCache[line])
-            
-        # Confirma a gravação de Edição
-        self.SetButton("Salvar")
-                            
-    def close_modal(self):
-        '''
-        This method closes the last open modal in the screen.
-        '''
-        modals = self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog")
-        if modals and (self.element_exists(By.CSS_SELECTOR, ".tmodaldialog .tbrowsebutton")):
-            modals.sort(key=lambda x: x.get_attribute("style").split("z-index:")[1].split(";")[0], reverse=True)
-            close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
-            if close_button:
-                self.Click(close_button[0])
+    def SetFocus(self, field):
+        """
+        Set the current focus on the desired field.
+        """
+        Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
+        jq.jquery_set_focus(self.driver, "#{} input".format(Id))
