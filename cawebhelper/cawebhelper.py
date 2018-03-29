@@ -87,14 +87,7 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-<<<<<<< HEAD
-        
-        self.camposCache = dict()
-        self.parametro = ''
-        self.backupSetup = dict()
-=======
         jq.inject_jquery(self.driver)
->>>>>>> dcf8fcd91cc03df60fd1e6f8ae9a91c446ddea01
 
     def set_prog_inic(self, initial_program):
         '''
