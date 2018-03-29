@@ -650,10 +650,7 @@ class CAWebHelper(unittest.TestCase):
         if not lista and not RetId:
             lista = soup.find_all(tag)
 
-        zlista = self.zindex_sort(lista,True)
-
-        if zlista:
-            lista = zlista
+        lista = self.zindex_sort(lista,True)
 
         for line in lista:
             try:#faço uma tentativa pois caso não esteja verificando o mesmo nivel pode dar erro.
@@ -1122,11 +1119,15 @@ class CAWebHelper(unittest.TestCase):
         return zindex[0]
 
     def zindex_sort (self, elements, reverse=False):
-        try:
-            elements.sort(key=lambda x: x.attrs['style'].split("z-index:")[1].split(";")[0].strip(), reverse=reverse)
-            return elements
-        except Exception:
-            pass
+        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        return elements
+        
+    def search_zindex(self,element):
+        zindex = 0
+        if "style" in element.attrs and "z-index:" in element.attrs['style']:
+            zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
+        
+        return zindex
 
     def SearchBrowse(self, descricao='', chave='', indice=False, placeholder=''):
         '''
