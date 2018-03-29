@@ -2060,11 +2060,11 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-<<<<<<< HEAD
-    
-    #def SetParameters( self, parametro, set_filial, cont_por, cont_ing, cont_esp ):
+
     def SetParameters( self, arrayParameters ):
-        
+        '''
+        Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
+        '''
         self.idwizard = []
         self.LogOff()
 
@@ -2126,6 +2126,8 @@ class CAWebHelper(unittest.TestCase):
 
     def RestoreParameters( self ):
         '''
+        Método responsável por restaurar os parâmetros do configurador antes de após o encerramento do/dos caso(s) de teste(s).
+        Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
         '''
         self.idwizard = []
         self.LogOff()
@@ -2154,7 +2156,6 @@ class CAWebHelper(unittest.TestCase):
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
                             
-=======
 
     def close_modal(self):
         '''
@@ -2197,4 +2198,3 @@ class CAWebHelper(unittest.TestCase):
             self.log.new_line(False, message)
         self.log.save_file()
         self.assertTrue(False, message)
->>>>>>> master
