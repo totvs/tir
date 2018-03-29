@@ -1183,6 +1183,7 @@ class CAWebHelper(unittest.TestCase):
                     pass
                     time.sleep(3)
             else:
+                self.driver.save_screenshot( self.GetFunction() +".png")
                 self.Restart()
                 self.log_error("Falhou")
                 
