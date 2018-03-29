@@ -1170,15 +1170,22 @@ class CAWebHelper(unittest.TestCase):
         """
         Wait until element to be clickable
         """
+        endtime =   time.time() + 120# 2 minutos de espera
+
         if self.consolelog:
             print("Waiting...")
         while True:
-            try:
-                element.click()
-                return True
-            except:
-                pass
-                time.sleep(3)
+            if time.time() < endtime:
+                try:
+                    element.click()
+                    return True
+                except:
+                    pass
+                    time.sleep(3)
+            else:
+                self.Restart()
+                self.log_error("Falhou")
+                
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
