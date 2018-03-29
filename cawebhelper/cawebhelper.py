@@ -1221,6 +1221,9 @@ class CAWebHelper(unittest.TestCase):
         self.Usuario()
         self.Ambiente()
 
+        while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
+            self.close_modal()
+
         self.set_log_info()
 
     def UTProgram(self, rotina):
@@ -2049,7 +2052,18 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
-                        
+
+    def close_modal(self):
+        '''
+        This method closes the last open modal in the screen.
+        '''
+        modals = self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog")
+        if modals and self.element_exists(By.CSS_SELECTOR, ".tmodaldialog .tbrowsebutton"):
+            modals.sort(key=lambda x: x.get_attribute("style").split("z-index:")[1].split(";")[0], reverse=True)
+            close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
+            if close_button:
+                self.Click(close_button[0])
+                            
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
