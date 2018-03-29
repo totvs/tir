@@ -2094,7 +2094,7 @@ class CAWebHelper(unittest.TestCase):
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
 
-            menuCampos = { 'Parametro': '', 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+            menuCampos = { 'Procurar por:': '', 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
             for line in menuCampos:
                 RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
