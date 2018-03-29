@@ -87,15 +87,12 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-<<<<<<< HEAD
         self.camposCache = []
         self.parametro = ''
         self.backupSetup = dict()
 
-    def set_prog_inic(self, initial_program='SIGAADV'):
-=======
+
     def set_prog_inic(self, initial_program):
->>>>>>> master
         '''
         Method that defines the program to be started
         '''
