@@ -87,7 +87,7 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-        jq.inject_jquery(self.driver)
+        #jq.inject_jquery(self.driver)
 
         self.camposCache = []
         self.parametro = ''
@@ -363,8 +363,8 @@ class CAWebHelper(unittest.TestCase):
                         if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
                             valor = valsub
-                        elif (self.valtype == "N"):
-                            jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
+                        #elif (self.valtype == "N"):
+                            #jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
                         else:
                             self.SendKeys(element, valor)
 
@@ -1257,6 +1257,7 @@ class CAWebHelper(unittest.TestCase):
         while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
             self.close_modal()
 
+        
         self.set_log_info()
 
     def UTProgram(self, rotina):
@@ -1265,7 +1266,7 @@ class CAWebHelper(unittest.TestCase):
         """
         self.rotina = rotina
         self.SetRotina()
-        self.wait_browse()
+        #self.wait_browse()
     
     def UTSetValue(self, cabitem, campo, valor, linha=0, chknewline=False, disabled=False):
         """
@@ -2232,4 +2233,4 @@ class CAWebHelper(unittest.TestCase):
         Set the current focus on the desired field.
         """
         Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
-        jq.jquery_set_focus(self.driver, "#{} input".format(Id))
+        #jq.jquery_set_focus(self.driver, "#{} input".format(Id))
