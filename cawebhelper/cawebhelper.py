@@ -2137,6 +2137,8 @@ class CAWebHelper(unittest.TestCase):
         # Clica no botão/icone pesquisar
         self.SetButton("Pesquisar")
 
+        backup_idwizard = self.idwizard[:]
+
         for line in self.camposCache:
             # Preenche o campo de Pesquisa
             self.UTSetValue("aCab", "Procurar por:", line['Procurar por:'])
@@ -2147,12 +2149,15 @@ class CAWebHelper(unittest.TestCase):
             # Clica no botão/icone Editar
             self.SetButton("Editar")
 
+            #self.idwizard = backup_idwizard[:]
+
             self.UTSetValue("aCab", 'Cont. Por', line['Cont. Por'])
             self.UTSetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
             self.UTSetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
                 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
+            self.idwizard = backup_idwizard[:]
                             
 
     def close_modal(self):
