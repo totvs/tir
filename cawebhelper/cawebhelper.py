@@ -2076,7 +2076,17 @@ class CAWebHelper(unittest.TestCase):
         return string
 
     def log_error(self, message, new_log_line=True):
+        """
+        Finishes execution of test case with an error and creates the log information for that test.
+        """
         if new_log_line:
             self.log.new_line(False, message)
         self.log.save_file()
         self.assertTrue(False, message)
+
+    def SetFocus(self, field):
+        """
+        Set the current focus on the desired field.
+        """
+        Id = self.SetScrap(field)
+        jq.jquery_set_focus(self.driver, "#{}".format(Id))

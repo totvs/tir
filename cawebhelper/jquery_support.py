@@ -25,3 +25,6 @@ def jquery_get_text(driver, selector):
 
     return driver.execute_script(script)
 
+def jquery_set_focus(driver, selector):
+    script = "jQuery(\"" + selector  + "\").focus()"
+    driver.execute_script(script)
