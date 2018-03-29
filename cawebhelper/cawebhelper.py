@@ -2094,14 +2094,15 @@ class CAWebHelper(unittest.TestCase):
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
 
-            menuCampos = { 'Procurar por:': '', 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+            menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
             for line in menuCampos:
-                RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-                cache = self.get_web_value(RetId)
-                self.lencache = len(cache)
-                cache = cache.strip()
-                menuCampos[line] = cache
+                if line == menuCampos[line]:
+                    RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+                    cache = self.get_web_value(RetId)
+                    self.lencache = len(cache)
+                    cache = cache.strip()
+                    menuCampos[line] = cache
 
             self.camposCache.append( menuCampos )
             self.idwizard = backup_idwizard[:]
@@ -2122,7 +2123,7 @@ class CAWebHelper(unittest.TestCase):
 
     def RestoreParameters( self ):
         '''
-        Método responsável por restaurar os parâmetros do configurador antes de após o encerramento do/dos caso(s) de teste(s).
+        Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
         Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
         '''
         self.idwizard = []
