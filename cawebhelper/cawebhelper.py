@@ -2102,5 +2102,5 @@ class CAWebHelper(unittest.TestCase):
         """
         Set the current focus on the desired field.
         """
-        Id = self.SetScrap(field)
-        jq.jquery_set_focus(self.driver, "#{}".format(Id))
+        Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
+        jq.jquery_set_focus(self.driver, "#{} input".format(Id))
