@@ -91,12 +91,7 @@ class CAWebHelper(unittest.TestCase):
         self.parametro = ''
         self.backupSetup = dict()
 
-<<<<<<< HEAD
-    def set_prog_inic(self, initial_program='SIGAADV'):
-
-=======
     def set_prog_inic(self, initial_program):
->>>>>>> ADVPRWEB-56
         '''
         Method that defines the program to be started
         '''
