@@ -2097,7 +2097,7 @@ class CAWebHelper(unittest.TestCase):
             menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
             for line in menuCampos:
-                if line == menuCampos[line]:
+                if not menuCampos[line]:
                     RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
                     cache = self.get_web_value(RetId)
                     self.lencache = len(cache)
