@@ -364,7 +364,16 @@ class CAWebHelper(unittest.TestCase):
                             self.SendKeys(element, valsub)
                             valor = valsub
                         elif (self.valtype == "N"):
-                            jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
+                            tries = 0
+                            selector = "#{} input".format(Id) 
+                            while(tries < 3):
+                                jq.jquery_set_focus(self.driver, selector)
+                                jq.jquery_click(self.driver, selector)
+                                self.SendKeys(element, valor)
+                                if self.apply_mask(jq.jquery_get_value(self.driver, selector)).strip() == valor:
+                                    break
+                                tries+=1
+
                         else:
                             self.SendKeys(element, valor)
 
