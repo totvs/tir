@@ -2147,9 +2147,9 @@ class CAWebHelper(unittest.TestCase):
             # Clica no botão/icone Editar
             self.SetButton("Editar")
 
-            #self.UTSetValue("aCab", line, line['Cont. Por'])
-            #self.UTSetValue("aCab", "Procurar por:", line['Procurar por:'])
-
+            self.UTSetValue("aCab", 'Cont. Por', line['Cont. Por'])
+            self.UTSetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
+            self.UTSetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
                 
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
