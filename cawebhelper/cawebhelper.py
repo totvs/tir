@@ -1921,7 +1921,6 @@ class CAWebHelper(unittest.TestCase):
         Método que efetua o clique nos botão da interface
         '''
         try:
-            Ret = ''
             Id  = ''
             if self.VldData():
                 if (button.lower() == self.language.Ok.lower()) and args1 != 'startParameters':
@@ -1930,13 +1929,16 @@ class CAWebHelper(unittest.TestCase):
                         element = self.driver.find_element_by_id(Id)
                         self.Click(element)
                 else:
-                    Id = self.SetScrap(button, tag, cClass, args1,''    , ''     , ''      , args3   ,searchMsg)
-                    if not Id:
-                        Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
-                        if Id:
-                            self.SetItemMen(button, '', 'menuitem')
+                    if button in self.language.no_actions:
+                        Id = self.SetScrap(button, tag, cClass, '', '', '', '', 60, searchMsg)
+                    else:
+                        Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
+                        if not Id:
+                            Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
+                            element = self.driver.find_element_by_id(Id)
+                            self.Click(element)
+                            if Id:
+                                self.SetItemMen(button, '', 'menuitem')
                     if Id:
                         if button == self.language.confirm or button == self.language.save:
                             self.savebtn = button
