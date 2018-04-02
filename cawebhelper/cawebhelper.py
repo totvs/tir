@@ -27,7 +27,7 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
-import cawebhelper.jquery_support as jq
+import cawebhelper.jquery as jq
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -363,8 +363,17 @@ class CAWebHelper(unittest.TestCase):
                         if valsub != valor and self.check_mask(element):
                             self.SendKeys(element, valsub)
                             valor = valsub
-                        #elif (self.valtype == "N"):
-                            #jq.jquery_set_value(self.driver,"#{} input".format(Id), valor)
+                        elif (self.valtype == "N"):
+                            tries = 0
+                            selector = "#{} input".format(Id) 
+                            while(tries < 3):
+                                jq.set_focus(self.driver, selector)
+                                jq.click(self.driver, selector)
+                                self.SendKeys(element, valor)
+                                if self.apply_mask(jq.get_value(self.driver, selector)).strip() == valor:
+                                    break
+                                tries+=1
+
                         else:
                             self.SendKeys(element, valor)
 
@@ -1632,6 +1641,10 @@ class CAWebHelper(unittest.TestCase):
         self.classe = ''
         self.Usuario()
         self.Ambiente()
+
+        while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
+            self.close_modal()
+
         self.SetRotina()
     
     def GetFunction(self):
@@ -2233,4 +2246,4 @@ class CAWebHelper(unittest.TestCase):
         Set the current focus on the desired field.
         """
         Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
-        #jq.jquery_set_focus(self.driver, "#{} input".format(Id))
+        jq.set_focus(self.driver, "#{} input".format(Id))
