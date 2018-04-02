@@ -14,6 +14,7 @@ class LanguagePack:
         self.environment = languagepack["Environment"]
         self.add = languagepack["Add"]
         self.delete= languagepack["Delete"]
+        self.no_actions = {languagepack["Confirm"],languagepack["Save"],languagepack["Cancel"],languagepack["Close"],languagepack["Finish"]}
         self.edit = languagepack["Edit"]
         self.cancel = languagepack["Cancel"]
         self.view = languagepack["View"]
