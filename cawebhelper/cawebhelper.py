@@ -1026,6 +1026,7 @@ class CAWebHelper(unittest.TestCase):
         RetId = ''
         self.idcomp = ''
         element = ''
+        Id = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1043,10 +1044,13 @@ class CAWebHelper(unittest.TestCase):
                     if seek in line.text:
                         Id = line.attrs['id']
                         break
+                if not Id:
+                    self.log_error("Não foi encontrado o indice informado: {}".format(seek))
+                    self.Restart()
         else:
             if args2:
                 lista = self.search_next_soup(args2, soup)
-            else:  
+            else:
                 lista = soup.find_all('div', class_=(cClass))
 
             #Coleto o Id do campo pesquisa correspondente
@@ -1195,15 +1199,23 @@ class CAWebHelper(unittest.TestCase):
         """
         Wait until element to be clickable
         """
+        endtime =   time.time() + 120# 2 minutos de espera
+
         if self.consolelog:
             print("Waiting...")
         while True:
-            try:
-                element.click()
-                return True
-            except:
-                pass
-                time.sleep(3)
+            if time.time() < endtime:
+                try:
+                    element.click()
+                    return True
+                except:
+                    pass
+                    time.sleep(3)
+            else:
+                self.driver.save_screenshot( self.GetFunction() +".png")
+                self.Restart()
+                self.log_error("Falhou")
+                
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
