@@ -1306,7 +1306,7 @@ class CAWebHelper(unittest.TestCase):
             alias = []
             field = []
 
-            exceptions = ['WT alias', 'WT recno']
+            exceptions = ['wt alias', 'wt recno', 'alias wt', 'recno wt']
             lExcept = False
             auxTable = self.SetTable()
             self.Table = []
@@ -1358,7 +1358,7 @@ class CAWebHelper(unittest.TestCase):
                     else:
                         if alias:
                             for x in exceptions:
-                                if line2 == x:
+                                if line2.lower() == x:
                                     acertos.append(line2)
                                     lExcept = True
                                     break
