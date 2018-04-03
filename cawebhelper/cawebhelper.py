@@ -316,10 +316,8 @@ class CAWebHelper(unittest.TestCase):
             self.numberOfTries = 0
             if self.elementDisabled and self.consolelog:
             	print("Element is Disabled")
-            self.LogResult(field=campo, user_value=disabled, captured_value=True, disabled_field=True)
-            self.log.save_file()
-            self.Restart()
-            self.assertTrue(False, self.create_message(['', campo],enum.MessageType.DISABLED))
+            if not disabled:
+                self.log_error(self.create_message(['', campo],enum.MessageType.DISABLED))
         else:
             tries += 1
             self.rota = "SetEnchoice"
@@ -1530,7 +1528,7 @@ class CAWebHelper(unittest.TestCase):
             self.elementDisabled = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('disabled') != None
         return valorweb       
 
-    def LogResult(self, field, user_value, captured_value, call_grid=False, disabled_field=False):
+    def LogResult(self, field, user_value, captured_value, call_grid=False):
         '''
         Log the result of comparison between user value and captured value
         '''
@@ -1539,11 +1537,7 @@ class CAWebHelper(unittest.TestCase):
         if call_grid:
             txtaux = 'Item: %s - ' %str(self.lineGrid + 1)
 
-        if disabled_field and not user_value:
-            message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
-        elif disabled_field and user_value:
-            message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
-        elif user_value != captured_value and not disabled_field:
+        if user_value != captured_value:
             message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
         
         self.validate_field(field, user_value, captured_value, message)
@@ -2095,7 +2089,12 @@ class CAWebHelper(unittest.TestCase):
         return string
 
     def log_error(self, message, new_log_line=True):
+        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("CT")[1]
+        log_message = ""
+        log_message += stack + " -" + message
+        
         if new_log_line:
-            self.log.new_line(False, message)
+            self.log.new_line(False, log_message)
         self.log.save_file()
-        self.assertTrue(False, message)
+        self.Restart()
+        self.assertTrue(False, log_message)
