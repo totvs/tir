@@ -1747,13 +1747,13 @@ class CAWebHelper(unittest.TestCase):
 
     def SendKeys(self, element, args):
         try:
-            element.send_keys(Keys.NULL)
+            element.send_keys("")
             element.click()
             element.send_keys(args)
         except Exception:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
-            actions.send_keys(Keys.NULL)
+            actions.send_keys("")
             actions.click()
             actions.send_keys(args)
             actions.perform()
