@@ -1615,6 +1615,10 @@ class CAWebHelper(unittest.TestCase):
         self.classe = ''
         self.Usuario()
         self.Ambiente()
+
+        while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
+            self.close_modal()
+
         self.SetRotina()
     
     def GetFunction(self):
