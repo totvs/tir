@@ -1249,7 +1249,7 @@ class CAWebHelper(unittest.TestCase):
         """
         self.rotina = rotina
         self.SetRotina()
-        self.wait_browse()
+        self.wait_browse() # Wait to load elements in browser
     
     def UTSetValue(self, cabitem, campo, valor, linha=0, chknewline=False, disabled=False):
         """
