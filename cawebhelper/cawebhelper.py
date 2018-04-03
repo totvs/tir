@@ -240,8 +240,6 @@ class CAWebHelper(unittest.TestCase):
             if self.consolelog:
                 print("Não encontrou o campo Módulo")
 
-
-
     def SetItemMen(self, args1='', args2='', args3=''):
         '''
         Método que clica nos itens do menu
@@ -2058,10 +2056,11 @@ class CAWebHelper(unittest.TestCase):
         Método que efetua o clique na aba
         ''' 
         self.rota = "ClickFolder"
+
+        self.wait_enchoice()
+
         if self.close_element:
             self.move_element(self.close_element) # Retira o ToolTip dos elementos focados.
-        self.wait_enchoice()
-        #self.advpl = False
         if self.VldData():
             try:#Tento pegar o elemento da aba de forma direta sem webscraping
                 element = self.driver.find_element_by_link_text(item)
