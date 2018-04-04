@@ -27,7 +27,6 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
-import cawebhelper.jquery as jq
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -42,8 +41,8 @@ class CAWebHelper(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
             self.driver = webdriver.Chrome(executable_path=driver_path)
         self.wait = WebDriverWait(self.driver,5)
+        self.driver.maximize_window()
         self.driver.get(self.config.url)
-        
         self.LastId = []
         self.LastIdBtn = []
         self.gridcpousr = []
@@ -87,9 +86,8 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-        jq.inject_jquery(self.driver)
 
-    def set_prog_inic(self, initial_program):
+    def set_prog_inic(self, initial_program='SIGAADV'):
         '''
         Method that defines the program to be started
         '''
@@ -274,20 +272,15 @@ class CAWebHelper(unittest.TestCase):
                         self.close_element = self.driver.find_element_by_id(Ret)
             return Ret
 
+   
     def wait_browse(self,searchMsg=True):
         Ret = ''
-        tag = 'button'
         endTime =   time.time() + 60
-        while True:
-            Ret = self.SetScrap(self.language.cancel,tag,"tbrowsebutton",'wait','',0,'',3,searchMsg)#Procuro botão de cancelar advpl antigo
-            if not Ret:
-                Ret = self.SetScrap(self.language.close,tag,"tbrowsebutton",'wait','',0,'',3,searchMsg)#Procuro botão de fechar advpl mvc
-            if not Ret:
-                break
+        while not Ret:
+            Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
             if time.time() > endTime:
                 self.assertTrue(False, 'Tempo de espera para exibir os elementos do Browse excedido.')
         return Ret
-
 
     def SetRotina(self):
         '''
@@ -367,13 +360,13 @@ class CAWebHelper(unittest.TestCase):
                             tries = 0
                             selector = "#{} input".format(Id) 
                             while(tries < 3):
-                                jq.set_focus(self.driver, selector)
-                                jq.click(self.driver, selector)
+                                self.focus(element)
+                                self.Click(element)
                                 self.SendKeys(element, valor)
-                                if self.apply_mask(jq.get_value(self.driver, selector)).strip() == valor:
+                                current_value = self.driver.execute_script("return document.querySelector('#{} input').value".format(Id))
+                                if self.apply_mask(current_value).strip() == valor:
                                     break
                                 tries+=1
-
                         else:
                             self.SendKeys(element, valor)
 
@@ -661,6 +654,8 @@ class CAWebHelper(unittest.TestCase):
             
         if not lista and not RetId:
             lista = soup.find_all(tag)
+
+        lista = self.zindex_sort(lista,True)
 
         for line in lista:
             try:#faço uma tentativa pois caso não esteja verificando o mesmo nivel pode dar erro.
@@ -1128,6 +1123,16 @@ class CAWebHelper(unittest.TestCase):
 
         return zindex[0]
 
+    def zindex_sort (self, elements, reverse=False):
+        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        return elements
+        
+    def search_zindex(self,element):
+        zindex = 0
+        if "style" in element.attrs and "z-index:" in element.attrs['style']:
+            zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
+        
+        return zindex
 
     def SearchBrowse(self, descricao='', chave='', indice=False, placeholder=''):
         '''
@@ -1136,7 +1141,7 @@ class CAWebHelper(unittest.TestCase):
         self.btnenchoice = True
         Ret = self.wait_browse() #Verifica se já efetuou o fechamento da tela
 
-        if not Ret:
+        if Ret:
             self.savebtn = ''
             #Caso solicite para alterar o indice
             #if indice:
@@ -1216,6 +1221,7 @@ class CAWebHelper(unittest.TestCase):
         Preenche as telas de programa inicial, usuario e ambiente.
         """
         #seta atributos do ambiente
+        self.config.initialprog = initial_program
         self.config.date = date
         self.config.group = group
         self.config.branch = branch
@@ -1224,7 +1230,7 @@ class CAWebHelper(unittest.TestCase):
         if not self.config.valid_language:
             self.config.language = self.SetScrap("language", "html")
             self.language = LanguagePack(self.config.language)
-
+        
         self.ProgramaInicial(initial_program)
 
         self.Usuario()
@@ -1241,6 +1247,7 @@ class CAWebHelper(unittest.TestCase):
         """
         self.rotina = rotina
         self.SetRotina()
+        self.wait_browse() # Wait to load elements in browser
     
     def UTSetValue(self, cabitem, campo, valor, linha=0, chknewline=False, disabled=False):
         """
@@ -1268,7 +1275,7 @@ class CAWebHelper(unittest.TestCase):
         Efetua logOff do sistema
         """   
         Ret = self.wait_browse(False)
-        if not Ret:
+        if Ret:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish,searchMsg=False)
     
@@ -1548,24 +1555,18 @@ class CAWebHelper(unittest.TestCase):
         Log the result of comparison between user value and captured value
         '''
         txtaux = ""
-        result = True
         message = ""
         if call_grid:
             txtaux = 'Item: %s - ' %str(self.lineGrid + 1)
 
         if disabled_field and not user_value:
             message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
-            result = False
         elif disabled_field and user_value:
             message = self.create_message([txtaux, field], enum.MessageType.DISABLED)
         elif user_value != captured_value and not disabled_field:
             message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
-            result = False
-        else:
-            message = self.create_message([txtaux, field])
-
-        self.log.new_line(result, message)
-        self.validate_field(field, user_value, captured_value)
+        
+        self.validate_field(field, user_value, captured_value, message)
 
     def ChangeEnvironment(self):
         """
@@ -1612,6 +1613,10 @@ class CAWebHelper(unittest.TestCase):
         self.classe = ''
         self.Usuario()
         self.Ambiente()
+
+        while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
+            self.close_modal()
+
         self.SetRotina()
     
     def GetFunction(self):
@@ -1793,7 +1798,6 @@ class CAWebHelper(unittest.TestCase):
                 print(response) #Send to Better Log
                 self.assertTrue(False, response)        
 
-        self.wait_browse()
 
     def scroll_to_element(self, element):
         '''
@@ -1829,22 +1833,33 @@ class CAWebHelper(unittest.TestCase):
 
         return value
 
-    def validate_field(self, field, user_value, captured_value):
+    def validate_field(self, field, user_value, captured_value, message):
         '''
         Validates and stores field in the self.invalid_fields array if the values are different.
         '''
         if str(user_value).strip() != str(captured_value).strip():
-            self.invalid_fields.append([field, user_value, captured_value])
+            self.invalid_fields.append(message)
 
     def assert_result(self, expected):
         expected_assert = expected
         msg = "Passed"
-
-        self.log.save_file()
+        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("CT")[1]
+        log_message = ""
+        log_message += stack + " -"
 
         if self.invalid_fields:
             expected = not expected
-            msg = (self.create_message([self.invalid_fields[0][0], self.invalid_fields[0][1], self.invalid_fields[0][2]], enum.MessageType.ASSERTERROR))
+            
+            for field_msg in self.invalid_fields:
+                log_message += (" " + field_msg)
+
+            msg = log_message
+
+            self.log.new_line(False, log_message)
+        else:
+            self.log.new_line(True, "")
+
+        self.log.save_file()
 
         self.invalid_fields = []
         print(msg)
@@ -1877,31 +1892,29 @@ class CAWebHelper(unittest.TestCase):
 
         self.SetButton(self.language.close)
 
-    def SetButton(self, button, args1='', args2='', args3=60, tag='div', cClass='tbrowsebutton',searchMsg = True):
+    def SetButton(self, button, args1='wait', args2='', args3=10, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
         Método que efetua o clique nos botão da interface
         '''
         try:
-            Ret = ''
+            Id  = ''
             if self.VldData():
                 if (button.lower() == self.language.Ok.lower()) and args1 != 'startParameters':
                     Id = self.SetScrap(button, tag, '', 'btnok') 
                     if Id:
                         element = self.driver.find_element_by_id(Id)
                         self.Click(element)
-                elif button == self.language.delete:
-                    Id = self.SetScrap(button, tag, cClass, 'wait','', '', '', 5,searchMsg)
-                    if not Id:
-                        Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', 5)
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
-                        if Id:
-                            self.SetItemMen(self.language.delete, '', 'menuitem')
-                    else:
-                        element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
                 else:
-                    Id = self.SetScrap(button, tag, cClass, args1,'', '', '', args3,searchMsg)
+                    if button in self.language.no_actions:
+                        Id = self.SetScrap(button, tag, cClass, '', '', '', '', 60, searchMsg)
+                    else:
+                        Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
+                        if not Id:
+                            Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
+                            element = self.driver.find_element_by_id(Id)
+                            self.Click(element)
+                            if Id:
+                                self.SetItemMen(button, '', 'menuitem')
                     if Id:
                         if button == self.language.confirm or button == self.language.save:
                             self.savebtn = button
@@ -1909,33 +1922,26 @@ class CAWebHelper(unittest.TestCase):
                             element = self.driver.find_element_by_class_name(Id)
                         else:
                             element = self.driver.find_element_by_id(Id)
-                        if not self.browse and button == self.language.other_actions and self.advpl:#Somente entra quando for o segundo botão Outras Ações
-                            Ret = self.SetScrap(self.language.cancel,"div","tbrowsebutton", '', '', '', '', 10)#Aguardo os elementos da Enchoice
-                            if Ret:
-                                Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
-                                if Id:
-                                    element = self.driver.find_element_by_id(Id)
                         time.sleep(3)
                         self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
                         self.Click(element)
-                        if button == self.language.other_actions: # TRATAR QND FOR NA ENCHOICE
-                            self.SetItemMen(args1, args2, 'menuitem')
-                        elif button == self.language.add:
+                        
+                        if button == self.language.add:
                             self.browse = False
-                            if args1 != '':#se for botão incluir com subitens
+                            if args1 != '' and args1 != 'wait':#se for botão incluir com subitens
                                 self.advpl = False
                                 Id = self.SetScrap(args1, 'li', 'tmenupopupitem')
                                 if Id:
                                     element = self.driver.find_element_by_id(Id)
                                     self.Click(element)
-                            #usar este trecho no novo método de filial self.SetButton('OK','','',60,'div','tbutton')
                         elif button == self.language.edit or button == self.language.view: # caso não seja outras ações do Browse.
                             self.browse = False
                     else:
                         self.proximo = False
-            if button == self.language.edit or button == self.language.view or button == self.language.delete:
-                self.wait_enchoice()
-                self.btnenchoice = True
+            if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
+                if not self.element_exists(By.CSS_SELECTOR, ".ui-dialog"):
+                    self.wait_enchoice()
+                    self.btnenchoice = True
         except ValueError as error:
             if self.consolelog:
                 print(error)
@@ -2116,4 +2122,16 @@ class CAWebHelper(unittest.TestCase):
         Set the current focus on the desired field.
         """
         Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
-        jq.set_focus(self.driver, "#{} input".format(Id))
+        element = self.driver.find_element_by_id(Id)
+        self.focus(element)
+
+    def focus(self, element):
+        """
+        Set the focus on the element
+        """
+        Id = element.get_attribute("id")
+        selector = "#{}".format(Id)
+        if(self.children_exists(element, By.CSS_SELECTOR, "input")):
+            selector = "#{} input".format(Id)
+        script = "window.focus; elem = document.querySelector('"+ selector +"'); elem.focus(); elem.click()"
+        self.driver.execute_script(script)

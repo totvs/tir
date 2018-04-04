@@ -15,6 +15,7 @@ class ConfigLoader:
         self.password = str(data["Password"])
         self.language = str(data["Language"])
         self.valid_language = False
+        self.initialprog = ""
         self.date = ""
         self.group = ""
         self.branch = ""
