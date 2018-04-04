@@ -1255,8 +1255,8 @@ class CAWebHelper(unittest.TestCase):
         Ret = self.wait_browse(False)
         if not Ret:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish,searchMsg=False)
-    
+            self.SetButton(self.language.finish,searchMsg=False)               
+
     def TearDown(self):
         """
         Finaliza o browser
@@ -1582,7 +1582,8 @@ class CAWebHelper(unittest.TestCase):
         self.assert_result(False)
 
     def Restart(self):
-        self.LogOff()
+        self.driver.refresh()
+        self.driver.switch_to_alert().accept()
         self.ProgramaInicial()
         self.classe = ''
         self.Usuario()
@@ -1736,8 +1737,6 @@ class CAWebHelper(unittest.TestCase):
                 if text in element.text:
                     return True
             return False
-
-
         
     def SetLateralMenu(self, menuitens):
         '''
@@ -1925,14 +1924,11 @@ class CAWebHelper(unittest.TestCase):
         except ValueError as error:
             if self.consolelog:
                 print(error)
-            self.Restart()
-            self.assertTrue(False, "Campo %s não encontrado" %error.args[0])
+            self.log_error("Campo %s não encontrado" %error.args[0])
         except Exception as error:
             if self.consolelog:
                 print(error)
-            self.Restart()
-            self.assertTrue(False) 
-
+            self.log_error(error)
 
     def SetFilial(self, filial):
         """
