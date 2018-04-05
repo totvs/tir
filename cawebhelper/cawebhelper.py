@@ -275,7 +275,7 @@ class CAWebHelper(unittest.TestCase):
    
     def wait_browse(self,searchMsg=True):
         Ret = ''
-        endTime =   time.time() + 60
+        endTime =   time.time() + 90
         while not Ret:
             Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
             if time.time() > endTime:
@@ -1888,7 +1888,7 @@ class CAWebHelper(unittest.TestCase):
 
         self.SetButton(self.language.close)
 
-    def SetButton(self, button, args1='wait', args2='', args3=10, tag='div', cClass='tbrowsebutton',searchMsg = True):
+    def SetButton(self, button, args1='wait', args2='', args3=45, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
         Método que efetua o clique nos botão da interface
         '''
