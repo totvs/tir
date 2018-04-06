@@ -358,7 +358,6 @@ class CAWebHelper(unittest.TestCase):
                             valor = valsub
                         elif (self.valtype == "N"):
                             tries = 0
-                            selector = "#{} input".format(Id) 
                             while(tries < 3):
                                 self.focus(element)
                                 self.Click(element)
@@ -370,12 +369,6 @@ class CAWebHelper(unittest.TestCase):
                         else:
                             self.SendKeys(element, valor)
 
-						# """childPresence = self.children_exists(element, By.CSS_SELECTOR, "img[src*=fwskin_icon_lookup]") TODO verificar tratamento do campo com consulta padrão.
-                        # if self.classe == "tget" and childPresence:
-                        #     for x in range(0, 3):i
-                        #         self.Click(element)
-                        #         self.SendKeys(element, Keys.ENTER)
-                        # """
                         if tam_valorusr < tam_interface:
                             if self.valtype == 'N':
                                 self.SendKeys(element, Keys.ENTER)
@@ -2112,6 +2105,61 @@ class CAWebHelper(unittest.TestCase):
             self.log.new_line(False, message)
         self.log.save_file()
         self.assertTrue(False, message)
+
+    def SetKey(self, key):
+        """
+        Press the desired key on the keyboard on the focused element.
+        Supported keys: F1 to F12, Up, Down and Delete
+        """
+        supported_keys = {
+            "F1" : Keys.F1,
+            "F2" : Keys.F2,
+            "F3" : Keys.F3,
+            "F4" : Keys.F4,
+            "F5" : Keys.F5,
+            "F6" : Keys.F6,
+            "F7" : Keys.F7,
+            "F8" : Keys.F8,
+            "F9" : Keys.F9,
+            "F10" : Keys.F10,
+            "F11" : Keys.F11,
+            "F12" : Keys.F12,
+            "UP" : Keys.UP,
+            "DOWN" : Keys.DOWN,
+            "DELETE" : Keys.DELETE
+        }
+
+        #JavaScript function to return focused element if DIV or Input OR empty
+
+        script = """
+        var getActiveElement = () => { 
+	        if(document.activeElement.tagName.toLowerCase() == "input" || document.activeElement.tagName.toLowerCase() == "div"){
+		        if(document.activeElement.attributes["id"]){
+			        return document.activeElement.attributes["id"].value
+		        }else if(document.activeElement.parentElement.attributes["id"]){
+			        return document.activeElement.parentElement.attributes["id"].value
+		        }
+            }
+	        return ""
+        }
+
+        return getActiveElement()
+        """
+
+        try:
+            Id = self.driver.execute_script(script)
+            if Id:
+                element = self.driver.find_element_by_id(Id)
+            else:
+                element = self.driver.find_element(By.TAG_NAME, "html")
+            
+            if key.upper() in supported_keys:
+                self.SendKeys(element, supported_keys[key.upper()])
+            else:
+                self.log_error("Key is not supported")
+
+        except Exception as error:
+            self.log_error(str(error))
 
     def SetFocus(self, field):
         """
