@@ -27,7 +27,6 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
-import cawebhelper.jquery as jq
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -42,8 +41,8 @@ class CAWebHelper(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
             self.driver = webdriver.Chrome(executable_path=driver_path)
         self.wait = WebDriverWait(self.driver,5)
+        self.driver.maximize_window()
         self.driver.get(self.config.url)
-        
         self.LastId = []
         self.LastIdBtn = []
         self.gridcpousr = []
@@ -87,7 +86,6 @@ class CAWebHelper(unittest.TestCase):
         self.invalid_fields = []
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
-        #jq.inject_jquery(self.driver)
 
         self.camposCache = []
         self.parametro = ''
@@ -280,7 +278,7 @@ class CAWebHelper(unittest.TestCase):
    
     def wait_browse(self,searchMsg=True):
         Ret = ''
-        endTime =   time.time() + 60
+        endTime =   time.time() + 90
         while not Ret:
             Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
             if time.time() > endTime:
@@ -365,13 +363,13 @@ class CAWebHelper(unittest.TestCase):
                             tries = 0
                             selector = "#{} input".format(Id) 
                             while(tries < 3):
-                                jq.set_focus(self.driver, selector)
-                                jq.click(self.driver, selector)
+                                self.focus(element)
+                                self.Click(element)
                                 self.SendKeys(element, valor)
-                                if self.apply_mask(jq.get_value(self.driver, selector)).strip() == valor:
+                                current_value = self.driver.execute_script("return document.querySelector('#{} input').value".format(Id))
+                                if self.apply_mask(current_value).strip() == valor:
                                     break
                                 tries+=1
-
                         else:
                             self.SendKeys(element, valor)
 
@@ -1930,7 +1928,7 @@ class CAWebHelper(unittest.TestCase):
 
         self.SetButton(self.language.close)
 
-    def SetButton(self, button, args1='wait', args2='', args3=10, tag='div', cClass='tbrowsebutton',searchMsg = True):
+    def SetButton(self, button, args1='wait', args2='', args3=45, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
         Método que efetua o clique nos botão da interface
         '''
@@ -2263,4 +2261,16 @@ class CAWebHelper(unittest.TestCase):
         Set the current focus on the desired field.
         """
         Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
-        jq.set_focus(self.driver, "#{} input".format(Id))
+        element = self.driver.find_element_by_id(Id)
+        self.focus(element)
+
+    def focus(self, element):
+        """
+        Set the focus on the element
+        """
+        Id = element.get_attribute("id")
+        selector = "#{}".format(Id)
+        if(self.children_exists(element, By.CSS_SELECTOR, "input")):
+            selector = "#{} input".format(Id)
+        script = "window.focus; elem = document.querySelector('"+ selector +"'); elem.focus(); elem.click()"
+        self.driver.execute_script(script)
