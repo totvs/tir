@@ -2086,7 +2086,7 @@ class CAWebHelper(unittest.TestCase):
         return string
 
     def log_error(self, message, new_log_line=True):
-        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("CT")[1]
+        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("test_")[1].split("_CT")[1]
         log_message = ""
         log_message += stack + " -" + message
         
