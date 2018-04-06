@@ -1929,7 +1929,7 @@ class CAWebHelper(unittest.TestCase):
         except Exception as error:
             if self.consolelog:
                 print(error)
-            self.log_error(error)
+            self.log_error(str(error))
 
     def SetFilial(self, filial):
         """
