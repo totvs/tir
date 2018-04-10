@@ -16,8 +16,10 @@ class LanguagePack:
         self.delete= languagepack["Delete"]
         self.no_actions = {languagepack["Confirm"],languagepack["Save"],languagepack["Cancel"],languagepack["Close"],languagepack["Finish"]}
         self.edit = languagepack["Edit"]
+        self.editar = languagepack["Editar"]
         self.cancel = languagepack["Cancel"]
         self.view = languagepack["View"]
+        self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
         self.confirm = languagepack["Confirm"]
         self.save = languagepack["Save"]
@@ -29,14 +31,15 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
-        self.copy = languagepack['Copy']
-        self.cut = languagepack['Cut']
+        self.copy = languagepack["Copy"]
+        self.cut = languagepack["Cut"]
         self.paste = languagepack["Paste"]
         self.calculator = languagepack["Calculator"]
         self.spool = languagepack['Spool']
-        self.ajuda = languagepack['Ajuda']
+        self.help = languagepack['Help']
         self.folders = languagepack['Folders']
         self.generate_differential_file = languagepack['Generate Differential File']
+        self.include = languagepack['Include']
         self.filter = languagepack['Filter']
         self.menu_about = languagepack["Menu About"]
 
@@ -59,18 +62,30 @@ class LanguagePack:
             "Add": "Add",
             "Delete": "Delete",
             "Edit": "Edit",
+            "Editar": "Edit", #usado num elemento especifico por conta do ambiente russo
             "Cancel": "Cancel",
             "View": "View",
+            "Visualizar": "View", #usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Other Actions",
             "Confirm": "Confirm",
             "Save": "Save",
             "Close": "Close",
             "Exit": "Exit",
+            "Leave Page": "Exit page",
             "Enter": "Enter",
             "Finish": "Finish",
             "Details": "Details", 
-            "Search": "Search   ",
+            "Search": "Search",
             "Ok": "Ok",
+            "Copy": "Copy",
+            "Cut": "Cut",
+            "Paste": "Paste",
+            "Calculator": "Calculator",
+            "Spool": "Spool",
+            "Folders": 'Folders',
+            "Generate Differential File": "Generate Differential File",
+            "Include": "Insert",
+            "Filter": "Filter",
 			"Menu About": "Help > About",
             "Error Log": "SMARTCLIENT a problem has been found while running it and this one will be concluded. For further information click on details.",
             "Error Log Print": "Error Log Print",
@@ -89,9 +104,11 @@ class LanguagePack:
             "Environment": "Ambiente",
             "Add": "Incluir",
             "Delete": "Excluir",
-            "Edit": "Alterar",
+            "Edit": "Editar",
+            "Editar": "Editar", #usado num elemento especifico por conta do ambiente russo
             "Cancel": "Cancelar",
-            "View": "Visualizar",
+            "View": "Visualizar", 
+            "Visualizar": "Visualizar", #usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Outras Ações",
             "Confirm": "Confirmar",
             "Save": "Salvar",
@@ -108,15 +125,15 @@ class LanguagePack:
             "Paste": "Colar",
             "Calculator": "Calculadora",
             "Spool": "Spool",
-            "Ajuda": "Ajuda",
             "Folders": 'Pastas',
             "Generate Differential File": "Gerar Arquivo Diferencial",
+            "Include": "Incluir",
             "Filter": "Filtrar",
 			"Menu About": "Ajuda > Sobre",
             "Error Log": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais clique em detalhes",
             "Error Log Print": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais verifique print efetuado da tela",
             "Error Msg Required": "Não é possível completar a ação.Existem campos obrigatórios não preenchidos.FecharCancelar - ",
-            "Help": "Help:",
+            "Help": "Ajuda:",
             "Problem": "Problema:",
             "Solution": "Solução:"
         }
@@ -129,27 +146,41 @@ class LanguagePack:
             "Environment": "Среда",
             "Add": "Добавлять",
             "Delete": "Удалить",
-            "Edit": "Изменить",
+            "Edit": "редактировать",
+            "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
             "Cancel": "Отмена",
             "View": "Просмотр",
+            "Visualizar": "Вид...", #usado num elemento especifico por conta do ambiente russo
             #"Other Actions": "Другие Действия",
             "Other Actions": "Др. действия",
             "Confirm": "Подтвердить",
             "Save": "Сохранить",
             "Close": "Закрыть",
             "Exit": "Выход",
+            "Leave Page": "Выйти без сохранения",
             "Enter": "Ввод",
             #"Finish": "Завершить",
             "Finish": "3акрыть",
             #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
-            "Search": "Поиск",
+            #"Search": "Поиск",
+            "Search": "Search",
             "Ok": "Да",
+            "Copy": "Copy",
+            "Cut": "Cut",
+            "Paste": "Paste",
+            "Calculator": "Calculator",
+            "Spool": "Spool",
+            "Help": "Help",
+            "Folders": "Folders",
+            "Generate Differential File": "Создать файл изменений",
+            "Include": "Bставить",
+            "Filter": "фильтр",            
             "Menu About": "Справки > О программе…",
             "Error Log": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта. Д/др. инфор-и нажать «Подробности»",
             "Error Log Print": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта.Для получения дополнительной информации проверьте распечатку экрана",
             "Error Msg Required": "Не удалось завершить это действие.Не заполнены обязательные поля.Закрытьотменить - ",
-            "Help": "Помощь:",
+            #"Help": "Помощь:",
             "Problem": "Проблема:",
             "Solution": "Решение:"
         }

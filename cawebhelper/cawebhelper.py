@@ -87,7 +87,12 @@ class CAWebHelper(unittest.TestCase):
         self.log = Log(console = self.consolelog)
         self.log.station = socket.gethostname()
 
-    def set_prog_inic(self, initial_program='SIGAADV'):
+        self.camposCache = []
+        self.parametro = ''
+        self.backupSetup = dict()
+
+
+    def set_prog_inic(self, initial_program):
         '''
         Method that defines the program to be started
         '''
@@ -233,8 +238,6 @@ class CAWebHelper(unittest.TestCase):
             if self.consolelog:
                 print("Não encontrou o campo Módulo")
 
-
-
     def SetItemMen(self, args1='', args2='', args3=''):
         '''
         Método que clica nos itens do menu
@@ -275,7 +278,7 @@ class CAWebHelper(unittest.TestCase):
    
     def wait_browse(self,searchMsg=True):
         Ret = ''
-        endTime =   time.time() + 60
+        endTime =   time.time() + 90
         while not Ret:
             Ret = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice')
             if time.time() > endTime:
@@ -714,7 +717,7 @@ class CAWebHelper(unittest.TestCase):
         try: # Encontra o botão via nome da imagem
             if not tooltipID or tooltipID[1]:
                 lista = soup.find_all(tag, class_=('tbutton'))
-                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.ajuda: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.add: 'bmpincluir.png', self.language.view: 'bmpvisual.png','Editar': 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.help: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.include: 'bmpincluir.png', self.language.visualizar: 'bmpvisual.png',self.language.editar: 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
                 button = menuItens[seek]
 
                 for line in lista:
@@ -1019,6 +1022,7 @@ class CAWebHelper(unittest.TestCase):
         RetId = ''
         self.idcomp = ''
         element = ''
+        Id = ''
 
         if args2 == 'detail':
             if args1 == 'indicedefault':
@@ -1036,10 +1040,13 @@ class CAWebHelper(unittest.TestCase):
                     if seek in line.text:
                         Id = line.attrs['id']
                         break
+                if not Id:
+                    self.log_error("Não foi encontrado o indice informado: {}".format(seek))
+                    self.Restart()
         else:
             if args2:
                 lista = self.search_next_soup(args2, soup)
-            else:  
+            else:
                 lista = soup.find_all('div', class_=(cClass))
 
             #Coleto o Id do campo pesquisa correspondente
@@ -1149,10 +1156,12 @@ class CAWebHelper(unittest.TestCase):
             Id = self.SetScrap('fwskin_seekbar_ico.png', '', 'tpanel', 'indice', placeholder)
             if Id:
                 element = self.driver.find_element_by_xpath("//div[@id='%s']/button" %Id)
+                return_wait = self.wait_until_clickable(element)
                 if self.rota == 'SetRotina' or self.rota == 'EDAPP':
                     self.SetScrap(self.language.view, 'div', 'tbrowsebutton', 'wait', '', '', '', 10)
                     self.rota = ''
-                self.Click(element)
+                if not return_wait:
+                    self.Click(element)
                 #seleciona a busca do indice baseado na descrição ex: Filial+numero
                 if indice:
                     self.SetScrap(descricao, 'div', 'tradiobutton', 'indice', 'detail')
@@ -1173,6 +1182,7 @@ class CAWebHelper(unittest.TestCase):
             time.sleep(1)
             self.Click(element)
             time.sleep(1)
+            self.SendKeys(element, Keys.ENTER)
             element2 = self.driver.find_element_by_xpath("//div[@id='%s']/img" %Id)
             time.sleep(2)
             self.DoubleClick(element2)
@@ -1180,6 +1190,28 @@ class CAWebHelper(unittest.TestCase):
             self.DoubleClick(element)
             self.SendKeys(element, Keys.BACK_SPACE)
             return True
+
+    def wait_until_clickable(self, element):
+        """
+        Wait until element to be clickable
+        """
+        endtime =   time.time() + 120# 2 minutos de espera
+
+        if self.consolelog:
+            print("Waiting...")
+        while True:
+            if time.time() < endtime:
+                try:
+                    element.click()
+                    return True
+                except:
+                    pass
+                    time.sleep(3)
+            else:
+                self.driver.save_screenshot( self.GetFunction() +".png")
+                self.log_error("Falhou")
+                self.Restart()
+                
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
@@ -1231,6 +1263,9 @@ class CAWebHelper(unittest.TestCase):
             self.config.language = self.SetScrap("language", "html")
             self.language = LanguagePack(self.config.language)
         
+        if not self.backupSetup:
+            self.backupSetup = { 'progini': self.config.initialprog, 'data': self.config.date, 'grupo': self.config.group, 'filial': self.config.branch }
+
         self.ProgramaInicial(initial_program)
 
         self.Usuario()
@@ -1239,6 +1274,7 @@ class CAWebHelper(unittest.TestCase):
         while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
             self.close_modal()
 
+        
         self.set_log_info()
 
     def UTProgram(self, rotina):
@@ -1892,7 +1928,7 @@ class CAWebHelper(unittest.TestCase):
 
         self.SetButton(self.language.close)
 
-    def SetButton(self, button, args1='wait', args2='', args3=10, tag='div', cClass='tbrowsebutton',searchMsg = True):
+    def SetButton(self, button, args1='wait', args2='', args3=45, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
         Método que efetua o clique nos botão da interface
         '''
@@ -2018,10 +2054,11 @@ class CAWebHelper(unittest.TestCase):
         Método que efetua o clique na aba
         ''' 
         self.rota = "ClickFolder"
+
+        self.wait_enchoice()
+
         if self.close_element:
             self.move_element(self.close_element) # Retira o ToolTip dos elementos focados.
-        self.wait_enchoice()
-        #self.advpl = False
         if self.VldData():
             try:#Tento pegar o elemento da aba de forma direta sem webscraping
                 element = self.driver.find_element_by_link_text(item)
@@ -2071,6 +2108,108 @@ class CAWebHelper(unittest.TestCase):
                             self.Click(elements_list[index])
                             time.sleep(1)
                             self.SendKeys(elements_list[index], Keys.ENTER)
+
+    def SetParameters( self, arrayParameters ):
+        '''
+        Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
+        '''
+        self.idwizard = []
+        self.LogOff()
+
+        #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
+
+        # Escolhe a opção do Menu Lateral
+        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # Clica no botão/icone pesquisar
+        self.SetButton("Pesquisar")
+
+        array = arrayParameters
+
+        backup_idwizard = self.idwizard[:]
+
+        for arrayLine in array:
+
+            # Preenche o campo de Pesquisa
+            self.UTSetValue("aCab", "Procurar por:", arrayLine[0])
+
+            # Confirma a busca
+            self.SetButton("Buscar")
+
+            # Clica no botão/icone Editar
+            self.SetButton("Editar")
+
+            # Faz a captura dos elementos dos campos
+            time.sleep(5)
+            content = self.driver.page_source
+            soup = BeautifulSoup(content,"html.parser")
+
+            menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+
+            for line in menuCampos:
+                if not menuCampos[line]:
+                    RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+                    cache = self.get_web_value(RetId)
+                    self.lencache = len(cache)
+                    cache = cache.strip()
+                    menuCampos[line] = cache
+
+            self.camposCache.append( menuCampos )
+            self.idwizard = backup_idwizard[:]
+
+            # Altero os parametros
+            self.UTSetValue("aCab", "Filial", arrayLine[1])
+            self.UTSetValue("aCab", "Cont. Por", arrayLine[2])
+            self.UTSetValue("aCab", "Cont. Ing", arrayLine[3])
+            self.UTSetValue("aCab", "Cont. Esp", arrayLine[4])
+
+            # Confirma a gravação de Edição
+            self.SetButton("Salvar")
+            self.idwizard = backup_idwizard[:]
+        self.LogOff()
+
+        self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
+        self.UTProgram(self.rotina)
+
+    def RestoreParameters( self ):
+        '''
+        Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
+        Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
+        '''
+        self.idwizard = []
+        self.LogOff()
+
+        self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        
+        # Escolhe a opção do Menu Lateral
+        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # Clica no botão/icone pesquisar
+        self.SetButton("Pesquisar")
+
+        backup_idwizard = self.idwizard[:]
+
+        for line in self.camposCache:
+            # Preenche o campo de Pesquisa
+            self.UTSetValue("aCab", "Procurar por:", line['Procurar por:'])
+
+            # Confirma a busca
+            self.SetButton("Buscar")
+
+            # Clica no botão/icone Editar
+            self.SetButton("Editar")
+
+            #self.idwizard = backup_idwizard[:]
+
+            self.UTSetValue("aCab", 'Cont. Por', line['Cont. Por'])
+            self.UTSetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
+            self.UTSetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
+                
+            # Confirma a gravação de Edição
+            self.SetButton("Salvar")
+            self.idwizard = backup_idwizard[:]
+                            
 
     def close_modal(self):
         '''
