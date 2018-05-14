@@ -71,4 +71,4 @@ This will generate a documentation website inside ~/docs/build/html/index.html, 
 
 In order to contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
 
-MindMap [PWA](Protheus Web Automation)
+MindMap [PWA](Protheus Web Automation.xmind)
