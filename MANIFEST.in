@@ -1,3 +1,4 @@
 include LICENSE
 include cawebhelper/drivers/*.exe
 include cawebhelper/data/*.csv
+include cawebhelper/third_party/*.py
