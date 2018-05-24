@@ -1209,9 +1209,7 @@ class CAWebHelper(unittest.TestCase):
     def ProgramaInicial(self, initial_program="", environment=""):
         self.set_prog_inic(initial_program)
         self.set_enviroment()
-        button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
-        self.Click(button)
-        
+        self.SetButton('Ok', 'startParameters', '', 60, 'button', 'tbutton')
 
     def Usuario(self):
         """
@@ -2301,10 +2299,10 @@ class CAWebHelper(unittest.TestCase):
         """
         Finishes execution of test case with an error and creates the log information for that test.
         """
-
-        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("test_")[1].split("_CT")[1]
+        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0]
+        stack = stack.split("_")[-1]
         log_message = ""
-        log_message += stack + " -" + message
+        log_message += stack + " - " + message
 
         if new_log_line:
             self.log.new_line(False, log_message)
