@@ -27,6 +27,7 @@ import cawebhelper.enumerations as enum
 from cawebhelper.log import Log
 from cawebhelper.config import ConfigLoader
 from cawebhelper.language import LanguagePack
+from cawebhelper.third_party.xpath_soup import xpath_soup
 
 class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
@@ -395,8 +396,8 @@ class CAWebHelper(unittest.TestCase):
                             self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
                         else:
                             self.log_error("Error trying to input value")
-                
-                elif re.match( r"^●+$", resultado ):  
+
+                elif re.match( r"^●+$", resultado ):
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
                         if tries < 103:
                             self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
@@ -2264,12 +2265,16 @@ class CAWebHelper(unittest.TestCase):
         '''
         This method closes the last open modal in the screen.
         '''
-        modals = self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog")
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(By.CSS_SELECTOR, ".tmodaldialog .tbrowsebutton"):
-            modals.sort(key=lambda x: x.get_attribute("style").split("z-index:")[1].split(";")[0], reverse=True)
-            close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
-            if close_button:
-                self.Click(close_button[0])
+            buttons = modals[0].select(".tbrowsebutton")
+            if buttons:
+                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
+                selenium_close_button = lambda: self.find_element_by_xpath(xpath_soup(close_button))
+                if close_button:
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(close_button))))
+                    self.Click(selenium_close_button())
 
     def check_mask(self, element):
         """
@@ -2384,3 +2389,6 @@ class CAWebHelper(unittest.TestCase):
             selector = "#{} input".format(Id)
         script = "window.focus; elem = document.querySelector('"+ selector +"'); elem.focus(); elem.click()"
         self.driver.execute_script(script)
+
+    def get_current_DOM(self):
+        return BeautifulSoup(self.driver.page_source,"html.parser")
