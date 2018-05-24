@@ -1209,7 +1209,9 @@ class CAWebHelper(unittest.TestCase):
     def ProgramaInicial(self, initial_program="", environment=""):
         self.set_prog_inic(initial_program)
         self.set_enviroment()
-        self.SetButton('Ok', 'startParameters', '', 60, 'button', 'tbutton')
+        button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
+        self.Click(button)
+        
 
     def Usuario(self):
         """
