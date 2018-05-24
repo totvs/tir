@@ -2271,7 +2271,7 @@ class CAWebHelper(unittest.TestCase):
             buttons = modals[0].select(".tbrowsebutton")
             if buttons:
                 close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
-                selenium_close_button = lambda: self.find_element_by_xpath(xpath_soup(close_button))
+                selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(close_button))))
                     self.Click(selenium_close_button())
