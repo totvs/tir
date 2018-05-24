@@ -386,7 +386,7 @@ class CAWebHelper(unittest.TestCase):
                 if self.consolelog and resultado != "":
                     print(resultado)
 
-                if resultado.lower() != str(valor).strip().lower() and not self.passfield and not self.valtype == 'N': #TODO AJUSTAR ESTE PONTO.
+                if resultado.lower() != str(valor).strip().lower() and not re.match( r"^●+$", resultado ) and not self.valtype == 'N': #TODO AJUSTAR ESTE PONTO.
                     if self.elementDisabled:
                         self.numberOfTries += 1
                         self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=self.numberOfTries)
@@ -395,7 +395,8 @@ class CAWebHelper(unittest.TestCase):
                             self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
                         else:
                             self.log_error("Error trying to input value")
-                elif self.passfield:
+                
+                elif re.match( r"^●+$", resultado ):  
                     if len(resultado) != len(str(valor).strip()):#TODO AJUSTAR ESTE PONTO.
                         if tries < 103:
                             self.set_enchoice(campo=campo, valor=valor, cClass='', args='', visibility='', Id=Id, disabled=disabled, tries=tries)
