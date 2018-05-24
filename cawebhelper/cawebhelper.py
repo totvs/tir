@@ -32,7 +32,7 @@ class CAWebHelper(unittest.TestCase):
     def __init__(self, config_path=""):
         if config_path == "":
             config_path = sys.path[0] + r"\\config.json"
-        self.config = ConfigLoader(config_path)      
+        self.config = ConfigLoader(config_path)
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -49,23 +49,23 @@ class CAWebHelper(unittest.TestCase):
         self.Table = []
         self.lenbutton = []
         self.idwizard = []
-        
+
         self.close_element = ''
         self.date = ''
-        self.rota = ''       
+        self.rota = ''
         self.CpoNewLine = ''
-        self.classe = ''     
+        self.classe = ''
         self.valtype = ''
         self.cClass = ''
-        self.savebtn = ''   
-        self.idcomp = ''       
+        self.savebtn = ''
+        self.idcomp = ''
         self.rotina = ''
         self.lenvalorweb = ''
         self.IdClose = ''
         self.grid_value = ''
         self.grid_class = ''
         self.initial_program = 'SIGAADV'
-        
+
         self.language = LanguagePack(self.config.language) if self.config.language else ""
 
         self.lineGrid = 0
@@ -121,11 +121,11 @@ class CAWebHelper(unittest.TestCase):
         Method that defines the environment that will be used
         """
         try:
-            time.sleep(2) 
+            time.sleep(2)
             Id = self.SetScrap(self.language.user, 'div', 'tget')
             if self.consolelog:
                 print('SetUsr ID: %s' %Id)
-            element = self.driver.find_element_by_id(Id)              
+            element = self.driver.find_element_by_id(Id)
             self.DoubleClick(element)
             self.SendKeys(element, Keys.HOME)
             self.SendKeys(element, self.config.user)
@@ -157,7 +157,7 @@ class CAWebHelper(unittest.TestCase):
         except:
             self.proximo = False
             if self.consolelog:
-                print("Não encontrou o campo Senha") 
+                print("Não encontrou o campo Senha")
 
     def set_based_date(self, trocaAmb):
         '''
@@ -178,7 +178,7 @@ class CAWebHelper(unittest.TestCase):
             self.proximo = False
             if self.consolelog:
                 print("Não encontrou o campo Database")
-        
+
     def set_group(self, trocaAmb):
         '''
         Method that sets the group of companies in the system
@@ -193,7 +193,7 @@ class CAWebHelper(unittest.TestCase):
             element = self.driver.find_element_by_id(Id)
             self.Click(element)
             self.SendKeys(element, self.config.group)
-        except: 
+        except:
             self.proximo = False
             if self.consolelog:
                 print("Não encontrou o campo Grupo")
@@ -217,7 +217,7 @@ class CAWebHelper(unittest.TestCase):
         except:
             self.proximo = False
             if self.consolelog:
-                print("Não encontrou o campo Filial")  
+                print("Não encontrou o campo Filial")
 
     def set_module_of_system(self, trocaAmb):
         '''
@@ -249,10 +249,10 @@ class CAWebHelper(unittest.TestCase):
             if args1 and args2:
                 ActionChains(self.driver).move_to_element(self.driver.find_element_by_xpath("//li[@id='%s']//label[.='%s']"%(Id, args1))).perform()
                 Id = self.SetScrap(args2, 'li', 'tmenupopupitem', args3)
-                if Id:    
+                if Id:
                     self.driver.find_element_by_xpath("//li[@id='%s']//label[.='%s']" %(Id, args2)).click()
             else:
-                self.driver.find_element_by_xpath("//li[@id='%s']//label[.='%s']" %(Id, args1)).click()     
+                self.driver.find_element_by_xpath("//li[@id='%s']//label[.='%s']" %(Id, args1)).click()
         else:
             self.proximo = False
 
@@ -275,7 +275,7 @@ class CAWebHelper(unittest.TestCase):
                         self.close_element = self.driver.find_element_by_id(Ret)
             return Ret
 
-   
+
     def wait_browse(self,searchMsg=True):
         Ret = ''
         endTime =   time.time() + 90
@@ -295,7 +295,7 @@ class CAWebHelper(unittest.TestCase):
             self.log.program = self.rotina
             if "CFG" in self.log.program:#TODO VERIFICAR ESTE TRECHO
                 self.advpl = False
-                self.passfield = True 
+                self.passfield = True
             element = self.driver.find_element_by_id(Id)
             self.DoubleClick(element)
             self.SendKeys(element, Keys.BACK_SPACE)
@@ -319,7 +319,7 @@ class CAWebHelper(unittest.TestCase):
         else:
             tries += 1
             self.rota = "SetEnchoice"
-            
+
             underline = (r'\w+(_)')#Se o campo conter "_"
             valsub = self.apply_mask(valor)
 
@@ -351,7 +351,7 @@ class CAWebHelper(unittest.TestCase):
                         if self.valtype != 'N':
                             self.SendKeys(element, Keys.DELETE)
                             self.SendKeys(element, Keys.HOME)
-                                                        
+
                         valsub = self.apply_mask(valor)
 
                         if valsub != valor and self.check_mask(element):
@@ -411,7 +411,7 @@ class CAWebHelper(unittest.TestCase):
             if valor == x.text[0:len(valor)]:
                 valor = x.text
                 break
-        if not self.elementDisabled:       
+        if not self.elementDisabled:
             combo.select_by_visible_text(valor)
         return valor
 
@@ -427,7 +427,7 @@ class CAWebHelper(unittest.TestCase):
             self.SearchField()  # Obtem a caracteristica dos campos da grid, gerando a lista self.Table
 
         if Ret:
-            element = self.wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'tmodaldialog.twidget'))) 
+            element = self.wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'tmodaldialog.twidget')))
             # as duas linhas abaixo são somente documentação
             #element = self.driver.find_element_by_xpath("//div[@id='COMP7626']/div[1]/table/tbody/tr[@id='0']/td[@id='1']") # para clicar no segundo campo da 1a linha do grid
             #element = self.driver.find_element_by_xpath("//div[@id='COMP7626']/div[1]/table/tbody/tr[@id='1']/td[@id='1']") # para clicar no segundo campo da 2a linha do grid
@@ -483,11 +483,11 @@ class CAWebHelper(unittest.TestCase):
             # MVC GRID NO FOLDER
             grid = soup.find_all('div', class_=('tgrid'))
             self.grid_class = ".tgrid"
-        #Seleção de filiis            
+        #Seleção de filiis
         if not grid:
             grid = soup.find_all('div', class_=('tcbrowse'))
             self.grid_class = ".tcbrowse"
-            
+
         if not self.advpl:
             for line in grid:
                 if line.attrs['class'][5] == 'cell-mode':
@@ -495,7 +495,7 @@ class CAWebHelper(unittest.TestCase):
             grid = aux
 
         divstring = str(grid)
-        soup = BeautifulSoup(divstring,"html.parser") 
+        soup = BeautifulSoup(divstring,"html.parser")
         rows = []
         xlabel = ''
 
@@ -506,13 +506,13 @@ class CAWebHelper(unittest.TestCase):
                 th_td_text = th_td.get_text(strip=True)
                 cols.append(th_td_text)
                 xlabel = th_td.name
-            
+
             if xlabel == 'td':
                 rows[len(rows)-1][1].append(cols)
             else:
                 rows.append([cols,[]])
 
-        return rows    
+        return rows
 
     def SetScrap(self, seek='', tag='', cClass='', args1='', args2='', args3=0, args4='', args5=60, searchMsg=True):
         '''
@@ -533,7 +533,7 @@ class CAWebHelper(unittest.TestCase):
                 time.sleep(1)#tempo de espera para cada verificação.
             if self.consolelog:
                 print('Procurando %s' %seek)
-            
+
             #Condições de retirada caso o timeout seja atingido
             if seek == 'inputStartProg':#se for a tela inicial e o tempo limite for atingido, faz o refresh da pagina.
                 if time.time() > refresh and not self.refreshed:
@@ -545,12 +545,12 @@ class CAWebHelper(unittest.TestCase):
             #faça somente se o tempo corrente for menor que o tempo definido no timeout
             if time.time() < endTime:
                 content = self.driver.page_source
-                soup = BeautifulSoup(content,"html.parser")        
-                
+                soup = BeautifulSoup(content,"html.parser")
+
                 #Verifica se possui errorlog na tela
                 if searchMsg:
                     self.SearchErrorLog(soup)
-                
+
                 if not self.SearchStack('UTCheckResult') and searchMsg:
                     self.SearchHelp(soup)
 
@@ -584,7 +584,7 @@ class CAWebHelper(unittest.TestCase):
                         print('caSearch')
                     if RetId:
                         break
-                
+
                 else:
                     RetId = self.cabutton(seek, soup, tag, cClass, args1, args2)
                     if RetId:
@@ -610,13 +610,13 @@ class CAWebHelper(unittest.TestCase):
                         print(args1)
                     break
                 else:
-                    self.assertTrue(False, msg)   
+                    self.assertTrue(False, msg)
                     break
         if RetId and self.consolelog:
             print("ID Retorno %s %s" %(seek, RetId))
 
         return(RetId)
-    
+
     def cabutton(self, seek, soup, tag, cClass, args1, args2):
         '''
         identifica botoes
@@ -632,10 +632,10 @@ class CAWebHelper(unittest.TestCase):
         # entra somente quando botao Ok da chamada de parametros iniciais
         elif args1 == 'startParameters':
             RetId = soup.button.attrs['class'][0]
-            
+
         elif cClass == 'tbrowsebutton':
             lista = soup.find_all(tag, class_=('tsbutton','tbutton', 'tbrowsebutton'))
-        
+
         elif args1 == 'abaenchoice' :
             lista = soup.find_all(class_=(cClass))
             try:
@@ -645,7 +645,7 @@ class CAWebHelper(unittest.TestCase):
 
         elif args1 == 'btnok':
             lista = soup.find_all(tag, class_=('tbutton', 'tsbutton', 'tbrowsebutton'))
-            
+
         if not lista and not RetId:
             lista = soup.find_all(tag)
 
@@ -678,7 +678,7 @@ class CAWebHelper(unittest.TestCase):
                         tooltipState = False
                     else:
                         tooltipState = True
-                
+
                 if tooltipState == True and line.attrs['class'][0] == 'tbutton' and line.text == '':
                     if line.attrs['id'][4:8] == tooltipId:
                         RetId = line.attrs['id']
@@ -718,7 +718,7 @@ class CAWebHelper(unittest.TestCase):
         except: # Encontra o botão via Tooltip
             if tooltipID[0].text == seek:
                     tooltip = tooltipID[0].attrs['id'][8:12]
-        
+
         return(tooltip)
 
     def cainput(self, seek, soup, tag, cClass, args1='', args2='', args3=0, args4='', args5=''):
@@ -739,7 +739,7 @@ class CAWebHelper(unittest.TestCase):
                 lista = soup.find_all('div', class_=(cClass))
                 if lista:
                     lista = lista[0].contents
-            else: 
+            else:
                 lista = soup.find_all('div', class_=(cClass))
             pass
 
@@ -753,8 +753,8 @@ class CAWebHelper(unittest.TestCase):
                     lista = soup.find_all(tag, class_=(cClass))
                     if not lista:
                         #Tenta montar a lista somente por Tag
-                        lista = soup.find_all(tag) 
-                        
+                        lista = soup.find_all(tag)
+
         for line in lista:
             #print('Passou uma vez %s' %time.time())
             # campo de input ex: Digitacao do Usuario
@@ -802,7 +802,7 @@ class CAWebHelper(unittest.TestCase):
                     if seek in line.text:
                         RetId = line.nextSibling.attrs['id']#Próximo Registro na mesma arvore de estrutura
                         break
-                
+
                 #Verifico se é a div correspondente a pasta ou tabela que foi passada pelo usuário.
                 elif args1 == 'setGrid':
                     start = 0
@@ -819,12 +819,12 @@ class CAWebHelper(unittest.TestCase):
                         if not self.classe == 'tcombobox':
                             self.valtype = line.contents[0]['valuetype']
                         break
-                        
+
 
                 #Pesquisa o campo da enchoice/grid pelo nome do campo e retorna o ID equivalente.
                 if args1 == 'Enchoice' or args1 == 'Grid':
                     if args1 == 'Grid':
-                        if args4 == 'SearchField': 
+                        if args4 == 'SearchField':
                             time.sleep(1)
                             if seek in line.attrs['name']:
                                 th = soup.find_all(class_=('selected-column'))
@@ -858,7 +858,7 @@ class CAWebHelper(unittest.TestCase):
                                                     self.valtype = x.contents[0]['valuetype']
                                                 break
                                     if RetId:# IF/Break responsavel pela parada do FOR, quando é encontrado o ID do campo
-                                        break 
+                                        break
                                 #preenche atributos do campo da enchoice
                         elif list(filter(bool, line.attrs["name"].split('->')))[1] == seek:
                             RetId = line.attrs['id']
@@ -871,7 +871,7 @@ class CAWebHelper(unittest.TestCase):
         #Se for uma chamada do método SearchField só busca uma unica vez
         if args4 == 'SearchField':
             self.Ret = True
-        
+
         return(RetId)
 
     def seek_content(self, seek, contents, line=''):
@@ -894,14 +894,14 @@ class CAWebHelper(unittest.TestCase):
                                 self.seek_content(seek, line.contents, line)
                             except Exception:
                                 pass
-                    return    
+                    return
                 else:
                     for line in contents:
                         try:
                             self.seek_content(seek, line.contents, line)
                         except Exception:
                             pass
-                return                
+                return
         except Exception:
             pass
 
@@ -915,10 +915,10 @@ class CAWebHelper(unittest.TestCase):
         if cClass == 'tmenuitem':
             # monta a lista baseado na tag 'label' e na class 'tmenuitem'
             lista = soup.find_all('li', class_=('tmenuitem'))
-        
+
         if cClass == '':
             RetId = ''
-        
+
         else:
             lista = soup.find_all(tag, class_=(cClass))
 
@@ -927,7 +927,7 @@ class CAWebHelper(unittest.TestCase):
                 RetId = line.attrs['id']
                 self.LastId.append(RetId)
                 break
-            
+
             elif args1 == 'menuitem':
                 if seek == line.text[0:len(seek)]:
                     RetId = line.attrs['id']
@@ -944,7 +944,7 @@ class CAWebHelper(unittest.TestCase):
             RetId = lista[0].attrs['id']
 
         return(RetId)
-    
+
     def caTrocaAmb(self, seek, soup, tag, cClass):
         lista = []
         RetId = ''
@@ -978,7 +978,7 @@ class CAWebHelper(unittest.TestCase):
                     print(RetId)
                 break
         return(RetId)
-    
+
     def caHelp(self, seek, soup, tag, cClass):
         lista = []
         RetId = ''
@@ -992,7 +992,7 @@ class CAWebHelper(unittest.TestCase):
                     print(RetId)
                 break
         return(RetId)
-    
+
     def caLang(self, soup, tag, cClass):
         lista = []
         lista = soup.find_all(tag, class_=(cClass))
@@ -1048,7 +1048,7 @@ class CAWebHelper(unittest.TestCase):
                         if self.idcomp:
                             RetId = self.idcomp
                             break
-                            
+
                 #Busca o campo para preenchimento da chave de busca
                 try:
                     if seek in line.contents[0].attrs['class'][0]:
@@ -1062,7 +1062,7 @@ class CAWebHelper(unittest.TestCase):
             return(RetId)
         pass
 
-        #Seleciona o botão correspondente a descrição do indice    
+        #Seleciona o botão correspondente a descrição do indice
         if cClass == 'tradiobutton':
             elem = self.driver.find_elements(By.ID, Id)
             radioitens = elem[0].find_elements(By.CLASS_NAME, 'tradiobuttonitem')
@@ -1085,7 +1085,7 @@ class CAWebHelper(unittest.TestCase):
         #Busca pelo primeiro indice de busca
         elif seek == 'indicedefault':
             RetId = line.contents[0].attrs['id']
-            
+
     def search_next_soup(self, seek, soup):
         """
         Retorna uma lista baseada no texto informado pelo usuário.
@@ -1113,7 +1113,7 @@ class CAWebHelper(unittest.TestCase):
                 #zindex_list.append(int(line.attrs("style").split("z-index:")[1].split(";")[0].strip()))
             except:
                 pass
-        
+
         if order == 'ascending':
             zindex = sorted(zindex_list, key=int)
         elif order == 'descending':
@@ -1124,12 +1124,12 @@ class CAWebHelper(unittest.TestCase):
     def zindex_sort (self, elements, reverse=False):
         elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
         return elements
-        
+
     def search_zindex(self,element):
         zindex = 0
         if "style" in element.attrs and "z-index:" in element.attrs['style']:
             zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
-        
+
         return zindex
 
     def SearchBrowse(self, descricao='', chave='', indice=False, placeholder=''):
@@ -1202,7 +1202,7 @@ class CAWebHelper(unittest.TestCase):
                 self.driver.save_screenshot( self.GetFunction() +".png")
                 self.log_error("Falhou")
                 self.Restart()
-                
+
 
     # VISAO 3 - Tela inicial
     def ProgramaInicial(self, initial_program="", environment=""):
@@ -1227,7 +1227,7 @@ class CAWebHelper(unittest.TestCase):
             self.set_based_date(trocaAmb)
         if self.proximo:
             self.set_group(trocaAmb)
-        if self.proximo:    
+        if self.proximo:
             self.set_branch(trocaAmb)
         if self.proximo:
             self.set_module_of_system(trocaAmb)
@@ -1253,7 +1253,7 @@ class CAWebHelper(unittest.TestCase):
         if not self.config.valid_language:
             self.config.language = self.SetScrap("language", "html")
             self.language = LanguagePack(self.config.language)
-        
+
         if not self.backupSetup:
             self.backupSetup = { 'progini': self.config.initialprog, 'data': self.config.date, 'grupo': self.config.group, 'filial': self.config.branch }
 
@@ -1265,7 +1265,7 @@ class CAWebHelper(unittest.TestCase):
         while(not self.element_exists(By.CSS_SELECTOR, ".tmenu")):
             self.close_modal()
 
-        
+
         self.set_log_info()
 
     def UTProgram(self, rotina):
@@ -1275,7 +1275,7 @@ class CAWebHelper(unittest.TestCase):
         self.rotina = rotina
         self.SetRotina()
         self.wait_browse() # Wait to load elements in browser
-    
+
     def UTSetValue(self, cabitem, campo, valor, linha=0, chknewline=False, disabled=False):
         """
         Indica os campos e o conteudo do campo para preenchimento da tela.
@@ -1293,25 +1293,25 @@ class CAWebHelper(unittest.TestCase):
             # guarda o campo de referencia para posteriormente adicionar nova linha
             if chknewline and len(self.gridcpousr) == 1:
                 self.CpoNewLine = campo
-            # indica para o metodo VldData a rota que deverá ser seguida    
+            # indica para o metodo VldData a rota que deverá ser seguida
             self.rota = 'SetValueItens'
             self.field = campo
 
-    def LogOff(self):    
+    def LogOff(self):
         """
         Efetua logOff do sistema
-        """   
+        """
         Ret = self.wait_browse(False)
         if Ret:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish,searchMsg=False)               
+            self.SetButton(self.language.finish,searchMsg=False)
 
     def TearDown(self):
         """
         Finaliza o browser
-        """   
+        """
         time.sleep(4)
-        self.driver.close()  
+        self.driver.close()
 
     def VldData(self):
         """
@@ -1331,7 +1331,7 @@ class CAWebHelper(unittest.TestCase):
 
     def SearchField(self):
         """
-        Obtem a caracteristica dos campos da grid, gerando a lista self.Table, essa lista sera 
+        Obtem a caracteristica dos campos da grid, gerando a lista self.Table, essa lista sera
         utlizada para o preenchimento dos campos da grid.
         """
         try:
@@ -1350,30 +1350,30 @@ class CAWebHelper(unittest.TestCase):
                 m = re.search(regex, line[0])
                 if m:
                     aux = m.group()
-                    if aux not in alias: 
+                    if aux not in alias:
                         alias.append(aux)
-            
+
             #Coleta so campos passado pelo usuário
             for line in self.gridcpousr:
                 if line[0] not in field:
                     field.append(line[0])
 
-            
+
             #caminho do arquivo csv(SX3)
             path = os.path.join(os.path.dirname(__file__), r'data\\sx3.csv')
-            #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv. 
-            data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False, 
+            #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
+            data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                             index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Título', None], low_memory=False)
             df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Título', None])
             if not alias:
                 df_filtered = df.query("Tipo=='C' or Tipo=='N' or Tipo=='D' ")
             else:
                 df_filtered = df.filter(regex='^%s' %alias[0], axis=0)
-                
+
             #Retiro os espaços em branco da coluna Campo e Titulo.
             df_filtered['Título'] = df_filtered['Título'].map(lambda x: x.strip())
             df_filtered.index = df_filtered.index.map(lambda x: x.strip())
-            
+
             #Filtro somente os campos que foram passados pelo usuário
             #df_fields = df_filtered.loc[df_filtered.index.isin(field)]
 
@@ -1407,7 +1407,7 @@ class CAWebHelper(unittest.TestCase):
                     self.Table.append(line[0])
                     self.index = index1
                     break
-            
+
             tam = len(self.Table[0])
             self.Table.append( [''] * tam ) # sera gravado o nome dos campos da grid.
             self.Table.append( [''] * tam ) # sera gravado o tipo do campo, para ser utilizado na setgrid().
@@ -1428,7 +1428,7 @@ class CAWebHelper(unittest.TestCase):
 
     def UTAddLine(self):
         """
-        Inclui uma marca indicando nova linha, na lista gridcpousr. 
+        Inclui uma marca indicando nova linha, na lista gridcpousr.
         """
         if len(self.gridcpousr) > 0:
             self.gridcpousr.append(["newline", "", 0])
@@ -1463,7 +1463,7 @@ class CAWebHelper(unittest.TestCase):
                 # Esta sendo executado por UTCheckResult então apenas guardo o resultado
                 if ChkResult:
                     self.LogResult(campo, valor, valorweb, True)
-                else:                
+                else:
                     # O tipo do campo em que a celula esta posicionada eh 'Numerico' ?
                     if tipoCpo == 'N':
                         # O campo numérico esta vazio ?
@@ -1496,7 +1496,7 @@ class CAWebHelper(unittest.TestCase):
                                     return False
                         if Id:
                             self.lenvalorweb = len(self.get_web_value(Id))
-                       
+
                             time.sleep(1)
                             if valsub != valor and self.check_mask(element):
                                 self.SendKeys(element, valsub)#element.send_keys(valsub)
@@ -1553,7 +1553,7 @@ class CAWebHelper(unittest.TestCase):
         if cabitem == 'help': # Efetua o fechamento da tela de help
             self.SetButton("Fechar")
             self.savebtn = ''
-            
+
         return valorweb
 
     def get_web_value(self, Id):
@@ -1575,7 +1575,7 @@ class CAWebHelper(unittest.TestCase):
         else:
             valorweb = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('value')
             self.elementDisabled = self.driver.find_element_by_xpath("//div[@id='%s']/input" %Id).get_attribute('disabled') != None
-        return valorweb       
+        return valorweb
 
     def LogResult(self, field, user_value, captured_value, call_grid=False):
         '''
@@ -1588,7 +1588,7 @@ class CAWebHelper(unittest.TestCase):
 
         if user_value != captured_value:
             message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
-        
+
         self.validate_field(field, user_value, captured_value, message)
 
     def ChangeEnvironment(self):
@@ -1643,7 +1643,7 @@ class CAWebHelper(unittest.TestCase):
             self.close_modal()
 
         self.SetRotina()
-    
+
     def GetFunction(self):
         stack = inspect.stack()
         function_name = "screenshot"
@@ -1660,7 +1660,7 @@ class CAWebHelper(unittest.TestCase):
                 ret = True
                 break
         return ret
-    
+
     def SearchErrorLog(self,soup):
         lista = soup.find_all('div', class_=('tsay twidget transparent dict-tsay align-left')) # Verifica de ocorreu error log antes de continuar
         if lista:
@@ -1684,10 +1684,10 @@ class CAWebHelper(unittest.TestCase):
                 if line.text == self.language.error_msg_required:
                     message = self.language.error_msg_required
                     self.search_help_error(message)
-                elif self.language.help in line.text and self.language.problem in line.text:     
+                elif self.language.help in line.text and self.language.problem in line.text:
                     message = line.text
                     self.search_help_error(message)
-                
+
     def search_help_error(self, message):
         '''
         This method is part of SearchHelp internal functionality
@@ -1712,7 +1712,7 @@ class CAWebHelper(unittest.TestCase):
             self.scroll_to_element(element)
             actions.click()
             actions.perform()
-    
+
     def move_element(self, element):
         actions = ActionChains(self.driver)
         actions.move_to_element(element)
@@ -1759,7 +1759,7 @@ class CAWebHelper(unittest.TestCase):
         elif messageType == enum.MessageType.ASSERTERROR:
             return assertErrorMessage.format(args[0], args[1], args[2])
         else:
-            return correctMessage.format(args[0], args[1])        
+            return correctMessage.format(args[0], args[1])
 
     def children_exists(self, element, by, childSelector):
         '''
@@ -1767,8 +1767,8 @@ class CAWebHelper(unittest.TestCase):
         '''
         children = element.find_elements(by, childSelector)
         return len(children) > 0
-    
-    
+
+
     def element_exists(self, by, selector, position='',text=''):
         '''
         Returns a boolean if element exists on the screen
@@ -1780,7 +1780,7 @@ class CAWebHelper(unittest.TestCase):
             element_list = self.driver.find_elements(by, selector)
             return len(element_list) >= position
         else:
-            time.sleep(1)            
+            time.sleep(1)
 
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
@@ -1791,7 +1791,7 @@ class CAWebHelper(unittest.TestCase):
                 if text in element.text:
                     return True
             return False
-        
+
     def SetLateralMenu(self, menuitens):
         '''
         Navigates through the lateral menu using provided menu path.
@@ -1807,7 +1807,7 @@ class CAWebHelper(unittest.TestCase):
             menu = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#{}".format(menu.get_attribute("id")))))
             self.wait_elements_load("#{} .tmenuitem".format(menu.get_attribute("id")))
             subMenuElements = menu.find_elements(By.CSS_SELECTOR, ".tmenuitem")
-            submenu = ""   
+            submenu = ""
             for child in subMenuElements:
                 if child.text.startswith(menuitem):
                     submenu = child
@@ -1819,7 +1819,7 @@ class CAWebHelper(unittest.TestCase):
             else:
                 response = "Error - Menu Item does not exist: {}".format(menuitem)
                 print(response) #Send to Better Log
-                self.assertTrue(False, response)        
+                self.assertTrue(False, response)
 
 
     def scroll_to_element(self, element):
@@ -1827,7 +1827,7 @@ class CAWebHelper(unittest.TestCase):
         Scroll to element on the screen.
         '''
         if element.get_attribute("id"):
-            self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))        
+            self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
         else:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
 
@@ -1842,7 +1842,7 @@ class CAWebHelper(unittest.TestCase):
         Get a web value from DOM elements
         '''
         value = ''
-        
+
         if cabitem == 'aCab':
             Id = self.set_enchoice(campo=field, args='Enchoice')
             value = self.get_web_value(Id)
@@ -1872,7 +1872,7 @@ class CAWebHelper(unittest.TestCase):
 
         if self.invalid_fields:
             expected = not expected
-            
+
             for field_msg in self.invalid_fields:
                 log_message += (" " + field_msg)
 
@@ -1900,7 +1900,7 @@ class CAWebHelper(unittest.TestCase):
         soup = BeautifulSoup(content,"html.parser")
 
         modal = list(soup.select(".tmodaldialog")[0].children)
-        
+
         for panel in modal:
             for element in panel.children:
                 if element.text.startswith("Release"):
@@ -1917,54 +1917,53 @@ class CAWebHelper(unittest.TestCase):
 
     def SetButton(self, button, args1='wait', args2='', args3=45, tag='div', cClass='tbrowsebutton',searchMsg = True):
         '''
-        Método que efetua o clique nos botão da interface
+        Method that clicks on a button of the interface.
         '''
         try:
             Id  = ''
             if self.VldData():
+
+                success = False
                 if (button.lower() == self.language.Ok.lower()) and args1 != 'startParameters':
-                    Id = self.SetScrap(button, tag, '', 'btnok') 
-                    if Id:
+                    Id = self.SetScrap(button, tag, '', 'btnok')
+                elif button in self.language.no_actions:
+                    Id = self.SetScrap(button, tag, cClass, '', '', '', '', 60, searchMsg)
+                elif button != self.language.other_actions:
+                    Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
+                if not Id:
+                    other_actions = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
+                    other_actions_element = self.driver.find_element_by_id(other_actions)
+                    self.Click(other_actions_element)
+                    success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else args1)
+                    if success:
+                        return
+                if Id:
+                    if button == self.language.confirm or button == self.language.save:
+                        self.savebtn = button
+                    if Id == 'button-ok':
+                        element = self.driver.find_element_by_class_name(Id)
+                    else:
                         element = self.driver.find_element_by_id(Id)
-                        self.Click(element)
-                else:
-                    if button in self.language.no_actions:
-                        Id = self.SetScrap(button, tag, cClass, '', '', '', '', 60, searchMsg)
-                    else:
-                        Id = self.SetScrap(button, tag, cClass, args1, '', '', '', args3, searchMsg)
-                        if not Id:
-                            Id = self.SetScrap(self.language.other_actions, tag, cClass, args1,'', '', '', args3,searchMsg)
-                            element = self.driver.find_element_by_id(Id)
-                            self.Click(element)
+
+                    time.sleep(3)
+                    self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
+                    self.Click(element)
+
+                    if button == self.language.add:
+                        if args1 != '' and args1 != 'wait':#se for botão incluir com subitens
+                            self.advpl = False
+                            Id = self.SetScrap(args1, 'li', 'tmenupopupitem')
                             if Id:
-                                self.SetItemMen(button, '', 'menuitem')
-                    if Id:
-                        if button == self.language.confirm or button == self.language.save:
-                            self.savebtn = button
-                        if Id == 'button-ok':
-                            element = self.driver.find_element_by_class_name(Id)
-                        else:
-                            element = self.driver.find_element_by_id(Id)
-                        time.sleep(3)
-                        self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
-                        self.Click(element)
-                        
-                        if button == self.language.add:
-                            self.browse = False
-                            if args1 != '' and args1 != 'wait':#se for botão incluir com subitens
-                                self.advpl = False
-                                Id = self.SetScrap(args1, 'li', 'tmenupopupitem')
-                                if Id:
-                                    element = self.driver.find_element_by_id(Id)
-                                    self.Click(element)
-                        elif button == self.language.edit or button == self.language.view: # caso não seja outras ações do Browse.
-                            self.browse = False
-                    else:
-                        self.proximo = False
+                                element = self.driver.find_element_by_id(Id)
+                                self.Click(element)
+                else:
+                    self.proximo = False
+
             if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
                 if not self.element_exists(By.CSS_SELECTOR, ".ui-dialog"):
                     self.wait_enchoice()
                     self.btnenchoice = True
+
         except ValueError as error:
             if self.consolelog:
                 print(error)
@@ -1974,6 +1973,70 @@ class CAWebHelper(unittest.TestCase):
                 print(error)
             self.log_error(str(error))
 
+    def click_sub_menu(self, button):
+        '''
+        Método que clica nos itens do menu
+        '''
+        content = self.driver.page_source
+        soup = BeautifulSoup(content,"html.parser")
+
+        menu_id = soup.select(".tmenupopup.active")[0].attrs["id"]
+        menu = self.driver.find_element_by_id(menu_id)
+
+        menu_itens = menu.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
+
+        result = self.find_sub_menu_text(button, menu_itens)
+
+        item = ""
+        if result[0]:
+            item = result[0]
+        elif result[1]:
+            item = self.find_sub_menu_child(button, result[1])
+        else:
+            return False
+
+        if item:
+            self.scroll_to_element(item)
+            self.Click(item)
+            return True
+        else:
+            self.proximo = False
+            return False
+
+    def find_sub_menu_child(self, button, containers):
+        item = ""
+        for child in containers:
+
+            child_id = child.get_attribute("id")
+            old_class = self.driver.execute_script("return document.querySelector('#{}').className".format(child_id))
+            new_class = old_class + " highlighted expanded"
+            self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, new_class))
+
+            child_itens = child.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
+            result = self.find_sub_menu_text(button, child_itens)
+
+            if not result[0] and result[1]:
+                item = self.find_sub_menu_child(button, result[1])
+            else:
+                item = result[0]
+                if item:
+                    break
+                self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, old_class))
+
+        return item
+
+    def find_sub_menu_text(self, button, itens):
+        submenu = ""
+        containers = []
+        for child in itens:
+            if "container" in child.get_attribute("class"):
+                containers.append(child)
+            elif child.text.startswith(button):
+                submenu = child
+                break
+
+        return (submenu, containers)
+
     def SetFilial(self, filial):
         """
         Método que seta a filial na inclusão
@@ -1982,7 +2045,7 @@ class CAWebHelper(unittest.TestCase):
         if Ret:
             self.SetButton('OK','','',60,'div','tbutton')
             self.wait_enchoice()
-            
+
     def UTWaitWhile(self,itens):
         '''
         Search string that was sent and wait while condition is true
@@ -2036,7 +2099,7 @@ class CAWebHelper(unittest.TestCase):
     def ClickFolder(self, item):
         '''
         Método que efetua o clique na aba
-        ''' 
+        '''
         self.rota = "ClickFolder"
 
         self.wait_enchoice()
@@ -2046,14 +2109,14 @@ class CAWebHelper(unittest.TestCase):
         if self.VldData():
             try:#Tento pegar o elemento da aba de forma direta sem webscraping
                 element = self.driver.find_element_by_link_text(item)
-            except:#caso contrário efetuo o clique na aba com webscraping    
+            except:#caso contrário efetuo o clique na aba com webscraping
                 Id = self.SetScrap(item, '', 'button-bar', 'abaenchoice')
                 if Id:
                     element = self.driver.find_element_by_id(Id)
-            
+
             self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
             self.Click(element)
-    
+
     def ClickBox(self, labels):
         '''
         Método que efetua o clique no checkbox
@@ -2069,9 +2132,9 @@ class CAWebHelper(unittest.TestCase):
             table = self.SetTable()
 
             while not table:
-                print("Esperando table")    
+                print("Esperando table")
                 table = self.SetTable()
-            
+
             tables = self.driver.find_elements(By.CSS_SELECTOR, self.grid_class)
             zindex = 0
             grid_id = ""
@@ -2080,7 +2143,7 @@ class CAWebHelper(unittest.TestCase):
                 if zindex < zindex_atual:
                     zindex = zindex_atual
                     grid_id = tab.get_attribute("Id")
-            
+
             grid = self.driver.find_element(By.ID, grid_id)
 
             for lista in listas:
@@ -2165,7 +2228,7 @@ class CAWebHelper(unittest.TestCase):
         self.LogOff()
 
         self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        
+
         # Escolhe a opção do Menu Lateral
         self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
 
@@ -2189,11 +2252,11 @@ class CAWebHelper(unittest.TestCase):
             self.UTSetValue("aCab", 'Cont. Por', line['Cont. Por'])
             self.UTSetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
             self.UTSetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
-                
+
             # Confirma a gravação de Edição
             self.SetButton("Salvar")
             self.idwizard = backup_idwizard[:]
-                            
+
 
     def close_modal(self):
         '''
@@ -2205,7 +2268,7 @@ class CAWebHelper(unittest.TestCase):
             close_button = list(filter(lambda x: x.text == self.language.close, modals[0].find_elements(By.CSS_SELECTOR, ".tbrowsebutton")))
             if close_button:
                 self.Click(close_button[0])
-                            
+
     def check_mask(self, element):
         """
         Checks wether the element has a numeric mask.
@@ -2216,7 +2279,7 @@ class CAWebHelper(unittest.TestCase):
             child = element.find_elements(By.CSS_SELECTOR, "input")
             if child:
                 mask = child[0].get_attribute("picture")
-            
+
         return (mask != "" and mask is not None and (re.search(reg, mask)))
 
     def apply_mask(self, string):
@@ -2239,7 +2302,7 @@ class CAWebHelper(unittest.TestCase):
         stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0].split("test_")[1].split("_CT")[1]
         log_message = ""
         log_message += stack + " -" + message
-                
+
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
@@ -2272,7 +2335,7 @@ class CAWebHelper(unittest.TestCase):
         #JavaScript function to return focused element if DIV or Input OR empty
 
         script = """
-        var getActiveElement = () => { 
+        var getActiveElement = () => {
 	        if(document.activeElement.tagName.toLowerCase() == "input" || document.activeElement.tagName.toLowerCase() == "div"){
 		        if(document.activeElement.attributes["id"]){
 			        return document.activeElement.attributes["id"].value
@@ -2292,7 +2355,7 @@ class CAWebHelper(unittest.TestCase):
                 element = self.driver.find_element_by_id(Id)
             else:
                 element = self.driver.find_element(By.TAG_NAME, "html")
-            
+
             if key.upper() in supported_keys:
                 self.SendKeys(element, supported_keys[key.upper()])
             else:
