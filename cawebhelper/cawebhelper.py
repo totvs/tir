@@ -292,6 +292,7 @@ class CAWebHelper(unittest.TestCase):
         '''
         Method that fills the enchoice.
         '''
+        element = ""
         if tries == 10:
             self.numberOfTries = 0
             if self.elementDisabled and self.consolelog:
@@ -375,7 +376,10 @@ class CAWebHelper(unittest.TestCase):
                     self.assertTrue(False, error)
                 #print('time.sleep(1) - 385')
                 #time.sleep(1)
-                resultado = self.apply_mask(self.get_web_value(Id).strip())[0:len(str(valor))]
+                if self.check_mask(element):
+                    resultado = self.apply_mask(self.get_web_value(Id).strip())[0:len(str(valor))]
+                else:
+                    resultado = self.get_web_value(Id).strip()[0:len(str(valor))]
 
                 if self.consolelog and resultado != "":
                     print(resultado)
