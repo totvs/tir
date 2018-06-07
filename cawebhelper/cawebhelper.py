@@ -2112,9 +2112,9 @@ class CAWebHelper(unittest.TestCase):
 
         return (submenu, containers)
 
-    def SetFilial(self, filial):
+    def SetBranch(self, branch):
         """
-        Método que seta a filial na inclusão
+        Método que preenche a filial na inclusão
         """
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2)
         Ret = self.fill_search_browse(filial, self.get_search_browse_elements())
