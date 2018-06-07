@@ -2319,7 +2319,7 @@ class CAWebHelper(unittest.TestCase):
         self.LogOff()
 
         self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        self.UTProgram(self.rotina)
+        self.Program(self.rotina)
 
     def RestoreParameters( self ):
         '''
