@@ -1309,7 +1309,7 @@ class CAWebHelper(unittest.TestCase):
 
         self.set_log_info()
 
-    def UTProgram(self, rotina):
+    def Program(self, rotina):
         """
         Preenche a tela de rotina
         """
@@ -1464,7 +1464,7 @@ class CAWebHelper(unittest.TestCase):
         except Exception as error:
             print("Entrou na exceção: %s" %error)
 
-    def UTAddLine(self):
+    def AddLine(self):
         """
         Inclui uma marca indicando nova linha, na lista gridcpousr.
         """
@@ -1824,14 +1824,6 @@ class CAWebHelper(unittest.TestCase):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def children_exists(self, element, by, childSelector):
-        '''
-        Returns a boolean if children element exists inside parent.
-        '''
-        children = element.find_elements(by, childSelector)
-        return len(children) > 0
-
-
     def element_exists(self, by, selector, position=None,text=''):
         '''
         Returns a boolean if element exists on the screen
@@ -2122,14 +2114,14 @@ class CAWebHelper(unittest.TestCase):
             self.SetButton('OK','','',60,'div','tbutton')
             #self.wait_enchoice()
 
-    def UTWaitWhile(self,itens):
+    def WaitWhile(self,itens):
         '''
         Search string that was sent and wait while condition is true
         e.g. "Item1,Item2,Item3"
         '''
         self.search_text(itens,True)
 
-    def UTWaitUntil(self,itens):
+    def WaitUntil(self,itens):
         '''
         Search string that was sent and wait until condition is true
         e.g. "Item1,Item2,Item3"
