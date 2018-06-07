@@ -2117,7 +2117,7 @@ class CAWebHelper(unittest.TestCase):
         Método que preenche a filial na inclusão
         """
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2)
-        Ret = self.fill_search_browse(filial, self.get_search_browse_elements())
+        Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
             self.SetButton('OK','','',60,'div','tbutton')
             #self.wait_enchoice()
