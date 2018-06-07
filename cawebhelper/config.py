@@ -14,6 +14,7 @@ class ConfigLoader:
         self.user = str(data["User"])
         self.password = str(data["Password"])
         self.language = str(data["Language"])
+        self.skip_environment = ("SkipEnvironment" in data and bool(data["SkipEnvironment"]))
         self.valid_language = False
         self.initialprog = ""
         self.date = ""

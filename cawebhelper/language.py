@@ -42,16 +42,14 @@ class LanguagePack:
         self.include = languagepack['Include']
         self.filter = languagepack['Filter']
         self.menu_about = languagepack["Menu About"]
-
-        self.error_log = languagepack["Error Log"]
-        self.error_log_print = languagepack["Error Log Print"]
-        self.error_msg_required = languagepack["Error Msg Required"]
+        self.branches =  languagepack["Branches"]
         self.help = languagepack["Help"]
         self.problem = languagepack["Problem"]
         self.solution = languagepack["Solution"]
 
+        self.messages = Messages(languagepack)
     def get_language_pack(self, language):
-    
+
         english = {
             "User": "User",
             "Password": "Password",
@@ -74,7 +72,7 @@ class LanguagePack:
             "Leave Page": "Exit page",
             "Enter": "Enter",
             "Finish": "Finish",
-            "Details": "Details", 
+            "Details": "Details",
             "Search": "Search",
             "Ok": "Ok",
             "Copy": "Copy",
@@ -92,7 +90,14 @@ class LanguagePack:
             "Error Msg Required": "This action could not be completed.There are mandatory fields not field.CloseCancel - ",
             "Help": "Help:",
             "Problem": "Problem:",
-            "Solution": "Solution:"
+            "Solution": "Solution:",
+            "Branches": "Branches",
+            "Grid Steps Misuse": "Grid steps misuse. Be sure to only use a group of inputs or a group of checks in each Grid Block.",
+            "Grid Steps Empty": "No grid steps were found. Be sure to only use a group of inputs or a group of checks in each Grid Block.",
+            "Grid Line Error": "Line does not exist in current grid.",
+            "Grid Column Error": "Column does not exist in current grid.",
+            "Grid Number Error": "There is not that many grids on the current screen.",
+            "Text Not Found": "Text Not Found."
         }
 
         brazilian_portuguese = {
@@ -107,7 +112,7 @@ class LanguagePack:
             "Edit": "Editar",
             "Editar": "Editar", #usado num elemento especifico por conta do ambiente russo
             "Cancel": "Cancelar",
-            "View": "Visualizar", 
+            "View": "Visualizar",
             "Visualizar": "Visualizar", #usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Outras Ações",
             "Confirm": "Confirmar",
@@ -135,7 +140,14 @@ class LanguagePack:
             "Error Msg Required": "Não é possível completar a ação.Existem campos obrigatórios não preenchidos.FecharCancelar - ",
             "Help": "Ajuda:",
             "Problem": "Problema:",
-            "Solution": "Solução:"
+            "Solution": "Solução:",
+            "Branches": "Filiais",
+            "Grid Steps Misuse": "Uso de grid errado. Passe apenas um grupo de inputs ou um grupo de checks em cada bloco de grid.",
+            "Grid Steps Empty": "Nenhum passo de grid encontrado. Passe um grupo de inputs ou um grupo de checks em cada bloco de grid.",
+            "Grid Line Error": "Linha não existe na grid atual.",
+            "Grid Column Error": "Coluna não existe na grid atual.",
+            "Grid Number Error": "Não existe essa quantidade de grids na tela atual.",
+            "Text Not Found": "Texto não encontrado."
         }
         russian = {
             "User": "Пользователь",
@@ -175,17 +187,24 @@ class LanguagePack:
             "Folders": "Folders",
             "Generate Differential File": "Создать файл изменений",
             "Include": "Bставить",
-            "Filter": "фильтр",            
+            "Filter": "фильтр",
             "Menu About": "Справки > О программе…",
             "Error Log": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта. Д/др. инфор-и нажать «Подробности»",
             "Error Log Print": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта.Для получения дополнительной информации проверьте распечатку экрана",
             "Error Msg Required": "Не удалось завершить это действие.Не заполнены обязательные поля.Закрытьотменить - ",
             #"Help": "Помощь:",
             "Problem": "Проблема:",
-            "Solution": "Решение:"
+            "Solution": "Решение:",
+            "Branches": "",
+            "Grid Steps Misuse": "Grid steps misuse. Be sure to only use a group of inputs or a group of checks in each Grid Block.",
+            "Grid Steps Empty": "No grid steps were found. Be sure to only use a group of inputs or a group of checks in each Grid Block.",
+            "Grid Line Error": "Line does not exist in current grid.",
+            "Grid Column Error": "Column does not exist in current grid.",
+            "Grid Number Error": "There is not that many grids on the current screen.",
+            "Text Not Found": "Text Not Found"
         }
 
-        if language.lower() == "en-us": 
+        if language.lower() == "en-us":
             return english
         elif language.lower() == "pt-br":
             return brazilian_portuguese
@@ -193,3 +212,17 @@ class LanguagePack:
             return russian
         else:
             return brazilian_portuguese
+
+class Messages():
+
+    def __init__(self, languagepack):
+
+        self.grid_misuse = languagepack["Grid Steps Misuse"]
+        self.grid_empty = languagepack["Grid Steps Empty"]
+        self.grid_line_error = languagepack["Grid Line Error"]
+        self.grid_column_error = languagepack["Grid Column Error"]
+        self.grid_number_error = languagepack["Grid Number Error"]
+        self.error_log = languagepack["Error Log"]
+        self.error_log_print = languagepack["Error Log Print"]
+        self.error_msg_required = languagepack["Error Msg Required"]
+        self.text_not_found = languagepack["Text Not Found"]
