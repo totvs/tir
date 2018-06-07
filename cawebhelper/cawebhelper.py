@@ -1185,13 +1185,13 @@ class CAWebHelper(unittest.TestCase):
         soup = self.get_current_DOM()
         tradiobuttonitens = soup.select(".tradiobuttonitem")
         tradio_index = 0
-        
+
         if key:
             tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
             tradiobutton_text = next(iter(list(filter(lambda x: x in key, tradiobutton_texts))))
             if tradiobutton_text:
                 tradio_index = tradiobutton_texts.index(tradiobutton_text)
-        
+
         tradiobuttonitem = tradiobuttonitens[tradio_index]
         sel_tradiobuttonitem = lambda: self.driver.find_element_by_xpath(xpath_soup(tradiobuttonitem))
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tradiobuttonitem))))
@@ -1553,7 +1553,7 @@ class CAWebHelper(unittest.TestCase):
                 print(error)
             return True
 
-    def CheckResult(self, cabitem, campo, valorusr, line=0, Id='', args1='', grid_number=1):
+    def CheckResult(self, cabitem, campo, valorusr, line=1, Id='', args1='', grid_number=1):
         """
         Validação de interface
         """
@@ -1603,7 +1603,7 @@ class CAWebHelper(unittest.TestCase):
             if args1 != 'input':
                 self.LogResult(campo, valorusr, valorweb)
         else:
-            self.CheckGrid(line, campo, valorusr, grid_number - 1)
+            self.CheckGrid(line - 1, campo, valorusr, grid_number - 1)
             self.rota = 'CheckResultItens'
         if cabitem == 'help': # Efetua o fechamento da tela de help
             self.SetButton("Fechar")
@@ -2315,7 +2315,7 @@ class CAWebHelper(unittest.TestCase):
         self.LogOff()
 
         self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        self.UTProgram(self.rotina)
+        self.Program(self.rotina)
 
     def RestoreParameters( self ):
         '''
