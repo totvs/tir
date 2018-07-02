@@ -7,7 +7,6 @@ Created on Tue May 30 09:21:13 2017
 import re
 import csv
 import time
-import numpy as np
 import pandas as pd
 import unittest
 import inspect
