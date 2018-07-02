@@ -10,6 +10,6 @@ set /P py="Install/Update Python[Y/N]? "
 set /P ff="Install/Update Firefox[Y/N]? "
 set /P vsc="Install/Update Visual Studio Code[Y/N]? "
 
-if /I "%py%" EQU "Y" choco upgrade python -y
+if /I "%py%" EQU "Y" choco upgrade python --version 3.6.5 -y
 if /I "%ff%" EQU "Y" choco upgrade firefox -y
 if /I "%vsc%" EQU "Y" choco upgrade vscode -y
