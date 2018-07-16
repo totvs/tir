@@ -2415,10 +2415,10 @@ class CAWebHelper(unittest.TestCase):
         self.Restart()
         self.assertTrue(False, log_message)
 
-    def SetKey(self, key, grid=None):
+    def SetKey(self, key, grid=False, grid_number=None):
         """
         Press the desired key on the keyboard on the focused element.
-        Supported keys: F1 to F12, Up, Down and Delete
+        Supported keys: F1 to F12, Up, Down, Enter and Delete
         """
         supported_keys = {
             "F1" : Keys.F1,
@@ -2435,7 +2435,8 @@ class CAWebHelper(unittest.TestCase):
             "F12" : Keys.F12,
             "UP" : Keys.UP,
             "DOWN" : Keys.DOWN,
-            "DELETE" : Keys.DELETE
+            "DELETE" : Keys.DELETE,
+            "ENTER": Keys.ENTER
         }
 
         #JavaScript function to return focused element if DIV or Input OR empty
@@ -2463,11 +2464,11 @@ class CAWebHelper(unittest.TestCase):
                 element = self.driver.find_element(By.TAG_NAME, "html")
 
             if key.upper() in supported_keys:
-                if key.upper() == "DOWN":
+                if key.upper() == "DOWN" and grid:
                     #self.UTSetValue('aItens','newline','0')
-                    if grid is None:
-                        grid = 0
-                    self.grid_input.append(["", "", grid, True])
+                    if grid_number is None:
+                        grid_number = 0
+                    self.grid_input.append(["", "", grid_number, True])
                 else:
                     self.set_selenium_focus(element)
                     self.SendKeys(element, supported_keys[key.upper()])
