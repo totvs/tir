@@ -2436,7 +2436,7 @@ class CAWebHelper(unittest.TestCase):
             "UP" : Keys.UP,
             "DOWN" : Keys.DOWN,
             "LEFT": Keys.LEFT,
-            "RIGHT": Keys.RIGHT
+            "RIGHT": Keys.RIGHT,
             "DELETE" : Keys.DELETE,
             "ENTER": Keys.ENTER
         }
