@@ -5,7 +5,7 @@ except ImportError:
     from distutils.core import setup
 
 config = {
-    'description': 'CAWebHelper',
+    'description': 'TOTVS Interface Robot',
     'author': 'TOTVS Automation Team',
     'url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
     'download_url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
@@ -14,6 +14,7 @@ config = {
     'install_requires': [
         'beautifulsoup4==4.6.0',
         'bs4==0.0.1',
+        'numpy==1.13.3',
         'pandas==0.22.0',
         'python-dateutil==2.6.1',
         'pytz==2017.3',
@@ -21,9 +22,9 @@ config = {
         'six==1.11.0',
         'enum34'
     ],
-    'packages': ['cawebhelper'],
+    'packages': ['tir'],
     'scripts': [],
-    'name': 'cawebhelper'
+    'name': 'tir'
 }
 
 setup(**config, include_package_data=True)

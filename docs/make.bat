@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=CAWebHelper
+set SPHINXPROJ=PWA
 
 if "%1" == "" goto help
 

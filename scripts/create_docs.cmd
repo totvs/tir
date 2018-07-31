@@ -1,6 +1,7 @@
 @echo off
-title CAWebHelper documentation generator
+title TIR documentation generator
 echo -------------------------
+cd ..
 echo Installing Sphinx Module...
 echo -------------------------
 pip install sphinx

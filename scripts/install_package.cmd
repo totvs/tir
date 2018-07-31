@@ -1,6 +1,7 @@
 @echo off
-title CAWebHelper installer
+title TIR installer
 echo -------------------------
+cd ..
 echo Building project...
 echo -------------------------
 python setup.py sdist
@@ -12,5 +13,5 @@ taskkill /f /im chromedriver.exe
 echo -------------------------
 echo Installing project...
 echo -------------------------
-pip install -U dist/cawebhelper-0.1.tar.gz
+pip install -U dist/tir-0.1.tar.gz
 pause >nul | set/p = Press any key to exit ...

@@ -16,11 +16,11 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import cawebhelper
+import tir
 
 # -- Project information -----------------------------------------------------
 
-project = 'CAWebHelper'
+project = 'TIR'
 copyright = '2018, Totvs Automation Team'
 author = 'Totvs Automation Team'
 
@@ -109,7 +109,7 @@ html_static_path = ['ystatic']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'CAWebHelperdoc'
+htmlhelp_basename = 'TIRdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -136,7 +136,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'CAWebHelper.tex', 'CAWebHelper Documentation',
+    (master_doc, 'TIR.tex', 'TIR Documentation',
      'Totvs Automation Team', 'manual'),
 ]
 
@@ -146,7 +146,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cawebhelper', 'CAWebHelper Documentation',
+    (master_doc, 'tir', 'TIR Documentation',
      [author], 1)
 ]
 
@@ -157,8 +157,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'CAWebHelper', 'CAWebHelper Documentation',
-     author, 'CAWebHelper', 'One line description of project.',
+    (master_doc, 'TIR', 'TIR Documentation',
+     author, 'TIR', 'One line description of project.',
      'Miscellaneous'),
 ]
 

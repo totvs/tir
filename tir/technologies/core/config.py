@@ -15,13 +15,15 @@ class ConfigLoader:
         self.password = str(data["Password"])
         self.language = str(data["Language"])
         self.skip_environment = ("SkipEnvironment" in data and bool(data["SkipEnvironment"]))
+        self.log_file = ("LogFile" in data and bool(data["LogFile"]))
         self.valid_language = False
         self.initialprog = ""
+        self.routine = ""
         self.date = ""
         self.group = ""
         self.branch = ""
         self.module = ""
-        
+
 
         if self.language:
             self.valid_language = True

@@ -97,7 +97,8 @@ class LanguagePack:
             "Grid Line Error": "Line does not exist in current grid.",
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
-            "Text Not Found": "Text Not Found."
+            "Text Not Found": "Text Not Found.",
+            "User Not Authenticated": "User Not Authenticated"
         }
 
         brazilian_portuguese = {
@@ -147,7 +148,8 @@ class LanguagePack:
             "Grid Line Error": "Linha não existe na grid atual.",
             "Grid Column Error": "Coluna não existe na grid atual.",
             "Grid Number Error": "Não existe essa quantidade de grids na tela atual.",
-            "Text Not Found": "Texto não encontrado."
+            "Text Not Found": "Texto não encontrado.",
+            "User Not Authenticated": "Usuário não autenticado"
         }
         russian = {
             "User": "Пользователь",
@@ -201,7 +203,8 @@ class LanguagePack:
             "Grid Line Error": "Line does not exist in current grid.",
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
-            "Text Not Found": "Text Not Found"
+            "Text Not Found": "Text Not Found",
+            "User Not Authenticated": "User Not Authenticated"
         }
 
         if language.lower() == "en-us":
@@ -226,3 +229,4 @@ class Messages():
         self.error_log_print = languagepack["Error Log Print"]
         self.error_msg_required = languagepack["Error Msg Required"]
         self.text_not_found = languagepack["Text Not Found"]
+        self.user_not_authenticated = languagepack["User Not Authenticated"]

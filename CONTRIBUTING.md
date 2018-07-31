@@ -1,6 +1,6 @@
 # Contributing
 
-In order to contribute to our project, be sure to take your time and read this document. It's a guide of an effective and easy way of how contribution should be done. 
+In order to contribute to our project, be sure to take your time and read this document. It's a guide of an effective and easy way of how contribution should be done.
 
 ## Issues list
 
@@ -44,17 +44,28 @@ Pull requests are really helpful. They must be in the project's scope and avoid 
 
 **Ask us first** before starting to work on a pull request of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
 
-The methods must have docstrings describing its functionality. e.g.:
+The methods must have docstrings describing its functionality and usage, and if any, parameters and returns. e.g.:
 
 ```python
-def hello_word(self):
+def sum_numbers(self, first_number, second_number):
     '''
-    This method prints Hello World on the screen.
+    This method returns the sum of two numbers.
+
+    :param first_number: The First number to be added
+    :type first_number: int
+    :param second_number: The Second number to be added
+    :type second_number: int
+
+    :return: The sum of the first_number and the second_number
+    :rtype: int
+
+    Usage:
+
+    >>> self.sum_numbers(1,2)
     '''
-    print("Hello World")
+    return first_number + second_number
 ```
 
 The pull request must follow the code conventions (identation, comments, naming) that are currently being used.
-
 
 **IMPORTANT**: When you submit any change you agree that your changes are now under the same license as the project itself.
