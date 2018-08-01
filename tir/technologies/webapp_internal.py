@@ -1669,7 +1669,7 @@ class WebappInternal(Base):
                 layers = len(self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog"))
 
             success = False
-            endtime = time.time() + 60
+            endtime = time.time() + 10
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
 
@@ -1690,10 +1690,6 @@ class WebappInternal(Base):
                 else:
                     self.log_error("Couldn't find element")
 
-                self.click(soup_element())
-                success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
-                if success:
-                    return
             if soup_element:
                 if button in self.language.no_actions:
                     self.idwizard = []
@@ -1703,17 +1699,23 @@ class WebappInternal(Base):
 
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
-                if button == self.language.add:
 
-                    if sub_item:#se for botão incluir com subitens
-                        soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+            if not soup_element or button.lower() == self.language.other_actions.lower(): 
+                success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
+                if success:
+                    return
 
-                        if soup_objects:
-                            soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
-                        else:
-                            self.log_error("Couldn't find element")
+            if button == self.language.add:
 
-                        self.click(soup_element())
+                if sub_item:#se for botão incluir com subitens
+                    soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+
+                    if soup_objects:
+                        soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                    else:
+                        self.log_error("Couldn't find element")
+
+                    self.click(soup_element())
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']")
