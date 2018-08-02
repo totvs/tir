@@ -1553,7 +1553,7 @@ class WebappInternal(Base):
                 by = By.CSS_SELECTOR
                 selector = f"[name*='{term}']"
 
-            soup = get_current_DOM()
+            soup = self.get_current_DOM()
             container_selector = self.base_container
             if (main_container is not None):
                 container_selector = main_container
