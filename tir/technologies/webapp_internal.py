@@ -1063,7 +1063,7 @@ class WebappInternal(Base):
         self.Usuario()
         self.Ambiente()
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
 
 
@@ -1562,7 +1562,11 @@ class WebappInternal(Base):
             if not container:
                 return False
 
-            container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+            try:
+                container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+            except:
+                return False
+
             element_list = container_element.find_elements(by, selector)
         else:
             if scrap_type == enum.ScrapType.MIXED:
@@ -1734,7 +1738,7 @@ class WebappInternal(Base):
                 self.wait_element(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']")
 
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1)
+                self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body")
 
             if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
                 if not self.element_exists(term=".ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR):
@@ -2299,7 +2303,7 @@ class WebappInternal(Base):
             field_to_valtype = x3_dictionaries[0]
             field_to_len = x3_dictionaries[1]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)):
+        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
 
@@ -2354,7 +2358,7 @@ class WebappInternal(Base):
                             self.js_click(selenium_column())
                             self.set_element_focus(selenium_column())
 
-                            while(not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)):
+                            while(not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
                                 time.sleep(1)
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
@@ -2362,7 +2366,7 @@ class WebappInternal(Base):
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
 
-                            self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
+                            self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
                             child = new_container.select("input")
@@ -2480,7 +2484,7 @@ class WebappInternal(Base):
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3)):
+        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
 
