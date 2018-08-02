@@ -1661,8 +1661,7 @@ class WebappInternal(Base):
             if (button.lower() == "x"):
                 self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
-                #self.wait_element_timeout(button, timeout=2.5, step=0.5)
-                self.wait_element(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
 
             layers = 0
             if button == self.language.confirm:
@@ -1690,6 +1689,13 @@ class WebappInternal(Base):
                 else:
                     self.log_error("Couldn't find element")
 
+                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(soup_element())
+
+                success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
+                if success:
+                    return
+
             if soup_element:
                 if button in self.language.no_actions:
                     self.idwizard = []
@@ -1700,22 +1706,17 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
 
-            if not soup_element or button.lower() == self.language.other_actions.lower(): 
-                success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
-                if success:
-                    return
+            # if button != self.language.other_actions:
 
-            if button == self.language.add:
+            if sub_item:
+                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
 
-                if sub_item:#se for botão incluir com subitens
-                    soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                if soup_objects:
+                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                else:
+                    self.log_error("Couldn't find element")
 
-                    if soup_objects:
-                        soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
-                    else:
-                        self.log_error("Couldn't find element")
-
-                    self.click(soup_element())
+                self.click(soup_element())
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']")
@@ -2628,22 +2629,20 @@ class WebappInternal(Base):
                 while(not sel_element().is_displayed()):
                     time.sleep(0.1)
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=None):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
         success = False
         if presence:
-            count = step
-            while count < timeout:
+            endtime = time.time() + timeout
+            while time.time() < endtime:
                 time.sleep(step)
-                count+=step
-                if self.element_exists(term, scrap_type, position, optional_term):
+                if self.element_exists(term, scrap_type, position, optional_term, main_container):
                     success = True
                     break
         else:
-            count = step
-            while count < timeout:
+            endtime = time.time() + timeout
+            while time.time() < endtime:
                 time.sleep(step)
-                count+=step
-                if not self.element_exists(term, scrap_type, position, optional_term):
+                if not self.element_exists(term, scrap_type, position, optional_term, main_container):
                     success = True
                     break
 
