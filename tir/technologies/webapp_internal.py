@@ -1553,7 +1553,17 @@ class WebappInternal(Base):
                 by = By.CSS_SELECTOR
                 selector = f"[name*='{term}']"
 
-            element_list = self.driver.find_elements(by, selector)
+            soup = get_current_DOM()
+            container_selector = self.base_container
+            if (main_container is not None):
+                container_selector = main_container
+            containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+            container = next(iter(containers), None)
+            if not container:
+                return False
+
+            container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+            element_list = container_element.find_elements(by, selector)
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
