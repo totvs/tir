@@ -857,9 +857,13 @@ class WebappInternal(Base):
                 tradio_index = tradiobutton_texts.index(tradiobutton_text)
 
         tradiobuttonitem = tradiobuttonitens[tradio_index]
-        sel_tradiobuttonitem = lambda: self.driver.find_element_by_xpath(xpath_soup(tradiobuttonitem))
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tradiobuttonitem))))
-        ActionChains(self.driver).move_to_element(sel_tradiobuttonitem()).click().perform()
+        trb_input = next(iter(tradiobuttonitem.select("input")), None)
+        if trb_input:
+            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
+            self.click(sel_input())
+        else:
+            log_error("Couldn't find key input.")
 
     def fill_search_browse(self, term, search_elements):
         '''
