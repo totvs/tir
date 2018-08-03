@@ -863,7 +863,7 @@ class WebappInternal(Base):
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
             self.click(sel_input())
         else:
-            log_error("Couldn't find key input.")
+            self.log_error("Couldn't find key input.")
 
     def fill_search_browse(self, term, search_elements):
         '''
