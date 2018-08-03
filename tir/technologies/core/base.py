@@ -229,12 +229,28 @@ class Base(unittest.TestCase):
         if self.consolelog:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
-        if (scrap_type != enum.ScrapType.MIXED and scrap_type != enum.ScrapType.TEXT):
+        if scrap_type == enum.ScrapType.SCRIPT:
+            return bool(self.driver.execute_script(term))
+        elif (scrap_type != enum.ScrapType.MIXED and scrap_type != enum.ScrapType.TEXT):
             selector = term
             if scrap_type == enum.ScrapType.CSS_SELECTOR:
                 by = By.CSS_SELECTOR
             elif scrap_type == enum.ScrapType.XPATH:
                 by = By.XPATH
+
+            soup = self.get_current_DOM()
+            container_selector = self.base_container
+            if (main_container is not None):
+                container_selector = main_container
+            containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+            container = next(iter(containers), None)
+            if not container:
+                return False
+
+            try:
+                container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+            except:
+                return False
 
             element_list = self.driver.find_elements(by, selector)
         else:
