@@ -2652,7 +2652,7 @@ class WebappInternal(Base):
 
         if presence:
             print("Element found! Waiting for element to be displayed.")
-            element = next(iter(self.self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 while(not sel_element().is_displayed() and time.time() < endtime):
