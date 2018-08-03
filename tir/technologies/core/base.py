@@ -229,7 +229,9 @@ class Base(unittest.TestCase):
         if self.consolelog:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
-        if (scrap_type != enum.ScrapType.MIXED and scrap_type != enum.ScrapType.TEXT):
+        if scrap_type == enum.ScrapType.SCRIPT:
+            return bool(self.driver.execute_script(term))
+        elif (scrap_type != enum.ScrapType.MIXED and scrap_type != enum.ScrapType.TEXT):
             selector = term
             if scrap_type == enum.ScrapType.CSS_SELECTOR:
                 by = By.CSS_SELECTOR

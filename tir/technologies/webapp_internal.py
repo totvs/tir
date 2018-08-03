@@ -977,7 +977,10 @@ class WebappInternal(Base):
             self.click(button())
             time.sleep(2)
             self.wait_element(term="Login", scrap_type=enum.ScrapType.MIXED, optional_term=".tsay label", main_container="body")
-            loop_control = self.element_exists(term=self.language.messages.user_not_authenticated, scrap_type=enum.ScrapType.MIXED, optional_term="textarea", main_container='body')
+
+            script = f"return document.querySelector('textarea').value.indexOf('{self.language.messages.user_not_authenticated}') != -1;"
+
+            loop_control = self.element_exists(term=script, scrap_type=enum.ScrapType.SCRIPT)
 
         self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container="body")
 
@@ -1543,7 +1546,9 @@ class WebappInternal(Base):
         if self.consolelog:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
-        if (scrap_type != enum.ScrapType.MIXED and not (scrap_type == enum.ScrapType.TEXT and not re.match(r"\w+(_)", term))):
+        if scrap_type == enum.ScrapType.SCRIPT:
+            return bool(self.driver.execute_script(term))
+        elif (scrap_type != enum.ScrapType.MIXED and not (scrap_type == enum.ScrapType.TEXT and not re.match(r"\w+(_)", term))):
             selector = term
             if scrap_type == enum.ScrapType.CSS_SELECTOR:
                 by = By.CSS_SELECTOR
