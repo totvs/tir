@@ -1820,7 +1820,7 @@ class WebappInternal(Base):
         """
         Método que preenche a filial na inclusão
         """
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2)
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
         Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
             #self.SetButton('OK','','',60,'div','tbutton')
@@ -2077,7 +2077,7 @@ class WebappInternal(Base):
         '''
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR):
+        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
             buttons = modals[0].select(".tbrowsebutton")
             if buttons:
                 close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
@@ -2411,8 +2411,8 @@ class WebappInternal(Base):
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         else:
-                                            self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False)
-                                            if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1):
+                                            self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
+                                            if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
                                                 self.send_keys(selenium_input(), Keys.ENTER)
 
                                 self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
