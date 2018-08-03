@@ -2611,6 +2611,7 @@ class WebappInternal(Base):
         self.driver.execute_script("arguments[0].click()", element)
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
+        endtime = time.time() + 10
         if self.consolelog:
             print("Waiting...")
         if presence:
@@ -2627,7 +2628,7 @@ class WebappInternal(Base):
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed()):
+                while(not sel_element().is_displayed() and time.time() < endtime):
                     time.sleep(0.1)
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=None):
