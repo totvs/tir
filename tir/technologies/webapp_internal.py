@@ -946,7 +946,8 @@ class WebappInternal(Base):
         Preenchimento da tela de usuario
         """
         self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-
+        current_textarea_value = ""
+        initial_pos = 0
         loop_control = True
         while(loop_control):
             soup = self.get_current_DOM()
@@ -976,11 +977,18 @@ class WebappInternal(Base):
             button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
             self.click(button())
             time.sleep(2)
-            self.wait_element(term="Login", scrap_type=enum.ScrapType.MIXED, optional_term=".tsay label", main_container="body")
+            self.wait_element(term="Login", scrap_type=enum.ScrapType.MIXED, optional_term=".tsay label", position=initial_pos, main_container="body")
 
-            script = f"return document.querySelector('textarea').value.indexOf('{self.language.messages.user_not_authenticated}') != -1;"
+            initial_pos += 1
+            script = f" element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value.indexOf('{self.language.messages.user_not_authenticated}') != -1;"
+            new_textarea_value = str(self.driver.execute_script("element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value"))
+
+            while(current_textarea_value == new_textarea_value):
+                new_textarea_value = str(self.driver.execute_script("element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value"))
 
             loop_control = self.element_exists(term=script, scrap_type=enum.ScrapType.SCRIPT)
+
+            current_textarea_value = new_textarea_value
 
         self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container="body")
 
