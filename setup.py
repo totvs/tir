@@ -7,8 +7,8 @@ except ImportError:
 config = {
     'description': 'TOTVS Interface Robot',
     'author': 'TOTVS Automation Team',
-    'url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
-    'download_url': 'http://code.engpro.totvs.com.br/heitor.marsolla/cawebhelper',
+    'url': 'http://code.engpro.totvs.com.br/engpro/tir',
+    'download_url': 'http://code.engpro.totvs.com.br/engpro/tir',
     'author_email': 'squad.automacaoprotheus@totvs.com.br',
     'version': '0.1',
     'install_requires': [
@@ -28,4 +28,3 @@ config = {
 }
 
 setup(**config, include_package_data=True)
-
