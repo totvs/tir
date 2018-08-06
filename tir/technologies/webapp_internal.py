@@ -1566,19 +1566,22 @@ class WebappInternal(Base):
                 by = By.CSS_SELECTOR
                 selector = f"[name*='{term}']"
 
-            soup = self.get_current_DOM()
-            container_selector = self.base_container
-            if (main_container is not None):
-                container_selector = main_container
-            containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-            container = next(iter(containers), None)
-            if not container:
-                return False
+            if scrap_type != enum.ScrapType.XPATH:
+                soup = self.get_current_DOM()
+                container_selector = self.base_container
+                if (main_container is not None):
+                    container_selector = main_container
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                container = next(iter(containers), None)
+                if not container:
+                    return False
 
-            try:
-                container_element = self.driver.find_element_by_xpath(xpath_soup(container))
-            except:
-                return False
+                try:
+                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                except:
+                    return False
+            else:
+                container_element = self.driver
 
             element_list = container_element.find_elements(by, selector)
         else:
