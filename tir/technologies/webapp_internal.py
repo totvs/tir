@@ -2805,7 +2805,7 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
-        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"\*?\s+$"))))), None)
+        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\*?)(\s*?)$"))))), None)
         if element is None:
             return []
 
