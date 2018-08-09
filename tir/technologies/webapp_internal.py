@@ -2346,12 +2346,13 @@ class WebappInternal(Base):
                 column_name = ""
                 if field[2] > len(grids):
                     self.log_error(self.language.messages.grid_number_error)
-
+                down_loop = 0
                 row = self.get_selected_row(grids[field[2]].select("tbody tr"))
                 if row:
-                    while int(row.attrs["id"]) < self.grid_counters[grid_id]:
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 3):
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+                        down_loop+=1
 
                     columns = row.select("td")
                     if columns:
