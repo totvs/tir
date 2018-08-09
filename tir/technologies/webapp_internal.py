@@ -2349,7 +2349,7 @@ class WebappInternal(Base):
                 down_loop = 0
                 row = self.get_selected_row(grids[field[2]].select("tbody tr"))
                 if row:
-                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 3):
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2):
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop+=1
