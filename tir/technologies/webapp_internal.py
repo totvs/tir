@@ -37,6 +37,7 @@ class WebappInternal(Base):
         self.grid_counters = {}
         self.grid_input = []
         self.grid_check = []
+        self.down_loop_grid = False
         self.date = ''
         self.rota = ''
         self.CpoNewLine = ''
@@ -2349,11 +2350,11 @@ class WebappInternal(Base):
                 down_loop = 0
                 row = self.get_selected_row(grids[field[2]].select("tbody tr"))
                 if row:
-                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2):
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid:
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop+=1
-
+                    self.down_loop_grid = False
                     columns = row.select("td")
                     if columns:
                         if "_" in field[0]:
@@ -2559,6 +2560,7 @@ class WebappInternal(Base):
                 self.log_error("Couldn't find grids.")
 
     def new_grid_line(self, field, addGridLineCounter=True):
+        self.down_loop_grid = True
         soup = self.get_current_DOM()
 
         containers = soup.select(".tmodaldialog.twidget")
