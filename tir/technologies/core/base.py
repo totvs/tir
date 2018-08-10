@@ -506,31 +506,26 @@ class Base(unittest.TestCase):
 
         return zindex
 
-    def select_combo(self, id, value):
+    def select_combo(self, element, option):
         """
-        Selects the passed value on the Combobox located by the parent div id.
+        Selects the option on the combobox.
 
-        :param id: Combobox's parent div's ID
-        :type id: string
-        :param id: Value to be selected
-        :type id: string
+        :param element: Combobox element
+        :type element: Beautiful Soup object
+        :param option: Option to be selected
+        :type option: string
 
         Usage:
 
         >>> #Calling the method:
-        >>> self.select_combo("my_div_id", "Chosen option")
-
+        >>> self.select_combo(element, "Chosen option")
         """
-        combo = Select(self.driver.find_element_by_xpath("//div[@id='%s']/select" %id))
-        options = combo.options
-        for x in options:
-            if value == x.text[0:len(value)]:
-                value = x.text
-                break
-        time.sleep(1)
-        combo.select_by_visible_text(value)
-        time.sleep(1)
-        return value
+        combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+        value = next(iter(filter(lambda: x.text[0:len(option)] == option, combo.options)), None)
+
+        if value:
+            time.sleep(1)
+            combo.select_by_visible_text(value)
 
     def send_keys(self, element, arg):
         """

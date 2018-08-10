@@ -83,24 +83,11 @@ class WebappInternal(Base):
 
             print(f"Searching for: {field}")
 
-            if re.match(r"\w+(_)", field):
-                elements_list = self.web_scrap(f"[name*='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                element = next(iter(filter(lambda x: re.search(f"{field}$", x.attrs["name"]), elements_list)), None)
-            else:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
-
+            element = self.get_field(field)
             if not element:
                 continue
 
-            #preparing variables that would be used
-            main_element = element
-            element_id = element.attrs["id"]
-
-            element_first_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
-            if element_first_children is not None:
-                main_element = element_first_children
-
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(main_element))
+            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             valtype = "C"
             main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
@@ -110,11 +97,11 @@ class WebappInternal(Base):
             interface_value_size = len(interface_value)
             user_value_size = len(main_value)
 
-            if not input_field().is_enabled() or "disabled" in main_element.attrs:
+            if not input_field().is_enabled() or "disabled" in element.attrs:
                 self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
-            if main_element.name == "input":
-                valtype = main_element.attrs["valuetype"]
+            if element.name == "input":
+                valtype = element.attrs["valuetype"]
 
             self.scroll_to_element(input_field())
 
@@ -123,11 +110,11 @@ class WebappInternal(Base):
                 if "tcombobox" in element.attrs["class"]:
                     self.wait.until(EC.visibility_of(input_field()))
                     self.set_element_focus(input_field())
-                    self.select_combo(element_id, main_value)
+                    self.select_combo(element, main_value)
                 #Action for Input elements
                 else:
                     self.wait.until(EC.visibility_of(input_field()))
-                    self.wait.until(EC.element_to_be_clickable((By.ID, element_id)))
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                     self.double_click(input_field())
 
                     #if Character input
@@ -174,24 +161,6 @@ class WebappInternal(Base):
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
-
-    def select_combo(self, Id, valor):
-        """
-        Retorna a lista do combobox através do select do DOM.
-        """
-        combo = Select(self.driver.find_element_by_xpath("//div[@id='%s']/select" %Id))
-        options = combo.options
-        for x in options:
-            if valor == x.text[0:len(valor)]:
-                valor = x.text
-                break
-
-        print('time.sleep(1) - 418')
-        time.sleep(1)
-        combo.select_by_visible_text(valor)
-        print('time.sleep(1) - 421')
-        time.sleep(1)
-        return valor
 
     def SetTable(self):
         '''
@@ -961,7 +930,7 @@ class WebappInternal(Base):
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
 
-    def CheckResult(self, cabitem, campo, valorusr, line=1, Id='', args1='', grid_number=1):
+    def CheckResultOld(self, cabitem, campo, valorusr, line=1, Id='', args1='', grid_number=1):
         """
         Validação de interface
         """
@@ -1007,6 +976,48 @@ class WebappInternal(Base):
 
         return valorweb
 
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
+        """
+        Checks if a field has the value the user expects.
+        """
+        if grid:
+            self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
+        elif isinstance(user_value, bool):
+            current_value = self.result_checkbox(field,valorusr)
+        else:
+            element = self.get_field(field)
+            if not element:
+                self.log_error(f"Couldn't find element: {field}")
+
+            field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            current_value = self.get_web_value(field()).strip()
+
+            if self.consolelog:
+                print(f"Value for Field {field} is: {current_value}")
+
+            #Remove mask if present.
+            if self.check_mask(element):
+                current_value = self.remove_mask(current_value)
+                user_value = self.remove_mask(user_value)
+            #If user value is string, Slice string to match user_value's length
+            if type(current_value) is str:
+                current_value = current_value[0:len(str(user_value))]
+
+        self.LogResult(field, user_value, current_value)
+
+    def get_field(self, field):
+        """
+        This method decides if field must be find either by it's name or by a label.
+        Internal method of input_value and check_value.
+        """
+        if re.match(r"\w+(_)", field):
+            element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+        else:
+            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+
+        element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
+        return element_children if element_children is not None else element
+
     def get_web_value(self, element):
         """
         Coleta as informações do campo baseado no ID
@@ -1044,10 +1055,9 @@ class WebappInternal(Base):
         """
         clique na area de troca de ambiente do protheus
         """
-        Id = self.SetScrap('ChangeEnvironment','div','tbutton')
-        if Id:
-            element = self.driver.find_element_by_id(Id)
-            self.click(element)
+        element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
+        if element:
+            self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.Ambiente(True)
 
     def Restart(self):
@@ -1811,9 +1821,8 @@ class WebappInternal(Base):
         """
         Set the current focus on the desired field.
         """
-        Id = self.SetScrap(field, 'div', 'tget', 'Enchoice')
-        element = self.driver.find_element_by_id(Id)
-        self.set_element_focus(element)
+        element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
+        self.set_element_focus(element())
 
     def down_grid(self):
         ActionChains(self.driver).key_down(Keys.DOWN).perform()
@@ -1866,10 +1875,14 @@ class WebappInternal(Base):
 
     def get_closing_button(self, is_advpl):
         if is_advpl:
-            Id = self.SetScrap(self.language.cancel, "div", "tbrowsebutton")
+            button = next(iter(self.web_scrap(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")), None)
         else:
-            Id = self.SetScrap(self.language.close, "div", "tbrowsebutton")
-        return self.driver.find_element_by_id(Id)
+            button = next(iter(self.web_scrap(term=self.language.close, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")), None)
+
+        if button:
+            return self.driver.find_element_by_xpath(xpath_soup(button))
+        else:
+            self.log_error("Button wasn't found.")
 
     def is_advpl(self):
         return self.element_exists(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")
@@ -2053,7 +2066,7 @@ class WebappInternal(Base):
                                 if not option_text:
                                     self.log_error("Couldn't find option")
                                 if (option_text != option_value_dict[option_value]):
-                                    self.select_combo(child[0].find_parent().attrs['id'], field[1])
+                                    self.select_combo(child[0], field[1])
                                     if field[1] in option_text[0:len(field[1])]:
                                         current_value = field[1]
                                 else:
