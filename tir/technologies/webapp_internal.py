@@ -27,43 +27,21 @@ class WebappInternal(Base):
         super().__init__(config_path)
         self.base_container = ".tmodaldialog"
 
-        self.LastId = []
-        self.LastIdBtn = []
-        self.gridcpousr = []
-        self.Table = []
-        self.lenbutton = []
-        self.idwizard = []
-
         self.grid_counters = {}
         self.grid_input = []
         self.grid_check = []
-        self.classe = ''
-        self.valtype = ''
-        self.savebtn = ''
-        self.idcomp = ''
-        self.lenvalorweb = ''
-        self.grid_value = ''
-        self.grid_class = ''
-        self.initial_program = 'SIGAADV'
-
-        self.lineGrid = 0
-        self.index = 0
-        self.lastColweb = 0
-
-        self.Ret = False
-        self.refreshed = False
-        self.consolelog = True
-        self.btnenchoice = True
-        self.elementDisabled = False
-        self.numberOfTries = 0
-
-        self.errors = []
-
-        self.camposCache = []
-        self.parametro = ''
-        self.backupSetup = dict()
 
         self.used_ids = []
+        self.consolelog = True
+        self.errors = []
+
+        self.LastId = []
+        self.LastIdBtn = []
+        self.Table = []
+
+        self.idwizard = []
+        self.camposCache = []
+        self.backupSetup = dict()
 
     def set_program(self, program):
         '''
@@ -207,64 +185,13 @@ class WebappInternal(Base):
             if valor == x.text[0:len(valor)]:
                 valor = x.text
                 break
-        if not self.elementDisabled:
-            print('time.sleep(1) - 418')
-            time.sleep(1)
-            combo.select_by_visible_text(valor)
-            print('time.sleep(1) - 421')
-            time.sleep(1)
+
+        print('time.sleep(1) - 418')
+        time.sleep(1)
+        combo.select_by_visible_text(valor)
+        print('time.sleep(1) - 421')
+        time.sleep(1)
         return valor
-
-    def SetGrid(self, ChkResult=0):
-        """
-        Preenche a grid baseado nas listas self.gridcpousr e self.Table
-        """
-        is_advpl = self.is_advpl()
-        if self.fillTable():    # Se self.Table estiver preenchido com campos da tabela que o usuario quer testar, não deve executar SearchField() novamente.
-            self.SearchField()  # Obtem a caracteristica dos campos da grid, gerando a lista self.Table
-
-        td = ''
-        self.lineGrid = 0
-        for campo, valor, linha in self.gridcpousr:
-            itens = lambda: self.driver.find_elements(By.CSS_SELECTOR, ".cell-mode .selected-row")
-            for line in itens():
-                if line.is_displayed():
-                    td = line
-                    break
-            element = lambda: td.find_element(By.CSS_SELECTOR, ".selected-cell")
-            self.lineGrid = int(td.get_attribute("id"))
-
-            if not element():
-                self.log_error("Celula não encontrada!")
-
-            if campo == "newline" or (ChkResult and linha and ((linha - 1) != self.lineGrid)):
-                self.lineGrid = int(td.get_attribute("id"))
-                print('time.sleep(3) - 460')
-                time.sleep(3)
-                self.down_grid()
-                print('time.sleep(3) - 463')
-                time.sleep(3)
-            else:
-                coluna = self.Table[1].index(campo)
-                if self.consolelog:
-                    print('Posicionando no campo %s' %campo)
-                # controla se a celula esta posicionada onde a variavel 'coluna' esta indicando e se a celula foi preenchida com o conteúdo da variavel 'valor'.
-                while self.cawait(coluna, campo, valor, element, ChkResult):
-                    Id = self.SetScrap('', 'div', '', 'setGrid')
-                    if Id:
-                        # nao estava posicionado na celula correta então tenta novamente e volta para a funcao cawait()
-                        if is_advpl:
-                            element_table = self.driver.find_element_by_xpath("//div[@id='%s']/div[1]/table/tbody/tr[@id=%s]/td[@id=%s]" % ( str(Id), str(self.lineGrid), str(coluna) ) )
-                        else:
-                            element_table = self.driver.find_element_by_xpath("//div[@id='%s']/div/table/tbody/tr[@id=%s]/td[@id=%s]/div" % ( str(Id), str(self.lineGrid), str(coluna) ) )
-                        self.lastColweb = coluna
-                        print('time.sleep(1) - 479')
-                        time.sleep(1)
-                        self.wait.until(EC.element_to_be_clickable((By.ID, Id)))
-                        self.click(element_table)
-        # Neste momento devo limpar a lista gridcpousr, pois ja utilizei os seus dados.
-        self.gridcpousr = []
-        return True
 
     def SetTable(self):
         '''
@@ -323,7 +250,7 @@ class WebappInternal(Base):
         while not RetId:
 
             if args1 == 'Grid':
-                if (self.Ret and args4 == 'SearchField') or (args3 == len(self.Table[0])):
+                if (args4 == 'SearchField') or (args3 == len(self.Table[0])):
                     break
 
             if not args1 == 'Grid':#Só espera 1 segundo se não for Grid
@@ -334,11 +261,10 @@ class WebappInternal(Base):
 
             #Condições de retirada caso o timeout seja atingido
             if seek == 'inputStartProg':#se for a tela inicial e o tempo limite for atingido, faz o refresh da pagina.
-                if time.time() > refresh and not self.refreshed:
+                if time.time() > refresh:
                     if self.consolelog:
                         print('Refreshing...')
                     self.driver.refresh()
-                    self.refreshed = True
 
             #faça somente se o tempo corrente for menor que o tempo definido no timeout
             if time.time() < endTime:
@@ -443,9 +369,6 @@ class WebappInternal(Base):
                      text = line.text
                 if (text[0:len(seek)] == seek) and (line.attrs['class'][0] == 'tbutton' or line.attrs['class'][0] == 'tbrowsebutton' or line.attrs['class'][0] == 'tsbutton') and line.attrs['id'] not in self.LastId and not args1 == 'setGrid':#TODO VERIFICAR SE TERÝ EFEITO USAR O LEN EM line.string
                     RetId = line.attrs['id']
-                    if self.savebtn:
-                        if RetId not in self.lenbutton:
-                            self.lenbutton.append(RetId)
                     if RetId not in self.LastIdBtn:
                         self.LastIdBtn.append(RetId)
                         RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
@@ -546,41 +469,26 @@ class WebappInternal(Base):
             try:
                 if ((line.previous == seek or line.string == seek) and line.attrs['class'][0] == 'tget' and not args1 == 'Virtual' and not args2 == 'label' and line.attrs['class'][0] != 'tbrowsebutton') :
                     RetId = line.attrs['id']
-                    self.classe = line.attrs['class'][0]
-                    if not self.classe == 'tcombobox':
-                        self.valtype = line.contents[0]['valuetype']
                     break
 
                 elif seek == 'Inverte Selecao':
                     if seek == line.text:
                         RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        if not self.classe == 'tcombobox':
-                            self.valtype = line.contents[0]['valuetype']
                         break
 
                 elif seek == 'cGet':
                     if line.attrs['name'] == 'cGet': #and line.next.attrs['class'][0] == 'placeHolder' and line.next.name == 'input':
                         RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        if not self.classe == 'tcombobox':
-                            self.valtype = line.contents[0]['valuetype']
                         self.LastId.append(RetId)
                         break
 
                 elif seek == 'inputStartProg' or seek == 'inputEnv':
                     RetId = line.attrs['id']
-                    self.classe = line.attrs['class'][0]
-                    if not self.classe == 'tcombobox':
-                        self.valtype = line.contents[0]['valuetype']
                     break
 
                 elif seek == self.language.search:
                     if seek in line.previous and line.attrs['name'] == args1:
                         RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        if not self.classe == 'tcombobox':
-                            self.valtype = line.contents[0]['valuetype']
                         break
 
                 elif args1 == 'Virtual':
@@ -600,9 +508,6 @@ class WebappInternal(Base):
                             alllabels.append(label)
                     if len(alllabels) == len(self.Table[0]):
                         RetId = line.attrs['id']
-                        self.classe = line.attrs['class'][0]
-                        if not self.classe == 'tcombobox':
-                            self.valtype = line.contents[0]['valuetype']
                         break
 
 
@@ -638,62 +543,21 @@ class WebappInternal(Base):
                                             if Id not in self.idwizard:
                                                 print(x.attrs['id'])
                                                 self.idwizard.append(Id)
-                                                self.classe = x.attrs['class'][0]
                                                 RetId = Id
-                                                if not self.classe == 'tcombobox':
-                                                    self.valtype = x.contents[0]['valuetype']
                                                 break
                                     if RetId:# IF/Break responsavel pela parada do FOR, quando é encontrado o ID do campo
                                         break
                                 #preenche atributos do campo da enchoice
                             elif line.next_sibling.text.strip() == seek.strip():
                                 RetId = line.attrs['id']
-                                self.classe = line.attrs['class'][0]
                                 break
                         elif list(filter(bool, line.attrs["name"].split('->')))[1] == seek:
                             RetId = line.attrs['id']
-                            self.classe = line.attrs['class'][0]
-                            if not self.classe == 'tcombobox':
-                                self.valtype = line.contents[0]['valuetype']
                             break
             except Exception: # Em caso de não encontrar passa para o proximo line
                 pass
-        #Se for uma chamada do método SearchField só busca uma unica vez
-        if args4 == 'SearchField':
-            self.Ret = True
 
         return(RetId)
-
-    def seek_content(self, seek, contents, line=''):
-        try:
-            if not self.idcomp:
-                if not contents:
-                    #print(line)
-                    if seek in str(line):
-                        self.idcomp = line.parent.attrs['id']
-                        return
-                if len(contents) == 1:
-                    if not contents[0].contents:
-                        #print(str(contents[0]))
-                        if seek in str(contents[0]):
-                            self.idcomp = line.parent.attrs['id']
-                            return
-                    else:
-                        for line in contents:
-                            try:
-                                self.seek_content(seek, line.contents, line)
-                            except Exception:
-                                pass
-                    return
-                else:
-                    for line in contents:
-                        try:
-                            self.seek_content(seek, line.contents, line)
-                        except Exception:
-                            pass
-                return
-        except Exception:
-            pass
 
     def camenu(self, seek, soup, tag, cClass, args1):
         '''
@@ -754,14 +618,12 @@ class WebappInternal(Base):
         for line in lista:
             if seek == line.attrs['name'][3:] and line.attrs['class'][0] == 'tcombobox':
                 RetId = line.attrs['id']
-                self.classe = line.attrs['class'][0]
                 if self.consolelog:
                     print(RetId)
                 break
 
             elif seek == line.attrs['name'][3:] and line.attrs['class'][0] == 'tget':
                 RetId = line.attrs['id']
-                self.classe = line.attrs['class'][0]
                 if self.consolelog:
                     print(RetId)
                 break
@@ -775,7 +637,6 @@ class WebappInternal(Base):
         for line in lista:
             if seek in line.text:
                 RetId = line.attrs['id']
-                self.classe = line.attrs['class'][0]
                 if self.consolelog:
                     print(RetId)
                 break
@@ -800,7 +661,6 @@ class WebappInternal(Base):
         '''
         Mètodo que pesquisa o registro no browse com base no indice informado.
         '''
-        self.savebtn = ''
         browse_elements = self.get_search_browse_elements(identificador)
         self.search_browse_key(descricao, browse_elements)
         self.fill_search_browse(chave, browse_elements)
@@ -911,9 +771,6 @@ class WebappInternal(Base):
 
     def ProgramaInicial(self, initial_program="", environment=""):
 
-        if initial_program:
-            self.initial_program = initial_program
-
         self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
@@ -923,7 +780,7 @@ class WebappInternal(Base):
             self.log_error("Couldn't find Initial Program input element.")
         start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
         start_prog().clear()
-        self.send_keys(start_prog(), self.initial_program)
+        self.send_keys(start_prog(), initial_program)
 
         env_element = next(iter(soup.select("#inputEnv")), None)
         if env_element is None:
@@ -1071,7 +928,6 @@ class WebappInternal(Base):
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
 
-
         self.set_log_info()
 
     def Program(self, rotina):
@@ -1086,8 +942,6 @@ class WebappInternal(Base):
         """
         Indica os campos e o conteudo do campo para preenchimento da tela.
         """
-        self.elementDisabled = False
-
         if not grid:
             if isinstance(valor,bool): # Tratamento para campos do tipo check e radio
                 element = self.check_checkbox(campo,valor)
@@ -1106,192 +960,6 @@ class WebappInternal(Base):
         """
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
-
-    def SearchField(self):
-        """
-        Obtem a caracteristica dos campos da grid, gerando a lista self.Table, essa lista sera
-        utlizada para o preenchimento dos campos da grid.
-        """
-        try:
-            regex = (r'\w+(_)')
-            aux = ''
-            alias = []
-            field = []
-
-            exceptions = ['wt alias', 'wt recno', 'alias wt', 'recno wt']
-            lExcept = False
-            auxTable = self.SetTable()
-            self.Table = []
-
-            #Separa somente o alias das tabelas sem repetir
-            for line in self.gridcpousr:
-                m = re.search(regex, line[0])
-                if m:
-                    aux = m.group()
-                    if aux not in alias:
-                        alias.append(aux)
-
-            #Coleta so campos passado pelo usuário
-            for line in self.gridcpousr:
-                if line[0] not in field:
-                    field.append(line[0])
-
-
-            #caminho do arquivo csv(SX3)
-            path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
-            #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-            data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
-                            index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Título', None], low_memory=False)
-            df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Título', None])
-            if not alias:
-                df_filtered = df.query("Tipo=='C' or Tipo=='N' or Tipo=='D' ")
-            else:
-                df_filtered = df.filter(regex='^%s' %alias[0], axis=0)
-
-            #Retiro os espaços em branco da coluna Campo e Titulo.
-            df_filtered['Título'] = df_filtered['Título'].map(lambda x: x.strip())
-            df_filtered.index = df_filtered.index.map(lambda x: x.strip())
-
-            #Filtro somente os campos que foram passados pelo usuário
-            #df_fields = df_filtered.loc[df_filtered.index.isin(field)]
-
-            #Colunas do dataframe que serão utilizadas para alimentar o array de tabelas(self.Table)
-            campo = df_filtered.index
-            tipo = df_filtered['Tipo'].values
-            Tamanho = df_filtered['Tamanho'].values
-            #Verifico se a linha do vetor é correspondente à tabela do X3
-            titulo = df_filtered['Título'].values
-
-            acertos = []
-            for index1, line in enumerate(auxTable):
-                for line2 in line[0]:
-                    if line2 in titulo:
-                        acertos.append(line2)
-                    else:
-                        if alias:
-                            for x in exceptions:
-                                if line2.lower() == x:
-                                    acertos.append(line2)
-                                    lExcept = True
-                                    break
-                                else:
-                                    lExcept = False
-                            if not lExcept:
-                                acertos = []
-                                break
-
-
-                if len(acertos) == len(line[0]):
-                    self.Table.append(line[0])
-                    self.index = index1
-                    break
-
-            tam = len(self.Table[0])
-            self.Table.append( [''] * tam ) # sera gravado o nome dos campos da grid.
-            self.Table.append( [''] * tam ) # sera gravado o tipo do campo, para ser utilizado na setgrid().
-            self.Table.append( [''] * tam ) # será gravado o tamanho do campo.
-            #self.Table.append( [''] * tam ) # posição do campo.
-            lastindex = []
-            for count in range(0, len(df_filtered)):
-                if titulo[count].strip() in self.Table[0]:
-                    index = self.Table[0].index(titulo[count].strip())#Busco a coluna titulo do dataframe na self.Table e utilizo como indice
-                    if index not in lastindex:
-                        self.Table[1][index] = campo[count].strip()
-                        self.Table[2][index] = tipo[count]
-                        self.Table[3][index] = Tamanho[count]
-                        #self.Table[4][index] = index2
-                        lastindex.append(index)
-        except Exception as error:
-            print("Entrou na exceção: %s" %error)
-
-    def AddLine(self):
-        """
-        Inclui uma marca indicando nova linha, na lista gridcpousr.
-        """
-        if len(self.gridcpousr) > 0:
-            self.gridcpousr.append(["newline", "", 0])
-
-    def cawait(self, coluna, campo, valor, element, ChkResult):
-        """
-        Preenchimento e checagem dos campos da grid
-        """
-        try:
-            # O scraping abaixo eh necessário para comparar se o que eu digitei no processo anterior, esta realmente preenchido na celula do grid.
-            tipoCpo = self.Table[2][coluna]
-            auxTable = self.SetTable()
-            valorweb = auxTable[self.index][1][self.lineGrid][coluna]
-
-            if self.SearchStack('GetValue'):
-                self.grid_value = valorweb
-                return False # return false encerra o laço
-
-            valsub = self.remove_mask(valor)
-            if self.lastColweb != coluna:
-                return True
-            else:
-                # Esta sendo executado por UTCheckResult então apenas guardo o resultado
-                if ChkResult:
-                    self.LogResult(campo, valor, valorweb, True)
-                else:
-                    # O tipo do campo em que a celula esta posicionada eh 'Numerico' ?
-                    if tipoCpo == 'N':
-                        # O campo numérico esta vazio ?
-                        if valorweb != valor:
-                            # preencha o campo numerico
-                            self.send_keys(element(), Keys.ENTER)#element.send_keys(Keys.ENTER)
-                            print('time.sleep(1) - 1506')
-                            time.sleep(1)
-                            self.send_keys(element(), valsub)#element.send_keys(valor)
-                            self.send_keys(element(), Keys.ENTER)#element.send_keys(Keys.ENTER)
-
-                            # return true fara com que entre novamente aqui( cawait ) para garantir que os dados foram preenchidos corretamente.
-                            return True
-                        else:
-                            # o campo numerio foi preenchido corretamente, então o processo analisará o próximo campo contido em gridcpousr.
-                            return False
-                    # O tipo do campo em que a celula esta posicionada eh diferente de 'Numerico' !
-                    # O conteudo da celula esta diferente da variavel 'valor'
-                    elif valorweb != valor.strip():
-                        #preencha campo
-                        #clique enter na célula
-                        #self.double_click(element())#self.send_keys(element, Keys.ENTER)
-                        print('time.sleep(3) - 1522')
-                        time.sleep(3)
-                        self.enter_grid()
-                        #Campo caractere
-                        Id = self.SetScrap(campo,'div','tget', args1='caSeek')
-                        #Se for combobox na grid
-                        if not Id:
-                            Id = self.SetScrap(campo,'div','tcombobox', args1='caSeek')
-                            if Id:
-                                valorcombo = self.select_combo(Id, valor)
-                                if valorcombo[0:len(valor)] == valor:
-                                    return False
-                        if Id:
-                            element_ = self.driver.find_element_by_id(Id)
-                            self.lenvalorweb = len(self.get_web_value(element_))
-
-                            if element_.tag_name == 'div':
-                                element_ = element_.find_element_by_tag_name("input")
-
-                            print('time.sleep(1) - 1541')
-                            time.sleep(1)
-                            self.click(element_)
-                            if valsub != valor and self.check_mask(element_):
-                                self.send_keys(element_, valsub)
-                            else:
-                                self.send_keys(element_, valor)
-                            if len(valor) < self.lenvalorweb:
-                                self.send_keys(element_, Keys.ENTER)
-                        # return true fara com que entre novamente aqui( cawait ) para garantir que os dados foram preenchidos corretamente.
-                        return True
-                    else:
-                        # o campo foi preenchido corretamente, então o processo analisará o próximo campo contido em gridcpousr.
-                        return False
-        except Exception as error:
-            if self.consolelog:
-                print(error)
-            return True
 
     def CheckResult(self, cabitem, campo, valorusr, line=1, Id='', args1='', grid_number=1):
         """
@@ -1322,7 +990,6 @@ class WebappInternal(Base):
                 # print('time.sleep(1) - 1583')
                 # time.sleep(1)
                 valorweb = self.get_web_value(element)
-                self.lenvalorweb = len(valorweb)
                 valorweb = valorweb.strip()
                 if self.consolelog and valorweb != '':
                     print(valorweb)
@@ -1361,14 +1028,12 @@ class WebappInternal(Base):
 
         return web_value
 
-    def LogResult(self, field, user_value, captured_value, call_grid=False):
+    def LogResult(self, field, user_value, captured_value):
         '''
         Log the result of comparison between user value and captured value
         '''
         txtaux = ""
         message = ""
-        if call_grid:
-            txtaux = 'Item: %s - ' %str(self.lineGrid + 1)
 
         if user_value != captured_value:
             message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
@@ -1385,32 +1050,13 @@ class WebappInternal(Base):
             self.click(element)
             self.Ambiente(True)
 
-    def fillTable(self):
-        """
-        verifica se os dados de self.Table referem-se a tabela que o usuário vai testar.
-        """
-        retorno = 1 # sempre preencha a lista self.TableTable
-        if len(self.Table):
-            campo = self.gridcpousr[0][0]
-            nseek = campo.find("_")
-            arquivo = campo[:nseek]
-
-            for linha in self.Table[1]:
-                if arquivo in linha:
-                    # não preencha a lista self.Table, pois, já foi preenchido em processos anteriores.
-                    retorno = 0
-                    break
-        return retorno
-
     def Restart(self):
         self.LastIdBtn = []
         self.idwizard = []
-        self.btnenchoice = True
         self.driver.refresh()
         self.driver.switch_to_alert().accept()
         if not self.config.skip_environment:
             self.ProgramaInicial()
-        self.classe = ''
         self.Usuario()
         self.Ambiente()
 
@@ -1471,7 +1117,6 @@ class WebappInternal(Base):
 
         self.driver.save_screenshot( self.GetFunction() +".png")
         self.SetButton(self.language.close)
-        self.savebtn = ''
 
         close_element = self.get_closing_button(is_advpl)
 
@@ -1710,8 +1355,6 @@ class WebappInternal(Base):
                 if button in self.language.no_actions:
                     self.idwizard = []
                     self.LastIdBtn = []
-                else:
-                    self.savebtn = button
 
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
@@ -1734,10 +1377,6 @@ class WebappInternal(Base):
 
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body")
-
-            if button == self.language.edit or button == self.language.view or button == self.language.delete or button == self.language.add:
-                if not self.element_exists(term=".ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR):
-                    self.btnenchoice = True
 
         except ValueError as error:
             if self.consolelog:
@@ -2236,7 +1875,6 @@ class WebappInternal(Base):
         return self.element_exists(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")
 
     def clear_grid(self):
-        self.btnenchoice = True
         self.grid_input = []
         self.grid_check = []
 
