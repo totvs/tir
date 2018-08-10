@@ -37,9 +37,6 @@ class WebappInternal(Base):
         self.grid_counters = {}
         self.grid_input = []
         self.grid_check = []
-        self.date = ''
-        self.rota = ''
-        self.CpoNewLine = ''
         self.classe = ''
         self.valtype = ''
         self.savebtn = ''
@@ -92,8 +89,6 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), Keys.BACK_SPACE)
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
-
-            self.rota = 'SetRotina'
 
     def input_value(self, field, value, ignore_case=True):
         """
@@ -225,7 +220,6 @@ class WebappInternal(Base):
         Preenche a grid baseado nas listas self.gridcpousr e self.Table
         """
         is_advpl = self.is_advpl()
-        self.rota = "SetGrid"
         if self.fillTable():    # Se self.Table estiver preenchido com campos da tabela que o usuario quer testar, não deve executar SearchField() novamente.
             self.SearchField()  # Obtem a caracteristica dos campos da grid, gerando a lista self.Table
 
@@ -1113,21 +1107,6 @@ class WebappInternal(Base):
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
 
-    def VldData(self):
-        """
-        Decide qual caminho será seguido
-        """
-        if self.rota == 'SetValueItens' or self.rota == 'ClickFolder':
-            if self.gridcpousr:
-                self.SetGrid()
-            self.rota = ''
-        elif self.rota == 'CheckResultItens':
-            # fim do caso de teste em segundos
-            # indica ao SetGrid que haverá apenas conferencia de resultado.
-            self.SetGrid(1)
-            self.rota = ''
-        return True
-
     def SearchField(self):
         """
         Obtem a caracteristica dos campos da grid, gerando a lista self.Table, essa lista sera
@@ -1318,8 +1297,6 @@ class WebappInternal(Base):
         """
         Validação de interface
         """
-        if args1 != 'input':
-            self.rota = "UTCheckResult"
         valorweb = ''
         if not Id:
             if cabitem == 'aCab' and isinstance(valorusr,bool):
@@ -1360,7 +1337,6 @@ class WebappInternal(Base):
                 self.LogResult(campo, valorusr, valorweb)
         else:
             self.check_grid_appender(line - 1, campo, valorusr, grid_number - 1)
-            self.rota = 'CheckResultItens'
 
         return valorweb
 
@@ -1900,33 +1876,26 @@ class WebappInternal(Base):
         Método que efetua o clique na aba
         '''
         self.wait_element(term=item, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
+        self.wait_element(term=item, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
+        #Retira o ToolTip dos elementos focados.
+        self.move_to_element(self.driver.find_element_by_tag_name("html"))
 
-        if self.savebtn == self.language.view:
-            self.rota == 'CheckResultItens'
+        #try:#Tento pegar o elemento da aba de forma direta sem webscraping
+        #    element = lambda: self.driver.find_element_by_link_text(item)
+        #except:#caso contrário efetuo o clique na aba com webscraping
+        soup = self.get_current_DOM()
+        panels = soup.select(".button-bar a")
+        panel = next(iter(list(filter(lambda x: x.text == item, panels))))
+        element = ""
+        if panel:
+            element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
+        if element:
+            self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
+            self.set_element_focus(element())
+            time.sleep(1)
+            self.driver.execute_script("arguments[0].click()", element())
         else:
-            self.rota = "ClickFolder"
-
-        if self.VldData():
-            self.wait_element(term=item, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
-            #Retira o ToolTip dos elementos focados.
-            self.move_to_element(self.driver.find_element_by_tag_name("html"))
-
-            #try:#Tento pegar o elemento da aba de forma direta sem webscraping
-            #    element = lambda: self.driver.find_element_by_link_text(item)
-            #except:#caso contrário efetuo o clique na aba com webscraping
-            soup = self.get_current_DOM()
-            panels = soup.select(".button-bar a")
-            panel = next(iter(list(filter(lambda x: x.text == item, panels))))
-            element = ""
-            if panel:
-                element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
-            if element:
-                self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
-                self.set_element_focus(element())
-                time.sleep(1)
-                self.driver.execute_script("arguments[0].click()", element())
-            else:
-                self.log_error("Couldn't find panel item.")
+            self.log_error("Couldn't find panel item.")
 
     def ClickBox(self, fields, contents_list, browse_index=1 ):
         '''
