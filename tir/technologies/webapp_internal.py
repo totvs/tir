@@ -986,7 +986,7 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field,valorusr)
+            current_value = self.result_checkbox(field, user_value)
         else:
             element = self.get_field(field)
             if not element:
