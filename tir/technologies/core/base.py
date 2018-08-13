@@ -521,11 +521,11 @@ class Base(unittest.TestCase):
         >>> self.select_combo(element, "Chosen option")
         """
         combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
-        value = next(iter(filter(lambda: x.text[0:len(option)] == option, combo.options)), None)
+        value = next(iter(filter(lambda x: x.text[0:len(option)] == option, combo.options)), None)
 
         if value:
             time.sleep(1)
-            combo.select_by_visible_text(value)
+            combo.select_by_visible_text(value.text)
 
     def send_keys(self, element, arg):
         """

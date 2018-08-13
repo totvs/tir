@@ -107,7 +107,8 @@ class WebappInternal(Base):
 
             try:
                 #Action for Combobox elements
-                if "tcombobox" in element.attrs["class"]:
+                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                     self.wait.until(EC.visibility_of(input_field()))
                     self.set_element_focus(input_field())
                     self.select_combo(element, main_value)
@@ -147,7 +148,8 @@ class WebappInternal(Base):
                     if self.consolelog and current_value != "":
                         print(current_value)
 
-                if "tcombobox" in element.attrs["class"]:
+                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         current_value = current_value[0:len(str(value))]
 
                 if re.match(r"^●+$", current_value):
@@ -989,14 +991,14 @@ class WebappInternal(Base):
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
-            field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            current_value = self.get_web_value(field()).strip()
+            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            current_value = self.get_web_value(field_element()).strip()
 
             if self.consolelog:
                 print(f"Value for Field {field} is: {current_value}")
 
             #Remove mask if present.
-            if self.check_mask(element):
+            if self.check_mask(field_element()):
                 current_value = self.remove_mask(current_value)
                 user_value = self.remove_mask(user_value)
             #If user value is string, Slice string to match user_value's length
@@ -1008,15 +1010,22 @@ class WebappInternal(Base):
     def get_field(self, field):
         """
         This method decides if field must be find either by it's name or by a label.
-        Internal method of input_value and check_value.
+        Internal method of input_value and CheckResult.
         """
-        if re.match(r"\w+(_)", field):
-            element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-        else:
-            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+        endtime = time.time() + 60
+        element =  None
+        while(time.time() < endtime and element is None):
+            if re.match(r"\w+(_)", field):
+                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+            else:
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
 
-        element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
-        return element_children if element_children is not None else element
+        if element:
+            element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
+            return element_children if element_children is not None else element
+        else:
+            self.log_error("Element wasn't found.")
+
 
     def get_web_value(self, element):
         """
@@ -1382,11 +1391,10 @@ class WebappInternal(Base):
                 self.click(soup_element())
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']")
-                self.wait_element(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']")
-
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1)
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1)
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body")
+                self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1)
 
         except ValueError as error:
             if self.consolelog:

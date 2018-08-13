@@ -33,11 +33,11 @@ class Webapp():
         """
         self.__webapp.AssertTrue()
 
-    def CheckResult(self, cabitem, field, user_value, line=1, Id="", args1="", grid_number=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
         '''
         Validates if a field on the interface has the expected value
         '''
-        self.__webapp.CheckResult(cabitem, field, user_value, line, Id, args1, grid_number)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number)
 
     def CheckView(self, text, element_type="help"):
         '''
