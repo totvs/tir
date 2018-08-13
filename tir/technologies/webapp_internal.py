@@ -1007,7 +1007,7 @@ class WebappInternal(Base):
 
         self.LogResult(field, user_value, current_value)
 
-    def get_field(self, field):
+    def get_field(self, field, name_attr=False):
         """
         This method decides if field must be find either by it's name or by a label.
         Internal method of input_value and CheckResult.
@@ -1015,7 +1015,7 @@ class WebappInternal(Base):
         endtime = time.time() + 60
         element =  None
         while(time.time() < endtime and element is None):
-            if re.match(r"\w+(_)", field):
+            if re.match(r"\w+(_)", field) or name_attr:
                 element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
             else:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
@@ -1517,12 +1517,13 @@ class WebappInternal(Base):
         Method that fills the field with the table to be checked in the generic query
         '''
         try:
-            Id = self.SetScrap(self.language.search, 'div', 'tget', 'cPesq')
-            element = self.driver.find_element_by_id(Id)
-            self.click(element)
-            self.send_keys(element, tabela)
-            self.send_keys(element, Keys.ENTER)
-            #self.SetButton('Ok','','',60,'div','tsbutton')
+            field = self.get_field("cPesq", name_attr=True)
+            element = lambda: self.driver.find_element_by_xpath(xpath_soup(field))
+            self.click(element())
+            self.send_keys(element(), tabela)
+            time.sleep(0.5)
+            self.send_keys(element(), Keys.ENTER)
+            self.send_keys(element(), Keys.ENTER)
             self.SetButton("Ok")
         except:
             if self.consolelog:

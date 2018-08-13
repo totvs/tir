@@ -144,6 +144,12 @@ class Webapp():
         '''
         self.__webapp.SetParameters(array_parameters)
 
+    def SetTabEDAPP(self, table_name):
+        '''
+        Sets the table name on the search field of EDAPP routine.
+        '''
+        self.__webapp.SetTabEDAPP(table_name)
+
     def SetValue(self, field, value, grid=False, grid_number=1, disabled=False, ignore_case=True):
         '''
         Sets the value on the desired field.
