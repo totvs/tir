@@ -112,6 +112,7 @@ class WebappInternal(Base):
                     self.wait.until(EC.visibility_of(input_field()))
                     self.set_element_focus(input_field())
                     self.select_combo(element, main_value)
+                    current_value = self.get_web_value(input_field()).strip()
                 #Action for Input elements
                 else:
                     self.wait.until(EC.visibility_of(input_field()))
@@ -150,7 +151,7 @@ class WebappInternal(Base):
 
                 if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                        current_value = current_value[0:len(str(value))]
+                    current_value = current_value[0:len(str(value))]
 
                 if re.match(r"^●+$", current_value):
                     success = len(current_value) == len(str(value).strip())
