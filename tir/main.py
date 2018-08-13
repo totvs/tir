@@ -33,6 +33,17 @@ class Webapp():
         """
         self.__webapp.AssertTrue()
 
+    def ChangeEnvironment(self):
+        """
+        Clicks on the Change Environment button and sets the new environment.
+
+        Usage:
+
+        >>> #Calling the method:
+        >>> inst.oHelper.ChangeEnvironment()
+        """
+        self.__webapp.ChangeEnvironment()
+
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
         '''
         Validates if a field on the interface has the expected value

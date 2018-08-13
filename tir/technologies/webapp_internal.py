@@ -1064,7 +1064,7 @@ class WebappInternal(Base):
         """
         clique na area de troca de ambiente do protheus
         """
-        element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
+        element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.Ambiente(True)
