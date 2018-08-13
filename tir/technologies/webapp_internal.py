@@ -1577,11 +1577,11 @@ class WebappInternal(Base):
         browse_index -= 1
 
         if contents_list == 'Todos':
-            self.wait_element('Inverte Selecao') # wait Inverte Seleção
-            Id = self.SetScrap('Inverte Selecao', 'label', 'tcheckbox')
-            if Id:
-                element = self.driver.find_element_by_id(Id)
-                self.click(element)
+            self.wait_element(self.language.invert_selection) # wait Inverte Seleção
+            element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+            if element:
+                box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.click(box())
         else:
             for line in fields:
                 self.wait_element(line) # wait columns
