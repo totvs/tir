@@ -25,19 +25,16 @@ from tir.technologies.core.base import Base
 class WebappInternal(Base):
     def __init__(self, config_path=""):
         super().__init__(config_path)
+
         self.base_container = ".tmodaldialog"
-
-        self.grid_counters = {}
-        self.grid_input = []
-        self.grid_check = []
-
-        self.used_ids = []
         self.consolelog = True
         self.errors = []
 
-        self.LastId = []
-        self.LastIdBtn = []
-        self.Table = []
+        self.grid_check = []
+        self.grid_counters = {}
+        self.grid_input = []
+
+        self.used_ids = []
 
         self.idwizard = []
         self.camposCache = []
@@ -165,454 +162,32 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
 
-    def SetTable(self):
-        '''
-        Método que retorna a table corrente
-        '''
-        print('time.sleep(1)')
-        time.sleep(1)#tempo de espera para cada verificação.
-        struct_tables = []
-
-        content = self.driver.page_source
-        soup = BeautifulSoup(content,"html.parser")
-        soup = soup.select(".tmodaldialog")
-        soup = self.zindex_sort(soup,True)[0] # Select a last modaldialog
-
-        grids = soup.find_all('div', class_=(['tgetdados','tgrid','tcbrowse']))
-
-        if grids:
-            if len(grids) > 1:
-                grids = self.filter_displayed_elements(grids,False)
-            else:
-                grids = self.filter_displayed_elements(grids,True)
-
-            self.current_tables = grids
-
-            for grid in grids:
-                if grid:
-                    divstring = str(grid)
-                    soup = BeautifulSoup(divstring,"html.parser")
-                    rows = []
-                    xlabel = ''
-
-                    for tr in soup.find_all('tr'):
-                        cols = []
-                        for th_td in tr.find_all(['td', 'th']):
-                            th_td_text = th_td.get_text(strip=True)
-                            cols.append(th_td_text)
-                            xlabel = th_td.name
-                        if xlabel == 'td':
-                            rows[len(rows)-1][1].append(cols)
-                        else:
-                            rows.append([cols,[]])
-
-                    struct_tables.append(rows)
-                    rows = []
-            return struct_tables
-
-    def SetScrap(self, seek='', tag='', cClass='', args1='', args2='', args3=0, args4='', args5=60, searchMsg=True):
-        '''
-        Método responsável pelo retorno do ID utilizando WebScraping
-        '''
-        RetId = ''
-        endTime =   time.time() + args5 #definição do timeout para 60 segundos
-        refresh =   time.time() + 10 #definição do tempo para refresh da pagina inicial
-
-        #Entra no loop somente se o RetId estiver vazio
-        while not RetId:
-
-            if args1 == 'Grid':
-                if (args4 == 'SearchField') or (args3 == len(self.Table[0])):
-                    break
-
-            if not args1 == 'Grid':#Só espera 1 segundo se não for Grid
-                print('time.sleep(0.5) - 547')
-                time.sleep(0.5)#tempo de espera para cada verificação.
-            if self.consolelog:
-                print('Procurando %s' %seek)
-
-            #Condições de retirada caso o timeout seja atingido
-            if seek == 'inputStartProg':#se for a tela inicial e o tempo limite for atingido, faz o refresh da pagina.
-                if time.time() > refresh:
-                    if self.consolelog:
-                        print('Refreshing...')
-                    self.driver.refresh()
-
-            #faça somente se o tempo corrente for menor que o tempo definido no timeout
-            if time.time() < endTime:
-                content = self.driver.page_source
-                soup = BeautifulSoup(content,"html.parser")
-
-                #Verifica se possui errorlog na tela
-                if searchMsg:
-                    self.SearchErrorLog(soup)
-
-                if not self.SearchStack('CheckResult') and searchMsg:
-                    self.SearchHelp(soup)
-
-                if seek == 'ChangeEnvironment':
-                    RetId = self.caTrocaAmb(seek, soup, tag, cClass)
-                    if RetId:
-                        if self.consolelog:
-                            print('caTrocaAmb')
-                elif args1 == 'caHelp':
-                    RetId = self.caHelp(seek, soup, tag, cClass)
-                    if RetId:
-                        if self.consolelog:
-                            print('caHelp')
-                    break
-                elif args1 == 'caSeek':
-                    RetId = self.caSeek(seek, soup, tag, cClass)
-                    if RetId:
-                        if self.consolelog:
-                            print('caSeek')
-                            break
-                    break
-
-                else:
-                    RetId = self.cabutton(seek, soup, tag, cClass, args1, args2)
-                    if RetId:
-                        if self.consolelog:
-                            print('cabutton')
-                    if RetId == '':
-                        RetId = self.camenu(seek, soup, tag, cClass, args1)
-                        if RetId:
-                            if self.consolelog:
-                                print('camenu')
-
-                    if RetId == '':
-                        RetId = self.cainput(seek, soup, tag, cClass, args1, args2, args3, args4, args5)
-                        if RetId:
-                            if self.consolelog:
-                                print('cainput')
-            else:
-                msg = ('O Campo ou Botão %s não foi encontrado' %seek)
-                if self.consolelog:
-                    print('TimeOut')
-                if args1 == 'wait':
-                    if self.consolelog:
-                        print(args1)
-                    break
-                else:
-                    self.assertTrue(False, msg)
-                    break
-        if RetId and self.consolelog:
-            print("ID Retorno %s %s" %(seek, RetId))
-
-        return(RetId)
-
-    def cabutton(self, seek, soup, tag, cClass, args1, args2):
-        '''
-        identifica botoes
-        '''
-        lista = []
-        RetId = ''
-        # caso seja o botao 'Entrar', sera parseado por div + class
-        if cClass == 'tbutton' and seek == self.language.enter:
-            lista = soup.find_all('div', class_=('tbutton'))
-
-        # entra somente quando botao Ok da chamada de parametros iniciais
-        elif args1 == 'startParameters':
-            RetId = soup.button.attrs['class'][0]
-
-        elif cClass == 'tbrowsebutton':
-            lista = soup.find_all(tag, class_=('tsbutton','tbutton', 'tbrowsebutton'))
-
-        elif args1 == 'abaenchoice' :
-            lista = soup.find_all(class_=(cClass))
-            try:
-                lista = lista[0].contents
-            except:
-                pass
-
-        elif args1 == 'btnok':
-            lista = soup.find_all(tag, class_=('tbutton', 'tsbutton', 'tbrowsebutton'))
-
-        if not lista and not RetId:
-            lista = soup.find_all(tag)
-
-        #lista = self.zindex_sort(lista,True)
-
-        for line in lista:
-            try:#faço uma tentativa pois caso não esteja verificando o mesmo nivel pode dar erro.
-                if line.string:
-                    text = line.string
-                else:
-                     text = line.text
-                if (text[0:len(seek)] == seek) and (line.attrs['class'][0] == 'tbutton' or line.attrs['class'][0] == 'tbrowsebutton' or line.attrs['class'][0] == 'tsbutton') and line.attrs['id'] not in self.LastId and not args1 == 'setGrid':#TODO VERIFICAR SE TERÝ EFEITO USAR O LEN EM line.string
-                    RetId = line.attrs['id']
-                    if RetId not in self.LastIdBtn:
-                        self.LastIdBtn.append(RetId)
-                        RetId = self.LastIdBtn[len(self.LastIdBtn)-1]
-                        if seek == self.language.other_actions:
-                            if args1 == 'SearchBrowse':
-                                self.teste = True
-                        break
-                '''
-                if tooltipState == False and cClass == 'tbrowsebutton' and line.attrs['class'][0] == 'tbutton' and line.text == '':
-                    tooltipId = self.SetButtonTooltip( seek, soup, tag, cClass )
-                    if tooltipId == '':
-                        tooltipState = False
-                    else:
-                        tooltipState = True
-
-                if tooltipState == True and line.attrs['class'][0] == 'tbutton' and line.text == '':
-                    if line.attrs['id'][4:8] == tooltipId:
-                        RetId = line.attrs['id']
-                        tooltipState = False
-                        break
-                '''
-            except:
-                pass
-
-            #Somente se for aba da enchoice
-            if args1 == 'abaenchoice':
-                if seek == line.text:
-                    RetId = line.attrs['id']
-                    break
-
-        return(RetId)
-
     def SetButtonTooltip(self, seek, soup, tag, cClass):
         '''
         Identifica o ID do Botão sem Rótulo/Texto.
         Via Tooltip ou via Nome da Imagem.
         '''
-        tooltip = ''
-        tooltipID = ''
+        return None
+    #     tooltip = ''
+    #     tooltipID = ''
 
-        tooltipID = soup.find_all('div', text=seek)
+    #     tooltipID = soup.find_all('div', text=seek)
 
-        try: # Encontra o botão via nome da imagem
-            if not tooltipID or tooltipID[1]:
-                lista = soup.find_all(tag, class_=('tbutton'))
-                menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.help: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.include: 'bmpincluir.png', self.language.visualizar: 'bmpvisual.png',self.language.editar: 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
-                button = menuItens[seek]
+    #     try: # Encontra o botão via nome da imagem
+    #         if not tooltipID or tooltipID[1]:
+    #             lista = soup.find_all(tag, class_=('tbutton'))
+    #             menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.help: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.include: 'bmpincluir.png', self.language.visualizar: 'bmpvisual.png',self.language.editar: 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
+    #             button = menuItens[seek]
 
-                for line in lista:
-                    if button in line.contents[1]['style']:
-                        tooltip = line.attrs['id'][4:8]
-                        break
-        except: # Encontra o botão via Tooltip
-            if tooltipID[0].text == seek:
-                    tooltip = tooltipID[0].attrs['id'][8:12]
+    #             for line in lista:
+    #                 if button in line.contents[1]['style']:
+    #                     tooltip = line.attrs['id'][4:8]
+    #                     break
+    #     except: # Encontra o botão via Tooltip
+    #         if tooltipID[0].text == seek:
+    #                 tooltip = tooltipID[0].attrs['id'][8:12]
 
-        return(tooltip)
-
-    def cainput(self, seek, soup, tag, cClass, args1='', args2='', args3=0, args4='', args5=''):
-        '''
-        identifica input
-        '''
-        lista = []
-        RetId = ''
-
-        if seek == 'inputStartProg' or seek == 'inputEnv':
-            lista = soup.find_all(id=seek)
-
-        elif args1 == 'Grid':
-            lista = soup.find_all(attrs={'name': re.compile(r'%s' %seek)})
-
-        elif args1 == 'indice':
-            if args2 == 'detail':
-                lista = soup.find_all('div', class_=(cClass))
-                if lista:
-                    lista = lista[0].contents
-            else:
-                lista = soup.find_all('div', class_=(cClass))
-            pass
-
-        else:
-            if args1 == 'Enchoice':
-                #Tenta montar a lista por tag e que contenha classe
-                lista = soup.find_all(tag, class_=True)
-
-            else:
-                if not lista:
-                    lista = soup.find_all(tag, class_=(cClass))
-                    if not lista:
-                        #Tenta montar a lista somente por Tag
-                        lista = soup.find_all(tag)
-
-        lista = self.zindex_sort(lista,True)
-
-        for line in lista:
-            #print('Passou uma vez %s' %time.time())
-            # campo de input ex: Digitacao do Usuario
-            try:
-                if ((line.previous == seek or line.string == seek) and line.attrs['class'][0] == 'tget' and not args1 == 'Virtual' and not args2 == 'label' and line.attrs['class'][0] != 'tbrowsebutton') :
-                    RetId = line.attrs['id']
-                    break
-
-                elif seek == 'Inverte Selecao':
-                    if seek == line.text:
-                        RetId = line.attrs['id']
-                        break
-
-                elif seek == 'cGet':
-                    if line.attrs['name'] == 'cGet': #and line.next.attrs['class'][0] == 'placeHolder' and line.next.name == 'input':
-                        RetId = line.attrs['id']
-                        self.LastId.append(RetId)
-                        break
-
-                elif seek == 'inputStartProg' or seek == 'inputEnv':
-                    RetId = line.attrs['id']
-                    break
-
-                elif seek == self.language.search:
-                    if seek in line.previous and line.attrs['name'] == args1:
-                        RetId = line.attrs['id']
-                        break
-
-                elif args1 == 'Virtual':
-                    if seek in line.text:
-                        RetId = line.nextSibling.attrs['id']#Próximo Registro na mesma arvore de estrutura
-                        break
-
-                #Verifico se é a div correspondente a pasta ou tabela que foi passada pelo usuário.
-                elif args1 == 'setGrid':
-                    start = 0
-                    end = 0
-                    alllabels = []
-                    for label in self.Table[0]:
-                        start = end
-                        end = start + len(label)
-                        if line.text[start:end] == label:
-                            alllabels.append(label)
-                    if len(alllabels) == len(self.Table[0]):
-                        RetId = line.attrs['id']
-                        break
-
-
-                #Pesquisa o campo da enchoice/grid pelo nome do campo e retorna o ID equivalente.
-                if args1 == 'Enchoice' or args1 == 'Grid':
-                    if args1 == 'Grid':
-                        if args4 == 'SearchField':
-                            print('time.sleep(1) - 853')
-                            time.sleep(1)
-                            if seek in line.attrs['name']:
-                                th = soup.find_all(class_=('selected-column'))
-
-                                for i in th:
-                                    if i.text == args2 and seek in line.attrs['name']:
-                                        self.Table[2][args3] = line.attrs['name']
-                                        self.Table[3][args3] = line.next.attrs['valuetype']
-                        else:
-                            pass
-                    else:
-                        if args2 == 'label':
-                            if len(line.text.strip()) == len(seek.strip()):
-                                if seek in line.text[0:len(seek)]:
-                                    next_ = line.find_next_siblings('div')
-                                    for x in next_:
-                                        if x.attrs['class'][0] == 'tget' or x.attrs['class'][0] == 'tcombobox':
-                                            if len(x.attrs['class']) > 3 and not self.SearchStack('UTCheckResult'):
-                                                if x.attrs['class'][3] == 'disabled':
-                                                    continue
-                                            print(seek)
-
-                                            #if cClass != '' and args2 != 'label' and args1 != 'Enchoice':
-                                            Id = x.attrs['id']
-                                            if Id not in self.idwizard:
-                                                print(x.attrs['id'])
-                                                self.idwizard.append(Id)
-                                                RetId = Id
-                                                break
-                                    if RetId:# IF/Break responsavel pela parada do FOR, quando é encontrado o ID do campo
-                                        break
-                                #preenche atributos do campo da enchoice
-                            elif line.next_sibling.text.strip() == seek.strip():
-                                RetId = line.attrs['id']
-                                break
-                        elif list(filter(bool, line.attrs["name"].split('->')))[1] == seek:
-                            RetId = line.attrs['id']
-                            break
-            except Exception: # Em caso de não encontrar passa para o proximo line
-                pass
-
-        return(RetId)
-
-    def camenu(self, seek, soup, tag, cClass, args1):
-        '''
-        identifica opcao do menu
-        '''
-        lista = []
-        RetId = ''
-
-        if cClass == 'tmenuitem':
-            # monta a lista baseado na tag 'label' e na class 'tmenuitem'
-            lista = soup.find_all('li', class_=('tmenuitem'))
-
-        if cClass == '':
-            RetId = ''
-
-        else:
-            lista = soup.find_all(tag, class_=(cClass))
-
-        for line in lista:
-            if seek in line.text and line.attrs['class'][0] == 'tmenuitem' and line.attrs['id'] not in self.LastId:
-                RetId = line.attrs['id']
-                self.LastId.append(RetId)
-                break
-
-            elif args1 == 'menuitem':
-                if seek == line.text[0:len(seek)]:
-                    RetId = line.attrs['id']
-                    break
-
-            else:
-                if seek ==  line.text and not args1 == 'Virtual':
-                    RetId = line.attrs['id']
-                    break
-
-        if len(lista) == 1 and cClass == "tmenu" and seek == "":
-            RetId = lista[0].attrs['id']
-
-        return(RetId)
-
-    def caTrocaAmb(self, seek, soup, tag, cClass):
-        lista = []
-        RetId = ''
-        lista = soup.find_all(tag, class_=(cClass))
-
-        for line in lista:
-            if line.text and len(line.attrs['class']) == 4 and line.attrs['class'][3] == 'CONTROL_ALIGN_RIGHT':
-                RetId = line.attrs['id']
-                if self.consolelog:
-                    print(RetId)
-                break
-        return(RetId)
-
-    def caSeek(self, seek, soup, tag, cClass):
-        lista = []
-        RetId = ''
-        lista = soup.find_all(tag, class_=(cClass))
-
-        for line in lista:
-            if seek == line.attrs['name'][3:] and line.attrs['class'][0] == 'tcombobox':
-                RetId = line.attrs['id']
-                if self.consolelog:
-                    print(RetId)
-                break
-
-            elif seek == line.attrs['name'][3:] and line.attrs['class'][0] == 'tget':
-                RetId = line.attrs['id']
-                if self.consolelog:
-                    print(RetId)
-                break
-        return(RetId)
-
-    def caHelp(self, seek, soup, tag, cClass):
-        lista = []
-        RetId = ''
-        lista = soup.find_all(tag, class_=cClass)
-
-        for line in lista:
-            if seek in line.text:
-                RetId = line.attrs['id']
-                if self.consolelog:
-                    print(RetId)
-                break
-        return(RetId)
+    #     return(tooltip)
 
     def search_next_soup(self, seek, soup):
         """
@@ -668,9 +243,7 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[0]))))
         self.set_element_focus(sel_browse_key())
-        self.js_click(sel_browse_key())
-        #sel_browse_key().click()
-
+        self.click(sel_browse_key())
 
         soup = self.get_current_DOM()
         tradiobuttonitens = soup.select(".tradiobuttonitem")
@@ -741,7 +314,7 @@ class WebappInternal(Base):
                 self.driver.save_screenshot( self.GetFunction() +".png")
                 self.log_error("Falhou")
 
-    def ProgramaInicial(self, initial_program="", environment=""):
+    def program_screen(self, initial_program="", environment=""):
 
         self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -764,7 +337,7 @@ class WebappInternal(Base):
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
         self.click(button)
 
-    def Usuario(self):
+    def user_screen(self):
         """
         Preenchimento da tela de usuario
         """
@@ -815,7 +388,7 @@ class WebappInternal(Base):
 
         self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container="body")
 
-    def Ambiente(self, change_env=False):
+    def environment_screen(self, change_env=False):
         """
         Preenche a tela de data base do sistema
         """
@@ -892,10 +465,10 @@ class WebappInternal(Base):
         if not self.backupSetup:
             self.backupSetup = { 'progini': self.config.initialprog, 'data': self.config.date, 'grupo': self.config.group, 'filial': self.config.branch }
         if not self.config.skip_environment:
-            self.ProgramaInicial(initial_program)
+            self.program_screen(initial_program)
 
-        self.Usuario()
-        self.Ambiente()
+        self.user_screen()
+        self.environment_screen()
 
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
@@ -932,52 +505,6 @@ class WebappInternal(Base):
         """
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
-
-    def CheckResultOld(self, cabitem, campo, valorusr, line=1, Id='', args1='', grid_number=1):
-        """
-        Validação de interface
-        """
-        valorweb = ''
-        if not Id:
-            if cabitem == 'aCab' and isinstance(valorusr,bool):
-                valorweb = self.result_checkbox(campo,valorusr)
-                self.LogResult(campo, valorusr, valorweb)
-                return valorweb
-            elif cabitem == 'aCab':
-                underline = (r'\w+(_)')#Se o campo conter "_"
-                match = re.search(underline, campo)
-                if match:
-                    Id = self.SetScrap(campo, 'div', 'tget', 'Enchoice')
-                else:
-                    Id = self.SetScrap(campo, 'div', 'tget', 'Enchoice', 'label')
-            elif cabitem == 'Virtual':
-                Id = self.SetScrap(campo, 'div', 'tsay', 'Virtual')
-        if cabitem != 'aItens':
-            if Id:
-                # print('time.sleep(1) - 1578')
-                # time.sleep(1)
-                element = self.driver.find_element_by_id(Id)
-                if args1 != 'input':
-                    self.click(element)
-                # print('time.sleep(1) - 1583')
-                # time.sleep(1)
-                valorweb = self.get_web_value(element)
-                valorweb = valorweb.strip()
-                if self.consolelog and valorweb != '':
-                    print(valorweb)
-                if self.check_mask(element):
-                    valorweb = self.remove_mask(valorweb)
-                    valorusr = self.remove_mask(valorusr)
-                if type(valorweb) is str:
-                    valorweb = valorweb[0:len(str(valorusr))]
-                # print('time.sleep(1) - 1595')
-                # time.sleep(1)
-            if args1 != 'input':
-                self.LogResult(campo, valorusr, valorweb)
-        else:
-            self.check_grid_appender(line - 1, campo, valorusr, grid_number - 1)
-
-        return valorweb
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
         """
@@ -1068,17 +595,16 @@ class WebappInternal(Base):
         element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
-            self.Ambiente(True)
+            self.environment_screen(True)
 
     def Restart(self):
-        self.LastIdBtn = []
         self.idwizard = []
         self.driver.refresh()
         self.driver.switch_to_alert().accept()
         if not self.config.skip_environment:
-            self.ProgramaInicial()
-        self.Usuario()
-        self.Ambiente()
+            self.program_screen()
+        self.user_screen()
+        self.environment_screen()
 
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR)):
             self.close_modal()
@@ -1374,7 +900,6 @@ class WebappInternal(Base):
             if soup_element:
                 if button in self.language.no_actions:
                     self.idwizard = []
-                    self.LastIdBtn = []
 
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
@@ -1619,103 +1144,105 @@ class WebappInternal(Base):
         '''
         Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
         '''
-        self.idwizard = []
-        self.LogOff()
+        return None
+        # self.idwizard = []
+        # self.LogOff()
 
-        #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
+        # #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        # self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
 
-        # Escolhe a opção do Menu Lateral
-        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+        # # Escolhe a opção do Menu Lateral
+        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
 
-        # Clica no botão/icone pesquisar
-        self.SetButton("Pesquisar")
+        # # Clica no botão/icone pesquisar
+        # self.SetButton("Pesquisar")
 
-        array = arrayParameters
+        # array = arrayParameters
 
-        backup_idwizard = self.idwizard[:]
+        # backup_idwizard = self.idwizard[:]
 
-        for arrayLine in array:
+        # for arrayLine in array:
 
-            # Preenche o campo de Pesquisa
-            self.SetValue("aCab", "Procurar por:", arrayLine[0])
+        #     # Preenche o campo de Pesquisa
+        #     self.SetValue("aCab", "Procurar por:", arrayLine[0])
 
-            # Confirma a busca
-            self.SetButton("Buscar")
+        #     # Confirma a busca
+        #     self.SetButton("Buscar")
 
-            # Clica no botão/icone Editar
-            self.SetButton("Editar")
+        #     # Clica no botão/icone Editar
+        #     self.SetButton("Editar")
 
-            # Faz a captura dos elementos dos campos
-            print('time.sleep(5) - 2204')
-            time.sleep(5)
-            content = self.driver.page_source
-            soup = BeautifulSoup(content,"html.parser")
+        #     # Faz a captura dos elementos dos campos
+        #     print('time.sleep(5) - 2204')
+        #     time.sleep(5)
+        #     content = self.driver.page_source
+        #     soup = BeautifulSoup(content,"html.parser")
 
-            menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+        #     menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
 
-            for line in menuCampos:
-                if not menuCampos[line]:
-                    RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-                    cache = self.get_web_value(RetId)
-                    self.lencache = len(cache)
-                    cache = cache.strip()
-                    menuCampos[line] = cache
+        #     for line in menuCampos:
+        #         if not menuCampos[line]:
+        #             RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+        #             cache = self.get_web_value(RetId)
+        #             self.lencache = len(cache)
+        #             cache = cache.strip()
+        #             menuCampos[line] = cache
 
-            self.camposCache.append( menuCampos )
-            self.idwizard = backup_idwizard[:]
+        #     self.camposCache.append( menuCampos )
+        #     self.idwizard = backup_idwizard[:]
 
-            # Altero os parametros
-            self.SetValue("aCab", "Filial", arrayLine[1])
-            self.SetValue("aCab", "Cont. Por", arrayLine[2])
-            self.SetValue("aCab", "Cont. Ing", arrayLine[3])
-            self.SetValue("aCab", "Cont. Esp", arrayLine[4])
+        #     # Altero os parametros
+        #     self.SetValue("aCab", "Filial", arrayLine[1])
+        #     self.SetValue("aCab", "Cont. Por", arrayLine[2])
+        #     self.SetValue("aCab", "Cont. Ing", arrayLine[3])
+        #     self.SetValue("aCab", "Cont. Esp", arrayLine[4])
 
-            # Confirma a gravação de Edição
-            self.SetButton("Salvar")
-            self.idwizard = backup_idwizard[:]
-        self.LogOff()
+        #     # Confirma a gravação de Edição
+        #     self.SetButton("Salvar")
+        #     self.idwizard = backup_idwizard[:]
+        # self.LogOff()
 
-        self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        self.Program(self.config.routine)
+        # self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
+        # self.Program(self.config.routine)
 
     def RestoreParameters( self ):
         '''
         Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
         Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
         '''
-        self.idwizard = []
-        self.LogOff()
+        return None
+        # self.idwizard = []
+        # self.LogOff()
 
-        self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        # self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
 
-        # Escolhe a opção do Menu Lateral
-        self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+        # # Escolhe a opção do Menu Lateral
+        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
 
-        # Clica no botão/icone pesquisar
-        self.SetButton("Pesquisar")
+        # # Clica no botão/icone pesquisar
+        # self.SetButton("Pesquisar")
 
-        backup_idwizard = self.idwizard[:]
+        # backup_idwizard = self.idwizard[:]
 
-        for line in self.camposCache:
-            # Preenche o campo de Pesquisa
-            self.SetValue("aCab", "Procurar por:", line['Procurar por:'])
+        # for line in self.camposCache:
+        #     # Preenche o campo de Pesquisa
+        #     self.SetValue("aCab", "Procurar por:", line['Procurar por:'])
 
-            # Confirma a busca
-            self.SetButton("Buscar")
+        #     # Confirma a busca
+        #     self.SetButton("Buscar")
 
-            # Clica no botão/icone Editar
-            self.SetButton("Editar")
+        #     # Clica no botão/icone Editar
+        #     self.SetButton("Editar")
 
-            #self.idwizard = backup_idwizard[:]
+        #     #self.idwizard = backup_idwizard[:]
 
-            self.SetValue("aCab", 'Cont. Por', line['Cont. Por'])
-            self.SetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
-            self.SetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
+        #     self.SetValue("aCab", 'Cont. Por', line['Cont. Por'])
+        #     self.SetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
+        #     self.SetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
 
-            # Confirma a gravação de Edição
-            self.SetButton("Salvar")
-            self.idwizard = backup_idwizard[:]
+        #     # Confirma a gravação de Edição
+        #     self.SetButton("Salvar")
+        #     self.idwizard = backup_idwizard[:]
 
     def close_modal(self):
         '''
@@ -1832,12 +1359,6 @@ class WebappInternal(Base):
         """
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
         self.set_element_focus(element())
-
-    def down_grid(self):
-        ActionChains(self.driver).key_down(Keys.DOWN).perform()
-
-    def enter_grid(self):
-        ActionChains(self.driver).key_down(Keys.ENTER).perform()
 
     def check_checkbox(self,campo,valor):
         print('time.sleep(1) - 2415')
@@ -2003,14 +1524,14 @@ class WebappInternal(Base):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
-                            self.js_click(selenium_column())
+                            self.click(selenium_column())
                             self.set_element_focus(selenium_column())
 
                             while(not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
                                 time.sleep(1)
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
-                                self.js_click(selenium_column())
+                                self.click(selenium_column())
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
 
@@ -2037,20 +1558,13 @@ class WebappInternal(Base):
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
                                 self.set_element_focus(selenium_input())
-                                self.js_click(selenium_input())
+                                self.click(selenium_input())
                                 self.try_send_keys(selenium_input, user_value, try_counter)
 
                                 if try_counter < 2:
                                     try_counter += 1
                                 else:
                                     try_counter = 0
-                                # time.sleep(1)
-                                # if last_column != column_number:
-                                #     ActionChains(self.driver).move_to_element(selenium_input()).send_keys_to_element(selenium_input(), user_value).perform()
-                                # else:
-                                #     selenium_input().send_keys(user_value)
-
-                                # last_column = column_number
 
                                 if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
                                     if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
@@ -2268,9 +1782,6 @@ class WebappInternal(Base):
             values = list(map(lambda x: x[0], enumerate(labels)))
             headers.append(dict(zip(keys, values)))
         return headers
-
-    def js_click(self, element):
-        self.driver.execute_script("arguments[0].click()", element)
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
         endtime = time.time() + 10
