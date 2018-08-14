@@ -11,11 +11,11 @@ Our documentation can be found in these locations:
 
 - [TIR Documentation](http://localhost:8080)
 
-- [TDN](http://tdn.totvs.com/display/F1/Classe%3A+CAWebHelper)
+- [TDN](http://tdn.totvs.com/display/F1/Classe%3A+Webapp)
 
 Our MindMap can be found here:
 
-- [TIR MindMap](http://code.engpro.totvs.com.br/heitor.marsolla/tir-test/src/branch/master/docs/Protheus%20Web%20Automation.xmind)
+- [TIR MindMap](http://code.engpro.totvs.com.br/engpro/tir/src/branch/master/docs/Protheus%20Web%20Automation.xmind)
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
