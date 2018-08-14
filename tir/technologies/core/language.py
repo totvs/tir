@@ -155,7 +155,7 @@ class LanguagePack:
             "Text Not Found": "Texto não encontrado.",
             "User Not Authenticated": "Usuário não autenticado",
             "Change Environment": "Trocar módulo",
-            "Invert Selection": "Inverte Selecao"
+            "Invert Selection": "Inverte Seleção"
         }
         russian = {
             "User": "Пользователь",

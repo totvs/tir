@@ -986,7 +986,7 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field, user_value)
+            current_value = self.result_checkbox(field,valorusr)
         else:
             element = self.get_field(field)
             if not element:
@@ -1556,65 +1556,64 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, fields, contents_list, browse_index=1 ):
+    def ClickBox(self, field, contents_list="", select_all=False, browse_index=1 ):
         '''
         Method that clicks in checkbox
         '''
-        time.sleep(3)
-        soup = self.get_current_DOM()
-        grids = soup.find_all('div', class_=(['tgetdados','tgrid','tcbrowse']))
+        browse_index -= 1
+        if contents_list:
+            self.wait_element_timeout(field)
+        elif select_all:
+            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+
+        endtime = time.time() + 60
+        grids = None
+        while(time.time() < endtime and not grids):
+            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
             if len(grids) > 1:
                 grids = self.filter_displayed_elements(grids,False)
             else:
                 grids = self.filter_displayed_elements(grids,True)
+        else:
+            self.log_error("Couldn't find grid.")
 
-            self.current_tables = grids
+        grid = grids[browse_index]
+        column_enumeration = list(enumerate(grid.select("thead label")))
+        chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
+        if chosen_column:
+            column_index = chosen_column[0]
+        else:
+            self.log_error("Couldn't find chosen column.")
 
         contents_list = contents_list.split(",")
-        fields = fields.split(",")
-        browse_index -= 1
 
-        if contents_list == 'Todos':
-            self.wait_element(self.language.invert_selection) # wait Inverte Seleção
-            element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+        if select_all:
+            self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
             if element:
                 box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.click(box())
-        else:
-            for line in fields:
-                self.wait_element(line) # wait columns
-                break
 
-            for line in contents_list:
-                self.wait_element(line) # wait columns
-                break
-
-            table_structs = self.SetTable()
-            table_struct = table_structs[browse_index] # Pega o browse valido na tela
-            grid = self.current_tables[browse_index]
+        elif contents_list:
+            self.wait_element(contents_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
-            grid = self.driver.find_element_by_xpath(xpath_soup(grid))
 
-            for line in contents_list:
-                for x in range(0, len(table_struct)):
-                    for index, y in enumerate(table_struct[x][1]):
-                        if line.strip() == y[1]:
-                            elements_list = grid.find_elements(By.CSS_SELECTOR, "td[id='1']")
-                            self.scroll_to_element(elements_list[index])
-                            self.click(elements_list[index])
-                            if class_grid != 'tcbrowse':
-                                print('time.sleep(1)')
-                                time.sleep(1)
-                                self.double_click(elements_list[index])
-                                print('time.sleep(2)')
-                                time.sleep(1)
-                            else:
-                                self.send_keys(elements_list[index], Keys.ENTER)
-                            break
-        self.current_tables = ''
+            column_elements = grid.select(f"td[id='{column_index}']")
+            filtered_column_elements = list(filter(lambda x: x.text.strip() in contents_list, column_elements))
+
+            for column_element in filtered_column_elements:
+                element = self.driver.find_element_by_xpath(xpath_soup(column_element))
+                self.scroll_to_element(element)
+                self.click(element)
+                if class_grid != 'tcbrowse':
+                    self.double_click(element)
+                else:
+                    self.send_keys(element, Keys.ENTER)
+        else:
+            self.log_error(f"Couldn't locate content: {contents_list}")
 
     def SetParameters( self, arrayParameters ):
         '''

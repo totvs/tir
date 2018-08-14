@@ -56,11 +56,11 @@ class Webapp():
         '''
         self.__webapp.CheckView(text, element_type)
 
-    def ClickBox(self, fields, contents_list, browse_index=1):
+    def ClickBox(self, fields, contents_list="", select_all=False, browse_index=1):
         '''
         Method that clicks in checkbox
         '''
-        self.__webapp.ClickBox(fields, contents_list, browse_index)
+        self.__webapp.ClickBox(fields, contents_list, select_all, browse_index)
 
     def ClickFolder(self, item):
         '''
