@@ -43,7 +43,16 @@ class WebappInternal(Base):
     def set_program(self, program):
         '''
         [Internal]
+
         Method that sets the program in the initial menu search field.
+
+        :param program: The program name
+        :type program: string
+
+        Usage:
+
+        >>> #Calling the method:
+        >>> self.set_program("MATA020")
         '''
         self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
@@ -67,9 +76,24 @@ class WebappInternal(Base):
     def input_value(self, field, value, ignore_case=True):
         """
         [Internal]
-        [returns Bool]
         Sets a value in an input element.
         Returns True if succeeded, False if it failed.
+
+        :param field: The field name or label to receive the value
+        :type field: string
+        :param value: The value to be set on the field
+        :type value: string
+        :param ignore_case: Boolean if case should be ignored or not
+        :type ignore_case: bool
+        :default ignore_case: True
+
+        :returns: True if succeeded, False if it failed.
+        :rtype: bool
+
+        Usage:
+
+        >>> #Calling the method
+        >>> self.input_value("A1_COD", "000001")
         """
         success = False
         endtime = time.time() + 60
@@ -188,21 +212,6 @@ class WebappInternal(Base):
 
     #     return(tooltip)
 
-    def search_next_soup(self, seek, soup):
-        """
-        Retorna uma lista baseada no texto informado pelo usuário.
-        """
-        text = ''
-        next_ = ''
-
-        text = soup.find_all('div')
-
-        for x in text:
-            if seek == x.text:
-                next_ = x.find_all_next('div')
-                break
-        return next_
-
     def SearchBrowse(self, chave, descricao=None, identificador=None):
         '''
         Mètodo que pesquisa o registro no browse com base no indice informado.
@@ -217,6 +226,15 @@ class WebappInternal(Base):
         [returns Tuple]
         Gets a tuple with the search browse elements in this order:
         Key Dropdown, Input, Icon.
+
+        :param panel_name: The identifier of the search box. If none is provided, it defaults to the first of the screen.
+        :type panel_name: string
+        :defaults panel_name: None
+
+        Usage:
+
+        >>> #Calling the method:
+        >>> self.get_search_browse_elements("Products")
         '''
         self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         soup = self.get_current_DOM()
@@ -1522,7 +1540,7 @@ class WebappInternal(Base):
 
                         try_counter = 0
 
-                        while(current_value.strip() != field[1].strip()):
+                        while(self.remove_mask(current_value).strip() != self.remove_mask(field[1]).strip()):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
