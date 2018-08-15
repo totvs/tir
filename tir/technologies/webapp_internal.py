@@ -45,7 +45,6 @@ class WebappInternal(Base):
         [Internal]
         Method that sets the program in the initial menu search field.
         '''
-
         self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
         tget = next(iter(soup.select("[name=cGet]")), None)
@@ -311,7 +310,7 @@ class WebappInternal(Base):
                     print('time.sleep(3) - 1230')
                     time.sleep(3)
             else:
-                self.driver.save_screenshot( self.GetFunction() +".png")
+                self.driver.save_screenshot( self.get_function() +".png")
                 self.log_error("Falhou")
 
     def program_screen(self, initial_program="", environment=""):
@@ -554,7 +553,6 @@ class WebappInternal(Base):
         else:
             self.log_error("Element wasn't found.")
 
-
     def get_web_value(self, element):
         """
         Coleta as informações do campo baseado no ID
@@ -611,7 +609,7 @@ class WebappInternal(Base):
 
         self.set_program(self.config.routine)
 
-    def GetFunction(self):
+    def get_function(self):
         stack = inspect.stack()
         function_name = "screenshot"
         for line in stack:
@@ -619,7 +617,7 @@ class WebappInternal(Base):
                 return line.function
         return function_name
 
-    def SearchStack(self,function):
+    def search_stack(self,function):
         stack = inspect.stack()
         ret = False
         for line in stack:
@@ -634,7 +632,7 @@ class WebappInternal(Base):
             for line in lista:
                 if (line.string == self.language.messages.error_log):
                     self.SetButton(self.language.details)
-                    self.driver.save_screenshot( self.GetFunction() +".png")
+                    self.driver.save_screenshot( self.get_function() +".png")
                     self.log.new_line(False, self.language.messages.error_log_print)
                     self.log.save_file()
                     self.assertTrue(False, self.language.messages.error_log_print)
@@ -661,7 +659,7 @@ class WebappInternal(Base):
         '''
         is_advpl = self.is_advpl()
 
-        self.driver.save_screenshot( self.GetFunction() +".png")
+        self.driver.save_screenshot( self.get_function() +".png")
         self.SetButton(self.language.close)
 
         close_element = self.get_closing_button(is_advpl)
@@ -1081,7 +1079,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, contents_list="", select_all=False, browse_index=1 ):
+    def ClickBox(self, field, contents_list="", select_all=False, browse_index=1):
         '''
         Method that clicks in checkbox
         '''
@@ -1140,7 +1138,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Couldn't locate content: {contents_list}")
 
-    def SetParameters( self, arrayParameters ):
+    def SetParameters(self, arrayParameters):
         '''
         Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
         '''
@@ -1205,7 +1203,7 @@ class WebappInternal(Base):
         # self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
         # self.Program(self.config.routine)
 
-    def RestoreParameters( self ):
+    def RestoreParameters(self):
         '''
         Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
         Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
