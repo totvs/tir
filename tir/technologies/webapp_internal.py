@@ -512,17 +512,21 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field,valorusr)
+            current_value = self.result_checkbox(field, user_value)
+            self.LogResult(field, user_value, current_value)
         else:
             element = self.get_field(field)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
             field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            current_value = self.get_web_value(field_element()).strip()
 
-            if self.consolelog:
-                print(f"Value for Field {field} is: {current_value}")
+            endtime = time.time() + 10
+            current_value =  ''
+            while(time.time() < endtime and not current_value):
+                current_value = self.get_web_value(field_element()).strip()
+
+            print(f"Value for Field {field} is: {current_value}")
 
             #Remove mask if present.
             if self.check_mask(field_element()):
@@ -532,7 +536,7 @@ class WebappInternal(Base):
             if type(current_value) is str:
                 current_value = current_value[0:len(str(user_value))]
 
-        self.LogResult(field, user_value, current_value)
+            self.LogResult(field, user_value, current_value)
 
     def get_field(self, field, name_attr=False):
         """
