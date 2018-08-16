@@ -1,7 +1,5 @@
 import re
-import csv
 import time
-import pandas as pd
 import unittest
 import inspect
 import socket
@@ -23,7 +21,7 @@ from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 
 class Base(unittest.TestCase):
-    '''
+    """
     Base class for any technology to implement Selenium Interface Tests.
 
     This class instantiates the browser, reads the config file and prepares the log.
@@ -31,23 +29,42 @@ class Base(unittest.TestCase):
     If no config_path is passed, it will read the config.json file that exists in the same
     folder as the file that would execute this module.
 
-    :param config_path: The path to the config file
+    :param config_path: The path to the config file. - **Default:** "" (empty string)
     :type config_path: string
-    :default config_path: "" (empty string)
 
     Usage:
 
-    The Base class must be inherited by every technology that would exist in this module.
+    The Base class must be inherited by every internal class of each technology that would exist in this module.
 
     The classes must be declared under pwa/technologies/ folder.
 
-    >>> def Webapp(Base):
-    >>> def APW(Base):
-    '''
+    >>> def WebappInternal(Base):
+    >>> def APWInternal(Base):
+    """
     def __init__(self, config_path=""):
+        """
+        Definition of each global variable:
+
+        base_container: A variable to contain the layer element to be used on all methods.
+
+        console_log: A variable to control if additional info should be displayed in the console.
+
+        errors: A list that contains every error that should be sent to log at the end of the execution.
+
+        language: Contains the terms defined in the language defined in config or found in the page.
+
+        log: Object that controls the logs of the entire application.
+
+        log.station: Property of the log that contains the machine's hostname.
+
+        log_file: A variable to control when to generate a log file of each execution of web_scrap. (Debug purposes)
+
+        wait: The global Selenium Wait defined to be used in the entire application.
+        """
         if config_path == "":
             config_path = os.path.join(sys.path[0], r"config.json")
         self.config = ConfigLoader(config_path)
+
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -56,13 +73,16 @@ class Base(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
             self.driver = webdriver.Chrome(executable_path=driver_path)
 
-        self.wait = WebDriverWait(self.driver,5)
         self.driver.maximize_window()
         self.driver.get(self.config.url)
-        self.consolelog = True
+
+        #Global Variables:
+
+        self.wait = WebDriverWait(self.driver,5)
+        self.console_log = True
 
         self.language = LanguagePack(self.config.language) if self.config.language else ""
-        self.log = Log(console=self.consolelog)
+        self.log = Log(console=self.console_log)
         self.log.station = socket.gethostname()
 
         self.base_container = "body"
@@ -72,7 +92,7 @@ class Base(unittest.TestCase):
 # Internal Methods
 
     def assert_result(self, expected):
-        '''
+        """
         [Internal]
 
         Asserts the result based on the expected value.
@@ -84,7 +104,7 @@ class Base(unittest.TestCase):
 
         >>> #Calling the method:
         >>> self.assert_result(True)
-        '''
+        """
 
         expected_assert = expected
         msg = "Passed"
@@ -127,9 +147,8 @@ class Base(unittest.TestCase):
 
         :param element: Selenium element
         :type element: Selenium object
-        :param click_type: ClickType enum
+        :param click_type: ClickType enum. - **Default:** enum.ClickType.JS
         :type click_type: enum.ClickType
-        :default click_type: enum.ClickType.JS
 
         Usage:
 
@@ -150,7 +169,7 @@ class Base(unittest.TestCase):
             self.log_error(str(error))
 
     def compare_field_values(self, field, user_value, captured_value, message):
-        '''
+        """
         [Internal]
 
         Validates and stores field in the self.errors array if the values are different.
@@ -168,7 +187,7 @@ class Base(unittest.TestCase):
 
         >>> #Calling the method
         >>> self.compare_field_values("A1_NOME", "JOÃO", "JOOÃ", "Field A1_NOME has different values")
-        '''
+        """
         if str(user_value).strip() != str(captured_value).strip():
             self.errors.append(message)
 
@@ -200,22 +219,19 @@ class Base(unittest.TestCase):
             actions.perform()
 
     def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog"):
-        '''
+        """
         [Internal]
 
         Returns a boolean if element exists on the screen.
 
         :param term: The first term to use on a search of element
         :type term: str
-        :param scrap_type: Type of element search
+        :param scrap_type: Type of element search. - **Default:** enum.ScrapType.TEXT
         :type scrap_type: enum.ScrapType
-        :param position: Position which element is located
+        :param position: Position which element is located. - **Default:** 0
         :type position: int
-        :param optional_term: Second term to use on a search of element. Used in MIXED search
+        :param optional_term: Second term to use on a search of element. Used in MIXED search. - **Default:** "" (empty string)
         :type optional_term: str
-        :default scrap_type: enum.ScrapType.TEXT
-        :default position: 0
-        :default optional_term: ""
 
         :return: True if element is present. False if element is not present.
         :rtype: bool
@@ -225,8 +241,8 @@ class Base(unittest.TestCase):
         >>> element_is_present = element_exists(term=".ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR)
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
-        '''
-        if self.consolelog:
+        """
+        if self.console_log:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
@@ -266,17 +282,15 @@ class Base(unittest.TestCase):
             return len(element_list) >= position
 
     def filter_displayed_elements(self, elements, reverse=False):
-        '''
+        """
         [Internal]
 
         Receives a BeautifulSoup element list and filters only the displayed elements.
 
         :param elements: BeautifulSoup element list
         :type elements: List of BeautifulSoup objects
-        :param reverse: Boolean value if order should be reversed or not
+        :param reverse: Boolean value if order should be reversed or not. - **Default:** False
         :type reverse: bool
-
-        :default reverse: False
 
         :return: List of filtered BeautifulSoup elements
         :rtype: List of BeautifulSoup objects
@@ -288,7 +302,7 @@ class Base(unittest.TestCase):
         >>> elements = soup.select("div")
         >>> #Calling the method
         >>> self.filter_displayed_elements(elements, True)
-        '''
+        """
         #1 - Create an enumerated list from the original elements
         indexed_elements = list(enumerate(elements))
         #2 - Convert every element from the original list to selenium objects
@@ -354,7 +368,7 @@ class Base(unittest.TestCase):
             return []
 
     def get_current_DOM(self):
-        '''
+        """
         [Internal]
 
         Returns current HTML DOM parsed as a BeautifulSoup object
@@ -366,11 +380,11 @@ class Base(unittest.TestCase):
 
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
-        '''
+        """
         return BeautifulSoup(self.driver.page_source,"html.parser")
 
     def get_element_text(self, element):
-        '''
+        """
         [Internal]
 
         Gets element text.
@@ -387,11 +401,11 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> text = self.get_element_text(element())
-        '''
+        """
         return self.driver.execute_script("return arguments[0].innerText", element)
 
     def get_element_value(self, element):
-        '''
+        """
         [Internal]
 
         Gets element value.
@@ -408,7 +422,7 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> text = self.get_element_value(element())
-        '''
+        """
         return self.driver.execute_script("return arguments[0].value", element)
 
     def log_error(self, message, new_log_line=True):
@@ -419,9 +433,8 @@ class Base(unittest.TestCase):
 
         :param message: Message to be logged
         :type message: string
-        :param new_log_line: Boolean value if Message should be logged as new line or not
+        :param new_log_line: Boolean value if Message should be logged as new line or not. - **Default:** True
         :type new_log_line: bool
-        :default new_log_line: True
 
         Usage:
 
@@ -440,7 +453,7 @@ class Base(unittest.TestCase):
         self.assertTrue(False, log_message)
 
     def move_to_element(self, element):
-        '''
+        """
         [Internal]
 
         Move focus to element on the screen.
@@ -454,11 +467,11 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
-        '''
+        """
         ActionChains(self.driver).move_to_element(element).perform()
 
     def scroll_to_element(self, element):
-        '''
+        """
         [Internal]
 
         Scroll to element on the screen.
@@ -472,14 +485,14 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
-        '''
+        """
         if element.get_attribute("id"):
             self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
         else:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
 
     def search_zindex(self,element):
-        '''
+        """
         [Internal]
 
         Returns zindex value of BeautifulSoup object.
@@ -499,7 +512,7 @@ class Base(unittest.TestCase):
         >>> #Line extracted from zindex_sort method:
         >>> elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
 
-        '''
+        """
         zindex = 0
         if hasattr(element,"attrs") and "style" in element.attrs and "z-index:" in element.attrs['style']:
             zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
@@ -560,7 +573,7 @@ class Base(unittest.TestCase):
             actions.perform()
 
     def set_element_focus(self, element):
-        '''
+        """
         [Internal]
 
         Sets focus on element.
@@ -574,7 +587,7 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> text = self.set_element_focus(element())
-        '''
+        """
         self.driver.execute_script("arguments[0].focus();", element)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
@@ -587,18 +600,14 @@ class Base(unittest.TestCase):
 
         :param term: The first search term. A text or a selector
         :type term: string
-        :param scrap_type: The type of webscraping
-        :type scrap_type: enum.ScrapType
-        :param optional_term: The second search term. A selector used in MIXED webscraping
+        :param scrap_type: The type of webscraping. - **Default:** enum.ScrapType.TEXT
+        :type scrap_type: enum.ScrapType.
+        :param optional_term: The second search term. A selector used in MIXED webscraping. - **Default:** None
         :type optional_term: string
-        :param label: If the search is based on a label near the element
+        :param label: If the search is based on a label near the element. - **Default:** False
         :type label: bool
-        :param main_container: The selector of a container element that has all other elements
+        :param main_container: The selector of a container element that has all other elements. - **Default:** None
         :type main_container: string
-        :default scrap_type: enum.ScrapType.TEXT
-        :default label: False
-        :default optional_term: None
-        :default main_container: None
 
         :return: List of BeautifulSoup4 elements based on search parameters.
         :rtype: List of BeautifulSoup4 objects
@@ -653,7 +662,7 @@ class Base(unittest.TestCase):
             self.log_error(str(e))
 
     def zindex_sort (self, elements, reverse=False):
-        '''
+        """
         [Internal]
 
         Sorts list of BeautifulSoup elements based on z-index style attribute.
@@ -662,9 +671,8 @@ class Base(unittest.TestCase):
 
         :param elements: BeautifulSoup element list
         :type elements: List of BeautifulSoup objects
-        :param reverse: Boolean value if order should be reversed or not
+        :param reverse: Boolean value if order should be reversed or not. - **Default:** False
         :type reverse: bool
-        :default reverse: False
 
         :return: List of sorted BeautifulSoup elements based on zindex.
         :rtype: List of BeautifulSoup objects
@@ -676,7 +684,7 @@ class Base(unittest.TestCase):
         >>> elements = soup.select("div")
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
-        '''
+        """
         elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
         return elements
 
