@@ -30,7 +30,7 @@ class Base(unittest.TestCase):
     folder as the file that would execute this module.
 
     :param config_path: The path to the config file. - **Default:** "" (empty string)
-    :type config_path: string
+    :type config_path: str
 
     Usage:
 
@@ -175,13 +175,13 @@ class Base(unittest.TestCase):
         Validates and stores field in the self.errors array if the values are different.
 
         :param field: Field name
-        :type field: string
+        :type field: str
         :param user_value: User input value
-        :type user_value: string
+        :type user_value: str
         :param captured_value: Interface captured value
-        :type captured_value: string
+        :type captured_value: str
         :param message: Error message if comparison fails
-        :type message: string
+        :type message: str
 
         Usage:
 
@@ -346,7 +346,7 @@ class Base(unittest.TestCase):
         Find input element next to label containing the label_text parameter.
 
         :param label_text: The label text to be searched
-        :type label_text: string
+        :type label_text: str
         :param container: The main container object to be used
         :type container: BeautifulSoup object
 
@@ -393,7 +393,7 @@ class Base(unittest.TestCase):
         :type element: Selenium object
 
         :return: Element text
-        :rtype: string
+        :rtype: str
 
         Usage:
 
@@ -414,7 +414,7 @@ class Base(unittest.TestCase):
         :type element: Selenium object
 
         :return: Element value
-        :rtype: string
+        :rtype: str
 
         Usage:
 
@@ -432,7 +432,7 @@ class Base(unittest.TestCase):
         Finishes execution of test case with an error and creates the log information for that test.
 
         :param message: Message to be logged
-        :type message: string
+        :type message: str
         :param new_log_line: Boolean value if Message should be logged as new line or not. - **Default:** True
         :type new_log_line: bool
 
@@ -526,7 +526,7 @@ class Base(unittest.TestCase):
         :param element: Combobox element
         :type element: Beautiful Soup object
         :param option: Option to be selected
-        :type option: string
+        :type option: str
 
         Usage:
 
@@ -549,7 +549,7 @@ class Base(unittest.TestCase):
         :param element: Selenium element
         :type element: Selenium object
         :param arg: Text or Keys to be sent to the element
-        :type arg: string or selenium.webdriver.common.keys
+        :type arg: str or selenium.webdriver.common.keys
 
         Usage:
 
@@ -599,15 +599,15 @@ class Base(unittest.TestCase):
         Does not support ScrapType.XPATH as scrap_type parameter value.
 
         :param term: The first search term. A text or a selector
-        :type term: string
+        :type term: str
         :param scrap_type: The type of webscraping. - **Default:** enum.ScrapType.TEXT
         :type scrap_type: enum.ScrapType.
         :param optional_term: The second search term. A selector used in MIXED webscraping. - **Default:** None
-        :type optional_term: string
+        :type optional_term: str
         :param label: If the search is based on a label near the element. - **Default:** False
         :type label: bool
         :param main_container: The selector of a container element that has all other elements. - **Default:** None
-        :type main_container: string
+        :type main_container: str
 
         :return: List of BeautifulSoup4 elements based on search parameters.
         :rtype: List of BeautifulSoup4 objects

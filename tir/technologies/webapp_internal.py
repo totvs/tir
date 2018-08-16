@@ -25,14 +25,13 @@ class WebappInternal(Base):
     Internal methods should have the **[Internal]** tag and should not be accessible to the user.
 
     :param config_path: The path to the config file. - **Default:** "" (empty string)
-    :type config_path: string
+    :type config_path: str
 
     Usage:
 
-    >>> # Inside Webapp class in main.py
+    >>> # Inside __init__ method in Webapp class of main.py
     >>> def __init__(self, config_path):
     >>>     self.__webapp = WebappInternal()
-
     """
     def __init__(self, config_path=""):
         """
@@ -68,15 +67,15 @@ class WebappInternal(Base):
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
         :param initial_program: The initial program to load.
-        :type initial_program: string
+        :type initial_program: str
         :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
-        :type date: string
+        :type date: str
         :param group: The group to fill on the environment screen. - **Default:** "99"
-        :type group: string
+        :type group: str
         :param branch: The branch to fill on the environment screen. - **Default:** "01"
-        :type branch: string
+        :type branch: str
         :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
-        :type module: string
+        :type module: str
 
         Usage:
 
@@ -114,9 +113,9 @@ class WebappInternal(Base):
         Fills the first screen of Protheus with the first program to run and the environment to connect.
 
         :param initial_program: The initial program to load
-        :type initial_program: string
+        :type initial_program: str
         :param environment: The environment to connect
-        :type environment: string
+        :type environment: str
 
         Usage:
 
@@ -292,7 +291,7 @@ class WebappInternal(Base):
         Method that sets the program in the initial menu search field.
 
         :param program_name: The program name
-        :type program_name: string
+        :type program_name: str
 
         Usage:
 
@@ -310,7 +309,7 @@ class WebappInternal(Base):
         Method that sets the program in the initial menu search field.
 
         :param program: The program name
-        :type program: string
+        :type program: str
 
         Usage:
 
@@ -347,20 +346,23 @@ class WebappInternal(Base):
         is provided, it will search on the chosen search box.
 
         :param term: The term that must be searched.
-        :type term: string
+        :type term: str
         :param key: The search key to be chosen on the search dropdown. - **Default:** None
-        :type key: string
+        :type key: str
         :param identifier: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
-        :type identifier: string
+        :type identifier: str
 
         Usage:
 
         >>> # To search using the first search box and default search key:
         >>> oHelper.SearchBrowse("D MG 001")
+        >>> #------------------------------------------------------------------------
         >>> # To search using the first search box and a chosen key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id")
+        >>> #------------------------------------------------------------------------
         >>> # To search using a chosen search box and the default search key:
         >>> oHelper.SearchBrowse("D MG 001", identifier="Products")
+        >>> #------------------------------------------------------------------------
         >>> # To search using a chosen search box and a chosen search key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
         """
@@ -376,7 +378,7 @@ class WebappInternal(Base):
         Key Dropdown, Input, Icon.
 
         :param panel_name: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
-        :type panel_name: string
+        :type panel_name: str
 
         :return: Tuple with the Key Dropdown, Input and Icon elements of a search box
         :rtype: Tuple of Beautiful Soup objects.
@@ -408,7 +410,7 @@ class WebappInternal(Base):
         Chooses the search key to be used during the search.
 
         :param search_key: The search key to be chosen on the search dropdown
-        :type search_key: string
+        :type search_key: str
         :param search_elements: Tuple of Search elements
         :type search_elements: Tuple of Beautiful Soup objects
 
@@ -452,7 +454,7 @@ class WebappInternal(Base):
         Fills search input method and presses the search button.
 
         :param term: The term to be searched
-        :type term: string
+        :type term: str
         :param search_elements: Tuple of Search elements
         :type search_elements: Tuple of Beautiful Soup objects
 
@@ -503,33 +505,57 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def SetValue(self, campo, valor, grid=False, grid_number=1, disabled=False, ignore_case=True):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True):
         """
-        Indica os campos e o conteudo do campo para preenchimento da tela.
+        Sets value of an input element.
+
+        :param field: The field name or label to receive the value
+        :type field: str
+        :param value: The value to be inputted on the element.
+        :type value: str
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param grid_number: Grid number of which grid should be inputted when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+        :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
+        :type ignore_case: bool
+
+        Usage:
+
+        >>> # Calling method to input value on a field:
+        >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is a grid:
+        >>> oHelper.SetValue("Client", "000001", grid=True)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is on the second grid of the screen:
+        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
+        >>> oHelper.LoadGrid()
         """
         if not grid:
-            if isinstance(valor,bool): # Tratamento para campos do tipo check e radio
-                element = self.check_checkbox(campo,valor)
+            if isinstance(value,bool): # Tratamento para campos do tipo check e radio
+                element = self.check_checkbox(field,value)
                 if not element:
-                   element = self.check_radio(campo,valor)
+                   element = self.check_radio(field,value)
             else:
-                self.wait_element(campo)
-                self.input_value(campo, valor, ignore_case)
+                self.wait_element(field)
+                self.input_value(field, value, ignore_case)
                 #self.set_enchoice(campo, valor, '', 'Enchoice', '', '', disabled)
         else:
-            self.input_grid_appender(campo, valor, grid_number - 1)
+            self.input_grid_appender(field, value, grid_number - 1)
 
     def input_value(self, field, value, ignore_case=True):
         """
         [Internal]
 
-        Sets a value in an input element.
+        Sets value of an input element.
         Returns True if succeeded, False if it failed.
 
         :param field: The field name or label to receive the value
-        :type field: string
+        :type field: str
         :param value: The value to be set on the field
-        :type value: string
+        :type value: str
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
 
@@ -639,7 +665,7 @@ class WebappInternal(Base):
         Internal method of input_value and CheckResult.
 
         :param field: Field name or field label to be searched
-        :type field: string
+        :type field: str
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
 
@@ -676,7 +702,7 @@ class WebappInternal(Base):
         :type element: Selenium object
 
         :return: The value or text of passed element
-        :rtype: string
+        :rtype: str
 
         Usage:
 
@@ -702,6 +728,30 @@ class WebappInternal(Base):
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
         """
         Checks if a field has the value the user expects.
+
+        :param field: The field or label of a field that must be checked.
+        :type field: str
+        :param user_value: The value that the field is expected to contain.
+        :type user_value: str
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param line: Grid line that contains the column field to be checked.- **Default:** 1
+        :type line: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling method to check a value of a field:
+        >>> oHelper.CheckResult("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field that is on the second line of a grid:
+        >>> oHelper.CheckResult("Client", "000001", grid=True, line=2)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field that is on the second grid of the screen:
+        >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
+        >>> oHelper.LoadGrid()
         """
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
@@ -739,11 +789,11 @@ class WebappInternal(Base):
         Logs the result of comparison between user value and captured value.
 
         :param field: The field whose values would be compared
-        :type field: string
+        :type field: str
         :param user_value: The value the user expects
-        :type user_value: string
+        :type user_value: str
         :param captured_value: The value that was captured on the screen
-        :type captured_value: string
+        :type captured_value: str
 
         Usage:
 
@@ -758,7 +808,17 @@ class WebappInternal(Base):
 
         self.compare_field_values(field, user_value, captured_value, message)
 
-    def Restart(self):
+    def restart(self):
+        """
+        [Internal]
+
+        Restarts the Protheus Webapp and fills the initial screens.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.restart()
+        """
         self.idwizard = []
         self.driver.refresh()
         self.driver.switch_to_alert().accept()
@@ -801,7 +861,7 @@ class WebappInternal(Base):
                 break
         return ret
 
-    def SearchErrorLog(self,soup):
+    def search_error_log(self,soup):
         lista = soup.find_all('div', class_=('tsay twidget transparent dict-tsay align-left')) # Verifica de ocorreu error log antes de continuar
         if lista:
             for line in lista:
@@ -812,7 +872,7 @@ class WebappInternal(Base):
                     self.log.save_file()
                     self.assertTrue(False, self.language.messages.error_log_print)
 
-    def SearchHelp(self,soup):
+    def search_help(self,soup):
         """
         This method is called to treat Help messages
         """
@@ -935,7 +995,6 @@ class WebappInternal(Base):
 
     def SetLateralMenu(self, menuitens):
         """
-        [External]
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
         """
@@ -2104,7 +2163,7 @@ class WebappInternal(Base):
         Find input element next to label containing the label_text parameter.
 
         :param label_text: The label text to be searched
-        :type label_text: string
+        :type label_text: str
         :param container: The main container object to be used
         :type container: BeautifulSoup object
 
