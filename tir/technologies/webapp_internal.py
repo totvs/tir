@@ -2045,7 +2045,7 @@ class WebappInternal(Base):
         :return: A tuple containing the needed x3 information.
         :rtype: Tuple of Dictionaries
 
-        Usage;
+        Usage:
 
         >>> # Calling the method:
         >>> x3_dictionaries = self.create_x3_tuple()
@@ -2754,7 +2754,7 @@ class WebappInternal(Base):
         :param key: The value that would be sent to the element.
         :type key: str or selenium.webdriver.common.keys
         :param try_counter: This counter will decide which technique should be used. - **Default:** 0
-        :type try_counter; int
+        :type try_counter: int
 
         Usage:
 
