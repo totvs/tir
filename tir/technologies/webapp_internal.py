@@ -286,6 +286,65 @@ class WebappInternal(Base):
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
 
+    def close_modal(self):
+        """
+        [Internal]
+
+        This method closes the modal in the opening screen.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.close_modal()
+        """
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
+            buttons = modals[0].select(".tbrowsebutton")
+            if buttons:
+                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
+                time.sleep(0.5)
+                selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
+                if close_button:
+                    try:
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(close_button))))
+                        self.click(selenium_close_button())
+                    except:
+                        pass
+
+    def set_log_info(self):
+        """
+        [Internal]
+        Fills the log information needed by opening the About page.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.set_log_info()
+        """
+        self.log.initial_time = time.time()
+        self.SetLateralMenu(self.language.menu_about)
+        self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
+
+        content = self.driver.page_source
+        soup = BeautifulSoup(content,"html.parser")
+
+        modal = list(soup.select(".tmodaldialog")[0].children)
+
+        for panel in modal:
+            for element in panel.children:
+                if element.text.startswith("Release"):
+                    release = element.text.split(":")[1].strip()
+                    self.log.release = release
+                    self.log.version = release.split(".")[0]
+                elif element.text.startswith("Top DataBase"):
+                    self.log.database = element.text.split(":")[1].strip()
+                else:
+                    if self.log.version and self.log.release and self.log.database:
+                        break
+
+        self.SetButton(self.language.close)
+
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
@@ -534,14 +593,13 @@ class WebappInternal(Base):
         >>> oHelper.LoadGrid()
         """
         if not grid:
-            if isinstance(value,bool): # Tratamento para campos do tipo check e radio
-                element = self.check_checkbox(field,value)
+            if isinstance(value,bool):
+                element = self.check_checkbox(field, value)
                 if not element:
-                   element = self.check_radio(field,value)
+                   element = self.check_radio(field, value)
             else:
                 self.wait_element(field)
                 self.input_value(field, value, ignore_case)
-                #self.set_enchoice(campo, valor, '', 'Enchoice', '', '', disabled)
         else:
             self.input_grid_appender(field, value, grid_number - 1)
 
@@ -808,6 +866,37 @@ class WebappInternal(Base):
 
         self.compare_field_values(field, user_value, captured_value, message)
 
+    def GetValue(self, field, grid=False, line=1, grid_number=1):
+        """
+        Gets the current value or text of element.
+
+        :param field: The field or label of a field that must be checked.
+        :type field: str
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param line: Grid line that contains the column field to be checked.- **Default:** 1
+        :type line: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> current_value = oHelper.GetValue("A1_COD")
+        """
+        if not grid:
+            element = self.get_field(field)
+
+            selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+
+            value = self.get_web_value(selenium_element())
+        else:
+            field_array = [line-1, field, "", grid_number-1]
+            x3_dictionaries = self.create_x3_tuple()
+            value = self.check_grid(field_array, x3_dictionaries, get_value=True)
+
+        return value
+
     def restart(self):
         """
         [Internal]
@@ -844,37 +933,76 @@ class WebappInternal(Base):
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
 
-    def get_function(self):
-        stack = inspect.stack()
-        function_name = "screenshot"
-        for line in stack:
-            if self.config.routine in line.filename:
-                return line.function
-        return function_name
+    def get_function_from_stack(self):
+        """
+        [Internal]
 
-    def search_stack(self,function):
-        stack = inspect.stack()
-        ret = False
-        for line in stack:
-            if line.function == function:
-                ret = True
-                break
-        return ret
+        Gets the function name that called the Webapp class from the call stack.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.get_function_from_stack()
+        """
+        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
+        return stack_item.function if stack_item and stack_item.function else "function_name"
+
+    def search_stack(self, function):
+        """
+        [Internal]
+
+        Returns True if passed function is present in the call stack.
+
+        :param function: Name of the function
+        :type function: str
+
+        :return: Boolean if passed function is present or not in the call stack.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_present = self.search_stack("MATA020")
+        """
+        return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
 
     def search_error_log(self,soup):
+        """
+        [Internal]
+
+        Logs error log if it is present on the screen.
+
+        :param soup: Beautiful Soup object to be checked.
+        :type soup: Beautiful Soup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.search_error_log(soup)
+        """
         lista = soup.find_all('div', class_=('tsay twidget transparent dict-tsay align-left')) # Verifica de ocorreu error log antes de continuar
         if lista:
             for line in lista:
                 if (line.string == self.language.messages.error_log):
                     self.SetButton(self.language.details)
-                    self.driver.save_screenshot( self.get_function() +".png")
+                    self.driver.save_screenshot( self.get_function_from_stack() +".png")
                     self.log.new_line(False, self.language.messages.error_log_print)
                     self.log.save_file()
                     self.assertTrue(False, self.language.messages.error_log_print)
 
-    def search_help(self,soup):
+    def search_error_message(self,soup):
         """
-        This method is called to treat Help messages
+        [Internal]
+
+        Logs error message if it is present on the screen.
+
+        :param soup: Beautiful Soup object to be checked.
+        :type soup: Beautiful Soup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.search_error_message(soup)
         """
         lista = soup.find_all('div', class_=('workspace-container')) # Leva como base div inicial
         if lista:
@@ -883,43 +1011,60 @@ class WebappInternal(Base):
                 message = ""
                 if line.text == self.language.messages.error_msg_required:
                     message = self.language.messages.error_msg_required
-                    self.search_help_error(message)
                 elif self.language.help in line.text and self.language.problem in line.text:
                     message = line.text
-                    self.search_help_error(message)
 
-    def search_help_error(self, message):
+                if message:
+                    is_advpl = self.is_advpl()
+
+                    self.driver.save_screenshot( self.get_function_from_stack() +".png")
+                    self.SetButton(self.language.close)
+
+                    close_element = self.get_closing_button(is_advpl)
+
+                    self.click(close_element)
+                    if not is_advpl:
+                        self.SetButton(self.language.leave_page)
+                    self.log.new_line(False, message)
+                    self.log.save_file()
+                    self.assertTrue(False, message)
+
+    def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
-        This method is part of SearchHelp internal functionality
+        [Internal]
+
+        Returns default messages used all throughout the class based on input parameters.
+
+        Each message type has a different number of placeholders to be passed as a list through args parameter:
+
+        Correct Message = *"{} Value of field {} is correct!"* - **2 placeholders**
+
+        Incorrect Message = *"{} Value expected for field \"{}\" ({}) is not equal to what was found ({})."* - **3 placeholders**
+
+        Disabled Message = *"{} Field \"{}\" is disabled."* - **2 placeholders**
+
+        AssertError Message = *"Failed: Value expected for field {}: \"{}\" is different from what was found \"{}\"."* - **2 placeholders**
+
+        :param args: A list of strings to be replaced in each message.
+        :type args: List of str
+        :param message_type: Enum of which message type should be created. - **Default:** enum.MessageType.Correct
+        :type message_type: enum.MessageType
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> message = self.create_message([txtaux, field, user_value, captured_value], enum.MessageType.INCORRECT)
         """
-        is_advpl = self.is_advpl()
+        correctMessage = "{} Value of field {} is correct!"
+        incorrectMessage = "{} Value expected for field \"{}\" ({}) is not equal to what was found ({})."
+        disabledMessage = "{} Field \"{}\" is disabled."
+        assertErrorMessage = "Failed: Value expected for field {}: \"{}\" is different from what was found \"{}\"."
 
-        self.driver.save_screenshot( self.get_function() +".png")
-        self.SetButton(self.language.close)
-
-        close_element = self.get_closing_button(is_advpl)
-
-        self.click(close_element)
-        if not is_advpl:
-            self.SetButton(self.language.leave_page)
-        self.log.new_line(False, message)
-        self.log.save_file()
-        self.assertTrue(False, message)
-
-    def create_message(self, args, messageType=enum.MessageType.CORRECT):
-        """
-        Returns default messages used all throughout the class.
-        """
-        correctMessage = "{} Valor fornecido para o campo {} esta correto!"
-        incorrectMessage = "{} Valor fornecido para o campo \"{}\" ({}) não confere com o valor encontrado na interface ({})."
-        disabledMessage = "{} Campo \"{}\" esta desabilitado."
-        assertErrorMessage = "Falhou: Valor fornecido para o campo {}: \"{}\" não confere com o valor encontrado na interface \"{}\"."
-
-        if messageType == enum.MessageType.INCORRECT:
+        if message_type == enum.MessageType.INCORRECT:
             return incorrectMessage.format(args[0], args[1], args[2], args[3])
-        elif messageType == enum.MessageType.DISABLED:
+        elif message_type == enum.MessageType.DISABLED:
             return disabledMessage.format(args[0], args[1])
-        elif messageType == enum.MessageType.ASSERTERROR:
+        elif message_type == enum.MessageType.ASSERTERROR:
             return assertErrorMessage.format(args[0], args[1], args[2])
         else:
             return correctMessage.format(args[0], args[1])
@@ -993,23 +1138,31 @@ class WebappInternal(Base):
         else:
             return len(element_list) >= position
 
-    def SetLateralMenu(self, menuitens):
+    def SetLateralMenu(self, menu_itens):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
+
+        :param menu_itens: String with the path to the menu.
+        :type menu_itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
         # try:
         self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        menuitens = list(map(str.strip, menuitens.split(">")))
+        menu_itens = list(map(str.strip, menu_itens.split(">")))
 
         soup = self.get_current_DOM()
 
-        menuXpath = soup.select(".tmenu")
+        menu_xpath = soup.select(".tmenu")
 
-        menu = menuXpath[0]
+        menu = menu_xpath[0]
         child = menu
         count = 0
-        for menuitem in menuitens:
+        for menuitem in menu_itens:
             self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
             self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
             self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
@@ -1026,65 +1179,29 @@ class WebappInternal(Base):
             if subMenuElements and submenu():
                 self.scroll_to_element(submenu())
                 ActionChains(self.driver).move_to_element(submenu()).click().perform()
-                if count < len(menuitens) - 1:
-                    self.wait_element(term=menuitens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                if count < len(menu_itens) - 1:
+                    self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
             else:
                 self.log_error(f"Error - Menu Item does not exist: {menuitem}")
             count+=1
-        # except Exception as error:
-        #     print(str(error))
-        #     print("SetLateralMenu failed!")
-        #     print("Trying again!")
-        #     self.SetLateralMenu(menuitens)
-
-    def GetValue(self, field, grid=False, line=1, grid_number=1):
-        """
-        Get a web value from DOM elements
-        """
-        if not grid:
-            if re.match(r"\w+(_)", field):
-                element = next(iter(self.web_scrap(f"[name*='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            else:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
-
-            selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-
-            value = self.get_web_value(selenium_element())
-        else:
-            field_array = [line-1, field, "", grid_number-1]
-            x3_dictionaries = self.create_x3_tuple()
-            value = self.check_grid(field_array, x3_dictionaries, get_value=True)
-
-        return value
-
-    def set_log_info(self):
-        self.log.initial_time = time.time()
-        self.SetLateralMenu(self.language.menu_about)
-        self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
-
-        content = self.driver.page_source
-        soup = BeautifulSoup(content,"html.parser")
-
-        modal = list(soup.select(".tmodaldialog")[0].children)
-
-        for panel in modal:
-            for element in panel.children:
-                if element.text.startswith("Release"):
-                    release = element.text.split(":")[1].strip()
-                    self.log.release = release
-                    self.log.version = release.split(".")[0]
-                elif element.text.startswith("Top DataBase"):
-                    self.log.database = element.text.split(":")[1].strip()
-                else:
-                    if self.log.version and self.log.release and self.log.database:
-                        break
-
-        self.SetButton(self.language.close)
 
     def SetButton(self, button, sub_item=""):
         """
-        Method that clicks on a button of the interface.
+        Method that clicks on a button on the screen.
+
+        :param button: Button to be clicked.
+        :type button: str
+        :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
+        :type sub_item: str
+
+        Usage:
+
+        >>> # Calling the method to click on a regular button:
+        >>> oHelper.SetButton("Add")
+        >>> #-------------------------------------------------
+        >>> # Calling the method to click on a sub item inside a button.
+        >>> oHelper.SetButton("Other Actions", "Process")
         """
         try:
             soup_element  = ""
@@ -1160,9 +1277,23 @@ class WebappInternal(Base):
                 print(error)
             self.log_error(str(error))
 
-    def click_sub_menu(self, button):
+    def click_sub_menu(self, item):
         """
-        Método que clica nos itens do menu
+        [Internal]
+
+        Clicks on the sub menu of buttons. Returns True if succeeded.
+        Internal method of SetButton.
+
+        :param item: The menu item that should be clicked.
+        :type item: str
+
+        :return: Boolean if click was successful.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.click_sub_menu("Process")
         """
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
@@ -1172,13 +1303,13 @@ class WebappInternal(Base):
 
         menu_itens = menu.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
 
-        result = self.find_sub_menu_text(button, menu_itens)
+        result = self.find_sub_menu_text(item, menu_itens)
 
         item = ""
         if result[0]:
             item = result[0]
         elif result[1]:
-            item = self.find_sub_menu_child(button, result[1])
+            item = self.find_sub_menu_child(item, result[1])
         else:
             return False
 
@@ -1189,7 +1320,25 @@ class WebappInternal(Base):
         else:
             return False
 
-    def find_sub_menu_child(self, button, containers):
+    def find_sub_menu_child(self, item, containers):
+        """
+        [Internal]
+
+        Finds the menu item inside child menu layers.
+
+        :param item: The menu item that should be clicked.
+        :type item: str
+        :param containers: The menu itens of the current layer that have children.
+        :type containers: List of Beautiful Soup objects
+
+        :return: The item that was found. If None was found, it returns an empty string.
+        :rtype: Selenium object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> item = self.find_sub_menu_child("Process", container_list)
+        """
         item = ""
         for child in containers:
 
@@ -1199,10 +1348,10 @@ class WebappInternal(Base):
             self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, new_class))
 
             child_itens = child.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
-            result = self.find_sub_menu_text(button, child_itens)
+            result = self.find_sub_menu_text(item, child_itens)
 
             if not result[0] and result[1]:
-                item = self.find_sub_menu_child(button, result[1])
+                item = self.find_sub_menu_child(item, result[1])
             else:
                 item = result[0]
                 if item:
@@ -1211,13 +1360,35 @@ class WebappInternal(Base):
 
         return item
 
-    def find_sub_menu_text(self, button, itens):
+    def find_sub_menu_text(self, menu_item, current_itens):
+        """
+        [Internal]
+
+        Returns a tuple containing a possible match of a menu item among the current itens.
+        If none was found it will be an empty string.
+
+        The second position will contain the itens that have children itens.
+        If none has children itens, it will be an empty list.
+
+        :param menu_item: The menu item that should be clicked.
+        :type menu_item: str
+        :param current_item: The menu itens in the current layer.
+        :type current_item: List of Selenium objects.
+
+        :return: Tuple containing a possible match of a menu item and the itens that have children itens.
+        :rtype: Tuple (selenium object, list of selenium objects)
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> result = self.find_sub_menu_text(item, child_itens)
+        """
         submenu = ""
         containers = []
-        for child in itens:
+        for child in current_itens:
             if "container" in child.get_attribute("class"):
                 containers.append(child)
-            elif child.text.startswith(button):
+            elif child.text.startswith(menu_item):
                 submenu = child
                 break
 
@@ -1225,32 +1396,67 @@ class WebappInternal(Base):
 
     def SetBranch(self, branch):
         """
-        Método que preenche a filial na inclusão
+        Chooses the branch on the branch selection screen.
+
+        :param branch: The branch that would be chosen.
+        :type branch: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetBranch("D MG 01 ")
         """
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
         Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
-            #self.SetButton('OK','','',60,'div','tbutton')
             self.SetButton('OK')
 
     def WaitWhile(self,itens):
         """
         Search string that was sent and wait while condition is true
         e.g. "Item1,Item2,Item3"
+
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitWhile("Processing")
         """
-        self.search_text(itens,True)
+        self.search_text(itens, True)
 
     def WaitUntil(self,itens):
         """
         Search string that was sent and wait until condition is true
         e.g. "Item1,Item2,Item3"
+
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitUntil("Processing")
         """
-        self.search_text(itens,False)
+        self.search_text(itens, False)
 
     def search_text(self,itens,invert):
         """
-        Search string that was sent and wait until condition is respected
+        [Internal]
+
+        Searches strings that were sent and waits until condition is respected
         e.g. "Item1,Item2,Item3"
+
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+        :param invert: Boolean if presence of text should be True or False.
+        :type invert: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.search_text(itens, True)
         """
         itens = list(map(str.strip, itens.split(",")))
         print("Aguardando processamento...")
@@ -1267,15 +1473,23 @@ class WebappInternal(Base):
             print('time.sleep(5) - 2081')
             time.sleep(5)
 
-    def SetTabEDAPP(self, tabela):
+    def SetTabEDAPP(self, table):
         """
-        Method that fills the field with the table to be checked in the generic query
+        Chooses the table on the generic query (EDAPP).
+
+        :param table: The table that would be chosen.
+        :type table: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetTabEDAPP("AAB")
         """
         try:
             field = self.get_field("cPesq", name_attr=True)
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(field))
             self.click(element())
-            self.send_keys(element(), tabela)
+            self.send_keys(element(), table)
             time.sleep(0.5)
             self.send_keys(element(), Keys.ENTER)
             self.send_keys(element(), Keys.ENTER)
@@ -1284,12 +1498,20 @@ class WebappInternal(Base):
             if self.console_log:
                 print("Não encontrou o campo Pesquisar")
 
-    def ClickFolder(self, item):
+    def ClickFolder(self, folder_name):
         """
-        Método que efetua o clique na aba
+        Clicks on folder elements on the screen.
+
+        :param folder_name: Which folder item should be clicked.
+        :type folder_name: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickFolder("Folder1")
         """
-        self.wait_element(term=item, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
-        self.wait_element(term=item, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
         #Retira o ToolTip dos elementos focados.
         self.move_to_element(self.driver.find_element_by_tag_name("html"))
 
@@ -1298,7 +1520,7 @@ class WebappInternal(Base):
         #except:#caso contrário efetuo o clique na aba com webscraping
         soup = self.get_current_DOM()
         panels = soup.select(".button-bar a")
-        panel = next(iter(list(filter(lambda x: x.text == item, panels))))
+        panel = next(iter(list(filter(lambda x: x.text == folder_name, panels))))
         element = ""
         if panel:
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
@@ -1310,12 +1532,32 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, contents_list="", select_all=False, browse_index=1):
+    def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
         """
-        Method that clicks in checkbox
+        Clicks on Checkbox elements of a grid.
+
+        :param field: The column to identify grid rows.
+        :type field: str
+        :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
+        :type content_list: str
+        :param select_all: Boolean if all options should be selected. - **Default:** False
+        :type select_all: bool
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method to select a specific checkbox:
+        >>> oHelper.ClickBox("Branch", "D MG 01 ")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to select multiple checkboxes:
+        >>> oHelper.ClickBox("Branch", "D MG 01 , D RJ 02")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to select all checkboxes:
+        >>> oHelper.ClickBox("Branch", select_all=True)
         """
-        browse_index -= 1
-        if contents_list:
+        grid_number -= 1
+        if content_list:
             self.wait_element_timeout(field)
         elif select_all:
             self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
@@ -1333,7 +1575,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find grid.")
 
-        grid = grids[browse_index]
+        grid = grids[grid_number]
         column_enumeration = list(enumerate(grid.select("thead label")))
         chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
         if chosen_column:
@@ -1341,7 +1583,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find chosen column.")
 
-        contents_list = contents_list.split(",")
+        content_list = content_list.split(",")
 
         if select_all:
             self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
@@ -1350,13 +1592,13 @@ class WebappInternal(Base):
                 box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.click(box())
 
-        elif contents_list:
-            self.wait_element(contents_list[0]) # wait columns
+        elif content_list:
+            self.wait_element(content_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
 
             column_elements = grid.select(f"td[id='{column_index}']")
-            filtered_column_elements = list(filter(lambda x: x.text.strip() in contents_list, column_elements))
+            filtered_column_elements = list(filter(lambda x: x.text.strip() in content_list, column_elements))
 
             for column_element in filtered_column_elements:
                 element = self.driver.find_element_by_xpath(xpath_soup(column_element))
@@ -1369,132 +1611,22 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Couldn't locate content: {contents_list}")
 
-    def SetParameters(self, arrayParameters):
-        """
-        Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
-        """
-        return None
-        # self.idwizard = []
-        # self.LogOff()
-
-        # #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        # self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
-
-        # # Escolhe a opção do Menu Lateral
-        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
-
-        # # Clica no botão/icone pesquisar
-        # self.SetButton("Pesquisar")
-
-        # array = arrayParameters
-
-        # backup_idwizard = self.idwizard[:]
-
-        # for arrayLine in array:
-
-        #     # Preenche o campo de Pesquisa
-        #     self.SetValue("aCab", "Procurar por:", arrayLine[0])
-
-        #     # Confirma a busca
-        #     self.SetButton("Buscar")
-
-        #     # Clica no botão/icone Editar
-        #     self.SetButton("Editar")
-
-        #     # Faz a captura dos elementos dos campos
-        #     print('time.sleep(5) - 2204')
-        #     time.sleep(5)
-        #     content = self.driver.page_source
-        #     soup = BeautifulSoup(content,"html.parser")
-
-        #     menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
-
-        #     for line in menuCampos:
-        #         if not menuCampos[line]:
-        #             RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-        #             cache = self.get_web_value(RetId)
-        #             self.lencache = len(cache)
-        #             cache = cache.strip()
-        #             menuCampos[line] = cache
-
-        #     self.camposCache.append( menuCampos )
-        #     self.idwizard = backup_idwizard[:]
-
-        #     # Altero os parametros
-        #     self.SetValue("aCab", "Filial", arrayLine[1])
-        #     self.SetValue("aCab", "Cont. Por", arrayLine[2])
-        #     self.SetValue("aCab", "Cont. Ing", arrayLine[3])
-        #     self.SetValue("aCab", "Cont. Esp", arrayLine[4])
-
-        #     # Confirma a gravação de Edição
-        #     self.SetButton("Salvar")
-        #     self.idwizard = backup_idwizard[:]
-        # self.LogOff()
-
-        # self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        # self.Program(self.config.routine)
-
-    def RestoreParameters(self):
-        """
-        Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
-        Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
-        """
-        return None
-        # self.idwizard = []
-        # self.LogOff()
-
-        # self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-
-        # # Escolhe a opção do Menu Lateral
-        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
-
-        # # Clica no botão/icone pesquisar
-        # self.SetButton("Pesquisar")
-
-        # backup_idwizard = self.idwizard[:]
-
-        # for line in self.camposCache:
-        #     # Preenche o campo de Pesquisa
-        #     self.SetValue("aCab", "Procurar por:", line['Procurar por:'])
-
-        #     # Confirma a busca
-        #     self.SetButton("Buscar")
-
-        #     # Clica no botão/icone Editar
-        #     self.SetButton("Editar")
-
-        #     #self.idwizard = backup_idwizard[:]
-
-        #     self.SetValue("aCab", 'Cont. Por', line['Cont. Por'])
-        #     self.SetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
-        #     self.SetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
-
-        #     # Confirma a gravação de Edição
-        #     self.SetButton("Salvar")
-        #     self.idwizard = backup_idwizard[:]
-
-    def close_modal(self):
-        """
-        This method closes the last open modal in the screen.
-        """
-        soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
-            buttons = modals[0].select(".tbrowsebutton")
-            if buttons:
-                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
-                time.sleep(0.5)
-                selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
-                if close_button:
-                    try:
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(close_button))))
-                        self.click(selenium_close_button())
-                    except:
-                        pass
-
     def check_mask(self, element):
         """
-        Checks wether the element has a numeric mask.
+        [Internal]
+
+        Checks whether the element has a mask or not.
+
+        :param element: The element that must be checked.
+        :type element: Selenium object
+
+        :return: Boolean if element has a mask or not.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_mask(my_element)
         """
         reg = (r"^[1-9.\/-:]+|(@. )[1-9.\/-:]+")
         mask = element.get_attribute("picture")
@@ -1507,7 +1639,21 @@ class WebappInternal(Base):
 
     def remove_mask(self, string):
         """
+        [Internal]
+
         Removes special characters from received string.
+
+        :param string: The string that would have its characters removed.
+        :type string: str
+
+        :return: The string with its special characters removed.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> value_without_mask = self.remove_mask("111-111.111")
+        >>> # value_without_mask == "111111111"
         """
         caracter = (r'[.\/-]')
         if string[0:4] != 'http':
@@ -1520,7 +1666,26 @@ class WebappInternal(Base):
     def SetKey(self, key, grid=False, grid_number=1):
         """
         Press the desired key on the keyboard on the focused element.
+
         Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete
+
+        :param key: Key that would be pressed
+        :type key: str
+        :param grid: Boolean if action must be applied on a grid. (Usually with DOWN key)
+        :type grid: bool
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetKey("ENTER")
+        >>> #--------------------------------------
+        >>> # Calling the method on a grid:
+        >>> oHelper.SetKey("DOWN", grid=True)
+        >>> #--------------------------------------
+        >>> # Calling the method on the second grid on the screen:
+        >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """
         supported_keys = {
             "F1" : Keys.F1,
@@ -1584,29 +1749,70 @@ class WebappInternal(Base):
 
     def SetFocus(self, field):
         """
-        Set the current focus on the desired field.
+        Sets the current focus on the desired field.
+
+        :param field: The field that must receive the focus.
+        :type field: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetFocus("A1_COD")
         """
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
         self.set_element_focus(element())
 
-    def check_checkbox(self,campo,valor):
-        print('time.sleep(1) - 2415')
+    def check_checkbox(self, field, value):
+        """
+        [Internal]
+
+        Sets a value to a Checkbox.
+
+        :param field: The field that would receive the input.
+        :type field: str
+        :param value: The value that must be on the checkbox.
+        :type value: bool
+
+        :return: The element that changed value.
+        :rtype: Selenium object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> element = self.check_checkbox("CheckBox1", True)
+        """
         time.sleep(1)
         element = ''
         lista = self.driver.find_elements(By.CSS_SELECTOR, ".tcheckbox.twidget")
         for line in lista:
-            if line.is_displayed() and ((line.get_attribute('name') != None and line.get_attribute('name').split('->')[1] == campo) or  line.text.strip() == campo.strip()):
+            if line.is_displayed() and ((line.get_attribute('name') != None and line.get_attribute('name').split('->')[1] == field) or  line.text.strip() == field.strip()):
                 checked = "CHECKED" in line.get_attribute('class').upper()
-                if valor != checked:
+                if value != checked:
                     element = line
                     self.click(line)
-                    print('time.sleep(1) - 2425')
                     time.sleep(1)
                     break
         return element
 
-    def check_radio(self,campo,valor):
-        print('time.sleep(1) - 2431')
+    def check_radio(self, field, value):
+        """
+        [Internal]
+
+        Sets a value to a RadioButton.
+
+        :param field: The field that would receive the input.
+        :type field: str
+        :param value: The value that must be on the radio button.
+        :type value: bool
+
+        :return: The element that changed value.
+        :rtype: Selenium object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> element = self.check_radio("RadioButton1", True)
+        """
         time.sleep(1)
         element = ''
         lista = self.driver.find_elements(By.CSS_SELECTOR, ".tradiobutton.twidget")
@@ -1614,25 +1820,57 @@ class WebappInternal(Base):
             if line.is_displayed():
                 lista2 = line.find_elements(By.CSS_SELECTOR, ".tradiobuttonitem")
                 for line2 in lista2:
-                    if line2.text.upper() == campo.upper():
+                    if line2.text.upper() == field.upper():
                         element = line2
                         self.click(line2)
-                        print('time.sleep(1) - 2442')
                         time.sleep(1)
                         return element
 
-    def result_checkbox(self,campo,valor):
+    def result_checkbox(self, field, value):
+        """
+        [Internal]
+
+        Checks expected value of a Checkbox element.
+
+        :param field: The field whose value would be checked.
+        :type field: str
+        :param value: The expected value of the radio button.
+        :type value: bool
+
+        :return: Boolean if expected value was found on the element or not.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> assertion_value = self.result_checkbox("CheckBox1", True)
+        """
         result = False
-        print('time.sleep(1) - 2448')
         time.sleep(1)
         lista = self.driver.find_elements(By.CSS_SELECTOR, ".tcheckbox.twidget")
         for line in lista:
-            if line.is_displayed() and line.get_attribute('name').split('->')[1] == campo:
+            if line.is_displayed() and line.get_attribute('name').split('->')[1] == field:
                 if "CHECKED" in line.get_attribute('class').upper():
                     result = True
         return result
 
     def get_closing_button(self, is_advpl):
+        """
+        [Internal]
+
+        Gets the closing element based if the screen was made using MVC or not.
+
+        :param is_advpl: Boolean if screen was made using MVC structure or not.
+        :type is_advpl: bool
+
+        :return: The closing element.
+        :rtype: Selenium object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> closing_element = self.get_closing_button(True)
+        """
         if is_advpl:
             button = next(iter(self.web_scrap(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")), None)
         else:
@@ -1644,25 +1882,100 @@ class WebappInternal(Base):
             self.log_error("Button wasn't found.")
 
     def is_advpl(self):
+        """
+        [Internal]
+
+        Returns a boolean if screen was made using MVC structure or not.
+
+        :return: Boolean if screen was made using MVC structure or not.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_advpl = self.is_advpl()
+        """
         return self.element_exists(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")
 
     def clear_grid(self):
+        """
+        [Internal]
+
+        Empties the global grid list variables.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.clear_grid()
+        """
         self.grid_input = []
         self.grid_check = []
 
     def input_grid_appender(self, column, value, grid_number=0, new=False):
+        """
+        [Internal]
+
+        Adds a value to the input queue of a grid.
+
+        :param column: The column of the grid that would receive the input.
+        :type column: str
+        :param value: The value that would be inputted.
+        :type value: str
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 0
+        :type grid_number: int
+        :param new: Boolean value if this is a new line that should be added. - **Default:** 1
+        :type new: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.input_grid_appender("A1_COD", "000001", 0)
+        >>> # ---------------------------------------------
+        >>> # Calling the method for a new line:
+        >>> self.input_grid_appender("", "", 0, True)
+        """
         self.grid_input.append([column, value, grid_number, new])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
+        """
+        [Internal]
+
+        Adds a value to the check queue of a grid.
+
+        :param line: The line of the grid that would be checked.
+        :type line: int
+        :param column: The column of the grid that would be checked.
+        :type column: str
+        :param value: The value that is expected.
+        :type value: str
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 0
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_grid_appender(0,"A1_COD", "000001", 0)
+        """
         self.grid_check.append([line, column, value, grid_number])
 
     def LoadGrid(self):
-        x3_dictionaries = ()
-        inputs = list(map(lambda x: x[0], self.grid_input))
-        checks = list(map(lambda x: x[1], self.grid_check))
-        fields = list(filter(lambda x: "_" in x, inputs + checks))
-        if fields:
-            x3_dictionaries = self.get_x3_dictionaries(fields)
+        """
+        This method is responsible for running all actions of the input and check queues
+        of a grid. After running, the queues would be empty.
+
+        Must be called after SetValue and CheckResult calls that has the grid parameter set to True.
+
+        Usage:
+
+        >>> # After SetValue:
+        >>> oHelper.SetValue("A1_COD", "000001", grid=True)
+        >>> oHelper.LoadGrid()
+        >>> #--------------------------------------
+        >>> # After CheckResult:
+        >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
+        """
+        x3_dictionaries = self.create_x3_tuple()
 
         initial_layer = 0
         if self.grid_input:
@@ -1683,6 +1996,19 @@ class WebappInternal(Base):
         self.clear_grid()
 
     def create_x3_tuple(self):
+        """
+        [Internal]
+
+        Returns a tuple of dictionaries of field information based on all fields in the grid queues.
+
+        :return: A tuple containing the needed x3 information.
+        :rtype: Tuple of Dictionaries
+
+        Usage;
+
+        >>> # Calling the method:
+        >>> x3_dictionaries = self.create_x3_tuple()
+        """
         x3_dictionaries = ()
         inputs = list(map(lambda x: x[0], self.grid_input))
         checks = list(map(lambda x: x[1], self.grid_check))
@@ -1692,6 +2018,23 @@ class WebappInternal(Base):
         return x3_dictionaries
 
     def fill_grid(self, field, x3_dictionaries, initial_layer):
+        """
+        [Internal]
+
+        Fills the grid cell with the passed parameters.
+
+        :param field: An item from the grid's input queue
+        :type field: List of values
+        :param x3_dictionaries: Tuple of dictionaries containing information extracted from x3.
+        :type x3_dictionaries: Tuple of dictionaries
+        :param initial_layer: The initial layer of elements of Protheus Webapp
+        :type initial_layer: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.fill_grid(["A1_COD", "000001", 0, False], x3_dictionaries, 0)
+        """
         field_to_label = {}
         field_to_valtype = {}
         field_to_len = {}
@@ -1834,7 +2177,17 @@ class WebappInternal(Base):
     def get_selenium_column_element(self, xpath):
         """
         [Internal]
+
+        Tries to get the selenium element out of a grid column.
         Workaround method to be used instead of a lambda function on fill_grid method.
+
+        :param xpath: The xpath to the column.
+        :type xpath: str
+
+        Usage:
+
+        >>> #  Calling the method:
+        >>> self.get_selenium_column_element(xpath)
         """
         try:
             return self.driver.find_element_by_xpath(xpath)
@@ -1844,7 +2197,26 @@ class WebappInternal(Base):
     def try_recover_lost_line(self, field, grid_id, row, headers, field_to_label):
         """
         [Internal]
+
+        Tries to recover the position if a new line is lost.
+
         Workaround method to keep trying to get the right row fill_grid method.
+
+        :param field: An item from the grid's input queue
+        :type field: List of values
+        :param grid_id: The grid's ID
+        :type grid_id: str
+        :param row: The current row
+        :type row: Beautiful Soup object
+        :param headers: List of dictionaries with each grid's headers
+        :type headers: List of Dictionaries
+        :param field_to_label: Dictionary from the x3 containing the field to label relationship.
+        :type field_to_label: Dict
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
         """
         print("Recovering lost line")
         while int(row.attrs["id"]) < self.grid_counters[grid_id]:
@@ -1871,6 +2243,26 @@ class WebappInternal(Base):
             return False
 
     def check_grid(self, field, x3_dictionaries, get_value=False):
+        """
+        [Internal]
+
+        Checks the grid cell with the passed parameters.
+
+        :param field: An item from the grid's check queue
+        :type field: List of values
+        :param x3_dictionaries: Tuple of dictionaries containing information extracted from x3.
+        :type x3_dictionaries: Tuple of dictionaries
+        :param get_value: Boolean value if check_grid should return its value.
+        :type get_value: bool
+
+        :return: If get_value flag is True, it will return the captured value.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
+        """
         field_to_label = {}
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
@@ -1929,7 +2321,22 @@ class WebappInternal(Base):
             else:
                 self.log_error("Couldn't find grids.")
 
-    def new_grid_line(self, field, addGridLineCounter=True):
+    def new_grid_line(self, field, add_grid_line_counter=True):
+        """
+        [Internal]
+
+        Creates a new line on the grid.
+
+        :param field: An item from the grid's input queue
+        :type field: List of values
+        :param add_grid_line_counter: Boolean if counter should be incremented when method is called. - **Default:** True
+        :type add_grid_line_counter: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.new_grid_line(["", "", 0, True])
+        """
         soup = self.get_current_DOM()
 
         containers = soup.select(".tmodaldialog.twidget")
@@ -1962,7 +2369,7 @@ class WebappInternal(Base):
                             print("Waiting for the new line to show")
                             time.sleep(1)
 
-                        if (addGridLineCounter):
+                        if (add_grid_line_counter):
                             self.add_grid_row_counter(grids[field[2]])
                     else:
                         self.log_error("Couldn't find columns.")
@@ -1972,7 +2379,6 @@ class WebappInternal(Base):
                 self.log_error("Couldn't find grids.")
 
     def get_x3_dictionaries(self, fields):
-
         prefixes = list(set(map(lambda x:x.split("_")[0] + "_" if "_" in x else "", fields)))
         regex = self.generate_regex_by_prefixes(prefixes)
 
@@ -2011,6 +2417,18 @@ class WebappInternal(Base):
             values = list(map(lambda x: x[0], enumerate(labels)))
             headers.append(dict(zip(keys, values)))
         return headers
+
+    def add_grid_row_counter(self, grid):
+        """
+        [Internal]
+        Adds the counter of rows to the global dictionary.
+        """
+        grid_id = grid.attrs["id"]
+
+        if grid_id not in self.grid_counters:
+            self.grid_counters[grid_id] = 0
+        else:
+            self.grid_counters[grid_id]+=1
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
         endtime = time.time() + 10
@@ -2122,18 +2540,6 @@ class WebappInternal(Base):
             print(language)
         return language
 
-    def add_grid_row_counter(self, grid):
-        """
-        [Internal]
-        Adds the counter of rows to the global dictionary.
-        """
-        grid_id = grid.attrs["id"]
-
-        if grid_id not in self.grid_counters:
-            self.grid_counters[grid_id] = 0
-        else:
-            self.grid_counters[grid_id]+=1
-
     def children_element_count(self, element_selector, children_selector):
         """
         [Internal]
@@ -2239,6 +2645,110 @@ class WebappInternal(Base):
         #If label exists but there is no element associated with it => return empty list
         else:
             return []
+
+    def SetParameters(self, arrayParameters):
+        #"""
+        #Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
+        #"""
+        # self.idwizard = []
+        # self.LogOff()
+
+        # #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        # self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
+
+        # # Escolhe a opção do Menu Lateral
+        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # # Clica no botão/icone pesquisar
+        # self.SetButton("Pesquisar")
+
+        # array = arrayParameters
+
+        # backup_idwizard = self.idwizard[:]
+
+        # for arrayLine in array:
+
+        #     # Preenche o campo de Pesquisa
+        #     self.SetValue("aCab", "Procurar por:", arrayLine[0])
+
+        #     # Confirma a busca
+        #     self.SetButton("Buscar")
+
+        #     # Clica no botão/icone Editar
+        #     self.SetButton("Editar")
+
+        #     # Faz a captura dos elementos dos campos
+        #     print('time.sleep(5) - 2204')
+        #     time.sleep(5)
+        #     content = self.driver.page_source
+        #     soup = BeautifulSoup(content,"html.parser")
+
+        #     menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+
+        #     for line in menuCampos:
+        #         if not menuCampos[line]:
+        #             RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
+        #             cache = self.get_web_value(RetId)
+        #             self.lencache = len(cache)
+        #             cache = cache.strip()
+        #             menuCampos[line] = cache
+
+        #     self.camposCache.append( menuCampos )
+        #     self.idwizard = backup_idwizard[:]
+
+        #     # Altero os parametros
+        #     self.SetValue("aCab", "Filial", arrayLine[1])
+        #     self.SetValue("aCab", "Cont. Por", arrayLine[2])
+        #     self.SetValue("aCab", "Cont. Ing", arrayLine[3])
+        #     self.SetValue("aCab", "Cont. Esp", arrayLine[4])
+
+        #     # Confirma a gravação de Edição
+        #     self.SetButton("Salvar")
+        #     self.idwizard = backup_idwizard[:]
+        # self.LogOff()
+
+        # self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
+        # self.Program(self.config.routine)
+        return None
+
+    def RestoreParameters(self):
+        #"""
+        #Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
+        #Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
+        #"""
+        # self.idwizard = []
+        # self.LogOff()
+
+        # self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+
+        # # Escolhe a opção do Menu Lateral
+        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+
+        # # Clica no botão/icone pesquisar
+        # self.SetButton("Pesquisar")
+
+        # backup_idwizard = self.idwizard[:]
+
+        # for line in self.camposCache:
+        #     # Preenche o campo de Pesquisa
+        #     self.SetValue("aCab", "Procurar por:", line['Procurar por:'])
+
+        #     # Confirma a busca
+        #     self.SetButton("Buscar")
+
+        #     # Clica no botão/icone Editar
+        #     self.SetButton("Editar")
+
+        #     #self.idwizard = backup_idwizard[:]
+
+        #     self.SetValue("aCab", 'Cont. Por', line['Cont. Por'])
+        #     self.SetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
+        #     self.SetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
+
+        #     # Confirma a gravação de Edição
+        #     self.SetButton("Salvar")
+        #     self.idwizard = backup_idwizard[:]
+        return None
 
     def SetButtonTooltip(self, seek, soup, tag, cClass):
         #Identifica o ID do Botão sem Rótulo/Texto.
