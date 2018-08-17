@@ -345,6 +345,25 @@ class WebappInternal(Base):
 
         self.SetButton(self.language.close)
 
+    def get_language(self):
+        """
+        [Internal]
+
+        Gets the current language of the html.
+
+        :return: The current language of the html.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> language = self.get_language()
+        """
+        language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
+        if self.console_log:
+            print(language)
+        return language
+
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
@@ -1185,6 +1204,28 @@ class WebappInternal(Base):
             else:
                 self.log_error(f"Error - Menu Item does not exist: {menuitem}")
             count+=1
+
+    def children_element_count(self, element_selector, children_selector):
+        """
+        [Internal]
+
+        Returns the count of elements of a certain CSS Selector that exists within a certain element located also via CSS Selector.
+
+        :param element_selector: The selector to find the first element.
+        :type element_selector: str
+        :param children_selector: The selector to find the children elements inside of the first element.
+        :type children_selector: str
+
+        :return: The count of elements matching the children_selector inside of element_selector.
+        :rtype: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.children_element_count(".tmenu", ".tmenuitem")
+        """
+        script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
+        return int(self.driver.execute_script(script))
 
     def SetButton(self, button, sub_item=""):
         """
@@ -2379,6 +2420,24 @@ class WebappInternal(Base):
                 self.log_error("Couldn't find grids.")
 
     def get_x3_dictionaries(self, fields):
+        """
+        [Internal]
+
+        Generates the dictionaries with field comparisons from the x3 file,
+
+        Dictionaries:Field to Type, Field to Size, Field to Title.
+
+        :param fields: List of fields that must be located in x3.
+        :type fields: List of str
+
+        :return: The three x3 dictionaries in a Tuple.
+        :trype: Tuple of Dictionary
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> x3_dictionaries = self.get_x3_dictionaries(field_list)
+        """
         prefixes = list(set(map(lambda x:x.split("_")[0] + "_" if "_" in x else "", fields)))
         regex = self.generate_regex_by_prefixes(prefixes)
 
@@ -2402,6 +2461,19 @@ class WebappInternal(Base):
         return (dict_['Tipo'], dict_['Tamanho'], dict_['Título'])
 
     def generate_regex_by_prefixes(self, prefixes):
+        """
+        [Internal]
+
+        Returns a regex string created by combining all field prefixes.
+
+        :param prefixes: Prefixes of fields to be combined in a regex.
+        :type prefixes: List of str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> regex = self.generate_regex_by_prefixes(field_prefixes)
+        """
         filtered_prefixes = list(filter(lambda x: x != "", prefixes))
         regex = ""
         for prefix in filtered_prefixes:
@@ -2410,6 +2482,22 @@ class WebappInternal(Base):
         return regex[:-1]
 
     def get_headers_from_grids(self, grids):
+        """
+        [Internal]
+
+        Returns the headers of each grid in *grids* parameter.
+
+        :param grids: The grids to extract the headers.
+        :type grids: List of BeautifulSoup objects
+
+        :return: List of Dictionaries with each header value and index.
+        :rtype: List of Dict
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> headers = self.get_headers_from_grids(grids)
+        """
         headers = []
         for item in grids:
             labels = item.select("thead tr label")
@@ -2421,7 +2509,16 @@ class WebappInternal(Base):
     def add_grid_row_counter(self, grid):
         """
         [Internal]
+
         Adds the counter of rows to the global dictionary.
+
+        :param grid: The grid whose rows are being controlled.
+        :type grid: BeautifulSoup object.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.add_grid_row_counter(grid)
         """
         grid_id = grid.attrs["id"]
 
@@ -2431,6 +2528,29 @@ class WebappInternal(Base):
             self.grid_counters[grid_id]+=1
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
+        """
+        [Internal]
+
+        Waits until the desired element is located on the screen.
+
+        :param term: The first search term. A text or a selector.
+        :type term: str
+        :param scrap_type: The type of webscraping. - **Default:** enum.ScrapType.TEXT
+        :type scrap_type: enum.ScrapType.
+        :param presence: If the element should exist or not in the screen. - **Default:** False
+        :type presence: bool
+        :param position: If the element should exist at a specific position. e.g. The fourth button. - **Default:** 0
+        :type position: int
+        :param optional_term: The second search term. A selector used in MIXED webscraping. - **Default:** None
+        :type optional_term: str
+        :param main_container: The selector of a container element that has all other elements. - **Default:** None
+        :type main_container: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        """
         endtime = time.time() + 10
         if self.console_log:
             print("Waiting...")
@@ -2452,6 +2572,33 @@ class WebappInternal(Base):
                     time.sleep(0.1)
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
+        """
+        [Internal]
+
+        Waits until the desired element is located on the screen or until the timeout is met.
+
+        :param term: The first search term. A text or a selector.
+        :type term: str
+        :param scrap_type: The type of webscraping. - **Default:** enum.ScrapType.TEXT
+        :type scrap_type: enum.ScrapType.
+        :param timeout: The maximum amount of time of wait. - **Default:** 5.0
+        :type timeout: float
+        :param timeout: The amount of time each step should wait. - **Default:** 0.1
+        :type timeout: float
+        :param presence: If the element should exist or not in the screen. - **Default:** False
+        :type presence: bool
+        :param position: If the element should exist at a specific position. e.g. The fourth button. - **Default:** 0
+        :type position: int
+        :param optional_term: The second search term. A selector used in MIXED webscraping. - **Default:** None
+        :type optional_term: str
+        :param main_container: The selector of a container element that has all other elements. - **Default:** None
+        :type main_container: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
+        """
         success = False
         if presence:
             endtime = time.time() + timeout
@@ -2477,11 +2624,38 @@ class WebappInternal(Base):
                     time.sleep(0.1)
 
     def get_selected_row(self, rows):
+        """
+        [Internal]
+
+        From a list of rows, filter the selected one.
+
+        :param rows: List of rows.
+        :type rows: List of Beautiful Soup objects
+
+        :return: The selected row.
+        :rtype: Beautiful Soup object.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> selected_row = self.get_selected_row(rows)
+        """
         filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
         if filtered_rows:
             return next(iter(filtered_rows))
 
-    def SetFilePath(self,value):
+    def SetFilePath(self, value):
+        """
+        Fills the path screen with desired path.
+
+        :param value: Path to be inputted.
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetFilePath(r"C:\\folder")
+        """
         self.wait_element("Nome do Arquivo:")
         element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
         if element:
@@ -2495,6 +2669,17 @@ class WebappInternal(Base):
                     break
 
     def MessageBoxClick(self, button_text):
+        """
+        Clicks on desired button inside a Messagebox element.
+
+        :param button_text: Desired button to click.
+        :type button_text: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.MessageBoxClick("Ok")
+        """
         self.wait_element(".messagebox-container", enum.ScrapType.CSS_SELECTOR)
 
         content = self.driver.page_source
@@ -2508,6 +2693,22 @@ class WebappInternal(Base):
                 self.click(selenium_button)
 
     def get_enchoice_button_ids(self, layer):
+        """
+        [Internal]
+
+        If current layer level has an enchoice, returns all buttons' ids.
+
+        :param layer: Current layer level that the application is.
+        :type layer: int
+
+        :return: List with enchoice's buttons' ids.
+        :rtype: List of str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.get_enchoice_button_ids(current_layer)
+        """
         try:
             soup = self.get_current_DOM()
             current_layer = self.zindex_sort(soup.select(".tmodaldialog"), False)[layer - 1]
@@ -2520,7 +2721,19 @@ class WebappInternal(Base):
 
     def CheckView(self, text, element_type="help"):
         """
-        Checks if a certain text is present in the screen at the time.
+        Checks if a certain text is present in the screen at the time and takes an action.
+
+        "help" - closes element.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param element_type: Type of element. - **Default:** "help"
+        :type element_type: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckView("Processing")
         """
         if element_type == "help":
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay")
@@ -2529,30 +2742,24 @@ class WebappInternal(Base):
             else:
                 self.SetButton(self.language.close)
 
-    def get_language(self):
-        """
-        [Internal]
-        [returns String]
-        Gets the current language of the html.
-        """
-        language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
-        if self.console_log:
-            print(language)
-        return language
-
-    def children_element_count(self, element_selector, children_selector):
-        """
-        [Internal]
-        [returns Int]
-        Returns the count of elements of a certain CSS Selector that exists within a certain element located also via CSS Selector.
-        """
-        script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
-        return int(self.driver.execute_script(script))
-
     def try_send_keys(self, element_function, key, try_counter=0):
         """
         [Internal]
-        Try to send value to element
+
+        Tries to send value to element using different techniques.
+        Meant to be used inside of a loop.
+
+        :param element_function: The function that returns the element that would receive the value.
+        :type element_function: function object
+        :param key: The value that would be sent to the element.
+        :type key: str or selenium.webdriver.common.keys
+        :param try_counter: This counter will decide which technique should be used. - **Default:** 0
+        :type try_counter; int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
         self.wait.until(EC.visibility_of(element_function()))
         if try_counter == 0:

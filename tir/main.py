@@ -77,7 +77,19 @@ class Webapp():
 
     def CheckView(self, text, element_type="help"):
         """
-        Checks if a certain text is present in the screen at the time.
+        Checks if a certain text is present in the screen at the time and takes an action.
+
+        "help" - closes element.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param element_type: Type of element. - **Default:** "help"
+        :type element_type: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckView("Processing")
         """
         self.__webapp.CheckView(text, element_type)
 
@@ -171,6 +183,20 @@ class Webapp():
         """
         self.__webapp.LogOff()
 
+    def MessageBoxClick(self, button_text):
+        """
+        Clicks on desired button inside a Messagebox element.
+
+        :param button_text: Desired button to click.
+        :type button_text: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.MessageBoxClick("Ok")
+        """
+        self.__webapp.MessageBoxClick(button_text)
+
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
@@ -256,6 +282,20 @@ class Webapp():
         >>> oHelper.SetButton("Other Actions", "Process")
         """
         self.__webapp.SetButton(button, sub_item)
+
+    def SetFilePath(self, value):
+        """
+        Fills the path screen with desired path.
+
+        :param value: Path to be inputted.
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetFilePath(r"C:\\folder")
+        """
+        self.__webapp.SetFilePath(value)
 
     def SetFocus(self, field):
         """
