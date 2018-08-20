@@ -44,19 +44,22 @@ Pull requests are really helpful. They must be in the project's scope and avoid 
 
 **Ask us first** before starting to work on a pull request of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
 
-The methods must have docstrings describing its functionality and usage, and if any, parameters and returns. e.g.:
+Make sure to read the [Architecture](docs/ARCHITECTURE.md) document
+to understand how the tool was designed.
+
+The methods must have docstrings describing its functionality and usage, and if any, parameters, defaults and returns. e.g.:
 
 ```python
-def sum_numbers(self, first_number, second_number):
+def sum_numbers(self, first_number, second_number = 0):
     '''
     This method returns the sum of two numbers.
 
-    :param first_number: The First number to be added
+    :param first_number: The First number to be added.
     :type first_number: int
-    :param second_number: The Second number to be added
+    :param second_number: The Second number to be added. - **Default:** 0
     :type second_number: int
 
-    :return: The sum of the first_number and the second_number
+    :return: The sum of the first_number and the second_number.
     :rtype: int
 
     Usage:

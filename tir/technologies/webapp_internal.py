@@ -20,7 +20,7 @@ class WebappInternal(Base):
     """
     Internal implementation of Protheus Webapp class.
 
-    This class contains all methods defined to run Selenium Interface Tests on Protheus Webapp.
+    This class contains all the methods defined to run Selenium Interface Tests on Protheus Webapp.
 
     Internal methods should have the **[Internal]** tag and should not be accessible to the user.
 

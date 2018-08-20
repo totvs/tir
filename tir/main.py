@@ -1,5 +1,11 @@
 from tir.technologies.webapp_internal import WebappInternal
 
+"""
+This file must contain the definition of all User Classes.
+
+These classes will contain only calls to the Internal classes.
+"""
+
 class Webapp():
     """
     Instantiates the Webapp automated interface testing class.
