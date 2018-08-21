@@ -46,6 +46,8 @@ class LanguagePack:
         self.help = languagepack["Help"]
         self.problem = languagepack["Problem"]
         self.solution = languagepack["Solution"]
+        self.change_environment = languagepack["Change Environment"]
+        self.invert_selection = languagepack["Invert Selection"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -98,7 +100,9 @@ class LanguagePack:
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
             "Text Not Found": "Text Not Found.",
-            "User Not Authenticated": "User Not Authenticated"
+            "User Not Authenticated": "User Not Authenticated",
+            "Change Environment": "Change environment",
+            "Invert Selection": "Invert Selection"
         }
 
         brazilian_portuguese = {
@@ -149,7 +153,9 @@ class LanguagePack:
             "Grid Column Error": "Coluna não existe na grid atual.",
             "Grid Number Error": "Não existe essa quantidade de grids na tela atual.",
             "Text Not Found": "Texto não encontrado.",
-            "User Not Authenticated": "Usuário não autenticado"
+            "User Not Authenticated": "Usuário não autenticado",
+            "Change Environment": "Trocar módulo",
+            "Invert Selection": "Inverte Seleção"
         }
         russian = {
             "User": "Пользователь",
@@ -204,7 +210,9 @@ class LanguagePack:
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
             "Text Not Found": "Text Not Found",
-            "User Not Authenticated": "User Not Authenticated"
+            "User Not Authenticated": "User Not Authenticated",
+            "Change Environment": "Change environment",
+            "Invert Selection": "Invert Selection"
         }
 
         if language.lower() == "en-us":
