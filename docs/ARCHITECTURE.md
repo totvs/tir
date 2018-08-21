@@ -4,7 +4,7 @@ This tool was idealized to work with any type of TOTVS Web technology.
 
 To achieve this, the whole project is built in this particular architecture:
 
-![Architecture](docs/tir_architecture.png)
+![Architecture](tir_architecture.png)
 
 ## The Core:
 
@@ -32,7 +32,7 @@ This class must have the **internal** suffix after its name. At this point not a
 
 These classes are defined inside the **main.py** file and will simply invoke the calls for the internal classes.
 
-The code below shows us the naming conventions and the general idea of the **main,py** file.
+The code below shows us the naming conventions and the general idea of the **main.py** file.
 
 ```python
 from tir.technologies.technology_internal import TechnologyInternal
