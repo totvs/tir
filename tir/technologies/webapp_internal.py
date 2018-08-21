@@ -2229,21 +2229,21 @@ class WebappInternal(Base):
                     break
         return element
 
-    def check_radio(self,campo,valor):
-        print('time.sleep(1) - 2431')
-        time.sleep(1)
-        element = ''
-        lista = self.driver.find_elements(By.CSS_SELECTOR, ".tradiobutton.twidget")
-        for line in lista:
-            if line.is_displayed():
-                lista2 = line.find_elements(By.CSS_SELECTOR, ".tradiobuttonitem")
-                for line2 in lista2:
-                    if line2.text.upper() == campo.upper():
-                        element = line2
-                        self.click(line2)
-                        print('time.sleep(1) - 2442')
-                        time.sleep(1)
-                        return element
+    def check_radio(self, field, value):
+
+        label_element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label")), None)
+
+        if not label_element:
+            self.log_error("Couldn't find label element")
+
+        element = next(iter(label_element.find_parent().select("input")), None)
+        
+        if not label_element:
+            self.log_error("Couldn't find input element")
+
+        input_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+
+        self.click(input_element())
 
     def result_checkbox(self,campo,valor):
         result = False
