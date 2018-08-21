@@ -6,7 +6,7 @@ To achieve this, the whole project is built in this particular architecture:
 
 ![Architecture](tir_architecture.png)
 
-## The Core:
+## The core:
 
 The core classes are the main part of the TIR tool.
 
