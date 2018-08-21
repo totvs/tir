@@ -11,7 +11,7 @@ To achieve this, the whole project is built in this particular architecture:
 The core classes are the main part of the TIR tool.
 
 The **base.py** contains the methods that are shared among all
-technologies. Its this class that implements the communication with the browser and each other core classes to make sure that its functionalities are working properly.
+technologies. It is this class that implements the communication with the browser and each other core classes to make sure that its functionalities are working properly.
 
 The core classes:
 
