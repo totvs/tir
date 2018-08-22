@@ -1650,7 +1650,7 @@ class WebappInternal(Base):
                 else:
                     self.send_keys(element, Keys.ENTER)
         else:
-            self.log_error(f"Couldn't locate content: {contents_list}")
+            self.log_error(f"Couldn't locate content: {content_list}")
 
     def check_mask(self, element):
         """

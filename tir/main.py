@@ -378,7 +378,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, disabled=False, ignore_case=True):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True):
         """
         Sets value of an input element.
 
@@ -406,7 +406,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, disabled, ignore_case)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
