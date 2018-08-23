@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import inspect
 import os
+from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
@@ -324,24 +325,22 @@ class WebappInternal(Base):
         """
         self.log.initial_time = time.time()
         self.SetLateralMenu(self.language.menu_about)
+        self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
 
-        content = self.driver.page_source
-        soup = BeautifulSoup(content,"html.parser")
+        soup = self.get_current_DOM()
+        labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
 
-        modal = list(soup.select(".tmodaldialog")[0].children)
+        release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
+        database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
 
-        for panel in modal:
-            for element in panel.children:
-                if element.text.startswith("Release"):
-                    release = element.text.split(":")[1].strip()
-                    self.log.release = release
-                    self.log.version = release.split(".")[0]
-                elif element.text.startswith("Top DataBase"):
-                    self.log.database = element.text.split(":")[1].strip()
-                else:
-                    if self.log.version and self.log.release and self.log.database:
-                        break
+        if release_element:
+            release = release_element.text.split(":")[1].strip()
+            self.log.release = release
+            self.log.version = release.split(".")[0]
+
+        if database_element:
+            self.log.database = database_element.text.split(":")[1].strip()
 
         self.SetButton(self.language.close)
 
@@ -952,38 +951,79 @@ class WebappInternal(Base):
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
 
-    def get_function_from_stack(self):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
         [Internal]
 
-        Gets the function name that called the Webapp class from the call stack.
+        Returns a BeautifulSoup object list based on the search parameters.
+
+        Does not support ScrapType.XPATH as scrap_type parameter value.
+
+        :param term: The first search term. A text or a selector
+        :type term: str
+        :param scrap_type: The type of webscraping. - **Default:** enum.ScrapType.TEXT
+        :type scrap_type: enum.ScrapType.
+        :param optional_term: The second search term. A selector used in MIXED webscraping. - **Default:** None
+        :type optional_term: str
+        :param label: If the search is based on a label near the element. - **Default:** False
+        :type label: bool
+        :param main_container: The selector of a container element that has all other elements. - **Default:** None
+        :type main_container: str
+
+        :return: List of BeautifulSoup4 elements based on search parameters.
+        :rtype: List of BeautifulSoup4 objects
 
         Usage:
 
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
+        >>> #All buttons
+        >>> buttons = self.web_scrap(term="button", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        >>> #----------------#
+        >>> #Elements that contain the text "Example"
+        >>> example_elements = self.web_scrap(term="Example")
+        >>> #----------------#
+        >>> #Elements with class "my_class" and text "my_text"
+        >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
+        try:
+            endtime = time.time() + 60
+            container =  None
+            while(time.time() < endtime and container is None):
+                soup = self.get_current_DOM()
 
-    def search_stack(self, function):
-        """
-        [Internal]
+                #self.search_error_log(soup)
+                self.search_alert_message(soup)
 
-        Returns True if passed function is present in the call stack.
+                if self.config.log_file:
+                    with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
+                        text_file.write(f" HTML CONTENT: {str(soup)}")
 
-        :param function: Name of the function
-        :type function: str
+                container_selector = self.base_container
+                if (main_container is not None):
+                    container_selector = main_container
 
-        :return: Boolean if passed function is present or not in the call stack.
-        :rtype: bool
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-        Usage:
+                container = next(iter(containers), None)
 
-        >>> # Calling the method:
-        >>> is_present = self.search_stack("MATA020")
-        """
-        return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
+            if container is None:
+                raise Exception("Couldn't find container")
+
+            if (scrap_type == enum.ScrapType.TEXT):
+                if label:
+                    return self.find_label_element(term, container)
+                else:
+                    return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
+            elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
+                return container.select(term)
+            elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
+                return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
+            elif (scrap_type == enum.ScrapType.SCRIPT):
+                script_result = self.driver.execute_script(term)
+                return script_result if isinstance(script_result, list) else []
+            else:
+                return []
+        except Exception as e:
+            self.log_error(str(e))
 
     def search_error_log(self,soup):
         """
@@ -1009,7 +1049,7 @@ class WebappInternal(Base):
                     self.log.save_file()
                     self.assertTrue(False, self.language.messages.error_log_print)
 
-    def search_error_message(self,soup):
+    def search_alert_message(self,soup):
         """
         [Internal]
 
@@ -1021,32 +1061,42 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Calling the method:
-        >>> self.search_error_message(soup)
+        >>> self.search_alert_message(soup)
         """
-        lista = soup.find_all('div', class_=('workspace-container')) # Leva como base div inicial
-        if lista:
-            lista = lista[0].contents # Pega filhos da tela principal
-            for line in lista:
-                message = ""
-                if line.text == self.language.messages.error_msg_required:
-                    message = self.language.messages.error_msg_required
-                elif self.language.help in line.text and self.language.problem in line.text:
-                    message = line.text
+        message = ""
+        top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog"), True)), None)
+        if not top_layer:
+            return None
 
-                if message:
-                    is_advpl = self.is_advpl()
+        icon = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
+        if not icon:
+            return None
 
-                    self.driver.save_screenshot( self.get_function_from_stack() +".png")
-                    self.SetButton(self.language.close)
+        label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text, top_layer.select(".tsay label")))
 
-                    close_element = self.get_closing_button(is_advpl)
+        if self.language.messages.error_msg_required in label:
+            message = self.language.messages.error_msg_required
+        elif "help:" in label.lower() and self.language.problem in label:
+            message = label
+        else:
+            return None
 
-                    self.click(close_element)
-                    if not is_advpl:
-                        self.SetButton(self.language.leave_page)
-                    self.log.new_line(False, message)
-                    self.log.save_file()
-                    self.assertTrue(False, message)
+        self.driver.save_screenshot( self.get_function_from_stack() +".png")
+        self.log_error(message)
+
+    def get_function_from_stack(self):
+        """
+        [Internal]
+
+        Gets the function name that called the Webapp class from the call stack.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.get_function_from_stack()
+        """
+        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
+        return stack_item.function if stack_item and stack_item.function else "function_name"
 
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
@@ -1129,6 +1179,10 @@ class WebappInternal(Base):
 
             if scrap_type != enum.ScrapType.XPATH:
                 soup = self.get_current_DOM()
+
+                #self.search_error_log(soup)
+                self.search_alert_message(soup)
+
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container

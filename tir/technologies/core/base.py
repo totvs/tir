@@ -449,7 +449,7 @@ class Base(unittest.TestCase):
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
-        #self.Restart()
+        self.Restart()
         self.assertTrue(False, log_message)
 
     def move_to_element(self, element):
@@ -571,6 +571,23 @@ class Base(unittest.TestCase):
             actions.click()
             actions.send_keys(arg)
             actions.perform()
+
+    def search_stack(self, function):
+        """
+        Returns True if passed function is present in the call stack.
+
+        :param function: Name of the function
+        :type function: str
+
+        :return: Boolean if passed function is present or not in the call stack.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_present = self.search_stack("MATA020")
+        """
+        return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
 
     def set_element_focus(self, element):
         """
