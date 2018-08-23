@@ -360,8 +360,6 @@ class WebappInternal(Base):
         >>> language = self.get_language()
         """
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
-        if self.console_log:
-            print(language)
         return language
 
     def Program(self, program_name):
@@ -715,8 +713,8 @@ class WebappInternal(Base):
                     else:
                         current_value = self.get_web_value(input_field()).strip()
 
-                    if self.console_log and current_value != "":
-                        print(current_value)
+                    if current_value != "":
+                        print(f"Current field value: {current_value}")
 
                 if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
@@ -1112,7 +1110,7 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
-        if self.console_log:
+        if self.config.debug_log:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
@@ -1310,12 +1308,12 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1)
 
         except ValueError as error:
-            if self.console_log:
-                print(error)
-            self.log_error("Campo %s não encontrado" %error.args[0])
+            print(error)
+            self.log_error(f"Button {button} could not be located.")
+        except AssertionError:
+            raise
         except Exception as error:
-            if self.console_log:
-                print(error)
+            print(error)
             self.log_error(str(error))
 
     def click_sub_menu(self, item):
@@ -1536,8 +1534,7 @@ class WebappInternal(Base):
             self.send_keys(element(), Keys.ENTER)
             self.SetButton("Ok")
         except:
-            if self.console_log:
-                print("Não encontrou o campo Pesquisar")
+            print("Search field could not be located.")
 
     def ClickFolder(self, folder_name):
         """
@@ -2551,24 +2548,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
-        endtime = time.time() + 10
-        if self.console_log:
-            print("Waiting...")
+        endtime = time.time() + self.config.timeout
+
         if presence:
-            while not self.element_exists(term, scrap_type, position, optional_term, main_container):
-                print('time.sleep(0.1) 2901')
+            while (not self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
+                print("Waiting...")
                 time.sleep(0.1)
         else:
-            while self.element_exists(term, scrap_type, position, optional_term, main_container):
-                print('time.sleep(0.1) 2905')
+            while (self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
+                print("Waiting...")
                 time.sleep(0.1)
 
+        presence_endtime = time.time() + 10
         if presence:
             print("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed() and time.time() < endtime):
+                while(not sel_element().is_displayed() and time.time() < presence_endtime):
                     time.sleep(0.1)
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
@@ -2715,9 +2712,8 @@ class WebappInternal(Base):
             buttons = list(filter(lambda x: x.text.strip() != "", current_layer.select(".tpanel button")))
             return list(map(lambda x: x.parent.attrs["id"], buttons))
         except Exception as error:
-            if self.console_log:
-                print(error)
-                return []
+            print(error)
+            return []
 
     def CheckView(self, text, element_type="help"):
         """
