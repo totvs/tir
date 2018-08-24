@@ -990,8 +990,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and container is None):
                 soup = self.get_current_DOM()
 
-                #self.search_error_log(soup)
-                self.search_alert_message(soup)
+                self.search_for_errors(soup)
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1025,11 +1024,11 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
 
-    def search_error_log(self,soup):
+    def search_for_errors(self,soup):
         """
         [Internal]
 
-        Logs error log if it is present on the screen.
+        Searches for errors and alerts in the screen.
 
         :param soup: Beautiful Soup object to be checked.
         :type soup: Beautiful Soup object
@@ -1037,49 +1036,40 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Calling the method:
-        >>> self.search_error_log(soup)
-        """
-        lista = soup.find_all('div', class_=('tsay twidget transparent dict-tsay align-left')) # Verifica de ocorreu error log antes de continuar
-        if lista:
-            for line in lista:
-                if (line.string == self.language.messages.error_log):
-                    self.SetButton(self.language.details)
-                    self.driver.save_screenshot( self.get_function_from_stack() +".png")
-                    self.log.new_line(False, self.language.messages.error_log_print)
-                    self.log.save_file()
-                    self.assertTrue(False, self.language.messages.error_log_print)
-
-    def search_alert_message(self,soup):
-        """
-        [Internal]
-
-        Logs error message if it is present on the screen.
-
-        :param soup: Beautiful Soup object to be checked.
-        :type soup: Beautiful Soup object
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.search_alert_message(soup)
+        >>> self.search_for_errors(soup)
         """
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog"), True)), None)
         if not top_layer:
             return None
 
-        icon = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
-        if not icon:
+        icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
+        icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
+        if not icon_alert and not icon_error_log:
             return None
 
-        label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text, top_layer.select(".tsay label")))
+        if icon_alert:
+            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text, top_layer.select(".tsay label")))
 
-        if self.language.messages.error_msg_required in label:
-            message = self.language.messages.error_msg_required
-        elif "help:" in label.lower() and self.language.problem in label:
-            message = label
-        else:
-            return None
+            if self.language.messages.error_msg_required in label:
+                message = self.language.messages.error_msg_required
+            elif "help:" in label.lower() and self.language.problem in label:
+                message = label
+            else:
+                return None
+
+        elif icon_error_log:
+            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text, top_layer.select(".tsay label")))
+            textarea = next(iter(top_layer.select("textarea")), None)
+            textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
+
+            error_paragraphs = textarea_value.split("\n\n")
+            error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
+            message = error_message.replace("\n", " ")
+
+            button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
+            self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
+            time.sleep(1)
 
         self.driver.save_screenshot( self.get_function_from_stack() +".png")
         self.log_error(message)
@@ -1180,8 +1170,7 @@ class WebappInternal(Base):
             if scrap_type != enum.ScrapType.XPATH:
                 soup = self.get_current_DOM()
 
-                #self.search_error_log(soup)
-                self.search_alert_message(soup)
+                self.search_for_errors(soup)
 
                 container_selector = self.base_container
                 if (main_container is not None):
