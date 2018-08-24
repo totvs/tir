@@ -156,49 +156,33 @@ class WebappInternal(Base):
         >>> self.user_screen()
         """
         self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-        current_textarea_value = ""
-        initial_pos = 0
-        loop_control = True
-        while(loop_control):
-            soup = self.get_current_DOM()
 
-            user_element = next(iter(soup.select("[name='cGetUser']")), None)
-            if user_element is None:
-                self.log_error("Couldn't find User input element.")
+        soup = self.get_current_DOM()
 
-            user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
-            self.double_click(user())
-            self.send_keys(user(), Keys.HOME)
-            self.send_keys(user(), self.config.user)
+        user_element = next(iter(soup.select("[name='cGetUser']")), None)
+        if user_element is None:
+            self.log_error("Couldn't find User input element.")
 
-            password_element = next(iter(soup.select("[name='cGetPsw']")), None)
-            if password_element is None:
-                self.log_error("Couldn't find User input element.")
+        user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
+        self.double_click(user())
+        self.send_keys(user(), Keys.HOME)
+        self.send_keys(user(), self.config.user)
 
-            password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element))
-            self.double_click(password())
-            self.send_keys(password(), Keys.HOME)
-            self.send_keys(password(), self.config.password)
+        password_element = next(iter(soup.select("[name='cGetPsw']")), None)
+        if password_element is None:
+            self.log_error("Couldn't find User input element.")
 
-            button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
-            if button_element is None:
-                self.log_error("Couldn't find Enter button.")
+        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element.find_parent()))
+        self.double_click(password())
+        self.send_keys(password(), Keys.HOME)
+        self.send_keys(password(), self.config.password)
 
-            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
-            self.click(button())
-            time.sleep(2)
-            self.wait_element(term="Login", scrap_type=enum.ScrapType.MIXED, optional_term=".tsay label", position=initial_pos, main_container="body")
+        button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
+        if button_element is None:
+            self.log_error("Couldn't find Enter button.")
 
-            initial_pos += 1
-            script = f" element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value.indexOf('{self.language.messages.user_not_authenticated}') != -1;"
-            new_textarea_value = str(self.driver.execute_script("element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value"))
-
-            while(current_textarea_value == new_textarea_value):
-                new_textarea_value = str(self.driver.execute_script("element_list = document.querySelectorAll('textarea'); return element_list[element_list.length - 1].value"))
-
-            loop_control = self.element_exists(term=script, scrap_type=enum.ScrapType.SCRIPT)
-
-            current_textarea_value = new_textarea_value
+        button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+        self.click(button())
 
         self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container="body")
 
@@ -226,11 +210,8 @@ class WebappInternal(Base):
             container = ".twindow"
 
         self.wait_element(self.language.database, main_container=container)
-        self.wait_element(self.language.group, main_container=container)
-        self.wait_element(self.language.branch, main_container=container)
-        self.wait_element(self.language.environment, main_container=container)
 
-        base_date = next(iter(self.web_scrap(self.language.database, label=True, main_container=container)), None)
+        base_date = next(iter(self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if base_date is None:
             self.log_error("Couldn't find Date input element.")
         date = lambda: self.driver.find_element_by_xpath(xpath_soup(base_date))
@@ -238,7 +219,7 @@ class WebappInternal(Base):
         self.send_keys(date(), Keys.HOME)
         self.send_keys(date(), self.config.date)
 
-        group_element = next(iter(self.web_scrap(self.language.group, label=True, main_container=container)), None)
+        group_element = next(iter(self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if group_element is None:
             self.log_error("Couldn't find Group input element.")
         group = lambda: self.driver.find_element_by_xpath(xpath_soup(group_element))
@@ -246,7 +227,7 @@ class WebappInternal(Base):
         self.send_keys(group(), Keys.HOME)
         self.send_keys(group(), self.config.group)
 
-        branch_element = next(iter(self.web_scrap(self.language.branch, label=True, main_container=container)), None)
+        branch_element = next(iter(self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if branch_element is None:
             self.log_error("Couldn't find Branch input element.")
         branch = lambda: self.driver.find_element_by_xpath(xpath_soup(branch_element))
@@ -254,7 +235,7 @@ class WebappInternal(Base):
         self.send_keys(branch(), Keys.HOME)
         self.send_keys(branch(), self.config.branch)
 
-        environment_element = next(iter(self.web_scrap(self.language.environment, label=True, main_container=container)), None)
+        environment_element = next(iter(self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if environment_element is None:
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
@@ -926,13 +907,17 @@ class WebappInternal(Base):
         """
         self.idwizard = []
         self.driver.refresh()
-        self.driver.switch_to_alert().accept()
+        try:
+            self.driver.switch_to_alert().accept()
+        except:
+            pass
+
         if not self.config.skip_environment:
-            self.program_screen()
+            self.program_screen(self.config.initialprog)
         self.user_screen()
         self.environment_screen()
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
 
         self.set_program(self.config.routine)
@@ -1019,6 +1004,8 @@ class WebappInternal(Base):
                 return script_result if isinstance(script_result, list) else []
             else:
                 return []
+        except AssertionError:
+            raise
         except Exception as e:
             self.log_error(str(e))
 
@@ -2891,6 +2878,32 @@ class WebappInternal(Base):
         #If label exists but there is no element associated with it => return empty list
         else:
             return []
+
+    def log_error(self, message, new_log_line=True):
+        """
+        [Internal]
+
+        Finishes execution of test case with an error and creates the log information for that test.
+
+        :param message: Message to be logged
+        :type message: str
+        :param new_log_line: Boolean value if Message should be logged as new line or not. - **Default:** True
+        :type new_log_line: bool
+
+        Usage:
+
+        >>> #Calling the method:
+        >>> self.log_error("Element was not found")
+        """
+        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+        log_message = f"{test_number} {message}"
+
+        if new_log_line:
+            self.log.new_line(False, log_message)
+        self.log.save_file()
+        self.restart()
+        self.assertTrue(False, log_message)
 
     def SetParameters(self, arrayParameters):
         #"""
