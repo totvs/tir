@@ -1827,11 +1827,8 @@ class WebappInternal(Base):
 
         self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
 
-        element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tcheckbox span")), None)
+        element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
 
-        if not element:
-            element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label")), None)
-        
         if not element:
             self.log_error("Couldn't find span element")
 
@@ -1842,9 +1839,9 @@ class WebappInternal(Base):
 
         xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
-        checked = next(iter(list(filter(lambda x: "checked" in x.lower(), input_element.parent.attrs['class']))))
-        if not checked:
-            self.click(xpath_input())
+        if input_element.attrs['type'] == "checkbox" and "checked" in input_element.parent.attrs['class']:
+            return None    
+        self.click(xpath_input())
 
     def result_checkbox(self, field, value):
         """
