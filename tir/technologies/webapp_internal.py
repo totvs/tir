@@ -611,16 +611,12 @@ class WebappInternal(Base):
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        if not grid:
-            if isinstance(value,bool):
-                element = self.check_checkbox(field, value)
-                if not element:
-                   element = self.check_radio(field, value)
-            else:
-                self.wait_element(field)
-                self.input_value(field, value, ignore_case)
-        else:
+        if grid:
             self.input_grid_appender(field, value, grid_number - 1)
+        elif isinstance(value, bool):
+            self.click_check_radio_button(field, value)
+        else:
+            self.input_value(field, value, ignore_case)
 
     def input_value(self, field, value, ignore_case=True):
         """
@@ -644,95 +640,102 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.input_value("A1_COD", "000001")
         """
-        success = False
-        endtime = time.time() + 60
 
-        while(time.time() < endtime and not success):
-            unmasked_value = self.remove_mask(value)
+        if isinstance(value, bool):
+            self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+            self.click_check_radio_button(field, value)
 
-            print(f"Searching for: {field}")
+        else:
+            self.wait_element(field)
+            success = False
+            endtime = time.time() + 60
 
-            element = self.get_field(field)
-            if not element:
-                continue
+            while(time.time() < endtime and not success):
+                unmasked_value = self.remove_mask(value)
 
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                print(f"Searching for: {field}")
 
-            valtype = "C"
-            main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
+                element = self.get_field(field)
+                if not element:
+                    continue
 
-            interface_value = self.get_web_value(input_field())
-            current_value = interface_value.strip()
-            interface_value_size = len(interface_value)
-            user_value_size = len(main_value)
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-            if not input_field().is_enabled() or "disabled" in element.attrs:
-                self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
+                valtype = "C"
+                main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
-            if element.name == "input":
-                valtype = element.attrs["valuetype"]
+                interface_value = self.get_web_value(input_field())
+                current_value = interface_value.strip()
+                interface_value_size = len(interface_value)
+                user_value_size = len(main_value)
 
-            self.scroll_to_element(input_field())
+                if not input_field().is_enabled() or "disabled" in element.attrs:
+                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
-            try:
-                #Action for Combobox elements
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    self.wait.until(EC.visibility_of(input_field()))
-                    self.set_element_focus(input_field())
-                    self.select_combo(element, main_value)
-                    current_value = self.get_web_value(input_field()).strip()
-                #Action for Input elements
-                else:
-                    self.wait.until(EC.visibility_of(input_field()))
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
-                    self.double_click(input_field())
+                if element.name == "input":
+                    valtype = element.attrs["valuetype"]
 
-                    #if Character input
-                    if valtype != 'N':
-                        self.send_keys(input_field(), Keys.DELETE)
-                        self.send_keys(input_field(), Keys.HOME)
-                        self.send_keys(input_field(), main_value)
-                    #if Number input
-                    else:
-                        tries = 0
-                        while(tries < 3):
-                            self.set_element_focus(input_field())
-                            self.send_keys(input_field(), Keys.DELETE)
-                            self.send_keys(input_field(), Keys.BACK_SPACE)
-                            self.click(input_field())
-                            input_field().send_keys(main_value)
-                            current_number_value = self.get_web_value(input_field())
-                            if self.remove_mask(current_number_value).strip() == main_value:
-                                break
-                            tries+=1
+                self.scroll_to_element(input_field())
 
-                    if user_value_size < interface_value_size:
-                        self.send_keys(input_field(), Keys.ENTER)
-
-                    if self.check_mask(input_field()):
-                        current_value = self.remove_mask(self.get_web_value(input_field()).strip())
-                    else:
+                try:
+                    #Action for Combobox elements
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        self.wait.until(EC.visibility_of(input_field()))
+                        self.set_element_focus(input_field())
+                        self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
+                    #Action for Input elements
+                    else:
+                        self.wait.until(EC.visibility_of(input_field()))
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.double_click(input_field())
 
-                    if self.console_log and current_value != "":
-                        print(current_value)
+                        #if Character input
+                        if valtype != 'N':
+                            self.send_keys(input_field(), Keys.DELETE)
+                            self.send_keys(input_field(), Keys.HOME)
+                            self.send_keys(input_field(), main_value)
+                        #if Number input
+                        else:
+                            tries = 0
+                            while(tries < 3):
+                                self.set_element_focus(input_field())
+                                self.send_keys(input_field(), Keys.DELETE)
+                                self.send_keys(input_field(), Keys.BACK_SPACE)
+                                self.click(input_field())
+                                input_field().send_keys(main_value)
+                                current_number_value = self.get_web_value(input_field())
+                                if self.remove_mask(current_number_value).strip() == main_value:
+                                    break
+                                tries+=1
 
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    current_value = current_value[0:len(str(value))]
+                        if user_value_size < interface_value_size:
+                            self.send_keys(input_field(), Keys.ENTER)
 
-                if re.match(r"^●+$", current_value):
-                    success = len(current_value) == len(str(value).strip())
-                elif ignore_case:
-                    success = current_value.lower() == main_value.lower()
-                else:
-                    success = current_value == main_value
-            except:
-                continue
+                        if self.check_mask(input_field()):
+                            current_value = self.remove_mask(self.get_web_value(input_field()).strip())
+                        else:
+                            current_value = self.get_web_value(input_field()).strip()
 
-        if not success:
-            self.log_error(f"Could not input value {value} in field {field}")
+                        if self.console_log and current_value != "":
+                            print(current_value)
+
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        current_value = current_value[0:len(str(value))]
+
+                    if re.match(r"^●+$", current_value):
+                        success = len(current_value) == len(str(value).strip())
+                    elif ignore_case:
+                        success = current_value.lower() == main_value.lower()
+                    else:
+                        success = current_value == main_value
+                except:
+                    continue
+
+            if not success:
+                self.log_error(f"Could not input value {value} in field {field}")
 
     def get_field(self, field, name_attr=False):
         """
@@ -1803,15 +1806,14 @@ class WebappInternal(Base):
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
         self.set_element_focus(element())
 
-    def check_checkbox(self, field, value):
+    def click_check_radio_button(self, field, value):
         """
         [Internal]
-
-        Sets a value to a Checkbox.
+        Identify and click on check or radio button.
 
         :param field: The field that would receive the input.
         :type field: str
-        :param value: The value that must be on the checkbox.
+        :param value: The value that must be on the checkbox or grid.
         :type value: bool
 
         :return: The element that changed value.
@@ -1822,51 +1824,27 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
-        time.sleep(1)
-        element = ''
-        lista = self.driver.find_elements(By.CSS_SELECTOR, ".tcheckbox.twidget")
-        for line in lista:
-            if line.is_displayed() and ((line.get_attribute('name') != None and line.get_attribute('name').split('->')[1] == field) or  line.text.strip() == field.strip()):
-                checked = "CHECKED" in line.get_attribute('class').upper()
-                if value != checked:
-                    element = line
-                    self.click(line)
-                    time.sleep(1)
-                    break
-        return element
 
-    def check_radio(self, field, value):
-        """
-        [Internal]
+        self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
 
-        Sets a value to a RadioButton.
+        element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tcheckbox span")), None)
 
-        :param field: The field that would receive the input.
-        :type field: str
-        :param value: The value that must be on the radio button.
-        :type value: bool
-
-        :return: The element that changed value.
-        :rtype: Selenium object
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> element = self.check_radio("RadioButton1", True)
-        """
-        label_element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label")), None)
-
-        if not label_element:
-            self.log_error("Couldn't find label element")
-
-        element = next(iter(label_element.find_parent().select("input")), None)
+        if not element:
+            element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label")), None)
         
-        if not label_element:
+        if not element:
+            self.log_error("Couldn't find span element")
+
+        input_element = next(iter(element.find_parent().select("input")), None)
+
+        if not input_element:
             self.log_error("Couldn't find input element")
 
-        input_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+        xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
-        self.click(input_element())
+        checked = next(iter(list(filter(lambda x: "checked" in x.lower(), input_element.parent.attrs['class']))))
+        if not checked:
+            self.click(xpath_input())
 
     def result_checkbox(self, field, value):
         """
