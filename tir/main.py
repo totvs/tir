@@ -1,4 +1,5 @@
 from tir.technologies.webapp_internal import WebappInternal
+from tir.technologies.apw_internal import ApwInternal
 
 """
 This file must contain the definition of all User Classes.
@@ -472,3 +473,76 @@ class Webapp():
         >>> oHelper.WaitWhile("Processing")
         """
         self.__webapp.WaitWhile(itens)
+
+class Apw():
+
+    def __init__(self, config_path=""):
+
+        self.__Apw = ApwInternal()
+
+    def CheckBrowse(self, valores):
+
+        self.__Apw.CheckBrowse(valores)
+
+
+    def CheckLink(self, Link):
+
+        self.__Apw.CheckLink(Link)
+
+
+    def ClickLink(self, Link):
+
+        self.__Apw.ClickLink(Link)
+
+    def ClickMenu(self, caminho):
+
+        self.__Apw.ClickMenu(caminho)
+
+
+    def CloseAlert(self):
+
+        self.__Apw.CloseAlert()
+
+    def CloseWindow(self):
+
+        self.__Apw.CloseWindow()
+
+    def EndCase(self):
+
+        self.__Apw.EndCase()
+
+    def SetButton(self, button, type=''):
+
+        self.__Apw.SetButton(button, type)
+
+    def SetGrid(self, btnFunc="Incluir"):
+
+        self.__Apw.SetGrid(btnFunc)
+
+    def SelectBrowse(self, valores, opcao='', duplo=True):
+
+        self.__Apw.SelectBrowse(valores, opcao, duplo)
+
+    def Setup(self, lblUser="Usuário", lblPassword="Senha", btnAccess="Acessar Portal"):
+
+        self.__Apw.Setup(lblUser, lblPassword, btnAccess)
+
+    def SwitchModal(self, opcao, frame=''):
+
+        self.__Apw.SwitchModal(opcao, frame)
+
+    def SwitchWindow(self, exit=False):
+
+        self.__Apw.SwitchWindow(exit)
+
+    def SearchValue(self, busca, valor, grid=False, btnOk='ok', btnFind='buscar', searchparam='Pesquisar'):
+
+        self.__Apw.SearchValue(busca, valor, grid, btnOk, btnFind, searchparam)
+
+    def SetValue(self, campo, valor, grid=False, linha=0, chknewline=False, disabled=False):
+
+        self.__Apw.SetValue(campo, valor, grid, linha, chknewline, disabled)
+
+    def WaitModal(self, text, opcao="title"):
+
+        self.__Apw.WaitModal(text, opcao)

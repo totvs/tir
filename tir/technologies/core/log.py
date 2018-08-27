@@ -12,7 +12,7 @@ class Log:
     >>> # Instanted inside base.py:
     >>> self.log = Log(console=self.console_log)
     """
-    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", console=False):
+    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", console=False, folder=""):    
         self.console = console
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
@@ -32,6 +32,7 @@ class Log:
         self.table_rows = []
         self.invalid_fields = []
         self.table_rows.append(self.generate_header())
+        self.folder = folder
 
     def generate_header(self):
         """
@@ -79,7 +80,10 @@ class Log:
         """
         if len(self.table_rows) > 0:
             data = nump.array(self.table_rows)
-            path = "loginter_{}.csv".format(self.timestamp)
+            if self.folder != "":
+                path = self.folder+"\loginter_{}.csv".format(self.timestamp)
+            else:
+                path = "loginter_{}.csv".format(self.timestamp)
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')

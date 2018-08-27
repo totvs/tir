@@ -15,6 +15,8 @@ class ConfigLoader:
         self.password = str(data["Password"])
         self.language = str(data["Language"])
         self.skip_environment = ("SkipEnvironment" in data and bool(data["SkipEnvironment"]))
+        self.headless = ("Headless" in data and bool(data["Headless"]))
+        self.log_folder = str(data["LogFolder"])
         self.log_file = ("LogFile" in data and bool(data["LogFile"]))
         self.valid_language = False
         self.initialprog = ""

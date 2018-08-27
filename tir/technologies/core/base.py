@@ -19,6 +19,8 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 
 class Base(unittest.TestCase):
     """
@@ -65,13 +67,18 @@ class Base(unittest.TestCase):
             config_path = os.path.join(sys.path[0], r"config.json")
         self.config = ConfigLoader(config_path)
 
+        options = Options()
+
+        if self.config.headless:
+            options.add_argument("--headless") 
+
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
-            self.driver = webdriver.Firefox(executable_path=driver_path, log_path=log_path)
+            self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
-            self.driver = webdriver.Chrome(executable_path=driver_path)
+            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
         self.driver.maximize_window()
         self.driver.get(self.config.url)
@@ -82,7 +89,7 @@ class Base(unittest.TestCase):
         self.console_log = True
 
         self.language = LanguagePack(self.config.language) if self.config.language else ""
-        self.log = Log(console=self.console_log)
+        self.log = Log(console=self.console_log, folder=self.config.log_folder)
         self.log.station = socket.gethostname()
 
         self.base_container = "body"
