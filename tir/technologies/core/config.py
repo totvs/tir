@@ -13,10 +13,10 @@ class ConfigLoader:
         self.environment = str(data["Environment"])
         self.user = str(data["User"])
         self.password = str(data["Password"])
-        self.language = str(data["Language"])
+        self.language = str(data["Language"]) if "Language" in data else ""
         self.skip_environment = ("SkipEnvironment" in data and bool(data["SkipEnvironment"]))
         self.headless = ("Headless" in data and bool(data["Headless"]))
-        self.log_folder = str(data["LogFolder"])
+        self.log_folder = str(data["LogFolder"]) if "LogFolder" in data else ""
         self.log_file = ("LogFile" in data and bool(data["LogFile"]))
         self.valid_language = False
         self.initialprog = ""
