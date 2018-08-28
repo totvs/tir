@@ -599,16 +599,12 @@ class WebappInternal(Base):
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        if not grid:
-            if isinstance(value,bool):
-                element = self.check_checkbox(field, value)
-                if not element:
-                   element = self.check_radio(field, value)
-            else:
-                self.wait_element(field)
-                self.input_value(field, value, ignore_case)
-        else:
+        if grid:
             self.input_grid_appender(field, value, grid_number - 1)
+        elif isinstance(value, bool):
+            self.click_check_radio_button(field, value)
+        else:
+            self.input_value(field, value, ignore_case)
 
     def input_value(self, field, value, ignore_case=True):
         """
@@ -632,6 +628,8 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.input_value("A1_COD", "000001")
         """
+
+        self.wait_element(field)
         success = False
         endtime = time.time() + 60
 
@@ -665,7 +663,7 @@ class WebappInternal(Base):
             try:
                 #Action for Combobox elements
                 if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                     self.wait.until(EC.visibility_of(input_field()))
                     self.set_element_focus(input_field())
                     self.select_combo(element, main_value)
@@ -707,7 +705,7 @@ class WebappInternal(Base):
                         print(f"Current field value: {current_value}")
 
                 if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                   (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                     current_value = current_value[0:len(str(value))]
 
                 if re.match(r"^●+$", current_value):
@@ -1693,7 +1691,7 @@ class WebappInternal(Base):
                 else:
                     self.send_keys(element, Keys.ENTER)
         else:
-            self.log_error(f"Couldn't locate content: {contents_list}")
+            self.log_error(f"Couldn't locate content: {content_list}")
 
     def check_mask(self, element):
         """
@@ -1848,15 +1846,14 @@ class WebappInternal(Base):
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
         self.set_element_focus(element())
 
-    def check_checkbox(self, field, value):
+    def click_check_radio_button(self, field, value):
         """
         [Internal]
-
-        Sets a value to a Checkbox.
+        Identify and click on check or radio button.
 
         :param field: The field that would receive the input.
         :type field: str
-        :param value: The value that must be on the checkbox.
+        :param value: The value that must be on the checkbox or grid.
         :type value: bool
 
         :return: The element that changed value.
@@ -1867,50 +1864,31 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
-        time.sleep(1)
-        element = ''
-        lista = self.driver.find_elements(By.CSS_SELECTOR, ".tcheckbox.twidget")
-        for line in lista:
-            if line.is_displayed() and ((line.get_attribute('name') != None and line.get_attribute('name').split('->')[1] == field) or  line.text.strip() == field.strip()):
-                checked = "CHECKED" in line.get_attribute('class').upper()
-                if value != checked:
-                    element = line
-                    self.click(line)
-                    time.sleep(1)
-                    break
-        return element
 
-    def check_radio(self, field, value):
-        """
-        [Internal]
+        if re.match(r"\w+(_)", field):
+            self.wait_element(field)
+            element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+        else:
+            self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+            element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+        
 
-        Sets a value to a RadioButton.
+        if not element:
+            self.log_error("Couldn't find span element")
 
-        :param field: The field that would receive the input.
-        :type field: str
-        :param value: The value that must be on the radio button.
-        :type value: bool
+        input_element = next(iter(element.find_parent().select("input")), None)
 
-        :return: The element that changed value.
-        :rtype: Selenium object
+        if not input_element:
+            self.log_error("Couldn't find input element")
 
-        Usage:
+        xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
-        >>> # Calling the method:
-        >>> element = self.check_radio("RadioButton1", True)
-        """
-        time.sleep(1)
-        element = ''
-        lista = self.driver.find_elements(By.CSS_SELECTOR, ".tradiobutton.twidget")
-        for line in lista:
-            if line.is_displayed():
-                lista2 = line.find_elements(By.CSS_SELECTOR, ".tradiobuttonitem")
-                for line2 in lista2:
-                    if line2.text.upper() == field.upper():
-                        element = line2
-                        self.click(line2)
-                        time.sleep(1)
-                        return element
+        if input_element.attrs['type'] == "checkbox" and "checked" in input_element.parent.attrs['class']:
+            return None
+            
+        self.scroll_to_element(xpath_input())
+
+        self.click(xpath_input())
 
     def result_checkbox(self, field, value):
         """
