@@ -534,6 +534,7 @@ class Base(unittest.TestCase):
         if value:
             time.sleep(1)
             combo.select_by_visible_text(value.text)
+            print(f"Selected value for combo is: {value.text}")
 
     def send_keys(self, element, arg):
         """
