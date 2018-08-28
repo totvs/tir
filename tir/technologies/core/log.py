@@ -10,10 +10,9 @@ class Log:
     Usage:
 
     >>> # Instanted inside base.py:
-    >>> self.log = Log(console=self.console_log)
+    >>> self.log = Log()
     """
-    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", console=False, folder=""):    
-        self.console = console
+    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", folder=""):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         self.user = user
@@ -88,8 +87,7 @@ class Log:
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
 
-            if self.console:
-                print('Arquivo {} gerado com sucesso!'.format(path))
+            print(f"File {path} created successfully!")
 
     def set_seconds(self):
         """

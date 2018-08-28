@@ -49,8 +49,6 @@ class Base(unittest.TestCase):
 
         base_container: A variable to contain the layer element to be used on all methods.
 
-        console_log: A variable to control if additional info should be displayed in the console.
-
         errors: A list that contains every error that should be sent to log at the end of the execution.
 
         language: Contains the terms defined in the language defined in config or found in the page.
@@ -83,10 +81,9 @@ class Base(unittest.TestCase):
         #Global Variables:
 
         self.wait = WebDriverWait(self.driver,5)
-        self.console_log = True
 
         self.language = LanguagePack(self.config.language) if self.config.language else ""
-        self.log = Log(console=self.console_log, folder=self.config.log_folder)
+        self.log = Log(folder=self.config.log_folder)
         self.log.station = socket.gethostname()
 
         self.base_container = "body"
@@ -246,7 +243,7 @@ class Base(unittest.TestCase):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
-        if self.console_log:
+        if self.debug_log:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
@@ -445,15 +442,13 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
-        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0]
-        stack = stack.split("_")[-1]
-        log_message = ""
-        log_message += stack + " - " + message
+        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+        log_message = f"{test_number} {message}"
 
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
-        #self.Restart()
         self.assertTrue(False, log_message)
 
     def move_to_element(self, element):
@@ -543,6 +538,7 @@ class Base(unittest.TestCase):
         if value:
             time.sleep(1)
             combo.select_by_visible_text(value.text)
+            print(f"Selected value for combo is: {value.text}")
 
     def send_keys(self, element, arg):
         """
@@ -575,6 +571,23 @@ class Base(unittest.TestCase):
             actions.click()
             actions.send_keys(arg)
             actions.perform()
+
+    def search_stack(self, function):
+        """
+        Returns True if passed function is present in the call stack.
+
+        :param function: Name of the function
+        :type function: str
+
+        :return: Boolean if passed function is present or not in the call stack.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_present = self.search_stack("MATA020")
+        """
+        return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
 
     def set_element_focus(self, element):
         """

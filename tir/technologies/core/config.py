@@ -1,9 +1,9 @@
 import json
 
 class ConfigLoader:
-    '''
+    """
     This class is instantiated to contain all config information used throughout the execution of the methods.
-    '''
+    """
     def __init__(self, path="config.json"):
         with open(path) as json_data_file:
             data = json.load(json_data_file)
@@ -18,6 +18,8 @@ class ConfigLoader:
         self.headless = ("Headless" in data and bool(data["Headless"]))
         self.log_folder = str(data["LogFolder"]) if "LogFolder" in data else ""
         self.log_file = ("LogFile" in data and bool(data["LogFile"]))
+        self.debug_log = ("DebugLog" in data and bool(data["DebugLog"]))
+        self.timeout = int(data["TimeOut"]) if "TimeOut" in data else 90
         self.valid_language = False
         self.initialprog = ""
         self.routine = ""
