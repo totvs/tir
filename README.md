@@ -33,7 +33,7 @@ OBS: Our installation scripts will install our package in the current active Pyt
 
 ##Config file
 
-The environment must be configured through a *config.json* file.
+The environment must be configured through a [config.json][config.json] file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
 
 ```python

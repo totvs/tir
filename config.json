@@ -1,8 +1,11 @@
 {
-    "Url": "http://localhost:9096/",
-    "Browser": "Firefox",
+    "Url": "http://localhost:port/",
+    "Browser": "BROWSER NAME",
     "Environment": "ENVIRONMENT_NAME",
     "Language": "pt-br",
-    "User": "ADMIN",
-    "Password": ""
+    "User": "USER NAME",
+    "Password": "PASSWORD",
+    "DebugLog": false,
+    "TimeOut": 90,
+    "Headless": false
 }
