@@ -2,6 +2,7 @@ import time
 import os
 import numpy as nump
 import pandas as panda
+from datetime import datetime
 
 class Log:
     """
@@ -25,7 +26,7 @@ class Log:
         self.issue = issue
         self.execution_id = execution_id
         self.country = country
-        self.initial_time = 0
+        self.initial_time = datetime.today()
         self.seconds = 0
 
         self.table_rows = []
@@ -79,15 +80,15 @@ class Log:
         """
         if len(self.table_rows) > 0:
             data = nump.array(self.table_rows)
-            if self.folder != "":
-                path = self.folder+"\loginter_{}.csv".format(self.timestamp)
+            if self.folder:
+                path = f"{self.folder}\loginter_{self.timestamp}.csv"
             else:
-                path = "loginter_{}.csv".format(self.timestamp)
+                path = f"loginter_{self.timestamp}.csv"
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
 
-            print(f"File {path} created successfully!")
+            print(f"Log file created successfully: {path}")
 
     def set_seconds(self):
         """
@@ -98,4 +99,5 @@ class Log:
         >>> # Calling the method:
         >>> self.log.set_seconds()
         """
-        self.seconds = time.time() - self.initial_time
+        delta = datetime.today() - self.initial_time
+        self.seconds = round(delta.total_seconds(), 2)

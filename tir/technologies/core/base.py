@@ -68,11 +68,13 @@ class Base(unittest.TestCase):
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
-            options = FirefoxOpt().set_headless(self.config.headless)
+            options = FirefoxOpt()
+            options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
-            options = ChromeOpt().set_headless(self.config.headless)
+            options = ChromeOpt()
+            options.set_headless(self.config.headless)
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
         self.driver.maximize_window()
@@ -255,21 +257,24 @@ class Base(unittest.TestCase):
             elif scrap_type == enum.ScrapType.XPATH:
                 by = By.XPATH
 
-            soup = self.get_current_DOM()
-            container_selector = self.base_container
-            if (main_container is not None):
-                container_selector = main_container
-            containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-            container = next(iter(containers), None)
-            if not container:
-                return False
+            if scrap_type != enum.ScrapType.XPATH:
+                soup = self.get_current_DOM()
+                container_selector = self.base_container
+                if (main_container is not None):
+                    container_selector = main_container
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                container = next(iter(containers), None)
+                if not container:
+                    return False
 
-            try:
-                container_element = self.driver.find_element_by_xpath(xpath_soup(container))
-            except:
-                return False
+                try:
+                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                except:
+                    return False
+            else:
+                container_element = self.driver
 
-            element_list = self.driver.find_elements(by, selector)
+            element_list = container_element.find_elements(by, selector)
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
@@ -445,6 +450,7 @@ class Base(unittest.TestCase):
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
+        self.log.set_seconds()
 
         if new_log_line:
             self.log.new_line(False, log_message)

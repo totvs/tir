@@ -312,7 +312,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
-        self.log.initial_time = time.time()
         self.SetLateralMenu(self.language.menu_about)
         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
@@ -1871,7 +1870,7 @@ class WebappInternal(Base):
         else:
             self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
             element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-        
+
 
         if not element:
             self.log_error("Couldn't find span element")
@@ -1885,7 +1884,7 @@ class WebappInternal(Base):
 
         if input_element.attrs['type'] == "checkbox" and "checked" in input_element.parent.attrs['class']:
             return None
-            
+
         self.scroll_to_element(xpath_input())
 
         self.click(xpath_input())
@@ -2898,6 +2897,7 @@ class WebappInternal(Base):
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
+        self.log.set_seconds()
 
         if new_log_line:
             self.log.new_line(False, log_message)
