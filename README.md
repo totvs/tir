@@ -39,23 +39,23 @@ You can find one to be used as a base in this repo. To select your file, you can
 
 ###Config options:
 
-**Url:** The Address of environment tha will run the tests.
+**Url:** The URL that will run the tests.
 
-**Browser:** Browser tha will be used to run the tests.
+**Browser:** Browser that will be used to run the tests.
 
-**Environment** Environemnt used to run the tests.
+**Environment:** Environment used to run the tests.
 
-**Language** Language to be considered in execution.
+**User:** User that will be logged into the environment.
 
-**User** User that will be logged into the environment.
+**Password:** Password to log  on to the environment.
 
-**Password** Password to log  on to the environment.
+**Language:** Language to be considered in execution. **Optional**
 
-**DebugLog** Defines whether the run log will be displayed during tests.
+**DebugLog:** Defines whether the run log will be displayed during tests. **Optional**
 
-**TimeOut** Time set to expire the test if it is reached.
+**TimeOut:** Time set to expire the test if it is reached. **Optional**
 
-**Headless** Defines whether the test will run with or without interface.
+**Headless:** Defines whether the test will run with or without interface. **Optional**
 
 
 ```python
