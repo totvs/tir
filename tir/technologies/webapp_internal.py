@@ -249,7 +249,7 @@ class WebappInternal(Base):
         if environment_element is None:
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
-        if ("disabled" not in environment_element.attrs["class"] and env().is_enabled()):
+        if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
             self.double_click(env())
             self.send_keys(env(), Keys.HOME)
             self.send_keys(env(), self.config.module)
