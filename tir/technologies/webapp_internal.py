@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import inspect
 import os
+import random
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
