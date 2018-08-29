@@ -19,6 +19,8 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from selenium.webdriver.firefox.options import Options as FirefoxOpt
+from selenium.webdriver.chrome.options import Options as ChromeOpt
 
 class Base(unittest.TestCase):
     """
@@ -47,8 +49,6 @@ class Base(unittest.TestCase):
 
         base_container: A variable to contain the layer element to be used on all methods.
 
-        console_log: A variable to control if additional info should be displayed in the console.
-
         errors: A list that contains every error that should be sent to log at the end of the execution.
 
         language: Contains the terms defined in the language defined in config or found in the page.
@@ -68,10 +68,14 @@ class Base(unittest.TestCase):
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
             log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
-            self.driver = webdriver.Firefox(executable_path=driver_path, log_path=log_path)
+            options = FirefoxOpt()
+            options.set_headless(self.config.headless)
+            self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
-            self.driver = webdriver.Chrome(executable_path=driver_path)
+            options = ChromeOpt()
+            options.set_headless(self.config.headless)
+            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
         self.driver.maximize_window()
         self.driver.get(self.config.url)
@@ -79,10 +83,9 @@ class Base(unittest.TestCase):
         #Global Variables:
 
         self.wait = WebDriverWait(self.driver,5)
-        self.console_log = True
 
         self.language = LanguagePack(self.config.language) if self.config.language else ""
-        self.log = Log(console=self.console_log)
+        self.log = Log(folder=self.config.log_folder)
         self.log.station = socket.gethostname()
 
         self.base_container = "body"
@@ -242,7 +245,7 @@ class Base(unittest.TestCase):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
-        if self.console_log:
+        if self.debug_log:
             print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
@@ -254,21 +257,24 @@ class Base(unittest.TestCase):
             elif scrap_type == enum.ScrapType.XPATH:
                 by = By.XPATH
 
-            soup = self.get_current_DOM()
-            container_selector = self.base_container
-            if (main_container is not None):
-                container_selector = main_container
-            containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-            container = next(iter(containers), None)
-            if not container:
-                return False
+            if scrap_type != enum.ScrapType.XPATH:
+                soup = self.get_current_DOM()
+                container_selector = self.base_container
+                if (main_container is not None):
+                    container_selector = main_container
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                container = next(iter(containers), None)
+                if not container:
+                    return False
 
-            try:
-                container_element = self.driver.find_element_by_xpath(xpath_soup(container))
-            except:
-                return False
+                try:
+                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                except:
+                    return False
+            else:
+                container_element = self.driver
 
-            element_list = self.driver.find_elements(by, selector)
+            element_list = container_element.find_elements(by, selector)
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
@@ -441,15 +447,14 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
-        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0]
-        stack = stack.split("_")[-1]
-        log_message = ""
-        log_message += stack + " - " + message
+        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+        log_message = f"{test_number} {message}"
+        self.log.set_seconds()
 
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
-        #self.Restart()
         self.assertTrue(False, log_message)
 
     def move_to_element(self, element):
@@ -539,6 +544,7 @@ class Base(unittest.TestCase):
         if value:
             time.sleep(1)
             combo.select_by_visible_text(value.text)
+            print(f"Selected value for combo is: {value.text}")
 
     def send_keys(self, element, arg):
         """
@@ -571,6 +577,23 @@ class Base(unittest.TestCase):
             actions.click()
             actions.send_keys(arg)
             actions.perform()
+
+    def search_stack(self, function):
+        """
+        Returns True if passed function is present in the call stack.
+
+        :param function: Name of the function
+        :type function: str
+
+        :return: Boolean if passed function is present or not in the call stack.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_present = self.search_stack("MATA020")
+        """
+        return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
 
     def set_element_focus(self, element):
         """

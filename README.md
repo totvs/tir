@@ -5,6 +5,7 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 ##Currently Supported Technologies:
 
 - Protheus Webapp
+- APW
 
 ##Documentation
 Our documentation can be found in these locations:
@@ -33,8 +34,29 @@ OBS: Our installation scripts will install our package in the current active Pyt
 
 ##Config file
 
-The environment must be configured through a *config.json* file.
+The environment must be configured through a [config.json](config.json) file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
+
+###Config options:
+
+**Url:** The URL that will run the tests.
+
+**Browser:** Browser that will be used to run the tests.
+
+**Environment:** Environment used to run the tests.
+
+**User:** User that will be logged into the environment.
+
+**Password:** Password to log  on to the environment.
+
+**Language:** Language to be considered in execution. **Optional**
+
+**DebugLog:** Defines whether the run log will be displayed during tests. **Optional**
+
+**TimeOut:** Time set to expire the test if it is reached. **Optional**
+
+**Headless:** Defines whether the test will run with or without interface. **Optional**
+
 
 ```python
 #To use the config file in the same workspace directory

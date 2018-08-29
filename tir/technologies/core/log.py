@@ -2,6 +2,7 @@ import time
 import os
 import numpy as nump
 import pandas as panda
+from datetime import datetime
 
 class Log:
     """
@@ -10,10 +11,9 @@ class Log:
     Usage:
 
     >>> # Instanted inside base.py:
-    >>> self.log = Log(console=self.console_log)
+    >>> self.log = Log()
     """
-    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", console=False):
-        self.console = console
+    def __init__(self, user="", station="", program="", program_date=time.strftime("%d/%m/%y %X"), version="", release="", database="", issue="", execution_id="", country="", folder=""):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         self.user = user
@@ -26,12 +26,13 @@ class Log:
         self.issue = issue
         self.execution_id = execution_id
         self.country = country
-        self.initial_time = 0
+        self.initial_time = datetime.today()
         self.seconds = 0
 
         self.table_rows = []
         self.invalid_fields = []
         self.table_rows.append(self.generate_header())
+        self.folder = folder
 
     def generate_header(self):
         """
@@ -79,13 +80,15 @@ class Log:
         """
         if len(self.table_rows) > 0:
             data = nump.array(self.table_rows)
-            path = "loginter_{}.csv".format(self.timestamp)
+            if self.folder:
+                path = f"{self.folder}\loginter_{self.timestamp}.csv"
+            else:
+                path = f"loginter_{self.timestamp}.csv"
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
 
-            if self.console:
-                print('Arquivo {} gerado com sucesso!'.format(path))
+            print(f"Log file created successfully: {path}")
 
     def set_seconds(self):
         """
@@ -96,4 +99,5 @@ class Log:
         >>> # Calling the method:
         >>> self.log.set_seconds()
         """
-        self.seconds = time.time() - self.initial_time
+        delta = datetime.today() - self.initial_time
+        self.seconds = round(delta.total_seconds(), 2)
