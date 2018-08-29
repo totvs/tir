@@ -2144,7 +2144,7 @@ class WebappInternal(Base):
                         if "_" in field[0]:
                             column_name = field_to_label[field[0]]
                         else:
-                            column_name = field[0]
+                            column_name = field[0].lower()
 
                         if column_name not in headers[field[2]]:
                             self.log_error(self.language.messages.grid_column_error)
@@ -2527,7 +2527,7 @@ class WebappInternal(Base):
         headers = []
         for item in grids:
             labels = item.select("thead tr label")
-            keys = list(map(lambda x: x.text.strip(), labels))
+            keys = list(map(lambda x: x.text.strip().lower(), labels))
             values = list(map(lambda x: x[0], enumerate(labels)))
             headers.append(dict(zip(keys, values)))
         return headers
