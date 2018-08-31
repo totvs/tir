@@ -51,7 +51,8 @@ class LanguagePack:
         self.parameter_menu = languagepack["Parameter Menu"]
         self.search2 = languagepack["Search 2"]
         self.search_by = languagepack["Search By"]
-
+        self.From = languagepack["From"]
+        self.To = languagepack["To"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -110,6 +111,8 @@ class LanguagePack:
             "Parameter Menu": "Environment > Registers > Parameters",
             "Search 2": "Search",
             "Search By": "Search by:"
+            "From": "From",
+            "To": "To"
         }
 
         brazilian_portuguese = {
@@ -166,6 +169,8 @@ class LanguagePack:
             "Parameter Menu": "Ambiente > Cadastros > Parâmetros",
             "Search 2": "Buscar",
             "Search By": "Procurar por:"
+            "From": "De",
+            "To": "Ate"
         }
         russian = {
             "User": "Пользователь",
