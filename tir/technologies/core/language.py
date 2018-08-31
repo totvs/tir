@@ -110,7 +110,7 @@ class LanguagePack:
             "Invert Selection": "Invert Selection",
             "Parameter Menu": "Environment > Registers > Parameters",
             "Search 2": "Search",
-            "Search By": "Search by:"
+            "Search By": "Search by:",
             "From": "From",
             "To": "To"
         }
@@ -168,7 +168,7 @@ class LanguagePack:
             "Invert Selection": "Inverte Seleção",
             "Parameter Menu": "Ambiente > Cadastros > Parâmetros",
             "Search 2": "Buscar",
-            "Search By": "Procurar por:"
+            "Search By": "Procurar por:",
             "From": "De",
             "To": "Ate"
         }
