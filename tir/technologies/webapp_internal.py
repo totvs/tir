@@ -630,6 +630,8 @@ class WebappInternal(Base):
         >>> self.input_value("A1_COD", "000001")
         """
 
+        field = re.sub(r"(\:*)(\?*)", "", field).strip()
+
         self.wait_element(field)
         success = False
         endtime = time.time() + 60
@@ -639,7 +641,13 @@ class WebappInternal(Base):
 
             print(f"Looking for element: {field}")
 
-            element = self.get_field(field)
+            if field.lower() == self.language.From.lower():
+                element = self.get_field("cDeCond", name_attr=True)
+            elif field.lower() == self.language.To.lower():
+                element = self.get_field("cAteCond", name_attr=True)
+            else:
+                element = self.get_field(field)
+
             if not element:
                 continue
 
@@ -976,6 +984,7 @@ class WebappInternal(Base):
         >>> #Elements with class "my_class" and text "my_text"
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
+
         try:
             endtime = time.time() + 60
             container =  None
@@ -2817,7 +2826,7 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
-        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\*?)(\s*?)$"))))), None)
+        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?$"))))), None)
         if element is None:
             return []
 

@@ -48,6 +48,8 @@ class LanguagePack:
         self.solution = languagepack["Solution"]
         self.change_environment = languagepack["Change Environment"]
         self.invert_selection = languagepack["Invert Selection"]
+        self.From = languagepack["From"]
+        self.To = languagepack["To"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -102,7 +104,9 @@ class LanguagePack:
             "Text Not Found": "Text Not Found.",
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
-            "Invert Selection": "Invert Selection"
+            "Invert Selection": "Invert Selection",
+            "From": "From",
+            "To": "To"
         }
 
         brazilian_portuguese = {
@@ -155,7 +159,9 @@ class LanguagePack:
             "Text Not Found": "Texto não encontrado.",
             "User Not Authenticated": "Usuário não autenticado",
             "Change Environment": "Trocar módulo",
-            "Invert Selection": "Inverte Seleção"
+            "Invert Selection": "Inverte Seleção",
+            "From": "De",
+            "To": "Ate"
         }
         russian = {
             "User": "Пользователь",
