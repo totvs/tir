@@ -61,11 +61,10 @@ class WebappInternal(Base):
 
         self.used_ids = []
 
-        self.idwizard = []
-        self.camposCache = []
-        self.backupSetup = dict()
+        self.parameters = []
+        self.backup_parameters = []
 
-    def Setup(self, initial_program, date='', group='99', branch='01', module=''):
+    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
         """
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
@@ -79,25 +78,25 @@ class WebappInternal(Base):
         :type branch: str
         :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Boolean if all input info should be saved for later usage. Leave this flag 'True' if you are not sure. **Default:** True
+        :type save_input: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
-        #seta atributos do ambiente
-        self.config.initialprog = initial_program
-        self.config.date = date
-        self.config.group = group
-        self.config.branch = branch
-        self.config.module = module
+        if save_input:
+            self.config.initialprog = initial_program
+            self.config.date = date
+            self.config.group = group
+            self.config.branch = branch
+            self.config.module = module
 
         if not self.config.valid_language:
             self.config.language = self.get_language()
             self.language = LanguagePack(self.config.language)
 
-        if not self.backupSetup:
-            self.backupSetup = { 'progini': self.config.initialprog, 'data': self.config.date, 'grupo': self.config.group, 'filial': self.config.branch }
         if not self.config.skip_environment:
             self.program_screen(initial_program)
 
@@ -107,7 +106,8 @@ class WebappInternal(Base):
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
 
-        self.set_log_info()
+        if save_input:
+            self.set_log_info()
 
     def program_screen(self, initial_program="", environment=""):
         """
@@ -2910,132 +2910,170 @@ class WebappInternal(Base):
         self.restart()
         self.assertTrue(False, log_message)
 
-    def SetParameters(self, arrayParameters):
-        #"""
-        #Método responsável por alterar os parâmetros do configurador antes de iniciar um caso de teste.
-        #"""
-        # self.idwizard = []
-        # self.LogOff()
+    def ClickIcon(self, icon_text):
+        """
+        Clicks on an Icon button based on its tooltip text.
 
-        # #self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
-        # self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch)
+        :param icon_text: The tooltip text.
+        :type icon_text: str
 
-        # # Escolhe a opção do Menu Lateral
-        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+        Usage:
 
-        # # Clica no botão/icone pesquisar
-        # self.SetButton("Pesquisar")
+        >>> # Call the method:
+        >>> oHelper.ClickIcon("Add")
+        >>> oHelper.ClickIcon("Edit")
+        """
+        self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        soup = self.get_current_DOM()
+        container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
+        container = container if container else soup
+        buttons = container.select("button[style]")
+        print("Searching for Icon")
+        filtered_buttons = list(filter(lambda x: self.check_button_tooltip(x, icon_text), buttons))
 
-        # array = arrayParameters
+        button = next(iter(filtered_buttons), None)
+        if not button:
+            self.log_error("Couldn't find Icon button.")
 
-        # backup_idwizard = self.idwizard[:]
+        button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
 
-        # for arrayLine in array:
+        self.click(button_element())
 
-        #     # Preenche o campo de Pesquisa
-        #     self.SetValue("aCab", "Procurar por:", arrayLine[0])
+    def check_button_tooltip(self, button, expected_text):
+        """
+        [Internal]
 
-        #     # Confirma a busca
-        #     self.SetButton("Buscar")
+        Internal method of ClickIcon.
 
-        #     # Clica no botão/icone Editar
-        #     self.SetButton("Editar")
+        Fires the MouseOver event of a button, checks tooltip text, fires the MouseOut event and
+        returns a boolean whether the tooltip has the expected text value or not.
 
-        #     # Faz a captura dos elementos dos campos
-        #     print('time.sleep(5) - 2204')
-        #     time.sleep(5)
-        #     content = self.driver.page_source
-        #     soup = BeautifulSoup(content,"html.parser")
+        :param button: The target button object.
+        :type button: BeautifulSoup object
+        :param expected_text: The text that is expected to exist in button's tooltip.
+        :type expected_text: str
 
-        #     menuCampos = { 'Procurar por:': arrayLine[0], 'Filial': '', 'Cont. Por': '', 'Cont. Ing':'', 'Cont. Esp':'' }
+        Usage:
 
-        #     for line in menuCampos:
-        #         if not menuCampos[line]:
-        #             RetId = self.cainput( line, soup, 'div', '', 'Enchoice', 'label', 0, '', 60 )
-        #             cache = self.get_web_value(RetId)
-        #             self.lencache = len(cache)
-        #             cache = cache.strip()
-        #             menuCampos[line] = cache
+        >>> # Call the method:
+        >>> has_add_text = self.check_button_tooltip(button_object, "Add")
+        """
+        element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
+        self.driver.execute_script(f"$(arguments[0]).mouseover()", element())
+        time.sleep(0.5)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
+        has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
+        self.driver.execute_script(f"$(arguments[0]).mouseout()", element())
+        return has_text
 
-        #     self.camposCache.append( menuCampos )
-        #     self.idwizard = backup_idwizard[:]
+    def AddParameter(self, parameter, branch, portuguese_value, english_value="", spanish_value=""):
+        """
+        Adds a parameter to the queue of parameters to be set by SetParameters method.
 
-        #     # Altero os parametros
-        #     self.SetValue("aCab", "Filial", arrayLine[1])
-        #     self.SetValue("aCab", "Cont. Por", arrayLine[2])
-        #     self.SetValue("aCab", "Cont. Ing", arrayLine[3])
-        #     self.SetValue("aCab", "Cont. Esp", arrayLine[4])
+        :param parameter: The parameter name.
+        :type parameter: str
+        :param branch: The branch to be filled in parameter edit screen.
+        :type branch: str
+        :param portuguese_value: The value for a portuguese repository.
+        :type portuguese_value: str
+        :param english_value: The value for an english repository.
+        :type english_value: str
+        :param spanish_value: The value for a spanish repository.
+        :type spanish_value: str
 
-        #     # Confirma a gravação de Edição
-        #     self.SetButton("Salvar")
-        #     self.idwizard = backup_idwizard[:]
-        # self.LogOff()
+        Usage:
 
-        # self.Setup( self.backupSetup['progini'], self.backupSetup['data'], self.backupSetup['grupo'], self.backupSetup['filial'])
-        # self.Program(self.config.routine)
-        return None
+        >>> # Calling the method:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        """
+        self.parameters.append([parameter, branch, portuguese_value, english_value, spanish_value])
+
+    def SetParameters(self):
+        """
+        Sets the parameters in CFG screen. The parameters must be passed with calls for **AddParameter** method.
+
+        Usage:
+
+        >>> # Adding Parameter:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        >>> # Calling the method:
+        >>> oHelper.SetParameters()
+        """
+        self.parameter_screen(restore_backup=False)
 
     def RestoreParameters(self):
-        #"""
-        #Método responsável por restaurar os parâmetros do configurador após o encerramento do/dos caso(s) de teste(s).
-        #Método deve ser executado quando for alterado os parametros do configurador, utilizando o método SetParameters()
-        #"""
-        # self.idwizard = []
-        # self.LogOff()
+        """
+        Restores parameters to previous value in CFG screen. Should be used after a **SetParameters** call.
 
-        # self.Setup("SIGACFG", "10/08/2017", "T1", "D MG 01")
+        Usage:
 
-        # # Escolhe a opção do Menu Lateral
-        # self.SetLateralMenu("Ambiente > Cadastros > Parâmetros")
+        >>> # Adding Parameter:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        >>> # Calling the method:
+        >>> oHelper.SetParameters()
+        """
+        self.parameter_screen(restore_backup=True)
 
-        # # Clica no botão/icone pesquisar
-        # self.SetButton("Pesquisar")
+    def parameter_screen(self, restore_backup):
+        """
+        [Internal]
 
-        # backup_idwizard = self.idwizard[:]
+        Internal method of SetParameters and RestoreParameters.
 
-        # for line in self.camposCache:
-        #     # Preenche o campo de Pesquisa
-        #     self.SetValue("aCab", "Procurar por:", line['Procurar por:'])
+        :param restore_backup: Boolean if method should restore the parameters.
+        :type restore_backup: bool
 
-        #     # Confirma a busca
-        #     self.SetButton("Buscar")
+        Usage:
 
-        #     # Clica no botão/icone Editar
-        #     self.SetButton("Editar")
+        >>> # Calling the method:
+        >>> self.parameter_screen(restore_backup=False)
+        """
+        self.driver.refresh()
 
-        #     #self.idwizard = backup_idwizard[:]
+        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+        self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu)
+        self.ClickIcon(self.language.search)
 
-        #     self.SetValue("aCab", 'Cont. Por', line['Cont. Por'])
-        #     self.SetValue("aCab", 'Cont. Ing', line['Cont. Ing'])
-        #     self.SetValue("aCab", 'Cont. Esp', line['Cont. Esp'])
+        self.fill_parameters(restore_backup=restore_backup)
 
-        #     # Confirma a gravação de Edição
-        #     self.SetButton("Salvar")
-        #     self.idwizard = backup_idwizard[:]
-        return None
+        self.LogOff()
 
-    def SetButtonTooltip(self, seek, soup, tag, cClass):
-        #Identifica o ID do Botão sem Rótulo/Texto.
-        #Via Tooltip ou via Nome da Imagem.
+        self.Setup(self.config.initialprog, self.config.date, self.config.group, self.config.branch, save_input=False)
+        self.Program(self.config.routine)
 
-        #     tooltip = ''
-        #     tooltipID = ''
+    def fill_parameters(self, restore_backup):
+        """
+        [Internal]
 
-        #     tooltipID = soup.find_all('div', text=seek)
+        Internal method of fill_parameters.
+        Searches and edits all parameters in the queue.
 
-        #     try: # Encontra o botão via nome da imagem
-        #         if not tooltipID or tooltipID[1]:
-        #             lista = soup.find_all(tag, class_=('tbutton'))
-        #             menuItens = {self.language.copy: 's4wb005n.png',self.language.cut: 's4wb006n.png',self.language.paste: 's4wb007n.png',self.language.calculator: 's4wb008n.png',self.language.spool: 's4wb010n.png',self.language.help: 's4wb016n.png',self.language.exit: 'final.png',self.language.search: 's4wb011n.png', self.language.folders: 'folder5.png', self.language.generate_differential_file: 'relatorio.png',self.language.include: 'bmpincluir.png', self.language.visualizar: 'bmpvisual.png',self.language.editar: 'editable.png',self.language.delete: 'excluir.png',self.language.filter: 'filtro.png'}
-        #             button = menuItens[seek]
+        :param restore_backup: Boolean if method should restore the parameters.
+        :type restore_backup: bool
 
-        #             for line in lista:
-        #                 if button in line.contents[1]['style']:
-        #                     tooltip = line.attrs['id'][4:8]
-        #                     break
-        #     except: # Encontra o botão via Tooltip
-        #         if tooltipID[0].text == seek:
-        #                 tooltip = tooltipID[0].attrs['id'][8:12]
+        Usage:
 
-        #     return(tooltip)
-        return None
+        >>> # Calling the method:
+        >>> self.fill_parameters(restore_backup=False)
+        """
+        parameter_list = self.backup_parameters if restore_backup else self.parameters
+        for parameter in parameter_list:
+            self.SetValue(self.language.search_by, parameter[0])
+            self.used_ids = []
+            self.SetButton(self.language.search2)
+            self.ClickIcon(self.language.edit)
+
+            if not restore_backup:
+                current_branch = self.GetValue("X6_FIL")
+                current_pt_value = self.GetValue("X6_CONTEUD")
+                current_en_value = self.GetValue("X6_CONTENG")
+                current_spa_value = self.GetValue("X6_CONTSPA")
+
+                self.backup_parameters.append([parameter[0], current_branch.strip(), current_pt_value.strip(), current_en_value.strip(), current_spa_value.strip()])
+
+            self.SetValue("X6_FIL", parameter[1])
+            self.SetValue("X6_CONTEUD", parameter[2])
+            self.SetValue("X6_CONTENG", parameter[3])
+            self.SetValue("X6_CONTSPA", parameter[4])
+
+            self.SetButton(self.language.save)

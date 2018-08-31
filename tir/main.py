@@ -14,6 +14,28 @@ class Webapp():
     def __init__(self, config_path=""):
         self.__webapp = WebappInternal()
 
+    def AddParameter(self, parameter, branch, portuguese_value, english_value, spanish_value):
+        """
+        Adds a parameter to the queue of parameters to be set by SetParameters method.
+
+        :param parameter: The parameter name.
+        :type parameter: str
+        :param branch: The branch to be filled in parameter edit screen.
+        :type branch: str
+        :param portuguese_value: The value for a portuguese repository.
+        :type portuguese_value: str
+        :param english_value: The value for an english repository.
+        :type english_value: str
+        :param spanish_value: The value for a spanish repository.
+        :type spanish_value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        """
+        self.__webapp.AddParameter(parameter, branch, portuguese_value, english_value, spanish_value)
+
     def AssertFalse(self):
         """
         Defines that the test case expects a False response to pass
@@ -140,6 +162,21 @@ class Webapp():
         """
         self.__webapp.ClickFolder(item)
 
+    def ClickIcon(self, icon_text):
+        """
+        Clicks on an Icon button based on its tooltip text.
+
+        :param icon_text: The tooltip text.
+        :type icon_text: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickIcon("Add")
+        >>> oHelper.ClickIcon("Edit")
+        """
+        self.__webapp.ClickIcon(icon_text)
+
     def GetValue(self, cabitem, field):
         """
         Gets the current value or text of element.
@@ -218,11 +255,18 @@ class Webapp():
         """
         self.__webapp.Program(program_name)
 
-    # def RestoreParameters(self):
-    #     """
-    #     Restores parameters altered by the method SetParameters.
-    #     """
-    #     self.__webapp.RestoreParameters()
+    def RestoreParameters(self):
+        """
+        Restores parameters to previous value in CFG screen. Should be used after a **SetParameters** call.
+
+        Usage:
+
+        >>> # Adding Parameter:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        >>> # Calling the method:
+        >>> oHelper.SetParameters()
+        """
+        self.__webapp.RestoreParameters()
 
     def SearchBrowse(self, term, key_description, identifier=None):
         """
@@ -359,11 +403,18 @@ class Webapp():
         """
         self.__webapp.SetLateralMenu(menuitens)
 
-    # def SetParameters(self, array_parameters):
-    #     """
-    #     Sets the parameters on Protheus' config.
-    #     """
-    #     self.__webapp.SetParameters(array_parameters)
+    def SetParameters(self):
+        """
+        Sets the parameters in CFG screen. The parameters must be passed with calls for **AddParameter** method.
+
+        Usage:
+
+        >>> # Adding Parameter:
+        >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
+        >>> # Calling the method:
+        >>> oHelper.SetParameters()
+        """
+        self.__webapp.SetParameters()
 
     def SetTabEDAPP(self, table_name):
         """

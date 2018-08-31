@@ -20,6 +20,7 @@ class ConfigLoader:
         self.log_file = ("LogFile" in data and bool(data["LogFile"]))
         self.debug_log = ("DebugLog" in data and bool(data["DebugLog"]))
         self.timeout = int(data["TimeOut"]) if "TimeOut" in data else 90
+        self.parameter_menu = str(data["ParameterMenu"]) if "ParameterMenu" in data else ""
         self.valid_language = False
         self.initialprog = ""
         self.routine = ""
@@ -27,7 +28,6 @@ class ConfigLoader:
         self.group = ""
         self.branch = ""
         self.module = ""
-
 
         if self.language:
             self.valid_language = True

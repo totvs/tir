@@ -48,6 +48,10 @@ class LanguagePack:
         self.solution = languagepack["Solution"]
         self.change_environment = languagepack["Change Environment"]
         self.invert_selection = languagepack["Invert Selection"]
+        self.parameter_menu = languagepack["Parameter Menu"]
+        self.search2 = languagepack["Search 2"]
+        self.search_by = languagepack["Search By"]
+
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -102,7 +106,10 @@ class LanguagePack:
             "Text Not Found": "Text Not Found.",
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
-            "Invert Selection": "Invert Selection"
+            "Invert Selection": "Invert Selection",
+            "Parameter Menu": "Environment > Registers > Parameters",
+            "Search 2": "Search",
+            "Search By": "Search by:"
         }
 
         brazilian_portuguese = {
@@ -155,7 +162,10 @@ class LanguagePack:
             "Text Not Found": "Texto não encontrado.",
             "User Not Authenticated": "Usuário não autenticado",
             "Change Environment": "Trocar módulo",
-            "Invert Selection": "Inverte Seleção"
+            "Invert Selection": "Inverte Seleção",
+            "Parameter Menu": "Ambiente > Cadastros > Parâmetros",
+            "Search 2": "Buscar",
+            "Search By": "Procurar por:"
         }
         russian = {
             "User": "Пользователь",
@@ -212,7 +222,10 @@ class LanguagePack:
             "Text Not Found": "Text Not Found",
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
-            "Invert Selection": "Invert Selection"
+            "Invert Selection": "Invert Selection",
+            "Parameter Menu": "Environment > Registers > Parameters",
+            "Search 2": "Search",
+            "Search By": "Search by:"
         }
 
         if language.lower() == "en-us":

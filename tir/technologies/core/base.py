@@ -108,13 +108,11 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
-
         expected_assert = expected
         msg = "Passed"
-        stack = list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function),inspect.stack())))[0]
-        stack = stack.split("_")[-1]
-        log_message = ""
-        log_message += stack + " - "
+        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+        log_message = f"{test_number}"
         self.log.set_seconds()
 
         if self.errors:
