@@ -165,32 +165,6 @@
 <em class="property">class </em><code class="descclassname">tir.main.</code><code class="descname">Webapp</code><span class="sig-paren">(</span><em>config_path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
 <dl class="method">
-<dt id="tir.main.Webapp.AddParameter">
-<code class="descname">AddParameter</code><span class="sig-paren">(</span><em>parameter</em>, <em>branch</em>, <em>portuguese_value</em>, <em>english_value</em>, <em>spanish_value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a parameter to the queue of parameters to be set by SetParameters method.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>parameter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The parameter name.</li>
-<li><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch to be filled in parameter edit screen.</li>
-<li><strong>portuguese_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for a portuguese repository.</li>
-<li><strong>english_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for an english repository.</li>
-<li><strong>spanish_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for a spanish repository.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.AssertFalse">
 <code class="descname">AssertFalse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AssertFalse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines that the test case expects a False response to pass</p>
@@ -337,26 +311,6 @@ fills the environment screen with the values passed on the Setup method.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.ClickIcon">
-<code class="descname">ClickIcon</code><span class="sig-paren">(</span><em>icon_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickIcon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicks on an Icon button based on its tooltip text.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>icon_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The tooltip text.</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="s2">&quot;Add&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="s2">&quot;Edit&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>cabitem</em>, <em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
@@ -444,19 +398,6 @@ of a grid. After running, the queues would be empty.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="tir.main.Webapp.RestoreParameters">
-<code class="descname">RestoreParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.RestoreParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restores parameters to previous value in CFG screen. Should be used after a <strong>SetParameters</strong> call.</p>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetParameters</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -628,19 +569,6 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetLateralMenu</span><span class="p">(</span><span class="s2">&quot;Updates &gt; Registers &gt; Products &gt; Groups&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="tir.main.Webapp.SetParameters">
-<code class="descname">SetParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the parameters in CFG screen. The parameters must be passed with calls for <strong>AddParameter</strong> method.</p>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetParameters</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
