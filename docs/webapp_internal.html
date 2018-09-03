@@ -1,0 +1,2167 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Webapp Internal &mdash; TIR 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Base" href="base.html" />
+    <link rel="prev" title="APW Internal" href="apw_internal.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> TIR
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Classes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apw.html">APW</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Internal Classes:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="apw_internal.html">APW Internal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp Internal</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core Classes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enumerations.html">Enumerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TIR</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Webapp Internal</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/webapp_internal.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-tir">
+<span id="webapp-internal"></span><h1>Webapp Internal<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tir.technologies.webapp_internal.WebappInternal">
+<em class="property">class </em><code class="descclassname">tir.technologies.webapp_internal.</code><code class="descname">WebappInternal</code><span class="sig-paren">(</span><em>config_path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal implementation of Protheus Webapp class.</p>
+<p>This class contains all the methods defined to run Selenium Interface Tests on Protheus Webapp.</p>
+<p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Inside __init__ method in Webapp class of main.py</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">__webapp</span> <span class="o">=</span> <span class="n">WebappInternal</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.AddParameter">
+<code class="descname">AddParameter</code><span class="sig-paren">(</span><em>parameter</em>, <em>branch</em>, <em>portuguese_value</em>, <em>english_value=''</em>, <em>spanish_value=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.AddParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a parameter to the queue of parameters to be set by SetParameters method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parameter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The parameter name.</li>
+<li><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch to be filled in parameter edit screen.</li>
+<li><strong>portuguese_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for a portuguese repository.</li>
+<li><strong>english_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for an english repository.</li>
+<li><strong>spanish_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value for a spanish repository.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ChangeEnvironment">
+<code class="descname">ChangeEnvironment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ChangeEnvironment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on the change environment area of Protheus Webapp and
+fills the environment screen with the values passed on the Setup method.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ChangeEnvironment</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.CheckResult">
+<code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a field has the value the user expects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field or label of a field that must be checked.</li>
+<li><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that the field is expected to contain.</li>
+<li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
+<li><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check a value of a field:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckResult</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check a field that is on the second line of a grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckResult</span><span class="p">(</span><span class="s2">&quot;Client&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check a field that is on the second grid of the screen:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckResult</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.CheckView">
+<code class="descname">CheckView</code><span class="sig-paren">(</span><em>text</em>, <em>element_type='help'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a certain text is present in the screen at the time and takes an action.</p>
+<p>“help” - closes element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text to be checked.</li>
+<li><strong>element_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Type of element. - <strong>Default:</strong> “help”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckView</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickBox">
+<code class="descname">ClickBox</code><span class="sig-paren">(</span><em>field</em>, <em>content_list=''</em>, <em>select_all=False</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on Checkbox elements of a grid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column to identify grid rows.</li>
+<li><strong>content_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Comma divided string with values that must be checked. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>select_all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if all options should be selected. - <strong>Default:</strong> False</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to select a specific checkbox:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickBox</span><span class="p">(</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to select multiple checkboxes:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickBox</span><span class="p">(</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="s2">&quot;D MG 01 , D RJ 02&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to select all checkboxes:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickBox</span><span class="p">(</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="n">select_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickFolder">
+<code class="descname">ClickFolder</code><span class="sig-paren">(</span><em>folder_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickFolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on folder elements on the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>folder_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Which folder item should be clicked.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickFolder</span><span class="p">(</span><span class="s2">&quot;Folder1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickIcon">
+<code class="descname">ClickIcon</code><span class="sig-paren">(</span><em>icon_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickIcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on an Icon button based on its tooltip text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>icon_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The tooltip text.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="s2">&quot;Add&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="s2">&quot;Edit&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.GetValue">
+<code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current value or text of element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field or label of a field that must be checked.</li>
+<li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
+<li><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">current_value</span> <span class="o">=</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.LoadGrid">
+<code class="descname">LoadGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.LoadGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is responsible for running all actions of the input and check queues
+of a grid. After running, the queues would be empty.</p>
+<p>Must be called after SetValue and CheckResult calls that has the grid parameter set to True.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># After SetValue:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># After CheckResult:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckResult</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.LogOff">
+<code class="descname">LogOff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.LogOff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs out of the Protheus Webapp.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LogOff</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.MessageBoxClick">
+<code class="descname">MessageBoxClick</code><span class="sig-paren">(</span><em>button_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.MessageBoxClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on desired button inside a Messagebox element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>button_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Desired button to click.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">MessageBoxClick</span><span class="p">(</span><span class="s2">&quot;Ok&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.Program">
+<code class="descname">Program</code><span class="sig-paren">(</span><em>program_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.Program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that sets the program in the initial menu search field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The program name</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.RestoreParameters">
+<code class="descname">RestoreParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.RestoreParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restores parameters to previous value in CFG screen. Should be used after a <strong>SetParameters</strong> call.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetParameters</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SearchBrowse">
+<code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key=None</em>, <em>identifier=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searchs a term on Protheus Webapp.</p>
+<p>It will search using the default search key, but if a <strong>key</strong> is provided
+it will search using the chosen key.</p>
+<p>It will search using the first search box on the screen, but if an <strong>identifier</strong>
+is provided, it will search on the chosen search box.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The term that must be searched.</li>
+<li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</li>
+<li><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and default search key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a chosen search box and the default search key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a chosen search box and a chosen search key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetBranch">
+<code class="descname">SetBranch</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetBranch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chooses the branch on the branch selection screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch that would be chosen.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetBranch</span><span class="p">(</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetButton">
+<code class="descname">SetButton</code><span class="sig-paren">(</span><em>button</em>, <em>sub_item=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetButton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that clicks on a button on the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</li>
+<li><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Sub item to be clicked inside the first button. - <strong>Default:</strong> “” (empty string)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click on a regular button:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Add&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click on a sub item inside a button.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Other Actions&quot;</span><span class="p">,</span> <span class="s2">&quot;Process&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetFilePath">
+<code class="descname">SetFilePath</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetFilePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills the path screen with desired path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path to be inputted.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetFilePath</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;C:\folder&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetFocus">
+<code class="descname">SetFocus</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetFocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the current focus on the desired field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field that must receive the focus.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetFocus</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetKey">
+<code class="descname">SetKey</code><span class="sig-paren">(</span><em>key</em>, <em>grid=False</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Press the desired key on the keyboard on the focused element.</p>
+<p>Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Key that would be pressed</li>
+<li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if action must be applied on a grid. (Usually with DOWN key)</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetKey</span><span class="p">(</span><span class="s2">&quot;ENTER&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method on a grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetKey</span><span class="p">(</span><span class="s2">&quot;DOWN&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method on the second grid on the screen:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetKey</span><span class="p">(</span><span class="s2">&quot;DOWN&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetLateralMenu">
+<code class="descname">SetLateralMenu</code><span class="sig-paren">(</span><em>menu_itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetLateralMenu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Navigates through the lateral menu using provided menu path.
+e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>menu_itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – String with the path to the menu.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetLateralMenu</span><span class="p">(</span><span class="s2">&quot;Updates &gt; Registers &gt; Products &gt; Groups&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetParameters">
+<code class="descname">SetParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the parameters in CFG screen. The parameters must be passed with calls for <strong>AddParameter</strong> method.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">AddParameter</span><span class="p">(</span><span class="s2">&quot;MV_MVCSA1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">,</span> <span class="s2">&quot;.F.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetParameters</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetTabEDAPP">
+<code class="descname">SetTabEDAPP</code><span class="sig-paren">(</span><em>table</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetTabEDAPP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chooses the table on the generic query (EDAPP).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The table that would be chosen.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetTabEDAPP</span><span class="p">(</span><span class="s2">&quot;AAB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.SetValue">
+<code class="descname">SetValue</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>grid=False</em>, <em>grid_number=1</em>, <em>ignore_case=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets value of an input element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field name or label to receive the value</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be inputted on the element.</li>
+<li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+<li><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is a grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Client&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is on the second grid of the screen:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.Setup">
+<code class="descname">Setup</code><span class="sig-paren">(</span><em>initial_program</em>, <em>date=''</em>, <em>group='99'</em>, <em>branch='01'</em>, <em>module=''</em>, <em>save_input=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.Setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The initial program to load.</li>
+<li><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “99”</li>
+<li><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “01”</li>
+<li><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>save_input</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if all input info should be saved for later usage. Leave this flag ‘True’ if you are not sure. <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span><span class="s2">&quot;SIGAFAT&quot;</span><span class="p">,</span> <span class="s2">&quot;18/08/2018&quot;</span><span class="p">,</span> <span class="s2">&quot;T1&quot;</span><span class="p">,</span> <span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitUntil">
+<code class="descname">WaitUntil</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitUntil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait until condition is true
+e.g. “Item1,Item2,Item3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitUntil</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitWhile">
+<code class="descname">WaitWhile</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitWhile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait while condition is true
+e.g. “Item1,Item2,Item3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitWhile</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.add_grid_row_counter">
+<code class="descname">add_grid_row_counter</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.add_grid_row_counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Adds the counter of rows to the global dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>grid</strong> (<em>BeautifulSoup object.</em>) – The grid whose rows are being controlled.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">add_grid_row_counter</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_button_tooltip">
+<code class="descname">check_button_tooltip</code><span class="sig-paren">(</span><em>button</em>, <em>expected_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_button_tooltip" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Internal method of ClickIcon.</p>
+<p>Fires the MouseOver event of a button, checks tooltip text, fires the MouseOut event and
+returns a boolean whether the tooltip has the expected text value or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>button</strong> (<em>BeautifulSoup object</em>) – The target button object.</li>
+<li><strong>expected_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The text that is expected to exist in button’s tooltip.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">has_add_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_button_tooltip</span><span class="p">(</span><span class="n">button_object</span><span class="p">,</span> <span class="s2">&quot;Add&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_grid">
+<code class="descname">check_grid</code><span class="sig-paren">(</span><em>field</em>, <em>x3_dictionaries</em>, <em>get_value=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Checks the grid cell with the passed parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<em>List of values</em>) – An item from the grid’s check queue</li>
+<li><strong>x3_dictionaries</strong> (<em>Tuple of dictionaries</em>) – Tuple of dictionaries containing information extracted from x3.</li>
+<li><strong>get_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean value if check_grid should return its value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If get_value flag is True, it will return the captured value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">check_grid</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x3_dictionaries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_grid_appender">
+<code class="descname">check_grid_appender</code><span class="sig-paren">(</span><em>line</em>, <em>column</em>, <em>value</em>, <em>grid_number=0</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_grid_appender" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Adds a value to the check queue of a grid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The line of the grid that would be checked.</li>
+<li><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column of the grid that would be checked.</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that is expected.</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 0</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">check_grid_appender</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_mask">
+<code class="descname">check_mask</code><span class="sig-paren">(</span><em>element</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Checks whether the element has a mask or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>element</strong> (<em>Selenium object</em>) – The element that must be checked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean if element has a mask or not.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">check_mask</span><span class="p">(</span><span class="n">my_element</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.children_element_count">
+<code class="descname">children_element_count</code><span class="sig-paren">(</span><em>element_selector</em>, <em>children_selector</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.children_element_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns the count of elements of a certain CSS Selector that exists within a certain element located also via CSS Selector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>element_selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The selector to find the first element.</li>
+<li><strong>children_selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The selector to find the children elements inside of the first element.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The count of elements matching the children_selector inside of element_selector.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">children_element_count</span><span class="p">(</span><span class="s2">&quot;.tmenu&quot;</span><span class="p">,</span> <span class="s2">&quot;.tmenuitem&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.clear_grid">
+<code class="descname">clear_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.clear_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Empties the global grid list variables.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">clear_grid</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.click_check_radio_button">
+<code class="descname">click_check_radio_button</code><span class="sig-paren">(</span><em>field</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_check_radio_button" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Identify and click on check or radio button.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field that would receive the input.</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – The value that must be on the checkbox or grid.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The element that changed value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Selenium object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_checkbox</span><span class="p">(</span><span class="s2">&quot;CheckBox1&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.click_sub_menu">
+<code class="descname">click_sub_menu</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_sub_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Clicks on the sub menu of buttons. Returns True if succeeded.
+Internal method of SetButton.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean if click was successful.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">click_sub_menu</span><span class="p">(</span><span class="s2">&quot;Process&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.close_modal">
+<code class="descname">close_modal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.close_modal" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>This method closes the modal in the opening screen.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">close_modal</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.create_message">
+<code class="descname">create_message</code><span class="sig-paren">(</span><em>args</em>, <em>message_type=&lt;MessageType.CORRECT: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.create_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns default messages used all throughout the class based on input parameters.</p>
+<p>Each message type has a different number of placeholders to be passed as a list through args parameter:</p>
+<p>Correct Message = <em>“{} Value of field {} is correct!”</em> - <strong>2 placeholders</strong></p>
+<p>Incorrect Message = <em>“{} Value expected for field “{}” ({}) is not equal to what was found ({}).”</em> - <strong>3 placeholders</strong></p>
+<p>Disabled Message = <em>“{} Field “{}” is disabled.”</em> - <strong>2 placeholders</strong></p>
+<p>AssertError Message = <em>“Failed: Value expected for field {}: “{}” is different from what was found “{}”.”</em> - <strong>2 placeholders</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>args</strong> (<em>List of str</em>) – A list of strings to be replaced in each message.</li>
+<li><strong>message_type</strong> (<em>enum.MessageType</em>) – Enum of which message type should be created. - <strong>Default:</strong> enum.MessageType.Correct</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_message</span><span class="p">([</span><span class="n">txtaux</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">user_value</span><span class="p">,</span> <span class="n">captured_value</span><span class="p">],</span> <span class="n">enum</span><span class="o">.</span><span class="n">MessageType</span><span class="o">.</span><span class="n">INCORRECT</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.create_x3_tuple">
+<code class="descname">create_x3_tuple</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.create_x3_tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a tuple of dictionaries of field information based on all fields in the grid queues.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A tuple containing the needed x3 information.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Tuple of Dictionaries</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x3_dictionaries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_x3_tuple</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.element_exists">
+<code class="descname">element_exists</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>position=0</em>, <em>optional_term=''</em>, <em>main_container='.tmodaldialog</em>, <em>.ui-dialog'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.element_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a boolean if element exists on the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The first term to use on a search of element</li>
+<li><strong>scrap_type</strong> (<em>enum.ScrapType</em>) – Type of element search. - <strong>Default:</strong> enum.ScrapType.TEXT</li>
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</li>
+<li><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if element is present. False if element is not present.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">element_is_present</span> <span class="o">=</span> <span class="n">element_exists</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;.ui-dialog&quot;</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">element_is_present</span> <span class="o">=</span> <span class="n">element_exists</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;.tmodaldialog.twidget&quot;</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">initial_layer</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">element_is_present</span> <span class="o">=</span> <span class="n">element_exists</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">MIXED</span><span class="p">,</span> <span class="n">optional_term</span><span class="o">=</span><span class="s2">&quot;.tsay&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.environment_screen">
+<code class="descname">environment_screen</code><span class="sig-paren">(</span><em>change_env=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.environment_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Fills the environment screen of Protheus with the values passed on the Setup method.
+Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>change_env</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if the method is being called by ChangeEnvironment. - <strong>Default:</strong> False</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">environment_screen</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.fill_grid">
+<code class="descname">fill_grid</code><span class="sig-paren">(</span><em>field</em>, <em>x3_dictionaries</em>, <em>initial_layer</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Fills the grid cell with the passed parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<em>List of values</em>) – An item from the grid’s input queue</li>
+<li><strong>x3_dictionaries</strong> (<em>Tuple of dictionaries</em>) – Tuple of dictionaries containing information extracted from x3.</li>
+<li><strong>initial_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The initial layer of elements of Protheus Webapp</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">fill_grid</span><span class="p">([</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">x3_dictionaries</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.fill_parameters">
+<code class="descname">fill_parameters</code><span class="sig-paren">(</span><em>restore_backup</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Internal method of fill_parameters.
+Searches and edits all parameters in the queue.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>restore_backup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if method should restore the parameters.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">fill_parameters</span><span class="p">(</span><span class="n">restore_backup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.fill_search_browse">
+<code class="descname">fill_search_browse</code><span class="sig-paren">(</span><em>term</em>, <em>search_elements</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_search_browse" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Fills search input method and presses the search button.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The term to be searched</li>
+<li><strong>search_elements</strong> (<em>Tuple of Beautiful Soup objects</em>) – Tuple of Search elements</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Preparing the tuple:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_search_browse_elements</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">fill_search_browse</span><span class="p">(</span><span class="s2">&quot;D MG 01&quot;</span><span class="p">,</span> <span class="n">search_elements</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.find_label_element">
+<code class="descname">find_label_element</code><span class="sig-paren">(</span><em>label_text</em>, <em>container</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_label_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Find input element next to label containing the label_text parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>label_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The label text to be searched</li>
+<li><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing a BeautifulSoup object next to the label</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">List of BeautifulSoup objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">find_label_element</span><span class="p">(</span><span class="s2">&quot;User:&quot;</span><span class="p">,</span> <span class="n">container_object</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.find_sub_menu_child">
+<code class="descname">find_sub_menu_child</code><span class="sig-paren">(</span><em>item</em>, <em>containers</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_sub_menu_child" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Finds the menu item inside child menu layers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</li>
+<li><strong>containers</strong> (<em>List of Beautiful Soup objects</em>) – The menu itens of the current layer that have children.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The item that was found. If None was found, it returns an empty string.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Selenium object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_sub_menu_child</span><span class="p">(</span><span class="s2">&quot;Process&quot;</span><span class="p">,</span> <span class="n">container_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.find_sub_menu_text">
+<code class="descname">find_sub_menu_text</code><span class="sig-paren">(</span><em>menu_item</em>, <em>current_itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_sub_menu_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a tuple containing a possible match of a menu item among the current itens.
+If none was found it will be an empty string.</p>
+<p>The second position will contain the itens that have children itens.
+If none has children itens, it will be an empty list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>menu_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</li>
+<li><strong>current_item</strong> (<em>List of Selenium objects.</em>) – The menu itens in the current layer.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tuple containing a possible match of a menu item and the itens that have children itens.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Tuple (selenium object, list of selenium objects)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_sub_menu_text</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">child_itens</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.generate_regex_by_prefixes">
+<code class="descname">generate_regex_by_prefixes</code><span class="sig-paren">(</span><em>prefixes</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.generate_regex_by_prefixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a regex string created by combining all field prefixes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prefixes</strong> (<em>List of str</em>) – Prefixes of fields to be combined in a regex.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">regex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_regex_by_prefixes</span><span class="p">(</span><span class="n">field_prefixes</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_closing_button">
+<code class="descname">get_closing_button</code><span class="sig-paren">(</span><em>is_advpl</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_closing_button" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Gets the closing element based if the screen was made using MVC or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>is_advpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if screen was made using MVC structure or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The closing element.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Selenium object</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">closing_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_closing_button</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids">
+<code class="descname">get_enchoice_button_ids</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>If current layer level has an enchoice, returns all buttons’ ids.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Current layer level that the application is.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List with enchoice’s buttons’ ids.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List of str</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_enchoice_button_ids</span><span class="p">(</span><span class="n">current_layer</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_field">
+<code class="descname">get_field</code><span class="sig-paren">(</span><em>field</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>This method decides if field would be found by either it’s name or by it’s label.
+Internal method of input_value and CheckResult.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Field name or field label to be searched</li>
+<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Field element</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Beautiful Soup object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">element1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">element2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;Product&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_function_from_stack">
+<code class="descname">get_function_from_stack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_function_from_stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Gets the function name that called the Webapp class from the call stack.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_function_from_stack</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_headers_from_grids">
+<code class="descname">get_headers_from_grids</code><span class="sig-paren">(</span><em>grids</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_headers_from_grids" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns the headers of each grid in <em>grids</em> parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>grids</strong> (<em>List of BeautifulSoup objects</em>) – The grids to extract the headers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of Dictionaries with each header value and index.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List of Dict</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_headers_from_grids</span><span class="p">(</span><span class="n">grids</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_language">
+<code class="descname">get_language</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_language" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Gets the current language of the html.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The current language of the html.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">language</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_language</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_panel_name_index">
+<code class="descname">get_panel_name_index</code><span class="sig-paren">(</span><em>panel_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_panel_name_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Gets the index of search box element based on the panel name associated with it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>panel_name</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The index of the search box starting with 0</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_name_index</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_search_browse_elements">
+<code class="descname">get_search_browse_elements</code><span class="sig-paren">(</span><em>panel_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_search_browse_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a tuple with the search browse elements in this order:
+Key Dropdown, Input, Icon.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>panel_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Tuple with the Key Dropdown, Input and Icon elements of a search box</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple of Beautiful Soup objects.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_search_browse_elements</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_selected_row">
+<code class="descname">get_selected_row</code><span class="sig-paren">(</span><em>rows</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_selected_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>From a list of rows, filter the selected one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rows</strong> (<em>List of Beautiful Soup objects</em>) – List of rows.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The selected row.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Beautiful Soup object.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_selected_row</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_selenium_column_element">
+<code class="descname">get_selenium_column_element</code><span class="sig-paren">(</span><em>xpath</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_selenium_column_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Tries to get the selenium element out of a grid column.
+Workaround method to be used instead of a lambda function on fill_grid method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xpath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The xpath to the column.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#  Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_selenium_column_element</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_web_value">
+<code class="descname">get_web_value</code><span class="sig-paren">(</span><em>element</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_web_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Gets the current value or text of element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>element</strong> (<em>Selenium object</em>) – The element to get value or text from</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The value or text of passed element</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">current_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_web_value</span><span class="p">(</span><span class="n">selenium_field_element</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_x3_dictionaries">
+<code class="descname">get_x3_dictionaries</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_x3_dictionaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Generates the dictionaries with field comparisons from the x3 file,</p>
+<p>Dictionaries:Field to Type, Field to Size, Field to Title.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fields</strong> (<em>List of str</em>) – List of fields that must be located in x3.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The three x3 dictionaries in a Tuple.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Trype:</th><td class="field-body">Tuple of Dictionary</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x3_dictionaries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x3_dictionaries</span><span class="p">(</span><span class="n">field_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.input_grid_appender">
+<code class="descname">input_grid_appender</code><span class="sig-paren">(</span><em>column</em>, <em>value</em>, <em>grid_number=0</em>, <em>new=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Adds a value to the input queue of a grid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column of the grid that would receive the input.</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that would be inputted.</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 0</li>
+<li><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean value if this is a new line that should be added. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">input_grid_appender</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ---------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method for a new line:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">input_grid_appender</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.input_value">
+<code class="descname">input_value</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>ignore_case=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Sets value of an input element.
+Returns True if succeeded, False if it failed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field name or label to receive the value</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be set on the field</li>
+<li><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if succeeded, False if it failed.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">input_value</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.is_advpl">
+<code class="descname">is_advpl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.is_advpl" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a boolean if screen was made using MVC structure or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean if screen was made using MVC structure or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_advpl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_advpl</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.log_error">
+<code class="descname">log_error</code><span class="sig-paren">(</span><em>message</em>, <em>new_log_line=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Finishes execution of test case with an error and creates the log information for that test.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Message to be logged</li>
+<li><strong>new_log_line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s2">&quot;Element was not found&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.log_result">
+<code class="descname">log_result</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>captured_value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Logs the result of comparison between user value and captured value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field whose values would be compared</li>
+<li><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value the user expects</li>
+<li><strong>captured_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that was captured on the screen</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log_result</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.new_grid_line">
+<code class="descname">new_grid_line</code><span class="sig-paren">(</span><em>field</em>, <em>add_grid_line_counter=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.new_grid_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Creates a new line on the grid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<em>List of values</em>) – An item from the grid’s input queue</li>
+<li><strong>add_grid_line_counter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if counter should be incremented when method is called. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">new_grid_line</span><span class="p">([</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.parameter_screen">
+<code class="descname">parameter_screen</code><span class="sig-paren">(</span><em>restore_backup</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.parameter_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Internal method of SetParameters and RestoreParameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>restore_backup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if method should restore the parameters.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_screen</span><span class="p">(</span><span class="n">restore_backup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.program_screen">
+<code class="descname">program_screen</code><span class="sig-paren">(</span><em>initial_program=''</em>, <em>environment=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.program_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Fills the first screen of Protheus with the first program to run and the environment to connect.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The initial program to load</li>
+<li><strong>environment</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The environment to connect</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">program_screen</span><span class="p">(</span><span class="s2">&quot;SIGAADV&quot;</span><span class="p">,</span> <span class="s2">&quot;MYENVIRONMENT&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.remove_mask">
+<code class="descname">remove_mask</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.remove_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Removes special characters from received string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The string that would have its characters removed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The string with its special characters removed.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value_without_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_mask</span><span class="p">(</span><span class="s2">&quot;111-111.111&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># value_without_mask == &quot;111111111&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.restart">
+<code class="descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.restart" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Restarts the Protheus Webapp and fills the initial screens.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.result_checkbox">
+<code class="descname">result_checkbox</code><span class="sig-paren">(</span><em>field</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.result_checkbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Checks expected value of a Checkbox element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field whose value would be checked.</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – The expected value of the radio button.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean if expected value was found on the element or not.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">assertion_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result_checkbox</span><span class="p">(</span><span class="s2">&quot;CheckBox1&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.search_browse_key">
+<code class="descname">search_browse_key</code><span class="sig-paren">(</span><em>search_key</em>, <em>search_elements</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_browse_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Chooses the search key to be used during the search.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>search_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The search key to be chosen on the search dropdown</li>
+<li><strong>search_elements</strong> (<em>Tuple of Beautiful Soup objects</em>) – Tuple of Search elements</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Preparing the tuple:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_search_browse_elements</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_browse_key</span><span class="p">(</span><span class="s2">&quot;Branch+Id&quot;</span><span class="p">,</span> <span class="n">search_elements</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.search_for_errors">
+<code class="descname">search_for_errors</code><span class="sig-paren">(</span><em>soup</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_for_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Searches for errors and alerts in the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>soup</strong> (<em>Beautiful Soup object</em>) – Beautiful Soup object to be checked.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_for_errors</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.search_text">
+<code class="descname">search_text</code><span class="sig-paren">(</span><em>itens</em>, <em>invert</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Searches strings that were sent and waits until condition is respected
+e.g. “Item1,Item2,Item3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</li>
+<li><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if presence of text should be True or False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_text</span><span class="p">(</span><span class="n">itens</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.set_log_info">
+<code class="descname">set_log_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.set_log_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Fills the log information needed by opening the About page.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">set_log_info</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.set_program">
+<code class="descname">set_program</code><span class="sig-paren">(</span><em>program</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.set_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Method that sets the program in the initial menu search field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The program name</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">set_program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.try_recover_lost_line">
+<code class="descname">try_recover_lost_line</code><span class="sig-paren">(</span><em>field</em>, <em>grid_id</em>, <em>row</em>, <em>headers</em>, <em>field_to_label</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_recover_lost_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Tries to recover the position if a new line is lost.</p>
+<p>Workaround method to keep trying to get the right row fill_grid method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<em>List of values</em>) – An item from the grid’s input queue</li>
+<li><strong>grid_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The grid’s ID</li>
+<li><strong>row</strong> (<em>Beautiful Soup object</em>) – The current row</li>
+<li><strong>headers</strong> (<em>List of Dictionaries</em>) – List of dictionaries with each grid’s headers</li>
+<li><strong>field_to_label</strong> (<em>Dict</em>) – Dictionary from the x3 containing the field to label relationship.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">try_recover_lost_line</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">grid_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">field_to_label</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.try_send_keys">
+<code class="descname">try_send_keys</code><span class="sig-paren">(</span><em>element_function</em>, <em>key</em>, <em>try_counter=0</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_send_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Tries to send value to element using different techniques.
+Meant to be used inside of a loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>element_function</strong> (<em>function object</em>) – The function that returns the element that would receive the value.</li>
+<li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><em>selenium.webdriver.common.keys</em>) – The value that would be sent to the element.</li>
+<li><strong>try_counter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – This counter will decide which technique should be used. - <strong>Default:</strong> 0</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">try_send_keys</span><span class="p">(</span><span class="n">selenium_input</span><span class="p">,</span> <span class="n">user_value</span><span class="p">,</span> <span class="n">try_counter</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.user_screen">
+<code class="descname">user_screen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.user_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Fills the user login screen of Protheus with the user and password located on config.json.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">user_screen</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.wait_element">
+<code class="descname">wait_element</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>presence=True</em>, <em>position=0</em>, <em>optional_term=None</em>, <em>main_container='.tmodaldialog</em>, <em>.ui-dialog'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Waits until the desired element is located on the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The first search term. A text or a selector.</li>
+<li><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</li>
+<li><strong>presence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</li>
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</li>
+<li><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</li>
+<li><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">wait_element</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;.ui-button.ui-dialog-titlebar-close[title=&#39;Close&#39;]&quot;</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.wait_element_timeout">
+<code class="descname">wait_element_timeout</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>timeout=5.0</em>, <em>step=0.1</em>, <em>presence=True</em>, <em>position=0</em>, <em>optional_term=None</em>, <em>main_container='.tmodaldialog</em>, <em>.ui-dialog'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Waits until the desired element is located on the screen or until the timeout is met.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The first search term. A text or a selector.</li>
+<li><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</li>
+<li><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The maximum amount of time of wait. - <strong>Default:</strong> 5.0</li>
+<li><strong>timeout</strong> – The amount of time each step should wait. - <strong>Default:</strong> 0.1</li>
+<li><strong>presence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</li>
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</li>
+<li><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</li>
+<li><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">wait_element_timeout</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="n">button</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">MIXED</span><span class="p">,</span> <span class="n">optional_term</span><span class="o">=</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.web_scrap">
+<code class="descname">web_scrap</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>optional_term=None</em>, <em>label=False</em>, <em>main_container=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.web_scrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a BeautifulSoup object list based on the search parameters.</p>
+<p>Does not support ScrapType.XPATH as scrap_type parameter value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The first search term. A text or a selector</li>
+<li><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</li>
+<li><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</li>
+<li><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If the search is based on a label near the element. - <strong>Default:</strong> False</li>
+<li><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of BeautifulSoup4 elements based on search parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">List of BeautifulSoup4 objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#All buttons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">buttons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_scrap</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#----------------#</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#Elements that contain the text &quot;Example&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">example_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_scrap</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;Example&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#----------------#</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#Elements with class &quot;my_class&quot; and text &quot;my_text&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_scrap</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="s2">&quot;my_text&quot;</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">MIXED</span><span class="p">,</span> <span class="n">optional_term</span><span class="o">=</span><span class="s2">&quot;.my_class&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="base.html" class="btn btn-neutral float-right" title="Base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="apw_internal.html" class="btn btn-neutral" title="APW Internal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Totvs Automation Team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
