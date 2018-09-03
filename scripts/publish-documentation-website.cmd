@@ -23,3 +23,9 @@ set date = date /t
 git add .
 git commit -m "Publishing documentation %date%"
 git push
+
+
+echo -------------------------------------
+echo Files published on git successfully.
+echo -------------------------------------
+pause >nul | set/p = Press any key to exit ...
