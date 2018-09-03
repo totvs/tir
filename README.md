@@ -20,7 +20,7 @@ Our MindMap can be found here:
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
-Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation.
+Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
 
 ##How to install:
 
