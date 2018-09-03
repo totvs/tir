@@ -44,7 +44,7 @@ Pull requests are really helpful. They must be in the project's scope and avoid 
 
 **Ask us first** before starting to work on a pull request of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
 
-Make sure to read the [Architecture](docs/ARCHITECTURE.md) document
+Make sure to read the [Architecture](doc_files/ARCHITECTURE.md) document
 to understand how the tool was designed.
 
 The methods must have docstrings describing its functionality and usage, and if any, parameters, defaults and returns. e.g.:

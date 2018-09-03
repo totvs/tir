@@ -12,7 +12,7 @@ pip install sphinx-rtd-theme
 echo -------------------------
 echo Creating Documentation...
 echo -------------------------
-cd docs
+cd doc_files
 call make.bat clean
 call make.bat html
 cd ..
