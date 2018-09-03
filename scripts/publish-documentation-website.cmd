@@ -18,12 +18,9 @@ echo Files created and copied to folder: %cd%
 echo Publishing on git...
 echo -------------------------------------
 
-set date_msg = date /t
-set time_msg = time /t
-
 cd ..
 git add docs/
-git commit -m "Publishing documentation %date_msg% %time_msg%"
+git commit -m "Publishing documentation %date% %time:~0,5%"
 git push
 
 
