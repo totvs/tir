@@ -20,6 +20,7 @@ echo -------------------------------------
 
 set date = date /t
 
+cd ..
 git add docs/
 git commit -m "Publishing documentation %date%"
 git push
