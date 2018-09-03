@@ -11,18 +11,19 @@ cd ..
 cd doc_files
 call make.bat clean
 call make.bat html
-xcopy /E ".\build\html\*" "..\docs\"
+xcopy /E ".\build\html\*" "..\docs\" /Y
 
 echo -------------------------------------
 echo Files created and copied to folder: %cd%
 echo Publishing on git...
 echo -------------------------------------
 
-set date = date /t
+set date_msg = date /t
+set time_msg = time /t
 
 cd ..
 git add docs/
-git commit -m "Publishing documentation %date% %time%"
+git commit -m "Publishing documentation %date_msg% %time_msg%"
 git push
 
 
