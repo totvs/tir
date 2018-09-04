@@ -541,8 +541,9 @@ class Base(unittest.TestCase):
 
         if value:
             time.sleep(1)
-            combo.select_by_visible_text(value.text)
-            print(f"Selected value for combo is: {value.text}")
+            text_value = value.text
+            combo.select_by_visible_text(text_value)
+            print(f"Selected value for combo is: {text_value}")
 
     def send_keys(self, element, arg):
         """
@@ -609,7 +610,7 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> text = self.set_element_focus(element())
         """
-        self.driver.execute_script("arguments[0].focus();", element)
+        self.driver.execute_script("window.focus(); arguments[0].focus();", element)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
