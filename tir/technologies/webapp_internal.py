@@ -2479,25 +2479,16 @@ class WebappInternal(Base):
         column_name = ""
 
         if re.match(r"\w+(_)", column):
-            column_name = self.get_x3_dictionaries([column])[2][column]
+            column_name = self.get_x3_dictionaries([column])[2][column].lower()
         else:
-            column_name = column
+            column_name = column.lower()
 
-        field_to_label = x3_dictionaries[2] if x3_dictionaries else {}
-
-        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, base_container="body")
+        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not containers:
             self.log_error("Couldn't find controller.")
 
-        is_advpl = self.is_advpl()
-        grid_selector = ""
-        if is_advpl:
-            grid_selector = ".tgetdados"
-        else:
-            grid_selector = ".tgrid"
-
         container = next(iter(self.zindex_sort(containers, True)), None)
-        grids = self.filter_displayed_elements(container.select(grid_selector))
+        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid"))
         if not grids:
             self.log_error("Couldn't find any grid.")
 

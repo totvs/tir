@@ -162,7 +162,7 @@ class Webapp():
         """
         self.__webapp.ClickFolder(item)
 
-    def ClickGridCell(self, row, column, grid_number=1):
+    def ClickGridCell(self, column, row=1, grid_number=1):
         """
         Clicks on a Cell of a Grid.
 
@@ -178,7 +178,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
-        self.__webapp.ClickGridCell(row, column, grid_number)
+        self.__webapp.ClickGridCell(column, row, grid_number)
 
     def ClickIcon(self, icon_text):
         """
