@@ -162,6 +162,24 @@ class Webapp():
         """
         self.__webapp.ClickFolder(item)
 
+    def ClickGridCell(self, row, column, grid_number=1):
+        """
+        Clicks on a Cell of a Grid.
+
+        :param column: The column that should be clicked.
+        :type column: str
+        :param row_number: Grid line that contains the column field to be checked.- **Default:** 1
+        :type row_number: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridCell("Product", 1)
+        """
+        self.__webapp.ClickGridCell(row, column, grid_number)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.

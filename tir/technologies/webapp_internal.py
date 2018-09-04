@@ -2458,6 +2458,72 @@ class WebappInternal(Base):
             else:
                 self.log_error("Couldn't find grids.")
 
+    def ClickGridCell(self, column, row_number=1, grid_number=1):
+        """
+        Clicks on a Cell of a Grid.
+
+        :param column: The column that should be clicked.
+        :type column: str
+        :param row_number: Grid line that contains the column field to be checked.- **Default:** 1
+        :type row_number: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridCell("Product", 1)
+        """
+        row_number -= 1
+        grid_number -= 1
+        column_name = ""
+
+        if re.match(r"\w+(_)", column):
+            column_name = self.get_x3_dictionaries([column])[2][column]
+        else:
+            column_name = column
+
+        field_to_label = x3_dictionaries[2] if x3_dictionaries else {}
+
+        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, base_container="body")
+        if not containers:
+            self.log_error("Couldn't find controller.")
+
+        is_advpl = self.is_advpl()
+        grid_selector = ""
+        if is_advpl:
+            grid_selector = ".tgetdados"
+        else:
+            grid_selector = ".tgrid"
+
+        container = next(iter(self.zindex_sort(containers, True)), None)
+        grids = self.filter_displayed_elements(container.select(grid_selector))
+        if not grids:
+            self.log_error("Couldn't find any grid.")
+
+        headers = self.get_headers_from_grids(grids)
+        if grid_number > len(grids):
+            self.log_error(self.language.messages.grid_number_error)
+
+        rows = grids[grid_number].select("tbody tr")
+        if not rows:
+            self.log_error("Couldn't find rows.")
+
+        if row_number > len(rows):
+            self.log_error(self.language.messages.grid_line_error)
+
+        columns = rows[row_number].select("td")
+        if not columns:
+            self.log_error("Couldn't find columns.")
+
+        if column_name not in headers[grid_number]:
+            self.log_error(self.language.messages.grid_column_error)
+
+        column_number = headers[grid_number][column_name]
+        column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
+
+        self.click(column_element())
+
     def get_x3_dictionaries(self, fields):
         """
         [Internal]
