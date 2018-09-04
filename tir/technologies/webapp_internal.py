@@ -659,7 +659,7 @@ class WebappInternal(Base):
             interface_value = self.get_web_value(input_field())
             current_value = interface_value.strip()
             interface_value_size = len(interface_value)
-            user_value_size = len(main_value)
+            user_value_size = len(value)
 
             if not input_field().is_enabled() or "disabled" in element.attrs:
                 self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
@@ -2153,7 +2153,7 @@ class WebappInternal(Base):
                     columns = row.select("td")
                     if columns:
                         if "_" in field[0]:
-                            column_name = field_to_label[field[0]]
+                            column_name = field_to_label[field[0]].lower()
                         else:
                             column_name = field[0].lower()
 
@@ -2376,9 +2376,9 @@ class WebappInternal(Base):
                     columns = rows[field[0]].select("td")
                     if columns:
                         if "_" in field[1]:
-                            column_name = field_to_label[field[1]]
+                            column_name = field_to_label[field[1]].lower()
                         else:
-                            column_name = field[1]
+                            column_name = field[1].lower()
 
                         if column_name not in headers[field[3]]:
                             self.log_error(self.language.messages.grid_column_error)
@@ -2969,6 +2969,7 @@ class WebappInternal(Base):
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
+        self.driver.save_screenshot("error.png")
 
         if new_log_line:
             self.log.new_line(False, log_message)
