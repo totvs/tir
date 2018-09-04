@@ -1938,49 +1938,6 @@ class WebappInternal(Base):
                     result = True
         return result
 
-    def get_closing_button(self, is_advpl):
-        """
-        [Internal]
-
-        Gets the closing element based if the screen was made using MVC or not.
-
-        :param is_advpl: Boolean if screen was made using MVC structure or not.
-        :type is_advpl: bool
-
-        :return: The closing element.
-        :rtype: Selenium object
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> closing_element = self.get_closing_button(True)
-        """
-        if is_advpl:
-            button = next(iter(self.web_scrap(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")), None)
-        else:
-            button = next(iter(self.web_scrap(term=self.language.close, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")), None)
-
-        if button:
-            return self.driver.find_element_by_xpath(xpath_soup(button))
-        else:
-            self.log_error("Button wasn't found.")
-
-    def is_advpl(self):
-        """
-        [Internal]
-
-        Returns a boolean if screen was made using MVC structure or not.
-
-        :return: Boolean if screen was made using MVC structure or not.
-        :rtype: bool
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> is_advpl = self.is_advpl()
-        """
-        return self.element_exists(term=self.language.cancel, scrap_type=enum.ScrapType.MIXED, optional_term="div.tbrowsebutton")
-
     def clear_grid(self):
         """
         [Internal]
@@ -2362,15 +2319,9 @@ class WebappInternal(Base):
 
         containers = soup.select(".tmodaldialog.twidget")
         if containers:
-            is_advpl = self.is_advpl()
-            grid_selector = ""
-            if is_advpl:
-                grid_selector = ".tgetdados"
-            else:
-                grid_selector = ".tgrid"
 
             containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(grid_selector))
+            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
             if grids:
 
                 headers = self.get_headers_from_grids(grids)
@@ -2430,15 +2381,9 @@ class WebappInternal(Base):
 
         containers = soup.select(".tmodaldialog.twidget")
         if containers:
-            is_advpl = self.is_advpl()
-            grid_selector = ""
-            if is_advpl:
-                grid_selector = ".tgetdados"
-            else:
-                grid_selector = ".tgrid"
 
             containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(grid_selector))
+            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
             if grids:
                 if field[2] > len(grids):
                     self.log_error(self.language.messages.grid_number_error)
