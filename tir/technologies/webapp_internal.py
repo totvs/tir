@@ -695,6 +695,7 @@ class WebappInternal(Base):
 
                     #if Character input
                     if valtype != 'N':
+                        self.set_element_focus(input_field())
                         self.send_keys(input_field(), Keys.DELETE)
                         self.send_keys(input_field(), Keys.HOME)
                         self.send_keys(input_field(), main_value)
