@@ -18,7 +18,7 @@ from selenium.webdriver.common.keys  import  Keys
 # Importations from base class
 from tir.technologies.core.base import Base
 from tir.technologies.core.config import ConfigLoader
-import tir.technologies.core.enumerations as enum
+from tir.technologies.core import enumerations as enum
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 
 # Classe que herda os métodos da classe base
@@ -41,9 +41,11 @@ class ApwInternal(Base):
     # Funções usadas no script
     # Functions used in the script
     def CheckBrowse(self, valores):
-
+        '''
+        Verify if a value exists in the browse
+        '''
+        
         lstValuesGrid = valores.split("|")
-
         self.tries = 1
         self.wait_elements_load(lstValuesGrid, "table")
 
@@ -51,7 +53,9 @@ class ApwInternal(Base):
             self.log_error('Não encontrou grid com conteúdo : ' + lstValuesGrid)
 
     def CheckLink(self, Link):
-        # time.sleep(1)
+        '''
+        Method to check if a link is valid
+        '''
         try:
             self.tries = 1
             self.wait_elements_load(Link, "link")
@@ -60,7 +64,6 @@ class ApwInternal(Base):
                 if a.tag_name == 'a' and a.text.startswith(Link):
                     linkcheck = self.driver.find_element_by_partial_link_text('%s' % Link).get_attribute('href')
                     r = requests.get(linkcheck)
-                    print(r.status_code)
                     if r.status_code != 200:
                         self.log_error(str("O arquivo não foi gerado para download"))
 
@@ -68,8 +71,9 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def ClickLink(self, Link):
-
-        # time.sleep(1)
+        '''
+        Method to click in a link
+        '''
         try:
             self.tries = 1
             self.wait_elements_load(Link, "link")
@@ -83,12 +87,15 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def ClickMenu(self, caminho):
-
+        '''
+        Method to click in a option on the menu
+        '''
         lstMenus = caminho.split(">")
 
         for noMenu in lstMenus:
 
             # Retirando espaços antes e depois
+            # Removing spaces before and after
             noMenu = noMenu.strip()
 
             self.tries = 1
@@ -104,7 +111,9 @@ class ApwInternal(Base):
                         self.log_error(str(e))
 
     def CloseAlert(self):
-
+        '''
+        Method to close an alert
+        '''
         try:
             aviso = self.wait
             aviso.until(EC.alert_is_present())
@@ -115,9 +124,16 @@ class ApwInternal(Base):
             time.sleep(0.5)
 
     def CloseWindow(self):
+        '''
+		Method to close a window
+		'''
         self.driver.close()
 
     def EndCase(self):
+        '''
+		Method to end the testcase
+		'''
+
         self.driver.refresh()
 
     def SetButton(self, button, type=''):
@@ -150,7 +166,6 @@ class ApwInternal(Base):
                 lista = soup.find_all('div')
                 for line in lista:
                     if line.text.strip().replace(" ", "").startswith(button.strip().replace(" ", "")):
-                        # soup2 = BeautifulSoup(line)
                         lista2 = line.find_all('button')
                         for line2 in lista2:
                             for line3 in line2.contents:
@@ -170,6 +185,9 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def SetGrid(self, btnFunc="Incluir"):
+        '''
+        Method to send values to a grid
+        '''
         try:
 
             self.SetButton(btnFunc)
@@ -181,6 +199,10 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def SelectBrowse(self, valores, opcao='', duplo=True):
+        '''
+		Method to select a option in a browse
+		'''
+
         opt = ""
         lstValuesGrid = valores.split("|")
         lAchouTodos = False
@@ -200,14 +222,12 @@ class ApwInternal(Base):
 
                 if lAchouTodos:
                     element = linha
-                    # break
 
             if element == "":
                 self.log_error('Não encontrou grid com conteúdo : ' + valores)
 
             if element:
                 if duplo:
-                    # self.DoubleClick(element)
                     self.double_click(element)
                 else:
                     self.Click(element)
@@ -235,14 +255,17 @@ class ApwInternal(Base):
             self.Click(opt)
 
     def Setup(self, lblUser="Usuário", lblPassword="Senha", btnAccess="Acessar Portal"):
-        """
-        Preenchimento da tela de usuario
-        """
+        '''
+        Fills the login screen
+        '''
         self.SetValue(lblUser, self.config.user)
         self.SetValue(lblPassword, self.config.password)
         self.SetButton(btnAccess)
 
-    def SwitchModal(self, opcao, frame=''):
+    def SwitchModal(self, option, frame=''):
+        '''
+        Sets the focus in a modal object
+        '''
         try:
             time.sleep(2)
             self.driver.switch_to.default_content()
@@ -250,18 +273,20 @@ class ApwInternal(Base):
             modaldupGuia = self.wait.until(EC.presence_of_element_located((By.ID, "modal-content")))
 
             if modaldupGuia.is_displayed():
-                btn = self.driver.find_element_by_xpath("//button[contains(text(), '%s')]" % opcao)
+                btn = self.driver.find_element_by_xpath("//button[contains(text(), '%s')]" % option)
                 btn.click()
             else:
                 time.sleep(2)
                 if modaldupGuia.is_displayed():
-                    btn = self.driver.find_element_by_xpath("//button[contains(text(), '%s')]" % opcao)
+                    btn = self.driver.find_element_by_xpath("//button[contains(text(), '%s')]" % option)
                     btn.click()
         except Exception as e:
             self.log_error(str(e))
 
     def SwitchWindow(self, exit=False):
-
+        '''
+        Sets the focus in the active window
+        '''
         try:
             if exit == False:
 
@@ -275,6 +300,9 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def SearchValue(self, busca, valor, grid=False, btnOk='ok', btnFind='buscar', searchparam='Pesquisar'):
+        '''
+        Searches for a register
+        '''
         try:
             if grid == True:
                 self.gridValues.extend([valor])
@@ -335,9 +363,9 @@ class ApwInternal(Base):
             self.log_error(str(e))
 
     def SetValue(self, campo, valor, grid=False, linha=0, chknewline=False, disabled=False):
-        """
-        Indica os campos e o conteudo do campo para preenchimento da tela.
-        """
+        '''
+        Includes values in a field
+        '''
         try:
             if grid == True:
                 self.gridValues.extend([valor])
@@ -346,12 +374,14 @@ class ApwInternal(Base):
             self.elementDisabled = False
             self.tries = 1
             self.wait_elements_load(campo, 'label')
-            # self.set_enchoice(campo, valor, '', 'Enchoice', '', '', disabled)
             self.input_value(campo, valor)
         except Exception as e:
             self.log_error(str(e))
 
     def WaitModal(self, text, opcao="title"):
+        '''
+        Waits for a modal object with a value on title
+        '''
         self.driver.switch_to.default_content()
         self.tries = 1
         self.wait_elements_load(text, opcao)
@@ -360,8 +390,8 @@ class ApwInternal(Base):
         else:
             modaldupGuia = self.wait.until(EC.presence_of_element_located((By.ID, "modal-content")))
 
-    # Métodos internos da classe
-    # Class Inner Methods
+    ######################### Métodos internos da classe ####################################
+    #########################     Class Inner Methods    ####################################
     def input_value(self, field, value, ignore_case=True):
         """
         [Internal]
@@ -381,57 +411,58 @@ class ApwInternal(Base):
                 elements_list = self.web_scrap(f"[name*='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 element = next(iter(filter(lambda x: re.search(f"{field}$", x.attrs["name"]), elements_list)), None)
             else:
-                # element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
                 element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)
             if not element:
                 continue
 
             #preparing variables that would be used
             main_element = element
-            # element_id = element.attrs["id"]
 
             #Aguardando campo ser carregado em tela
+			#Waiting for field to be loaded in the screen
 
             element_first_children = next((x for x in element.contents if x.name in ["input", "select", "textarea"]), None)
             if element_first_children is not None:
                 main_element = element_first_children
 
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(main_element))
+            else:
+                element_div = next((x for x in element.contents if x.name in ["div"]), None)
+                element_first_children = next((x for x in element_div.contents if x.name in ["input", "select", "textarea"]), None)
+                main_element = element_first_children
+            try:
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(main_element))
+            except:
+                time.sleep(1)
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(main_element))
 
             valtype = "C"
-            main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
-            # interface_value = self.get_web_value(input_field())
-            # current_value = interface_value.strip()
-            # interface_value_size = len(interface_value)
-            # user_value_size = len(main_value)
+            main_value = value
 
-            if not input_field().is_enabled() or "disabled" in main_element.attrs:
-                self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
-
-            #if main_element.name == "input":
-            #    valtype = main_element.attrs["valuetype"]
+            try:
+                if not input_field().is_enabled() or "disabled" in main_element.attrs:
+                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
+            except:
+                time.sleep(1)
+                if not input_field().is_enabled() or "disabled" in main_element.attrs:
+                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
             cId = main_element.attrs['id']
 
             self.tries = 1
             self.wait_elements_load(cId, main_element.name)
 
-            self.scroll_to_element(input_field())
+
+            time.sleep(0.5)
 
             if main_element.name == 'select':
 
                 self.SetComboBox(cId, main_value)
 
                 success = True
-                # current_value = self.get_web_value(input_field()).strip()
-                # success = current_value == main_value
 
             else:
                 try:
-                    # self.send_keys(input_field(), Keys.DELETE)
-                    # self.send_keys(input_field(), Keys.HOME)
-                    # self.send_keys(input_field(), Keys.BACKSPACE)
                     input_field().clear()
                     self.send_keys(input_field(), main_value)
                     self.send_keys(input_field(), Keys.TAB)
@@ -451,7 +482,7 @@ class ApwInternal(Base):
 
     def get_web_value(self, element):
         """
-        Coleta as informações do campo baseado no ID
+		Gets the informations of field based in the ID
         """
 
         if element.tag_name == "div":
@@ -471,6 +502,10 @@ class ApwInternal(Base):
         return web_value
 
     def Click(self, element):
+        '''
+		Execute a click in a button
+		'''
+
         try:
             self.scroll_to_element(element)
             self.driver.execute_script("arguments[0].click();", element)
@@ -483,7 +518,9 @@ class ApwInternal(Base):
             actions.perform()
 
     def wait_elements_load(self, noElement, type='', frames=''):
-
+        '''
+		Waits until a element to be present
+		'''
         content = self.driver.page_source
         soup = BeautifulSoup(content, "html.parser")
         lAchouTodos = False
@@ -551,7 +588,6 @@ class ApwInternal(Base):
                             self.tries = 0
                             break
                         except:
-                            # print("Encontrei, mas ainda não consigo clicar, tentando novamente em 0.5 Segundos!!!!")
                             time.sleep(0.5)
 
         else:
@@ -578,12 +614,9 @@ class ApwInternal(Base):
 
                     if frames.find(frame2.attrs['id']) == -1:
                         frames = frames + ";" + frame2.attrs['id']
-                        # print("Campo %s" % noElement)
-                        # print("Procurando no frame %s" % frame2.attrs['id'])
                         self.driver.switch_to.frame(frame2.attrs['id'])
                         self.wait_elements_load(noElement, type, frames)
                     else:
-                        # print("Já procurou nesse frame, vamos para o próximo.")
                         continue
 
                     if self.tries == 0:
@@ -594,13 +627,14 @@ class ApwInternal(Base):
                     pass
 
         if self.tries != 0 and self.tries <= 20:
-            # print("Não encontrou em nenhum frame, procurando novamente. Campo: %s" % noElement)
             self.tries += 1
             time.sleep(0.5)
             self.wait_elements_load(noElement, type)
 
     def SetComboBox(self, Id, cText):
-
+        '''
+		Selects a value in a combobox
+		'''
         try:
 
             select = Select(self.driver.find_element_by_id('%s' % Id))
