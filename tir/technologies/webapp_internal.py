@@ -2399,7 +2399,7 @@ class WebappInternal(Base):
                         self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
                         ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
-                        while not(self.element_exists(term=f"{grid_selector} tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1)):
+                        while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1)):
                             if self.config.debug_log:
                                 print("Waiting for the new line to show")
                             time.sleep(1)
