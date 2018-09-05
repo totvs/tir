@@ -550,6 +550,7 @@ class WebappInternal(Base):
         while (current_value.rstrip() != term.strip()):
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
             self.click(sel_browse_input())
+            self.set_element_focus(sel_browse_input())
             sel_browse_input().clear()
             self.set_element_focus(sel_browse_input())
             sel_browse_input().send_keys(term.strip())
