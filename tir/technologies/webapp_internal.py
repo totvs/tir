@@ -324,7 +324,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
-        self.SetLateralMenu(self.language.menu_about)
+        self.SetLateralMenu(self.language.menu_about, save_input=False)
         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
 
@@ -933,7 +933,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.restart()
         """
-        self.idwizard = []
         self.driver.refresh()
         try:
             self.driver.switch_to_alert().accept()
@@ -948,7 +947,10 @@ class WebappInternal(Base):
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
             self.close_modal()
 
-        self.set_program(self.config.routine)
+        if ">" in self.config.routine:
+            self.SetLateralMenu(self.config.routine, save_input=False)
+        else:
+            self.set_program(self.config.routine)
 
     def LogOff(self):
         """
@@ -1219,19 +1221,24 @@ class WebappInternal(Base):
         else:
             return len(element_list) >= position
 
-    def SetLateralMenu(self, menu_itens):
+    def SetLateralMenu(self, menu_itens, save_input=True):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
 
         :param menu_itens: String with the path to the menu.
         :type menu_itens: str
+        :param save_input: Boolean if all input info should be saved for later usage. Leave this flag 'True' if you are not sure. **Default:** True
+        :type save_input: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
+        if save_input:
+            self.config.routine = menu_itens
+
         print(f"Navigating lateral menu: {menu_itens}")
         self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         menu_itens = list(map(str.strip, menu_itens.split(">")))
@@ -3054,7 +3061,7 @@ class WebappInternal(Base):
         self.driver.refresh()
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
-        self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu)
+        self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
         self.ClickIcon(self.language.search)
 
         self.fill_parameters(restore_backup=restore_backup)
