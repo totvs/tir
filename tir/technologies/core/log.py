@@ -81,7 +81,7 @@ class Log:
         if len(self.table_rows) > 0:
             data = nump.array(self.table_rows)
             if self.folder:
-                path = f"{self.folder}\loginter_{self.timestamp}.csv"
+                path = f"{self.folder}\\loginter_{self.timestamp}.csv"
             else:
                 path = f"loginter_{self.timestamp}.csv"
             df = panda.DataFrame(data, columns=data[0])
