@@ -628,14 +628,18 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SetLateralMenu">
-<code class="descname">SetLateralMenu</code><span class="sig-paren">(</span><em>menu_itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetLateralMenu" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetLateralMenu</code><span class="sig-paren">(</span><em>menu_itens</em>, <em>save_input=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetLateralMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Navigates through the lateral menu using provided menu path.
 e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>menu_itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – String with the path to the menu.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>menu_itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – String with the path to the menu.</li>
+<li><strong>save_input</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if all input info should be saved for later usage. Leave this flag ‘True’ if you are not sure. <strong>Default:</strong> True</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1305,30 +1309,6 @@ If none has children itens, it will be an empty list.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.get_closing_button">
-<code class="descname">get_closing_button</code><span class="sig-paren">(</span><em>is_advpl</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_closing_button" title="Permalink to this definition">¶</a></dt>
-<dd><p>[Internal]</p>
-<p>Gets the closing element based if the screen was made using MVC or not.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>is_advpl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if screen was made using MVC structure or not.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The closing element.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Selenium object</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">closing_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_closing_button</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids">
 <code class="descname">get_enchoice_button_ids</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1647,28 +1627,6 @@ Returns True if succeeded, False if it failed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.is_advpl">
-<code class="descname">is_advpl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.is_advpl" title="Permalink to this definition">¶</a></dt>
-<dd><p>[Internal]</p>
-<p>Returns a boolean if screen was made using MVC structure or not.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean if screen was made using MVC structure or not.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">is_advpl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_advpl</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.log_error">
 <code class="descname">log_error</code><span class="sig-paren">(</span><em>message</em>, <em>new_log_line=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1894,31 +1852,6 @@ Returns True if succeeded, False if it failed.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_for_errors</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.search_text">
-<code class="descname">search_text</code><span class="sig-paren">(</span><em>itens</em>, <em>invert</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>[Internal]</p>
-<p>Searches strings that were sent and waits until condition is respected
-e.g. “Item1,Item2,Item3”</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</li>
-<li><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if presence of text should be True or False.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_text</span><span class="p">(</span><span class="n">itens</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

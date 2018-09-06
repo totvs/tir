@@ -1525,7 +1525,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitWhile(self,itens):
+    def WaitWhile(self, itens):
         """
         Search string that was sent and wait while condition is true
         e.g. "Item1,Item2,Item3"
@@ -1538,7 +1538,14 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitWhile("Processing")
         """
-        self.search_text(itens, True)
+        itens = list(map(str.strip, itens.split(",")))
+        print("Waiting processing...")
+        while True:
+            soup = self.get_current_DOM()
+            elements = soup.find_all('div', string=(itens))
+            if not elements:
+                break
+            time.sleep(5)
 
     def WaitUntil(self,itens):
         """
@@ -1553,37 +1560,13 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitUntil("Processing")
         """
-        self.search_text(itens, False)
-
-    def search_text(self,itens,invert):
-        """
-        [Internal]
-
-        Searches strings that were sent and waits until condition is respected
-        e.g. "Item1,Item2,Item3"
-
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
-        :param invert: Boolean if presence of text should be True or False.
-        :type invert: bool
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.search_text(itens, True)
-        """
         itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            content = self.driver.page_source
-            soup = BeautifulSoup(content,"html.parser")
-            lista = soup.find_all('div', string=(itens))
-            if invert:
-                if not lista:
-                    break
-            else:
-                if lista:
-                    break
+            soup = self.get_current_DOM()
+            elements = soup.find_all('div', string=(itens))
+            if elements:
+                break
             time.sleep(5)
 
     def SetTabEDAPP(self, table):
