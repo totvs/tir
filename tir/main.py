@@ -14,7 +14,7 @@ class Webapp():
     def __init__(self, config_path=""):
         self.__webapp = WebappInternal()
 
-    def AddParameter(self, parameter, branch, portuguese_value, english_value, spanish_value):
+    def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
         Adds a parameter to the queue of parameters to be set by SetParameters method.
 
