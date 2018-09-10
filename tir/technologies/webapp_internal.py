@@ -511,9 +511,10 @@ class WebappInternal(Base):
 
         if search_key:
             tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_text = next(iter(list(filter(lambda x: x in search_key, tradiobutton_texts))))
-            if tradiobutton_text:
-                tradio_index = tradiobutton_texts.index(tradiobutton_text)
+            tradiobutton_text = next(iter(list(filter(lambda x: x in search_key, tradiobutton_texts))), None)
+            if not tradiobutton_text:
+                self.log_error(f"Key not found: {search_key}")
+            tradio_index = tradiobutton_texts.index(tradiobutton_text)
 
         tradiobuttonitem = tradiobuttonitens[tradio_index]
         trb_input = next(iter(tradiobuttonitem.select("input")), None)

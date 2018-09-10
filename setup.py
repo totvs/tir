@@ -20,7 +20,8 @@ config = {
         'pytz==2017.3',
         'selenium==3.8.0',
         'six==1.11.0',
-        'enum34'
+        'enum34',
+        'requests'
     ],
     'packages': ['tir'],
     'scripts': [],

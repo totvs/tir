@@ -286,7 +286,7 @@ class Webapp():
         """
         self.__webapp.RestoreParameters()
 
-    def SearchBrowse(self, term, key_description, identifier=None):
+    def SearchBrowse(self, term, key_description=None, identifier=None):
         """
         Searchs a term on Protheus Webapp.
 
