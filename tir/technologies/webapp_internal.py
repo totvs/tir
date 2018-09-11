@@ -3052,6 +3052,12 @@ class WebappInternal(Base):
         >>> self.parameter_screen(restore_backup=False)
         """
         self.driver.refresh()
+        if self.config.browser.lower() == "chrome":
+            try:
+                self.wait.until(EC.alert_is_present())
+                self.driver.switch_to_alert().accept()
+            except:
+                pass
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
         self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
