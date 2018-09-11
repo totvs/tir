@@ -444,7 +444,8 @@ class WebappInternal(Base):
         """
         print(f"Searching: {term}")
         browse_elements = self.get_search_browse_elements(identifier)
-        self.search_browse_key(key, browse_elements)
+        if key:
+            self.search_browse_key(key, browse_elements)
         self.fill_search_browse(term, browse_elements)
 
     def get_search_browse_elements(self, panel_name=None):
@@ -469,16 +470,21 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         search_index = self.get_panel_name_index(panel_name) if panel_name else 0
         containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True)
-        if containers:
-            container = next(iter(containers))
+        container = next(iter(containers), None)
+        if not container:
+            self.log_error("Couldn't find container of element.")
+
+        try:
             browse_div = container.select("[style*='fwskin_seekbar_ico']")[search_index].find_parent().find_parent()
-            browse_tget = browse_div.select(".tget")[0]
+        except IndexError:
+            self.log_error("Search element wasn't found.")
+        browse_tget = browse_div.select(".tget")[0]
 
-            browse_key = browse_div.select(".tbutton button")[0]
-            browse_input = browse_tget.select("input")[0]
-            browse_icon = browse_tget.select("img")[0]
+        browse_key = browse_div.select(".tbutton button")[0]
+        browse_input = browse_tget.select("input")[0]
+        browse_icon = browse_tget.select("img")[0]
 
-            return (browse_key, browse_input, browse_icon)
+        return (browse_key, browse_input, browse_icon)
 
     def search_browse_key(self, search_key, search_elements):
         """
@@ -509,21 +515,22 @@ class WebappInternal(Base):
         tradiobuttonitens = soup.select(".tradiobuttonitem")
         tradio_index = 0
 
-        if search_key:
-            tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_text = next(iter(list(filter(lambda x: x in search_key, tradiobutton_texts))), None)
-            if not tradiobutton_text:
-                self.log_error(f"Key not found: {search_key}")
-            tradio_index = tradiobutton_texts.index(tradiobutton_text)
+        tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
+        tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
+        if not tradiobutton_text:
+            self.log_error(f"Key not found: {search_key}")
+
+        tradio_index = tradiobutton_texts.index(tradiobutton_text)
 
         tradiobuttonitem = tradiobuttonitens[tradio_index]
         trb_input = next(iter(tradiobuttonitem.select("input")), None)
-        if trb_input:
-            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
-            self.click(sel_input())
-        else:
+        if not trb_input:
             self.log_error("Couldn't find key input.")
+
+        sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
+        self.click(sel_input())
+
 
     def fill_search_browse(self, term, search_elements):
         """
