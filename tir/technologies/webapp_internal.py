@@ -104,6 +104,7 @@ class WebappInternal(Base):
         self.environment_screen()
 
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            self.close_coin_screen()
             self.close_modal()
 
         if save_input:
@@ -313,6 +314,22 @@ class WebappInternal(Base):
                         self.click(selenium_close_button())
                     except:
                         pass
+
+    def close_coin_screen(self):
+        """
+        [Internal]
+
+        Closes the coin screen.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.close_coin_screen()
+        """
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        if modals and self.element_exists(term="Moedas", scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+            self.SetButton(self.language.confirm)
 
     def set_log_info(self):
         """
