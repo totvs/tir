@@ -7,8 +7,8 @@ pipeline {
                 echo 'Building..'
                 bat 'start %repos%\\testgrounds\\appserverkiller.cmd'
                 bat 'start %repos%\\testgrounds\\appserverstarter.cmd'
-                bat 'cd scripts'
-                bat 'install_package.cmd'
+                bat 'python setup.py sdist'
+                bat 'pip install -U dist/tir-0.1.tar.gz'
             }
         }
         stage('Test') {
