@@ -5,9 +5,9 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                bat '%repos%\\testgrounds\\appserverkiller.cmd > nul 2> nul'
-                bat 'scripts\\install_package.cmd'
-                bat '%repos%\\testgrounds\\appserverstarter.cmd'
+                bat '%repos%\\testgrounds\\appserverkiller.cmd > nul 2> nul' || true
+                bat 'scripts\\install_package.cmd' || true
+                bat '%repos%\\testgrounds\\appserverstarter.cmd' || true
             }
         }
         stage('Test') {
