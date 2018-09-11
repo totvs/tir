@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                bat '%repos%\\testgrounds\\appserverkiller.cmd' > nul 2> nul
+                bat '%repos%\\testgrounds\\appserverkiller.cmd > nul 2> nul'
                 bat 'scripts\\install_package.cmd'
                 bat '%repos%\\testgrounds\\appserverstarter.cmd'
             }
