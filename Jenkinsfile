@@ -7,7 +7,7 @@ pipeline {
                 echo 'Building..'
                 bat 'start %repos%\\testgrounds\\appserverkiller.cmd'
                 bat 'start %repos%\\testgrounds\\appserverstarter.cmd'
-                bat 'scripts\\install_package.cmd' || true
+                bat 'scripts\\install_package.cmd'
             }
         }
         stage('Test') {
