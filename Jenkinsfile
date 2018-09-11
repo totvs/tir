@@ -14,8 +14,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-				bat 'python %repos%\\MATA030TESTSUITE.py'
-				bat 'python %repos%\\MATA410TESTSUITE.py'
+				bat 'python %repos%\\testgrounds\\MATA030TESTSUITE.py'
+				bat 'python %repos%\\testgrounds\\MATA410TESTSUITE.py'
             }
         }
     }
