@@ -10,7 +10,7 @@ config = {
     'url': 'http://code.engpro.totvs.com.br/engpro/tir',
     'download_url': 'http://code.engpro.totvs.com.br/engpro/tir',
     'author_email': 'squad.automacaoprotheus@totvs.com.br',
-    'version': '0.1',
+    'version': '1.0',
     'install_requires': [
         'beautifulsoup4==4.6.0',
         'bs4==0.0.1',
