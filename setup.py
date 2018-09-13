@@ -7,8 +7,8 @@ except ImportError:
 config = {
     'description': 'TOTVS Interface Robot',
     'author': 'TOTVS Automation Team',
-    'url': 'http://code.engpro.totvs.com.br/engpro/tir',
-    'download_url': 'http://code.engpro.totvs.com.br/engpro/tir',
+    'url': 'https://github.com/totvs/tir',
+    'download_url': 'https://github.com/totvs/tir',
     'author_email': 'squad.automacaoprotheus@totvs.com.br',
     'version': '1.0',
     'install_requires': [
