@@ -1,18 +1,16 @@
-#TIR - Totvs Interface Robot
+# TIR - Totvs Interface Robot
 
 TIR is a Python module used to create test scripts for web interfaces. With it, you are able to easily create and execute test suites and test cases for any supported Totvs' web interface systems, such as Protheus Webapp.
 
-##Currently Supported Technologies:
+## Currently Supported Technologies:
 
 - Protheus Webapp
 - APW
 
-##Documentation
-Our documentation can be found in these locations:
+## Documentation
+Our documentation can be found here:
 
-- [TIR Documentation](http://localhost:8080)
-
-- [TDN](http://tdn.totvs.com/display/F1/Classe%3A+Webapp)
+- [TIR Documentation](https://totvs.github.io/tir/)
 
 Our MindMap can be found here:
 
@@ -22,7 +20,7 @@ This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
 
-##How to install:
+## How to install:
 
 The installation is pretty simple. All you need as a requirement is Python 3.6 and a browser (Mozilla Firefox/Google Chrome) installed in your system.
 
@@ -32,12 +30,12 @@ After cloning or downloading this repository and having your environment ready, 
 
 OBS: Our installation scripts will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
 
-##Config file
+## Config file
 
 The environment must be configured through a [config.json](config.json) file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
-
-###Config options:
+ 
+### Config options:
 
 **Url:** The URL that will run the tests.
 
@@ -66,7 +64,7 @@ test_helper = Webapp()
 test_helper = Webapp("C:\PATH_HERE\config.json")
 ```
 
-##Usage:
+## Usage:
 
 After the module is installed, you could just import it on your Test Case.
 See the following example:
@@ -85,6 +83,6 @@ test_helper.AssertTrue()
 test_helper.TearDown()
 ```
 
-##Contributing
+## Contributing
 
 In order to contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
