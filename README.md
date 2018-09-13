@@ -12,10 +12,6 @@ Our documentation can be found here:
 
 - [TIR Documentation](https://totvs.github.io/tir/)
 
-Our MindMap can be found here:
-
-- [TIR MindMap](http://code.engpro.totvs.com.br/engpro/tir/src/branch/master/doc_files/Protheus%20Web%20Automation.xmind)
-
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
