@@ -1,4 +1,4 @@
-#TIR Architecture
+# TIR Architecture
 
 This tool was idealized to work with any type of TOTVS Web technology.
 
