@@ -543,6 +543,20 @@ class Webapp():
         """
         self.__webapp.WaitHide(itens)
 
+    def WaitProcessing(self, itens):
+        """
+        Uses WaitShow and WaitHide to Wait a Processing screen
+        
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitProcessing("Processing")
+        """
+        self.__webapp.WaitProcessing(itens)
+
 class Apw():
 
     def __init__(self, config_path=""):
