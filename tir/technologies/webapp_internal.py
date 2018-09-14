@@ -1550,9 +1550,9 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitWhile(self, itens):
+    def WaitHide(self, itens):
         """
-        Search string that was sent and wait while condition is true
+        Search string that was sent and wait hide the elements.
         e.g. "Item1,Item2,Item3"
 
         :param itens: List of itens that will hold the wait.
@@ -1561,7 +1561,7 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.WaitWhile("Processing")
+        >>> oHelper.WaitHide("Processing")
         """
         itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
@@ -1572,9 +1572,9 @@ class WebappInternal(Base):
                 break
             time.sleep(5)
 
-    def WaitUntil(self,itens):
+    def WaitShow(self,itens):
         """
-        Search string that was sent and wait until condition is true
+        Search string that was sent and wait show the elements.
         e.g. "Item1,Item2,Item3"
 
         :param itens: List of itens that will hold the wait.
@@ -1583,7 +1583,7 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.WaitUntil("Processing")
+        >>> oHelper.WaitShow("Processing")
         """
         itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
