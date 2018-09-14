@@ -1594,6 +1594,23 @@ class WebappInternal(Base):
                 break
             time.sleep(5)
 
+    def WaitProcessing(self, itens):
+        """
+        Uses WaitShow and WaitHide to Wait a Processing screen
+        
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitProcessing("Processing")
+        """
+        self.WaitShow(itens)
+        
+        self.WaitHide(itens)
+
+
     def SetTabEDAPP(self, table):
         """
         Chooses the table on the generic query (EDAPP).
