@@ -428,7 +428,7 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
 
-    def SearchBrowse(self, term, key=None, identifier=None):
+    def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
 
@@ -444,6 +444,8 @@ class WebappInternal(Base):
         :type key: str
         :param identifier: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
         :type identifier: str
+        :param index: Whether the key is an index or not. - **Default:** False
+        :type index: bool
 
         Usage:
 
@@ -460,9 +462,10 @@ class WebappInternal(Base):
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
         """
         print(f"Searching: {term}")
+        index -= 1
         browse_elements = self.get_search_browse_elements(identifier)
         if key:
-            self.search_browse_key(key, browse_elements)
+            self.search_browse_key(key, browse_elements, index)
         self.fill_search_browse(term, browse_elements)
 
     def get_search_browse_elements(self, panel_name=None):
@@ -503,7 +506,7 @@ class WebappInternal(Base):
 
         return (browse_key, browse_input, browse_icon)
 
-    def search_browse_key(self, search_key, search_elements):
+    def search_browse_key(self, search_key, search_elements, index=False):
         """
         [Internal]
 
@@ -513,6 +516,8 @@ class WebappInternal(Base):
         :type search_key: str
         :param search_elements: Tuple of Search elements
         :type search_elements: Tuple of Beautiful Soup objects
+        :param index: Whether the key is an index or not.
+        :type index: bool
 
         Usage:
 
@@ -522,6 +527,9 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
+        if index and not isinstance(key, int):
+            self.log_error("If index parameter is True, key must be a number!")
+
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[0]))))
@@ -529,22 +537,27 @@ class WebappInternal(Base):
         self.click(sel_browse_key())
 
         soup = self.get_current_DOM()
-        tradiobuttonitens = soup.select(".tradiobuttonitem")
-        tradio_index = 0
-
-        tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-        tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
-        if not tradiobutton_text:
-            tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
+        if not index:
+            tradiobuttonitens = soup.select(".tradiobuttonitem")
+            tradio_index = 0
+            tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
+            tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
             if not tradiobutton_text:
-                self.log_error(f"Key not found: {search_key}")
+                tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
+                if not tradiobutton_text:
+                    self.log_error(f"Key not found: {search_key}")
 
-        tradio_index = tradiobutton_texts.index(tradiobutton_text)
+            tradio_index = tradiobutton_texts.index(tradiobutton_text)
 
-        tradiobuttonitem = tradiobuttonitens[tradio_index]
-        trb_input = next(iter(tradiobuttonitem.select("input")), None)
-        if not trb_input:
-            self.log_error("Couldn't find key input.")
+            tradiobuttonitem = tradiobuttonitens[tradio_index]
+            trb_input = next(iter(tradiobuttonitem.select("input")), None)
+            if not trb_input:
+                self.log_error("Couldn't find key input.")
+        else:
+            tradiobuttonitens = soup.select(".tradiobuttonitem input")
+            if len(tradiobuttonitens) < key + 1:
+                self.log_error("Key index out of range.")
+            trb_input = tradiobuttonitens[key]
 
         sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
