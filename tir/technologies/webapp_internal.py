@@ -535,7 +535,9 @@ class WebappInternal(Base):
         tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
         tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
         if not tradiobutton_text:
-            self.log_error(f"Key not found: {search_key}")
+            tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
+            if not tradiobutton_text:
+                self.log_error(f"Key not found: {search_key}")
 
         tradio_index = tradiobutton_texts.index(tradiobutton_text)
 
@@ -2969,7 +2971,8 @@ class WebappInternal(Base):
         container = container if container else soup
         buttons = container.select("button[style]")
         print("Searching for Icon")
-        filtered_buttons = list(filter(lambda x: self.check_button_tooltip(x, icon_text), buttons))
+        filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+        #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
 
         button = next(iter(filtered_buttons), None)
         if not button:
@@ -2978,33 +2981,6 @@ class WebappInternal(Base):
         button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
 
         self.click(button_element())
-
-    def check_button_tooltip(self, button, expected_text):
-        """
-        [Internal]
-
-        Internal method of ClickIcon.
-
-        Fires the MouseOver event of a button, checks tooltip text, fires the MouseOut event and
-        returns a boolean whether the tooltip has the expected text value or not.
-
-        :param button: The target button object.
-        :type button: BeautifulSoup object
-        :param expected_text: The text that is expected to exist in button's tooltip.
-        :type expected_text: str
-
-        Usage:
-
-        >>> # Call the method:
-        >>> has_add_text = self.check_button_tooltip(button_object, "Add")
-        """
-        element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
-        self.driver.execute_script(f"$(arguments[0]).mouseover()", element())
-        time.sleep(0.5)
-        tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
-        has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
-        self.driver.execute_script(f"$(arguments[0]).mouseout()", element())
-        return has_text
 
     def AddParameter(self, parameter, branch, portuguese_value, english_value="", spanish_value=""):
         """
@@ -3123,3 +3099,55 @@ class WebappInternal(Base):
             self.SetValue("X6_CONTSPA", parameter[4])
 
             self.SetButton(self.language.save)
+
+    def filter_by_tooltip_value(self, element_list, expected_text):
+        """
+        [Internal]
+
+        Filters elements by finding the tooltip value that is shown when mouseover event
+        is triggered.
+
+        :param element_list: The list to be filtered
+        :type element_list: Beautiful Soup object list
+        :param expected_text: The expected tooltip text.
+        :type expected_text: str
+
+        :return: The filtered list of elements.
+        :rtype: Beautiful Soup object list
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> filtered_elements = self.filter_by_tooltip_value(my_element_list, "Edit")
+        """
+        return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
+
+    def check_element_tooltip(self, element, expected_text):
+        """
+        [Internal]
+
+        Internal method of ClickIcon.
+
+        Fires the MouseOver event of an element, checks tooltip text, fires the MouseOut event and
+        returns a boolean whether the tooltip has the expected text value or not.
+
+        :param element: The target element object.
+        :type element: BeautifulSoup object
+        :param expected_text: The text that is expected to exist in button's tooltip.
+        :type expected_text: str
+
+        :return: Boolean value whether element has tooltip text or not.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Call the method:
+        >>> has_add_text = self.check_element_tooltip(button_object, "Add")
+        """
+        element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+        self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
+        time.sleep(0.5)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
+        has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
+        self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
+        return has_text
