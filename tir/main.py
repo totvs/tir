@@ -513,9 +513,9 @@ class Webapp():
         """
         self.__webapp.TearDown()
 
-    def WaitUntil(self, itens):
+    def WaitShow(self, itens):
         """
-        Search string that was sent and wait until condition is true
+        Search string that was sent and wait show the elements.
         e.g. "Item1,Item2,Item3"
 
         :param itens: List of itens that will hold the wait.
@@ -524,13 +524,13 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.WaitUntil("Processing")
+        >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitUntil(itens)
+        self.__webapp.WaitShow(itens)
 
-    def WaitWhile(self, itens):
+    def WaitHide(self, itens):
         """
-        Search string that was sent and wait while condition is true
+        Search string that was sent and wait hide the elements.
         e.g. "Item1,Item2,Item3"
 
         :param itens: List of itens that will hold the wait.
@@ -539,9 +539,9 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.WaitWhile("Processing")
+        >>> oHelper.WaitHide("Processing")
         """
-        self.__webapp.WaitWhile(itens)
+        self.__webapp.WaitHide(itens)
 
 class Apw():
 
