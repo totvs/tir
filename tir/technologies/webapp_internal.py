@@ -885,6 +885,9 @@ class WebappInternal(Base):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
         else:
+            field = re.sub(r"(\:*)(\?*)", "", field).strip()
+
+            self.wait_element(field)
             element = self.get_field(field)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
