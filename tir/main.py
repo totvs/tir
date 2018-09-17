@@ -318,6 +318,10 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using a chosen search box and a chosen search key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
+        >>> oHelper.SearchBrowse("D MG 001", identifier="Products")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using an index instead of name for the search key:
+        >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
         """
         self.__webapp.SearchBrowse(term, key_description, identifier, index)
 

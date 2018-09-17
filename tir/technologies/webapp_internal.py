@@ -462,7 +462,8 @@ class WebappInternal(Base):
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
         """
         print(f"Searching: {term}")
-        index -= 1
+        if index and isinstance(key, int):
+            key -= 1
         browse_elements = self.get_search_browse_elements(identifier)
         if key:
             self.search_browse_key(key, browse_elements, index)
@@ -527,7 +528,7 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
-        if index and not isinstance(key, int):
+        if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
@@ -555,9 +556,9 @@ class WebappInternal(Base):
                 self.log_error("Couldn't find key input.")
         else:
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
-            if len(tradiobuttonitens) < key + 1:
+            if len(tradiobuttonitens) < search_key + 1:
                 self.log_error("Key index out of range.")
-            trb_input = tradiobuttonitens[key]
+            trb_input = tradiobuttonitens[search_key]
 
         sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
