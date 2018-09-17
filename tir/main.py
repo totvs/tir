@@ -286,7 +286,7 @@ class Webapp():
         """
         self.__webapp.RestoreParameters()
 
-    def SearchBrowse(self, term, key_description=None, identifier=None):
+    def SearchBrowse(self, term, key_description=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
 
@@ -302,6 +302,8 @@ class Webapp():
         :type key: str
         :param identifier: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
         :type identifier: str
+        :param index: Whether the key is an index or not. - **Default:** False
+        :type index: bool
 
         Usage:
 
@@ -316,8 +318,12 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using a chosen search box and a chosen search key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
+        >>> oHelper.SearchBrowse("D MG 001", identifier="Products")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using an index instead of name for the search key:
+        >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
         """
-        self.__webapp.SearchBrowse(term, key_description, identifier)
+        self.__webapp.SearchBrowse(term, key_description, identifier, index)
 
     def SetBranch(self, branch):
         """
