@@ -885,6 +885,9 @@ class WebappInternal(Base):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
         else:
+            field = re.sub(r"(\:*)(\?*)", "", field).strip()
+
+            self.wait_element(field)
             element = self.get_field(field)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
@@ -1613,7 +1616,7 @@ class WebappInternal(Base):
     def WaitProcessing(self, itens):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
-        
+
         :param itens: List of itens that will hold the wait.
         :type itens: str
 
@@ -1623,7 +1626,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitProcessing("Processing")
         """
         self.WaitShow(itens)
-        
+
         self.WaitHide(itens)
 
 
@@ -3182,3 +3185,38 @@ class WebappInternal(Base):
         has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
+
+    def WaitFieldValue(self, field, expected_value):
+        """
+        Wait until field has expected value.
+        Recommended for Trigger fields.
+
+        :param field: The desired field.
+        :type field: str
+        :param expected_value: The expected value.
+        :type expected_value: str
+
+        Usage:
+
+        >>> # Calling method:
+        >>> self.WaitFieldValue("CN0_DESCRI", "MY DESCRIPTION")
+        """
+        print(f"Waiting for field {field} value to be: {expected_value}")
+        field = re.sub(r"(\:*)(\?*)", "", field).strip()
+        self.wait_element(field)
+
+        field_soup = self.get_field(field)
+
+        if not field_soup:
+            self.log_error(f"Couldn't find field {field}")
+
+        field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(field_soup))
+
+        success = False
+        endtime = time.time() + 60
+
+        while(time.time() < endtime and not success):
+            if ((field_element().text.strip() == expected_value) or
+                (field_element().get_attribute("value").strip() == expected_value)):
+                success = True
+            time.sleep(0.5)

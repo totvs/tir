@@ -512,27 +512,27 @@ class Webapp():
 
         Usage:
 
-        >>> #Instantiating the class
-        >>> inst.oHelper = Webapp()
         >>> #Calling the method
         >>> inst.oHelper.TearDown()
         """
         self.__webapp.TearDown()
 
-    def WaitShow(self, itens):
+    def WaitFieldValue(self, field, expected_value):
         """
-        Search string that was sent and wait show the elements.
-        e.g. "Item1,Item2,Item3"
+        Wait until field has expected value.
+        Recommended for Trigger fields.
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param field: The desired field.
+        :type field: str
+        :param expected_value: The expected value.
+        :type expected_value: str
 
         Usage:
 
-        >>> # Calling the method:
-        >>> oHelper.WaitShow("Processing")
+        >>> # Calling method:
+        >>> self.WaitFieldValue("CN0_DESCRI", "MY DESCRIPTION")
         """
-        self.__webapp.WaitShow(itens)
+        self.__webapp.WaitFieldValue(field, expected_value)
 
     def WaitHide(self, itens):
         """
@@ -552,7 +552,7 @@ class Webapp():
     def WaitProcessing(self, itens):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
-        
+
         :param itens: List of itens that will hold the wait.
         :type itens: str
 
@@ -562,6 +562,21 @@ class Webapp():
         >>> oHelper.WaitProcessing("Processing")
         """
         self.__webapp.WaitProcessing(itens)
+
+    def WaitShow(self, itens):
+        """
+        Search string that was sent and wait show the elements.
+        e.g. "Item1,Item2,Item3"
+
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitShow("Processing")
+        """
+        self.__webapp.WaitShow(itens)
 
 class Apw():
 
