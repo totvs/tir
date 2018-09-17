@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Webapp Internal &mdash; TIR 0.0.1 documentation</title>
+  <title>Webapp Internal &mdash; TIR 1.0.0 documentation</title>
   
 
   
@@ -477,7 +477,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SearchBrowse">
-<code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key=None</em>, <em>identifier=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key=None</em>, <em>identifier=None</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -491,6 +491,7 @@ is provided, it will search on the chosen search box.</p>
 <li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The term that must be searched.</li>
 <li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</li>
 <li><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</li>
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether the key is an index or not. - <strong>Default:</strong> False</li>
 </ul>
 </td>
 </tr>
@@ -804,27 +805,33 @@ e.g. “Item1,Item2,Item3”</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.check_button_tooltip">
-<code class="descname">check_button_tooltip</code><span class="sig-paren">(</span><em>button</em>, <em>expected_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_button_tooltip" title="Permalink to this definition">¶</a></dt>
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_element_tooltip">
+<code class="descname">check_element_tooltip</code><span class="sig-paren">(</span><em>element</em>, <em>expected_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_element_tooltip" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Internal method of ClickIcon.</p>
-<p>Fires the MouseOver event of a button, checks tooltip text, fires the MouseOut event and
+<p>Fires the MouseOver event of an element, checks tooltip text, fires the MouseOut event and
 returns a boolean whether the tooltip has the expected text value or not.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>button</strong> (<em>BeautifulSoup object</em>) – The target button object.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>element</strong> (<em>BeautifulSoup object</em>) – The target element object.</li>
 <li><strong>expected_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The text that is expected to exist in button’s tooltip.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean value whether element has tooltip text or not.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
 </td>
 </tr>
 </tbody>
 </table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">has_add_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_button_tooltip</span><span class="p">(</span><span class="n">button_object</span><span class="p">,</span> <span class="s2">&quot;Add&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">has_add_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_element_tooltip</span><span class="p">(</span><span class="n">button_object</span><span class="p">,</span> <span class="s2">&quot;Add&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1003,6 +1010,18 @@ Internal method of SetButton.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">click_sub_menu</span><span class="p">(</span><span class="s2">&quot;Process&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.close_coin_screen">
+<code class="descname">close_coin_screen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.close_coin_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Closes the coin screen.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">close_coin_screen</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1192,6 +1211,37 @@ Searches and edits all parameters in the queue.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">search_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_search_browse_elements</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">fill_search_browse</span><span class="p">(</span><span class="s2">&quot;D MG 01&quot;</span><span class="p">,</span> <span class="n">search_elements</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.filter_by_tooltip_value">
+<code class="descname">filter_by_tooltip_value</code><span class="sig-paren">(</span><em>element_list</em>, <em>expected_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.filter_by_tooltip_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Filters elements by finding the tooltip value that is shown when mouseover event
+is triggered.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>element_list</strong> (<em>Beautiful Soup object list</em>) – The list to be filtered</li>
+<li><strong>expected_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The expected tooltip text.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The filtered list of elements.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Beautiful Soup object list</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filtered_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_by_tooltip_value</span><span class="p">(</span><span class="n">my_element_list</span><span class="p">,</span> <span class="s2">&quot;Edit&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1812,7 +1862,7 @@ Returns True if succeeded, False if it failed.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.search_browse_key">
-<code class="descname">search_browse_key</code><span class="sig-paren">(</span><em>search_key</em>, <em>search_elements</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_browse_key" title="Permalink to this definition">¶</a></dt>
+<code class="descname">search_browse_key</code><span class="sig-paren">(</span><em>search_key</em>, <em>search_elements</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_browse_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Chooses the search key to be used during the search.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1822,6 +1872,7 @@ Returns True if succeeded, False if it failed.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>search_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The search key to be chosen on the search dropdown</li>
 <li><strong>search_elements</strong> (<em>Tuple of Beautiful Soup objects</em>) – Tuple of Search elements</li>
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether the key is an index or not.</li>
 </ul>
 </td>
 </tr>
@@ -2098,7 +2149,7 @@ Meant to be used inside of a loop.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.1',
+            VERSION:'1.0.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
