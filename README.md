@@ -78,6 +78,11 @@ test_helper.AssertTrue()
 
 test_helper.TearDown()
 ```
+## Samples
+
+We have a repository with different samples of TIR scripts:
+
+[TIR Script Samples](https://github.com/totvs/tir-script-samples)
 
 ## Contributing
 
