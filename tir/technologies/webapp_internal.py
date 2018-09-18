@@ -2666,6 +2666,9 @@ class WebappInternal(Base):
             while (self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
                 time.sleep(0.1)
 
+        if time.time() > endtime:
+            self.log_error(f"Element {term} not found!")
+
         presence_endtime = time.time() + 10
         if presence:
             if self.config.debug_log:
