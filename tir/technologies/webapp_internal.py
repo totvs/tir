@@ -2659,7 +2659,7 @@ class WebappInternal(Base):
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
         endtime = time.time() + self.config.timeout
-        print("Waiting for element.")
+        print("Waiting for element")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
