@@ -1399,6 +1399,8 @@ class WebappInternal(Base):
                 success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
                 if success:
                     return
+                else:
+                    self.log_error(f"Element {button} not found!")
 
             if soup_element:
                 if button in self.language.no_actions:
@@ -1434,15 +1436,15 @@ class WebappInternal(Base):
             print(error)
             self.log_error(str(error))
 
-    def click_sub_menu(self, item):
+    def click_sub_menu(self, sub_item):
         """
         [Internal]
 
         Clicks on the sub menu of buttons. Returns True if succeeded.
         Internal method of SetButton.
 
-        :param item: The menu item that should be clicked.
-        :type item: str
+        :param sub_item: The menu item that should be clicked.
+        :type sub_item: str
 
         :return: Boolean if click was successful.
         :rtype: bool
@@ -1460,13 +1462,13 @@ class WebappInternal(Base):
 
         menu_itens = menu.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
 
-        result = self.find_sub_menu_text(item, menu_itens)
+        result = self.find_sub_menu_text(sub_item, menu_itens)
 
         item = ""
         if result[0]:
             item = result[0]
         elif result[1]:
-            item = self.find_sub_menu_child(item, result[1])
+            item = self.find_sub_menu_child(sub_item, result[1])
         else:
             return False
 
@@ -1477,14 +1479,14 @@ class WebappInternal(Base):
         else:
             return False
 
-    def find_sub_menu_child(self, item, containers):
+    def find_sub_menu_child(self, sub_item, containers):
         """
         [Internal]
 
         Finds the menu item inside child menu layers.
 
-        :param item: The menu item that should be clicked.
-        :type item: str
+        :param sub_item: The menu item that should be clicked.
+        :type sub_item: str
         :param containers: The menu itens of the current layer that have children.
         :type containers: List of Beautiful Soup objects
 
@@ -1505,10 +1507,10 @@ class WebappInternal(Base):
             self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, new_class))
 
             child_itens = child.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
-            result = self.find_sub_menu_text(item, child_itens)
+            result = self.find_sub_menu_text(sub_item, child_itens)
 
             if not result[0] and result[1]:
-                item = self.find_sub_menu_child(item, result[1])
+                item = self.find_sub_menu_child(sub_item, result[1])
             else:
                 item = result[0]
                 if item:
