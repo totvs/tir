@@ -2659,7 +2659,7 @@ class WebappInternal(Base):
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
         endtime = time.time() + self.config.timeout
-        print("Waiting for element.")
+        print("Waiting for element")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
@@ -3225,3 +3225,48 @@ class WebappInternal(Base):
                 (field_element().get_attribute("value").strip() == expected_value)):
                 success = True
             time.sleep(0.5)
+
+    def assert_result(self, expected):
+        """
+        [Internal]
+
+        Asserts the result based on the expected value.
+
+        :param expected: Expected value
+        :type expected: bool
+
+        Usage :
+
+        >>> #Calling the method:
+        >>> self.assert_result(True)
+        """
+        expected_assert = expected
+        msg = "Passed"
+        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+        log_message = f"{test_number}"
+        self.log.set_seconds()
+
+        if self.grid_input or self.grid_check:
+            self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
+
+        if self.errors:
+            expected = not expected
+
+            for field_msg in self.errors:
+                log_message += (" " + field_msg)
+
+            msg = log_message
+
+            self.log.new_line(False, log_message)
+        else:
+            self.log.new_line(True, "")
+
+        self.log.save_file()
+
+        self.errors = []
+        print(msg)
+        if expected_assert:
+            self.assertTrue(expected, msg)
+        else:
+            self.assertFalse(expected, msg)
