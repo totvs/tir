@@ -726,7 +726,7 @@ class WebappInternal(Base):
                 #Action for Combobox elements
                 if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                 (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    self.wait.until(EC.visibility_of(input_field()))
+                    #self.wait.until(EC.visibility_of(input_field()))
                     self.set_element_focus(input_field())
                     self.select_combo(element, main_value)
                     current_value = self.get_web_value(input_field()).strip()
@@ -1671,7 +1671,7 @@ class WebappInternal(Base):
         self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
         self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
         #Retira o ToolTip dos elementos focados.
-        self.move_to_element(self.driver.find_element_by_tag_name("html"))
+        #self.move_to_element(self.driver.find_element_by_tag_name("html"))
 
         #try:#Tento pegar o elemento da aba de forma direta sem webscraping
         #    element = lambda: self.driver.find_element_by_link_text(item)
