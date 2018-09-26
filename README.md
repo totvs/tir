@@ -35,7 +35,7 @@ You can find one to be used as a base in this repo. To select your file, you can
 
 **Url:** The URL that will run the tests.
 
-**Browser:** Browser that will be used to run the tests.
+**Browser:** Browser that will be used to run the tests. (Firefox or Chrome)
 
 **Environment:** Environment used to run the tests.
 
