@@ -2,6 +2,10 @@
 
 TIR is a Python module used to create test scripts for web interfaces. With it, you are able to easily create and execute test suites and test cases for any supported Totvs' web interface systems, such as Protheus Webapp.
 
+## Contact
+
+[Gitter](https://gitter.im/totvs-tir/General)
+
 ## Current Supported Technologies:
 
 - Protheus Webapp
@@ -33,24 +37,25 @@ You can find one to be used as a base in this repo. To select your file, you can
  
 ### Config options:
 
-**Url:** The URL that will run the tests.
+- **Url:** The URL that will run the tests.
 
-**Browser:** Browser that will be used to run the tests.
+- **Browser:** Browser that will be used to run the tests.
 
-**Environment:** Environment used to run the tests.
+- **Environment:** Environment used to run the tests.
 
-**User:** User that will be logged into the environment.
+- **User:** User that will be logged into the environment.
 
-**Password:** Password to log  on to the environment.
+- **Password:** Password to log  on to the environment.
 
-**Language:** Language to be considered in execution. **Optional**
+- **Language:** Language to be considered in execution. **Optional**
 
-**DebugLog:** Defines whether the run log will be displayed during tests. **Optional**
+- **DebugLog:** Defines whether the run log will be displayed during tests. **Optional**
 
-**TimeOut:** Time set to expire the test if it is reached. **Optional**
+- **TimeOut:** Time set to expire the test if it is reached. **Optional**
 
-**Headless:** Defines whether the test will run with or without interface. **Optional**
+- **SkipEnvironment** Skips the module selection screen, if your Protheus configuration does not have it. **Optional**
 
+- **Headless:** Defines whether the test will run with or without interface. **Optional**
 
 ```python
 #To use the config file in the same workspace directory
