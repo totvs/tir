@@ -381,6 +381,9 @@ class WebappInternal(Base):
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
+        
+        .. note::
+            Only used when the Initial Program is the module Ex: SIGAFAT.
 
         :param program_name: The program name
         :type program_name: str
