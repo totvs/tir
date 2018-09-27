@@ -2176,7 +2176,10 @@ class WebappInternal(Base):
                     columns = row.select("td")
                     if columns:
                         if "_" in field[0]:
-                            column_name = field_to_label[field[0]].lower()
+                            try:
+                                column_name = field_to_label[field[0]].lower()
+                            except:
+                                self.log_error("Couldn't find colum '" + field[0] + "' in sx3 file. Try with the field label")
                         else:
                             column_name = field[0].lower()
 
