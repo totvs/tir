@@ -457,6 +457,10 @@ of a grid. After running, the queues would be empty.</p>
 <dt id="tir.main.Webapp.Program">
 <code class="descname">Program</code><span class="sig-paren">(</span><em>program_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Program" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that sets the program in the initial menu search field.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only used when the Initial Program is the module Ex: SIGAFAT.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -758,38 +762,40 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <code class="descname">TearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.TearDown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Closes the webdriver and ends the test case.</p>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Instantiating the class</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">inst</span><span class="o">.</span><span class="n">oHelper</span> <span class="o">=</span> <span class="n">Webapp</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">inst</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">TearDown</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.WaitUntil">
-<code class="descname">WaitUntil</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitUntil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait until condition is true
-e.g. “Item1,Item2,Item3”</p>
+<dt id="tir.main.Webapp.WaitFieldValue">
+<code class="descname">WaitFieldValue</code><span class="sig-paren">(</span><em>field</em>, <em>expected_value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitFieldValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until field has expected value.
+Recommended for Trigger fields.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The desired field.</li>
+<li><strong>expected_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The expected value.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitUntil</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">WaitFieldValue</span><span class="p">(</span><span class="s2">&quot;CN0_DESCRI&quot;</span><span class="p">,</span> <span class="s2">&quot;MY DESCRIPTION&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.WaitWhile">
-<code class="descname">WaitWhile</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitWhile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait while condition is true
+<dt id="tir.main.Webapp.WaitHide">
+<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait hide the elements.
 e.g. “Item1,Item2,Item3”</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -801,7 +807,46 @@ e.g. “Item1,Item2,Item3”</p>
 </table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitWhile</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitHide</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.main.Webapp.WaitProcessing">
+<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitProcessing</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.main.Webapp.WaitShow">
+<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait show the elements.
+e.g. “Item1,Item2,Item3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitShow</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

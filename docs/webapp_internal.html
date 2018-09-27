@@ -447,6 +447,10 @@ of a grid. After running, the queues would be empty.</p>
 <dt id="tir.technologies.webapp_internal.WebappInternal.Program">
 <code class="descname">Program</code><span class="sig-paren">(</span><em>program_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.Program" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that sets the program in the initial menu search field.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only used when the Initial Program is the module Ex: SIGAFAT.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -745,29 +749,33 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.WaitUntil">
-<code class="descname">WaitUntil</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitUntil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait until condition is true
-e.g. “Item1,Item2,Item3”</p>
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitFieldValue">
+<code class="descname">WaitFieldValue</code><span class="sig-paren">(</span><em>field</em>, <em>expected_value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitFieldValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until field has expected value.
+Recommended for Trigger fields.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The desired field.</li>
+<li><strong>expected_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The expected value.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitUntil</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">WaitFieldValue</span><span class="p">(</span><span class="s2">&quot;CN0_DESCRI&quot;</span><span class="p">,</span> <span class="s2">&quot;MY DESCRIPTION&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.technologies.webapp_internal.WebappInternal.WaitWhile">
-<code class="descname">WaitWhile</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitWhile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait while condition is true
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitHide">
+<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitHide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait hide the elements.
 e.g. “Item1,Item2,Item3”</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -779,7 +787,46 @@ e.g. “Item1,Item2,Item3”</p>
 </table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitWhile</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitHide</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitProcessing">
+<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitProcessing</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.WaitShow">
+<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitShow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait show the elements.
+e.g. “Item1,Item2,Item3”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitShow</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -800,6 +847,26 @@ e.g. “Item1,Item2,Item3”</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">add_grid_row_counter</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.assert_result">
+<code class="descname">assert_result</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.assert_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Asserts the result based on the expected value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expected</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Expected value</td>
+</tr>
+</tbody>
+</table>
+<p>Usage :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">assert_result</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -991,7 +1058,7 @@ Identify and click on check or radio button.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.click_sub_menu">
-<code class="descname">click_sub_menu</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_sub_menu" title="Permalink to this definition">¶</a></dt>
+<code class="descname">click_sub_menu</code><span class="sig-paren">(</span><em>sub_item</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_sub_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Clicks on the sub menu of buttons. Returns True if succeeded.
 Internal method of SetButton.</p>
@@ -999,7 +1066,7 @@ Internal method of SetButton.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean if click was successful.</td>
 </tr>
@@ -1277,7 +1344,7 @@ is triggered.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.find_sub_menu_child">
-<code class="descname">find_sub_menu_child</code><span class="sig-paren">(</span><em>item</em>, <em>containers</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_sub_menu_child" title="Permalink to this definition">¶</a></dt>
+<code class="descname">find_sub_menu_child</code><span class="sig-paren">(</span><em>sub_item</em>, <em>containers</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_sub_menu_child" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Finds the menu item inside child menu layers.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1285,7 +1352,7 @@ is triggered.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</li>
+<li><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The menu item that should be clicked.</li>
 <li><strong>containers</strong> (<em>List of Beautiful Soup objects</em>) – The menu itens of the current layer that have children.</li>
 </ul>
 </td>
