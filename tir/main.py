@@ -457,7 +457,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None):
         """
         Sets value of an input element.
 
@@ -471,6 +471,8 @@ class Webapp():
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
+        :param row: Row number that will be filled 
+        :type row: int
 
         Usage:
 
@@ -485,7 +487,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

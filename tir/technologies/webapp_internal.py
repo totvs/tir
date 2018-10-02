@@ -628,7 +628,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None):
         """
         Sets value of an input element.
 
@@ -642,6 +642,8 @@ class WebappInternal(Base):
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
+        :param row: Row number that will be filled 
+        :type row: int
 
         Usage:
 
@@ -657,7 +659,7 @@ class WebappInternal(Base):
         >>> oHelper.LoadGrid()
         """
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1)
+            self.input_grid_appender(field, value, grid_number - 1, row=row)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value)
         else:
@@ -2011,7 +2013,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None):
         """
         [Internal]
 
@@ -2025,6 +2027,8 @@ class WebappInternal(Base):
         :type grid_number: int
         :param new: Boolean value if this is a new line that should be added. - **Default:** 1
         :type new: bool
+        :param row: Row number that will be filled 
+        :type row: int
 
         Usage:
 
@@ -2034,7 +2038,10 @@ class WebappInternal(Base):
         >>> # Calling the method for a new line:
         >>> self.input_grid_appender("", "", 0, True)
         """
-        self.grid_input.append([column, value, grid_number, new])
+        if row is not None:
+            row -= 1
+            
+        self.grid_input.append([column, value, grid_number, new, row])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -2075,6 +2082,9 @@ class WebappInternal(Base):
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
         """
+
+        self.wait_element(term=".tgetdados, .tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
         x3_dictionaries = self.create_x3_tuple()
 
         initial_layer = 0
@@ -2154,9 +2164,7 @@ class WebappInternal(Base):
         if containers:
             containers = self.zindex_sort(containers, True)
 
-            grids = containers[0].select(".tgetdados")
-            if not grids:
-                grids = containers[0].select(".tgrid")
+            grids = containers[0].select(".tgetdados, .tgrid")
 
             grids = self.filter_displayed_elements(grids)
             if grids:
@@ -2169,9 +2177,15 @@ class WebappInternal(Base):
                 if field[2] > len(grids):
                     self.log_error(self.language.messages.grid_number_error)
                 down_loop = 0
-                row = self.get_selected_row(grids[field[2]].select("tbody tr"))
+                rows = grids[field[2]].select("tbody tr")
+                
+                if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
+                    self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
+                    
+                row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
+
                 if row:
-                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid:
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None:
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop+=1
@@ -2182,7 +2196,7 @@ class WebappInternal(Base):
                             try:
                                 column_name = field_to_label[field[0]].lower()
                             except:
-                                self.log_error("Couldn't find colum '" + field[0] + "' in sx3 file. Try with the field label.")
+                                self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
                         else:
                             column_name = field[0].lower()
 
