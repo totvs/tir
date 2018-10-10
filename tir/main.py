@@ -582,10 +582,6 @@ class Webapp():
         >>> oHelper.WaitShow("Processing")
         """
         self.__webapp.WaitShow(itens)
-    
-    def find_tree_bs4(self, treepath):
-
-        self.__webapp.find_tree_bs4(treepath)
 
 class Apw():
 
