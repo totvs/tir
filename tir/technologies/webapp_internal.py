@@ -3290,3 +3290,20 @@ class WebappInternal(Base):
             self.assertTrue(expected, msg)
         else:
             self.assertFalse(expected, msg)
+
+    def ClickTree(self, treepath):
+        pass
+    
+    def find_tree_bs4(self, treepath):
+        """
+        [Internal]
+        """
+        #TODO WAIT ELEMENT
+        soup = self.get_current_DOM()
+        
+        container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"), True)), None)
+
+        if not container:
+            self.log_error("Couldn't find container of element.")
+
+        tree_element = container.select(".ttree")
