@@ -10,6 +10,7 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 ## Table of Contents
 
 [Documentation](#documentation)<br>
+[Architecture](#architecture)<br>
 [Installation](#installation)<br>
 [Config](#config)<br>
 [Usage](#usage)<br>
@@ -25,6 +26,10 @@ Our documentation can be found here:
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
+
+## Architecture:
+
+[TIR Architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md)
 
 ## Installation:
 
