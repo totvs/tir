@@ -7,13 +7,15 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 - Protheus Webapp
 - APW
 
-##### Table of Contents
-[Documentation](#documentation)
-[Installation](#installation)
-[Config](#config)
-[Usage](#usage)
-[Samples](#samples)
-[Contact Us](#contact us)
+## Table of Contents
+
+[Documentation](#documentation)<br>
+[Installation](#installation)<br>
+[Config](#config)<br>
+[Usage](#usage)<br>
+[Samples](#samples)<br>
+[Contact Us](#contact)<br>
+[Contributing](#contributing)
 
 ## Documentation
 Our documentation can be found here:
