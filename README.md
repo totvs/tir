@@ -24,11 +24,14 @@ Our **create_docs.cmd** script handles the installation of dependencies and crea
 
 The installation is pretty simple. All you need as a requirement is Python 3.6 and a browser (Mozilla Firefox/Google Chrome) installed in your system.
 
-We provide a handy environment setup script named **install_environment.cmd** inside **scripts** folder that can install/upgrade Python 3.6, Mozilla Firefox and Visual Studio Code, using the Windows package manager called Chocolatey.
+Our installation wizard handles the environment setup, the package installation and also it can update your package.
 
-After cloning or downloading this repository and having your environment ready, double click on **install_package.cmd**.
+Download [TIR Installer](https://github.com/totvs/tir-installer/blob/master/tir-installer%201.0.0.exe?raw=true)
 
-OBS: Our installation scripts will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
+It is also an open-source project, you can see the repository [here](https://github.com/totvs/tir-installer/)
+
+
+OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
 
 ## Config file
 
