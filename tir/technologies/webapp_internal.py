@@ -766,9 +766,11 @@ class WebappInternal(Base):
 
                     if self.check_mask(input_field()):
                         current_value = self.remove_mask(self.get_web_value(input_field()).strip())
+                        if re.findall(r"\s", current_value):
+                            current_value = re.sub(r"\s", "", current_value)
                     else:
                         current_value = self.get_web_value(input_field()).strip()
-
+                    
                     if current_value != "":
                         print(f"Current field value: {current_value}")
 
@@ -1791,14 +1793,14 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_mask(my_element)
         """
-        reg = (r"^[1-9.\/-:]+|(@. )[1-9.\/-:]+")
+        reg = (r"^[1-9.\/-:\+]+|(@. )[1-9.\/-:\+]+")
         mask = element.get_attribute("picture")
         if mask is None:
             child = element.find_elements(By.CSS_SELECTOR, "input")
             if child:
                 mask = child[0].get_attribute("picture")
 
-        return (mask != "" and mask is not None and (re.search(reg, mask)))
+        return (mask != "" and mask is not None and (re.findall(reg, mask)))
 
     def remove_mask(self, string):
         """
@@ -1818,9 +1820,9 @@ class WebappInternal(Base):
         >>> value_without_mask = self.remove_mask("111-111.111")
         >>> # value_without_mask == "111111111"
         """
-        caracter = (r'[.\/-]')
+        caracter = (r'[.\/+-]')
         if string[0:4] != 'http':
-            match = re.search(caracter, string)
+            match = re.findall(caracter, string)
             if match:
                 string = re.sub(caracter, '', string)
 
