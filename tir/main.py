@@ -195,6 +195,20 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text)
 
+    def ClickLabel(self, label_name):
+        """
+        Clicks on a Label on the screen.
+
+        :param label_name: The label name
+        :type label_name: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickLabel("Search")
+        """
+        self.__webapp.ClickLabel(label_name)
+
     def GetValue(self, cabitem, field):
         """
         Gets the current value or text of element.
@@ -262,7 +276,7 @@ class Webapp():
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
-                
+
         .. note::
             Only used when the Initial Program is the module Ex: SIGAFAT.
 
@@ -471,7 +485,7 @@ class Webapp():
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
-        :param row: Row number that will be filled 
+        :param row: Row number that will be filled
         :type row: int
 
         Usage:
