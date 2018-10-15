@@ -612,6 +612,25 @@ class Base(unittest.TestCase):
         """
         self.driver.execute_script("window.focus(); arguments[0].focus();", element)
 
+    def soup_to_selenium(self, soup_object):
+        """
+        [Internal]
+
+        An abstraction of the Selenium call to simplify the conversion of elements.
+
+        :param soup_object: The BeautifulSoup object to be converted.
+        :type soup_object: BeautifulSoup object
+
+        :return: The object converted to a Selenium object.
+        :rtype: Selenium object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
+        """
+        return self.driver.find_element_by_xpath(xpath_soup(soup_object))
+
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
         [Internal]

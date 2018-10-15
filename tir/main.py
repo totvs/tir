@@ -195,6 +195,20 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text)
 
+    def ClickLabel(self, label_name):
+        """
+        Clicks on a Label on the screen.
+
+        :param label_name: The label name
+        :type label_name: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickLabel("Search")
+        """
+        self.__webapp.ClickLabel(label_name)
+
     def GetValue(self, cabitem, field):
         """
         Gets the current value or text of element.
@@ -262,7 +276,7 @@ class Webapp():
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
-                
+
         .. note::
             Only used when the Initial Program is the module Ex: SIGAFAT.
 
@@ -457,7 +471,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
 
@@ -471,8 +485,10 @@ class Webapp():
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
-        :param row: Row number that will be filled 
+        :param row: Row number that will be filled
         :type row: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -487,7 +503,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

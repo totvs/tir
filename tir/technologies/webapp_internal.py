@@ -381,7 +381,7 @@ class WebappInternal(Base):
     def Program(self, program_name):
         """
         Method that sets the program in the initial menu search field.
-        
+
         .. note::
             Only used when the Initial Program is the module Ex: SIGAFAT.
 
@@ -628,7 +628,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
 
@@ -642,8 +642,10 @@ class WebappInternal(Base):
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
-        :param row: Row number that will be filled 
+        :param row: Row number that will be filled
         :type row: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -663,9 +665,9 @@ class WebappInternal(Base):
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value)
         else:
-            self.input_value(field, value, ignore_case)
+            self.input_value(field, value, ignore_case, name_attr=name_attr)
 
-    def input_value(self, field, value, ignore_case=True):
+    def input_value(self, field, value, ignore_case=True, name_attr=False):
         """
         [Internal]
 
@@ -678,6 +680,8 @@ class WebappInternal(Base):
         :type value: str
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         :returns: True if succeeded, False if it failed.
         :rtype: bool
@@ -690,7 +694,11 @@ class WebappInternal(Base):
 
         field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
-        self.wait_element(field)
+        if name_attr:
+            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:        
+            self.wait_element(field)
+
         success = False
         endtime = time.time() + 60
 
@@ -704,7 +712,7 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.get_field(field)
+                element = self.get_field(field, name_attr)
 
             if not element:
                 continue
@@ -770,7 +778,7 @@ class WebappInternal(Base):
                             current_value = re.sub(r"\s", "", current_value)
                     else:
                         current_value = self.get_web_value(input_field()).strip()
-                    
+
                     if current_value != "":
                         print(f"Current field value: {current_value}")
 
@@ -1900,7 +1908,6 @@ class WebappInternal(Base):
 
             if key.upper() in supported_keys:
                 if key.upper() == "DOWN" and grid:
-                    #self.UTSetValue('aItens','newline','0')
                     if grid_number is None:
                         grid_number = 0
                     self.grid_input.append(["", "", grid_number, True])
@@ -2029,7 +2036,7 @@ class WebappInternal(Base):
         :type grid_number: int
         :param new: Boolean value if this is a new line that should be added. - **Default:** 1
         :type new: bool
-        :param row: Row number that will be filled 
+        :param row: Row number that will be filled
         :type row: int
 
         Usage:
@@ -2042,7 +2049,7 @@ class WebappInternal(Base):
         """
         if row is not None:
             row -= 1
-            
+
         self.grid_input.append([column, value, grid_number, new, row])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
@@ -2180,10 +2187,10 @@ class WebappInternal(Base):
                     self.log_error(self.language.messages.grid_number_error)
                 down_loop = 0
                 rows = grids[field[2]].select("tbody tr")
-                
+
                 if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                     self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
-                    
+
                 row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
 
                 if row:
@@ -3292,3 +3299,49 @@ class WebappInternal(Base):
             self.assertTrue(expected, msg)
         else:
             self.assertFalse(expected, msg)
+
+    def ClickLabel(self, label_name):
+        """
+        Clicks on a Label on the screen.
+
+        :param label_name: The label name
+        :type label_name: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickLabel("Search")
+        """
+        self.wait_element(label_name)
+
+        container = self.get_current_container()
+        if not container:
+            self.log_error("Couldn't locate container.")
+
+        labels = container.select("label")
+        filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
+        label = next(iter(filtered_labels), None)
+        if not label:
+            self.log_error("Couldn't find any labels.")
+
+        label_element = lambda: self.soup_to_selenium(label)
+        self.click(label_element())
+
+    def get_current_container(self):
+        """
+        [Internal]
+
+        An internal method designed to get the current container.
+        Returns the BeautifulSoup object that represents this container or NONE if nothing is found.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_current_container()
+        """
+        soup = self.get_current_DOM()
+        containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        return next(iter(containers), None)
