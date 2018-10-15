@@ -628,7 +628,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
 
@@ -644,6 +644,8 @@ class WebappInternal(Base):
         :type ignore_case: bool
         :param row: Row number that will be filled
         :type row: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -663,9 +665,9 @@ class WebappInternal(Base):
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value)
         else:
-            self.input_value(field, value, ignore_case)
+            self.input_value(field, value, ignore_case, name_attr=name_attr)
 
-    def input_value(self, field, value, ignore_case=True):
+    def input_value(self, field, value, ignore_case=True, name_attr=False):
         """
         [Internal]
 
@@ -678,6 +680,8 @@ class WebappInternal(Base):
         :type value: str
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         :returns: True if succeeded, False if it failed.
         :rtype: bool
@@ -690,7 +694,11 @@ class WebappInternal(Base):
 
         field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
-        self.wait_element(field)
+        if name_attr:
+            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:        
+            self.wait_element(field)
+
         success = False
         endtime = time.time() + 60
 
@@ -704,7 +712,7 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.get_field(field)
+                element = self.get_field(field, name_attr)
 
             if not element:
                 continue
@@ -1900,7 +1908,6 @@ class WebappInternal(Base):
 
             if key.upper() in supported_keys:
                 if key.upper() == "DOWN" and grid:
-                    #self.UTSetValue('aItens','newline','0')
                     if grid_number is None:
                         grid_number = 0
                     self.grid_input.append(["", "", grid_number, True])
