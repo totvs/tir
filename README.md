@@ -2,14 +2,21 @@
 
 TIR is a Python module used to create test scripts for web interfaces. With it, you are able to easily create and execute test suites and test cases for any supported Totvs' web interface systems, such as Protheus Webapp.
 
-## Contact
-
-[Gitter](https://gitter.im/totvs-tir/General)
-
-## Current Supported Technologies:
+### Current Supported Technologies
 
 - Protheus Webapp
 - APW
+
+## Table of Contents
+
+[Documentation](#documentation)<br>
+[Architecture](#architecture)<br>
+[Installation](#installation)<br>
+[Config](#config)<br>
+[Usage](#usage)<br>
+[Samples](#samples)<br>
+[Contact Us](#contact)<br>
+[Contributing](#contributing)
 
 ## Documentation
 Our documentation can be found here:
@@ -20,17 +27,23 @@ This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
 
-## How to install:
+## Architecture:
+
+[TIR Architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md)
+
+## Installation:
 
 The installation is pretty simple. All you need as a requirement is Python 3.6 and a browser (Mozilla Firefox/Google Chrome) installed in your system.
 
-We provide a handy environment setup script named **install_environment.cmd** inside **scripts** folder that can install/upgrade Python 3.6, Mozilla Firefox and Visual Studio Code, using the Windows package manager called Chocolatey.
+Our installation wizard handles the environment setup, the package installation and also it can update your package.
 
-After cloning or downloading this repository and having your environment ready, double click on **install_package.cmd**.
+Download [TIR Installer](https://github.com/totvs/tir-installer/blob/master/tir-installer%201.0.0.exe?raw=true)
 
-OBS: Our installation scripts will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
+It is also an open-source project, you can see the repository [here](https://github.com/totvs/tir-installer/)
 
-## Config file
+OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
+
+## Config
 
 The environment must be configured through a [config.json](config.json) file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
@@ -83,11 +96,16 @@ test_helper.AssertTrue()
 
 test_helper.TearDown()
 ```
+
 ## Samples
 
 We have a repository with different samples of TIR scripts:
 
 [TIR Script Samples](https://github.com/totvs/tir-script-samples)
+
+## Contact
+
+[Gitter](https://gitter.im/totvs-tir/General)
 
 ## Contributing
 
