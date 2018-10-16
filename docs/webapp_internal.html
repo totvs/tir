@@ -371,6 +371,25 @@ fills the environment screen with the values passed on the Setup method.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickLabel">
+<code class="descname">ClickLabel</code><span class="sig-paren">(</span><em>label_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on a Label on the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>label_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The label name</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickLabel</span><span class="p">(</span><span class="s2">&quot;Search&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
@@ -689,7 +708,7 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SetValue">
-<code class="descname">SetValue</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>grid=False</em>, <em>grid_number=1</em>, <em>ignore_case=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetValue" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetValue</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>grid=False</em>, <em>grid_number=1</em>, <em>ignore_case=True</em>, <em>row=None</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets value of an input element.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -701,6 +720,8 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
 <li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
 <li><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</li>
+<li><strong>row</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Row number that will be filled</li>
+<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</li>
 </ul>
 </td>
 </tr>
@@ -1426,6 +1447,29 @@ If none has children itens, it will be an empty list.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_current_container">
+<code class="descname">get_current_container</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>An internal method designed to get the current container.
+Returns the BeautifulSoup object that represents this container or NONE if nothing is found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The container object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">BeautifulSoup object</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_container</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids">
 <code class="descname">get_enchoice_button_ids</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1684,7 +1728,7 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.input_grid_appender">
-<code class="descname">input_grid_appender</code><span class="sig-paren">(</span><em>column</em>, <em>value</em>, <em>grid_number=0</em>, <em>new=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Permalink to this definition">¶</a></dt>
+<code class="descname">input_grid_appender</code><span class="sig-paren">(</span><em>column</em>, <em>value</em>, <em>grid_number=0</em>, <em>new=False</em>, <em>row=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Adds a value to the input queue of a grid.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1696,6 +1740,7 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 <li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that would be inputted.</li>
 <li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 0</li>
 <li><strong>new</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean value if this is a new line that should be added. - <strong>Default:</strong> 1</li>
+<li><strong>row</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Row number that will be filled</li>
 </ul>
 </td>
 </tr>
@@ -1713,7 +1758,7 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.input_value">
-<code class="descname">input_value</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>ignore_case=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_value" title="Permalink to this definition">¶</a></dt>
+<code class="descname">input_value</code><span class="sig-paren">(</span><em>field</em>, <em>value</em>, <em>ignore_case=True</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Sets value of an input element.
 Returns True if succeeded, False if it failed.</p>
@@ -1725,6 +1770,7 @@ Returns True if succeeded, False if it failed.</p>
 <li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field name or label to receive the value</li>
 <li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be set on the field</li>
 <li><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</li>
+<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</li>
 </ul>
 </td>
 </tr>

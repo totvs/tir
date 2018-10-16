@@ -695,6 +695,30 @@ folder as the file that would execute this module.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.base.Base.soup_to_selenium">
+<code class="descname">soup_to_selenium</code><span class="sig-paren">(</span><em>soup_object</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.soup_to_selenium" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>An abstraction of the Selenium call to simplify the conversion of elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>soup_object</strong> (<em>BeautifulSoup object</em>) – The BeautifulSoup object to be converted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The object converted to a Selenium object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Selenium object</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selenium_obj</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">soup_to_selenium</span><span class="p">(</span><span class="n">bs_obj</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.base.Base.web_scrap">
 <code class="descname">web_scrap</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>optional_term=None</em>, <em>label=False</em>, <em>main_container=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.web_scrap" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
