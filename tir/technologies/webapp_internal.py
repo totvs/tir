@@ -2518,6 +2518,8 @@ class WebappInternal(Base):
         grid_number -= 1
         column_name = ""
 
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
         if re.match(r"\w+(_)", column):
             column_name = self.get_x3_dictionaries([column])[2][column].lower()
         else:
@@ -2529,6 +2531,7 @@ class WebappInternal(Base):
 
         container = next(iter(self.zindex_sort(containers, True)), None)
         grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid"))
+        grids = list(filter(lambda x:x.select("tbody tr"), grids))
         if not grids:
             self.log_error("Couldn't find any grid.")
 
@@ -2637,9 +2640,10 @@ class WebappInternal(Base):
         headers = []
         for item in grids:
             labels = item.select("thead tr label")
-            keys = list(map(lambda x: x.text.strip().lower(), labels))
-            values = list(map(lambda x: x[0], enumerate(labels)))
-            headers.append(dict(zip(keys, values)))
+            if labels:
+                keys = list(map(lambda x: x.text.strip().lower(), labels))
+                values = list(map(lambda x: x[0], enumerate(labels)))
+                headers.append(dict(zip(keys, values)))
         return headers
 
     def add_grid_row_counter(self, grid):
