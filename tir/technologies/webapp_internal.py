@@ -696,7 +696,7 @@ class WebappInternal(Base):
 
         if name_attr:
             self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        else:        
+        else:
             self.wait_element(field)
 
         success = False
@@ -1774,15 +1774,135 @@ class WebappInternal(Base):
             filtered_column_elements = list(filter(lambda x: x.text.strip() in content_list, column_elements))
 
             for column_element in filtered_column_elements:
-                element = self.driver.find_element_by_xpath(xpath_soup(column_element))
-                self.scroll_to_element(element)
-                self.click(element)
+                element = lambda: self.soup_to_selenium(column_element)
+                self.scroll_to_element(element())
+                self.click(element())
                 if class_grid != 'tcbrowse':
-                    self.double_click(element)
+                    self.double_click(element())
                 else:
-                    self.send_keys(element, Keys.ENTER)
+                    self.send_keys(element(), Keys.ENTER)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
+
+    def ClickBox2(self, field, content_list="", select_all=False, grid_number=1):
+        """
+        Clicks on Checkbox elements of a grid.
+
+        :param field: The column to identify grid rows.
+        :type field: str
+        :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
+        :type content_list: str
+        :param select_all: Boolean if all options should be selected. - **Default:** False
+        :type select_all: bool
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method to select a specific checkbox:
+        >>> oHelper.ClickBox("Branch", "D MG 01 ")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to select multiple checkboxes:
+        >>> oHelper.ClickBox("Branch", "D MG 01 , D RJ 02")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to select all checkboxes:
+        >>> oHelper.ClickBox("Branch", select_all=True)
+        """
+        grid_number -= 1
+        if content_list:
+            self.wait_element_timeout(field)
+        elif select_all:
+            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+
+        grid = self.get_grid(grid_number)
+        column_enumeration = list(enumerate(grid.select("thead label")))
+        chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
+        if chosen_column:
+            column_index = chosen_column[0]
+        else:
+            self.log_error("Couldn't find chosen column.")
+
+        content_list = content_list.split(",")
+
+        is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+
+        if select_all and is_select_all_button:
+            self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+            if element:
+                box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.click(box())
+
+        elif content_list or (select_all and not is_select_all_button):
+            self.wait_element(content_list[0]) # wait columns
+
+            class_grid = grid.attrs['class'][0]
+
+            if class_grid != "tgrid":
+                column_elements = grid.select(f"td[id='{column_index}']")
+                filtered_column_elements = list(filter(lambda x: x.text.strip() in content_list, column_elements))
+
+                for column_element in filtered_column_elements:
+                    element = lambda: self.soup_to_selenium(column_element)
+                    self.scroll_to_element(element())
+                    self.click(element())
+                    if class_grid != 'tcbrowse':
+                        self.double_click(element())
+                    else:
+                        self.send_keys(element(), Keys.ENTER)
+
+            else:
+                sd_button = next(iter(self.web_scrap(term="tbtnbmp[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
+                scroll_down = lambda: self.click(scroll_down_button()) else None
+
+                last = None
+                current = lambda: self.get_grid(grid_number).select("tbody tr.selected_row")[0]
+                contents = content_list[:]
+                while(last != current() and contents):
+                    cur = current()
+                    td = next(iter(cur.select(f"td[id='{column_index}']")), None)
+                    text = td.text if td else ""
+                    if text.trim() in contents:
+                        self.double_click(element())
+                        contents.remove(text)
+                    last = cur
+                    scroll_down()
+        else:
+            self.log_error(f"Couldn't locate content: {content_list}")
+
+    def get_grid(self, grid_number=0):
+        """
+        [Internal]
+        Gets a grid BeautifulSoup object from the screen.
+
+        :param grid_number: The number of the grid on the screen.
+        :type: int
+        :return: Grid BeautifulSoup object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> my_grid = self.get_grid()
+        """
+        endtime = time.time() + 60
+        grids = None
+        while(time.time() < endtime and not grids):
+            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        if grids:
+            if len(grids) > 1:
+                grids = self.filter_displayed_elements(grids,False)
+            else:
+                grids = self.filter_displayed_elements(grids,True)
+        else:
+            self.log_error("Couldn't find grid.")
+
+        if len(grids) - 1  >= grid_number:
+            return grids[grid_number]
+        else:
+            self.log_error("Grid number out of bounds.")
 
     def check_mask(self, element):
         """

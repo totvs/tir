@@ -146,7 +146,7 @@ class Webapp():
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
-        self.__webapp.ClickBox(fields, contents_list, select_all, grid_number)
+        self.__webapp.ClickBox2(fields, contents_list, select_all, grid_number)
 
     def ClickFolder(self, item):
         """
