@@ -1538,6 +1538,32 @@ Internal method of input_value and CheckResult.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_grid">
+<code class="descname">get_grid</code><span class="sig-paren">(</span><em>grid_number=0</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Gets a grid BeautifulSoup object from the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>grid_number</strong> – The number of the grid on the screen.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Grid BeautifulSoup object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">BeautifulSoup object</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_grid</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_headers_from_grids">
 <code class="descname">get_headers_from_grids</code><span class="sig-paren">(</span><em>grids</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_headers_from_grids" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
