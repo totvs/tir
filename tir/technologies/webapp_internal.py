@@ -1854,7 +1854,7 @@ class WebappInternal(Base):
             else:
                 sd_button = next(iter(self.web_scrap(term="tbtnbmp[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
                 scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
-                scroll_down = lambda: self.click(scroll_down_button()) else None
+                scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
                 last = None
                 current = lambda: self.get_grid(grid_number).select("tbody tr.selected_row")[0]
