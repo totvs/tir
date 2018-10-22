@@ -1852,7 +1852,8 @@ class WebappInternal(Base):
                         self.send_keys(element(), Keys.ENTER)
 
             else:
-                sd_button = next(iter(self.web_scrap(term="tbtnbmp[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR))
+                sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
                 scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
                 scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
