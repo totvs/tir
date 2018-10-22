@@ -6,21 +6,21 @@ To achieve this, the whole project is built in this particular architecture:
 
 ![Architecture](tir_architecture.png)
 
-## The core:
+## The core
 
 The core classes are the main part of the TIR tool.
 
 The **base.py** contains the methods that are shared among all
 technologies. It is this class that implements the communication with the browser and each other core classes to make sure that its functionalities are working properly.
 
-The core classes:
+The core classes
 
 - **config.py** : A class that parses the *config.json* file;
 - **enumerations.py** : contains each enumeration used in the tool;
 - **language.py** : contains the language dictionaries;
 - **log.py** : implements the log functionality;
 
-## The implementation for each technology:
+## The implementation for each technology
 
 Each technology should inherit the **base.py** class. It already handles the basic functionalities so now the only thing left is to create all methods that are specific to each technology.
 
@@ -28,7 +28,7 @@ e.g. A method for choosing an option from the menu could be different for each T
 
 This class must have the **internal** suffix after its name. At this point not all methods are designed for the user, so now we must define the user classes.
 
-## The user classes:
+## The user classes
 
 These classes are defined inside the **main.py** file and will simply invoke the calls for the internal classes.
 

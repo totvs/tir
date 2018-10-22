@@ -27,11 +27,11 @@ This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
 
-## Architecture:
+## Architecture
 
 [TIR Architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md)
 
-## Installation:
+## Installation
 
 The installation is pretty simple. All you need as a requirement is Python 3.6 and a browser (Mozilla Firefox/Google Chrome) installed in your system.
 
@@ -48,7 +48,7 @@ OBS: Our installation wizard will install our package in the current active Pyth
 The environment must be configured through a [config.json](config.json) file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
  
-### Config options:
+### Config options
 
 - **Url:** The URL that will run the tests.
 
@@ -78,7 +78,7 @@ test_helper = Webapp()
 test_helper = Webapp("C:\PATH_HERE\config.json")
 ```
 
-## Usage:
+## Usage
 
 After the module is installed, you could just import it on your Test Case.
 See the following example:
