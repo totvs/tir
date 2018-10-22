@@ -1858,17 +1858,20 @@ class WebappInternal(Base):
                 scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
                 last = None
-                current = lambda: self.get_grid(grid_number).select("tbody tr.selected_row")[0]
+                get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
+                current = get_current()
                 contents = content_list[:]
-                while(last != current() and contents):
-                    cur = current()
-                    td = next(iter(cur.select(f"td[id='{column_index}']")), None)
-                    text = td.text if td else ""
-                    if text.trim() in contents:
-                        self.double_click(element())
+                while(last != current and contents):
+                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                    text = td.text.strip() if td else ""
+                    if text in contents:
+                        self.double_click(self.soup_to_selenium(current))
                         contents.remove(text)
-                    last = cur
+                    last = current
                     scroll_down()
+                    time.sleep(0.5)
+                    current = get_current()
+                    time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
