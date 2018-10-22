@@ -1408,8 +1408,8 @@ class WebappInternal(Base):
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
 
-                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
-                self.click(soup_element())
+                self.scroll_to_element(other_action_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(other_action_element())
 
                 success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
                 if success:
