@@ -1357,7 +1357,7 @@ class WebappInternal(Base):
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
-    def SetButton(self, button, sub_item=""):
+    def SetButton(self, button, sub_item="", position=1):
         """
         Method that clicks on a button on the screen.
 
@@ -1375,6 +1375,7 @@ class WebappInternal(Base):
         >>> oHelper.SetButton("Other Actions", "Process")
         """
         print(f"Clicking on {button}")
+        position -= 1
         try:
             soup_element  = ""
             if (button.lower() == "x"):
@@ -1391,8 +1392,8 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
 
-                if soup_objects:
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                if soup_objects and len(soup_objects) - 1 >= position:
+                    soup_element = lambda : self.soup_to_selenium(soup_objects[position])
 
             if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close']")
@@ -1401,15 +1402,14 @@ class WebappInternal(Base):
                 self.click(element)
 
             if not soup_element:
-                soup_objects = self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")
-
-                if soup_objects:
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
-                else:
+                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
+                if other_action is None:
                     self.log_error("Couldn't find element")
 
-                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
-                self.click(soup_element())
+                other_action_element = lambda : self.soup_to_selenium(other_action)
+
+                self.scroll_to_element(other_action_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(other_action_element())
 
                 success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
                 if success:
@@ -1418,8 +1418,6 @@ class WebappInternal(Base):
                     self.log_error(f"Element {button} not found!")
 
             if soup_element:
-                if button in self.language.no_actions:
-                    self.idwizard = []
 
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
