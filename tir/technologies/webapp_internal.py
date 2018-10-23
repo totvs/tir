@@ -1599,11 +1599,15 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
+        container = self.get_current_container()
+        
+        if not container:
+            self.log_error("Couldn't locate container.")
+
         itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
+            elements = container.find_all('div', string=(itens))
             if not elements:
                 break
             time.sleep(5)
@@ -1621,11 +1625,16 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
+
+        container = self.get_current_container()
+        
+        if not container:
+            self.log_error("Couldn't locate container.")
+
         itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
+            elements = container.find_all('div', string=(itens))
             if elements:
                 break
             time.sleep(5)

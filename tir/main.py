@@ -12,7 +12,7 @@ class Webapp():
     Instantiates the Webapp automated interface testing class.
     """
     def __init__(self, config_path=""):
-        self.__webapp = WebappInternal()
+        self.__webapp = WebappInternal(config_path)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
