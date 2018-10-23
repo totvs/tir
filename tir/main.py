@@ -356,7 +356,7 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
-    def SetButton(self, button, sub_item=""):
+    def SetButton(self, button, sub_item="", position=1):
         """
         Method that clicks on a button on the screen.
 
@@ -373,7 +373,7 @@ class Webapp():
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
-        self.__webapp.SetButton(button, sub_item)
+        self.__webapp.SetButton(button, sub_item, position)
 
     def SetFilePath(self, value):
         """
