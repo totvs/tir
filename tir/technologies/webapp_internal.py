@@ -1786,7 +1786,12 @@ class WebappInternal(Base):
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
                     text = td.text.strip() if td else ""
                     if text in contents:
-                        self.double_click(self.soup_to_selenium(current))
+                        clicking_row_element_bs = next(iter(current.select("td")), None)
+                        if not clicking_row_element_bs:
+                            clicking_row_element_bs = current
+                        clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
+                        self.set_element_focus(clicking_row_element())
+                        self.double_click(clicking_row_element())
                         contents.remove(text)
                     last = current
                     scroll_down()
