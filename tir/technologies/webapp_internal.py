@@ -1791,8 +1791,10 @@ class WebappInternal(Base):
                             clicking_row_element_bs = current
                         clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
                         self.set_element_focus(clicking_row_element())
+                        time.sleep(1)
                         self.double_click(clicking_row_element())
                         contents.remove(text)
+                    time.sleep(2)
                     last = current
                     scroll_down()
                     time.sleep(0.5)
