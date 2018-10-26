@@ -1365,6 +1365,8 @@ class WebappInternal(Base):
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
+        :param position: Position which element is located. - **Default:** 0
+        :type position: int
 
         Usage:
 
@@ -2980,7 +2982,7 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
-        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?$"))))), None)
+        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))), None)
         if element is None:
             return []
 
@@ -3183,7 +3185,11 @@ class WebappInternal(Base):
         self.LogOff()
 
         self.Setup(self.config.initialprog, self.config.date, self.config.group, self.config.branch, save_input=False)
-        self.Program(self.config.routine)
+
+        if ">" in self.config.routine:
+            self.SetLateralMenu(self.config.routine, save_input=False)
+        else:
+            self.Program(self.config.routine)
 
     def fill_parameters(self, restore_backup):
         """
@@ -3215,10 +3221,10 @@ class WebappInternal(Base):
 
                 self.backup_parameters.append([parameter[0], current_branch.strip(), current_pt_value.strip(), current_en_value.strip(), current_spa_value.strip()])
 
-            self.SetValue("X6_FIL", parameter[1])
-            self.SetValue("X6_CONTEUD", parameter[2])
-            self.SetValue("X6_CONTENG", parameter[3])
-            self.SetValue("X6_CONTSPA", parameter[4])
+            self.SetValue("X6_FIL", parameter[1]) if parameter[1] else None 
+            self.SetValue("X6_CONTEUD", parameter[2]) if parameter[2] else None 
+            self.SetValue("X6_CONTENG", parameter[3]) if parameter[3] else None 
+            self.SetValue("X6_CONTSPA", parameter[4]) if parameter[4] else None 
 
             self.SetButton(self.language.save)
 

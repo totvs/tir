@@ -364,6 +364,8 @@ class Webapp():
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
+        :param position: Position which element is located. - **Default:** 0
+        :type position: int
 
         Usage:
 
