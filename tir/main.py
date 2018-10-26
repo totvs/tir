@@ -313,7 +313,7 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> self.take_screenshot(file_name="myscreenshot")
+        >>> oHelper.Screenshot(filename="myscreenshot")
         """
         self.__webapp.take_screenshot(filename)
 

@@ -485,7 +485,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> # Calling the method:
-        >>> self.take_screenshot(file_name="myscreenshot")
+        >>> self.take_screenshot(filename="myscreenshot")
         """
         if not filename.endswith(".png"):
             filename += ".png"
