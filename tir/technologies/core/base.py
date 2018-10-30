@@ -327,10 +327,10 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> parent_element = self.find_first_div_parent(my_ele
-        
-        
-        
-        
+
+
+
+
         ment)
         """
         current = element
@@ -468,7 +468,7 @@ class Base(unittest.TestCase):
         """
         ActionChains(self.driver).move_to_element(element).perform()
 
-  def normalize_config_name(self, config_name):
+    def normalize_config_name(self, config_name):
         """
         [Internal]
 
@@ -479,7 +479,7 @@ class Base(unittest.TestCase):
         :type config_name: str
         :return: The config name string normalized.
         :rtype: str
-        
+
         Usage:
 
         >>> # Calling the method:
