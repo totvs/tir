@@ -303,6 +303,20 @@ class Webapp():
         """
         self.__webapp.RestoreParameters()
 
+    def Screenshot(self, filename):
+        """
+        Takes a screenshot and saves on the screenshot folder defined in config.
+
+        :param filename: The name of the screenshot file.
+        :type: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Screenshot(filename="myscreenshot")
+        """
+        self.__webapp.take_screenshot(filename)
+
     def SearchBrowse(self, term, key_description=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
