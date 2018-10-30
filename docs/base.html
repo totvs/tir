@@ -719,6 +719,28 @@ folder as the file that would execute this module.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.base.Base.take_screenshot">
+<code class="descname">take_screenshot</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.take_screenshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Takes a screenshot and saves on the screenshot folder defined in config.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – The name of the screenshot file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">take_screenshot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;myscreenshot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.base.Base.web_scrap">
 <code class="descname">web_scrap</code><span class="sig-paren">(</span><em>term</em>, <em>scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em>optional_term=None</em>, <em>label=False</em>, <em>main_container=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.web_scrap" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
