@@ -326,7 +326,12 @@ class Base(unittest.TestCase):
 
         Usage:
 
-        >>> parent_element = self.find_first_div_parent(my_element)
+        >>> parent_element = self.find_first_div_parent(my_ele
+        
+        
+        
+        
+        ment)
         """
         current = element
         while(hasattr(current, "name") and current.name != "div"):
@@ -463,7 +468,7 @@ class Base(unittest.TestCase):
         """
         ActionChains(self.driver).move_to_element(element).perform()
 
-    def normalize_config_name(self, config_name):
+  def normalize_config_name(self, config_name):
         """
         [Internal]
 
@@ -474,7 +479,7 @@ class Base(unittest.TestCase):
         :type config_name: str
         :return: The config name string normalized.
         :rtype: str
-
+        
         Usage:
 
         >>> # Calling the method:
@@ -496,6 +501,32 @@ class Base(unittest.TestCase):
             normalized = config_name.lower()
 
         return normalized
+
+    def take_screenshot(self, filename):
+        """
+        [Internal]
+
+        Takes a screenshot and saves on the screenshot folder defined in config.
+
+        :param filename: The name of the screenshot file.
+        :type: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.take_screenshot(filename="myscreenshot")
+        """
+        if not filename.endswith(".png"):
+            filename += ".png"
+
+        directory = self.config.screenshot_folder if self.config.screenshot_folder else os.path.join(os.getcwd(), "screenshot")
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        fullpath = os.path.join(directory, filename)
+
+        self.driver.save_screenshot(fullpath)
 
     def scroll_to_element(self, element):
         """

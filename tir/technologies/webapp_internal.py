@@ -1804,6 +1804,58 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
+    def ScrollGrid(self, column, match_value, grid_number=1):
+        """
+        Scrolls Grid until a matching column is found.
+
+        :param field: The column to be matched.
+        :type field: str
+        :param match_value: The value to be matched in defined column.
+        :type match_value: str
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method to scroll to a column match:
+        >>> oHelper.ScrollGrid(column="Branch",match_value="D MG 01 ")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to scroll to a column match of the second grid:
+        >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
+        """
+        grid_number -= 1
+        self.wait_element_timeout(column)
+
+        grid = self.get_grid(grid_number)
+        column_enumeration = list(enumerate(grid.select("thead label")))
+        chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+        if chosen_column:
+            column_index = chosen_column[0]
+        else:
+            self.log_error("Couldn't find chosen column.")
+
+        sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR))
+        sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
+        scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
+        scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
+
+        last = None
+        get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
+        current = get_current()
+        while(last != current and match_value):
+            td = next(iter(current.select(f"td[id='{column_index}']")), None)
+            text = td.text.strip() if td else ""
+            if text in match_value:
+                break
+            time.sleep(2)
+            last = current
+            scroll_down()
+            time.sleep(0.5)
+            current = get_current()
+            time.sleep(0.5)
+        else:
+            self.log_error(f"Couldn't locate content: {match_value}")
+
     def get_grid(self, grid_number=0):
         """
         [Internal]

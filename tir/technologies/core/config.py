@@ -28,6 +28,7 @@ class ConfigLoader:
         self.debug_log = ("DebugLog" in data and bool(data["DebugLog"]))
         self.time_out = int(data["TimeOut"]) if "TimeOut" in data else 90
         self.parameter_menu = str(data["ParameterMenu"]) if "ParameterMenu" in data else ""
+        self.screenshot_folder = str(data["ScreenshotFolder"]) if "ScreenshotFolder" in data else ""
         self.valid_language = self.language != ""
         self.initial_program = ""
         self.routine = ""
