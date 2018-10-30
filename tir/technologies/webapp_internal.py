@@ -28,14 +28,16 @@ class WebappInternal(Base):
 
     :param config_path: The path to the config file. - **Default:** "" (empty string)
     :type config_path: str
+    :param autostart: Sets whether TIR should open browser and execute from the start. - **Default:** True
+    :type: bool
 
     Usage:
 
     >>> # Inside __init__ method in Webapp class of main.py
-    >>> def __init__(self, config_path):
-    >>>     self.__webapp = WebappInternal()
+    >>> def __init__(self, config_path="", autostart=True):
+    >>>     self.__webapp = WebappInternal(config_path, autostart)
     """
-    def __init__(self, config_path=""):
+    def __init__(self, config_path="", autostart=True):
         """
         Definition of each global variable:
 
@@ -49,8 +51,7 @@ class WebappInternal(Base):
 
         used_ids: List of element ids already captured by a label search.
         """
-        super().__init__(config_path)
-
+        super().__init__(config_path, autostart)
 
         self.base_container = ".tmodaldialog"
 
@@ -87,7 +88,7 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
         if save_input:
-            self.config.initialprog = initial_program
+            self.config.initial_program = initial_program
             self.config.date = date
             self.config.group = group
             self.config.branch = branch
@@ -1001,7 +1002,7 @@ class WebappInternal(Base):
             pass
 
         if not self.config.skip_environment:
-            self.program_screen(self.config.initialprog)
+            self.program_screen(self.config.initial_program)
         self.user_screen()
         self.environment_screen()
 
@@ -2743,8 +2744,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
-        endtime = time.time() + self.config.timeout
-        print("Waiting for element")
+        endtime = time.time() + self.config.time_out
+        if self.config.debug_log:
+            print("Waiting for element")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
@@ -3184,7 +3186,7 @@ class WebappInternal(Base):
 
         self.LogOff()
 
-        self.Setup(self.config.initialprog, self.config.date, self.config.group, self.config.branch, save_input=False)
+        self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
         if ">" in self.config.routine:
             self.SetLateralMenu(self.config.routine, save_input=False)
@@ -3221,10 +3223,10 @@ class WebappInternal(Base):
 
                 self.backup_parameters.append([parameter[0], current_branch.strip(), current_pt_value.strip(), current_en_value.strip(), current_spa_value.strip()])
 
-            self.SetValue("X6_FIL", parameter[1]) if parameter[1] else None 
-            self.SetValue("X6_CONTEUD", parameter[2]) if parameter[2] else None 
-            self.SetValue("X6_CONTENG", parameter[3]) if parameter[3] else None 
-            self.SetValue("X6_CONTSPA", parameter[4]) if parameter[4] else None 
+            self.SetValue("X6_FIL", parameter[1]) if parameter[1] else None
+            self.SetValue("X6_CONTEUD", parameter[2]) if parameter[2] else None
+            self.SetValue("X6_CONTENG", parameter[3]) if parameter[3] else None
+            self.SetValue("X6_CONTSPA", parameter[4]) if parameter[4] else None
 
             self.SetButton(self.language.save)
 

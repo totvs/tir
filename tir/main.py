@@ -10,9 +10,14 @@ These classes will contain only calls to the Internal classes.
 class Webapp():
     """
     Instantiates the Webapp automated interface testing class.
+
+    :param config_path: The path to the config file. - **Default:** "" (empty string)
+    :type config_path: str
+    :param autostart: Sets whether TIR should open browser and execute from the start. - **Default:** True
+    :type: bool
     """
-    def __init__(self, config_path=""):
-        self.__webapp = WebappInternal()
+    def __init__(self, config_path="", autostart=True):
+        self.__webapp = WebappInternal(config_path, autostart)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -528,6 +533,52 @@ class Webapp():
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
         self.__webapp.Setup(initial_program, date, group, branch, module)
+
+    def SetTIRConfig(self, config_name, value):
+        """
+        Changes a value of a TIR internal config during runtime.
+
+        This could be useful for TestCases that must use a different set of configs
+        than the ones defined at **config.json**
+
+        Available configs:
+
+        - Url
+        - Environment
+        - User
+        - Password
+        - Language
+        - DebugLog
+        - TimeOut
+        - InitialProgram
+        - Routine
+        - Date
+        - Group
+        - Branch
+        - Module
+
+        :param config_name: The config to be changed.
+        :type config_name: str
+        :param value: The value that would be set.
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
+        """
+        self.__webapp.SetTIRConfig(config_name, value)
+
+    def Start(self):
+        """
+        Opens the browser maximized and goes to defined URL.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Start()
+        """
+        self.__webapp.Start()
 
     def TearDown(self):
         """
