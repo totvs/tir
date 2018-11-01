@@ -3459,3 +3459,22 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
+
+    def find_tree_bs4(self, treepath):
+        """
+        [Internal]
+        """
+        #TODO WAIT ELEMENT
+
+        soup = self.get_current_DOM()
+        
+        container = self.get_current_container()
+
+        if not container:
+            self.log_error("Couldn't find container of element.")
+        
+        tree_element = container.select(".ttree label")
+
+        label = list(map(str.strip, treepath.split(">")))
+
+        tree_label = list(filter(lambda x: label[-1].lower() in x.text.lower(), tree_element))
