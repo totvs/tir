@@ -1945,7 +1945,7 @@ class WebappInternal(Base):
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete
+        Supported keys: F1 to F12, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
