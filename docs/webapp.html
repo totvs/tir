@@ -162,8 +162,23 @@
 <span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tir.main.Webapp">
-<em class="property">class </em><code class="descclassname">tir.main.</code><code class="descname">Webapp</code><span class="sig-paren">(</span><em>config_path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tir.main.</code><code class="descname">Webapp</code><span class="sig-paren">(</span><em>config_path=''</em>, <em>autostart=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="tir.main.Webapp.AddParameter">
 <code class="descname">AddParameter</code><span class="sig-paren">(</span><em>parameter</em>, <em>branch</em>, <em>portuguese_value=''</em>, <em>english_value=''</em>, <em>spanish_value=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Permalink to this definition">¶</a></dt>
@@ -530,6 +545,33 @@ of a grid. After running, the queues would be empty.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.ScrollGrid">
+<code class="descname">ScrollGrid</code><span class="sig-paren">(</span><em>column</em>, <em>match_value</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ScrollGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scrolls Grid until a matching column is found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column to be matched.</li>
+<li><strong>match_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be matched in defined column.</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span><span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match of the second grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.SearchBrowse">
 <code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key_description=None</em>, <em>identifier=None</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
@@ -720,6 +762,47 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.SetTIRConfig">
+<code class="descname">SetTIRConfig</code><span class="sig-paren">(</span><em>config_name</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTIRConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes a value of a TIR internal config during runtime.</p>
+<p>This could be useful for TestCases that must use a different set of configs
+than the ones defined at <strong>config.json</strong></p>
+<p>Available configs:</p>
+<ul class="simple">
+<li>Url</li>
+<li>Environment</li>
+<li>User</li>
+<li>Password</li>
+<li>Language</li>
+<li>DebugLog</li>
+<li>TimeOut</li>
+<li>InitialProgram</li>
+<li>Routine</li>
+<li>Date</li>
+<li>Group</li>
+<li>Branch</li>
+<li>Module</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The config to be changed.</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that would be set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetTIRConfig</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;30/10/2018&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.SetTabEDAPP">
 <code class="descname">SetTabEDAPP</code><span class="sig-paren">(</span><em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTabEDAPP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Chooses the table on the generic query (EDAPP).</p>
@@ -796,6 +879,17 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Setup</span><span class="p">(</span><span class="s2">&quot;SIGAFAT&quot;</span><span class="p">,</span> <span class="s2">&quot;18/08/2018&quot;</span><span class="p">,</span> <span class="s2">&quot;T1&quot;</span><span class="p">,</span> <span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.main.Webapp.Start">
+<code class="descname">Start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens the browser maximized and goes to defined URL.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
