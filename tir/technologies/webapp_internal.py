@@ -1403,6 +1403,7 @@ class WebappInternal(Base):
                 self.scroll_to_element(element)
                 time.sleep(2)
                 self.click(element)
+                return
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
