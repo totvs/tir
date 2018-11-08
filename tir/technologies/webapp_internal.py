@@ -2216,7 +2216,7 @@ class WebappInternal(Base):
                 self.fill_grid(field, x3_dictionaries, initial_layer)
 
         for field in self.grid_check:
-            print(f"Checking grid field value: {field[0]}")
+            print(f"Checking grid field value: {field[1]}")
             self.check_grid(field, x3_dictionaries)
 
         self.clear_grid()
@@ -2544,6 +2544,7 @@ class WebappInternal(Base):
 
                         field_name = f"({field[0]}, {column_name})"
                         self.log_result(field_name, field[2], text)
+                        print(f"Collected value: {text}")
                     else:
                         self.log_error("Couldn't find columns.")
                 else:
