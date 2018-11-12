@@ -79,7 +79,7 @@ class Webapp():
         """
         self.__webapp.ChangeEnvironment()
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
         """
         Checks if a field has the value the user expects.
 
@@ -93,6 +93,8 @@ class Webapp():
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -107,7 +109,7 @@ class Webapp():
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr)
 
     def CheckView(self, text, element_type="help"):
         """
@@ -404,7 +406,7 @@ class Webapp():
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
-        :param position: Position which element is located. - **Default:** 0
+        :param position: Position which element is located. - **Default:** 1
         :type position: int
 
         Usage:
