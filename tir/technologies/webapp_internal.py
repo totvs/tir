@@ -1154,7 +1154,7 @@ class WebappInternal(Base):
             error_message = f"Error Log: {error_paragraphs[0]}" if len(error_paragraphs) > 2 else "Error Log: Server down."
             message = error_message.replace("\n", " ")
 
-        self.driver.save_screenshot( self.get_function_from_stack() +".png")
+        #self.driver.save_screenshot( self.get_function_from_stack() +".png")
         self.log_error(message)
 
     def get_function_from_stack(self):
@@ -3125,7 +3125,11 @@ class WebappInternal(Base):
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
-        self.driver.save_screenshot("error.png")
+        try:
+            os.makedirs(f"logs\\{self.log.timestamp}")
+        except OSError:
+            pass
+        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\error.png")
 
         if new_log_line:
             self.log.new_line(False, log_message)

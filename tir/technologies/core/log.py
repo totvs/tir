@@ -83,7 +83,11 @@ class Log:
             if self.folder:
                 path = f"{self.folder}\\loginter_{self.timestamp}.csv"
             else:
-                path = f"loginter_{self.timestamp}.csv"
+                try:
+                    os.makedirs(f"logs\\{self.timestamp}")
+                except OSError:
+                    pass
+                path = f"logs\\{self.timestamp}\\loginter_{self.timestamp}.csv"
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
