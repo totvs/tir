@@ -162,7 +162,7 @@
 <span id="webapp-internal"></span><h1>Webapp Internal<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tir.technologies.webapp_internal.WebappInternal">
-<em class="property">class </em><code class="descclassname">tir.technologies.webapp_internal.</code><code class="descname">WebappInternal</code><span class="sig-paren">(</span><em>config_path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tir.technologies.webapp_internal.</code><code class="descname">WebappInternal</code><span class="sig-paren">(</span><em>config_path=''</em>, <em>autostart=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Internal implementation of Protheus Webapp class.</p>
 <p>This class contains all the methods defined to run Selenium Interface Tests on Protheus Webapp.</p>
 <p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
@@ -170,14 +170,21 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
 </tr>
 </tbody>
 </table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Inside __init__ method in Webapp class of main.py</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">__webapp</span> <span class="o">=</span> <span class="n">WebappInternal</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">autostart</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">__webapp</span> <span class="o">=</span> <span class="n">WebappInternal</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">autostart</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
@@ -499,6 +506,33 @@ of a grid. After running, the queues would be empty.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ScrollGrid">
+<code class="descname">ScrollGrid</code><span class="sig-paren">(</span><em>column</em>, <em>match_value</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ScrollGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scrolls Grid until a matching column is found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column to be matched.</li>
+<li><strong>match_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be matched in defined column.</li>
+<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span><span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match of the second grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SearchBrowse">
 <code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key=None</em>, <em>identifier=None</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
@@ -624,7 +658,7 @@ is provided, it will search on the chosen search box.</p>
 <dt id="tir.technologies.webapp_internal.WebappInternal.SetKey">
 <code class="descname">SetKey</code><span class="sig-paren">(</span><em>key</em>, <em>grid=False</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Press the desired key on the keyboard on the focused element.</p>
-<p>Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete</p>
+<p>Supported keys: F1 to F12, Up, Down, Left, Right, ESC, Enter and Delete</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

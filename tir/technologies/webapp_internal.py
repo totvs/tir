@@ -1382,7 +1382,7 @@ class WebappInternal(Base):
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
 
@@ -1398,11 +1398,12 @@ class WebappInternal(Base):
                 if soup_objects and len(soup_objects) - 1 >= position:
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
 
-            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
-                element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close']")
+            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+                element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png']")
                 self.scroll_to_element(element)
                 time.sleep(2)
                 self.click(element)
+                return
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
@@ -1945,7 +1946,7 @@ class WebappInternal(Base):
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete
+        Supported keys: F1 to F12, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
@@ -1984,7 +1985,8 @@ class WebappInternal(Base):
             "LEFT": Keys.LEFT,
             "RIGHT": Keys.RIGHT,
             "DELETE" : Keys.DELETE,
-            "ENTER": Keys.ENTER
+            "ENTER": Keys.ENTER,
+            "ESC": Keys.ESCAPE
         }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
@@ -2214,7 +2216,7 @@ class WebappInternal(Base):
                 self.fill_grid(field, x3_dictionaries, initial_layer)
 
         for field in self.grid_check:
-            print(f"Checking grid field value: {field[0]}")
+            print(f"Checking grid field value: {field[1]}")
             self.check_grid(field, x3_dictionaries)
 
         self.clear_grid()
@@ -2542,6 +2544,7 @@ class WebappInternal(Base):
 
                         field_name = f"({field[0]}, {column_name})"
                         self.log_result(field_name, field[2], text)
+                        print(f"Collected value: {text}")
                     else:
                         self.log_error("Couldn't find columns.")
                 else:
