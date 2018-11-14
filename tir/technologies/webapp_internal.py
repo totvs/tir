@@ -3154,7 +3154,7 @@ class WebappInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
-        if not self.skip_restart:
+        if not self.config.skip_restart:
             self.restart()
         self.assertTrue(False, log_message)
 
