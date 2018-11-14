@@ -275,17 +275,38 @@ class WebappInternal(Base):
 
         self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
 
-    def ChangeEnvironment(self):
+    def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
-        fills the environment screen with the values passed on the Setup method.
+        fills the environment screen.
+
+        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "" (empty string)
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "" (empty string)
+        :type branch: str
+        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.ChangeEnvironment()
+        >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
+        if date:
+            self.config.date = date
+        if group:
+            self.config.group = group
+        if branch:
+            self.config.branch = branch
+        if module:
+            self.config.module = module
+
         element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
+        if not element:
+            tbuttons = self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)

@@ -67,17 +67,26 @@ class Webapp():
         """
         self.__webapp.AssertTrue()
 
-    def ChangeEnvironment(self):
+    def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
-        fills the environment screen with the values passed on the Setup method.
+        fills the environment screen.
+
+        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "" (empty string)
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "" (empty string)
+        :type branch: str
+        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.ChangeEnvironment()
+        >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
-        self.__webapp.ChangeEnvironment()
+        self.__webapp.ChangeEnvironment(date, group, branch, module)
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
         """
