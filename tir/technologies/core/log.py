@@ -69,7 +69,7 @@ class Log:
         line.extend([time.strftime("%d/%m/%y %X"), self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country])
         self.table_rows.append(line)
 
-    def save_file(self):
+    def save_file(self, filename):
         """
         Writes the log file to the file system.
 
@@ -87,7 +87,7 @@ class Log:
                     os.makedirs(f"logs\\{self.timestamp}")
                 except OSError:
                     pass
-                path = f"logs\\{self.timestamp}\\loginter_{self.timestamp}.csv"
+                path = f"logs\\{self.timestamp}\\{filename}.csv"
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
