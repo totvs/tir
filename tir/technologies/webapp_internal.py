@@ -275,17 +275,38 @@ class WebappInternal(Base):
 
         self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
 
-    def ChangeEnvironment(self):
+    def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
-        fills the environment screen with the values passed on the Setup method.
+        fills the environment screen.
+
+        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "" (empty string)
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "" (empty string)
+        :type branch: str
+        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.ChangeEnvironment()
+        >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
+        if date:
+            self.config.date = date
+        if group:
+            self.config.group = group
+        if branch:
+            self.config.branch = branch
+        if module:
+            self.config.module = module
+
         element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
+        if not element:
+            tbuttons = self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
@@ -867,7 +888,7 @@ class WebappInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
         """
         Checks if a field has the value the user expects.
 
@@ -881,6 +902,8 @@ class WebappInternal(Base):
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -904,7 +927,7 @@ class WebappInternal(Base):
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
             self.wait_element(field)
-            element = self.get_field(field)
+            element = self.get_field(field, name_attr=name_attr)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
@@ -1026,7 +1049,7 @@ class WebappInternal(Base):
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
         self.SetButton(self.language.finish)
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
         [Internal]
 
@@ -1066,7 +1089,8 @@ class WebappInternal(Base):
             while(time.time() < endtime and container is None):
                 soup = self.get_current_DOM()
 
-                self.search_for_errors(soup)
+                if check_error:
+                    self.search_for_errors(soup)
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1211,7 +1235,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog"):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
         [Internal]
 
@@ -1253,7 +1277,8 @@ class WebappInternal(Base):
             if scrap_type != enum.ScrapType.XPATH:
                 soup = self.get_current_DOM()
 
-                self.search_for_errors(soup)
+                if check_error:
+                    self.search_for_errors(soup)
 
                 container_selector = self.base_container
                 if (main_container is not None):
@@ -1277,7 +1302,7 @@ class WebappInternal(Base):
             else:
                 selector = "div"
 
-            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)
+            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
         if position == 0:
             return len(element_list) > 0
         else:
@@ -1366,7 +1391,7 @@ class WebappInternal(Base):
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
-        :param position: Position which element is located. - **Default:** 0
+        :param position: Position which element is located. - **Default:** 1
         :type position: int
 
         Usage:
@@ -1439,10 +1464,10 @@ class WebappInternal(Base):
                 self.click(soup_element())
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1)
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1)
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1)
+                self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
             print(error)
@@ -2775,7 +2800,7 @@ class WebappInternal(Base):
         else:
             self.grid_counters[grid_id]+=1
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
+    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
         [Internal]
 
@@ -2804,10 +2829,10 @@ class WebappInternal(Base):
             print("Waiting for element")
 
         if presence:
-            while (not self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
+            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
                 time.sleep(0.1)
         else:
-            while (self.element_exists(term, scrap_type, position, optional_term, main_container) and time.time() < endtime):
+            while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
                 time.sleep(0.1)
 
         if time.time() > endtime:
@@ -2817,13 +2842,13 @@ class WebappInternal(Base):
         if presence:
             if self.config.debug_log:
                 print("Element found! Waiting for element to be displayed.")
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 while(not sel_element().is_displayed() and time.time() < presence_endtime):
                     time.sleep(0.1)
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog"):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
         [Internal]
 
@@ -2856,21 +2881,21 @@ class WebappInternal(Base):
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if self.element_exists(term, scrap_type, position, optional_term, main_container):
+                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error):
                     success = True
                     break
         else:
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if not self.element_exists(term, scrap_type, position, optional_term, main_container):
+                if not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error):
                     success = True
                     break
 
         if presence and success:
             if self.config.debug_log:
                 print("Element found! Waiting for element to be displayed.")
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 while(not sel_element().is_displayed()):
@@ -2975,7 +3000,7 @@ class WebappInternal(Base):
         """
         Checks if a certain text is present in the screen at the time and takes an action.
 
-        "help" - closes element.
+        "help" - alerts with messages of errors.
 
         :param text: Text to be checked.
         :type text: str
@@ -2988,11 +3013,10 @@ class WebappInternal(Base):
         >>> oHelper.CheckView("Processing")
         """
         if element_type == "help":
-            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay")
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay"):
-                self.errors.append(self.language.messages.text_not_found)
-            else:
-                self.SetButton(self.language.close)
+            print(f"Checking text on screen: {text}")
+            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+                self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
         """
@@ -3134,7 +3158,8 @@ class WebappInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file()
-        self.restart()
+        if not self.config.skip_restart:
+            self.restart()
         self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
