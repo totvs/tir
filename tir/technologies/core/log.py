@@ -61,11 +61,9 @@ class Log:
         """
         line = []
         total_cts = "1"
-        passed = "1"
-        failed = "0"
-        if not result:
-            passed = "0"
-            failed = "1"
+        passed = "1" if result else "0"
+        failed = "0" if result else "1"
+
         line.extend([time.strftime("%d/%m/%y %X"), self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country])
         self.table_rows.append(line)
 
