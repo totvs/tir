@@ -3488,21 +3488,34 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def find_tree_bs4(self, treepath):
+    def find_tree_bs(self, treepath):
         """
         [Internal]
         """
         #TODO WAIT ELEMENT
 
-        soup = self.get_current_DOM()
+        labels = list(map(str.strip, treepath.split(">")))
         
-        container = self.get_current_container()
+        for label in labels:
+            container = self.get_current_container()
 
-        if not container:
-            self.log_error("Couldn't find container of element.")
-        
-        tree_element = container.select(".ttree label")
+            if not container:
+                self.log_error("Couldn't find container of element.")
+            
+            tree_node = container.select(".ttreenode")
 
-        label = list(map(str.strip, treepath.split(">")))
+            self.click_tree(tree_node, label)
 
-        tree_label = list(filter(lambda x: label[-1].lower() in x.text.lower(), tree_element))
+    def click_tree(self, tree_node, label):
+
+        label_filtered = label.lower().strip()
+
+        tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+
+        element_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() in label_filtered, tree_node_filtered))))
+
+        toggler = next(iter(list(map(lambda x: x.next.next, element_filtered))))
+
+        toggler_element = lambda: self.driver.find_element_by_xpath(xpath_soup(toggler))
+
+        toggler_element().click()
