@@ -3153,7 +3153,7 @@ class WebappInternal(Base):
         except OSError:
             pass
 
-        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{test_number} error.png")
+        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{self.config.routine} - {test_number} error.png")
 
         if new_log_line:
             self.log.new_line(False, log_message)
