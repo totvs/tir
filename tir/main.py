@@ -10,9 +10,14 @@ These classes will contain only calls to the Internal classes.
 class Webapp():
     """
     Instantiates the Webapp automated interface testing class.
+
+    :param config_path: The path to the config file. - **Default:** "" (empty string)
+    :type config_path: str
+    :param autostart: Sets whether TIR should open browser and execute from the start. - **Default:** True
+    :type: bool
     """
-    def __init__(self, config_path=""):
-        self.__webapp = WebappInternal(config_path)
+    def __init__(self, config_path="", autostart=True):
+        self.__webapp = WebappInternal(config_path, autostart)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -62,19 +67,28 @@ class Webapp():
         """
         self.__webapp.AssertTrue()
 
-    def ChangeEnvironment(self):
+    def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
-        fills the environment screen with the values passed on the Setup method.
+        fills the environment screen.
+
+        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "" (empty string)
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "" (empty string)
+        :type branch: str
+        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.ChangeEnvironment()
+        >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
-        self.__webapp.ChangeEnvironment()
+        self.__webapp.ChangeEnvironment(date, group, branch, module)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
         """
         Checks if a field has the value the user expects.
 
@@ -88,6 +102,8 @@ class Webapp():
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
 
         Usage:
 
@@ -102,7 +118,7 @@ class Webapp():
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr)
 
     def CheckView(self, text, element_type="help"):
         """
@@ -303,6 +319,41 @@ class Webapp():
         """
         self.__webapp.RestoreParameters()
 
+    def ScrollGrid(self, column, match_value, grid_number=1):
+        """
+        Scrolls Grid until a matching column is found.
+
+        :param field: The column to be matched.
+        :type field: str
+        :param match_value: The value to be matched in defined column.
+        :type match_value: str
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method to scroll to a column match:
+        >>> oHelper.ScrollGrid(column="Branch",match_value="D MG 01 ")
+        >>> #--------------------------------------------------
+        >>> # Calling the method to scroll to a column match of the second grid:
+        >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
+        """
+        self.__webapp.ScrollGrid(column, match_value, grid_number)
+
+    def Screenshot(self, filename):
+        """
+        Takes a screenshot and saves on the screenshot folder defined in config.
+
+        :param filename: The name of the screenshot file.
+        :type: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Screenshot(filename="myscreenshot")
+        """
+        self.__webapp.take_screenshot(filename)
+
     def SearchBrowse(self, term, key_description=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -364,6 +415,8 @@ class Webapp():
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -526,6 +579,52 @@ class Webapp():
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
         self.__webapp.Setup(initial_program, date, group, branch, module)
+
+    def SetTIRConfig(self, config_name, value):
+        """
+        Changes a value of a TIR internal config during runtime.
+
+        This could be useful for TestCases that must use a different set of configs
+        than the ones defined at **config.json**
+
+        Available configs:
+
+        - Url
+        - Environment
+        - User
+        - Password
+        - Language
+        - DebugLog
+        - TimeOut
+        - InitialProgram
+        - Routine
+        - Date
+        - Group
+        - Branch
+        - Module
+
+        :param config_name: The config to be changed.
+        :type config_name: str
+        :param value: The value that would be set.
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
+        """
+        self.__webapp.SetTIRConfig(config_name, value)
+
+    def Start(self):
+        """
+        Opens the browser maximized and goes to defined URL.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Start()
+        """
+        self.__webapp.Start()
 
     def TearDown(self):
         """

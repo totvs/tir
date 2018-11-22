@@ -47,7 +47,7 @@ OBS: Our installation wizard will install our package in the current active Pyth
 
 The environment must be configured through a [config.json](config.json) file.
 You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
- 
+
 ### Config options
 
 - **Url:** The URL that will run the tests.
@@ -69,6 +69,8 @@ You can find one to be used as a base in this repo. To select your file, you can
 - **SkipEnvironment** Skips the module selection screen, if your Protheus configuration does not have it. **Optional**
 
 - **Headless:** Defines whether the test will run with or without interface. **Optional**
+
+- **ScreenshotFolder** A folder to contain all screenshots taken by the user with the Screenshot method. **Optional**
 
 ```python
 #To use the config file in the same workspace directory
