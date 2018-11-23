@@ -94,11 +94,14 @@ class WebappInternal(Base):
             self.config.branch = branch
             self.config.module = module
 
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+
         if not self.config.valid_language:
             self.config.language = self.get_language()
             self.language = LanguagePack(self.config.language)
 
-        if not self.config.skip_environment:
+        if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program)
 
         self.user_screen()
@@ -3509,3 +3512,17 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
+
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+         Usage:
+         >>> #Calling the method
+        >>> self.TearDown()
+        """
+        if self.config.coverage:
+            self.LogOff()
+            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
+            self.driver.close()
+        else:
+            self.driver.close() 
