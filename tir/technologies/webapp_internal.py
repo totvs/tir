@@ -1613,49 +1613,67 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, itens):
+    def WaitHide(self, string):
         """
-        Search string that was sent and wait hide the elements.
-        e.g. "Item1,Item2,Item3"
+        Search string that was sent and wait hide the element.
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param string: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
-            if not elements:
-                break
-            time.sleep(5)
 
-    def WaitShow(self,itens):
+            container = self.get_current_container()
+        
+            if not container:
+                self.log_error("Couldn't locate container.")
+
+            tsays = container.select(".tsay")
+
+            if not tsays:
+                self.log_error("Couldn't locate tsays.")
+
+            element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+
+            if not element:
+                break
+            time.sleep(3)
+
+    def WaitShow(self, string):
         """
         Search string that was sent and wait show the elements.
-        e.g. "Item1,Item2,Item3"
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param string: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
-            if elements:
+
+            container = self.get_current_container()
+        
+            if not container:
+                self.log_error("Couldn't locate container.")
+            
+            tsays = container.select(".tsay")
+
+            if not tsays:
+                self.log_error("Couldn't locate tsays.")
+
+            element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+
+            if element:
                 break
-            time.sleep(5)
+            time.sleep(3)
 
     def WaitProcessing(self, itens):
         """
