@@ -654,49 +654,47 @@ class Webapp():
         """
         self.__webapp.WaitFieldValue(field, expected_value)
 
-    def WaitHide(self, itens):
+    def WaitHide(self, string):
         """
         Search string that was sent and wait hide the elements.
-        e.g. "Item1,Item2,Item3"
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param itens: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        self.__webapp.WaitHide(itens)
+        self.__webapp.WaitHide(string)
 
-    def WaitProcessing(self, itens):
+    def WaitProcessing(self, string):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param string: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
         """
-        self.__webapp.WaitProcessing(itens)
+        self.__webapp.WaitProcessing(string)
 
-    def WaitShow(self, itens):
+    def WaitShow(self, string):
         """
         Search string that was sent and wait show the elements.
-        e.g. "Item1,Item2,Item3"
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param itens: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitShow(itens)
+        self.__webapp.WaitShow(string)
 
 class Apw():
 
