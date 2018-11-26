@@ -698,9 +698,9 @@ class Webapp():
         """
         self.__webapp.WaitShow(itens)
 
-    def find_tree_bs4(self, treepath):
+    def ClickTree(self, treepath):
          
-         self.__webapp.find_tree_bs4(treepath)
+         self.__webapp.ClickTree(treepath)
 
 class Apw():
 

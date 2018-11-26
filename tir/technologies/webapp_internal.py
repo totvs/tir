@@ -101,15 +101,15 @@ class WebappInternal(Base):
         if not self.config.skip_environment:
             self.program_screen(initial_program)
 
-        self.user_screen()
-        self.environment_screen()
+            self.user_screen()
+            self.environment_screen()
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
-            self.close_coin_screen()
-            self.close_modal()
+            while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+                self.close_coin_screen()
+                self.close_modal()
 
-        if save_input:
-            self.set_log_info()
+            if save_input:
+                self.set_log_info()
 
     def program_screen(self, initial_program="", environment=""):
         """
@@ -3488,13 +3488,17 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def find_tree_bs(self, treepath):
+    def ClickTree(self, treepath):
+
+        labels = list(map(str.strip, treepath.split(">")))
+
+        self.find_tree_bs(labels)
+
+    def find_tree_bs(self, labels):
         """
         [Internal]
         """
         #TODO WAIT ELEMENT
-
-        labels = list(map(str.strip, treepath.split(">")))
         
         for label in labels:
             container = self.get_current_container()
@@ -3512,10 +3516,13 @@ class WebappInternal(Base):
 
         tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-        element_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() in label_filtered, tree_node_filtered))))
+        element_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() in label_filtered, tree_node_filtered))), None)
 
-        toggler = next(iter(list(map(lambda x: x.next.next, element_filtered))))
+        if not element_filtered:
+            self.log_error("Couldn't find element.")
 
-        toggler_element = lambda: self.driver.find_element_by_xpath(xpath_soup(toggler))
+        element_class = next(iter(element_filtered.select(".toggler, .lastchild")), None)
 
-        toggler_element().click()
+        element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+
+        element().click()
