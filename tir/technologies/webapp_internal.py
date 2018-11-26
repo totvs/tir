@@ -1631,7 +1631,7 @@ class WebappInternal(Base):
         while True:
 
             container = self.get_current_container()
-        
+
             if not container:
                 self.log_error("Couldn't locate container.")
 
@@ -1662,10 +1662,10 @@ class WebappInternal(Base):
         while True:
 
             container = self.get_current_container()
-        
+
             if not container:
                 self.log_error("Couldn't locate container.")
-            
+
             tsays = container.select(".tsay")
 
             if not tsays:
@@ -3516,8 +3516,10 @@ class WebappInternal(Base):
     def TearDown(self):
         """
         Closes the webdriver and ends the test case.
-         Usage:
-         >>> #Calling the method
+
+        Usage:
+
+        >>> #Calling the method
         >>> self.TearDown()
         """
         if self.config.coverage:
@@ -3525,4 +3527,4 @@ class WebappInternal(Base):
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
             self.driver.close()
         else:
-            self.driver.close() 
+            self.driver.close()

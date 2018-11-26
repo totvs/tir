@@ -10,7 +10,6 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 ## Table of Contents
 
 [Documentation](#documentation)<br>
-[Architecture](#architecture)<br>
 [Installation](#installation)<br>
 [Config](#config)<br>
 [Usage](#usage)<br>
@@ -26,10 +25,6 @@ Our documentation can be found here:
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
 Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
-
-## Architecture
-
-[TIR Architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md)
 
 ## Installation
 
@@ -60,31 +55,10 @@ It will install the last release of TIR in the active Python instance.
 ## Config
 
 The environment must be configured through a [config.json](config.json) file.
-You can find one to be used as a base in this repo. To select your file, you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
+You can find one to be used as a base in this repository. To select your file,
+you can either put it in your workspace or pass its path as a parameter of any of our classes' initialization.
 
 ### Config options
-
-- **Url:** The URL that will run the tests.
-
-- **Browser:** Browser that will be used to run the tests. (Firefox or Chrome)
-
-- **Environment:** Environment used to run the tests.
-
-- **User:** User that will be logged into the environment.
-
-- **Password:** Password to log  on to the environment.
-
-- **Language:** Language to be considered in execution. **Optional**
-
-- **DebugLog:** Defines whether the run log will be displayed during tests. **Optional**
-
-- **TimeOut:** Time set to expire the test if it is reached. **Optional**
-
-- **SkipEnvironment** Skips the module selection screen, if your Protheus configuration does not have it. **Optional**
-
-- **Headless:** Defines whether the test will run with or without interface. **Optional**
-
-- **ScreenshotFolder** A folder to contain all screenshots taken by the user with the Screenshot method. **Optional**
 
 ```python
 #To use the config file in the same workspace directory
@@ -126,3 +100,5 @@ We have a repository with different samples of TIR scripts:
 ## Contributing
 
 In order to contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
+
+Also, it's import to understand the chosen [architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md).

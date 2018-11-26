@@ -48,9 +48,9 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['ytemplates']
 
-source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
-}
+# source_parsers = {
+#    '.md': 'recommonmark.parser.CommonMarkParser',
+# }
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
