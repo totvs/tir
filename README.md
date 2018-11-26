@@ -64,7 +64,7 @@ Here you can find all the supported keys: [Config.json keys](https://totvs.githu
 
 ### Custom config path
 
-Just pass the path as a parameter in your call
+Just pass the path as a parameter in your script:
 
 ```python
 #To use a custom path for your config.json
