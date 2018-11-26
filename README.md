@@ -60,10 +60,13 @@ you can either put it in your workspace or pass its path as a parameter of any o
 
 ### Config options
 
-```python
-#To use the config file in the same workspace directory
-test_helper = Webapp()
+Here you can find all the supported keys: [Config.json keys](https://totvs.github.io/tir/configjson)
 
+### Custom config path
+
+Just pass the path as a parameter in your call
+
+```python
 #To use a custom path for your config.json
 test_helper = Webapp("C:\PATH_HERE\config.json")
 ```
