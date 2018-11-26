@@ -33,7 +33,11 @@ Our **create_docs.cmd** script handles the installation of dependencies and crea
 
 ## Installation
 
-The installation is pretty simple. All you need as a requirement is Python 3.6 and a browser (Mozilla Firefox/Google Chrome) installed in your system.
+The installation is pretty simple. All you need as a requirement is Python 3.6 or greater and a browser (Mozilla Firefox/Google Chrome) installed in your system.
+
+There are two ways of installing TIR:
+
+### 1. via Installation Wizard
 
 Our installation wizard handles the environment setup, the package installation and also it can update your package.
 
@@ -42,6 +46,16 @@ Download [TIR Installer](https://github.com/totvs/tir-installer/blob/master/tir-
 It is also an open-source project, you can see the repository [here](https://github.com/totvs/tir-installer/)
 
 OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
+
+### 2. via Terminal
+
+You can install TIR via terminal. Make sure your Python is installed and run this command:
+
+```shell
+pip install git+https://github.com/totvs/tir.git --upgrade
+```
+
+It will install the last release of TIR in the active Python instance.
 
 ## Config
 
