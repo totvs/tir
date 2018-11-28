@@ -3165,6 +3165,11 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+
+        routine_name = routine_name if routine_name else "error"
+
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
@@ -3174,11 +3179,11 @@ class WebappInternal(Base):
         except OSError:
             pass
 
-        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{self.config.routine} - {test_number} error.png")
+        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{routine_name} - {test_number} error.png")
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        self.log.save_file(self.config.routine)
+        self.log.save_file(routine_name)
         if not self.config.skip_restart:
             self.restart()
         self.assertTrue(False, log_message)
@@ -3458,7 +3463,11 @@ class WebappInternal(Base):
         else:
             self.log.new_line(True, "")
 
-        self.log.save_file(self.config.routine)
+        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+
+        routine_name = routine_name if routine_name else "error"
+
+        self.log.save_file(routine_name)
 
         self.errors = []
         print(msg)
