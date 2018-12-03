@@ -1105,25 +1105,26 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                container = next(iter(containers), None)
+                for container in containers:
 
-            if container is None:
-                raise Exception("Couldn't find container")
+                    if container is None:
+                        raise Exception("Couldn't find container")
 
-            if (scrap_type == enum.ScrapType.TEXT):
-                if label:
-                    return self.find_label_element(term, container)
-                else:
-                    return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
-            elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
-                return container.select(term)
-            elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
-                return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
-            elif (scrap_type == enum.ScrapType.SCRIPT):
-                script_result = self.driver.execute_script(term)
-                return script_result if isinstance(script_result, list) else []
-            else:
-                return []
+                    if (scrap_type == enum.ScrapType.TEXT):
+                        if label:
+                            return self.find_label_element(term, container)
+                        else:
+                            return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
+                    elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
+                        return container.select(term)
+                    elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
+                        return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
+                    elif (scrap_type == enum.ScrapType.SCRIPT):
+                        script_result = self.driver.execute_script(term)
+                        return script_result if isinstance(script_result, list) else []
+                    else:
+                        return []
+
         except AssertionError:
             raise
         except Exception as e:
@@ -1285,15 +1286,17 @@ class WebappInternal(Base):
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container
+                    
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-                container = next(iter(containers), None)
-                if not container:
-                    return False
 
-                try:
-                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
-                except:
-                    return False
+                for container in containers:
+                    if not container:
+                        return False
+
+                    try:
+                        container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                    except:
+                        return False
             else:
                 container_element = self.driver
 
@@ -3537,3 +3540,21 @@ class WebappInternal(Base):
             self.driver.close()
         else:
             self.driver.close()
+
+    def containers_filter(self, containers):
+        """
+        Internal
+        """
+        class_remove = "tsvg"
+        container_filtered = []
+        iscorrect = True
+
+        for container in containers:
+            container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
+            for container_div in container_class:
+                if class_remove in container_div.attrs['class']:
+                    iscorrect = False
+            if iscorrect:
+                container_filtered.append(container)
+        
+        return container_filtered
