@@ -1105,10 +1105,10 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                if list(filter(lambda x: "SetButton" in x.function, inspect.stack())):
+                if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
-                container = next(iter(containers), None) if isinstance(containers, list) else containers
+                container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
                 raise Exception("Couldn't find container")
@@ -1291,7 +1291,7 @@ class WebappInternal(Base):
                 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                if list(filter(lambda x: "SetButton" in x.function, inspect.stack())):
+                if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
                 container = next(iter(containers), None) if isinstance(containers, list) else containers
@@ -3557,9 +3557,8 @@ class WebappInternal(Base):
 
         for container in containers:
             container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
-            for container_div in container_class:
-                if class_remove in container_div.attrs['class']:
-                    iscorrect = False
+            if list(filter(lambda x: class_remove in x.attrs['class'], container_class)):
+                iscorrect = False
             if iscorrect:
                 container_filtered.append(container)
         
