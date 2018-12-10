@@ -326,12 +326,7 @@ class Base(unittest.TestCase):
 
         Usage:
 
-        >>> parent_element = self.find_first_div_parent(my_ele
-
-
-
-
-        ment)
+        >>> parent_element = self.find_first_div_parent(my_element)
         """
         current = element
         while(hasattr(current, "name") and current.name != "div"):

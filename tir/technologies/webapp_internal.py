@@ -1105,7 +1105,10 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                container = next(iter(containers), None)
+                if self.base_container in container_selector:
+                    container = self.containers_filter(containers)
+
+                container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
                 raise Exception("Couldn't find container")
@@ -1285,8 +1288,14 @@ class WebappInternal(Base):
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container
+                
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-                container = next(iter(containers), None)
+
+                if self.base_container in container_selector:
+                    container = self.containers_filter(containers)
+
+                container = next(iter(containers), None) if isinstance(containers, list) else containers
+
                 if not container:
                     return False
 
@@ -3543,3 +3552,20 @@ class WebappInternal(Base):
             self.driver.close()
         else:
             self.driver.close()
+
+    def containers_filter(self, containers):
+        """
+        Internal
+        """
+        class_remove = "tsvg"
+        container_filtered = []
+        iscorrect = True
+
+        for container in containers:
+            container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
+            if list(filter(lambda x: class_remove in x.attrs['class'], container_class)):
+                iscorrect = False
+            if iscorrect:
+                container_filtered.append(container)
+        
+        return container_filtered
