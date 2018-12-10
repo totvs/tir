@@ -330,7 +330,7 @@ class WebappInternal(Base):
         if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
             buttons = modals[0].select(".tbrowsebutton")
             if buttons:
-                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
+                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
                 time.sleep(0.5)
                 selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
@@ -353,7 +353,7 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term="Moedas", scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
             self.SetButton(self.language.confirm)
 
     def set_log_info(self):
@@ -2735,22 +2735,28 @@ class WebappInternal(Base):
 
         #caminho do arquivo csv(SX3)
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
+            
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
-                        index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Título', None], low_memory=False)
-        df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Título', None])
+                        index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
+        df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
             df_filtered = df.query("Tipo=='C' or Tipo=='N' or Tipo=='D' ")
         else:
             df_filtered = df.filter(regex=regex, axis=0)
 
-        #Retiro os espaços em branco da coluna Campo e Titulo.
-        df_filtered['Título'] = df_filtered['Título'].map(lambda x: x.strip())
+        if self.config.language == "es-es":
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo_Spa')].str.strip()
+        elif self.config.language == "en-us":
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo_Eng')].str.strip()
+        else:
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo')].str.strip()
+
         df_filtered.index = df_filtered.index.map(lambda x: x.strip())
 
         dict_ = df_filtered.to_dict()
 
-        return (dict_['Tipo'], dict_['Tamanho'], dict_['Título'])
+        return (dict_['Tipo'], dict_['Tamanho'], dict_['Titulo'])
 
     def generate_regex_by_prefixes(self, prefixes):
         """
