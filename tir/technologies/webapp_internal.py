@@ -570,13 +570,14 @@ class WebappInternal(Base):
             tradiobuttonitens = soup.select(".tradiobuttonitem")
             tradio_index = 0
             tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
+            tradiobutton_texts_filtered = list(map(lambda x: x.lower, tradiobutton_texts))
+            tradiobutton_text = next(iter(list(filter(lambda x: search_key.lower() in x, tradiobutton_texts_filtered))), None)
             if not tradiobutton_text:
                 tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
                 if not tradiobutton_text:
                     self.log_error(f"Key not found: {search_key}")
 
-            tradio_index = tradiobutton_texts.index(tradiobutton_text)
+            tradio_index = tradiobutton_texts_filtered.index(tradiobutton_text)
 
             tradiobuttonitem = tradiobuttonitens[tradio_index]
             trb_input = next(iter(tradiobuttonitem.select("input")), None)
