@@ -3559,9 +3559,9 @@ class WebappInternal(Base):
         """
         class_remove = "tsvg"
         container_filtered = []
-        iscorrect = True
 
         for container in containers:
+            iscorrect = True
             container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
             if list(filter(lambda x: class_remove in x.attrs['class'], container_class)):
                 iscorrect = False
