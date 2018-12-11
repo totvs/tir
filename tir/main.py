@@ -354,7 +354,7 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def SearchBrowse(self, term, key_description=None, identifier=None, index=False):
+    def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
 
@@ -391,7 +391,7 @@ class Webapp():
         >>> # To search using an index instead of name for the search key:
         >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
         """
-        self.__webapp.SearchBrowse(term, key_description, identifier, index)
+        self.__webapp.SearchBrowse(term, key, identifier, index)
 
     def SetBranch(self, branch):
         """
