@@ -29,6 +29,7 @@ class ConfigLoader:
         self.time_out = int(data["TimeOut"]) if "TimeOut" in data else 90
         self.parameter_menu = str(data["ParameterMenu"]) if "ParameterMenu" in data else ""
         self.screenshot_folder = str(data["ScreenshotFolder"]) if "ScreenshotFolder" in data else ""
+        self.coverage = ("Coverage" in data  and bool(data["Coverage"]))
         self.skip_restart = ("SkipRestart" in data and bool(data["SkipRestart"]))
         self.valid_language = self.language != ""
         self.initial_program = ""

@@ -78,7 +78,10 @@
               
             
             
-              <p class="caption"><span class="caption-text">User Classes:</span></p>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="configjson.html">Config.json</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Classes:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="apw.html">APW</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp</a></li>
@@ -174,7 +177,7 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">bool</p>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
 </td>
 </tr>
 </tbody>
@@ -233,19 +236,33 @@
 
 <dl class="method">
 <dt id="tir.main.Webapp.ChangeEnvironment">
-<code class="descname">ChangeEnvironment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ChangeEnvironment</code><span class="sig-paren">(</span><em>date=''</em>, <em>group=''</em>, <em>branch=''</em>, <em>module=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on the change environment area of Protheus Webapp and
-fills the environment screen with the values passed on the Setup method.</p>
+fills the environment screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+<li><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ChangeEnvironment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ChangeEnvironment</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="s2">&quot;13/11/2018&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;T1&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="tir.main.Webapp.CheckResult">
-<code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition">¶</a></dt>
+<code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -257,6 +274,7 @@ fills the environment screen with the values passed on the Setup method.</p>
 <li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
 <li><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</li>
 <li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
+<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</li>
 </ul>
 </td>
 </tr>
@@ -533,7 +551,7 @@ of a grid. After running, the queues would be empty.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – The name of the screenshot file.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">str</td>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
 </tr>
 </tbody>
 </table>
@@ -643,7 +661,7 @@ is provided, it will search on the chosen search box.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</li>
 <li><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Sub item to be clicked inside the first button. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</li>
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</li>
 </ul>
 </td>
 </tr>
@@ -931,14 +949,13 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitHide">
-<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait hide the elements.
-e.g. “Item1,Item2,Item3”</p>
+<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait hide the elements.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> – String that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -951,13 +968,13 @@ e.g. “Item1,Item2,Item3”</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitProcessing">
-<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition">¶</a></dt>
+<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – String that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -970,14 +987,13 @@ e.g. “Item1,Item2,Item3”</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitShow">
-<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait show the elements.
-e.g. “Item1,Item2,Item3”</p>
+<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait show the elements.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> – String that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -1012,7 +1028,7 @@ e.g. “Item1,Item2,Item3”</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Totvs Automation Team.
+        &copy; Copyright 2018, Totvs Automation Team
 
     </p>
   </div>
@@ -1031,20 +1047,13 @@ e.g. “Item1,Item2,Item3”</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.0.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
 
   
 

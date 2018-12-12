@@ -94,11 +94,14 @@ class WebappInternal(Base):
             self.config.branch = branch
             self.config.module = module
 
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+
         if not self.config.valid_language:
             self.config.language = self.get_language()
             self.language = LanguagePack(self.config.language)
 
-        if not self.config.skip_environment:
+        if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program)
 
             self.user_screen()
@@ -327,7 +330,7 @@ class WebappInternal(Base):
         if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
             buttons = modals[0].select(".tbrowsebutton")
             if buttons:
-                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))))
+                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
                 time.sleep(0.5)
                 selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
@@ -350,7 +353,7 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term="Moedas", scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
             self.SetButton(self.language.confirm)
 
     def set_log_info(self):
@@ -567,13 +570,14 @@ class WebappInternal(Base):
             tradiobuttonitens = soup.select(".tradiobuttonitem")
             tradio_index = 0
             tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_text = next(iter(list(filter(lambda x: search_key in x, tradiobutton_texts))), None)
+            tradiobutton_texts_filtered = list(map(lambda x: x.lower(), tradiobutton_texts))
+            tradiobutton_text = next(iter(list(filter(lambda x: search_key.lower() in x, tradiobutton_texts_filtered))), None)
             if not tradiobutton_text:
                 tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
                 if not tradiobutton_text:
                     self.log_error(f"Key not found: {search_key}")
 
-            tradio_index = tradiobutton_texts.index(tradiobutton_text)
+            tradio_index = tradiobutton_texts_filtered.index(tradiobutton_text)
 
             tradiobuttonitem = tradiobuttonitens[tradio_index]
             trb_input = next(iter(tradiobuttonitem.select("input")), None)
@@ -1102,7 +1106,10 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                container = next(iter(containers), None)
+                if self.base_container in container_selector:
+                    container = self.containers_filter(containers)
+
+                container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
                 raise Exception("Couldn't find container")
@@ -1178,7 +1185,6 @@ class WebappInternal(Base):
             error_message = f"Error Log: {error_paragraphs[0]}" if len(error_paragraphs) > 2 else "Error Log: Server down."
             message = error_message.replace("\n", " ")
 
-        self.driver.save_screenshot( self.get_function_from_stack() +".png")
         self.log_error(message)
 
     def get_function_from_stack(self):
@@ -1283,8 +1289,14 @@ class WebappInternal(Base):
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container
+                
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
-                container = next(iter(containers), None)
+
+                if self.base_container in container_selector:
+                    container = self.containers_filter(containers)
+
+                container = next(iter(containers), None) if isinstance(containers, list) else containers
+
                 if not container:
                     return False
 
@@ -1613,49 +1625,61 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, itens):
+    def WaitHide(self, string):
         """
-        Search string that was sent and wait hide the elements.
-        e.g. "Item1,Item2,Item3"
+        Search string that was sent and wait hide the element.
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param string: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
-            if not elements:
-                break
-            time.sleep(5)
+            
+            element = None
 
-    def WaitShow(self,itens):
+            container = self.get_current_container()
+
+            if container:
+                tsays = container.select(".tsay")
+
+                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+
+            if not element:
+                break
+            time.sleep(3)
+
+    def WaitShow(self, string):
         """
         Search string that was sent and wait show the elements.
-        e.g. "Item1,Item2,Item3"
 
-        :param itens: List of itens that will hold the wait.
-        :type itens: str
+        :param string: String that will hold the wait.
+        :type string: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        itens = list(map(str.strip, itens.split(",")))
         print("Waiting processing...")
         while True:
-            soup = self.get_current_DOM()
-            elements = soup.find_all('div', string=(itens))
-            if elements:
+
+            element = None
+
+            container = self.get_current_container()
+
+            if container:
+                tsays = container.select(".tsay")
+
+                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+
+            if element:
                 break
-            time.sleep(5)
+            time.sleep(3)
 
     def WaitProcessing(self, itens):
         """
@@ -2715,22 +2739,28 @@ class WebappInternal(Base):
 
         #caminho do arquivo csv(SX3)
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
+            
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
-                        index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Título', None], low_memory=False)
-        df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Título', None])
+                        index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
+        df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
             df_filtered = df.query("Tipo=='C' or Tipo=='N' or Tipo=='D' ")
         else:
             df_filtered = df.filter(regex=regex, axis=0)
 
-        #Retiro os espaços em branco da coluna Campo e Titulo.
-        df_filtered['Título'] = df_filtered['Título'].map(lambda x: x.strip())
+        if self.config.language == "es-es":
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo_Spa')].str.strip()
+        elif self.config.language == "en-us":
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo_Eng')].str.strip()
+        else:
+            df_filtered.Titulo = df_filtered.loc[:,('Titulo')].str.strip()
+
         df_filtered.index = df_filtered.index.map(lambda x: x.strip())
 
         dict_ = df_filtered.to_dict()
 
-        return (dict_['Tipo'], dict_['Tamanho'], dict_['Título'])
+        return (dict_['Tipo'], dict_['Tamanho'], dict_['Titulo'])
 
     def generate_regex_by_prefixes(self, prefixes):
         """
@@ -3145,15 +3175,25 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+
+        routine_name = routine_name if routine_name else "error"
+
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
-        self.driver.save_screenshot("error.png")
+        try:
+            os.makedirs(f"logs\\{self.log.timestamp}")
+        except OSError:
+            pass
+
+        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{routine_name} - {test_number} error.png")
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        self.log.save_file()
+        self.log.save_file(routine_name)
         if not self.config.skip_restart:
             self.restart()
         self.assertTrue(False, log_message)
@@ -3433,7 +3473,11 @@ class WebappInternal(Base):
         else:
             self.log.new_line(True, "")
 
-        self.log.save_file()
+        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+
+        routine_name = routine_name if routine_name else "error"
+
+        self.log.save_file(routine_name)
 
         self.errors = []
         print(msg)
@@ -3526,3 +3570,35 @@ class WebappInternal(Base):
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
         element().click()
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> self.TearDown()
+        """
+        if self.config.coverage:
+            self.LogOff()
+            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
+            self.driver.close()
+        else:
+            self.driver.close()
+
+    def containers_filter(self, containers):
+        """
+        Internal
+        """
+        class_remove = "tsvg"
+        container_filtered = []
+
+        for container in containers:
+            iscorrect = True
+            container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
+            if list(filter(lambda x: class_remove in x.attrs['class'], container_class)):
+                iscorrect = False
+            if iscorrect:
+                container_filtered.append(container)
+        
+        return container_filtered

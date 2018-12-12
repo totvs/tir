@@ -61,15 +61,13 @@ class Log:
         """
         line = []
         total_cts = "1"
-        passed = "1"
-        failed = "0"
-        if not result:
-            passed = "0"
-            failed = "1"
+        passed = "1" if result else "0"
+        failed = "0" if result else "1"
+
         line.extend([time.strftime("%d/%m/%y %X"), self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country])
         self.table_rows.append(line)
 
-    def save_file(self):
+    def save_file(self, filename):
         """
         Writes the log file to the file system.
 
@@ -83,7 +81,11 @@ class Log:
             if self.folder:
                 path = f"{self.folder}\\loginter_{self.timestamp}.csv"
             else:
-                path = f"loginter_{self.timestamp}.csv"
+                try:
+                    os.makedirs(f"logs\\{self.timestamp}")
+                except OSError:
+                    pass
+                path = f"logs\\{self.timestamp}\\{filename}.csv"
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')
