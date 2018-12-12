@@ -1639,12 +1639,15 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
         while True:
+            
+            element = None
 
             container = self.get_current_container()
 
-            tsays = container.select(".tsay")
+            if container:
+                tsays = container.select(".tsay")
 
-            element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
 
             if not element:
                 break
@@ -1665,11 +1668,14 @@ class WebappInternal(Base):
         print("Waiting processing...")
         while True:
 
+            element = None
+
             container = self.get_current_container()
 
-            tsays = container.select(".tsay")
+            if container:
+                tsays = container.select(".tsay")
 
-            element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
 
             if element:
                 break
