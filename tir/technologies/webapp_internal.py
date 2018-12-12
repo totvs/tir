@@ -1642,13 +1642,7 @@ class WebappInternal(Base):
 
             container = self.get_current_container()
 
-            if not container:
-                self.log_error("Couldn't locate container.")
-
             tsays = container.select(".tsay")
-
-            if not tsays:
-                self.log_error("Couldn't locate tsays.")
 
             element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
 
@@ -1673,13 +1667,7 @@ class WebappInternal(Base):
 
             container = self.get_current_container()
 
-            if not container:
-                self.log_error("Couldn't locate container.")
-
             tsays = container.select(".tsay")
-
-            if not tsays:
-                self.log_error("Couldn't locate tsays.")
 
             element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
 
