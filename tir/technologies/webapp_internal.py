@@ -3549,9 +3549,11 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        #TODO WAIT ELEMENT
-        
+
         for label in labels:
+            
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode")
+
             container = self.get_current_container()
 
             if not container:
@@ -3573,10 +3575,24 @@ class WebappInternal(Base):
             self.log_error("Couldn't find element.")
 
         element_class = next(iter(element_filtered.select(".toggler, .lastchild")), None)
-
+        
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
-        element().click()
+        endtime = time.time() + self.config.time_out
+
+        success = False
+
+        while(time.time() < endtime):
+            try:
+                element().click()
+                success = True
+                break
+            except:
+                pass
+                
+        if not success:
+            self.log_error("Couldn't click on element.")
+                
     def TearDown(self):
         """
         Closes the webdriver and ends the test case.
