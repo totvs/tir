@@ -784,16 +784,23 @@ class WebappInternal(Base):
                     #if Number input
                     else:
                         tries = 0
+                        try_counter = 0
                         while(tries < 3):
                             self.set_element_focus(input_field())
                             self.send_keys(input_field(), Keys.DELETE)
                             self.send_keys(input_field(), Keys.BACK_SPACE)
-                            self.click(input_field())
-                            input_field().send_keys(main_value)
+                            if interface_value_size == 1:
+                                self.double_click(input_field())
+                                self.send_keys(input_field(), Keys.HOME)
+                            else:
+                                self.click(input_field())
+                            self.set_element_focus(input_field())
+                            self.try_send_keys(input_field, main_value, try_counter)
                             current_number_value = self.get_web_value(input_field())
                             if self.remove_mask(current_number_value).strip() == main_value:
                                 break
                             tries+=1
+                            try_counter+=1
 
                     if user_value_size < interface_value_size:
                         self.send_keys(input_field(), Keys.ENTER)
