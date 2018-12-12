@@ -515,7 +515,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
-        self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         soup = self.get_current_DOM()
         search_index = self.get_panel_name_index(panel_name) if panel_name else 0
         containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True)
@@ -784,16 +784,23 @@ class WebappInternal(Base):
                     #if Number input
                     else:
                         tries = 0
+                        try_counter = 0
                         while(tries < 3):
                             self.set_element_focus(input_field())
                             self.send_keys(input_field(), Keys.DELETE)
                             self.send_keys(input_field(), Keys.BACK_SPACE)
-                            self.click(input_field())
-                            input_field().send_keys(main_value)
+                            if interface_value_size == 1:
+                                self.double_click(input_field())
+                                self.send_keys(input_field(), Keys.HOME)
+                            else:
+                                self.click(input_field())
+                            self.set_element_focus(input_field())
+                            self.try_send_keys(input_field, main_value, try_counter)
                             current_number_value = self.get_web_value(input_field())
                             if self.remove_mask(current_number_value).strip() == main_value:
                                 break
                             tries+=1
+                            try_counter+=1
 
                     if user_value_size < interface_value_size:
                         self.send_keys(input_field(), Keys.ENTER)
@@ -1289,7 +1296,7 @@ class WebappInternal(Base):
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container
-                
+
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
                 if self.base_container in container_selector:
@@ -1639,7 +1646,7 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
         while True:
-            
+
             element = None
 
             container = self.get_current_container()
@@ -2739,7 +2746,7 @@ class WebappInternal(Base):
 
         #caminho do arquivo csv(SX3)
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
-            
+
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
@@ -3600,5 +3607,5 @@ class WebappInternal(Base):
                 iscorrect = False
             if iscorrect:
                 container_filtered.append(container)
-        
+
         return container_filtered
