@@ -3550,48 +3550,60 @@ class WebappInternal(Base):
         [Internal]
         """
 
+        tree_node = ""
+
         for label in labels:
             
-            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode")
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
 
-            container = self.get_current_container()
+            endtime = time.time() + self.config.time_out
 
-            if not container:
-                self.log_error("Couldn't find container of element.")
-            
-            tree_node = container.select(".ttreenode")
+            while (time.time() < endtime and not tree_node):
+
+                container = self.get_current_container()
+
+                tree_node = container.select(".ttreenode")
+
+            if not tree_node:
+                self.log_error("Couldn't find tree element.")
 
             self.click_tree(tree_node, label)
 
     def click_tree(self, tree_node, label):
 
+        tree_element = []
+
+        success = False
+
         label_filtered = label.lower().strip()
 
         tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-        element_filtered = next(iter(list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))), None)
+        elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
 
-        if not element_filtered:
-            self.log_error("Couldn't find element.")
-
-        element_class = next(iter(element_filtered.select(".toggler, .lastchild, .data")), None)
-        
-        element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
-
-        endtime = time.time() + self.config.time_out
-
-        success = False
-
-        while(time.time() < endtime):
-            try:
-                element().click()
-                success = True
-                break
-            except:
-                pass
+        for element in elements:
+            element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+            
+            if "expanded" not in element_class.attrs['class'] and not success:
+                tree_element.append(element)
                 
-        if not success:
-            self.log_error("Couldn't click on element.")
+                if not element:
+                    self.log_error("Couldn't find element.")
+                
+                element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+
+                endtime = time.time() + self.config.time_out
+
+                while(time.time() < endtime):
+                    try:
+                        element_click().click()
+                        success = True
+                        break
+                    except:
+                        pass
+                        
+                if not success:
+                    self.log_error("Couldn't click on element.")
                 
     def TearDown(self):
         """
