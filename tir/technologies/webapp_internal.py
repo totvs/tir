@@ -3569,7 +3569,7 @@ class WebappInternal(Base):
 
         tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-        element_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() in label_filtered, tree_node_filtered))), None)
+        element_filtered = next(iter(list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))), None)
 
         if not element_filtered:
             self.log_error("Couldn't find element.")
