@@ -3574,7 +3574,7 @@ class WebappInternal(Base):
         if not element_filtered:
             self.log_error("Couldn't find element.")
 
-        element_class = next(iter(element_filtered.select(".toggler, .lastchild")), None)
+        element_class = next(iter(element_filtered.select(".toggler, .lastchild, .data")), None)
         
         element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
