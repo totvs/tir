@@ -104,15 +104,15 @@ class WebappInternal(Base):
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program)
 
-            self.user_screen()
-            self.environment_screen()
+        self.user_screen()
+        self.environment_screen()
 
-            while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
-                self.close_coin_screen()
-                self.close_modal()
+        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            self.close_coin_screen()
+            self.close_modal()
 
-            if save_input:
-                self.set_log_info()
+        if save_input:
+            self.set_log_info()
 
     def program_screen(self, initial_program="", environment=""):
         """
@@ -3550,9 +3550,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        tree_node = ""
-
         for label in labels:
+
+            tree_node = ""
             
             self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
 
@@ -3571,8 +3571,6 @@ class WebappInternal(Base):
 
     def click_tree(self, tree_node, label):
 
-        tree_element = []
-
         success = False
 
         label_filtered = label.lower().strip()
@@ -3581,15 +3579,14 @@ class WebappInternal(Base):
 
         elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
 
+        if not elements:
+            self.log_error("Couldn't find elements.")
+
         for element in elements:
             element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
             
             if "expanded" not in element_class.attrs['class'] and not success:
-                tree_element.append(element)
-                
-                if not element:
-                    self.log_error("Couldn't find element.")
-                
+                            
                 element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
                 endtime = time.time() + self.config.time_out
