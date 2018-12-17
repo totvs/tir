@@ -1436,7 +1436,7 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + 10
-            while(time.time() < endtime and not soup_element):
+            while(time.time() < endtime and not soup_element and button.lower() != "x"):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
 
                 if soup_objects and len(soup_objects) - 1 >= position:
