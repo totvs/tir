@@ -3539,6 +3539,87 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
+    def ClickTree(self, treepath):
+        """
+        Clicks on TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3")
+        """ 
+
+        labels = list(map(str.strip, treepath.split(">")))
+
+        self.find_tree_bs(labels)
+
+    def find_tree_bs(self, labels):
+        """
+        [Internal]
+
+        Search the label string in current container and return a treenode element.
+        """
+
+        for label in labels:
+
+            tree_node = ""
+            
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
+
+            endtime = time.time() + self.config.time_out
+
+            while (time.time() < endtime and not tree_node):
+
+                container = self.get_current_container()
+
+                tree_node = container.select(".ttreenode")
+
+            if not tree_node:
+                self.log_error("Couldn't find tree element.")
+
+            self.click_tree(tree_node, label)
+
+    def click_tree(self, tree_node, label):
+        """
+        [Internal]
+        Take treenode and label to filter and click in the toggler element to expand de TreeView.
+        """
+
+        success = False
+
+        label_filtered = label.lower().strip()
+
+        tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+
+        elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
+
+        if not elements:
+            self.log_error("Couldn't find elements.")
+
+        for element in elements:
+            if not success:
+                element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+                
+                if "expanded" not in element_class.attrs['class'] and not success:
+                                
+                    element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+
+                    endtime = time.time() + self.config.time_out
+
+                    while(time.time() < endtime):
+                        try:
+                            element_click().click()
+                            success = True
+                            break
+                        except:
+                            pass
+                        
+        if not success:
+            self.log_error("Couldn't click on element.")
+                
     def TearDown(self):
         """
         Closes the webdriver and ends the test case.
