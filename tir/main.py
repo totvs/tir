@@ -697,8 +697,18 @@ class Webapp():
         self.__webapp.WaitShow(string)
 
     def ClickTree(self, treepath):
-         
-         self.__webapp.ClickTree(treepath)
+        """
+        Clicks on TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3")
+        """ 
+        self.__webapp.ClickTree(treepath)
 
 class Apw():
 

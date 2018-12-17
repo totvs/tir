@@ -3540,6 +3540,17 @@ class WebappInternal(Base):
         return next(iter(containers), None)
 
     def ClickTree(self, treepath):
+        """
+        Clicks on TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3")
+        """ 
 
         labels = list(map(str.strip, treepath.split(">")))
 
@@ -3548,6 +3559,8 @@ class WebappInternal(Base):
     def find_tree_bs(self, labels):
         """
         [Internal]
+
+        Search the label string in current container and return a treenode element.
         """
 
         for label in labels:
@@ -3570,6 +3583,10 @@ class WebappInternal(Base):
             self.click_tree(tree_node, label)
 
     def click_tree(self, tree_node, label):
+        """
+        [Internal]
+        Take treenode and label to filter and click in the toggler element to expand de TreeView.
+        """
 
         success = False
 
@@ -3583,24 +3600,25 @@ class WebappInternal(Base):
             self.log_error("Couldn't find elements.")
 
         for element in elements:
-            element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
-            
-            if "expanded" not in element_class.attrs['class'] and not success:
-                            
-                element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+            if not success:
+                element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+                
+                if "expanded" not in element_class.attrs['class'] and not success:
+                                
+                    element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
-                endtime = time.time() + self.config.time_out
+                    endtime = time.time() + self.config.time_out
 
-                while(time.time() < endtime):
-                    try:
-                        element_click().click()
-                        success = True
-                        break
-                    except:
-                        pass
+                    while(time.time() < endtime):
+                        try:
+                            element_click().click()
+                            success = True
+                            break
+                        except:
+                            pass
                         
-                if not success:
-                    self.log_error("Couldn't click on element.")
+        if not success:
+            self.log_error("Couldn't click on element.")
                 
     def TearDown(self):
         """
