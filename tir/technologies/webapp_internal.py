@@ -3602,9 +3602,11 @@ class WebappInternal(Base):
         for element in elements:
             if not success:
                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+
+                if "data" in element_class.get_attribute_list("class"):
+                    element_class =  element_class.select_one("img")
                 
                 if "expanded" not in element_class.attrs['class'] and not success:
-                                
                     element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
 
                     endtime = time.time() + self.config.time_out
