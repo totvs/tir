@@ -3100,9 +3100,15 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
-        element = next(iter(list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))), None)
-        if element is None:
-            return []
+        element = None
+        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
+        if elements:
+            for element_item in elements:
+                label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_item))
+                if label_element().is_displayed():
+                    element = element_item                      
+        else:
+            return[]
 
         #Checking previous and next element:
         next_sibling = element.find_next_sibling("div")
