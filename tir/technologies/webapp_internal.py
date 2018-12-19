@@ -1124,6 +1124,8 @@ class WebappInternal(Base):
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
                     return self.find_label_element(term, container)
+                elif not re.match(r"\w+(_)", term):
+                    return self.label_element_displayed(term, container)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
@@ -3100,15 +3102,8 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
-        element = None
-        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
-        if elements:
-            for element_item in elements:
-                label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_item))
-                if label_element().is_displayed():
-                    element = element_item                      
-        else:
-            return[]
+
+        element = self.label_element_displayed(label_text, container)
 
         #Checking previous and next element:
         next_sibling = element.find_next_sibling("div")
@@ -3658,3 +3653,17 @@ class WebappInternal(Base):
                 container_filtered.append(container)
 
         return container_filtered
+
+    def label_element_displayed(self, label_text, container):
+        """
+        [Internal]
+        """
+        
+        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
+        if elements:
+            for element_item in elements:
+                label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_item))
+                if label_element().is_displayed():
+                    return element_item       
+        else:
+            return[]
