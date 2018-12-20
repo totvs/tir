@@ -1878,8 +1878,8 @@ class WebappInternal(Base):
             column_index = chosen_column[0]
         else:
             self.log_error("Couldn't find chosen column.")
-
-        sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR))
+            
+        sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
         sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
         scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
         scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
