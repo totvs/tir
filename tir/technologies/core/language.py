@@ -54,6 +54,7 @@ class LanguagePack:
         self.From = languagepack["From"]
         self.To = languagepack["To"]
         self.coins = languagepack["Coins"]
+        self.next = languagepack["Next"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -114,7 +115,8 @@ class LanguagePack:
             "Search By": "Search by:",
             "From": "From",
             "To": "To",
-            "Coins": "Coins"
+            "Coins": "Coins",
+            "Next": "Next >>" 
         }
 
         brazilian_portuguese = {
@@ -173,7 +175,8 @@ class LanguagePack:
             "Search By": "Procurar por:",
             "From": "De",
             "To": "Ate",
-            "Coins": "Moedas"
+            "Coins": "Moedas",
+            "Next": "Avançar >>"
         }
         spanish = {
             "User": "Usuário",
