@@ -1816,48 +1816,36 @@ class WebappInternal(Base):
             self.wait_element(content_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
+            sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR))
+            sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
+            scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
+            scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
-            if class_grid != "tgrid":
-                column_elements = grid.select(f"td[id='{column_index}']")
-                filtered_column_elements = list(filter(lambda x: x.text.strip() in content_list, column_elements))
-
-                for column_element in filtered_column_elements:
-                    element = lambda: self.soup_to_selenium(column_element)
-                    self.scroll_to_element(element())
-                    self.click(element())
-                    if class_grid != 'tcbrowse':
-                        self.double_click(element())
+            last = None
+            get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
+            current = get_current()
+            contents = content_list[:]
+            while(last != current and contents):
+                td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                text = td.text.strip() if td else ""
+                if text in contents:
+                    clicking_row_element_bs = next(iter(current.select("td")), None)
+                    if not clicking_row_element_bs:
+                        clicking_row_element_bs = current
+                    clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
+                    self.set_element_focus(clicking_row_element())
+                    time.sleep(1)
+                    if class_grid != "tgrid":
+                        self.send_keys(clicking_row_element(),Keys.ENTER)
                     else:
-                        self.send_keys(element(), Keys.ENTER)
-
-            else:
-                sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png']", scrap_type=enum.ScrapType.CSS_SELECTOR))
-                sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
-                scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
-                scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
-
-                last = None
-                get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
-                current = get_current()
-                contents = content_list[:]
-                while(last != current and contents):
-                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                    text = td.text.strip() if td else ""
-                    if text in contents:
-                        clicking_row_element_bs = next(iter(current.select("td")), None)
-                        if not clicking_row_element_bs:
-                            clicking_row_element_bs = current
-                        clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
-                        self.set_element_focus(clicking_row_element())
-                        time.sleep(1)
                         self.double_click(clicking_row_element())
-                        contents.remove(text)
-                    time.sleep(2)
-                    last = current
-                    scroll_down()
-                    time.sleep(0.5)
-                    current = get_current()
-                    time.sleep(0.5)
+                    contents.remove(text)
+                time.sleep(2)
+                last = current
+                scroll_down()
+                time.sleep(0.5)
+                current = get_current()
+                time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
