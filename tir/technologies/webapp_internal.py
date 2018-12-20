@@ -1493,7 +1493,7 @@ class WebappInternal(Base):
 
             if self.used_ids:
 
-                buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, "x"]
+                buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
                 buttons_filtered = list(map(lambda x: x.lower(), buttons))
 
@@ -3124,68 +3124,70 @@ class WebappInternal(Base):
         >>> self.find_label_element("User:", container_object)
         """
 
-        element = self.label_element_displayed(label_text, container)
+        elements = self.label_element_displayed(label_text, container)
 
-        #Checking previous and next element:
-        next_sibling = element.find_next_sibling("div")
-        second_next_sibling = next_sibling.find_next_sibling("div")
+        for element in elements:
 
-        previous_sibling = element.find_next_sibling("div")
-        second_previous_sibling = previous_sibling.find_next_sibling("div")
+            #Checking previous and next element:
+            next_sibling = element.find_next_sibling("div")
+            second_next_sibling = next_sibling.find_next_sibling("div")
 
-        #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
-        if (hasattr(element, "attrs") and "class" in element.attrs
-            and "tsay" in element.attrs["class"]
-            and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
-            and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
-            and next_sibling.attrs["id"] not in self.used_ids)
-            or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
-            and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
-            and second_next_sibling.attrs["id"] not in self.used_ids)):
+            previous_sibling = element.find_next_sibling("div")
+            second_previous_sibling = previous_sibling.find_next_sibling("div")
 
-            if (("tget" in next_sibling.attrs["class"]
-                    or "tcombobox" in next_sibling.attrs["class"])
-                    and next_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
-                return [next_sibling]
-            elif (("tget" in second_next_sibling.attrs["class"]
-                    or "tcombobox" in second_next_sibling.attrs["class"])
-                    and second_next_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
-                return [second_next_sibling]
-            else:
-                return []
+            #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
+            if (hasattr(element, "attrs") and "class" in element.attrs
+                and "tsay" in element.attrs["class"]
+                and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
+                and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
+                and next_sibling.attrs["id"] not in self.used_ids)
+                or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
+                and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
+                and second_next_sibling.attrs["id"] not in self.used_ids)):
 
-        #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
-        elif (hasattr(element, "attrs") and "class" in element.attrs
-            and "tsay" in element.attrs["class"]
-            and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
-            and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
-            and previous_sibling.attrs["id"] not in self.used_ids)
-            or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
-            and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
-            and second_previous_sibling.attrs["id"] not in self.used_ids)):
+                if (("tget" in next_sibling.attrs["class"]
+                        or "tcombobox" in next_sibling.attrs["class"])
+                        and next_sibling.attrs["id"] not in self.used_ids):
+                    self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
+                    return [next_sibling]
+                elif (("tget" in second_next_sibling.attrs["class"]
+                        or "tcombobox" in second_next_sibling.attrs["class"])
+                        and second_next_sibling.attrs["id"] not in self.used_ids):
+                    self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
+                    return [second_next_sibling]
+                else:
+                    return []
 
-            if (("tget" in previous_sibling.attrs["class"]
-                    or "tcombobox" in previous_sibling.attrs["class"])
-                    and previous_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
-                return [previous_sibling]
-            elif (("tget" in second_previous_sibling.attrs["class"]
-                    or "tcombobox" in second_previous_sibling.attrs["class"])
-                    and second_previous_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
-                return [second_previous_sibling]
-            else:
-                return []
+            #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
+            elif (hasattr(element, "attrs") and "class" in element.attrs
+                and "tsay" in element.attrs["class"]
+                and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
+                and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
+                and previous_sibling.attrs["id"] not in self.used_ids)
+                or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
+                and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
+                and second_previous_sibling.attrs["id"] not in self.used_ids)):
 
-        #If element is not tsay => return it
-        elif (hasattr(element, "attrs") and "class" in element.attrs
-            and "tsay" not in element.attrs["class"]):
-            return [element]
+                if (("tget" in previous_sibling.attrs["class"]
+                        or "tcombobox" in previous_sibling.attrs["class"])
+                        and previous_sibling.attrs["id"] not in self.used_ids):
+                    self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
+                    return [previous_sibling]
+                elif (("tget" in second_previous_sibling.attrs["class"]
+                        or "tcombobox" in second_previous_sibling.attrs["class"])
+                        and second_previous_sibling.attrs["id"] not in self.used_ids):
+                    self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
+                    return [second_previous_sibling]
+                else:
+                    return []
 
+            #If element is not tsay => return it
+            elif (hasattr(element, "attrs") and "class" in element.attrs
+                and "tsay" not in element.attrs["class"]):
+                return [element]
+                
         #If label exists but there is no element associated with it => return empty list
-        else:
+        if not element:
             return []
 
     def log_error(self, message, new_log_line=True):
@@ -3683,10 +3685,4 @@ class WebappInternal(Base):
         """
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
-        if elements:
-            for element_item in elements:
-                label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element_item))
-                if label_element().is_displayed():
-                    return element_item       
-        else:
-            return[]
+        return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
