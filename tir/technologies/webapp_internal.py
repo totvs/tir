@@ -49,7 +49,7 @@ class WebappInternal(Base):
 
         grid_input: List with fields from a grid that must be filled in the next LoadGrid call.
 
-        used_ids: List of element ids already captured by a label search.
+        used_ids: Dictionary of element ids and container already captured by a label search.
         """
         super().__init__(config_path, autostart)
 
@@ -60,7 +60,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
 
-        self.used_ids = []
+        self.used_ids = {}
 
         self.parameters = []
         self.backup_parameters = []
@@ -1423,7 +1423,14 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
+
+        container = self.get_current_container()
+
+        if container:
+            id_container = container.attrs['id']
+
         print(f"Clicking on {button}")
+
         position -= 1
         try:
             soup_element  = ""
@@ -1484,6 +1491,19 @@ class WebappInternal(Base):
 
                 self.click(soup_element())
 
+            if self.used_ids:
+
+                buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, "x"]
+
+                buttons_filtered = list(map(lambda x: x.lower(), buttons))
+
+                if button.lower() in buttons_filtered:
+                    
+                    new_dictionary = {k: v  for k, v in self.used_ids.items() if v == id_container}
+
+                    for key in list(new_dictionary.keys()):
+                        self.used_ids.pop(key)
+
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
@@ -1498,6 +1518,7 @@ class WebappInternal(Base):
         except Exception as error:
             print(error)
             self.log_error(str(error))
+
 
     def click_sub_menu(self, sub_item):
         """
@@ -3125,12 +3146,12 @@ class WebappInternal(Base):
             if (("tget" in next_sibling.attrs["class"]
                     or "tcombobox" in next_sibling.attrs["class"])
                     and next_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids.append(next_sibling.attrs["id"])
+                self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
                 return [next_sibling]
             elif (("tget" in second_next_sibling.attrs["class"]
                     or "tcombobox" in second_next_sibling.attrs["class"])
                     and second_next_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids.append(second_next_sibling.attrs["id"])
+                self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
                 return [second_next_sibling]
             else:
                 return []
@@ -3148,12 +3169,12 @@ class WebappInternal(Base):
             if (("tget" in previous_sibling.attrs["class"]
                     or "tcombobox" in previous_sibling.attrs["class"])
                     and previous_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids.append(previous_sibling.attrs["id"])
+                self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
                 return [previous_sibling]
             elif (("tget" in second_previous_sibling.attrs["class"]
                     or "tcombobox" in second_previous_sibling.attrs["class"])
                     and second_previous_sibling.attrs["id"] not in self.used_ids):
-                self.used_ids.append(second_previous_sibling.attrs["id"])
+                self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
                 return [second_previous_sibling]
             else:
                 return []
