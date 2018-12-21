@@ -3684,5 +3684,5 @@ class WebappInternal(Base):
         [Internal]
         """
         
-        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
+        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
