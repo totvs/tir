@@ -718,7 +718,7 @@ class WebappInternal(Base):
         >>> self.input_value("A1_COD", "000001")
         """
 
-        field = re.sub(r"(\:*)(\?*)", "", field).strip()
+        field = re.sub(r"$(\:*)(\?*)", "", field).strip()
 
         if name_attr:
             self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
