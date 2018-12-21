@@ -1816,7 +1816,7 @@ class WebappInternal(Base):
             self.wait_element(content_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
-            sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'] .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
+            sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
             sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
             scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
             scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
