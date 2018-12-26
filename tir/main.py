@@ -710,6 +710,9 @@ class Webapp():
         """ 
         self.__webapp.ClickTree(treepath)
 
+    def teste(self,field):
+        self.__webapp.teste(field)
+
 class Apw():
 
     def __init__(self, config_path=""):
@@ -780,5 +783,4 @@ class Apw():
         self.__Apw.SetValue(campo, valor, grid, linha, chknewline, disabled)
 
     def WaitModal(self, text, opcao="title"):
-
         self.__Apw.WaitModal(text, opcao)

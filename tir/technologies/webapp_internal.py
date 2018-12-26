@@ -3686,3 +3686,32 @@ class WebappInternal(Base):
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+    def teste(self,field):
+        # pegamdo a label
+        element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT)), None)
+        label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+        xy_label = label_element().location
+        #All inputs pegando os inputs
+        inputs = self.web_scrap(term=".tget", scrap_type=enum.ScrapType.CSS_SELECTOR) # ou colocar term = "input"
+        verdade_verdadeira = list(filter(lambda x: self.find_label(xy_label, self.soup_to_selenium(x).location), inputs))
+        print('sla')
+        return verdade_verdadeira
+
+    
+    def find_label(self,xy_label,xy_field):
+        script = """
+        function screenSize(){
+            return {'pos_x':window.innerWidth,'pos_y':window.innerHeight}
+        };
+        return screenSize()
+        """
+        tamanho_da_tela = self.driver.execute_script(script)
+        # ver como este objeto está
+        pos_x = ((tamanho_da_tela['pos_x'] * 0.5) / 100)
+        pos_y = ((tamanho_da_tela['pos_y'] * 0.5) / 100)
+        return (xy_label['pos_x'] == xy_field['pos_x'] and ((xy_label['pos_y'] - xy_field['pos_y']) <= pos_y)) or (xy_label['pos_y'] == xy_field['pos_y'] and ((xy_label['pos_x'] - xy_field['pos_x']) <= pos_x))
+
+        # (x1 == x2 AND range_xy(y1,y2)) OR (y1 == y2 AND range_xy(x1,x2))
+        # se  == xy ['pos_x'] AND ((pos_y - xy['pos_y']) >= pos_y) OR pos_y == xy ['pos_y'] AND ((pos_x - xy['pos_x']) >= pos_x)  
+        
