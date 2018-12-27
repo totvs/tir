@@ -3690,11 +3690,11 @@ class WebappInternal(Base):
     def teste(self,field):
         # pegamdo a label
         element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT)), None)
-        label_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-        xy_label = label_element().location
+        label_element = lambda: self.soup_to_selenium(element)
+        xy_label = self.driver.execute_script('return arguments[0].getPosition()',label_element())
         #All inputs pegando os inputs
         inputs = self.web_scrap(term=".tget", scrap_type=enum.ScrapType.CSS_SELECTOR) # ou colocar term = "input"
-        verdade_verdadeira = list(filter(lambda x: self.find_label(xy_label, self.soup_to_selenium(x).location), inputs))
+        verdade_verdadeira = list(filter(lambda x: self.find_label(xy_label, self.driver.execute_script('return arguments[0].getPosition()',self.soup_to_selenium(x))), inputs))
         print('sla')
         return verdade_verdadeira
 
@@ -3708,9 +3708,9 @@ class WebappInternal(Base):
         """
         tamanho_da_tela = self.driver.execute_script(script)
         # ver como este objeto está
-        pos_x = ((tamanho_da_tela['pos_x'] * 0.5) / 100)
-        pos_y = ((tamanho_da_tela['pos_y'] * 0.5) / 100)
-        return (xy_label['pos_x'] == xy_field['pos_x'] and ((xy_label['pos_y'] - xy_field['pos_y']) <= pos_y)) or (xy_label['pos_y'] == xy_field['pos_y'] and ((xy_label['pos_x'] - xy_field['pos_x']) <= pos_x))
+        pos_x = ((tamanho_da_tela['pos_x'] * 10) / 100)
+        pos_y = ((tamanho_da_tela['pos_y'] * 10) / 100)
+        return (xy_label['x'] == xy_field['x'] and ((xy_label['y'] - xy_field['y']) <= pos_y)) or (xy_label['y'] == xy_field['y'] and ((xy_label['x'] - xy_field['x']) <= pos_x))
 
         # (x1 == x2 AND range_xy(y1,y2)) OR (y1 == y2 AND range_xy(x1,x2))
         # se  == xy ['pos_x'] AND ((pos_y - xy['pos_y']) >= pos_y) OR pos_y == xy ['pos_y'] AND ((pos_x - xy['pos_x']) >= pos_x)  
