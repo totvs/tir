@@ -1440,7 +1440,7 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
 
             layers = 0
-            if button == self.language.confirm:
+            if button in [self.language.confirm, self.language.save]:
                 layers = len(self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog"))
 
             success = False
@@ -1505,8 +1505,8 @@ class WebappInternal(Base):
                         self.used_ids.pop(key)
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
@@ -1668,6 +1668,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitHide("Processing")
         """
         print("Waiting processing...")
+        
         while True:
 
             element = None
@@ -1696,6 +1697,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitShow("Processing")
         """
         print("Waiting processing...")
+
         while True:
 
             element = None
@@ -1705,7 +1707,7 @@ class WebappInternal(Base):
             if container:
                 tsays = container.select(".tsay")
 
-                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+                element = next(iter(list(filter(lambda x: string in re.sub(r"\t|\n|\r", " ", x.text), tsays))), None)
 
             if element:
                 break
