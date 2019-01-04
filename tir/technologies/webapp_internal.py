@@ -1842,6 +1842,7 @@ class WebappInternal(Base):
 
             class_grid = grid.attrs['class'][0]
             sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
+            sd_button_list = self.filter_is_displayed(sd_button_list)
             sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
             scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
             scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
@@ -3676,3 +3677,9 @@ class WebappInternal(Base):
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements)) if len(elements) > 1 else elements
+
+    def filter_is_displayed(self, elements):
+        """
+        [Internal]
+        """
+        return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
