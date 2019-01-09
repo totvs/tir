@@ -17,6 +17,7 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
+from math import sqrt, pow
 
 class WebappInternal(Base):
     """
@@ -654,6 +655,32 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
+    def search_element_position(self,field):
+        container = self.get_current_container()
+        labels = container.select("label")
+        label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(field),x.text) ,labels))),None)
+        if(label != None):   
+            label_s  = lambda:self.soup_to_selenium(label)
+            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            list_in_range = self.web_scrap(term=".tget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
+            position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1],xy_label)), enumerate(list_in_range)))
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] > xy_label['y'] or xy_elem[1]['x'] > xy_label['x']),position_list ))
+            distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
+            elem          = min(distance, key = lambda x: x[1])
+            elem          = list_in_range[elem[0]]
+            return elem
+
+
+    def get_position_from_bs_element(self,element,label):
+        selenium_element = self.soup_to_selenium(element)
+        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
+        return position
+
+    def get_distance(self,label_pos,element_pos):
+	    return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
+
+
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
@@ -738,7 +765,8 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.get_field(field, name_attr)
+                element = self.search_element_position(field)
+                #element = self.get_field(field, name_attr)
 
             if not element:
                 continue
@@ -3687,31 +3715,4 @@ class WebappInternal(Base):
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"(\s*)?([\*\?]{1})?(\s*)?(\:*)?$"))))
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
 
-    def teste(self,field):
-        # pegamdo a label
-        element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT)), None)
-        label_element = lambda: self.soup_to_selenium(element)
-        xy_label = self.driver.execute_script('return arguments[0].getPosition()',label_element())
-        #All inputs pegando os inputs
-        inputs = self.web_scrap(term=".tget", scrap_type=enum.ScrapType.CSS_SELECTOR) # ou colocar term = "input"
-        verdade_verdadeira = list(filter(lambda x: self.find_label(xy_label, self.driver.execute_script('return arguments[0].getPosition()',self.soup_to_selenium(x))), inputs))
-        print('sla')
-        return verdade_verdadeira
-
     
-    def find_label(self,xy_label,xy_field):
-        script = """
-        function screenSize(){
-            return {'pos_x':window.innerWidth,'pos_y':window.innerHeight}
-        };
-        return screenSize()
-        """
-        tamanho_da_tela = self.driver.execute_script(script)
-        # ver como este objeto está
-        pos_x = ((tamanho_da_tela['pos_x'] * 10) / 100)
-        pos_y = ((tamanho_da_tela['pos_y'] * 10) / 100)
-        return (xy_label['x'] == xy_field['x'] and ((xy_label['y'] - xy_field['y']) <= pos_y)) or (xy_label['y'] == xy_field['y'] and ((xy_label['x'] - xy_field['x']) <= pos_x))
-
-        # (x1 == x2 AND range_xy(y1,y2)) OR (y1 == y2 AND range_xy(x1,x2))
-        # se  == xy ['pos_x'] AND ((pos_y - xy['pos_y']) >= pos_y) OR pos_y == xy ['pos_y'] AND ((pos_x - xy['pos_x']) >= pos_x)  
-        

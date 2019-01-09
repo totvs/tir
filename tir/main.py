@@ -711,7 +711,7 @@ class Webapp():
         self.__webapp.ClickTree(treepath)
 
     def teste(self,field):
-        self.__webapp.teste(field)
+        self.__webapp.search_element_position(field)
 
 class Apw():
 
