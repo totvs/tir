@@ -1057,8 +1057,21 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.LogOff()
         """
-        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-        self.SetButton(self.language.finish)
+        element = ""
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+
+        if self.config.coverage:
+            while not element:
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                self.SetButton(self.language.finish)
+
+                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+
+                element = self.search_text(selector=".tsay", text=string)
+
+        else:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+            self.SetButton(self.language.finish)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -3683,3 +3696,14 @@ class WebappInternal(Base):
         [Internal]
         """
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+    def search_text(self, selector, text):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+
+        if container:
+            container_selector = container.select(selector)
+
+            return next(iter(list(filter(lambda x: text in re.sub(r"\t|\n|\r", " ", x.text), container_selector))), None)
