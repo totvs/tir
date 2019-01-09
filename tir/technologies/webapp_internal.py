@@ -1685,13 +1685,8 @@ class WebappInternal(Base):
         while True:
 
             element = None
-
-            container = self.get_current_container()
-
-            if container:
-                tsays = container.select(".tsay")
-
-                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+            
+            element = self.search_text(selector=".tsay", text=string)
 
             if not element:
                 break
@@ -1714,13 +1709,8 @@ class WebappInternal(Base):
         while True:
 
             element = None
-
-            container = self.get_current_container()
-
-            if container:
-                tsays = container.select(".tsay")
-
-                element = next(iter(list(filter(lambda x: string in re.sub(r"\t|\n|\r", " ", x.text), tsays))), None)
+            
+            element = self.search_text(selector=".tsay", text=string)
 
             if element:
                 break
