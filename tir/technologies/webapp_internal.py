@@ -1468,7 +1468,7 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
 
             layers = 0
-            if button == self.language.confirm:
+            if button in [self.language.confirm, self.language.save]:
                 layers = len(self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog"))
 
             success = False
@@ -1533,8 +1533,8 @@ class WebappInternal(Base):
                         self.used_ids.pop(key)
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
-                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False)
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
+                self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
             elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
@@ -1696,6 +1696,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitHide("Processing")
         """
         print("Waiting processing...")
+        
         while True:
 
             element = None
@@ -1724,6 +1725,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitShow("Processing")
         """
         print("Waiting processing...")
+
         while True:
 
             element = None
@@ -1733,7 +1735,7 @@ class WebappInternal(Base):
             if container:
                 tsays = container.select(".tsay")
 
-                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+                element = next(iter(list(filter(lambda x: string in re.sub(r"\t|\n|\r", " ", x.text), tsays))), None)
 
             if element:
                 break
@@ -1868,6 +1870,7 @@ class WebappInternal(Base):
 
             class_grid = grid.attrs['class'][0]
             sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
+            sd_button_list = self.filter_is_displayed(sd_button_list)
             sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
             scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
             scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
@@ -3702,3 +3705,9 @@ class WebappInternal(Base):
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements)) if len(elements) > 1 else elements
+
+    def filter_is_displayed(self, elements):
+        """
+        [Internal]
+        """
+        return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))

@@ -415,6 +415,25 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickTree">
+<code class="descname">ClickTree</code><span class="sig-paren">(</span><em>treepath</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on TreeView component.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
@@ -1165,6 +1184,13 @@ Internal method of SetButton.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.click_tree">
+<code class="descname">click_tree</code><span class="sig-paren">(</span><em>tree_node</em>, <em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Take treenode and label to filter and click in the toggler element to expand de TreeView.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.close_coin_screen">
 <code class="descname">close_coin_screen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.close_coin_screen" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1186,6 +1212,12 @@ Internal method of SetButton.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">close_modal</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.containers_filter">
+<code class="descname">containers_filter</code><span class="sig-paren">(</span><em>containers</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.containers_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal</p>
 </dd></dl>
 
 <dl class="method">
@@ -1486,6 +1518,13 @@ If none has children itens, it will be an empty list.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_sub_menu_text</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">child_itens</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.find_tree_bs">
+<code class="descname">find_tree_bs</code><span class="sig-paren">(</span><em>labels</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.find_tree_bs" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Search the label string in current container and return a treenode element.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1875,6 +1914,12 @@ Returns True if succeeded, False if it failed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">input_value</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.label_element_displayed">
+<code class="descname">label_element_displayed</code><span class="sig-paren">(</span><em>label_text</em>, <em>container</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.label_element_displayed" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="method">
@@ -2353,6 +2398,7 @@ Meant to be used inside of a loop.</p>
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
 
   
