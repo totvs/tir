@@ -3603,7 +3603,7 @@ class WebappInternal(Base):
     def click_tree(self, tree_node, label):
         """
         [Internal]
-        Take treenode and label to filter and click in the toggler element to expand de TreeView.
+        Take treenode and label to filter and click in the toggler element to expand the TreeView.
         """
 
         success = False
@@ -3658,7 +3658,13 @@ class WebappInternal(Base):
 
     def containers_filter(self, containers):
         """
-        Internal
+        [Internal]
+        Filter and remove tsvg class an return a container_filtered
+        
+        Usage:
+
+        >>> #Calling the method
+        >>> containers = self.containers_filter(containers)
         """
         class_remove = "tsvg"
         container_filtered = []
@@ -3676,6 +3682,12 @@ class WebappInternal(Base):
     def filter_label_element(self, label_text, container):
         """
         [Internal]
+        Filter and remove a specified character with regex, return only displayed elements if > 1.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> elements = self.filter_label_element(label_text, container)
         """
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
@@ -3684,12 +3696,24 @@ class WebappInternal(Base):
     def filter_is_displayed(self, elements):
         """
         [Internal]
+        Returns only displayed elements.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> elements = self.filter_is_displayed(elements)
         """
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
 
     def search_text(self, selector, text):
         """
         [Internal]
+        Return a element based on text and selector.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> element = self.search_text(selector, text)
         """
         container = self.get_current_container()
 
