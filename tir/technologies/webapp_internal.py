@@ -679,8 +679,7 @@ class WebappInternal(Base):
             if not elem:
                 self.log_error("Element wasn't found.")
 
-            element_children = next((x for x in elem.contents if x.name in ["input", "select"]), None)
-            return element_children if element_children is not None else elem
+            return elem
        
         except Exception as error:
             print(error)
@@ -780,7 +779,6 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                #element = self.search_element_position(field)
                 element = self.get_field(field, name_attr)
 
             if not element:
@@ -3213,7 +3211,7 @@ class WebappInternal(Base):
                     self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
                     return [second_previous_sibling]
                 else:
-                    return self.search_element_position(label_text)
+                    return []
 
             #If element is not tsay => return it
             elif (hasattr(element, "attrs") and "class" in element.attrs
@@ -3223,6 +3221,8 @@ class WebappInternal(Base):
         #If label exists but there is no element associated with it => return empty list
         if not element:
             return []
+        else
+            return self.search_elemento_position(label_text)
 
     def log_error(self, message, new_log_line=True):
         """
