@@ -595,6 +595,7 @@ class WebappInternal(Base):
         self.click(sel_input())
 
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -656,20 +657,34 @@ class WebappInternal(Base):
         return tsays.index(label)
 
     def search_element_position(self,field):
-        container = self.get_current_container()
-        labels = container.select("label")
-        label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(field),x.text) ,labels))),None)
-        if(label != None):   
+        try:
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Container wasn't found.")
+
+            labels = container.select("label")
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            if not label:
+                self.log_error("Label wasn't found.")
+
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=".tget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = self.web_scrap(term=".tget, .tcombobox", scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1],xy_label)), enumerate(list_in_range)))
-            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] > xy_label['y'] or xy_elem[1]['x'] > xy_label['x']),position_list ))
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
-            return elem
+            if not elem:
+                self.log_error("Element wasn't found.")
+
+            element_children = next((x for x in elem.contents if x.name in ["input", "select"]), None)
+            return element_children if element_children is not None else elem
+       
+        except Exception as error:
+            print(error)
+            self.log_error(str(error))
 
 
     def get_position_from_bs_element(self,element,label):
@@ -765,8 +780,8 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.search_element_position(field)
-                #element = self.get_field(field, name_attr)
+                #element = self.search_element_position(field)
+                element = self.get_field(field, name_attr)
 
             if not element:
                 continue
@@ -3175,7 +3190,7 @@ class WebappInternal(Base):
                     self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
                     return [second_next_sibling]
                 else:
-                    return []
+                    return[]
 
             #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
             elif (hasattr(element, "attrs") and "class" in element.attrs
@@ -3198,7 +3213,7 @@ class WebappInternal(Base):
                     self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
                     return [second_previous_sibling]
                 else:
-                    return []
+                    return self.search_element_position(label_text)
 
             #If element is not tsay => return it
             elif (hasattr(element, "attrs") and "class" in element.attrs
