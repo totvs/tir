@@ -3221,8 +3221,8 @@ class WebappInternal(Base):
         #If label exists but there is no element associated with it => return empty list
         if not element:
             return []
-        else
-            return self.search_elemento_position(label_text)
+        else:
+            return self.search_element_position(label_text)
 
     def log_error(self, message, new_log_line=True):
         """
