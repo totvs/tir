@@ -1057,8 +1057,22 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.LogOff()
         """
-        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-        self.SetButton(self.language.finish)
+        element = ""
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+
+        if self.config.coverage:
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not element):
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                self.SetButton(self.language.finish)
+
+                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+
+                element = self.search_text(selector=".tsay", text=string)
+
+        else:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+            self.SetButton(self.language.finish)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -1672,13 +1686,8 @@ class WebappInternal(Base):
         while True:
 
             element = None
-
-            container = self.get_current_container()
-
-            if container:
-                tsays = container.select(".tsay")
-
-                element = next(iter(list(filter(lambda x: string in x.text, tsays))), None)
+            
+            element = self.search_text(selector=".tsay", text=string)
 
             if not element:
                 break
@@ -1701,13 +1710,8 @@ class WebappInternal(Base):
         while True:
 
             element = None
-
-            container = self.get_current_container()
-
-            if container:
-                tsays = container.select(".tsay")
-
-                element = next(iter(list(filter(lambda x: string in re.sub(r"\t|\n|\r", " ", x.text), tsays))), None)
+            
+            element = self.search_text(selector=".tsay", text=string)
 
             if element:
                 break
@@ -3600,7 +3604,7 @@ class WebappInternal(Base):
     def click_tree(self, tree_node, label):
         """
         [Internal]
-        Take treenode and label to filter and click in the toggler element to expand de TreeView.
+        Take treenode and label to filter and click in the toggler element to expand the TreeView.
         """
 
         success = False
@@ -3655,7 +3659,13 @@ class WebappInternal(Base):
 
     def containers_filter(self, containers):
         """
-        Internal
+        [Internal]
+        Filter and remove tsvg class an return a container_filtered
+        
+        Usage:
+
+        >>> #Calling the method
+        >>> containers = self.containers_filter(containers)
         """
         class_remove = "tsvg"
         container_filtered = []
@@ -3673,6 +3683,12 @@ class WebappInternal(Base):
     def filter_label_element(self, label_text, container):
         """
         [Internal]
+        Filter and remove a specified character with regex, return only displayed elements if > 1.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> elements = self.filter_label_element(label_text, container)
         """
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
@@ -3681,5 +3697,28 @@ class WebappInternal(Base):
     def filter_is_displayed(self, elements):
         """
         [Internal]
+        Returns only displayed elements.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> elements = self.filter_is_displayed(elements)
         """
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+    def search_text(self, selector, text):
+        """
+        [Internal]
+        Return a element based on text and selector.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> element = self.search_text(selector, text)
+        """
+        container = self.get_current_container()
+
+        if container:
+            container_selector = container.select(selector)
+
+            return next(iter(list(filter(lambda x: text in re.sub(r"\t|\n|\r", " ", x.text), container_selector))), None)
