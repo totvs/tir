@@ -1061,7 +1061,8 @@ class WebappInternal(Base):
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
         if self.config.coverage:
-            while not element:
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 self.SetButton(self.language.finish)
 
