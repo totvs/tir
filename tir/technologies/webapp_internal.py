@@ -1505,6 +1505,14 @@ class WebappInternal(Base):
 
                 self.click(soup_element())
 
+            if self.grid_counters:
+                buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
+
+                buttons_filtered = list(map(lambda x: x.lower(), buttons))
+
+                if button.lower() in buttons_filtered:
+                    self.grid_counters = {}
+
             if self.used_ids:
 
                 buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
