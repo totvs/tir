@@ -709,10 +709,7 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
         """ 
         self.__webapp.ClickTree(treepath)
-
-    def teste(self,field):
-        self.__webapp.search_element_position(field)
-
+        
 class Apw():
 
     def __init__(self, config_path=""):
