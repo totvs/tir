@@ -354,6 +354,31 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
+    def StandardSearchField(self, field, name_attr=False):
+        """
+        This method is similar to ClickIcon
+            1.Clicks on the Selenium element.
+
+            [Internal]
+            Do the standard query(F3) 
+            this method 
+            1.Search the field
+            2.Search icon "lookup"
+            3.Click()
+
+        :param term: The term that must be searched.
+        :param name_attr: If true searchs element by name
+
+        Usage:
+
+        >>> # To search using a label name:
+        >>> oHelper.SearchBrowse("Cód")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input:
+        >>> oHelper.StandardSearchField(field='A1_EST',name_attr=True)
+        """
+        self.__webapp.standard_search_field(field,name_attr=False)
+
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.

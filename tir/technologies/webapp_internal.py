@@ -456,6 +456,42 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
 
+    def standard_search_field(self, field, name_attr=False):
+        """
+            [Internal]
+            Do the standard query(F3) 
+            this method 
+            1.Search the field
+            2.Search icon "lookup"
+            3.Click()
+
+        :param term: The term that must be searched.
+        :param name_attr: If true searchs element by name
+
+        Usage:
+
+        >>> # To search using a label name:
+        >>> oHelper.SearchBrowse("Cód")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input:
+        >>> oHelper.StandardSearchField(field='A1_EST',name_attr=True)
+        """
+
+        #wait element
+        if name_attr:
+            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            self.wait_element(field)
+        # find element
+        element = self.get_field(field,name_attr).find_parent()
+        if not(element):
+            print("Field not found")
+        else:
+            print("Field successfully found")
+            icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
+            icon_s = self.soup_to_selenium(icon)
+            self.click(icon_s)
+            
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
