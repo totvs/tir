@@ -234,7 +234,8 @@ class LanguagePack:
             "Search By": "Procurar por:",
             "From": "De",
             "To": "Ate",
-            "Coins": "Monedas"
+            "Coins": "Monedas",
+            "Next": "Avançar >>"
         }
         russian = {
             "User": "Пользователь",
@@ -294,7 +295,11 @@ class LanguagePack:
             "Invert Selection": "Invert Selection",
             "Parameter Menu": "Environment > Registers > Parameters",
             "Search 2": "Search",
-            "Search By": "Search by:"
+            "Search By": "Search by:",
+            "From": "De",
+            "To": "Ate",
+            "Coins": "Monedas",
+            "Next": "Avançar >>"
         }
 
         if language.lower() == "en-us":
