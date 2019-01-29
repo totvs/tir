@@ -734,7 +734,7 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
         """ 
         self.__webapp.ClickTree(treepath)
-
+        
 class Apw():
 
     def __init__(self, config_path=""):
@@ -805,5 +805,4 @@ class Apw():
         self.__Apw.SetValue(campo, valor, grid, linha, chknewline, disabled)
 
     def WaitModal(self, text, opcao="title"):
-
         self.__Apw.WaitModal(text, opcao)
