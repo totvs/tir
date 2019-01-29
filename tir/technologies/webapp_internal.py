@@ -17,6 +17,7 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
+from math import sqrt, pow
 
 class WebappInternal(Base):
     """
@@ -594,6 +595,7 @@ class WebappInternal(Base):
         self.click(sel_input())
 
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -653,6 +655,45 @@ class WebappInternal(Base):
         tsays = list(map(lambda x: x.select(".tsay"), panels))
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
+
+    def search_element_position(self,field):
+        try:
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Container wasn't found.")
+
+            labels = container.select("label")
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            if not label:
+                self.log_error("Label wasn't found.")
+
+            label_s  = lambda:self.soup_to_selenium(label)
+            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            list_in_range = self.web_scrap(term=".tget, .tcombobox", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
+            position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
+            distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
+            elem          = min(distance, key = lambda x: x[1])
+            elem          = list_in_range[elem[0]]
+            if not elem:
+                self.log_error("Element wasn't found.")
+
+            return elem
+       
+        except Exception as error:
+            print(error)
+            self.log_error(str(error))
+
+
+    def get_position_from_bs_element(self,element):
+        selenium_element = self.soup_to_selenium(element)
+        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
+        return position
+
+    def get_distance(self,label_pos,element_pos):
+	    return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
+
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
@@ -3151,7 +3192,7 @@ class WebappInternal(Base):
                     self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
                     return [second_next_sibling]
                 else:
-                    return []
+                    return[]
 
             #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
             elif (hasattr(element, "attrs") and "class" in element.attrs
@@ -3184,6 +3225,8 @@ class WebappInternal(Base):
         #If label exists but there is no element associated with it => return empty list
         if not element:
             return []
+        else:
+            return self.search_element_position(label_text)
 
     def log_error(self, message, new_log_line=True):
         """
