@@ -459,23 +459,25 @@ class WebappInternal(Base):
 
     def standard_search_field(self, field, name_attr=False):
         """
-            [Internal]
-            Do the standard query(F3) 
-            this method 
-            1.Search the field
-            2.Search icon "lookup"
-            3.Click()
+        [Internal]
+        Do the standard query(F3) 
+        this method 
+        1.Search the field
+        2.Search icon "lookup"
+        3.Click()
 
         :param term: The term that must be searched.
+        :type term: str
         :param name_attr: If true searchs element by name
+        :type name_attr: bool
 
         Usage:
 
         >>> # To search using a label name:
-        >>> oHelper.SearchBrowse("Cód")
+        >>> self.standard_search_field(name_label)
         >>> #------------------------------------------------------------------------
         >>> # To search using the name of input:
-        >>> oHelper.StandardSearchField(field='A1_EST',name_attr=True)
+        >>> self.standard_search_field(field='A1_EST',name_attr=True)
         """
 
         #wait element

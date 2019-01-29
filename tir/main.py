@@ -354,7 +354,7 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def StandardSearchField(self, field, name_attr=False):
+    def F3(self, field, name_attr=False):
         """
         This method is similar to ClickIcon
             1.Clicks on the Selenium element.
@@ -372,10 +372,10 @@ class Webapp():
         Usage:
 
         >>> # To search using a label name:
-        >>> oHelper.SearchBrowse("Cód")
+        >>> oHelper.F3("Cód")
         >>> #------------------------------------------------------------------------
         >>> # To search using the name of input:
-        >>> oHelper.StandardSearchField(field='A1_EST',name_attr=True)
+        >>> oHelper.F3(field='A1_EST',name_attr=True)
         """
         self.__webapp.standard_search_field(field,name_attr=False)
 
