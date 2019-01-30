@@ -457,7 +457,7 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
 
-    def standard_search_field(self, field, name_attr=False):
+    def standard_search_field(self, term, name_attr=False,send_key=False):
         """
         [Internal]
         Do the standard query(F3) 
@@ -478,22 +478,44 @@ class WebappInternal(Base):
         >>> #------------------------------------------------------------------------
         >>> # To search using the name of input:
         >>> self.standard_search_field(field='A1_EST',name_attr=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input and do action with a key:
+        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
+        soup = self.get_current_DOM()
+        container_selector = self.base_container
+        container = self.zindex_sort(soup.select(container_selector), reverse=True)
 
         #wait element
         if name_attr:
-            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
-            self.wait_element(field)
+            self.wait_element(term)
         # find element
-        element = self.get_field(field,name_attr).find_parent()
+        element = self.get_field(term,name_attr).find_parent()
         if not(element):
             print("Field not found")
         else:
             print("Field successfully found")
-            icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
-            icon_s = self.soup_to_selenium(icon)
-            self.click(icon_s)
+            if(send_key):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
+                icon_s = self.soup_to_selenium(icon)
+                self.click(icon_s)
+        
+        soup = self.get_current_DOM()
+        container_selector = self.base_container
+        container_end = self.zindex_sort(soup.select(container_selector), reverse=True)
+
+        if (container[0]  == container_end[0]):
+            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            self.set_element_focus(input_field())
+            self.send_keys(input_field(), Keys.F3)
+        else:
+            print("Sucess")
             
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
@@ -695,6 +717,12 @@ class WebappInternal(Base):
         return tsays.index(label)
 
     def search_element_position(self,field):
+        """
+        [Internal]
+        Usage:
+        >>> # Calling the method
+        >>> self.search_element_position(field)
+        """
         try:
             container = self.get_current_container()
             if not container:
@@ -725,12 +753,20 @@ class WebappInternal(Base):
 
 
     def get_position_from_bs_element(self,element):
+        """
+        [Internal]
+
+        """
         selenium_element = self.soup_to_selenium(element)
         position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
         return position
 
     def get_distance(self,label_pos,element_pos):
-	    return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
+        """
+        [internal]
+
+        """
+        return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
@@ -3258,7 +3294,7 @@ class WebappInternal(Base):
             #If element is not tsay => return it
             elif (hasattr(element, "attrs") and "class" in element.attrs
                 and "tsay" not in element.attrs["class"]):
-                return [element]
+                return self.search_element_position(label_text)
                 
         #If label exists but there is no element associated with it => return empty list
         if not element:

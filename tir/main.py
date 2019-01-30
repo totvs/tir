@@ -354,7 +354,7 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def F3(self, field, name_attr=False):
+    def F3(self, term, name_attr=False,send_key=False):
         """
         This method is similar to ClickIcon
             1.Clicks on the Selenium element.
@@ -367,8 +367,12 @@ class Webapp():
             3.Click()
 
         :param term: The term that must be searched.
-        :param name_attr: If true searchs element by name
-
+        :type  term: str
+        :param name_attr: True: searchs element by name
+        :type  name_attr: bool
+        :param send_key: True: try open standard search field send key F3 
+        :type bool
+        
         Usage:
 
         >>> # To search using a label name:
@@ -376,8 +380,11 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using the name of input:
         >>> oHelper.F3(field='A1_EST',name_attr=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input and do action with a key:
+        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
-        self.__webapp.standard_search_field(field,name_attr=False)
+        self.__webapp.standard_search_field( term, name_attr, send_key )
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
