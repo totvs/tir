@@ -3764,8 +3764,6 @@ class WebappInternal(Base):
             container_selector = container.select(selector)
 
             return next(iter(list(filter(lambda x: text in re.sub(r"\t|\n|\r", " ", x.text), container_selector))), None)
-<<<<<<< HEAD
-=======
 
     def pop_dict_itens(self, dict_, element_id):
         """
@@ -3777,4 +3775,3 @@ class WebappInternal(Base):
             dict_.pop(key)
 
         return dict_
->>>>>>> master
