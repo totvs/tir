@@ -1505,18 +1505,17 @@ class WebappInternal(Base):
 
                 self.click(soup_element())
 
-            if self.used_ids:
+            buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
-                buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
+            buttons_filtered = list(map(lambda x: x.lower(), buttons))
 
-                buttons_filtered = list(map(lambda x: x.lower(), buttons))
+            if button.lower() in buttons_filtered:
 
-                if button.lower() in buttons_filtered:
+                if self.used_ids:
+                    self.used_ids = self.pop_dict_itens(self.used_ids, id_container)
                     
-                    new_dictionary = {k: v  for k, v in self.used_ids.items() if v == id_container}
-
-                    for key in list(new_dictionary.keys()):
-                        self.used_ids.pop(key)
+                elif self.grid_counters:
+                    self.grid_counters = {}
 
             if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
@@ -3722,3 +3721,14 @@ class WebappInternal(Base):
             container_selector = container.select(selector)
 
             return next(iter(list(filter(lambda x: text in re.sub(r"\t|\n|\r", " ", x.text), container_selector))), None)
+
+    def pop_dict_itens(self, dict_, element_id):
+        """
+        [Internal]
+        """
+        new_dictionary = {k: v  for k, v in dict_.items() if v == element_id}
+
+        for key in list(new_dictionary.keys()):
+            dict_.pop(key)
+
+        return dict_
