@@ -78,10 +78,7 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="configjson.html">Config.json</a></li>
-</ul>
-<p class="caption"><span class="caption-text">User Classes:</span></p>
+              <p class="caption"><span class="caption-text">User Classes:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="apw.html">APW</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp</a></li>
@@ -165,23 +162,8 @@
 <span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tir.main.Webapp">
-<em class="property">class </em><code class="descclassname">tir.main.</code><code class="descname">Webapp</code><span class="sig-paren">(</span><em>config_path=''</em>, <em>autostart=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tir.main.</code><code class="descname">Webapp</code><span class="sig-paren">(</span><em>config_path=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
-</td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="tir.main.Webapp.AddParameter">
 <code class="descname">AddParameter</code><span class="sig-paren">(</span><em>parameter</em>, <em>branch</em>, <em>portuguese_value=''</em>, <em>english_value=''</em>, <em>spanish_value=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Permalink to this definition">¶</a></dt>
@@ -236,33 +218,19 @@
 
 <dl class="method">
 <dt id="tir.main.Webapp.ChangeEnvironment">
-<code class="descname">ChangeEnvironment</code><span class="sig-paren">(</span><em>date=''</em>, <em>group=''</em>, <em>branch=''</em>, <em>module=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ChangeEnvironment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on the change environment area of Protheus Webapp and
-fills the environment screen.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+fills the environment screen with the values passed on the Setup method.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ChangeEnvironment</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="s2">&quot;13/11/2018&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;T1&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ChangeEnvironment</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="tir.main.Webapp.CheckResult">
-<code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition">¶</a></dt>
+<code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -274,7 +242,6 @@ fills the environment screen.</p>
 <li><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</li>
 <li><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</li>
 <li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
-<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</li>
 </ul>
 </td>
 </tr>
@@ -433,25 +400,6 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.ClickTree">
-<code class="descname">ClickTree</code><span class="sig-paren">(</span><em>treepath</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicks on TreeView component.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
@@ -561,56 +509,8 @@ of a grid. After running, the queues would be empty.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.Screenshot">
-<code class="descname">Screenshot</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Screenshot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a screenshot and saves on the screenshot folder defined in config.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – The name of the screenshot file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Screenshot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;myscreenshot&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="tir.main.Webapp.ScrollGrid">
-<code class="descname">ScrollGrid</code><span class="sig-paren">(</span><em>column</em>, <em>match_value</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ScrollGrid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scrolls Grid until a matching column is found.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The column to be matched.</li>
-<li><strong>match_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to be matched in defined column.</li>
-<li><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span><span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to scroll to a column match of the second grid:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ScrollGrid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="n">match_value</span><span class="o">=</span><span class="s2">&quot;D MG 01 &quot;</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.SearchBrowse">
-<code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key=None</em>, <em>identifier=None</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SearchBrowse</code><span class="sig-paren">(</span><em>term</em>, <em>key_description=None</em>, <em>identifier=None</em>, <em>index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -680,7 +580,7 @@ is provided, it will search on the chosen search box.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</li>
 <li><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Sub item to be clicked inside the first button. - <strong>Default:</strong> “” (empty string)</li>
-<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</li>
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</li>
 </ul>
 </td>
 </tr>
@@ -799,47 +699,6 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.SetTIRConfig">
-<code class="descname">SetTIRConfig</code><span class="sig-paren">(</span><em>config_name</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTIRConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>Changes a value of a TIR internal config during runtime.</p>
-<p>This could be useful for TestCases that must use a different set of configs
-than the ones defined at <strong>config.json</strong></p>
-<p>Available configs:</p>
-<ul class="simple">
-<li>Url</li>
-<li>Environment</li>
-<li>User</li>
-<li>Password</li>
-<li>Language</li>
-<li>DebugLog</li>
-<li>TimeOut</li>
-<li>InitialProgram</li>
-<li>Routine</li>
-<li>Date</li>
-<li>Group</li>
-<li>Branch</li>
-<li>Module</li>
-</ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The config to be changed.</li>
-<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value that would be set.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetTIRConfig</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;30/10/2018&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.SetTabEDAPP">
 <code class="descname">SetTabEDAPP</code><span class="sig-paren">(</span><em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTabEDAPP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Chooses the table on the generic query (EDAPP).</p>
@@ -921,17 +780,6 @@ than the ones defined at <strong>config.json</strong></p>
 </dd></dl>
 
 <dl class="method">
-<dt id="tir.main.Webapp.Start">
-<code class="descname">Start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Opens the browser maximized and goes to defined URL.</p>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="tir.main.Webapp.TearDown">
 <code class="descname">TearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.TearDown" title="Permalink to this definition">¶</a></dt>
 <dd><p>Closes the webdriver and ends the test case.</p>
@@ -968,13 +816,14 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitHide">
-<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait hide the elements.</p>
+<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait hide the elements.
+e.g. “Item1,Item2,Item3”</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> – String that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -987,13 +836,13 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitProcessing">
-<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition">¶</a></dt>
+<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – String that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -1006,13 +855,14 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.WaitShow">
-<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search string that was sent and wait show the elements.</p>
+<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search string that was sent and wait show the elements.
+e.g. “Item1,Item2,Item3”</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> – String that will hold the wait.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – List of itens that will hold the wait.</td>
 </tr>
 </tbody>
 </table>
@@ -1047,7 +897,7 @@ Recommended for Trigger fields.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Totvs Automation Team
+        &copy; Copyright 2018, Totvs Automation Team.
 
     </p>
   </div>
@@ -1066,14 +916,20 @@ Recommended for Trigger fields.</p>
 
   
 
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
 
   
 
