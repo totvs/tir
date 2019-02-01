@@ -3223,7 +3223,7 @@ class WebappInternal(Base):
                 #If element is not tsay => return it
                 elif (hasattr(element, "attrs") and "class" in element.attrs
                     and "tsay" not in element.attrs["class"]):
-                    return [element]
+                    return self.search_element_position(label_text)
                     
             #If label exists but there is no element associated with it => return empty list
             if not element:
