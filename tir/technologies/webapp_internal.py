@@ -470,6 +470,8 @@ class WebappInternal(Base):
         :type term: str
         :param name_attr: If true searchs element by name
         :type name_attr: bool
+        :param send_key: True: try open standard search field send key F3 (no click)
+        :type bool
 
         Usage:
 
