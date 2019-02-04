@@ -22,6 +22,7 @@ from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
+from selenium.common.exceptions import StaleElementReferenceException
 
 class Base(unittest.TestCase):
     """
@@ -158,6 +159,8 @@ class Base(unittest.TestCase):
                 ActionChains(self.driver).move_to_element(element).click().perform()
         except Exception as error:
             self.log_error(str(error))
+        except StaleElementReferenceException:
+            pass
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -659,8 +662,12 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> text = self.set_element_focus(element())
-        """
-        self.driver.execute_script("window.focus(); arguments[0].focus();", element)
+        """   
+        try:
+            self.driver.execute_script("window.focus(); arguments[0].focus();", element)
+        except StaleElementReferenceException:
+            pass
+    
 
     def soup_to_selenium(self, soup_object):
         """
