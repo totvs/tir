@@ -552,6 +552,10 @@ class Webapp():
         >>> oHelper.SetValue("Client", "000001", grid=True)
         >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
+        >>> # Calling method to checkbox value on a field that is a grid:
+        >>> oHelper.SetValue('Confirmado?', True, grid=True)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
