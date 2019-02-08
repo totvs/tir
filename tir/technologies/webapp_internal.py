@@ -457,6 +457,66 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
 
+    def standard_search_field(self, term, name_attr=False,send_key=False):
+        """
+        [Internal]
+        Do the standard query(F3) 
+        this method 
+        1.Search the field
+        2.Search icon "lookup"
+        3.Click()
+
+        :param term: The term that must be searched.
+        :type term: str
+        :param name_attr: If true searchs element by name
+        :type name_attr: bool
+        :param send_key: True: try open standard search field send key F3 (no click)
+        :type bool
+
+        Usage:
+
+        >>> # To search using a label name:
+        >>> self.standard_search_field(name_label)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input:
+        >>> self.standard_search_field(field='A1_EST',name_attr=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input and do action with a key:
+        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        """
+        container = self.get_current_container()
+
+        try:
+            #wait element
+            if name_attr:
+                self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(term)
+            # find element
+            element = self.get_field(term,name_attr).find_parent()
+            if not(element):
+                raise Exception("Couldn't find element")
+
+            print("Field successfully found")
+            if(send_key):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
+                icon_s = self.soup_to_selenium(icon)
+                self.click(icon_s)
+
+            container_end = self.get_current_container()
+            if (container['id']  == container_end['id']):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                print("Sucess")
+        except Exception as e:
+            self.log_error(str(e))
+            
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -657,6 +717,12 @@ class WebappInternal(Base):
         return tsays.index(label)
 
     def search_element_position(self,field):
+        """
+        [Internal]
+        Usage:
+        >>> # Calling the method
+        >>> self.search_element_position(field)
+        """
         try:
             container = self.get_current_container()
             if not container:
@@ -691,12 +757,20 @@ class WebappInternal(Base):
 
 
     def get_position_from_bs_element(self,element):
+        """
+        [Internal]
+
+        """
         selenium_element = self.soup_to_selenium(element)
         position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
         return position
 
     def get_distance(self,label_pos,element_pos):
-	    return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
+        """
+        [internal]
+
+        """
+        return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
