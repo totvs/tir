@@ -484,20 +484,19 @@ class WebappInternal(Base):
         >>> # To search using the name of input and do action with a key:
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
-        soup = self.get_current_DOM()
-        container_selector = self.base_container
-        container = self.zindex_sort(soup.select(container_selector), reverse=True)
+        container = self.get_current_container()
 
-        #wait element
-        if name_attr:
-            self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        else:
-            self.wait_element(term)
-        # find element
-        element = self.get_field(term,name_attr).find_parent()
-        if not(element):
-            print("Field not found")
-        else:
+        try:
+            #wait element
+            if name_attr:
+                self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(term)
+            # find element
+            element = self.get_field(term,name_attr).find_parent()
+            if not(element):
+                raise Exception("Couldn't find element")
+
             print("Field successfully found")
             if(send_key):
                 input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
@@ -507,17 +506,16 @@ class WebappInternal(Base):
                 icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
                 icon_s = self.soup_to_selenium(icon)
                 self.click(icon_s)
-        
-        soup = self.get_current_DOM()
-        container_selector = self.base_container
-        container_end = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-        if (container[0]  == container_end[0]):
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            self.set_element_focus(input_field())
-            self.send_keys(input_field(), Keys.F3)
-        else:
-            print("Sucess")
+            container_end = self.get_current_container()
+            if (container['id']  == container_end['id']):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                print("Sucess")
+        except Exception as e:
+            self.log_error(str(e))
             
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """

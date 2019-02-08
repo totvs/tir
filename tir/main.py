@@ -354,7 +354,7 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def F3(self, term, name_attr=False,send_key=False):
+    def F3(self, field, name_attr=False,send_key=False):
         """
         This method is similar to ClickIcon
             1.Clicks on the Selenium element.
@@ -384,7 +384,7 @@ class Webapp():
         >>> # To search using the name of input and do action with a key:
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
-        self.__webapp.standard_search_field( term, name_attr, send_key )
+        self.__webapp.standard_search_field( field, name_attr, send_key )
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
