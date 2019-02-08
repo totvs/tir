@@ -157,10 +157,11 @@ class Base(unittest.TestCase):
                 element.click()
             elif click_type == enum.ClickType.ACTIONCHAINS:
                 ActionChains(self.driver).move_to_element(element).click().perform()
+        except StaleElementReferenceException:
+            print("********Element Stale click*********")
+            pass
         except Exception as error:
             self.log_error(str(error))
-        except StaleElementReferenceException:
-            pass
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -399,7 +400,11 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> text = self.get_element_text(element())
         """
-        return self.driver.execute_script("return arguments[0].innerText", element)
+        try:
+            return self.driver.execute_script("return arguments[0].innerText", element)
+        except StaleElementReferenceException:
+            print("********Element Stale get_element_text*********")
+            pass
 
     def get_element_value(self, element):
         """
@@ -420,7 +425,11 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> text = self.get_element_value(element())
         """
-        return self.driver.execute_script("return arguments[0].value", element)
+        try:
+            return self.driver.execute_script("return arguments[0].value", element)
+        except StaleElementReferenceException:
+            print("********Element Stale get_element_value*********")
+            pass
 
     def log_error(self, message, new_log_line=True):
         """
@@ -542,10 +551,14 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
-        if element.get_attribute("id"):
-            self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
-        else:
-            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+        try:
+            if element.get_attribute("id"):
+                self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
+            else:
+                self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+        except StaleElementReferenceException:
+            print("********Element Stale scroll_to_element*********")
+            pass
 
     def search_zindex(self,element):
         """
@@ -666,6 +679,7 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
+            print("********Element Stale set_element_focus*********")
             pass
     
 
