@@ -357,14 +357,14 @@ class Webapp():
     def F3(self, field, name_attr=False,send_key=False):
         """
         This method is similar to ClickIcon
-            1.Clicks on the Selenium element.
+        1.Clicks on the Selenium element.
 
-            [Internal]
-            Do the standard query(F3) 
-            this method 
-            1.Search the field
-            2.Search icon "lookup"
-            3.Click()
+        [Internal]
+        Do the standard query(F3) 
+        this method 
+        1.Search the field
+        2.Search icon "lookup"
+        3.Click()
 
         :param term: The term that must be searched.
         :type  term: str
