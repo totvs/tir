@@ -2052,13 +2052,14 @@ class WebappInternal(Base):
         >>> value_without_mask = self.remove_mask("111-111.111")
         >>> # value_without_mask == "111111111"
         """
-        caracter = (r'[.\/+-]')
-        if string[0:4] != 'http':
-            match = re.findall(caracter, string)
-            if match:
-                string = re.sub(caracter, '', string)
+        if type(string) is str:
+            caracter = (r'[.\/+-]')
+            if string[0:4] != 'http':
+                match = re.findall(caracter, string)
+                if match:
+                    string = re.sub(caracter, '', string)
 
-        return string
+            return string
 
     def SetKey(self, key, grid=False, grid_number=1):
         """
