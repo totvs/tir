@@ -776,11 +776,14 @@ class WebappInternal(Base):
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
-
+        
+        .. note::
+            Attention on the grid use the field mask.
+         
         :param field: The field name or label to receive the value
         :type field: str
         :param value: The value to be inputted on the element.
-        :type value: str
+        :type value: str or bool
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
         :param grid_number: Grid number of which grid should be inputted when there are multiple grids on the same screen. - **Default:** 1
@@ -799,6 +802,10 @@ class WebappInternal(Base):
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to checkbox value on a field that is a grid:
+        >>> oHelper.SetValue('Confirmado?', True, grid=True)
         >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
@@ -2518,8 +2525,16 @@ class WebappInternal(Base):
                         xpath = xpath_soup(columns[column_number])
 
                         try_counter = 0
+                        current_value = self.remove_mask(current_value).strip()
 
-                        while(self.remove_mask(current_value).strip() != self.remove_mask(field[1]).strip()):
+                        if(field[1] == True):
+                            field_one = 'is a boolean value'
+                        elif(field[1] == False):
+                            field_one = ''
+                        elif(isinstance(field[1],str)):
+                            field_one = self.remove_mask(field[1]).strip()
+
+                        while(self.remove_mask(current_value).strip() != field_one):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2533,6 +2548,11 @@ class WebappInternal(Base):
                                 self.click(selenium_column())
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
+                                if(field[1] == True):
+                                    field_one = ''
+                                    break
+
+                            if(field[1] == True): break # if boolean field finish here.
 
                             self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
