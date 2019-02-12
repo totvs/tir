@@ -17,6 +17,7 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
+from math import sqrt, pow
 
 class WebappInternal(Base):
     """
@@ -456,6 +457,66 @@ class WebappInternal(Base):
             self.send_keys(s_tget(), program)
             self.click(s_tget_img())
 
+    def standard_search_field(self, term, name_attr=False,send_key=False):
+        """
+        [Internal]
+        Do the standard query(F3) 
+        this method 
+        1.Search the field
+        2.Search icon "lookup"
+        3.Click()
+
+        :param term: The term that must be searched.
+        :type term: str
+        :param name_attr: If true searchs element by name
+        :type name_attr: bool
+        :param send_key: True: try open standard search field send key F3 (no click)
+        :type bool
+
+        Usage:
+
+        >>> # To search using a label name:
+        >>> self.standard_search_field(name_label)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input:
+        >>> self.standard_search_field(field='A1_EST',name_attr=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the name of input and do action with a key:
+        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        """
+        container = self.get_current_container()
+
+        try:
+            #wait element
+            if name_attr:
+                self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(term)
+            # find element
+            element = self.get_field(term,name_attr).find_parent()
+            if not(element):
+                raise Exception("Couldn't find element")
+
+            print("Field successfully found")
+            if(send_key):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
+                icon_s = self.soup_to_selenium(icon)
+                self.click(icon_s)
+
+            container_end = self.get_current_container()
+            if (container['id']  == container_end['id']):
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                self.set_element_focus(input_field())
+                self.send_keys(input_field(), Keys.F3)
+            else:
+                print("Sucess")
+        except Exception as e:
+            self.log_error(str(e))
+            
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -594,6 +655,7 @@ class WebappInternal(Base):
         self.click(sel_input())
 
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -654,14 +716,74 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
+    def search_element_position(self,field):
+        """
+        [Internal]
+        Usage:
+        >>> # Calling the method
+        >>> self.search_element_position(field)
+        """
+        try:
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Container wasn't found.")
+
+            labels = container.select("label")
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            if not label:
+                self.log_error("Label wasn't found.")
+
+            label_s  = lambda:self.soup_to_selenium(label)
+            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            list_in_range = self.web_scrap(term=".tget, .tcombobox", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
+            position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
+            if(position_list == []):
+                position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
+                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] or xy_elem[1]['x'] >= xy_label['x']),position_list ))
+
+            distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
+            elem          = min(distance, key = lambda x: x[1])
+            elem          = list_in_range[elem[0]]
+            if not elem:
+                self.log_error("Element wasn't found.")
+
+            return elem
+       
+        except Exception as error:
+            print(error)
+            self.log_error(str(error))
+
+
+    def get_position_from_bs_element(self,element):
+        """
+        [Internal]
+
+        """
+        selenium_element = self.soup_to_selenium(element)
+        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
+        return position
+
+    def get_distance(self,label_pos,element_pos):
+        """
+        [internal]
+
+        """
+        return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
+
+
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
         Sets value of an input element.
-
+        
+        .. note::
+            Attention on the grid use the field mask.
+         
         :param field: The field name or label to receive the value
         :type field: str
         :param value: The value to be inputted on the element.
-        :type value: str
+        :type value: str or bool
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
         :param grid_number: Grid number of which grid should be inputted when there are multiple grids on the same screen. - **Default:** 1
@@ -680,6 +802,10 @@ class WebappInternal(Base):
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to checkbox value on a field that is a grid:
+        >>> oHelper.SetValue('Confirmado?', True, grid=True)
         >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
@@ -2007,13 +2133,14 @@ class WebappInternal(Base):
         >>> value_without_mask = self.remove_mask("111-111.111")
         >>> # value_without_mask == "111111111"
         """
-        caracter = (r'[.\/+-]')
-        if string[0:4] != 'http':
-            match = re.findall(caracter, string)
-            if match:
-                string = re.sub(caracter, '', string)
+        if type(string) is str:
+            caracter = (r'[.\/+-]')
+            if string[0:4] != 'http':
+                match = re.findall(caracter, string)
+                if match:
+                    string = re.sub(caracter, '', string)
 
-        return string
+            return string
 
     def SetKey(self, key, grid=False, grid_number=1):
         """
@@ -2398,8 +2525,16 @@ class WebappInternal(Base):
                         xpath = xpath_soup(columns[column_number])
 
                         try_counter = 0
+                        current_value = self.remove_mask(current_value).strip()
 
-                        while(self.remove_mask(current_value).strip() != self.remove_mask(field[1]).strip()):
+                        if(field[1] == True):
+                            field_one = 'is a boolean value'
+                        elif(field[1] == False):
+                            field_one = ''
+                        elif(isinstance(field[1],str)):
+                            field_one = self.remove_mask(field[1]).strip()
+
+                        while(self.remove_mask(current_value).strip() != field_one):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2413,6 +2548,11 @@ class WebappInternal(Base):
                                 self.click(selenium_column())
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
+                                if(field[1] == True):
+                                    field_one = ''
+                                    break
+
+                            if(field[1] == True): break # if boolean field finish here.
 
                             self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
@@ -3117,73 +3257,77 @@ class WebappInternal(Base):
 
         >>> self.find_label_element("User:", container_object)
         """
+        try:
+            elements = self.filter_label_element(label_text, container)
 
-        elements = self.filter_label_element(label_text, container)
+            for element in elements:
 
-        for element in elements:
+                #Checking previous and next element:
+                next_sibling = element.find_next_sibling("div")
+                second_next_sibling = next_sibling.find_next_sibling("div")
 
-            #Checking previous and next element:
-            next_sibling = element.find_next_sibling("div")
-            second_next_sibling = next_sibling.find_next_sibling("div")
+                previous_sibling = element.find_next_sibling("div")
+                second_previous_sibling = previous_sibling.find_next_sibling("div")
 
-            previous_sibling = element.find_next_sibling("div")
-            second_previous_sibling = previous_sibling.find_next_sibling("div")
+                #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
+                if (hasattr(element, "attrs") and "class" in element.attrs
+                    and "tsay" in element.attrs["class"]
+                    and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
+                    and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
+                    and next_sibling.attrs["id"] not in self.used_ids)
+                    or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
+                    and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
+                    and second_next_sibling.attrs["id"] not in self.used_ids)):
 
-            #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
-            if (hasattr(element, "attrs") and "class" in element.attrs
-                and "tsay" in element.attrs["class"]
-                and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
-                and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
-                and next_sibling.attrs["id"] not in self.used_ids)
-                or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
-                and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
-                and second_next_sibling.attrs["id"] not in self.used_ids)):
+                    if (("tget" in next_sibling.attrs["class"]
+                            or "tcombobox" in next_sibling.attrs["class"])
+                            and next_sibling.attrs["id"] not in self.used_ids):
+                        self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
+                        return [next_sibling]
+                    elif (("tget" in second_next_sibling.attrs["class"]
+                            or "tcombobox" in second_next_sibling.attrs["class"])
+                            and second_next_sibling.attrs["id"] not in self.used_ids):
+                        self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
+                        return [second_next_sibling]
+                    else:
+                        return[]
 
-                if (("tget" in next_sibling.attrs["class"]
-                        or "tcombobox" in next_sibling.attrs["class"])
-                        and next_sibling.attrs["id"] not in self.used_ids):
-                    self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
-                    return [next_sibling]
-                elif (("tget" in second_next_sibling.attrs["class"]
-                        or "tcombobox" in second_next_sibling.attrs["class"])
-                        and second_next_sibling.attrs["id"] not in self.used_ids):
-                    self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
-                    return [second_next_sibling]
-                else:
-                    return []
+                #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
+                elif (hasattr(element, "attrs") and "class" in element.attrs
+                    and "tsay" in element.attrs["class"]
+                    and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
+                    and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
+                    and previous_sibling.attrs["id"] not in self.used_ids)
+                    or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
+                    and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
+                    and second_previous_sibling.attrs["id"] not in self.used_ids)):
 
-            #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
-            elif (hasattr(element, "attrs") and "class" in element.attrs
-                and "tsay" in element.attrs["class"]
-                and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
-                and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
-                and previous_sibling.attrs["id"] not in self.used_ids)
-                or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
-                and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
-                and second_previous_sibling.attrs["id"] not in self.used_ids)):
+                    if (("tget" in previous_sibling.attrs["class"]
+                            or "tcombobox" in previous_sibling.attrs["class"])
+                            and previous_sibling.attrs["id"] not in self.used_ids):
+                        self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
+                        return [previous_sibling]
+                    elif (("tget" in second_previous_sibling.attrs["class"]
+                            or "tcombobox" in second_previous_sibling.attrs["class"])
+                            and second_previous_sibling.attrs["id"] not in self.used_ids):
+                        self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
+                        return [second_previous_sibling]
+                    else:
+                        return []
 
-                if (("tget" in previous_sibling.attrs["class"]
-                        or "tcombobox" in previous_sibling.attrs["class"])
-                        and previous_sibling.attrs["id"] not in self.used_ids):
-                    self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
-                    return [previous_sibling]
-                elif (("tget" in second_previous_sibling.attrs["class"]
-                        or "tcombobox" in second_previous_sibling.attrs["class"])
-                        and second_previous_sibling.attrs["id"] not in self.used_ids):
-                    self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
-                    return [second_previous_sibling]
-                else:
-                    return []
-
-            #If element is not tsay => return it
-            elif (hasattr(element, "attrs") and "class" in element.attrs
-                and "tsay" not in element.attrs["class"]):
-                return [element]
-                
-        #If label exists but there is no element associated with it => return empty list
-        if not element:
-            return []
-
+                #If element is not tsay => return it
+                elif (hasattr(element, "attrs") and "class" in element.attrs
+                    and "tsay" not in element.attrs["class"]):
+                    return self.search_element_position(label_text)
+                    
+            #If label exists but there is no element associated with it => return empty list
+            if not element:
+                return []
+            else:
+                return self.search_element_position(label_text)
+        except AttributeError:
+            return self.search_element_position(label_text)
+            
     def log_error(self, message, new_log_line=True):
         """
         [Internal]
