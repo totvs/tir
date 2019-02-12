@@ -8,6 +8,11 @@ TOTVS Interface Robot
 
 .. toctree::
    :maxdepth: 5
+
+   configjson
+
+.. toctree::
+   :maxdepth: 5
    :caption: User Classes:
 
    apw
