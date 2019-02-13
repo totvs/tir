@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="APW Internal" href="apw_internal.html" />
     <link rel="prev" title="APW" href="apw.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -447,6 +449,44 @@ fills the environment screen.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.main.Webapp.F3">
+<code class="descname">F3</code><span class="sig-paren">(</span><em>field</em>, <em>name_attr=False</em>, <em>send_key=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.F3" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is similar to ClickIcon
+1.Clicks on the Selenium element.</p>
+<p>[Internal]
+Do the standard query(F3) 
+this method 
+1.Search the field
+2.Search icon “lookup”
+3.Click()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The term that must be searched.</li>
+<li><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – True: searchs element by name</li>
+<li><strong>send_key</strong> – True: try open standard search field send key F3</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:type bool</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a label name:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="s2">&quot;Cód&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input and do action with a key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">send_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -887,6 +927,10 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Client&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to checkbox value on a field that is a grid:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s1">&#39;Confirmado?&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is on the second grid of the screen:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
@@ -1038,7 +1082,7 @@ Recommended for Trigger fields.</p>
         <a href="apw_internal.html" class="btn btn-neutral float-right" title="APW Internal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="apw.html" class="btn btn-neutral" title="APW" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="apw.html" class="btn btn-neutral float-left" title="APW" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1064,26 +1108,16 @@ Recommended for Trigger fields.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
