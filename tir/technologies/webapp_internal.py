@@ -1975,10 +1975,14 @@ class WebappInternal(Base):
             sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
             scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
             scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
-
+            
             last = None
-            get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
-            current = get_current()
+            get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")
+            if(not get_current()):
+                get_current = lambda: self.get_grid(grid_number).select("tbody tr")
+
+            get_current_filtered = next(iter(get_current()),None)
+            current = get_current_filtered()
             contents = content_list[:]
             while(last != current and contents):
                 td = next(iter(current.select(f"td[id='{column_index}']")), None)
