@@ -1982,7 +1982,7 @@ class WebappInternal(Base):
                 get_current = lambda: self.get_grid(grid_number).select("tbody tr")
 
             get_current_filtered = next(iter(get_current()),None)
-            current = get_current_filtered()
+            current = get_current_filtered
             contents = content_list[:]
             while(last != current and contents):
                 td = next(iter(current.select(f"td[id='{column_index}']")), None)
