@@ -1195,6 +1195,8 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
 
                 element = self.search_text(selector=".tsay", text=string)
+                if element:
+                    print(string)
 
         else:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
