@@ -15,6 +15,9 @@ class ConfigLoader:
             data = {}
 
         self.autostart = True
+        self.country = str(data["Country"]) if "Country" in data else "BRA"
+        self.execution_id = str(data["ExecId"]) if "ExecId" in data else ""
+        self.issue = str(data["MotExec"]) if "MotExec" in data else ""
         self.url = str(data["Url"]) if "Url" in data else ""
         self.browser = str(data["Browser"]) if "Browser" in data else ""
         self.environment = str(data["Environment"])  if "Environment" in data else ""
