@@ -114,6 +114,13 @@ class WebappInternal(Base):
 
         if save_input:
             self.set_log_info()
+        
+        if not self.log.program:
+            self.log.program = self.get_program_name()
+
+        self.log.country = self.config.country
+        self.log.execution_id = self.config.execution_id
+        self.log.issue = self.config.issue
 
     def program_screen(self, initial_program="", environment=""):
         """
@@ -1195,6 +1202,8 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
 
                 element = self.search_text(selector=".tsay", text=string)
+                if element:
+                    print(string)
 
         else:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -3876,3 +3885,11 @@ class WebappInternal(Base):
             dict_.pop(key)
 
         return dict_
+
+    def get_program_name(self):
+        """
+        [Internal]
+        """
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower(), inspect.stack()))))
+
+        return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
