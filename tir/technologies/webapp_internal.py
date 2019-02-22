@@ -1069,8 +1069,11 @@ class WebappInternal(Base):
             self.log_result(field, user_value, current_value)
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
-
-            self.wait_element(field)
+            if name_attr:
+                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(field)
+                
             element = self.get_field(field, name_attr=name_attr)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
