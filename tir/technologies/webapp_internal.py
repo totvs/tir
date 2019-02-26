@@ -523,7 +523,7 @@ class WebappInternal(Base):
                 print("Sucess")
         except Exception as e:
             self.log_error(str(e))
-            
+   
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -2411,7 +2411,7 @@ class WebappInternal(Base):
         >>> oHelper.LoadGrid()
         """
 
-        self.wait_element(term=".tgetdados, .tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         x3_dictionaries = self.create_x3_tuple()
 
@@ -2727,7 +2727,7 @@ class WebappInternal(Base):
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
             if self.config.debug_log:
                 print("Waiting for container to be active")
             time.sleep(1)
@@ -2738,7 +2738,7 @@ class WebappInternal(Base):
         if containers:
 
             containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
+            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid, .tcbrowse"))
             if grids:
 
                 headers = self.get_headers_from_grids(grids)
