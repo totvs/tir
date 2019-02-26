@@ -3289,6 +3289,9 @@ class WebappInternal(Base):
             elements = self.filter_label_element(label_text, container)
 
             for element in elements:
+                elem = self.search_element_position(label_text)
+                if elem:
+                    return elem
 
                 #Checking previous and next element:
                 next_sibling = element.find_next_sibling("div")
