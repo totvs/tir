@@ -3893,6 +3893,6 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower(), inspect.stack()))))
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))))
 
         return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
