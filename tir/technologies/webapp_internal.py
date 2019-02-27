@@ -4,6 +4,7 @@ import pandas as pd
 import inspect
 import os
 import random
+import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -3361,16 +3362,27 @@ class WebappInternal(Base):
 
         routine_name = routine_name if routine_name else "error"
 
+        
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
-        try:
-            os.makedirs(f"logs\\{self.log.timestamp}")
-        except OSError:
-            pass
 
-        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{routine_name} - {test_number} error.png")
+        if self.config.screenshot:
+
+            log_file = f"{self.log.user}_{uuid.uuid4().hex}_{routine_name}-{test_number} error.png"
+            
+            try:
+                if self.config.log_folder:
+                    path = f"{self.log.folder}\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"{self.log.folder}\\{self.log.station}")
+                else:
+                    path = f"Log\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"Log\\{self.log.station}")
+            except OSError:
+                pass
+
+            self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)

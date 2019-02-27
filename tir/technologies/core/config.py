@@ -15,6 +15,7 @@ class ConfigLoader:
             data = {}
 
         self.autostart = True
+        self.screenshot = bool(data["ScreenShot"]) if "ScreenShot" in data else True
         self.country = str(data["Country"]) if "Country" in data else "BRA"
         self.execution_id = str(data["ExecId"]) if "ExecId" in data else ""
         self.issue = str(data["MotExec"]) if "MotExec" in data else ""
