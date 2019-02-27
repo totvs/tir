@@ -2418,6 +2418,7 @@ class WebappInternal(Base):
 
         initial_layer = 0
         if self.grid_input:
+            self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
             initial_layer = len(soup.select(".tmodaldialog"))
 
@@ -2486,6 +2487,8 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
+
+        self.wait_element(field[0])
 
         soup = self.get_current_DOM()
 
@@ -2591,23 +2594,26 @@ class WebappInternal(Base):
                                 self.wait.until(EC.visibility_of(selenium_input()))
                                 self.set_element_focus(selenium_input())
                                 self.click(selenium_input())
-                                self.try_send_keys(selenium_input, user_value, try_counter)
+                                if "tget" in self.get_current_container().next.attrs['class']:
+                                    bsoup_element = self.get_current_container().next
+                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                    self.try_send_keys(selenium_input, user_value, try_counter)
 
-                                if try_counter < 2:
-                                    try_counter += 1
-                                else:
-                                    try_counter = 0
-
-                                if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
-                                        self.send_keys(selenium_input(), Keys.ENTER)
+                                    if try_counter < 2:
+                                        try_counter += 1
                                     else:
-                                        if not (re.match(r"[0-9]+,[0-9]+", user_value)):
+                                        try_counter = 0
+
+                                    if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
+                                        if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         else:
-                                            self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
-                                            if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                            if not (re.match(r"[0-9]+,[0-9]+", user_value)):
                                                 self.send_keys(selenium_input(), Keys.ENTER)
+                                            else:
+                                                self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
+                                                if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                                    self.send_keys(selenium_input(), Keys.ENTER)
 
                                 self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
                                 time.sleep(1)
@@ -3905,6 +3911,6 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower(), inspect.stack()))))
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))))
 
         return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
