@@ -463,6 +463,13 @@ class WebappInternal(Base):
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
             self.send_keys(s_tget(), program)
+            current_value = self.get_web_value(s_tget()).strip()
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and current_value != program):
+                self.send_keys(s_tget(), Keys.BACK_SPACE)
+                self.send_keys(s_tget(), program)
+                current_value = self.get_web_value(s_tget()).strip()
+                
             self.click(s_tget_img())
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
