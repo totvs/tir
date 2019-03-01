@@ -2,6 +2,7 @@ import time
 import os
 import numpy as nump
 import pandas as panda
+import uuid
 from datetime import datetime
 
 class Log:
@@ -31,6 +32,9 @@ class Log:
         self.table_rows.append(self.generate_header())
         self.folder = folder
         self.test_type = test_type
+        self.issue = issue
+        self.execution_id = execution_id
+        self.country = country
 
     def generate_header(self):
         """
@@ -74,17 +78,21 @@ class Log:
         >>> # Calling the method:
         >>> self.log.save_file()
         """
+        
+        log_file = f"{self.user}_{uuid.uuid4().hex}_auto.csv"
                 
         if len(self.table_rows) > 0:
             data = nump.array(self.table_rows)
-            if self.folder:
-                path = f"{self.folder}\\loginter_{self.timestamp}.csv"
-            else:
-                try:
-                    os.makedirs(f"logs\\{self.timestamp}")
-                except OSError:
-                    pass
-                path = f"logs\\{self.timestamp}\\{filename}.csv"
+            try:
+                if self.folder:
+                    path = f"{self.folder}\\{self.station}\\{log_file}"
+                    os.makedirs(f"{self.folder}\\{self.station}")
+                else:
+                    path = f"Log\\{self.station}\\{log_file}"
+                    os.makedirs(f"Log\\{self.station}")
+            except OSError:
+                pass
+                
             df = panda.DataFrame(data, columns=data[0])
             df.drop(0, inplace=True)
             df.to_csv(path, index=False, sep=';', encoding='latin-1')

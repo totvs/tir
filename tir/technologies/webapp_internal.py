@@ -4,6 +4,7 @@ import pandas as pd
 import inspect
 import os
 import random
+import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -462,6 +463,13 @@ class WebappInternal(Base):
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
             self.send_keys(s_tget(), program)
+            current_value = self.get_web_value(s_tget()).strip()
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and current_value != program):
+                self.send_keys(s_tget(), Keys.BACK_SPACE)
+                self.send_keys(s_tget(), program)
+                current_value = self.get_web_value(s_tget()).strip()
+                
             self.click(s_tget_img())
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
@@ -523,7 +531,7 @@ class WebappInternal(Base):
                 print("Sucess")
         except Exception as e:
             self.log_error(str(e))
-            
+   
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -681,6 +689,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
+        flag = True # To click Sel_Browse_icon
+
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
@@ -696,7 +706,12 @@ class WebappInternal(Base):
             sel_browse_input().send_keys(term.strip())
             current_value = self.get_element_value(sel_browse_input())
         self.send_keys(sel_browse_input(), Keys.ENTER)
-
+        while(flag):
+            soup = self.get_current_DOM()
+            blocker = soup.select('.ajax-blocker')
+            if blocker:
+                flag = False
+            
         self.double_click(sel_browse_icon())
         return True
 
@@ -739,6 +754,11 @@ class WebappInternal(Base):
             label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
             if not label:
                 self.log_error("Label wasn't found.")
+            
+            container_size = self.get_element_size(container['id'])
+            # The safe values add to postion of element
+            width_safe  = (container_size['width']  * 0.01)
+            height_safe = (container_size['height'] * 0.01)
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
@@ -748,7 +768,7 @@ class WebappInternal(Base):
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
                 position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] or xy_elem[1]['x'] >= xy_label['x']),position_list ))
+                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
 
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
@@ -779,6 +799,17 @@ class WebappInternal(Base):
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
+    def get_element_size(self, id):
+        """
+        Internal
+        Return Height/Width
+
+        """
+        script = f'return document.getElementById("{id}").offsetHeight;'
+        height = self.driver.execute_script(script)
+        script = f'return document.getElementById("{id}").offsetWidth;'
+        width  = self.driver.execute_script(script)
+        return {'height': height, 'width':width}
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
@@ -1069,8 +1100,11 @@ class WebappInternal(Base):
             self.log_result(field, user_value, current_value)
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
-
-            self.wait_element(field)
+            if name_attr:
+                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(field)
+                
             element = self.get_field(field, name_attr=name_attr)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
@@ -2408,12 +2442,13 @@ class WebappInternal(Base):
         >>> oHelper.LoadGrid()
         """
 
-        self.wait_element(term=".tgetdados, .tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         x3_dictionaries = self.create_x3_tuple()
 
         initial_layer = 0
         if self.grid_input:
+            self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
             initial_layer = len(soup.select(".tmodaldialog"))
 
@@ -2482,6 +2517,8 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
+
+        self.wait_element(field[0])
 
         soup = self.get_current_DOM()
 
@@ -2587,23 +2624,26 @@ class WebappInternal(Base):
                                 self.wait.until(EC.visibility_of(selenium_input()))
                                 self.set_element_focus(selenium_input())
                                 self.click(selenium_input())
-                                self.try_send_keys(selenium_input, user_value, try_counter)
+                                if "tget" in self.get_current_container().next.attrs['class']:
+                                    bsoup_element = self.get_current_container().next
+                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                    self.try_send_keys(selenium_input, user_value, try_counter)
 
-                                if try_counter < 2:
-                                    try_counter += 1
-                                else:
-                                    try_counter = 0
-
-                                if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
-                                        self.send_keys(selenium_input(), Keys.ENTER)
+                                    if try_counter < 2:
+                                        try_counter += 1
                                     else:
-                                        if not (re.match(r"[0-9]+,[0-9]+", user_value)):
+                                        try_counter = 0
+
+                                    if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
+                                        if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         else:
-                                            self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
-                                            if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                            if not (re.match(r"[0-9]+,[0-9]+", user_value)):
                                                 self.send_keys(selenium_input(), Keys.ENTER)
+                                            else:
+                                                self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
+                                                if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                                    self.send_keys(selenium_input(), Keys.ENTER)
 
                                 self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
                                 time.sleep(1)
@@ -2724,7 +2764,7 @@ class WebappInternal(Base):
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
             if self.config.debug_log:
                 print("Waiting for container to be active")
             time.sleep(1)
@@ -2735,7 +2775,7 @@ class WebappInternal(Base):
         if containers:
 
             containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
+            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid, .tcbrowse"))
             if grids:
 
                 headers = self.get_headers_from_grids(grids)
@@ -3270,6 +3310,9 @@ class WebappInternal(Base):
             elements = self.filter_label_element(label_text, container)
 
             for element in elements:
+                elem = self.search_element_position(label_text)
+                if elem:
+                    return elem
 
                 #Checking previous and next element:
                 next_sibling = element.find_next_sibling("div")
@@ -3358,16 +3401,27 @@ class WebappInternal(Base):
 
         routine_name = routine_name if routine_name else "error"
 
+        
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
-        try:
-            os.makedirs(f"logs\\{self.log.timestamp}")
-        except OSError:
-            pass
 
-        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{routine_name} - {test_number} error.png")
+        if self.config.screenshot:
+
+            log_file = f"{self.log.user}_{uuid.uuid4().hex}_{routine_name}-{test_number} error.png"
+            
+            try:
+                if self.config.log_folder:
+                    path = f"{self.log.folder}\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"{self.log.folder}\\{self.log.station}")
+                else:
+                    path = f"Log\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"Log\\{self.log.station}")
+            except OSError:
+                pass
+
+            self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)
@@ -3890,6 +3944,6 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower(), inspect.stack()))))
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))))
 
         return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
