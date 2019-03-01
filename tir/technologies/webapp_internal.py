@@ -740,6 +740,11 @@ class WebappInternal(Base):
             label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
             if not label:
                 self.log_error("Label wasn't found.")
+            
+            container_size = self.get_element_size(container['id'])
+            # The safe values add to postion of element
+            width_safe  = (container_size['width']  * 0.01)
+            height_safe = (container_size['height'] * 0.01)
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
@@ -749,7 +754,7 @@ class WebappInternal(Base):
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
                 position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] or xy_elem[1]['x'] >= xy_label['x']),position_list ))
+                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
 
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
@@ -780,6 +785,17 @@ class WebappInternal(Base):
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
+    def get_element_size(self, id):
+        """
+        Internal
+        Return Height/Width
+
+        """
+        script = f'return document.getElementById("{id}").offsetHeight;'
+        height = self.driver.execute_script(script)
+        script = f'return document.getElementById("{id}").offsetWidth;'
+        width  = self.driver.execute_script(script)
+        return {'height': height, 'width':width}
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
@@ -3280,6 +3296,9 @@ class WebappInternal(Base):
             elements = self.filter_label_element(label_text, container)
 
             for element in elements:
+                elem = self.search_element_position(label_text)
+                if elem:
+                    return elem
 
                 #Checking previous and next element:
                 next_sibling = element.find_next_sibling("div")
