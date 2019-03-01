@@ -18,6 +18,7 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
+from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
 
 class WebappInternal(Base):
@@ -61,6 +62,7 @@ class WebappInternal(Base):
         self.grid_counters = {}
         self.grid_input = []
         self.down_loop_grid = False
+        self.num_exec = NumExec()
 
         self.used_ids = {}
 
@@ -122,6 +124,9 @@ class WebappInternal(Base):
         self.log.country = self.config.country
         self.log.execution_id = self.config.execution_id
         self.log.issue = self.config.issue
+
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_start_exec)
 
     def program_screen(self, initial_program="", environment=""):
         """
@@ -3856,6 +3861,10 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> self.TearDown()
         """
+
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+
         if self.config.coverage:
             self.LogOff()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
