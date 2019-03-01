@@ -17,6 +17,7 @@ class ConfigLoader:
         self.autostart = True
         self.url_set_start_exec = str(data["UrlSetStartExec"]) if "UrlSetStartExec" in data else ""
         self.url_set_end_exec = str(data["UrlSetEndExec"]) if "UrlSetEndExec" in data else ""
+        self.screenshot = bool(data["ScreenShot"]) if "ScreenShot" in data else True
         self.country = str(data["Country"]) if "Country" in data else "BRA"
         self.execution_id = str(data["ExecId"]) if "ExecId" in data else ""
         self.num_exec = str(data["NumExec"]) if "NumExec" in data else ""

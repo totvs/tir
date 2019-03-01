@@ -4,6 +4,7 @@ import pandas as pd
 import inspect
 import os
 import random
+import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -528,7 +529,7 @@ class WebappInternal(Base):
                 print("Sucess")
         except Exception as e:
             self.log_error(str(e))
-            
+   
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
@@ -744,6 +745,11 @@ class WebappInternal(Base):
             label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
             if not label:
                 self.log_error("Label wasn't found.")
+            
+            container_size = self.get_element_size(container['id'])
+            # The safe values add to postion of element
+            width_safe  = (container_size['width']  * 0.01)
+            height_safe = (container_size['height'] * 0.01)
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
@@ -753,7 +759,7 @@ class WebappInternal(Base):
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
                 position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] or xy_elem[1]['x'] >= xy_label['x']),position_list ))
+                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
 
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
@@ -784,6 +790,17 @@ class WebappInternal(Base):
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
+    def get_element_size(self, id):
+        """
+        Internal
+        Return Height/Width
+
+        """
+        script = f'return document.getElementById("{id}").offsetHeight;'
+        height = self.driver.execute_script(script)
+        script = f'return document.getElementById("{id}").offsetWidth;'
+        width  = self.driver.execute_script(script)
+        return {'height': height, 'width':width}
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
         """
@@ -2416,7 +2433,7 @@ class WebappInternal(Base):
         >>> oHelper.LoadGrid()
         """
 
-        self.wait_element(term=".tgetdados, .tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         x3_dictionaries = self.create_x3_tuple()
 
@@ -2738,7 +2755,7 @@ class WebappInternal(Base):
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
             if self.config.debug_log:
                 print("Waiting for container to be active")
             time.sleep(1)
@@ -2749,7 +2766,7 @@ class WebappInternal(Base):
         if containers:
 
             containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
+            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid, .tcbrowse"))
             if grids:
 
                 headers = self.get_headers_from_grids(grids)
@@ -3284,6 +3301,9 @@ class WebappInternal(Base):
             elements = self.filter_label_element(label_text, container)
 
             for element in elements:
+                elem = self.search_element_position(label_text)
+                if elem:
+                    return elem
 
                 #Checking previous and next element:
                 next_sibling = element.find_next_sibling("div")
@@ -3372,16 +3392,27 @@ class WebappInternal(Base):
 
         routine_name = routine_name if routine_name else "error"
 
+        
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
-        try:
-            os.makedirs(f"logs\\{self.log.timestamp}")
-        except OSError:
-            pass
 
-        self.driver.save_screenshot(f"logs\\{self.log.timestamp}\\{routine_name} - {test_number} error.png")
+        if self.config.screenshot:
+
+            log_file = f"{self.log.user}_{uuid.uuid4().hex}_{routine_name}-{test_number} error.png"
+            
+            try:
+                if self.config.log_folder:
+                    path = f"{self.log.folder}\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"{self.log.folder}\\{self.log.station}")
+                else:
+                    path = f"Log\\{self.log.station}\\{log_file}"
+                    os.makedirs(f"Log\\{self.log.station}")
+            except OSError:
+                pass
+
+            self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)
