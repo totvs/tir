@@ -468,6 +468,13 @@ class WebappInternal(Base):
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
             self.send_keys(s_tget(), program)
+            current_value = self.get_web_value(s_tget()).strip()
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and current_value != program):
+                self.send_keys(s_tget(), Keys.BACK_SPACE)
+                self.send_keys(s_tget(), program)
+                current_value = self.get_web_value(s_tget()).strip()
+                
             self.click(s_tget_img())
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
@@ -687,6 +694,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
+        flag = True # To click Sel_Browse_icon
+
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
@@ -702,7 +711,12 @@ class WebappInternal(Base):
             sel_browse_input().send_keys(term.strip())
             current_value = self.get_element_value(sel_browse_input())
         self.send_keys(sel_browse_input(), Keys.ENTER)
-
+        while(flag):
+            soup = self.get_current_DOM()
+            blocker = soup.select('.ajax-blocker')
+            if blocker:
+                flag = False
+            
         self.double_click(sel_browse_icon())
         return True
 
