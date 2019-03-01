@@ -701,8 +701,8 @@ class WebappInternal(Base):
         self.send_keys(sel_browse_input(), Keys.ENTER)
         while(flag):
             soup = self.get_current_DOM()
-            teste = soup.select('.ajax-blocker')
-            if teste:
+            blocker = soup.select('.ajax-blocker')
+            if blocker:
                 flag = False
             
         self.double_click(sel_browse_icon())
