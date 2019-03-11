@@ -2608,7 +2608,6 @@ class WebappInternal(Base):
                                     break
 
                             if(field[1] == True): break # if boolean field finish here.
-
                             self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
@@ -2627,8 +2626,17 @@ class WebappInternal(Base):
                                 valtype = selenium_input().get_attribute("valuetype")
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
-                                if self.check_mask(selenium_input()):
-                                    user_value = self.remove_mask(user_value)
+                                check_mask = self.check_mask(selenium_input())
+                                if check_mask:
+                                    if check_mask[0].startswith('@E'):
+                                        first_dot   = user_value[::-1].find('.')
+                                        first_comma = user_value[::-1].find(',')
+                                        if first_comma < 0:
+                                            first_comma = 999 
+                                        if(first_dot < first_comma): # American picture
+                                            user_value = user_value[::-1].replace('.',',', 1)[::-1]
+                                user_value = self.remove_mask(user_value)
+
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
                                 self.set_element_focus(selenium_input())
