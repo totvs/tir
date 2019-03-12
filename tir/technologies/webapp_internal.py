@@ -2629,11 +2629,6 @@ class WebappInternal(Base):
                                 check_mask = self.check_mask(selenium_input())
                                 if check_mask:
                                     if check_mask[0].startswith('@E'):
-                                        first_dot   = user_value[::-1].find('.')
-                                        first_comma = user_value[::-1].find(',')
-                                        if first_comma < 0:
-                                            first_comma = 999 
-                                        if(first_dot < first_comma): # American picture
                                             user_value = user_value[::-1].replace('.',',', 1)[::-1]
                                 user_value = self.remove_mask(user_value)
 
