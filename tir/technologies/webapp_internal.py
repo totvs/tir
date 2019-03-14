@@ -1632,7 +1632,7 @@ class WebappInternal(Base):
                 layers = len(self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog"))
 
             success = False
-            endtime = time.time() + 10
+            endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
 
@@ -2457,7 +2457,8 @@ class WebappInternal(Base):
 
         initial_layer = 0
         if self.grid_input:
-            self.wait_element(self.grid_input[0][0])
+            if "tget" in self.get_current_container().next.attrs['class']:
+                self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
             initial_layer = len(soup.select(".tmodaldialog"))
 
@@ -2526,8 +2527,9 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
-
-        self.wait_element(field[0])
+            
+        if "tget" in self.get_current_container().next.attrs['class']:
+            self.wait_element(field[0])
 
         soup = self.get_current_DOM()
 
