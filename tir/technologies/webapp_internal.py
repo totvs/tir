@@ -1235,6 +1235,11 @@ class WebappInternal(Base):
         if self.config.coverage:
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not element):
+                self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                soup = self.get_current_DOM()
+                cget = next(iter(soup.select("[name=cGet]")), None)
+                s_cget = lambda : self.driver.find_element_by_xpath(xpath_soup(cget))
+                self.set_element_focus(s_cget())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 self.SetButton(self.language.finish)
 

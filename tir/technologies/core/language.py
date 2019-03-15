@@ -199,7 +199,7 @@ class LanguagePack:
             "Exit": "Sair",
             "Leave Page": "Sair da página",
             "Enter": "Entrar",
-            "Finish": "Finalizar",
+            "Finish": "Terminar",
             "Details": "Detalhes",
             "Search": "Pesquisar",
             "Ok": "Ok",
