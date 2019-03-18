@@ -2589,7 +2589,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip() != field_one):
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2626,12 +2626,8 @@ class WebappInternal(Base):
                                 valtype = selenium_input().get_attribute("valuetype")
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
-                                check_mask = self.check_mask(selenium_input())
-                                if check_mask:
-                                    if check_mask[0].startswith('@E'):
-                                            user_value = user_value[::-1].replace('.',',', 1)[::-1]
-                                user_value = self.remove_mask(user_value)
-
+                                if self.check_mask(selenium_input()):
+                                    user_value = self.remove_mask(user_value)
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
                                 self.set_element_focus(selenium_input())
