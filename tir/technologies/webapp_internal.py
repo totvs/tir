@@ -1654,7 +1654,7 @@ class WebappInternal(Base):
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
                 if other_action is None:
-                    self.log_error("Couldn't find element")
+                    self.log_error(f"Couldn't find element: {button}")
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
 
@@ -1680,7 +1680,7 @@ class WebappInternal(Base):
                 if soup_objects:
                     soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
                 else:
-                    self.log_error("Couldn't find element")
+                    self.log_error(f"Couldn't find element {sub_item}")
 
                 self.click(soup_element())
 
