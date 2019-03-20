@@ -2626,7 +2626,10 @@ class WebappInternal(Base):
                                 valtype = selenium_input().get_attribute("valuetype")
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
-                                if self.check_mask(selenium_input()):
+                                check_mask = self.check_mask(selenium_input())
+                                if check_mask:
+                                    if (check_mask[0].startswith('@E') and user_value == ''):
+                                        user_value = '00000000'
                                     user_value = self.remove_mask(user_value)
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
