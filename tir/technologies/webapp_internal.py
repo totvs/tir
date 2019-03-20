@@ -694,7 +694,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
-        flag = True # To click Sel_Browse_icon
 
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
@@ -711,14 +710,20 @@ class WebappInternal(Base):
             sel_browse_input().send_keys(term.strip())
             current_value = self.get_element_value(sel_browse_input())
         self.send_keys(sel_browse_input(), Keys.ENTER)
-        while(flag):
+        self.wait_blocker_ajax()
+        self.double_click(sel_browse_icon())
+        return True
+    
+    def wait_blocker_ajax(self):
+        result = True
+        while(result):
             soup = self.get_current_DOM()
             blocker = soup.select('.ajax-blocker')
             if blocker:
-                flag = False
-            
-        self.double_click(sel_browse_icon())
-        return True
+                result = True
+            else:
+                result = False
+        return result
 
     def get_panel_name_index(self, panel_name):
         """
