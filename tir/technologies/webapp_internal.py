@@ -3549,7 +3549,10 @@ class WebappInternal(Base):
 
         self.fill_parameters(restore_backup=restore_backup)
 
-        self.LogOff()
+        if self.config.coverage:
+            self.driver.refresh()
+        else:
+            self.LogOff()
 
         self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
