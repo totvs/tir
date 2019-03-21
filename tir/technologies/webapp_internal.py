@@ -715,6 +715,12 @@ class WebappInternal(Base):
         return True
     
     def wait_blocker_ajax(self):
+        """
+        [Internal]
+        
+        Wait ajax blocker disappear
+
+        """
         result = True
         while(result):
             soup = self.get_current_DOM()
