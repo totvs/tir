@@ -3161,8 +3161,15 @@ class WebappInternal(Base):
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed()):
-                    time.sleep(0.1)
+                endtime = time.time() + timeout
+                while(time.time() < endtime and not sel_element().is_displayed()):
+                    try:
+                        time.sleep(0.1)
+                        self.scroll_to_element(sel_element())
+                        if(sel_element().is_displayed()):
+                            break
+                    except:
+                        continue
 
     def get_selected_row(self, rows):
         """
