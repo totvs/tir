@@ -2628,7 +2628,7 @@ class WebappInternal(Base):
                                 user_value = field[1]
                                 check_mask = self.check_mask(selenium_input())
                                 if check_mask:
-                                    if (check_mask[0].startswith('@E') and user_value == ''):
+                                    if (check_mask[0].startswith('@D') and user_value == ''):
                                         user_value = '00000000'
                                     user_value = self.remove_mask(user_value)
 
