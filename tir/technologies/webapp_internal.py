@@ -20,6 +20,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
+from selenium.common.exceptions import StaleElementReferenceException
 
 class WebappInternal(Base):
     """
@@ -778,7 +779,7 @@ class WebappInternal(Base):
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=".tget, .tcombobox", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
@@ -1246,6 +1247,7 @@ class WebappInternal(Base):
         if self.config.coverage:
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not element):
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 self.SetButton(self.language.finish)
 
@@ -1474,7 +1476,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
         if self.config.debug_log:
-            print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
+            with open("debug_log.txt", "a", ) as debug_log:
+                debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
+                print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -1514,8 +1518,10 @@ class WebappInternal(Base):
                     return False
             else:
                 container_element = self.driver
-
-            element_list = container_element.find_elements(by, selector)
+            try:
+                element_list = container_element.find_elements(by, selector)
+            except StaleElementReferenceException:
+                pass
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
@@ -1630,20 +1636,20 @@ class WebappInternal(Base):
 
         print(f"Clicking on {button}")
 
-        position -= 1
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
+                position -= 1
 
             layers = 0
             if button in [self.language.confirm, self.language.save]:
                 layers = len(self.driver.find_elements(By.CSS_SELECTOR, ".tmodaldialog"))
 
             success = False
-            endtime = time.time() + 10
+            endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
 
@@ -1660,7 +1666,7 @@ class WebappInternal(Base):
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
                 if other_action is None:
-                    self.log_error("Couldn't find element")
+                    self.log_error(f"Couldn't find element: {button}")
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
 
@@ -1686,7 +1692,7 @@ class WebappInternal(Base):
                 if soup_objects:
                     soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
                 else:
-                    self.log_error("Couldn't find element")
+                    self.log_error(f"Couldn't find element {sub_item}")
 
                 self.click(soup_element())
 
@@ -2062,7 +2068,8 @@ class WebappInternal(Base):
                 last = current
                 scroll_down()
                 time.sleep(0.5)
-                current = get_current()
+                get_current_filtered = next(iter(get_current()),None)
+                current = get_current_filtered
                 time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
@@ -2468,7 +2475,8 @@ class WebappInternal(Base):
 
         initial_layer = 0
         if self.grid_input:
-            self.wait_element(self.grid_input[0][0])
+            if "tget" in self.get_current_container().next.attrs['class']:
+                self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
             initial_layer = len(soup.select(".tmodaldialog"))
 
@@ -2537,8 +2545,9 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
             print("Waiting for container to be active")
             time.sleep(1)
-
-        self.wait_element(field[0])
+            
+        if "tget" in self.get_current_container().next.attrs['class']:
+            self.wait_element(field[0])
 
         soup = self.get_current_DOM()
 
@@ -3563,7 +3572,10 @@ class WebappInternal(Base):
 
         self.fill_parameters(restore_backup=restore_backup)
 
-        self.LogOff()
+        if self.config.coverage:
+            self.driver.refresh()
+        else:
+            self.LogOff()
 
         self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
@@ -3975,6 +3987,9 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))))
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))), None)
 
-        return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+        if stack_item_splited:
+            return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+        else:
+            return None

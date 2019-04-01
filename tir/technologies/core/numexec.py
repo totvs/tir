@@ -11,4 +11,4 @@ class NumExec:
 
             data = {'num_exec': self.config.num_exec}
 
-            return requests.post(url, str(data))
+            return requests.post(url.strip(), json=data)
