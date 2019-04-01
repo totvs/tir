@@ -20,6 +20,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
+from selenium.common.exceptions import StaleElementReferenceException
 
 class WebappInternal(Base):
     """
@@ -1464,7 +1465,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
         if self.config.debug_log:
-            print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
+            with open("debug_log.txt", "a", ) as debug_log:
+                debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
+                print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -1504,8 +1507,10 @@ class WebappInternal(Base):
                     return False
             else:
                 container_element = self.driver
-
-            element_list = container_element.find_elements(by, selector)
+            try:
+                element_list = container_element.find_elements(by, selector)
+            except StaleElementReferenceException:
+                pass
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
@@ -1620,13 +1625,13 @@ class WebappInternal(Base):
 
         print(f"Clicking on {button}")
 
-        position -= 1
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
+                position -= 1
 
             layers = 0
             if button in [self.language.confirm, self.language.save]:
@@ -3964,6 +3969,9 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))))
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))), None)
 
-        return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+        if stack_item_splited:
+            return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+        else:
+            return None
