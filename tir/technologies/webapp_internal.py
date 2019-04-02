@@ -64,6 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
+        self.input_value_list_history = []
 
         self.used_ids = {}
 
@@ -768,7 +769,8 @@ class WebappInternal(Base):
                 self.log_error("Container wasn't found.")
 
             labels = container.select("label")
-            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))),None)
             if not label:
                 self.log_error("Label wasn't found.")
             
@@ -920,6 +922,10 @@ class WebappInternal(Base):
                 element = self.get_field("cAteCond", name_attr=True)
             else:
                 element = self.get_field(field, name_attr)
+
+            container = self.get_current_container()
+            if 'ui-draggable' in container['class']:
+                self.input_value_list_history.append(element.findParent()['id'])
 
             if not element:
                 continue
