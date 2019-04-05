@@ -3975,3 +3975,68 @@ class WebappInternal(Base):
             return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
         else:
             return None
+
+    def GetText(self, string_left="", string_right=""):
+        """
+
+        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+
+        If the string_left was filled then the right side content is return.
+
+        If the string_right was filled then the left side content is return.
+
+        If None parameter was filled so the full content is return.
+
+        :param string_left: String of the left side of content
+        :type str
+        :param string_right: String of the right side of content
+        :type str
+        :returns String content
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText()
+        """
+
+        return self.get_text(string_left, string_right)
+
+    def get_text(self, string_left, string_right):
+        """
+
+        :param string:
+        :return:
+        """
+        if string_left:
+            string = string_left
+        else:
+            string = string_right
+
+        if string:
+            self.wait_element(string)
+
+        container = self.get_current_container()
+
+        labels = container.select('label')
+
+        label = next(iter(list(filter(lambda x: string.lower() in x.text.lower(), labels))))
+
+        return self.get_text_position(label.text, string_left, string_right)
+
+    def get_text_position(self, text="", string_left="", string_right=""):
+        """
+
+        :param string_left:
+        :param srting_right:
+        :return:
+        """
+        if string_left and string_right:
+            return text[len(string_left):text.index(string_right)].strip()
+        elif string_left:
+            return text[len(string_left):].strip()
+        elif string_right:
+            return text[:-len(string_right)].strip()
+        else:
+            return text.strip()
