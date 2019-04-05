@@ -755,7 +755,7 @@ class Webapp():
 
         If the string_right was filled then the left side content is return.
 
-        If None parameter was filled so the full content is return.
+        If no parameter was filled so the full content is return.
 
         :param string_left: String of the left side of content
         :type str
