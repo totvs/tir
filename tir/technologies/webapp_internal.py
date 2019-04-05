@@ -3097,6 +3097,8 @@ class WebappInternal(Base):
                 time.sleep(0.1)
 
         if time.time() > endtime:
+            if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
+                self.SetKey(Keys.ESCAPE)
             self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
