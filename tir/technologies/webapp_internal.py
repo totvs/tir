@@ -2615,7 +2615,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip() != field_one):
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2634,7 +2634,6 @@ class WebappInternal(Base):
                                     break
 
                             if(field[1] == True): break # if boolean field finish here.
-
                             self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
@@ -2653,7 +2652,10 @@ class WebappInternal(Base):
                                 valtype = selenium_input().get_attribute("valuetype")
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
-                                if self.check_mask(selenium_input()):
+                                check_mask = self.check_mask(selenium_input())
+                                if check_mask:
+                                    if (check_mask[0].startswith('@D') and user_value == ''):
+                                        user_value = '00000000'
                                     user_value = self.remove_mask(user_value)
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
