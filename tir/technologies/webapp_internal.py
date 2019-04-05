@@ -64,6 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
+        self.input_value_list_history = []
 
         self.used_ids = {}
 
@@ -768,7 +769,8 @@ class WebappInternal(Base):
                 self.log_error("Container wasn't found.")
 
             labels = container.select("label")
-            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))),None)
             if not label:
                 self.log_error("Label wasn't found.")
             
@@ -780,7 +782,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and x['id'] not in self.input_value_list_history, list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
@@ -920,6 +922,10 @@ class WebappInternal(Base):
                 element = self.get_field("cAteCond", name_attr=True)
             else:
                 element = self.get_field(field, name_attr)
+
+            container = self.get_current_container()
+            if 'ui-draggable' in container['class']:
+                self.input_value_list_history.append(element.findParent()['id'])
 
             if not element:
                 continue
