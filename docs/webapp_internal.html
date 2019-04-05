@@ -436,6 +436,34 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.GetText">
+<code class="descname">GetText</code><span class="sig-paren">(</span><em>string_left=''</em>, <em>string_right=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GetText" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns a string from modal based on the string in the left or rigth position that you send on parameter.</p>
+<p>If the string_left was filled then the right side content is return.</p>
+<p>If the string_right was filled then the left side content is return.</p>
+<p>If no parameter was filled so the full content is return.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string_left</strong> – String of the left side of content</td>
+</tr>
+</tbody>
+</table>
+<p>:type str
+:param string_right: String of the right side of content
+:type str
+:returns String content</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">(</span><span class="s2">&quot;string_left=&quot;</span><span class="n">Left</span> <span class="n">Text</span><span class="s2">&quot;, string_right=&quot;</span><span class="n">Right</span> <span class="n">Text</span><span class="s2">&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">(</span><span class="s2">&quot;string_left=&quot;</span><span class="n">Left</span> <span class="n">Text</span><span class="s2">&quot;) </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
@@ -1617,6 +1645,13 @@ Returns the BeautifulSoup object that represents this container or NONE if nothi
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_element_size">
+<code class="descname">get_element_size</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_element_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal
+Return Height/Width</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids">
 <code class="descname">get_enchoice_button_ids</code><span class="sig-paren">(</span><em>layer</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1787,6 +1822,12 @@ Gets a grid BeautifulSoup object from the screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_program_name">
+<code class="descname">get_program_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_program_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_search_browse_elements">
 <code class="descname">get_search_browse_elements</code><span class="sig-paren">(</span><em>panel_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_search_browse_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1854,6 +1895,41 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_selenium_column_element</span><span class="p">(</span><span class="n">xpath</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_text">
+<code class="descname">get_text</code><span class="sig-paren">(</span><em>string_left</em>, <em>string_right</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_text" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_text_position">
+<code class="descname">get_text_position</code><span class="sig-paren">(</span><em>text=''</em>, <em>string_left=''</em>, <em>string_right=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_text_position" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>string_left</strong> – </li>
+<li><strong>srting_right</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">

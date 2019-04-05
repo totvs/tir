@@ -166,7 +166,7 @@
 <span id="log"></span><h1>Log<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tir.technologies.core.log.Log">
-<em class="property">class </em><code class="descclassname">tir.technologies.core.log.</code><code class="descname">Log</code><span class="sig-paren">(</span><em>user=''</em>, <em>station=''</em>, <em>program=''</em>, <em>program_date='13/02/19 10:49:07'</em>, <em>version=''</em>, <em>release=''</em>, <em>database=''</em>, <em>issue=''</em>, <em>execution_id=''</em>, <em>country=''</em>, <em>folder=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tir.technologies.core.log.</code><code class="descname">Log</code><span class="sig-paren">(</span><em>user=''</em>, <em>station=''</em>, <em>program=''</em>, <em>program_date='01/01/1980 12:00:00'</em>, <em>version=''</em>, <em>release=''</em>, <em>database=''</em>, <em>issue=''</em>, <em>execution_id=''</em>, <em>country=''</em>, <em>folder=''</em>, <em>test_type='TIR'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is instantiated to create the log file and to append the results and failures to it.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instanted inside base.py:</span>
@@ -182,6 +182,12 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">generate_header</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.core.log.Log.list_of_testcases">
+<code class="descname">list_of_testcases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.list_of_testcases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of test cases from suite</p>
 </dd></dl>
 
 <dl class="method">
