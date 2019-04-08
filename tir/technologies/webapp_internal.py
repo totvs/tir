@@ -1645,7 +1645,10 @@ class WebappInternal(Base):
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
+                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
+                if not wait_button:
+                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                    return
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
                 position -= 1
@@ -3117,7 +3120,7 @@ class WebappInternal(Base):
 
         if time.time() > endtime:
             if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
-                self.SetKey(Keys.ESCAPE)
+                return False
             self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
