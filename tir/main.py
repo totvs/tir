@@ -745,6 +745,33 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
         """ 
         self.__webapp.ClickTree(treepath)
+    
+    def GetText(self, string_left="", string_right=""):
+        """
+
+        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+
+        If the string_left was filled then the right side content is return.
+
+        If the string_right was filled then the left side content is return.
+
+        If no parameter was filled so the full content is return.
+
+        :param string_left: String of the left side of content
+        :type str
+        :param string_right: String of the right side of content
+        :type str
+        :returns String content
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText()
+        """
+
+        return self.__webapp.GetText(string_left, string_right)
         
 class Apw():
 
