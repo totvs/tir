@@ -64,6 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
+        self.input_value_list_history = []
 
         self.used_ids = {}
 
@@ -695,7 +696,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
-        flag = True # To click Sel_Browse_icon
 
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
@@ -712,14 +712,26 @@ class WebappInternal(Base):
             sel_browse_input().send_keys(term.strip())
             current_value = self.get_element_value(sel_browse_input())
         self.send_keys(sel_browse_input(), Keys.ENTER)
-        while(flag):
+        self.wait_blocker_ajax()
+        self.double_click(sel_browse_icon())
+        return True
+    
+    def wait_blocker_ajax(self):
+        """
+        [Internal]
+        
+        Wait ajax blocker disappear
+
+        """
+        result = True
+        while(result):
             soup = self.get_current_DOM()
             blocker = soup.select('.ajax-blocker')
             if blocker:
-                flag = False
-            
-        self.double_click(sel_browse_icon())
-        return True
+                result = True
+            else:
+                result = False
+        return result
 
     def get_panel_name_index(self, panel_name):
         """
@@ -757,7 +769,8 @@ class WebappInternal(Base):
                 self.log_error("Container wasn't found.")
 
             labels = container.select("label")
-            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels))),None)
+            labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
+            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))),None)
             if not label:
                 self.log_error("Label wasn't found.")
             
@@ -769,7 +782,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and x['id'] not in self.input_value_list_history, list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
@@ -909,6 +922,10 @@ class WebappInternal(Base):
                 element = self.get_field("cAteCond", name_attr=True)
             else:
                 element = self.get_field(field, name_attr)
+
+            container = self.get_current_container()
+            if 'ui-draggable' in container['class']:
+                self.input_value_list_history.append(element.findParent()['id'])
 
             if not element:
                 continue
@@ -2598,7 +2615,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip() != field_one):
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2617,7 +2634,6 @@ class WebappInternal(Base):
                                     break
 
                             if(field[1] == True): break # if boolean field finish here.
-
                             self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
@@ -2636,7 +2652,10 @@ class WebappInternal(Base):
                                 valtype = selenium_input().get_attribute("valuetype")
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
-                                if self.check_mask(selenium_input()):
+                                check_mask = self.check_mask(selenium_input())
+                                if check_mask:
+                                    if (check_mask[0].startswith('@D') and user_value == ''):
+                                        user_value = '00000000'
                                     user_value = self.remove_mask(user_value)
 
                                 self.wait.until(EC.visibility_of(selenium_input()))
@@ -3161,8 +3180,15 @@ class WebappInternal(Base):
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed()):
-                    time.sleep(0.1)
+                endtime = time.time() + timeout
+                while(time.time() < endtime and not sel_element().is_displayed()):
+                    try:
+                        time.sleep(0.1)
+                        self.scroll_to_element(sel_element())
+                        if(sel_element().is_displayed()):
+                            break
+                    except:
+                        continue
 
     def get_selected_row(self, rows):
         """
