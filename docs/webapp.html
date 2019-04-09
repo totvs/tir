@@ -448,6 +448,31 @@ this method
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.GetText">
+<code class="descname">GetText</code><span class="sig-paren">(</span><em>string_left=''</em>, <em>string_right=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetText" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns a string from modal based on the string in the left or rigth position that you send on parameter.</p>
+<p>If the string_left was filled then the right side content is return.</p>
+<p>If the string_right was filled then the left side content is return.</p>
+<p>If no parameter was filled so the full content is return.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>string_left</strong> – String of the left side of content</p>
+</dd>
+</dl>
+<p>:type str
+:param string_right: String of the right side of content
+:type str
+:returns String content</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">(</span><span class="s2">&quot;string_left=&quot;</span><span class="n">Left</span> <span class="n">Text</span><span class="s2">&quot;, string_right=&quot;</span><span class="n">Right</span> <span class="n">Text</span><span class="s2">&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">(</span><span class="s2">&quot;string_left=&quot;</span><span class="n">Left</span> <span class="n">Text</span><span class="s2">&quot;) </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GetText</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.GetValue">
 <code class="descname">GetValue</code><span class="sig-paren">(</span><em>field</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the current value or text of element.</p>
