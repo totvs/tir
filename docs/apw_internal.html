@@ -293,24 +293,20 @@
 <code class="descname">find_label_element</code><span class="sig-paren">(</span><em>label_text</em>, <em>container</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.apw_internal.ApwInternal.find_label_element" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Find input element next to label containing the label_text parameter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>label_text</strong> (<em>string</em>) – The label text to be searched</li>
-<li><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label_text</strong> (<em>string</em>) – The label text to be searched</p></li>
+<li><p><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing a BeautifulSoup object next to the label</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">List of BeautifulSoup objects</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing a BeautifulSoup object next to the label</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of BeautifulSoup objects</p>
+</dd>
+</dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">find_label_element</span><span class="p">(</span><span class="s2">&quot;User:&quot;</span><span class="p">,</span> <span class="n">container_object</span><span class="p">)</span>
 </pre></div>
@@ -343,18 +339,14 @@ Returns True if succeeded, False if it failed.</p>
 <code class="descname">send_keys</code><span class="sig-paren">(</span><em>element</em>, <em>arg</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.apw_internal.ApwInternal.send_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Clicks two times on the Selenium element.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>element</strong> (<em>Selenium object</em>) – Selenium element</li>
-<li><strong>arg</strong> (<em>string</em><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p></li>
+<li><p><strong>arg</strong> (<em>string</em><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Defining the element:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">element</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">&quot;example_id&quot;</span><span class="p">)</span>
