@@ -2301,21 +2301,30 @@ class WebappInternal(Base):
         except Exception as error:
             self.log_error(str(error))
 
-    def SetFocus(self, field):
+    def SetFocus(self, field, grid_cell):
         """
         Sets the current focus on the desired field.
 
         :param field: The field that must receive the focus.
         :type field: str
+        :type grid_cell: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
+        >>> oHelper.SetFocus("A1_COD", grid_cell = True)
         """
-        print(f"Setting focus on element {field}.")
-        element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-        self.set_element_focus(element())
+        if grid_cell:
+            self.wait_element(field)
+            self.ClickGridCell(field)
+            time.sleep(1)
+            ActionChains(self.driver).key_down(Keys.ENTER).perform()
+            time.sleep(1)
+        else:
+            print(f"Setting focus on element {field}.")
+            element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
+            self.set_element_focus(element())
 
     def click_check_radio_button(self, field, value):
         """
