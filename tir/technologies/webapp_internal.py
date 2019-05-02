@@ -3475,6 +3475,9 @@ class WebappInternal(Base):
             self.restart()
         self.assertTrue(False, log_message)
 
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
