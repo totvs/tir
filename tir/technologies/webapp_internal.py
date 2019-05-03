@@ -922,7 +922,6 @@ class WebappInternal(Base):
             else:
                 element = self.get_field(field, name_attr)
 
-
             if not element:
                 continue
 

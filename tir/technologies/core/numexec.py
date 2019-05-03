@@ -9,6 +9,6 @@ class NumExec:
 
     def post_exec(self, url):
 
-            data = {'num_exec': self.config.num_exec}
+            data = {'num_exec': self.config.num_exec,'ip_exec': self.config.ipExec}
 
             return requests.post(url.strip(), json=data)

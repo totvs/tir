@@ -15,6 +15,7 @@ class ConfigLoader:
             data = {}
 
         self.autostart = True
+        self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
         self.url_set_start_exec = str(data["UrlSetStartExec"]) if "UrlSetStartExec" in data else ""
         self.url_set_end_exec = str(data["UrlSetEndExec"]) if "UrlSetEndExec" in data else ""
         self.screenshot = bool(data["ScreenShot"]) if "ScreenShot" in data else True
