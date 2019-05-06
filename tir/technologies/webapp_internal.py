@@ -783,11 +783,7 @@ class WebappInternal(Base):
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = list(filter(lambda xy_elem: (int(xy_elem[1]['y']) >= int(xy_label['y']) and xy_elem[1]['x'] >= xy_label['x']),position_list ))
-            if(position_list == []):
-                position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
-
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
