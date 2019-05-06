@@ -1645,7 +1645,7 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     return
             else:
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1)
                 position -= 1
 
             layers = 0
@@ -1654,8 +1654,8 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not soup_element and button.lower() != "x"):
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
+            while(time.time() < endtime and not soup_element and button.lower() != "x"): 
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton")
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
                 if soup_objects and len(soup_objects) - 1 >= position:
