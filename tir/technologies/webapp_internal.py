@@ -3907,16 +3907,16 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-
         if self.config.coverage:
             self.LogOff()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
             self.driver.close()
         else:
             self.driver.close()
-
+            
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+            
     def containers_filter(self, containers):
         """
         [Internal]
