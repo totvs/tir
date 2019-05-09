@@ -1220,7 +1220,7 @@ class WebappInternal(Base):
         except:
             pass
 
-        if not self.config.skip_environment:
+        if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
         self.user_screen()
         self.environment_screen()
