@@ -2032,6 +2032,11 @@ class WebappInternal(Base):
                 box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.click(box())
 
+        elif select_all and not is_select_all_button:
+            th = next(iter(grid.select('th')))
+            th_element = self.soup_to_selenium(th)
+            th_element.click()
+
         elif content_list or (select_all and not is_select_all_button):
             self.wait_element(content_list[0]) # wait columns
 
