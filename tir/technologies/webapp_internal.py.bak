@@ -3790,21 +3790,21 @@ class WebappInternal(Base):
             self.assertFalse(expected, msg)
 
     
-    def ClickCheckBox(self, label_box_name, position=1):
+    def ClickCheckBox(self, label_box_name, index=1):
         """
         Clicks on a Label in box on the screen.
 
         :param label_box_name: The label box name
         :type label_box_name: str
-        :param position: position label box on interface
-        :type position: int
+        :param index: index label box on interface
+        :type index: int
 
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickCheckBox("Search",1)
+        >>> oHelper.ClickBoxLabel("Search")
         """
-        if position > 0:
+        if index > 0:
 
             self.wait_element(label_box_name)
 
@@ -3815,9 +3815,9 @@ class WebappInternal(Base):
             labels_boxs = container.select("span")
             filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))                
         
-            if position <= len(filtered_labels_boxs):
-                position -= 1
-                label_box = filtered_labels_boxs[position].parent
+            if index <= len(filtered_labels_boxs):
+                index -= 1
+                label_box = filtered_labels_boxs[index].parent
                 label_box_element = lambda: self.soup_to_selenium(label_box)                
                 self.click(label_box_element())
                 
