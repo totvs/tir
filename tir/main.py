@@ -195,6 +195,7 @@ class Webapp():
         >>> oHelper.ClickGridCell("Product", 1)
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
+    
 
     def ClickIcon(self, icon_text):
         """
