@@ -64,6 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
+        self.input_value_list_history = []
 
         self.used_ids = {}
 
@@ -781,7 +782,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and x['id'] not in self.input_value_list_history, list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
@@ -922,6 +923,10 @@ class WebappInternal(Base):
             else:
                 element = self.get_field(field, name_attr)
 
+            container = self.get_current_container()
+            if 'ui-draggable' in container['class']:
+                self.input_value_list_history.append(element.findParent()['id'])
+
             if not element:
                 continue
 
@@ -1001,7 +1006,7 @@ class WebappInternal(Base):
                 (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                     current_value = current_value[0:len(str(value))]
 
-                if re.match(r"^●+$", current_value):
+                if re.match(r"^◝+$", current_value):
                     success = len(current_value) == len(str(value).strip())
                 elif ignore_case:
                     success = current_value.lower() == main_value.lower()
@@ -1220,7 +1225,7 @@ class WebappInternal(Base):
         except:
             pass
 
-        if not self.config.skip_environment and not self.config.coverage:
+        if not self.config.skip_environment:
             self.program_screen(self.config.initial_program)
         self.user_screen()
         self.environment_screen()
@@ -1911,7 +1916,7 @@ class WebappInternal(Base):
                 break
             time.sleep(3)
 
-    def WaitProcessing(self, itens):
+    def WaitProcessing(self, itens): 
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -2212,7 +2217,7 @@ class WebappInternal(Base):
             if string[0:4] != 'http':
                 match = re.findall(caracter, string)
                 if match:
-                    string = re.sub(caracter, '', string)
+                    string = re.sub(caracter, '', string) 
 
             return string
 
@@ -2245,8 +2250,8 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """
-        print(f"Key pressed: {key}")
+        """        
+        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
         supported_keys = {
             "F1" : Keys.F1,
             "F2" : Keys.F2,
@@ -2983,7 +2988,7 @@ class WebappInternal(Base):
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
 
         self.click(column_element())
-
+          
     def get_x3_dictionaries(self, fields):
         """
         [Internal]
@@ -3495,9 +3500,6 @@ class WebappInternal(Base):
             self.restart()
         self.assertTrue(False, log_message)
 
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
@@ -3818,9 +3820,11 @@ class WebappInternal(Base):
             if position <= len(filtered_labels_boxs):
                 position -= 1
                 label_box = filtered_labels_boxs[position].parent
-                label_box_element = lambda: self.soup_to_selenium(label_box)                
-                self.click(label_box_element())
-                
+                if 'tcheckbox' in label_box.get_attribute_list('class'):
+                    label_box_element = lambda: self.soup_to_selenium(label_box)                
+                    self.click(label_box_element())
+                else:
+                    self.log_error("Index the Ckeckbox invalid.")                
             else:
                 self.log_error("Index the Ckeckbox invalid.")
         else:
@@ -3830,12 +3834,9 @@ class WebappInternal(Base):
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
-
         :param label_name: The label name
         :type label_name: str
-
         Usage:
-
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
@@ -3966,16 +3967,16 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+
         if self.config.coverage:
             self.LogOff()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
             self.driver.close()
         else:
             self.driver.close()
-            
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-            
+
     def containers_filter(self, containers):
         """
         [Internal]
