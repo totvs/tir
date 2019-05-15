@@ -1624,6 +1624,9 @@ class WebappInternal(Base):
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+        >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
+        >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
 
         container = self.get_current_container()
@@ -1697,18 +1700,25 @@ class WebappInternal(Base):
 
                 self.click(soup_element())
 
-            elif sub_item and ',' in sub_item:
-                list_sub_itens = sub_item.split()
-                last_sub_item = list_sub_itens.pop()
+            elif ',' in sub_item:
+                list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
                 while(len(filtered_sub_itens) > 0):
                     soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
-                    #aqui pega exatamente o sub item correto -- Percorrer o soup_objects procurando o sub item correto
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                    if not soup_objects:
+                        self.log_error(f"Couldn't find element {sub_item}")
+                    for i in range(len(soup_objects)):
+                        if soup_objects[i].text == filtered_sub_itens[0]:
+                            soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[i]))
+                        
+                    if not soup_element:
+                        soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+
                     self.move_to_element(soup_element())
                     filtered_sub_itens.remove(filtered_sub_itens[0])
 
-                soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(last_sub_item))
+                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(soup_element())
 
 
 
