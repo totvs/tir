@@ -64,7 +64,6 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-        self.input_value_list_history = []
 
         self.used_ids = {}
 
@@ -782,7 +781,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and x['id'] not in self.input_value_list_history, list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
             if(position_list == []):
@@ -922,10 +921,6 @@ class WebappInternal(Base):
                 element = self.get_field("cAteCond", name_attr=True)
             else:
                 element = self.get_field(field, name_attr)
-
-            container = self.get_current_container()
-            if 'ui-draggable' in container['class']:
-                self.input_value_list_history.append(element.findParent()['id'])
 
             if not element:
                 continue
@@ -1220,12 +1215,16 @@ class WebappInternal(Base):
         >>> self.restart()
         """
         self.driver.refresh()
+        
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+
         try:
             self.driver.switch_to_alert().accept()
         except:
             pass
 
-        if not self.config.skip_environment:
+        if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
         self.user_screen()
         self.environment_screen()
@@ -1916,7 +1915,7 @@ class WebappInternal(Base):
                 break
             time.sleep(3)
 
-    def WaitProcessing(self, itens): 
+    def WaitProcessing(self, itens):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -2217,7 +2216,7 @@ class WebappInternal(Base):
             if string[0:4] != 'http':
                 match = re.findall(caracter, string)
                 if match:
-                    string = re.sub(caracter, '', string) 
+                    string = re.sub(caracter, '', string)
 
             return string
 
@@ -2233,7 +2232,8 @@ class WebappInternal(Base):
         :type grid: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
-        :param additional_key: Key additional that would be pressed.         
+        :param additional_key: Key additional that would be pressed. 
+        :type additional_key: str        
 
         Usage:
 
@@ -3491,6 +3491,9 @@ class WebappInternal(Base):
             self.restart()
         self.assertTrue(False, log_message)
 
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
@@ -3825,9 +3828,12 @@ class WebappInternal(Base):
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
+
         :param label_name: The label name
         :type label_name: str
+
         Usage:
+
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
@@ -3958,16 +3964,16 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-
         if self.config.coverage:
             self.LogOff()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
             self.driver.close()
         else:
             self.driver.close()
-
+            
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_end_exec)
+            
     def containers_filter(self, containers):
         """
         [Internal]
