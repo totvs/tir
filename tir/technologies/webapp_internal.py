@@ -2220,11 +2220,11 @@ class WebappInternal(Base):
 
             return string
 
-    def SetKey(self, key, grid=False, grid_number=1):
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""):
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, ESC, Enter and Delete
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
@@ -2232,6 +2232,8 @@ class WebappInternal(Base):
         :type grid: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param additional_key: Key additional that would be pressed. 
+        :type additional_key: str        
 
         Usage:
 
@@ -2243,8 +2245,8 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """
-        print(f"Key pressed: {key}")
+        """        
+        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
         supported_keys = {
             "F1" : Keys.F1,
             "F2" : Keys.F2,
@@ -2264,7 +2266,9 @@ class WebappInternal(Base):
             "RIGHT": Keys.RIGHT,
             "DELETE" : Keys.DELETE,
             "ENTER": Keys.ENTER,
-            "ESC": Keys.ESCAPE
+            "ESC": Keys.ESCAPE,
+            "CTRL": Keys.CONTROL,
+            "ALT": Keys.ALT
         }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
@@ -2284,24 +2288,33 @@ class WebappInternal(Base):
         return getActiveElement()
         """
         grid_number-=1
+        hotkey = ["CTRL","ALT"]
+        key = key.upper()
         try:
-            Id = self.driver.execute_script(script)
-            if Id:
-                element = self.driver.find_element_by_id(Id)
-            else:
-                element = self.driver.find_element(By.TAG_NAME, "html")
+            if key in supported_keys:      
 
-            if key.upper() in supported_keys:
-                if key.upper() == "DOWN" and grid:
-                    if grid_number is None:
-                        grid_number = 0
-                    self.grid_input.append(["", "", grid_number, True])
+                if key not in hotkey:
+                    Id = self.driver.execute_script(script)
+                    if Id:
+                        element = self.driver.find_element_by_id(Id)
+                    else:
+                        element = self.driver.find_element(By.TAG_NAME, "html")
+
+                    if key == "DOWN" and grid:
+                        if grid_number is None:
+                            grid_number = 0
+                        self.grid_input.append(["", "", grid_number, True])
+                        self.set_element_focus(element)
+                    else:
+                        self.set_element_focus(element)
+                        self.send_keys(element, supported_keys[key])
                 else:
-                    self.set_element_focus(element)
-                    self.send_keys(element, supported_keys[key.upper()])
+                    if additional_key != "":
+                        ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
+                    else:
+                        self.log_error("Additional key is empty")  
             else:
                 self.log_error("Key is not supported")
-
         except Exception as error:
             self.log_error(str(error))
 

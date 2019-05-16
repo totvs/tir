@@ -488,11 +488,11 @@ class Webapp():
         """
         self.__webapp.SetFocus(field)
 
-    def SetKey(self, key, grid=False, grid_number=1):
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
@@ -500,6 +500,8 @@ class Webapp():
         :type grid: bool
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+		:param additional_key: Key additional that would be pressed.
+        :type additional_key: str
 
         Usage:
 
@@ -512,7 +514,7 @@ class Webapp():
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """
-        self.__webapp.SetKey(key, grid, grid_number)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key)
 
     def SetLateralMenu(self, menuitens):
         """
