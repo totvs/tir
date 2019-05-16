@@ -2221,7 +2221,7 @@ class WebappInternal(Base):
 
             return string
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key="",focus_label="",focus_field=""):
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -2233,12 +2233,7 @@ class WebappInternal(Base):
         :type grid: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
-        :param additional_key: Key additional that would be pressed.
-        :type focus_label: str
-        :param focus_label: The label name that must receive the focus ( use focus_label or focus_field ).
-        :type focus_label: str
-        :param focus_field: The field (A1_COD or Client) that must receive the focus ( use focus_label or focus_field ).
-        :type focus_field: str 
+        :param additional_key: Key additional that would be pressed.         
 
         Usage:
 
@@ -2296,11 +2291,7 @@ class WebappInternal(Base):
         hotkey = ["CTRL","ALT"]
         key = key.upper()
         try:
-            if key in supported_keys:
-                if focus_label != "":
-                    self.ClickLabel(focus_label)
-                elif focus_field !="":
-                    self.SetFocus(focus_field)
+            if key in supported_keys:      
 
                 if key not in hotkey:
                     Id = self.driver.execute_script(script)
