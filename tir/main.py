@@ -195,7 +195,6 @@ class Webapp():
         >>> oHelper.ClickGridCell("Product", 1)
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
-    
 
     def ClickIcon(self, icon_text):
         """
@@ -518,12 +517,7 @@ class Webapp():
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
 		:param additional_key: Key additional that would be pressed.
-        :type focus_label: str
-        :param focus_label: The label name that must receive the focus ( use focus_label or focus_field ).
-        :type focus_label: str
-        :param focus_field: The field (A1_COD or Client) that must receive the focus ( use focus_label or focus_field ).
-        :type focus_field: str
-
+        :type additional_key: str
 
         Usage:
 
