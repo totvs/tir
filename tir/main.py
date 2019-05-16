@@ -211,6 +211,22 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text)
 
+    def ClickCheckBox(self, label_box_name, position=1):
+        """
+        Clicks on a Label in box on the screen.
+
+        :param label_box_name: The label box name
+        :type label_box_name: str
+        :param position: index label box on interface
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCheckBox("Search",1)
+        """
+        self.__webapp.ClickCheckBox(label_box_name,position)
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
