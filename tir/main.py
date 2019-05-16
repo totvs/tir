@@ -505,7 +505,7 @@ class Webapp():
         """
         self.__webapp.SetFocus(field)
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key="",focus_label="",focus_field=""): 
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -536,7 +536,7 @@ class Webapp():
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """
-        self.__webapp.SetKey(key, grid, grid_number,additional_key,focus_label,focus_field)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key)
 
     def SetLateralMenu(self, menuitens):
         """
