@@ -6,6 +6,7 @@ import uuid
 import csv
 import inspect
 from datetime import datetime
+from tir.technologies.core.config import ConfigLoader
 
 class Log:
     """
@@ -38,6 +39,7 @@ class Log:
         self.issue = issue
         self.execution_id = execution_id
         self.country = country
+        self.config = ConfigLoader()
 
     def generate_header(self):
         """
@@ -90,18 +92,21 @@ class Log:
         if len(self.table_rows) > 0:
             try:
                 if self.folder:
-                    path = f"{self.folder}\\{self.station}\\{log_file}"
+                    path = f"{self.folder}\\{self.station}"
                     os.makedirs(f"{self.folder}\\{self.station}")
                 else:
-                    path = f"Log\\{self.station}\\{log_file}"
+                    path = f"Log\\{self.station}"
                     os.makedirs(f"Log\\{self.station}")
             except OSError:
                 pass
+
+            if self.config.smart_test:
+                open(f"{path}\\log_exec_file.txt", "w")
             
             testcases = self.list_of_testcases()
 
             if len(self.table_rows[1:]) == len(testcases):
-                with open(path, mode="w", newline="") as csv_file:
+                with open(f"{path}\\{log_file}", mode="w", newline="") as csv_file:
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
                     for line in self.table_rows:
                         csv_writer.writerow(line)
