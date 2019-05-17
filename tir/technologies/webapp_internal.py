@@ -1890,9 +1890,9 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(0.5)
+            time.sleep(3)
             
-        self.log_error("Element "+string+" not found")
+        self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string):
         """
@@ -1917,9 +1917,9 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(0.5)
+            time.sleep(3)
 
-        self.log_error("Element "+string+" not found")
+        self.log_error(f"Element {string} not found")
 
     def WaitProcessing(self, itens):
         """
