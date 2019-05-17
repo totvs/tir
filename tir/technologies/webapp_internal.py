@@ -1881,15 +1881,18 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
         
-        while True:
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
 
             element = None
             
             element = self.search_text(selector=".tsay", text=string)
 
             if not element:
-                break
+                return
             time.sleep(3)
+            
+        self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string):
         """
@@ -1905,15 +1908,18 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
 
-        while True:
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
 
             element = None
             
             element = self.search_text(selector=".tsay", text=string)
 
             if element:
-                break
+                return
             time.sleep(3)
+
+        self.log_error(f"Element {string} not found")
 
     def WaitProcessing(self, itens):
         """
