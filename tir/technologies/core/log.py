@@ -107,11 +107,13 @@ class Log:
 
             if len(self.table_rows[1:]) == len(testcases):
                 with open(f"{path}\\{log_file}", mode="w", newline="") as csv_file:
+                    csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
+                    csv_writer_header.writerow(self.table_rows[0])
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                    for line in self.table_rows:
+                    for line in self.table_rows[1:]:
                         csv_writer.writerow(line)
 
-                print(f"Log file created successfully: {path}")
+                print(f"Log file created successfully: {path}\\{log_file}")
 
     def set_seconds(self):
         """
