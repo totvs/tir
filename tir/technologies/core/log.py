@@ -16,7 +16,7 @@ class Log:
     >>> # Instanted inside base.py:
     >>> self.log = Log()
     """
-    def __init__(self, user="", station="", program="", program_date=time.strftime("01/01/1980 12:00:00"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
+    def __init__(self, suite_datetime="", user="", station="", program="", program_date=time.strftime("01/01/1980 12:00:00"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         self.user = user
@@ -28,6 +28,7 @@ class Log:
         self.database = database
         self.initial_time = datetime.today()
         self.seconds = 0
+        self.suite_datetime = suite_datetime
 
         self.table_rows = []
         self.invalid_fields = []
@@ -68,7 +69,10 @@ class Log:
         passed = 1 if result else 0
         failed = 0 if result else 1
 
-        line.extend([time.strftime("%d/%m/%Y %X"), self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country, self.test_type])
+        if not self.suite_datetime:
+            self.suite_datetime = time.strftime("%d/%m/%Y %X")
+
+        line.extend([self.suite_datetime, self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country, self.test_type])
         self.table_rows.append(line)
 
     def save_file(self, filename):

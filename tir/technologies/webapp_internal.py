@@ -1211,12 +1211,16 @@ class WebappInternal(Base):
         >>> self.restart()
         """
         self.driver.refresh()
+        
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+
         try:
             self.driver.switch_to_alert().accept()
         except:
             pass
 
-        if not self.config.skip_environment:
+        if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
         self.user_screen()
         self.environment_screen()
