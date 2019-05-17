@@ -39,6 +39,7 @@ class ConfigLoader:
         self.screenshot_folder = str(data["ScreenshotFolder"]) if "ScreenshotFolder" in data else ""
         self.coverage = ("Coverage" in data  and bool(data["Coverage"]))
         self.skip_restart = ("SkipRestart" in data and bool(data["SkipRestart"]))
+        self.smart_test = ("SmartTest" in data and bool(data["SmartTest"]))
         self.valid_language = self.language != ""
         self.initial_program = ""
         self.routine = ""
