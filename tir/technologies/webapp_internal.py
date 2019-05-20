@@ -3787,6 +3787,46 @@ class WebappInternal(Base):
         else:
             self.assertFalse(expected, msg)
 
+    
+    def ClickCheckBox(self, label_box_name, position=1):
+        """
+        Clicks on a Label in box on the screen.
+
+        :param label_box_name: The label box name
+        :type label_box_name: str
+        :param position: position label box on interface
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCheckBox("Search",1)
+        """
+        if position > 0:
+
+            self.wait_element(label_box_name)
+
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Couldn't locate container.")
+
+            labels_boxs = container.select("span")
+            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))                
+        
+            if position <= len(filtered_labels_boxs):
+                position -= 1
+                label_box = filtered_labels_boxs[position].parent
+                if 'tcheckbox' in label_box.get_attribute_list('class'):
+                    label_box_element = lambda: self.soup_to_selenium(label_box)                
+                    self.click(label_box_element())
+                else:
+                    self.log_error("Index the Ckeckbox invalid.")                
+            else:
+                self.log_error("Index the Ckeckbox invalid.")
+        else:
+            self.log_error("Index the Ckeckbox invalid.")
+
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
