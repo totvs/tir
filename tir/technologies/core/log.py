@@ -101,7 +101,7 @@ class Log:
                 pass
 
             if self.config.smart_test:
-                open(f"{path}\\log_exec_file.txt", "w")
+                open("log_exec_file.txt", "w")
             
             testcases = self.list_of_testcases()
 
