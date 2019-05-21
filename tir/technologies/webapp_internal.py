@@ -1981,7 +1981,8 @@ class WebappInternal(Base):
         #except:#caso contrário efetuo o clique na aba com webscraping
         soup = self.get_current_DOM()
         panels = soup.select(".button-bar a")
-        panel = next(iter(list(filter(lambda x: x.text == folder_name, panels))))
+        panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
+        panel = next(iter(self.filter_is_displayed(panels_filtered)))
         element = ""
         if panel:
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
