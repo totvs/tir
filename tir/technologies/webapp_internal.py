@@ -2822,7 +2822,7 @@ class WebappInternal(Base):
         :type get_value: bool
 
         :return: If get_value flag is True, it will return the captured value.
-        :rtype: str
+        :return type: str
 
         Usage:
 
