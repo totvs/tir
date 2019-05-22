@@ -489,9 +489,9 @@ class WebappInternal(Base):
 
         :param term: The term that must be searched.
         :type term: str
-        :param name_attr: If true searchs element by name
+        :param name_attr: If true searchs element by name.
         :type name_attr: bool
-        :param send_key: True: try open standard search field send key F3 (no click)
+        :param send_key: Try open standard search field send key F3 (no click).
         :type bool
 
         Usage:
@@ -4085,8 +4085,7 @@ class WebappInternal(Base):
 
     def GetText(self, string_left="", string_right=""):
         """
-
-        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+        This method returns a string from modal based on the string in the left or right position that you send on parameter.
 
         If the string_left was filled then the right side content is return.
 
@@ -4094,17 +4093,16 @@ class WebappInternal(Base):
 
         If no parameter was filled so the full content is return.
 
-        :param string_left: String of the left side of content
-        :type str
-        :param string_right: String of the right side of content
-        :type str
-        :returns String content
+        :param string_left: String of the left side of content.
+        :type string_left: str
+        :param string_right: String of the right side of content.
+        :type string_right: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
-        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText(string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText(string_left="Left Text")
         >>> oHelper.GetText()
         """
 
