@@ -489,9 +489,9 @@ class WebappInternal(Base):
 
         :param term: The term that must be searched.
         :type term: str
-        :param name_attr: If true searchs element by name
+        :param name_attr: If true searchs element by name.
         :type name_attr: bool
-        :param send_key: True: try open standard search field send key F3 (no click)
+        :param send_key: Try open standard search field send key F3 (no click).
         :type bool
 
         Usage:
@@ -783,11 +783,7 @@ class WebappInternal(Base):
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y'] >= xy_label['y'] and xy_elem[1]['x'] >= xy_label['x']),position_list ))
-            if(position_list == []):
-                position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-                position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
-
+            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
@@ -1649,7 +1645,7 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     return
             else:
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1)
                 position -= 1
 
             layers = 0
@@ -1658,8 +1654,9 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not soup_element and button.lower() != "x"):
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button")
+            while(time.time() < endtime and not soup_element and button.lower() != "x"): 
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton")
+                soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
                 if soup_objects and len(soup_objects) - 1 >= position:
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
@@ -1881,15 +1878,18 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
         
-        while True:
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
 
             element = None
             
             element = self.search_text(selector=".tsay", text=string)
 
             if not element:
-                break
+                return
             time.sleep(3)
+            
+        self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string):
         """
@@ -1905,15 +1905,18 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
 
-        while True:
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
 
             element = None
             
             element = self.search_text(selector=".tsay", text=string)
 
             if element:
-                break
+                return
             time.sleep(3)
+
+        self.log_error(f"Element {string} not found")
 
     def WaitProcessing(self, itens):
         """
@@ -2038,6 +2041,11 @@ class WebappInternal(Base):
             if element:
                 box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.click(box())
+
+        elif select_all and not is_select_all_button:
+            th = next(iter(grid.select('th')))
+            th_element = self.soup_to_selenium(th)
+            th_element.click()
 
         elif content_list or (select_all and not is_select_all_button):
             self.wait_element(content_list[0]) # wait columns
@@ -2220,11 +2228,11 @@ class WebappInternal(Base):
 
             return string
 
-    def SetKey(self, key, grid=False, grid_number=1):
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""):
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, ESC, Enter and Delete
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
@@ -2232,6 +2240,8 @@ class WebappInternal(Base):
         :type grid: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param additional_key: Key additional that would be pressed. 
+        :type additional_key: str        
 
         Usage:
 
@@ -2243,8 +2253,8 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """
-        print(f"Key pressed: {key}")
+        """        
+        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
         supported_keys = {
             "F1" : Keys.F1,
             "F2" : Keys.F2,
@@ -2264,7 +2274,9 @@ class WebappInternal(Base):
             "RIGHT": Keys.RIGHT,
             "DELETE" : Keys.DELETE,
             "ENTER": Keys.ENTER,
-            "ESC": Keys.ESCAPE
+            "ESC": Keys.ESCAPE,
+            "CTRL": Keys.CONTROL,
+            "ALT": Keys.ALT
         }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
@@ -2284,42 +2296,60 @@ class WebappInternal(Base):
         return getActiveElement()
         """
         grid_number-=1
+        hotkey = ["CTRL","ALT"]
+        key = key.upper()
         try:
-            Id = self.driver.execute_script(script)
-            if Id:
-                element = self.driver.find_element_by_id(Id)
-            else:
-                element = self.driver.find_element(By.TAG_NAME, "html")
+            if key in supported_keys:      
 
-            if key.upper() in supported_keys:
-                if key.upper() == "DOWN" and grid:
-                    if grid_number is None:
-                        grid_number = 0
-                    self.grid_input.append(["", "", grid_number, True])
+                if key not in hotkey:
+                    Id = self.driver.execute_script(script)
+                    if Id:
+                        element = self.driver.find_element_by_id(Id)
+                    else:
+                        element = self.driver.find_element(By.TAG_NAME, "html")
+
+                    if key == "DOWN" and grid:
+                        if grid_number is None:
+                            grid_number = 0
+                        self.grid_input.append(["", "", grid_number, True])
+                        self.set_element_focus(element)
+                    else:
+                        self.set_element_focus(element)
+                        self.send_keys(element, supported_keys[key])
                 else:
-                    self.set_element_focus(element)
-                    self.send_keys(element, supported_keys[key.upper()])
+                    if additional_key != "":
+                        ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
+                    else:
+                        self.log_error("Additional key is empty")  
             else:
                 self.log_error("Key is not supported")
-
         except Exception as error:
             self.log_error(str(error))
 
-    def SetFocus(self, field):
+    def SetFocus(self, field, grid_cell):
         """
         Sets the current focus on the desired field.
 
         :param field: The field that must receive the focus.
         :type field: str
+        :type grid_cell: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
+        >>> oHelper.SetFocus("A1_COD", grid_cell = True)
         """
-        print(f"Setting focus on element {field}.")
-        element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-        self.set_element_focus(element())
+        if grid_cell:
+            self.wait_element(field)
+            self.ClickGridCell(field)
+            time.sleep(1)
+            ActionChains(self.driver).key_down(Keys.ENTER).perform()
+            time.sleep(1)
+        else:
+            print(f"Setting focus on element {field}.")
+            element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
+            self.set_element_focus(element())
 
     def click_check_radio_button(self, field, value):
         """
@@ -3586,9 +3616,13 @@ class WebappInternal(Base):
         self.ClickIcon(self.language.search)
 
         self.fill_parameters(restore_backup=restore_backup)
+        self.parameters = []
 
         if self.config.coverage:
+            self.ClickIcon(self.language.exit)
+            time.sleep(1)
             self.driver.refresh()
+
         else:
             self.LogOff()
 
@@ -3771,6 +3805,46 @@ class WebappInternal(Base):
             self.assertTrue(expected, msg)
         else:
             self.assertFalse(expected, msg)
+
+    
+    def ClickCheckBox(self, label_box_name, position=1):
+        """
+        Clicks on a Label in box on the screen.
+
+        :param label_box_name: The label box name
+        :type label_box_name: str
+        :param position: position label box on interface
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCheckBox("Search",1)
+        """
+        if position > 0:
+
+            self.wait_element(label_box_name)
+
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Couldn't locate container.")
+
+            labels_boxs = container.select("span")
+            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))                
+        
+            if position <= len(filtered_labels_boxs):
+                position -= 1
+                label_box = filtered_labels_boxs[position].parent
+                if 'tcheckbox' in label_box.get_attribute_list('class'):
+                    label_box_element = lambda: self.soup_to_selenium(label_box)                
+                    self.click(label_box_element())
+                else:
+                    self.log_error("Index the Ckeckbox invalid.")                
+            else:
+                self.log_error("Index the Ckeckbox invalid.")
+        else:
+            self.log_error("Index the Ckeckbox invalid.")
+
 
     def ClickLabel(self, label_name):
         """
@@ -4011,8 +4085,7 @@ class WebappInternal(Base):
 
     def GetText(self, string_left="", string_right=""):
         """
-
-        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+        This method returns a string from modal based on the string in the left or right position that you send on parameter.
 
         If the string_left was filled then the right side content is return.
 
@@ -4020,17 +4093,16 @@ class WebappInternal(Base):
 
         If no parameter was filled so the full content is return.
 
-        :param string_left: String of the left side of content
-        :type str
-        :param string_right: String of the right side of content
-        :type str
-        :returns String content
+        :param string_left: String of the left side of content.
+        :type string_left: str
+        :param string_right: String of the right side of content.
+        :type string_right: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
-        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText(string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText(string_left="Left Text")
         >>> oHelper.GetText()
         """
 

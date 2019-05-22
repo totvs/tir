@@ -211,6 +211,22 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text)
 
+    def ClickCheckBox(self, label_box_name, position=1):
+        """
+        Clicks on a Label in box on the screen.
+
+        :param label_box_name: The label box name
+        :type label_box_name: str
+        :param position: index label box on interface
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCheckBox("Search",1)
+        """
+        self.__webapp.ClickCheckBox(label_box_name,position)
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
@@ -474,7 +490,7 @@ class Webapp():
         """
         self.__webapp.SetFilePath(value)
 
-    def SetFocus(self, field):
+    def SetFocus(self, field, grid_cell=False):
         """
         Sets the current focus on the desired field.
 
@@ -486,13 +502,13 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
         """
-        self.__webapp.SetFocus(field)
+        self.__webapp.SetFocus(field,grid_cell)
 
-    def SetKey(self, key, grid=False, grid_number=1):
+    def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, Up, Down, Left, Right, Enter and Delete
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
         :type key: str
@@ -500,6 +516,8 @@ class Webapp():
         :type grid: bool
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+		:param additional_key: Key additional that would be pressed.
+        :type additional_key: str
 
         Usage:
 
@@ -512,7 +530,7 @@ class Webapp():
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """
-        self.__webapp.SetKey(key, grid, grid_number)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key)
 
     def SetLateralMenu(self, menuitens):
         """
@@ -748,8 +766,7 @@ class Webapp():
     
     def GetText(self, string_left="", string_right=""):
         """
-
-        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+        This method returns a string from modal based on the string in the left or right position that you send on parameter.
 
         If the string_left was filled then the right side content is return.
 
@@ -757,17 +774,16 @@ class Webapp():
 
         If no parameter was filled so the full content is return.
 
-        :param string_left: String of the left side of content
-        :type str
-        :param string_right: String of the right side of content
-        :type str
-        :returns String content
+        :param string_left: String of the left side of content.
+        :type string_left: str
+        :param string_right: String of the right side of content.
+        :type string_right: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
-        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText(string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText(string_left="Left Text")
         >>> oHelper.GetText()
         """
 

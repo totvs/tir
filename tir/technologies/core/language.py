@@ -196,7 +196,7 @@ class LanguagePack:
             "Confirm": "Confirmar",
             "Save": "Grabar",
             "Close": "Finalizar",
-            "Exit": "Sair",
+            "Exit": "Salir",
             "Leave Page": "Sair da página",
             "Enter": "Entrar",
             "Finish": "Terminar",
