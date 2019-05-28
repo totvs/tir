@@ -1658,11 +1658,14 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton")
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog")
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
+
 
                 if soup_objects and len(soup_objects) - 1 >= position:
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                    parent_element = self.soup_to_selenium(soup_objects[0].parent)
+                    id_parent_element = parent_element.get_attribute('id')
 
             if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
@@ -1738,10 +1741,10 @@ class WebappInternal(Base):
                 elif self.grid_counters:
                     self.grid_counters = {}
 
-            if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            if button == self.language.save and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
-            elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            elif button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
