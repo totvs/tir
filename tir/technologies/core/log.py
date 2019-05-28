@@ -70,11 +70,12 @@ class Log:
         total_cts = 1
         passed = 1 if result else 0
         failed = 0 if result else 1
+        printable_message = ''.join(filter(lambda x: x.isprintable(), message))
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
 
-        line.extend([self.suite_datetime, self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, message, self.database, self.issue, self.execution_id, self.country, self.test_type])
+        line.extend([self.suite_datetime, self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, printable_message, self.database, self.issue, self.execution_id, self.country, self.test_type])
         self.table_rows.append(line)
 
     def save_file(self, filename):
