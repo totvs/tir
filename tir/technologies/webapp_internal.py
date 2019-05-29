@@ -280,9 +280,14 @@ class WebappInternal(Base):
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
-            self.double_click(env())
-            self.send_keys(env(), Keys.HOME)
-            self.send_keys(env(), self.config.module)
+            env_value = self.get_web_value(env())
+            endtime = time.time() + self.config.time_out
+            while (time.time() < endtime and env_value != self.config.module):
+                self.double_click(env())
+                self.send_keys(env(), Keys.HOME)
+                self.send_keys(env(), self.config.module)
+                env_value = self.get_web_value(env())
+                time.sleep(1)
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
