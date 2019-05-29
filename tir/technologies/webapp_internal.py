@@ -92,6 +92,10 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+
+        if not self.log.program:
+            self.log.program = self.get_program_name()
+
         if save_input:
             self.config.initial_program = initial_program
             self.config.date = date
@@ -118,9 +122,6 @@ class WebappInternal(Base):
 
         if save_input:
             self.set_log_info()
-        
-        if not self.log.program:
-            self.log.program = self.get_program_name()
 
         self.log.country = self.config.country
         self.log.execution_id = self.config.execution_id
@@ -280,9 +281,14 @@ class WebappInternal(Base):
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
-            self.double_click(env())
-            self.send_keys(env(), Keys.HOME)
-            self.send_keys(env(), self.config.module)
+            env_value = self.get_web_value(env())
+            endtime = time.time() + self.config.time_out
+            while (time.time() < endtime and env_value != self.config.module):
+                self.double_click(env())
+                self.send_keys(env(), Keys.HOME)
+                self.send_keys(env(), self.config.module)
+                env_value = self.get_web_value(env())
+                time.sleep(1)
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
@@ -434,7 +440,9 @@ class WebappInternal(Base):
         >>> oHelper.Program("MATA020")
         """
         self.config.routine = program_name
-        self.log.program = program_name
+        
+        if not self.log.program:
+            self.log.program = program_name
         self.set_program(program_name)
 
     def set_program(self, program):
@@ -489,9 +497,9 @@ class WebappInternal(Base):
 
         :param term: The term that must be searched.
         :type term: str
-        :param name_attr: If true searchs element by name
+        :param name_attr: If true searchs element by name.
         :type name_attr: bool
-        :param send_key: True: try open standard search field send key F3 (no click)
+        :param send_key: Try open standard search field send key F3 (no click).
         :type bool
 
         Usage:
@@ -4076,17 +4084,23 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
-            return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+            get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
+
+            program_name = next(iter(list(map(lambda x: re.findall(fr"(\w+)(?:{get_file_name})", x.upper()), filter(lambda x: ".PY" in x.upper(), stack_item_splited)))), None)
+
+            if program_name:
+                return next(iter(program_name))
+            else:
+                return None
         else:
             return None
 
     def GetText(self, string_left="", string_right=""):
         """
-
-        This method returns a string from modal based on the string in the left or rigth position that you send on parameter.
+        This method returns a string from modal based on the string in the left or right position that you send on parameter.
 
         If the string_left was filled then the right side content is return.
 
@@ -4094,17 +4108,16 @@ class WebappInternal(Base):
 
         If no parameter was filled so the full content is return.
 
-        :param string_left: String of the left side of content
-        :type str
-        :param string_right: String of the right side of content
-        :type str
-        :returns String content
+        :param string_left: String of the left side of content.
+        :type string_left: str
+        :param string_right: String of the right side of content.
+        :type string_right: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.GetText("string_left="Left Text", string_right="Right Text")
-        >>> oHelper.GetText("string_left="Left Text") 
+        >>> oHelper.GetText(string_left="Left Text", string_right="Right Text")
+        >>> oHelper.GetText(string_left="Left Text")
         >>> oHelper.GetText()
         """
 
