@@ -92,6 +92,10 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+
+        if not self.log.program:
+            self.log.program = self.get_program_name()
+
         if save_input:
             self.config.initial_program = initial_program
             self.config.date = date
@@ -118,9 +122,6 @@ class WebappInternal(Base):
 
         if save_input:
             self.set_log_info()
-        
-        if not self.log.program:
-            self.log.program = self.get_program_name()
 
         self.log.country = self.config.country
         self.log.execution_id = self.config.execution_id
@@ -434,7 +435,9 @@ class WebappInternal(Base):
         >>> oHelper.Program("MATA020")
         """
         self.config.routine = program_name
-        self.log.program = program_name
+        
+        if not self.log.program:
+            self.log.program = program_name
         self.set_program(program_name)
 
     def set_program(self, program):
@@ -4076,10 +4079,17 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
-            return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+            get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
+
+            program_name = next(iter(list(map(lambda x: re.findall(fr"(\w+)(?:{get_file_name})", x.upper()), filter(lambda x: ".PY" in x.upper(), stack_item_splited)))), None)
+
+            if program_name:
+                return next(iter(program_name))
+            else:
+                return None
         else:
             return None
 
