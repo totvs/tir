@@ -186,6 +186,8 @@ class WebappInternal(Base):
 
         print("Filling User")
         user_element = next(iter(soup.select("[name='cGetUser']")), None)
+        user_element = next(iter(user_element.select("input")), None)
+
         if user_element is None:
             self.log_error("Couldn't find User input element.")
 
@@ -201,10 +203,11 @@ class WebappInternal(Base):
         # while(loop_control):
         print("Filling Password")
         password_element = next(iter(soup.select("[name='cGetPsw']")), None)
+        password_element = next(iter(password_element.select("input")), None)
         if password_element is None:
             self.log_error("Couldn't find User input element.")
 
-        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element.find_parent()))
+        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element))
         self.set_element_focus(password())
         self.click(password())
         # self.send_keys(password(), Keys.HOME)
@@ -463,16 +466,17 @@ class WebappInternal(Base):
         self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
         tget = next(iter(soup.select("[name=cGet]")), None)
+        tget_input = next(iter(tget.select("input")), None)
         if tget:
             tget_img = next(iter(tget.select("img")), None)
 
             if tget_img is None:
                 self.log_error("Couldn't find Program field.")
 
-            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget))
+            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
             s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
 
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget))))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
             self.double_click(s_tget())
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
@@ -964,6 +968,7 @@ class WebappInternal(Base):
                     #if Character input
                     if valtype != 'N':
                         self.set_element_focus(input_field())
+                        input_field().send_keys(Keys.CONTROL, 'a')
                         self.send_keys(input_field(), Keys.DELETE)
                         # self.send_keys(input_field(), Keys.HOME)
                         self.send_keys(input_field(), main_value)
