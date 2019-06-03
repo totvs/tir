@@ -4178,4 +4178,6 @@ class WebappInternal(Base):
         container = self.get_current_container()
         buttons = container.select("button")
         button_filtered = next(iter(filter(lambda x: x.text != "", buttons)))
+        if not button_filtered:
+            self.log_error(f"Couldn't find button")
         return button_filtered
