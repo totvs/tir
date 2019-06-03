@@ -633,20 +633,20 @@ class Base(unittest.TestCase):
         >>> self.send_keys(element(), Keys.ENTER)
         """
         try:
-            element.send_keys("")
-            element.click()
+            # element.send_keys("")
+            # element.click()
             if arg.isprintable():
                 element.clear()
-            element.send_keys(Keys.HOME)
+                element.send_keys(Keys.CONTROL, 'a')
             element.send_keys(arg)
         except Exception:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
-            actions.send_keys("")
-            actions.click()
+            # actions.send_keys("")
+            # actions.click()
             if arg.isprintable():
-                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
-            actions.send_keys(Keys.HOME)
+                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)    
+                actions.key_down(Keys.CONTROL).send_keys('a')
             actions.send_keys(arg)
             actions.perform()
 
