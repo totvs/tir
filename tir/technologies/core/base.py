@@ -23,6 +23,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import WebDriverException
 
 class Base(unittest.TestCase):
     """
@@ -380,7 +381,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-        return BeautifulSoup(self.driver.page_source,"html.parser")
+        try:
+            return BeautifulSoup(self.driver.page_source,"html.parser")
+        except WebDriverException:
+            pass
 
     def get_element_text(self, element):
         """
