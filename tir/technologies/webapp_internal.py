@@ -474,16 +474,17 @@ class WebappInternal(Base):
         self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
         tget = next(iter(soup.select("[name=cGet]")), None)
+        tget_input = next(iter(tget.select("input")), None)
         if tget:
             tget_img = next(iter(tget.select("img")), None)
 
             if tget_img is None:
                 self.log_error("Couldn't find Program field.")
 
-            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget))
+            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
             s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
 
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget))))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
             self.double_click(s_tget())
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
@@ -976,8 +977,9 @@ class WebappInternal(Base):
                     #if Character input
                     if valtype != 'N':
                         self.set_element_focus(input_field())
+                        input_field().send_keys(Keys.CONTROL, 'a')
                         self.send_keys(input_field(), Keys.DELETE)
-                        self.send_keys(input_field(), Keys.HOME)
+                        # self.send_keys(input_field(), Keys.HOME)
                         self.send_keys(input_field(), main_value)
                     #if Number input
                     else:
@@ -986,12 +988,12 @@ class WebappInternal(Base):
                         while(tries < 3):
                             self.set_element_focus(input_field())
                             self.send_keys(input_field(), Keys.DELETE)
-                            self.send_keys(input_field(), Keys.BACK_SPACE)
-                            if interface_value_size == 1:
-                                self.double_click(input_field())
-                                self.send_keys(input_field(), Keys.HOME)
-                            else:
-                                self.click(input_field())
+                            # self.send_keys(input_field(), Keys.BACK_SPACE)
+                            # if interface_value_size == 1:
+                            #     self.double_click(input_field())
+                            #     self.send_keys(input_field(), Keys.HOME)
+                            # else:
+                            #     self.click(input_field())
                             self.set_element_focus(input_field())
                             self.try_send_keys(input_field, main_value, try_counter)
                             current_number_value = self.get_web_value(input_field())
@@ -3383,10 +3385,13 @@ class WebappInternal(Base):
         """
         self.wait.until(EC.visibility_of(element_function()))
         if try_counter == 0:
+            element_function().send_keys(Keys.CONTROL, 'a')
             element_function().send_keys(key)
         elif try_counter == 1:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
         else:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
     def find_label_element(self, label_text, container):
