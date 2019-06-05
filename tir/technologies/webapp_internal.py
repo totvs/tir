@@ -93,6 +93,9 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
+        if self.config.smart_erp:
+            self.wait_smart_erp_environment()
+
         if not self.log.program:
             self.log.program = self.get_program_name()
 
@@ -1484,6 +1487,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+
+        element_list = []
+
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
                 debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
@@ -4160,3 +4166,18 @@ class WebappInternal(Base):
             return text[:-len(string_right)].strip()
         else:
             return text.strip()
+    
+    def wait_smart_erp_environment(self):
+        """
+        [Internal]
+        """
+        content = False
+        endtime = time.time() + self.config.time_out
+
+        print("Waiting for SmartERP environment assembly")
+
+        while not content and (time.time() < endtime):
+            
+            soup = self.get_current_DOM()
+
+            content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
