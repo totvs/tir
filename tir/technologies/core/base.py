@@ -645,6 +645,9 @@ class Base(unittest.TestCase):
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
             actions.click()
+            if arg.isprintable():
+                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
+            actions.send_keys(Keys.HOME)
             actions.send_keys(arg)
             actions.perform()
 
