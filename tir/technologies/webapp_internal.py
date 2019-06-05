@@ -185,12 +185,14 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
 
         print("Filling User")
-        user_element = next(iter(soup.select("[name='cGetUser']")), None)
+        user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
+
         if user_element is None:
             self.log_error("Couldn't find User input element.")
 
         user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
         self.set_element_focus(user())
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
         self.double_click(user())
         self.send_keys(user(), Keys.HOME)
         self.send_keys(user(), self.config.user)
@@ -200,16 +202,22 @@ class WebappInternal(Base):
 
         # while(loop_control):
         print("Filling Password")
-        password_element = next(iter(soup.select("[name='cGetPsw']")), None)
+        password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
         if password_element is None:
             self.log_error("Couldn't find User input element.")
 
-        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element.find_parent()))
-        self.set_element_focus(password())
-        self.click(password())
-        self.send_keys(password(), Keys.HOME)
-        self.send_keys(password(), self.config.password)
-        self.send_keys(password(), Keys.ENTER)
+        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element))
+        password_value = self.get_web_value(password())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not password_value.strip()):
+            self.set_element_focus(password())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(password_element))))
+            self.click(password())
+            self.send_keys(password(), Keys.HOME)
+            self.send_keys(password(), self.config.password)
+            self.send_keys(password(), Keys.ENTER)
+            password_value = self.get_web_value(password())
+            self.wait_blocker_ajax()
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
@@ -730,6 +738,7 @@ class WebappInternal(Base):
         Wait ajax blocker disappear
 
         """
+        print("Waiting ajax blocker to continue...")
         result = True
         while(result):
             soup = self.get_current_DOM()
