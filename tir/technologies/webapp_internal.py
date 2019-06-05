@@ -3512,8 +3512,10 @@ class WebappInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file(routine_name)
-        if not self.config.skip_restart:
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1:
             self.restart()
+        else:
+            self.driver.close()
         self.assertTrue(False, log_message)
 
         if self.config.num_exec:
