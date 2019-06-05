@@ -1484,6 +1484,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+
+        element_list = []
+
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
                 debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
