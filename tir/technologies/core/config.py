@@ -40,7 +40,6 @@ class ConfigLoader:
         self.coverage = ("Coverage" in data  and bool(data["Coverage"]))
         self.skip_restart = ("SkipRestart" in data and bool(data["SkipRestart"]))
         self.smart_test = ("SmartTest" in data and bool(data["SmartTest"]))
-        self.smart_erp = ("SmartERP" in data and bool(data["SmartERP"]))
         self.valid_language = self.language != ""
         self.initial_program = ""
         self.routine = ""
