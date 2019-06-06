@@ -4195,7 +4195,9 @@ class WebappInternal(Base):
         print("Waiting for SmartERP environment assembly")
 
         while not content and (time.time() < endtime):
-            
-            soup = self.get_current_DOM()
+            try:
+                soup = self.get_current_DOM()
 
-            content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
+                content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
+            except AttributeError:
+                pass
