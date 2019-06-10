@@ -1253,8 +1253,10 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
+        timeout = 900 if self.config.coverage else self.config.time_out
+
         if self.config.coverage:
-            endtime = time.time() + self.config.time_out
+            endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1872,7 +1874,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, string):
+    def WaitHide(self, string, timeout=None):
         """
         Search string that was sent and wait hide the element.
 
@@ -1886,7 +1888,7 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
         
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
@@ -1899,7 +1901,7 @@ class WebappInternal(Base):
             
         self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string):
+    def WaitShow(self, string, timeout=None):
         """
         Search string that was sent and wait show the elements.
 
@@ -1913,7 +1915,7 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
@@ -1938,9 +1940,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
         """
-        self.WaitShow(itens)
+        timeout = 900 if self.config.coverage else self.config.time_out
 
-        self.WaitHide(itens)
+        self.WaitShow(itens, timeout)
+
+        self.WaitHide(itens, timeout)
 
 
     def SetTabEDAPP(self, table):
