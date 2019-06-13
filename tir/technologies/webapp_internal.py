@@ -1253,9 +1253,8 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
-        timeout = 900 if self.config.coverage else self.config.time_out
-
         if self.config.coverage:
+            timeout = 900
             endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
@@ -1887,6 +1886,9 @@ class WebappInternal(Base):
         >>> oHelper.WaitHide("Processing")
         """
         print("Waiting processing...")
+
+        if not timeout:
+            timeout = self.config.time_out
         
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -1915,6 +1917,9 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
 
+        if not timeout:
+            timeout = self.config.time_out
+
         endtime = time.time() + timeout
         while(time.time() < endtime):
 
@@ -1928,7 +1933,7 @@ class WebappInternal(Base):
 
         self.log_error(f"Element {string} not found")
 
-    def WaitProcessing(self, itens):
+    def WaitProcessing(self, itens, timeout=None):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -1940,7 +1945,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
         """
-        timeout = 900 if self.config.coverage else self.config.time_out
+        if not timeout:
+            timeout = self.config.time_out
 
         self.WaitShow(itens, timeout)
 
@@ -3998,8 +4004,11 @@ class WebappInternal(Base):
         """
 
         if self.config.coverage:
+
+            timeout = 900
+            
             self.LogOff()
-            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
+            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
             self.driver.close()
         else:
             self.driver.close()
