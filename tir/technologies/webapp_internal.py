@@ -92,6 +92,10 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+
+        if not self.log.program:
+            self.log.program = self.get_program_name()
+
         if save_input:
             self.config.initial_program = initial_program
             self.config.date = date
@@ -118,9 +122,6 @@ class WebappInternal(Base):
 
         if save_input:
             self.set_log_info()
-        
-        if not self.log.program:
-            self.log.program = self.get_program_name()
 
         self.log.country = self.config.country
         self.log.execution_id = self.config.execution_id
@@ -280,9 +281,14 @@ class WebappInternal(Base):
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
-            self.double_click(env())
-            self.send_keys(env(), Keys.HOME)
-            self.send_keys(env(), self.config.module)
+            env_value = self.get_web_value(env())
+            endtime = time.time() + self.config.time_out
+            while (time.time() < endtime and env_value != self.config.module):
+                self.double_click(env())
+                self.send_keys(env(), Keys.HOME)
+                self.send_keys(env(), self.config.module)
+                env_value = self.get_web_value(env())
+                time.sleep(1)
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
@@ -434,7 +440,9 @@ class WebappInternal(Base):
         >>> oHelper.Program("MATA020")
         """
         self.config.routine = program_name
-        self.log.program = program_name
+        
+        if not self.log.program:
+            self.log.program = program_name
         self.set_program(program_name)
 
     def set_program(self, program):
@@ -781,7 +789,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
@@ -1246,7 +1254,8 @@ class WebappInternal(Base):
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
         if self.config.coverage:
-            endtime = time.time() + self.config.time_out
+            timeout = 900
+            endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1892,7 +1901,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, string):
+    def WaitHide(self, string, timeout=None):
         """
         Search string that was sent and wait hide the element.
 
@@ -1905,8 +1914,11 @@ class WebappInternal(Base):
         >>> oHelper.WaitHide("Processing")
         """
         print("Waiting processing...")
+
+        if not timeout:
+            timeout = self.config.time_out
         
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
@@ -1919,7 +1931,7 @@ class WebappInternal(Base):
             
         self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string):
+    def WaitShow(self, string, timeout=None):
         """
         Search string that was sent and wait show the elements.
 
@@ -1933,7 +1945,10 @@ class WebappInternal(Base):
         """
         print("Waiting processing...")
 
-        endtime = time.time() + self.config.time_out
+        if not timeout:
+            timeout = self.config.time_out
+
+        endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
@@ -1946,7 +1961,7 @@ class WebappInternal(Base):
 
         self.log_error(f"Element {string} not found")
 
-    def WaitProcessing(self, itens):
+    def WaitProcessing(self, itens, timeout=None):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -1958,9 +1973,12 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
         """
-        self.WaitShow(itens)
+        if not timeout:
+            timeout = self.config.time_out
 
-        self.WaitHide(itens)
+        self.WaitShow(itens, timeout)
+
+        self.WaitHide(itens, timeout)
 
 
     def SetTabEDAPP(self, table):
@@ -4015,8 +4033,11 @@ class WebappInternal(Base):
         """
 
         if self.config.coverage:
+
+            timeout = 900
+            
             self.LogOff()
-            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.")
+            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
             self.driver.close()
         else:
             self.driver.close()
@@ -4105,10 +4126,17 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "testsuite.py" in x.filename.lower() or "testcase.py" in x.filename.lower(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
-            return next(iter(list(map(lambda x: x[:7], filter(lambda x: ".py" in x, stack_item_splited)))), None)
+            get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
+
+            program_name = next(iter(list(map(lambda x: re.findall(fr"(\w+)(?:{get_file_name})", x.upper()), filter(lambda x: ".PY" in x.upper(), stack_item_splited)))), None)
+
+            if program_name:
+                return next(iter(program_name))
+            else:
+                return None
         else:
             return None
 
