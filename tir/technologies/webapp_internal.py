@@ -2975,7 +2975,7 @@ class WebappInternal(Base):
         grid_number -= 1
         column_name = ""
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if re.match(r"\w+(_)", column):
             column_name = self.get_x3_dictionaries([column])[2][column].lower()
@@ -2987,7 +2987,7 @@ class WebappInternal(Base):
             self.log_error("Couldn't find controller.")
 
         container = next(iter(self.zindex_sort(containers, True)), None)
-        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid"))
+        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
         grids = list(filter(lambda x:x.select("tbody tr"), grids))
         if not grids:
             self.log_error("Couldn't find any grid.")
