@@ -1628,6 +1628,9 @@ class WebappInternal(Base):
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+        >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
+        >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
 
         container = self.get_current_container()
@@ -1655,11 +1658,14 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", check_error=check_error)
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog")
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
+
 
                 if soup_objects and len(soup_objects) - 1 >= position:
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                    parent_element = self.soup_to_selenium(soup_objects[0].parent)
+                    id_parent_element = parent_element.get_attribute('id')
 
             if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
@@ -1691,8 +1697,8 @@ class WebappInternal(Base):
 
             # if button != self.language.other_actions:
 
-            if sub_item:
-                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
+            if sub_item and ',' not in sub_item:
+                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
 
                 if soup_objects:
                     soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
@@ -1701,9 +1707,31 @@ class WebappInternal(Base):
 
                 self.click(soup_element())
 
+            elif ',' in sub_item:
+                list_sub_itens = sub_item.split(',')
+                filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
+                while(len(filtered_sub_itens) > 0):
+                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                    if not soup_objects:
+                        self.log_error(f"Couldn't find element {sub_item}")
+                    for i in range(len(soup_objects)):
+                        if soup_objects[i].text == filtered_sub_itens[0]:
+                            soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[i]))
+                        
+                    if not soup_element:
+                        soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+
+                    self.move_to_element(soup_element())
+                    filtered_sub_itens.remove(filtered_sub_itens[0])
+
+                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(soup_element())
+
+
+
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
-            buttons_filtered = list(map(lambda x: x.lower(), buttons))
+            buttons_filtered = list(map(lambda x: x.lower(), buttons)) 
 
             if button.lower() in buttons_filtered:
 
@@ -1713,10 +1741,10 @@ class WebappInternal(Base):
                 elif self.grid_counters:
                     self.grid_counters = {}
 
-            if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            if button == self.language.save and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
-            elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            elif button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
@@ -2822,7 +2850,7 @@ class WebappInternal(Base):
         :type get_value: bool
 
         :return: If get_value flag is True, it will return the captured value.
-        :rtype: str
+        :return type: str
 
         Usage:
 
@@ -2838,50 +2866,51 @@ class WebappInternal(Base):
                 print("Waiting for container to be active")
             time.sleep(1)
 
-        soup = self.get_current_DOM()
+        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        container = next(iter(self.zindex_sort(containers, True)), None)
 
-        containers = soup.select(".tmodaldialog.twidget")
-        if containers:
+        if not container:
+            self.log_error('Container not found')
+            
+        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
 
-            containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid, .tcbrowse"))
-            if grids:
+        if grids:
+            headers = self.get_headers_from_grids(grids)
+            column_name = ""
 
-                headers = self.get_headers_from_grids(grids)
-                column_name = ""
-                if field[3] > len(grids):
-                    self.log_error(self.language.messages.grid_number_error)
+            if field[3] > len(grids):
+                self.log_error(self.language.messages.grid_number_error)
 
-                rows = grids[field[3]].select("tbody tr")
-                if rows:
-                    if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error)
+            rows = grids[field[3]].select("tbody tr")
+            if rows:
+                if field[0] > len(rows):
+                    self.log_error(self.language.messages.grid_line_error)
 
-                    columns = rows[field[0]].select("td")
-                    if columns:
-                        if "_" in field[1]:
-                            column_name = field_to_label[field[1]].lower()
-                        else:
-                            column_name = field[1].lower()
-
-                        if column_name not in headers[field[3]]:
-                            self.log_error(self.language.messages.grid_column_error)
-
-                        column_number = headers[field[3]][column_name]
-                        text = columns[column_number].text.strip()
-
-                        if get_value:
-                            return text
-
-                        field_name = f"({field[0]}, {column_name})"
-                        self.log_result(field_name, field[2], text)
-                        print(f"Collected value: {text}")
+                columns = rows[field[0]].select("td")
+                if columns:
+                    if "_" in field[1]:
+                        column_name = field_to_label[field[1]].lower()
                     else:
-                        self.log_error("Couldn't find columns.")
+                        column_name = field[1].lower()
+
+                    if column_name not in headers[field[3]]:
+                        self.log_error(self.language.messages.grid_column_error)
+
+                    column_number = headers[field[3]][column_name]
+                    text = columns[column_number].text.strip()
+
+                    if get_value:
+                        return text
+
+                    field_name = f"({field[0]}, {column_name})"
+                    self.log_result(field_name, field[2], text)
+                    print(f"Collected value: {text}")
                 else:
-                    self.log_error("Couldn't find rows.")
+                    self.log_error("Couldn't find columns.")
             else:
-                self.log_error("Couldn't find grids.")
+                self.log_error("Couldn't find rows.")
+        else:
+            self.log_error("Couldn't find grids.")
 
     def new_grid_line(self, field, add_grid_line_counter=True):
         """
