@@ -1610,7 +1610,7 @@ class WebappInternal(Base):
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
-    def SetButton(self, button, sub_item="", position=1):
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
 
@@ -1643,12 +1643,12 @@ class WebappInternal(Base):
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
+                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
                 if not wait_button:
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     return
             else:
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1)
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1, check_error=check_error)
                 position -= 1
 
             layers = 0
@@ -1675,7 +1675,7 @@ class WebappInternal(Base):
                 return
 
             if not soup_element:
-                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
+                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
                 if other_action is None:
                     self.log_error(f"Couldn't find element: {button}")
 
@@ -4174,3 +4174,39 @@ class WebappInternal(Base):
             return text[:-len(string_right)].strip()
         else:
             return text.strip()
+
+    def CheckHelp(self, text, button):
+        """
+        Checks if some help screen is present in the screen at the time and takes an action.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param button: Button to be clicked.
+        :type button: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        """
+        if not button:
+            button = self.get_single_button().text
+
+        print(f"Checking Help on screen: {text}")
+        self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
+        if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+            self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            self.SetButton(button, check_error=False)
+        else:
+            self.SetButton(button, check_error=False)
+
+    def get_single_button(self):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+        buttons = container.select("button")
+        button_filtered = next(iter(filter(lambda x: x.text != "", buttons)))
+        if not button_filtered:
+            self.log_error(f"Couldn't find button")
+        return button_filtered
