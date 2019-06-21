@@ -3013,6 +3013,7 @@ class WebappInternal(Base):
         column_number = headers[grid_number][column_name]
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
 
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
     def get_x3_dictionaries(self, fields):
