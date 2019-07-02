@@ -1485,6 +1485,7 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+        element_list = 0
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
                 debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
@@ -2971,9 +2972,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
+        grids = None
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        endtime = time.time() + self.config.time_out
 
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -2985,10 +2988,12 @@ class WebappInternal(Base):
         containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not containers:
             self.log_error("Couldn't find controller.")
+        while(not grids and time.time() < endtime):
+            container = next(iter(self.zindex_sort(containers, True)), None)
+            grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+            grids = list(filter(lambda x:x.select("tbody tr"), grids))
+            time.sleep(1)
 
-        container = next(iter(self.zindex_sort(containers, True)), None)
-        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
-        grids = list(filter(lambda x:x.select("tbody tr"), grids))
         if not grids:
             self.log_error("Couldn't find any grid.")
 
