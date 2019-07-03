@@ -3539,10 +3539,11 @@ class WebappInternal(Base):
             self.restart()
         else:
             self.driver.close()
-        self.assertTrue(False, log_message)
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
+            
+        self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
