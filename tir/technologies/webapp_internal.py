@@ -1589,6 +1589,7 @@ class WebappInternal(Base):
             submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
             if subMenuElements and submenu():
                 self.scroll_to_element(submenu())
+                self.wait.until(EC.element_to_be_clickable((submenu())))
                 ActionChains(self.driver).move_to_element(submenu()).click().perform()
                 if count < len(menu_itens) - 1:
                     self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
