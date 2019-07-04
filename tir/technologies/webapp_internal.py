@@ -2747,6 +2747,7 @@ class WebappInternal(Base):
                                             else:
                                                 self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
                                                 if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                     self.send_keys(selenium_input(), Keys.ENTER)
 
                                 self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
@@ -3548,10 +3549,11 @@ class WebappInternal(Base):
             self.restart()
         else:
             self.driver.close()
-        self.assertTrue(False, log_message)
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
+            
+        self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
