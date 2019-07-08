@@ -2985,15 +2985,16 @@ class WebappInternal(Base):
         else:
             column_name = column.lower()
 
-        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        if not containers:
-            self.log_error("Couldn't find controller.")
         while(not grids and time.time() < endtime):
+            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             container = next(iter(self.zindex_sort(containers, True)), None)
             grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
             grids = list(filter(lambda x:x.select("tbody tr"), grids))
             time.sleep(1)
 
+        if not containers:
+            self.log_error("Couldn't find controller.")
+            
         if not grids:
             self.log_error("Couldn't find any grid.")
 
