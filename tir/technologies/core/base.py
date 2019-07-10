@@ -708,7 +708,7 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
-        return self.driver.find_element_by_xpath(xpath_soup(soup_object))
+        return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
