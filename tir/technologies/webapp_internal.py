@@ -2374,7 +2374,7 @@ class WebappInternal(Base):
         except Exception as error:
             self.log_error(str(error))
 
-    def SetFocus(self, field, grid_cell):
+    def SetFocus(self, field, grid_cell, row_number):
         """
         Sets the current focus on the desired field.
 
@@ -2390,7 +2390,8 @@ class WebappInternal(Base):
         """
         if grid_cell:
             self.wait_element(field)
-            self.ClickGridCell(field)
+            
+            self.ClickGridCell(field, row_number)
             time.sleep(1)
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)

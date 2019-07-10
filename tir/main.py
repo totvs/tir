@@ -490,7 +490,7 @@ class Webapp():
         """
         self.__webapp.SetFilePath(value)
 
-    def SetFocus(self, field, grid_cell=False):
+    def SetFocus(self, field, grid_cell=False, row_number=1):
         """
         Sets the current focus on the desired field.
 
@@ -502,7 +502,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
         """
-        self.__webapp.SetFocus(field,grid_cell)
+        self.__webapp.SetFocus(field,grid_cell,row_number)
 
     def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
