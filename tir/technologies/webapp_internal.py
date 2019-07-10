@@ -3568,20 +3568,25 @@ class WebappInternal(Base):
         >>> oHelper.ClickIcon("Add")
         >>> oHelper.ClickIcon("Edit")
         """
-        self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        soup = self.get_current_DOM()
-        container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
-        container = container if container else soup
-        buttons = container.select("button[style]")
-        print("Searching for Icon")
-        filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-        #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+        button = ""
+        # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not button):
+            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            soup = self.get_current_DOM()
+            container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
+            container = container if container else soup
+            buttons = container.select("button[style]")
+            print("Searching for Icon")
+            filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+            #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
 
-        button = next(iter(filtered_buttons), None)
+            button = next(iter(filtered_buttons), None)
+
+            button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
+        
         if not button:
             self.log_error("Couldn't find Icon button.")
-
-        button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
 
         self.click(button_element())
 

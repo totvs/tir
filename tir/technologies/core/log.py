@@ -70,7 +70,7 @@ class Log:
         total_cts = 1
         passed = 1 if result else 0
         failed = 0 if result else 1
-        printable_message = ''.join(filter(lambda x: x.isprintable(), message))
+        printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
