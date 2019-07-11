@@ -3954,6 +3954,7 @@ class WebappInternal(Base):
 
         labels = container.select("label")
         filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
+        filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
         label = next(iter(filtered_labels), None)
         if not label:
             self.log_error("Couldn't find any labels.")
