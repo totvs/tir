@@ -107,6 +107,7 @@ class LanguagePack:
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
             "Text Not Found": "Text Not Found.",
+            "Help Not Found": "Help Not Found",
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
             "Invert Selection": "Invert Selection",
@@ -167,6 +168,7 @@ class LanguagePack:
             "Grid Column Error": "Coluna não existe na grid atual.",
             "Grid Number Error": "Não existe essa quantidade de grids na tela atual.",
             "Text Not Found": "Texto não encontrado.",
+            "Help Not Found": "Help não encontrado.",
             "User Not Authenticated": "Usuário não autenticado",
             "Change Environment": "Trocar módulo",
             "Invert Selection": "Inverte Seleção",
@@ -226,6 +228,7 @@ class LanguagePack:
             "Grid Column Error": "Coluna não existe na grid atual.",
             "Grid Number Error": "Não existe essa quantidade de grids na tela atual.",
             "Text Not Found": "Texto não encontrado.",
+            "Help Not Found": "Help não encontrado.",
             "User Not Authenticated": "Usuário não autenticado",
             "Change Environment": "Trocar módulo",
             "Invert Selection": "Inverte Seleção",
@@ -290,6 +293,7 @@ class LanguagePack:
             "Grid Column Error": "Column does not exist in current grid.",
             "Grid Number Error": "There is not that many grids on the current screen.",
             "Text Not Found": "Text Not Found",
+            "Help Not Found": "Help Not Found",
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
             "Invert Selection": "Invert Selection",
@@ -327,3 +331,4 @@ class Messages():
         self.error_msg_required = languagepack["Error Msg Required"]
         self.text_not_found = languagepack["Text Not Found"]
         self.user_not_authenticated = languagepack["User Not Authenticated"]
+        self.help_not_found = languagepack["Help Not Found"]
