@@ -70,7 +70,7 @@ class Log:
         total_cts = 1
         passed = 1 if result else 0
         failed = 0 if result else 1
-        printable_message = ''.join(filter(lambda x: x.isprintable(), message))
+        printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
@@ -107,7 +107,7 @@ class Log:
             testcases = self.list_of_testcases()
 
             if len(self.table_rows[1:]) == len(testcases):
-                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="utf-8") as csv_file:
+                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)

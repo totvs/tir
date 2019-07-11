@@ -455,7 +455,7 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
-    def SetButton(self, button, sub_item="", position=1):
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
 
@@ -474,7 +474,7 @@ class Webapp():
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
-        self.__webapp.SetButton(button, sub_item, position)
+        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
     def SetFilePath(self, value):
         """
@@ -490,7 +490,7 @@ class Webapp():
         """
         self.__webapp.SetFilePath(value)
 
-    def SetFocus(self, field, grid_cell=False):
+    def SetFocus(self, field, grid_cell=False, row_number=1):
         """
         Sets the current focus on the desired field.
 
@@ -502,7 +502,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
         """
-        self.__webapp.SetFocus(field,grid_cell)
+        self.__webapp.SetFocus(field,grid_cell,row_number)
 
     def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
@@ -788,6 +788,23 @@ class Webapp():
         """
 
         return self.__webapp.GetText(string_left, string_right)
+    
+    def CheckHelp(self, text, button=""):
+        """
+        Checks if some help screen is present in the screen at the time and takes an action.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param button: Button to be clicked.
+        :type button: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        """
+
+        return self.__webapp.CheckHelp(text, button)
         
 class Apw():
 
