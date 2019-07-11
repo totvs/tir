@@ -3022,24 +3022,29 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
+        grids = None
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        endtime = time.time() + self.config.time_out
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if re.match(r"\w+(_)", column):
             column_name = self.get_x3_dictionaries([column])[2][column].lower()
         else:
             column_name = column.lower()
 
-        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        while(not grids and time.time() < endtime):
+            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
+            grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+            grids = list(filter(lambda x:x.select("tbody tr"), grids))
+            time.sleep(1)
+
         if not containers:
             self.log_error("Couldn't find controller.")
-
-        container = next(iter(self.zindex_sort(containers, True)), None)
-        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid"))
-        grids = list(filter(lambda x:x.select("tbody tr"), grids))
+            
         if not grids:
             self.log_error("Couldn't find any grid.")
 
@@ -3064,6 +3069,7 @@ class WebappInternal(Base):
         column_number = headers[grid_number][column_name]
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
 
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
     def get_x3_dictionaries(self, fields):
