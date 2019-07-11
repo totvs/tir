@@ -197,7 +197,7 @@ class WebappInternal(Base):
         self.set_element_focus(user())
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
         self.double_click(user())
-        self.send_keys(user(), Keys.HOME)
+        # self.send_keys(user(), Keys.HOME)
         self.send_keys(user(), self.config.user)
         self.send_keys(user(), Keys.ENTER)
 
