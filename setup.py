@@ -12,7 +12,7 @@ config = {
     'author_email': 'squad.automacaoprotheus@totvs.com.br',
     'version': '1.10.2',
     'install_requires': [
-        'beautifulsoup4==4.6.0',
+        'beautifulsoup4==4.7.1',
         'bs4==0.0.1',
         'numpy',
         'pandas==0.23.4',

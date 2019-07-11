@@ -23,6 +23,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import WebDriverException
 
 class Base(unittest.TestCase):
     """
@@ -380,7 +381,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-        return BeautifulSoup(self.driver.page_source,"html.parser")
+        try:
+            return BeautifulSoup(self.driver.page_source,"html.parser")
+        except WebDriverException:
+            pass
 
     def get_element_text(self, element):
         """
@@ -633,14 +637,17 @@ class Base(unittest.TestCase):
         >>> self.send_keys(element(), Keys.ENTER)
         """
         try:
-            element.send_keys("")
-            element.click()
+            if arg.isprintable():
+                element.clear()
+                element.send_keys(Keys.CONTROL, 'a')
             element.send_keys(arg)
         except Exception:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
-            actions.send_keys("")
             actions.click()
+            if arg.isprintable():
+                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
+            actions.send_keys(Keys.HOME)
             actions.send_keys(arg)
             actions.perform()
 
@@ -701,7 +708,7 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
-        return self.driver.find_element_by_xpath(xpath_soup(soup_object))
+        return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
