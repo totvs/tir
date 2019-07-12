@@ -263,6 +263,29 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.CheckHelp">
+<code class="descname">CheckHelp</code><span class="sig-paren">(</span><em>text</em>, <em>button=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text to be checked.</li>
+<li><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;EXISTCLI Problema: Não pode haver mais...&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.CheckResult">
 <code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
@@ -762,7 +785,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.SetButton">
-<code class="descname">SetButton</code><span class="sig-paren">(</span><em>button</em>, <em>sub_item=''</em>, <em>position=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetButton</code><span class="sig-paren">(</span><em>button</em>, <em>sub_item=''</em>, <em>position=1</em>, <em>check_error=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that clicks on a button on the screen.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -808,7 +831,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.SetFocus">
-<code class="descname">SetFocus</code><span class="sig-paren">(</span><em>field</em>, <em>grid_cell=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFocus" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetFocus</code><span class="sig-paren">(</span><em>field</em>, <em>grid_cell=False</em>, <em>row_number=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFocus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the current focus on the desired field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
