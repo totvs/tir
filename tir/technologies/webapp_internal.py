@@ -2045,19 +2045,23 @@ class WebappInternal(Base):
         #except:#caso contrário efetuo o clique na aba com webscraping
         soup = self.get_current_DOM()
         panels = soup.select(".button-bar a")
-        panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
-        panel = next(iter(self.filter_is_displayed(panels_filtered)))
-        element = ""
-        if panel:
+        
+        #tratamento para considerar a pasta ativa no webapp.
+        #ex: tela 1 com a pasta "Outros" faz abertura de uma nova rotina com outra pasta chamada "Outros"
+        panels = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
+        if panels:  
+            panel = panels[len(panels)-1] 
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
-        if element:
-            self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
-            self.set_element_focus(element())
-            time.sleep(1)
-            self.driver.execute_script("arguments[0].click()", element())
+            if element:
+                self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.set_element_focus(element())
+                time.sleep(1)
+                self.driver.execute_script("arguments[0].click()", element())
+            else:
+                self.log_error("Couldn't find panel item.")
         else:
             self.log_error("Couldn't find panel item.")
-
+        
     def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
         """
         Clicks on Checkbox elements of a grid.
