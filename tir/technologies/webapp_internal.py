@@ -92,6 +92,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+        if not self.config.initial_program:
+            self.log_error("Couldn't find The initial program")
 
         if self.config.smart_erp:
             self.wait_smart_erp_environment()
@@ -1234,7 +1236,7 @@ class WebappInternal(Base):
         """
         self.driver.refresh()
         
-        if self.config.coverage:
+        if self.config.coverage and self.config.initial_program != '':
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         try:
@@ -1242,18 +1244,20 @@ class WebappInternal(Base):
         except:
             pass
 
-        if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program)
-        self.user_screen()
-        self.environment_screen()
+        if self.config.initial_program != '':
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
-            self.close_modal()
+            if not self.config.skip_environment and not self.config.coverage:
+                self.program_screen(self.config.initial_program)
+            self.user_screen()
+            self.environment_screen()
 
-        if ">" in self.config.routine:
-            self.SetLateralMenu(self.config.routine, save_input=False)
-        else:
-            self.set_program(self.config.routine)
+            while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+                self.close_modal()
+
+            if ">" in self.config.routine:
+                self.SetLateralMenu(self.config.routine, save_input=False)
+            else:
+                self.set_program(self.config.routine)
 
     def LogOff(self):
         """
@@ -3584,7 +3588,7 @@ class WebappInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file(routine_name)
-        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1:
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         else:
             self.driver.close()
