@@ -92,7 +92,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
-        if not self.config.initial_program:
+        if not initial_program:
             self.log_error("Couldn't find The initial program")
 
         if self.config.smart_erp:
