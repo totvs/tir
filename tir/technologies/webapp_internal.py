@@ -3590,6 +3590,8 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
+        elif self.config.coverage and self.config.initial_program != '':
+            self.restart()
         else:
             self.driver.close()
 
