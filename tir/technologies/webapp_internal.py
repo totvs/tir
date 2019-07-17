@@ -2048,8 +2048,8 @@ class WebappInternal(Base):
         #try:#Tento pegar o elemento da aba de forma direta sem webscraping
         #    element = lambda: self.driver.find_element_by_link_text(item)
         #except:#caso contrário efetuo o clique na aba com webscraping
-        soup = self.get_current_DOM()
-        panels = soup.select(".button-bar a")
+        container = self.get_current_container()
+        panels = container.select(".button-bar a")
         panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
         panel = next(iter(self.filter_is_displayed(panels_filtered)))
         element = ""
