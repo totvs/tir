@@ -196,12 +196,16 @@ class WebappInternal(Base):
             self.log_error("Couldn't find User input element.")
 
         user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
-        self.set_element_focus(user())
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
-        self.double_click(user())
-        # self.send_keys(user(), Keys.HOME)
-        self.send_keys(user(), self.config.user)
-        self.send_keys(user(), Keys.ENTER)
+        user_value = self.get_web_value(user())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not user_value.strip()):
+            self.set_element_focus(user())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+            self.double_click(user())
+            # self.send_keys(user(), Keys.HOME)
+            self.send_keys(user(), self.config.user)
+            self.send_keys(user(), Keys.ENTER)
+            user_value = self.get_web_value(user())
 
         # loop_control = True
 
