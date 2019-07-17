@@ -92,7 +92,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
-        if not self.config.initial_program:
+        if not initial_program:
             self.log_error("Couldn't find The initial program")
 
         if self.config.smart_erp:
@@ -1223,6 +1223,7 @@ class WebappInternal(Base):
 
         return value
 
+
     def restart(self):
         """
         [Internal]
@@ -1259,6 +1260,36 @@ class WebappInternal(Base):
             else:
                 self.set_program(self.config.routine)
 
+    def Finish(self):
+        """
+        Exit the protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.Finish()
+        """
+        element = ""
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+
+        if self.config.coverage:
+            timeout = 900
+            endtime = time.time() + timeout
+            while(time.time() < endtime and not element):
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                self.SetButton(self.language.finish)
+
+                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+
+                element = self.search_text(selector=".tsay", text=string)
+                if element:
+                    print(string)
+
+        else:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+            self.SetButton(self.language.finish)
+
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
@@ -1287,7 +1318,7 @@ class WebappInternal(Base):
 
         else:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish)
+            self.SetButton(self.language.logOff)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -3233,13 +3264,29 @@ class WebappInternal(Base):
 
         presence_endtime = time.time() + 10
         if presence:
+
             if self.config.debug_log:
                 print("Element found! Waiting for element to be displayed.")
+
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
+            
             if element is not None:
-                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed() and time.time() < presence_endtime):
-                    time.sleep(0.1)
+
+                sel_element = lambda:self.soup_to_selenium(element)
+                sel_element_isdisplayed = False
+
+                while(not sel_element_isdisplayed and time.time() < presence_endtime):
+                    try:
+                        if sel_element != None:
+                            sel_element_isdisplayed = sel_element().is_displayed()
+                        else:
+                            sel_element = lambda:self.soup_to_selenium(element)
+                        time.sleep(0.1)
+                    except AttributeError:
+                        pass
+
+                if not sel_element_isdisplayed:
+                    self.log_error("Element is not displayed")
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
@@ -3716,7 +3763,7 @@ class WebappInternal(Base):
             self.driver.refresh()
 
         else:
-            self.LogOff()
+            self.Finish()
 
         self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
@@ -4082,7 +4129,7 @@ class WebappInternal(Base):
 
             timeout = 900
             
-            self.LogOff()
+            self.Finish()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
             self.driver.close()
         else:

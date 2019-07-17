@@ -291,6 +291,17 @@ class Webapp():
         """
         self.__webapp.LogOff()
 
+    def Finish(self):
+        """
+        Exit the Protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.Finish()
+        """
+        self.__webapp.Finish()
+
     def MessageBoxClick(self, button_text):
         """
         Clicks on desired button inside a Messagebox element.
@@ -805,6 +816,7 @@ class Webapp():
         """
 
         return self.__webapp.CheckHelp(text, button)
+    
         
 class Apw():
 
