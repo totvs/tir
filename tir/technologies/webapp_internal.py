@@ -3285,9 +3285,6 @@ class WebappInternal(Base):
                     except AttributeError:
                         pass
 
-                if not sel_element_isdisplayed:
-                    self.log_error("Element is not displayed")
-
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
         [Internal]
