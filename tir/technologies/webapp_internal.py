@@ -1730,9 +1730,10 @@ class WebappInternal(Base):
 
             if sub_item and ',' not in sub_item:
                 soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
-
+                soup_objects_filtered = self.filter_is_displayed(soup_objects)
+                
                 if soup_objects:
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects_filtered[0]))
                 else:
                     self.log_error(f"Couldn't find element {sub_item}")
 
