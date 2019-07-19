@@ -4082,6 +4082,8 @@ class WebappInternal(Base):
 
         if self.config.coverage:
 
+            self.driver.refresh()
+            self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             timeout = 900
             
             self.LogOff()
