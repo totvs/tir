@@ -4052,20 +4052,22 @@ class WebappInternal(Base):
                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
 
                 if "data" in element_class.get_attribute_list("class"):
-                    element_class =  element_class.select_one("img")
+                    element_class =  element_class.select("img, span")
+
+                for element_class_item in element_class:
                 
-                if "expanded" not in element_class.attrs['class'] and not success:
-                    element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+                    if "expanded" not in element_class_item.attrs['class'] and not success:
+                        element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class_item))
 
-                    endtime = time.time() + self.config.time_out
+                        endtime = time.time() + self.config.time_out
 
-                    while(time.time() < endtime):
-                        try:
-                            element_click().click()
-                            success = True
-                            break
-                        except:
-                            pass
+                        while(time.time() < endtime):
+                            try:
+                                element_click().click()
+                                success = True
+                                break
+                            except:
+                                pass
                         
         if not success:
             self.log_error("Couldn't click on element.")
