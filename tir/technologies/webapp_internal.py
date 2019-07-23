@@ -206,6 +206,8 @@ class WebappInternal(Base):
             self.send_keys(user(), self.config.user)
             self.send_keys(user(), Keys.ENTER)
             user_value = self.get_web_value(user())
+            self.wait_blocker_ajax()
+            time.sleep(1)
 
         # loop_control = True
 
@@ -227,6 +229,7 @@ class WebappInternal(Base):
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
+            time.sleep(1)
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
