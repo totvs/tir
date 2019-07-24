@@ -1297,7 +1297,7 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
 
-    def LogOff(self):
+    def LogOff(self, refresh_page):
         """
         Logs out of the Protheus Webapp.
 
@@ -1309,23 +1309,16 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
-        if self.config.coverage:
+        if refresh_page:
+            self.driver.refresh()
+        else:
             timeout = 900
             endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.finish)
+                self.SetButton(self.language.logOff)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
-
-                element = self.search_text(selector=".tsay", text=string)
-                if element:
-                    print(string)
-
-        else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.logOff)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """

@@ -280,7 +280,7 @@ class Webapp():
         """
         self.__webapp.LoadGrid()
 
-    def LogOff(self):
+    def LogOff(self, refresh_page = True):
         """
         Logs out of the Protheus Webapp.
 
@@ -289,7 +289,7 @@ class Webapp():
         >>> # Calling the method.
         >>> oHelper.LogOff()
         """
-        self.__webapp.LogOff()
+        self.__webapp.LogOff(refresh_page)
 
     def Finish(self):
         """
