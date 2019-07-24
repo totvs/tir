@@ -1301,14 +1301,15 @@ class WebappInternal(Base):
         """
         Logs out of the Protheus Webapp.
 
+        :param refresh_page: LogOff with refresh page
+        :type refresh_page: boolean
+
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.LogOff()
+        >>> oHelper.LogOff(refresh_page = False)
         """
-        element = ""
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
-
         if refresh_page:
             self.driver.refresh()
         else:
