@@ -3595,7 +3595,8 @@ class WebappInternal(Base):
         else:
             self.driver.close()
 
-        if self.config.num_exec:
+        # if self.config.num_exec:
+        if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
