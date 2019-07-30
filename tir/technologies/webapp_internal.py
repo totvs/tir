@@ -1964,7 +1964,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
         
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -1994,7 +1994,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -2022,7 +2022,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitProcessing("Processing")
         """
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
 
         self.WaitShow(itens, timeout)
 
