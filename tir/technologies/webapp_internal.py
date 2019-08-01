@@ -970,7 +970,14 @@ class WebappInternal(Base):
             if not element:
                 continue
 
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            if "tmultiget" in element.attrs['class'] if element.name == 'div' else None:
+                textarea = element.select("textarea")
+                if not textarea:
+                    input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                else:
+                    input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
+            else:
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             valtype = "C"
             main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
