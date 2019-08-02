@@ -3305,6 +3305,7 @@ class WebappInternal(Base):
         if time.time() > endtime:
             if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                 return False
+            self.restart_counter += 1
             self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
