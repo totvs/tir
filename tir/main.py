@@ -138,7 +138,7 @@ class Webapp():
         """
         self.__webapp.CheckView(text, element_type)
 
-    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1):
+    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1, ignore_current=False):
         """
         Clicks on Checkbox elements of a grid.
 
@@ -150,6 +150,8 @@ class Webapp():
         :type select_all: bool
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param ignore_current: Boolean to ignore the get_current_filtered on loop case of box click. - **Default:** False
+        :type ignore_current: bool
 
         Usage:
 

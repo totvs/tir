@@ -2088,7 +2088,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
+    def ClickBox(self, field, content_list="", select_all=False, grid_number=1, ignore_current=False):
         """
         Clicks on Checkbox elements of a grid.
 
@@ -2100,6 +2100,8 @@ class WebappInternal(Base):
         :type select_all: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param ignore_current: Boolean to ignore the get_current_filtered on loop case of box click. - **Default:** False
+        :type ignore_current: bool
 
         Usage:
 
@@ -2179,7 +2181,9 @@ class WebappInternal(Base):
                 last = current
                 scroll_down()
                 time.sleep(0.5)
-                get_current_filtered = next(iter(get_current()),None)
+                if not ignore_current:
+                    get_current_filtered = next(iter(get_current()),None)
+                    current = get_current_filtered
                 current = get_current_filtered
                 time.sleep(0.5)
         else:
