@@ -2256,7 +2256,7 @@ class WebappInternal(Base):
         endtime = time.time() + 60
         grids = None
         while(time.time() < endtime and not grids):
-            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
             if len(grids) > 1:
