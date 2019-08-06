@@ -245,6 +245,29 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.CheckHelp">
+<code class="descname">CheckHelp</code><span class="sig-paren">(</span><em>text</em>, <em>button</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text to be checked.</li>
+<li><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;EXISTCLI Problema: Não pode haver mais...&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.CheckResult">
 <code class="descname">CheckResult</code><span class="sig-paren">(</span><em>field</em>, <em>user_value</em>, <em>grid=False</em>, <em>line=1</em>, <em>grid_number=1</em>, <em>name_attr=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckResult" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
@@ -681,7 +704,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SetButton">
-<code class="descname">SetButton</code><span class="sig-paren">(</span><em>button</em>, <em>sub_item=''</em>, <em>position=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetButton" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetButton</code><span class="sig-paren">(</span><em>button</em>, <em>sub_item=''</em>, <em>position=1</em>, <em>check_error=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetButton" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that clicks on a button on the screen.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -702,6 +725,9 @@ is provided, it will search on the chosen search box.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#-------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click on a sub item inside a button.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Other Actions&quot;</span><span class="p">,</span> <span class="s2">&quot;Process&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click on a sub item inside a button, this form is an alternative.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Other Actions&quot;</span><span class="p">,</span> <span class="s2">&quot;Process, Process_02, Process_03&quot;</span><span class="p">)</span> 
 </pre></div>
 </div>
 </dd></dl>
@@ -727,7 +753,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SetFocus">
-<code class="descname">SetFocus</code><span class="sig-paren">(</span><em>field</em>, <em>grid_cell</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetFocus" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetFocus</code><span class="sig-paren">(</span><em>field</em>, <em>grid_cell</em>, <em>row_number</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SetFocus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the current focus on the desired field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -941,7 +967,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.WaitHide">
-<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitHide" title="Permalink to this definition">¶</a></dt>
+<code class="descname">WaitHide</code><span class="sig-paren">(</span><em>string</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitHide" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search string that was sent and wait hide the element.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -960,7 +986,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.WaitProcessing">
-<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitProcessing" title="Permalink to this definition">¶</a></dt>
+<code class="descname">WaitProcessing</code><span class="sig-paren">(</span><em>itens</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -979,7 +1005,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.WaitShow">
-<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitShow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">WaitShow</code><span class="sig-paren">(</span><em>string</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitShow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search string that was sent and wait show the elements.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1087,7 +1113,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If get_value flag is True, it will return the captured value.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
 </td>
 </tr>
 </tbody>
@@ -1923,6 +1949,12 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.get_single_button">
+<code class="descname">get_single_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_single_button" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_text">
 <code class="descname">get_text</code><span class="sig-paren">(</span><em>string_left</em>, <em>string_right</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_text" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2524,6 +2556,12 @@ Meant to be used inside of a loop.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">wait_element_timeout</span><span class="p">(</span><span class="n">term</span><span class="o">=</span><span class="n">button</span><span class="p">,</span> <span class="n">scrap_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ScrapType</span><span class="o">.</span><span class="n">MIXED</span><span class="p">,</span> <span class="n">optional_term</span><span class="o">=</span><span class="s2">&quot;button&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.wait_smart_erp_environment">
+<code class="descname">wait_smart_erp_environment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_smart_erp_environment" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="method">
