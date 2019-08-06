@@ -1297,28 +1297,34 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
 
-    def LogOff(self, refresh_page):
+    def LogOff(self, refresh_page = False):
         """
         Logs out of the Protheus Webapp.
 
-        :param refresh_page: LogOff with refresh page
+        :param refresh_page: LogOff with selenium method
         :type refresh_page: boolean
 
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.LogOff()
-        >>> oHelper.LogOff(refresh_page = False)
+        >>> oHelper.LogOff(refresh_page = True)
         """
         if refresh_page:
             self.driver.refresh()
         else:
-            timeout = 900
-            endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
+            element = "empty"
+
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime  and element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 self.SetButton(self.language.logOff)
+                element = self.search_text(selector="button", text=self.language.logOff)
+                time.sleep(1)
+            
+            if time.time() > endtime:
+                self.log_error("Could not find log off")
 
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):

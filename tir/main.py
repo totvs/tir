@@ -280,14 +280,20 @@ class Webapp():
         """
         self.__webapp.LoadGrid()
 
-    def LogOff(self, refresh_page = True):
+    def LogOff(self, refresh_page = False):
         """
         Logs out of the Protheus Webapp.
+        .. note::
+            .Do not use this method in any routine. Use on home screen
+            
+        :param refresh_page: LogOff with selenium method
+        :type refresh_page: boolean
 
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.LogOff()
+        >>> oHelper.LogOff(refresh_page = True)
         """
         self.__webapp.LogOff(refresh_page)
 
