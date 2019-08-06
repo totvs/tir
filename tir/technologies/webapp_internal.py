@@ -1418,8 +1418,7 @@ class WebappInternal(Base):
 
         icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
         icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
-        critical_box = next(iter(top_layer.select(".tmessagebox")), None)
-        if not icon_alert and not icon_error_log and not critical_box:
+        if not icon_alert and not icon_error_log:
             return None
 
         if icon_alert:
@@ -1443,11 +1442,6 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
-        elif critical_box:
-            error_paragraphs = critical_box.text.split("\n\n")
-            error_message = f"Error Log: {error_paragraphs[0]}" if len(error_paragraphs) > 2 else "Error Log: Server down."
-            message = error_message.replace("\n", " ")
 
         self.log_error(message)
 
