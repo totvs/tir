@@ -2088,7 +2088,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, content_list="", select_all=False, grid_number=1, ignore_current=False):
+    def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
         """
         Clicks on Checkbox elements of a grid.
 
@@ -2181,7 +2181,7 @@ class WebappInternal(Base):
                 last = current
                 scroll_down()
                 time.sleep(0.5)
-                if not ignore_current:
+                if not self.get_single_button():
                     get_current_filtered = next(iter(get_current()),None)
                     current = get_current_filtered
                 current = get_current_filtered

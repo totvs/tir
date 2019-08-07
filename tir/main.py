@@ -138,7 +138,7 @@ class Webapp():
         """
         self.__webapp.CheckView(text, element_type)
 
-    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1, ignore_current=False):
+    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1):
         """
         Clicks on Checkbox elements of a grid.
 
