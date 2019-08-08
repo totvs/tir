@@ -2224,7 +2224,9 @@ class WebappInternal(Base):
                 last = current
                 scroll_down()
                 time.sleep(0.5)
-                get_current_filtered = next(iter(get_current()),None)
+                if not self.get_single_button():
+                    get_current_filtered = next(iter(get_current()),None)
+                    current = get_current_filtered
                 current = get_current_filtered
                 time.sleep(0.5)
         else:
