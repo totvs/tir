@@ -804,7 +804,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self,field):
+    def search_element_position(self, field, position=1):
         """
         [Internal]
         Usage:
@@ -818,7 +818,11 @@ class WebappInternal(Base):
 
             labels = container.select("label")
             labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
-            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))),None)
+            labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+            position -= 1
+            if labels_list and len(labels_list) -1 >= position:
+                label = labels_list[position]
+
             if not label:
                 self.log_error("Label wasn't found.")
             
@@ -874,7 +878,7 @@ class WebappInternal(Base):
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
         Sets value of an input element.
         
@@ -916,11 +920,11 @@ class WebappInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row=row)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value)
+            self.click_check_radio_button(field, value, name_attr, position)
         else:
-            self.input_value(field, value, ignore_case, name_attr=name_attr)
+            self.input_value(field, value, ignore_case, name_attr, position)
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False):
+    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1):
         """
         [Internal]
 
@@ -965,7 +969,7 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.get_field(field, name_attr)
+                element = self.get_field(field, name_attr, position)
 
             if not element:
                 continue
@@ -1066,7 +1070,7 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
 
-    def get_field(self, field, name_attr=False):
+    def get_field(self, field, name_attr=False, position=1):
         """
         [Internal]
 
@@ -1091,9 +1095,16 @@ class WebappInternal(Base):
         element =  None
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            else:
+                ##element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                position -= 1
+                element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                if element_list and len(element_list) -1 >= position:
+                    element = element_list[position]
+                
+            elif position == 1:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+            else:
+                element = self.find_label_element(label_text = field, position = position)
 
         if element:
             element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
@@ -2450,7 +2461,7 @@ class WebappInternal(Base):
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
             self.set_element_focus(element())
 
-    def click_check_radio_button(self, field, value):
+    def click_check_radio_button(self, field, value, name_attr = False, position = 1):
         """
         [Internal]
         Identify and click on check or radio button.
@@ -2468,19 +2479,28 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
+        print(f'Clicking in {field}')
 
-        if re.match(r"\w+(_)", field):
-            self.wait_element(field)
-            element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+        if re.match(r"\w+(_)", field) or name_attr:
+            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+            element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
             self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-            element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+            #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+            element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
 
+        position -= 1
 
-        if not element:
+        if not element_list:
             self.log_error("Couldn't find span element")
 
-        input_element = next(iter(element.find_parent().select("input")), None)
+        #if soup_objects and len(soup_objects) - 1 >= position:
+        if element_list and len(element_list) -1 >= position:
+            element = element_list[position]
+
+        if 'input' not in element and element:
+            input_element = next(iter(element.find_parent().select("input")), None)
 
         if not input_element:
             self.log_error("Couldn't find input element")
@@ -3476,7 +3496,7 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
-    def find_label_element(self, label_text, container):
+    def find_label_element(self, label_text, container= None, position = 1):
         """
         [Internal]
 
@@ -3498,7 +3518,7 @@ class WebappInternal(Base):
             elements = self.filter_label_element(label_text, container)
             if elements:
                 for element in elements:
-                    elem = self.search_element_position(label_text)
+                    elem = self.search_element_position(label_text, position)
                     if elem:
                         return elem
 
