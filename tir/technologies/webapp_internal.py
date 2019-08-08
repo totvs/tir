@@ -2698,7 +2698,7 @@ class WebappInternal(Base):
         if containers:
             containers = self.zindex_sort(containers, True)
 
-            grids = containers[0].select(".tgetdados, .tgrid")
+            grids = containers[0].select(".tgetdados, .tgrid, .tcbrowse")
 
             grids = self.filter_displayed_elements(grids)
             if grids:
