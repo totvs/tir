@@ -1356,7 +1356,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1397,20 +1397,20 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
 
-    def search_for_errors(self,soup):
+    def search_for_errors(self):
         """
         [Internal]
 
         Searches for errors and alerts in the screen.
 
-        :param soup: Beautiful Soup object to be checked.
-        :type soup: Beautiful Soup object
-
         Usage:
 
         >>> # Calling the method:
-        >>> self.search_for_errors(soup)
+        >>> self.search_for_errors()
         """
+
+        soup = self.get_current_DOM()
+        
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
         if not top_layer:
@@ -1547,7 +1547,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 container_selector = self.base_container
                 if (main_container is not None):
