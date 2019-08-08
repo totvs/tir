@@ -1332,18 +1332,26 @@ class WebappInternal(Base):
         if refresh_page:
             self.driver.refresh()
         else:
-            element = "empty"
+            element = ""
+            string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
-            endtime = time.time() + self.config.time_out
-            while(time.time() < endtime  and element):
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            if self.config.coverage:
+                timeout = 900
+                endtime = time.time() + timeout
+                while(time.time() < endtime and not element):
+                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                    self.SetButton(self.language.logOff)
+
+                    self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+
+                    element = self.search_text(selector=".tsay", text=string)
+                    if element:
+                        print(string)
+
+            else:
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 self.SetButton(self.language.logOff)
-                element = self.search_text(selector="button", text=self.language.logOff)
-                time.sleep(1)
-            
-            if time.time() > endtime:
-                self.log_error("Could not find log off")
 
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
