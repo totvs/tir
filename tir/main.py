@@ -283,6 +283,8 @@ class Webapp():
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
+        .. note::
+            .Do not use this method in any routine. Use on home screen
 
         Usage:
 
@@ -290,6 +292,17 @@ class Webapp():
         >>> oHelper.LogOff()
         """
         self.__webapp.LogOff()
+
+    def Finish(self):
+        """
+        Exit the Protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.Finish()
+        """
+        self.__webapp.Finish()
 
     def MessageBoxClick(self, button_text):
         """
@@ -805,6 +818,7 @@ class Webapp():
         """
 
         return self.__webapp.CheckHelp(text, button)
+    
         
 class Apw():
 
