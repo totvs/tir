@@ -1363,7 +1363,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1404,20 +1404,20 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
 
-    def search_for_errors(self,soup):
+    def search_for_errors(self):
         """
         [Internal]
 
         Searches for errors and alerts in the screen.
 
-        :param soup: Beautiful Soup object to be checked.
-        :type soup: Beautiful Soup object
-
         Usage:
 
         >>> # Calling the method:
-        >>> self.search_for_errors(soup)
+        >>> self.search_for_errors()
         """
+
+        soup = self.get_current_DOM()
+        
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
         if not top_layer:
@@ -1425,8 +1425,7 @@ class WebappInternal(Base):
 
         icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
         icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
-        critical_box = next(iter(top_layer.select(".tmessagebox")), None)
-        if not icon_alert and not icon_error_log and not critical_box:
+        if not icon_alert and not icon_error_log:
             return None
 
         if icon_alert:
@@ -1450,11 +1449,6 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
-        elif critical_box:
-            error_paragraphs = critical_box.text.split("\n\n")
-            error_message = f"Error Log: {error_paragraphs[0]}" if len(error_paragraphs) > 2 else "Error Log: Server down."
-            message = error_message.replace("\n", " ")
 
         self.log_error(message)
 
@@ -1560,7 +1554,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 container_selector = self.base_container
                 if (main_container is not None):
