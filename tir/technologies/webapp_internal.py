@@ -415,6 +415,24 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
             self.SetButton(self.language.confirm)
+        
+    def close_resolution_screen(self):
+        """
+        [Internal]
+
+        Closes the Alert of resolution screen.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.close_resolution_screen()
+        """
+        endtime = time.time() + self.config.time_out
+        container = self.get_current_container()
+        while (time.time() < endtime and container and self.element_exists(term="img[src*='fwskin_alert_ico.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+            self.SetButton(self.language.close)
+            time.sleep(1)
+        self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out, main_container='body')
 
     def set_log_info(self):
         """
@@ -3309,9 +3327,12 @@ class WebappInternal(Base):
                 time.sleep(0.1)
 
         if time.time() > endtime:
-            if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
-                return False
-            self.log_error(f"Element {term} not found!")
+            if term == "[name='cGetUser']":
+                self.close_resolution_screen()
+            else:
+                if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
+                    return False
+                self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
         if presence:
