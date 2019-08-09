@@ -1016,23 +1016,14 @@ class WebappInternal(Base):
                     #if Character input
                     if valtype != 'N':
                         self.set_element_focus(input_field())
-                        input_field().send_keys(Keys.CONTROL, 'a')
-                        self.send_keys(input_field(), Keys.DELETE)
-                        # self.send_keys(input_field(), Keys.HOME)
-                        self.send_keys(input_field(), main_value)
+                        self.send_keys(input_field(), Keys.HOME)
+                        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                        input_field().send_keys(main_value)
                     #if Number input
                     else:
                         tries = 0
                         try_counter = 0
                         while(tries < 3):
-                            self.set_element_focus(input_field())
-                            self.send_keys(input_field(), Keys.DELETE)
-                            # self.send_keys(input_field(), Keys.BACK_SPACE)
-                            # if interface_value_size == 1:
-                            #     self.double_click(input_field())
-                            #     self.send_keys(input_field(), Keys.HOME)
-                            # else:
-                            #     self.click(input_field())
                             self.set_element_focus(input_field())
                             self.try_send_keys(input_field, main_value, try_counter)
                             current_number_value = self.get_web_value(input_field())
@@ -3534,13 +3525,16 @@ class WebappInternal(Base):
         """
         self.wait.until(EC.visibility_of(element_function()))
         if try_counter == 0:
-            element_function().send_keys(Keys.CONTROL, 'a')
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
         elif try_counter == 1:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').perform()
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').perform()
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
     def find_label_element(self, label_text, container= None, position = 1):
