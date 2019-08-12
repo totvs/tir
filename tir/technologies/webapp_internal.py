@@ -2524,7 +2524,7 @@ class WebappInternal(Base):
         """
         print(f'Clicking in {field}')
 
-        if re.match(r"\w+(_)", field) or name_attr:
+        if re.match(r"\w+(_)", field):
             self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
             #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
             element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
