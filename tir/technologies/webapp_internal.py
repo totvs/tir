@@ -1102,10 +1102,10 @@ class WebappInternal(Base):
         """
         endtime = time.time() + 60
         element =  None
+        position -= 1
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
                 ##element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-                position -= 1
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
