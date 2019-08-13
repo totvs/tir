@@ -1612,7 +1612,11 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                try:
+                    containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                except Exception as e:
+                    print(e)
+                    pass
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
