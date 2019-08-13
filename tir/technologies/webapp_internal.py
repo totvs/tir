@@ -2388,6 +2388,9 @@ class WebappInternal(Base):
         """
         Press the desired key on the keyboard on the focused element.
 
+        .. note::
+            If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
         Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
         :param key: Key that would be pressed
