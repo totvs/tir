@@ -1677,30 +1677,34 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        for menuitem in menu_itens:
-            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
-            self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
-            self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
-            subMenuElements = menu.select(".tmenuitem")
-            endTime =   time.time() + 90
-            while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
-                menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
+        try:
+            for menuitem in menu_itens:
+                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
+                self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
+                self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                 subMenuElements = menu.select(".tmenuitem")
-                if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
-                    self.log_error(f"Couldn't find menu item: {menuitem}")
-            submenu = ""
-            child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
-            submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
-            if subMenuElements and submenu():
-                self.scroll_to_element(submenu())
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
-                ActionChains(self.driver).move_to_element(submenu()).click().perform()
-                if count < len(menu_itens) - 1:
-                    self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                endTime =   time.time() + 90
+                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
-            else:
-                self.log_error(f"Error - Menu Item does not exist: {menuitem}")
-            count+=1
+                    subMenuElements = menu.select(".tmenuitem")
+                    if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                        self.log_error(f"Couldn't find menu item: {menuitem}")
+                submenu = ""
+                child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                if subMenuElements and submenu():
+                    self.scroll_to_element(submenu())
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
+                    ActionChains(self.driver).move_to_element(submenu()).click().perform()
+                    if count < len(menu_itens) - 1:
+                        self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                        menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
+                else:
+                    self.log_error(f"Error - Menu Item does not exist: {menuitem}")
+                count+=1
+        except Exception as error:
+            print(error)
+            self.log_error(str(error))
 
     def children_element_count(self, element_selector, children_selector):
         """
