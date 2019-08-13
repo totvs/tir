@@ -2523,15 +2523,22 @@ class WebappInternal(Base):
         >>> element = self.check_checkbox("CheckBox1", True)
         """
         print(f'Clicking in {field}')
+        
+        element_list = []
 
-        if re.match(r"\w+(_)", field):
-            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
-            #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        else:
-            self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-            #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-            element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not element_list):
+            if re.match(r"\w+(_)", field):
+                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+                #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
+
+        if not element_list:
+            self.log_error("Couldn't find span element")
 
         position -= 1
 
