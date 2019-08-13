@@ -150,6 +150,8 @@ class Webapp():
         :type select_all: bool
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param ignore_current: Boolean to ignore the get_current_filtered on loop case of box click. - **Default:** False
+        :type ignore_current: bool
 
         Usage:
 
@@ -283,6 +285,8 @@ class Webapp():
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
+        .. note::
+            .Do not use this method in any routine. Use on home screen
 
         Usage:
 
@@ -290,6 +294,17 @@ class Webapp():
         >>> oHelper.LogOff()
         """
         self.__webapp.LogOff()
+
+    def Finish(self):
+        """
+        Exit the Protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.Finish()
+        """
+        self.__webapp.Finish()
 
     def MessageBoxClick(self, button_text):
         """
@@ -574,7 +589,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
         Sets value of an input element.
 
@@ -610,7 +625,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
@@ -805,6 +820,7 @@ class Webapp():
         """
 
         return self.__webapp.CheckHelp(text, button)
+    
         
 class Apw():
 
