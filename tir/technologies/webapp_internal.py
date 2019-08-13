@@ -64,7 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-
+        self.restart_counter = 0
         self.used_ids = {}
 
         self.parameters = []
@@ -151,6 +151,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
+        try_counter = 0
         self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
@@ -158,33 +159,54 @@ class WebappInternal(Base):
         print("Filling Initial Program")
         start_prog_element = next(iter(soup.select("#inputStartProg")), None)
         if start_prog_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Initial Program input element.")
-        start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
+
+        start_prog = lambda: self.soup_to_selenium(start_prog_element)
         start_prog_value = self.get_web_value(start_prog())
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
+
+            if try_counter == 0:
+                start_prog = lambda: self.soup_to_selenium(start_prog_element)
+            else:
+                start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+
             self.set_element_focus(start_prog())
             start_prog().clear()
             self.send_keys(start_prog(), initial_program)
             start_prog_value = self.get_web_value(start_prog())
+            try_counter += 1 if(try_counter < 1) else -1
         
         if (start_prog_value.strip() != initial_program.strip()):
+            self.restart_counter += 1
             self.log_error("Couldn't fill Program input element.")
 
         print("Filling Environment")
         env_element = next(iter(soup.select("#inputEnv")), None)
         if env_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Environment input element.")
-        env = lambda: self.driver.find_element_by_xpath(xpath_soup(env_element))
+
+        env = lambda: self.soup_to_selenium(env_element)
         env_value = self.get_web_value(env())
         endtime = time.time() + self.config.time_out
+        try_counter = 0
         while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
+
+            if try_counter == 0:
+                env = lambda: self.soup_to_selenium(env_element)
+            else:
+                env = lambda: self.soup_to_selenium(env_element.parent)
+
             self.set_element_focus(env())
             env().clear()
             self.send_keys(env(), self.config.environment)
             env_value = self.get_web_value(env())
+            try_counter += 1 if(try_counter < 1) else -1
 
         if (env_value.strip() != self.config.environment.strip()):
+            self.restart_counter += 1
             self.log_error("Couldn't fill Environment input element.")
 
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
@@ -203,18 +225,26 @@ class WebappInternal(Base):
         """
         self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
+        try_counter = 0
         soup = self.get_current_DOM()
 
         print("Filling User")
         user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
         if user_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find User input element.")
 
-        user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
+        user = lambda: self.soup_to_selenium(user_element)
         user_value = self.get_web_value(user())
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
+
+            if try_counter == 0:
+                user = lambda: self.soup_to_selenium(user_element)
+            else:
+                user = lambda: self.soup_to_selenium(user_element.parent)
+
             self.set_element_focus(user())
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
             self.double_click(user())
@@ -222,8 +252,10 @@ class WebappInternal(Base):
             self.send_keys(user(), self.config.user)
             self.send_keys(user(), Keys.ENTER)
             user_value = self.get_web_value(user())
+            try_counter += 1 if(try_counter < 1) else -1
 
         if (user_value.strip() != self.config.user.strip()):
+            self.restart_counter += 1
             self.log_error("Couldn't fill User input element.")
 
         # loop_control = True
@@ -232,12 +264,20 @@ class WebappInternal(Base):
         print("Filling Password")
         password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
         if password_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find User input element.")
 
-        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element))
+        password = lambda: self.soup_to_selenium(password_element)
         password_value = self.get_web_value(password())
         endtime = time.time() + self.config.time_out
+        try_counter = 0
         while (time.time() < endtime and not password_value.strip()):
+
+            if try_counter == 0:
+                password = lambda: self.soup_to_selenium(password_element)
+            else:
+                password = lambda: self.soup_to_selenium(password_element.parent)
+
             self.set_element_focus(password())
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(password_element))))
             self.click(password())
@@ -246,12 +286,15 @@ class WebappInternal(Base):
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
+            try_counter += 1 if(try_counter < 1) else -1
         
         if not password_value.strip():
+            self.restart_counter += 1
             self.log_error("Couldn't fill User input element.")
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Enter button.")
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
@@ -290,6 +333,7 @@ class WebappInternal(Base):
         print("Filling Date")
         base_date = next(iter(self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if base_date is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Date input element.")
         date = lambda: self.driver.find_element_by_xpath(xpath_soup(base_date))
         self.double_click(date())
@@ -299,6 +343,7 @@ class WebappInternal(Base):
         print("Filling Group")
         group_element = next(iter(self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if group_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Group input element.")
         group = lambda: self.driver.find_element_by_xpath(xpath_soup(group_element))
         self.double_click(group())
@@ -308,6 +353,7 @@ class WebappInternal(Base):
         print("Filling Branch")
         branch_element = next(iter(self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if branch_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Branch input element.")
         branch = lambda: self.driver.find_element_by_xpath(xpath_soup(branch_element))
         self.double_click(branch())
@@ -317,6 +363,7 @@ class WebappInternal(Base):
         print("Filling Environment")
         environment_element = next(iter(self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if environment_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
@@ -332,6 +379,7 @@ class WebappInternal(Base):
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
         if button_element is None:
+            self.restart_counter += 1
             self.log_error(f"Couldn't find {label} button.")
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
@@ -1290,7 +1338,7 @@ class WebappInternal(Base):
         """
         self.driver.refresh()
         
-        if self.config.coverage and self.config.initial_program != '':
+        if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         try:
@@ -1298,7 +1346,7 @@ class WebappInternal(Base):
         except:
             pass
 
-        if self.config.initial_program != '':
+        if self.config.initial_program != ''  and self.restart_counter < 3:
 
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(self.config.initial_program)
@@ -1688,6 +1736,7 @@ class WebappInternal(Base):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(".tmenuitem")
                     if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                        self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
                 submenu = ""
                 child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
@@ -1700,10 +1749,12 @@ class WebappInternal(Base):
                         self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                         menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                 else:
+                    self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
         except Exception as error:
             print(error)
+            self.restart_counter += 1
             self.log_error(str(error))
 
     def children_element_count(self, element_selector, children_selector):
@@ -3341,6 +3392,7 @@ class WebappInternal(Base):
             else:
                 if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                     return False
+                self.restart_counter += 1
                 self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
@@ -3670,7 +3722,7 @@ class WebappInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
@@ -3692,7 +3744,7 @@ class WebappInternal(Base):
         routine_name = routine_name if routine_name else "error"
 
         
-        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
@@ -3710,8 +3762,9 @@ class WebappInternal(Base):
                     os.makedirs(f"Log\\{self.log.station}")
             except OSError:
                 pass
-
-            self.driver.save_screenshot(path)
+            
+            if self.log.get_testcase_stack() not in self.log.test_case_log:
+                self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)
@@ -3723,7 +3776,9 @@ class WebappInternal(Base):
         else:
             self.driver.close()
 
-        # if self.config.num_exec:
+        if self.restart_counter > 2:
+            self.restart_counter = 0
+
         if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
