@@ -3741,7 +3741,7 @@ class WebappInternal(Base):
         routine_name = routine_name if routine_name else "error"
 
         
-        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
@@ -3759,8 +3759,9 @@ class WebappInternal(Base):
                     os.makedirs(f"Log\\{self.log.station}")
             except OSError:
                 pass
-
-            self.driver.save_screenshot(path)
+            
+            if self.log.get_testcase_stack() not in self.log.test_case_log:
+                self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)
