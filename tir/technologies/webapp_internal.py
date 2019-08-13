@@ -1736,6 +1736,7 @@ class WebappInternal(Base):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(".tmenuitem")
                     if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                        self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
                 submenu = ""
                 child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
@@ -1748,10 +1749,12 @@ class WebappInternal(Base):
                         self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                         menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                 else:
+                    self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
         except Exception as error:
             print(error)
+            self.restart_counter += 1
             self.log_error(str(error))
 
     def children_element_count(self, element_selector, children_selector):
@@ -3386,6 +3389,7 @@ class WebappInternal(Base):
             else:
                 if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                     return False
+                self.restart_counter += 1
                 self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
