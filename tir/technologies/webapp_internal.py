@@ -3836,6 +3836,13 @@ class WebappInternal(Base):
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
         self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
+        
+        self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+        if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
+            self.ClickTree('Empresa Grupo Totvs 1')
+            self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+            self.ClickTree('Parâmetros')
+
         self.ClickIcon(self.language.search)
 
         self.fill_parameters(restore_backup=restore_backup)
