@@ -2877,8 +2877,9 @@ class WebappInternal(Base):
                             field_one = ''
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
-
-                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                            
+                        endtime = time.time() + self.config.time_out
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -3891,12 +3892,28 @@ class WebappInternal(Base):
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
         self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
-        
+
+        self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+
         if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
-            self.ClickTree('Empresa Grupo Totvs 1')
+            container = self.get_current_container()
+            img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
+            label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+            
+            if not label_serv1:
+                self.log_error(f"Couldn't find Icon")
+
+            self.ClickTree(label_serv1.text.strip())
             self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
-            self.ClickTree('Parâmetros')
+            container = self.get_current_container()
+            img_param = next(iter(container.select("img[src*='bmpparam']")), None )
+            label_param = next(iter(img_param.parent.select('label')), None)
+
+            if not label_param:
+                self.log_error(f"Couldn't find Icon")
+
+        self.ClickTree(label_param.text.strip())
 
         self.ClickIcon(self.language.search)
 
