@@ -1632,6 +1632,7 @@ class WebappInternal(Base):
         """
 
         element_list = []
+        containers = None
 
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
@@ -2877,7 +2878,7 @@ class WebappInternal(Base):
                             field_one = ''
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
-                            
+
                         endtime = time.time() + self.config.time_out
                         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
@@ -2965,6 +2966,8 @@ class WebappInternal(Base):
                                 else:
                                     self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                     current_value = field[1]
+                        if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                            self.log_error("Couldn't fill input value.")
                     else:
                         self.log_error("Couldn't find columns.")
                 else:
