@@ -661,7 +661,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        return self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
