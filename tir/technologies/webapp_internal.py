@@ -3843,7 +3843,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
-        self.parameters.append([parameter, branch, portuguese_value, english_value, spanish_value])
+        self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
     def SetParameters(self):
         """
@@ -3916,7 +3916,7 @@ class WebappInternal(Base):
             if not label_param:
                 self.log_error(f"Couldn't find Icon")
 
-        self.ClickTree(label_param.text.strip())
+            self.ClickTree(label_param.text.strip())
 
         self.ClickIcon(self.language.search)
 
