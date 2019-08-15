@@ -31,6 +31,7 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
+        self.OK = languagepack["OK"]
         self.copy = languagepack["Copy"]
         self.cut = languagepack["Cut"]
         self.paste = languagepack["Paste"]
@@ -84,6 +85,7 @@ class LanguagePack:
             "Details": "Details",
             "Search": "Search",
             "Ok": "Ok",
+            "OK": "OK",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",
@@ -145,6 +147,7 @@ class LanguagePack:
             "Details": "Detalhes",
             "Search": "Pesquisar",
             "Ok": "Ok",
+            "OK": "OK",
             "Copy": "Copiar",
             "Cut": "Recortar",
             "Paste": "Colar",
@@ -205,6 +208,7 @@ class LanguagePack:
             "Details": "Detalhes",
             "Search": "Buscar",
             "Ok": "Ok",
+            "OK": "OK",
             "Copy": "Copiar",
             "Cut": "Recortar",
             "Paste": "Colar",
@@ -262,13 +266,14 @@ class LanguagePack:
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
             "Enter": "Ввод",
-            #"Finish": "Завершить",
-            "Finish": "3акрыть",
+            "Finish": "Завершить",
+            #"Finish": "3акрыть",
             #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
             #"Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
+            "OK": "Да",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",

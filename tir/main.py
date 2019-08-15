@@ -227,6 +227,26 @@ class Webapp():
         """
         self.__webapp.ClickCheckBox(label_box_name,position)
 
+    def ClickComboBox(self, label_comboBox_name, flagX=0, Xpath_1="", position=1):
+        """
+        Clicks on a Label in ComboBox on the screen.
+
+        :param label_comboBox_name: The label box name
+        :type label_comboBox_name: str
+        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
+        :type flagX: int
+        :param Xpath_1: Path to the necessary button under main label_comboBox_name
+        :type Xpath_1: str
+        :param position: position of label box on interface(!number of field!)
+        :type position: int
+
+        Usage:
+
+        >>> # To call the method:
+        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        """
+        self.__webapp.ClickComboBox(label_comboBox_name, flagX, Xpath_1, position)
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
@@ -455,6 +475,37 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
+    def Randomex (self, rand_val):
+        """
+        Method that return random digits of number
+
+        :param rand_val: required number of digits
+        :type rand_val: int
+        :returns str number
+
+        Usage:
+
+        >>> # Calling the method to get random digits of number to put it in form.
+        >>> self.oHelper.SetValue('B1_COD', self.oHelper.Randomex(7))
+        """
+        return self.__webapp.Randomex (rand_val)
+
+    def FindButton (self, csource, cposition):
+        """
+        Method that gets string label of button from [name_module.tres]
+
+        :param csource: name of the module in lowercase
+        :type csource: str
+        :param cposition: the [STRxxxx] of the button from [name_module.tres]
+        :type cposition: str
+
+        Usage:
+
+        >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
+        >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
+        """
+        return self.__webapp.FindButton (csource, cposition)
+        
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -474,7 +525,7 @@ class Webapp():
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
-        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
+        self.__webapp.SetButton(button, sub_item, position=1, check_error=check_error)
 
     def SetFilePath(self, value):
         """
@@ -604,13 +655,13 @@ class Webapp():
         >>> #-----------------------------------------
         >>> # Calling method to checkbox value on a field that is a grid:
         >>> oHelper.SetValue('Confirmado?', True, grid=True)
-        >>> oHelper.LoadGrid()
+        >>> oHelper.LoadGrid() 
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
+        return self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
@@ -805,6 +856,23 @@ class Webapp():
         """
 
         return self.__webapp.CheckHelp(text, button)
+
+    def GiveMeAccess (self):
+        """
+        Call of the function give to your instance (ex. inst_1) which is copy of WebApp class instance (__webapp),
+            private methods from WebappInternal class.
+
+        :param self: Instance of Webapp class
+        :type self: instance
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> inst_1 = self.oHelper.GiveMeAccess()
+            inst_1.print_in()                        #calling private method which isn't initialized in main.py directly
+        """
+        x = self.__webapp                       # object model here, x is link to instance
+        return x
         
 class Apw():
 

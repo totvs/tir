@@ -106,8 +106,8 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if len(self.table_rows[1:]) == len(testcases):
-                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
+            if len(self.table_rows[1:]) == len(testcases) or self.config.initial_program == '':
+                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="utf-8") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)

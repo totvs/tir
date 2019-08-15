@@ -5,6 +5,8 @@ import inspect
 import os
 import random
 import uuid
+import codecs
+from codecs import encode,decode
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -160,32 +162,16 @@ class WebappInternal(Base):
         if start_prog_element is None:
             self.log_error("Couldn't find Initial Program input element.")
         start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
-        start_prog_value = self.get_web_value(start_prog())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
-            self.set_element_focus(start_prog())
-            start_prog().clear()
-            self.send_keys(start_prog(), initial_program)
-            start_prog_value = self.get_web_value(start_prog())
-        
-        if (start_prog_value.strip() != initial_program.strip()):
-            self.log_error("Couldn't fill Program input element.")
+        start_prog().clear()
+        self.send_keys(start_prog(), initial_program)
 
         print("Filling Environment")
         env_element = next(iter(soup.select("#inputEnv")), None)
         if env_element is None:
             self.log_error("Couldn't find Environment input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(env_element))
-        env_value = self.get_web_value(env())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
-            self.set_element_focus(env())
-            env().clear()
-            self.send_keys(env(), self.config.environment)
-            env_value = self.get_web_value(env())
-
-        if (env_value.strip() != self.config.environment.strip()):
-            self.log_error("Couldn't fill Environment input element.")
+        env().clear()
+        self.send_keys(env(), self.config.environment)
 
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
         self.click(button)
@@ -212,19 +198,12 @@ class WebappInternal(Base):
             self.log_error("Couldn't find User input element.")
 
         user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
-        user_value = self.get_web_value(user())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
-            self.set_element_focus(user())
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
-            self.double_click(user())
-            # self.send_keys(user(), Keys.HOME)
-            self.send_keys(user(), self.config.user)
-            self.send_keys(user(), Keys.ENTER)
-            user_value = self.get_web_value(user())
-
-        if (user_value.strip() != self.config.user.strip()):
-            self.log_error("Couldn't fill User input element.")
+        self.set_element_focus(user())
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+        self.double_click(user())
+        # self.send_keys(user(), Keys.HOME)
+        self.send_keys(user(), self.config.user)
+        self.send_keys(user(), Keys.ENTER)
 
         # loop_control = True
 
@@ -246,9 +225,6 @@ class WebappInternal(Base):
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
-        
-        if not password_value.strip():
-            self.log_error("Couldn't fill User input element.")
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
@@ -1315,6 +1291,9 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
 
+    def print_in (self):        #test
+        print ("Got access")
+
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
         [Internal]
@@ -1667,6 +1646,67 @@ class WebappInternal(Base):
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
+    def Randomex (self, rand_val):
+
+        try:
+            if (int(rand_val) < 1):
+                print("Error, amount can't be 0 -or- less")
+                return -1
+            else:
+                mass_rand = [str(random.randint(0, 9)) for i in range (int(rand_val))]     # implicit assignment str cause .join() waits for STR!
+                z = str("".join(mass_rand))
+
+        except ValueError:
+            print("Error, no amount numbers for randomizing entered")
+
+        else:
+            return z
+
+
+    def FindButton(self, csource, cposition):
+        existsfile = 0                                  # flag
+        cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
+
+        path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
+        path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
+
+        if (os.path.exists(path_encoding) == 0):                                # if not exists new
+
+            if (os.path.exists(path2)):                                         # if exists orig
+                with open(path2, "r", encoding='cp1251') as z:
+                    str_1251 = z.read()
+                    z.close()
+
+                with open(path_encoding, "w+", encoding='utf-8') as x:
+                    x.write(str_1251)
+                    x.close()
+                    existsfile = 1
+            else:
+                existsfile = 0
+                print ("\nNo tres file for this test\n")
+        else:
+            existsfile = 2                  
+        
+        if (existsfile):
+            with codecs.open (path_encoding, 'r','utf-8') as p:
+                str_original = p.read()
+                nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
+
+                if nstart < 0:
+                    nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
+
+                if nstart > 0:
+                    nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
+                    
+                    if nend < 0:
+                        c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
+                    else:
+                        c_ret = str_original[nstart+12 : nend].replace(" ", "")
+
+                p.close()
+
+        return c_ret
+
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -1677,6 +1717,12 @@ class WebappInternal(Base):
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+        
+        :test
+        :param nbutton: STR value from .tres file
+        :type nbutton <-> cposition: str
+        :csource: source path to .tres file
+        :type csource: str(PATH)
 
         Usage:
 
@@ -1689,7 +1735,6 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
-
         container = self.get_current_container()
 
         if container:
@@ -2643,7 +2688,7 @@ class WebappInternal(Base):
         >>> x3_dictionaries = self.create_x3_tuple()
         """
         x3_dictionaries = ()
-        inputs = list(map(lambda x: x[0], self.grid_input))
+        inputs = list(map(lambda x: x[0], self.grid_input))     # returns 1 element from initializated list to every value in list
         checks = list(map(lambda x: x[1], self.grid_check))
         fields = list(filter(lambda x: "_" in x, inputs + checks))
         if fields:
@@ -3128,7 +3173,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -3616,13 +3661,10 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
-        elif self.config.coverage and self.config.initial_program != '':
-            self.restart()
         else:
             self.driver.close()
 
-        # if self.config.num_exec:
-        if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
+        if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
@@ -3965,6 +4007,56 @@ class WebappInternal(Base):
                 self.log_error("Index the Ckeckbox invalid.")
         else:
             self.log_error("Index the Ckeckbox invalid.")
+
+    #ошибка (3998 if 'tcombobox' <- tcheckbox, clicktype = SELENIUM JS) not SELENiUMJS
+    def ClickComboBox (self, label_comboBox_name, flagX=0, Xpath_1="", position = 1):
+        """
+        Clicks on a Label in ComboBox on the screen.
+
+        :param label_comboBox_name: The label box name
+        :type label_comboBox_name: str
+        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
+        :type flagX: int
+        :param Xpath_1: Path to the necessary button under main label_comboBox_name
+        :type Xpath_1: str
+        :param position: position of label box on interface(!number of field!)
+        :type position: int
+
+        Usage:
+
+        >>> # To call the method:
+        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        """
+        if position > 0:
+
+            self.wait_element (label_comboBox_name)
+
+            container = self.get_current_container()
+            if not container:
+                self.log_error ("Couldn't locate container.")
+
+            labels_boxs = container.select("span")
+            filtered_labels_boxs = list (filter (lambda x: label_comboBox_name.lower() in x.text.lower(), labels_boxs))
+        
+            if position <= len(filtered_labels_boxs):
+                position -= 1
+                label_box = filtered_labels_boxs[position].parent
+
+                if 'tcombobox' in label_box.get_attribute_list('class'):
+                    label_box_element = lambda: self.soup_to_selenium(label_box)                
+                    self.click (element = label_box_element(), click_type = enum.ClickType.SELENIUM)
+                    
+                    if flagX > 0:
+                        #self.SetButton("Все блокировки")
+                        #это на крайний случай, вставь xpath до элемента сюда если не работает SetValue(..)
+                        element_1 = self.driver.find_element_by_xpath(Xpath_1)
+                        self.click (element = element_1, click_type = enum.ClickType.SELENIUM)
+                else:
+                    self.log_error ("Index the ComboBox invalid.")                
+            else:
+                self.log_error ("Index the ComboBox invalid.")
+        else:
+            self.log_error ("Index the ComboBox invalid.")
 
 
     def ClickLabel(self, label_name):
