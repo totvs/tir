@@ -525,7 +525,7 @@ class Webapp():
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
-        self.__webapp.SetButton(button, sub_item, position=1, check_error=check_error)
+        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
     def SetFilePath(self, value):
         """
