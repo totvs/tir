@@ -3923,12 +3923,11 @@ class WebappInternal(Base):
 
         self.fill_parameters(restore_backup=restore_backup)
         self.parameters = []
-
+        self.ClickIcon(self.language.exit)
+        time.sleep(1)
+        
         if self.config.coverage:
-            self.ClickIcon(self.language.exit)
-            time.sleep(1)
             self.driver.refresh()
-
         else:
             self.Finish()
 
