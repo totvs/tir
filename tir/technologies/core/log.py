@@ -34,7 +34,7 @@ class Log:
 
         self.table_rows = []
         self.test_case_log = []
-        self.setup_log_error = []
+        self.csv_log = []
         self.invalid_fields = []
         self.table_rows.append(self.generate_header())
         self.folder = folder
@@ -110,7 +110,7 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if len(self.table_rows[1:]) == len(testcases) or self.get_testcase_stack() == "setUpClass" and self.get_testcase_stack() not in self.setup_log_error:
+            if len(self.table_rows[1:]) == len(testcases) or self.get_testcase_stack() == "setUpClass" and self.get_testcase_stack() not in self.csv_log:
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -119,9 +119,8 @@ class Log:
                         csv_writer.writerow(line)
 
                 print(f"Log file created successfully: {path}\\{log_file}")
-                
-                if self.get_testcase_stack() == "setUpClass":
-                    self.setup_log_error.append(self.get_testcase_stack)
+                            
+                self.csv_log.append(self.get_testcase_stack())
 
     def set_seconds(self):
         """
