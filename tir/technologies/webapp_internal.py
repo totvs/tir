@@ -1158,7 +1158,7 @@ class WebappInternal(Base):
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
                 
-            elif position == 1:
+            elif position == 0:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
             else:
                 element = self.find_label_element(label_text = field, position = position)
@@ -3651,7 +3651,8 @@ class WebappInternal(Base):
         >>> self.find_label_element("User:", container_object)
         """
         try:
-            elements = self.filter_label_element(label_text, container)
+            if container:
+                elements = self.filter_label_element(label_text, container)
             if elements:
                 for element in elements:
                     elem = self.search_element_position(label_text, position)
