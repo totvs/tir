@@ -2807,6 +2807,8 @@ class WebappInternal(Base):
         field_to_valtype = {}
         field_to_len = {}
 
+        endtime = time.time() + self.config.time_out
+
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
             field_to_valtype = x3_dictionaries[0]
@@ -2846,7 +2848,7 @@ class WebappInternal(Base):
                 row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
 
                 if row:
-                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None:
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop+=1
@@ -2887,7 +2889,7 @@ class WebappInternal(Base):
                             self.click(selenium_column())
                             self.set_element_focus(selenium_column())
 
-                            while(not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+                            while(time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
                                 time.sleep(1)
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
