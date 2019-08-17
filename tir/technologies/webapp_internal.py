@@ -4290,7 +4290,7 @@ class WebappInternal(Base):
                             try:
                                 if last_item:
                                     self.click(element_click(), enum.ClickType.SELENIUM)
-                                    if self.clicktree_status_selected(label_filtered):
+                                    if self.check_toggler(label_filtered):
                                         success = self.clicktree_status_selected(label_filtered, check_expanded=True)
                                     else:
                                         if right_click:
@@ -4325,7 +4325,32 @@ class WebappInternal(Base):
             return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
         else:
             tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
-            return "expanded" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            if tree_selected.find_all_next("span"):
+                if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
+                    return "expanded" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            else:
+                return False
+    
+    def check_toggler(self, label_filtered):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+
+        tr = container.select("tr")
+
+        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+
+        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+
+        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+
+        tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+        
+        if tree_selected.find_all_next("span"):
+            return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+        else:
+            return False
                 
     def TearDown(self):
         """
