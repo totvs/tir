@@ -4208,6 +4208,8 @@ class WebappInternal(Base):
 
         for label in labels:
 
+            last_item = True if labels.index(label) == len(labels)-1 else False
+
             tree_node = ""
             
             self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
@@ -4223,9 +4225,9 @@ class WebappInternal(Base):
             if not tree_node:
                 self.log_error("Couldn't find tree element.")
 
-            self.click_tree(tree_node, label)
+            self.click_tree(tree_node, label, last_item)
 
-    def click_tree(self, tree_node, label):
+    def click_tree(self, tree_node, label, last_item):
         """
         [Internal]
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
@@ -4256,16 +4258,47 @@ class WebappInternal(Base):
 
                         endtime = time.time() + self.config.time_out
 
-                        while(time.time() < endtime):
+                        try_counter = 0
+
+                        while(time.time() < endtime and try_counter < 3):
                             try:
-                                element_click().click()
-                                success = True
-                                break
+                                if last_item:
+                                    element_click().click()
+                                    success = True
+                                    break
+                                else:
+                                    element_click().click()
+                                    success = self.get_toggler_status(label_filtered)
+                                    break
                             except:
+                                try_counter += 1
                                 pass
                         
         if not success:
             self.log_error("Couldn't click on element.")
+
+    def get_toggler_status(self, label):
+
+        container = self.get_current_container()
+
+        togglers = container.select(".toggler")
+
+        togglers_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), togglers))
+
+        if togglers_filtered:
+
+            for toggler in togglers_filtered:
+                try:
+                    if "expanded" in toggler.attrs['class']:
+                        if list(filter(lambda x: x.strip().lower() == label, next(iter(toggler.find_all_next("label"))))):
+                            return True
+                except:
+                    pass
+            
+            return False
+
+        else:
+            return True
                 
     def TearDown(self):
         """
