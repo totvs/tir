@@ -1158,7 +1158,7 @@ class WebappInternal(Base):
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
                 
-            elif position == 1:
+            elif position == 0:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
             else:
                 element = self.find_label_element(label_text = field, position = position)
@@ -1632,6 +1632,7 @@ class WebappInternal(Base):
         """
 
         element_list = []
+        containers = None
 
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
@@ -2878,7 +2879,8 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                        endtime = time.time() + self.config.time_out
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2964,6 +2966,8 @@ class WebappInternal(Base):
                                 else:
                                     self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                     current_value = field[1]
+                        if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                            self.log_error("Couldn't fill input value.")
                     else:
                         self.log_error("Couldn't find columns.")
                 else:
@@ -3156,7 +3160,8 @@ class WebappInternal(Base):
                         self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
                         ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
-                        while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1)):
+                        endtime = time.time() + self.config.time_out
+                        while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1) and time.time() < endtime):
                             if self.config.debug_log:
                                 print("Waiting for the new line to show")
                             time.sleep(1)
@@ -3647,7 +3652,8 @@ class WebappInternal(Base):
         >>> self.find_label_element("User:", container_object)
         """
         try:
-            elements = self.filter_label_element(label_text, container)
+            if container:
+                elements = self.filter_label_element(label_text, container)
             if elements:
                 for element in elements:
                     elem = self.search_element_position(label_text, position)
@@ -3839,7 +3845,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
-        self.parameters.append([parameter, branch, portuguese_value, english_value, spanish_value])
+        self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
     def SetParameters(self):
         """
@@ -3891,23 +3897,38 @@ class WebappInternal(Base):
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
         self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
-        
+
+        self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+
         if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
-            self.ClickTree('Empresa Grupo Totvs 1')
+            container = self.get_current_container()
+            img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
+            label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+            
+            if not label_serv1:
+                self.log_error(f"Couldn't find Icon")
+
+            self.ClickTree(label_serv1.text.strip())
             self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
-            self.ClickTree('Parâmetros')
+            container = self.get_current_container()
+            img_param = next(iter(container.select("img[src*='bmpparam']")), None )
+            label_param = next(iter(img_param.parent.select('label')), None)
+
+            if not label_param:
+                self.log_error(f"Couldn't find Icon")
+
+            self.ClickTree(label_param.text.strip())
 
         self.ClickIcon(self.language.search)
 
         self.fill_parameters(restore_backup=restore_backup)
         self.parameters = []
+        self.ClickIcon(self.language.exit)
+        time.sleep(1)
 
         if self.config.coverage:
-            self.ClickIcon(self.language.exit)
-            time.sleep(1)
             self.driver.refresh()
-
         else:
             self.Finish()
 
