@@ -162,32 +162,16 @@ class WebappInternal(Base):
         if start_prog_element is None:
             self.log_error("Couldn't find Initial Program input element.")
         start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
-        start_prog_value = self.get_web_value(start_prog())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
-            self.set_element_focus(start_prog())
-            start_prog().clear()
-            self.send_keys(start_prog(), initial_program)
-            start_prog_value = self.get_web_value(start_prog())
-        
-        if (start_prog_value.strip() != initial_program.strip()):
-            self.log_error("Couldn't fill Program input element.")
+        start_prog().clear()
+        self.send_keys(start_prog(), initial_program)
 
         print("Filling Environment")
         env_element = next(iter(soup.select("#inputEnv")), None)
         if env_element is None:
             self.log_error("Couldn't find Environment input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(env_element))
-        env_value = self.get_web_value(env())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
-            self.set_element_focus(env())
-            env().clear()
-            self.send_keys(env(), self.config.environment)
-            env_value = self.get_web_value(env())
-
-        if (env_value.strip() != self.config.environment.strip()):
-            self.log_error("Couldn't fill Environment input element.")
+        env().clear()
+        self.send_keys(env(), self.config.environment)
 
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
         self.click(button)
@@ -214,19 +198,12 @@ class WebappInternal(Base):
             self.log_error("Couldn't find User input element.")
 
         user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
-        user_value = self.get_web_value(user())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
-            self.set_element_focus(user())
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
-            self.double_click(user())
-            # self.send_keys(user(), Keys.HOME)
-            self.send_keys(user(), self.config.user)
-            self.send_keys(user(), Keys.ENTER)
-            user_value = self.get_web_value(user())
-
-        if (user_value.strip() != self.config.user.strip()):
-            self.log_error("Couldn't fill User input element.")
+        self.set_element_focus(user())
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+        self.double_click(user())
+        # self.send_keys(user(), Keys.HOME)
+        self.send_keys(user(), self.config.user)
+        self.send_keys(user(), Keys.ENTER)
 
         # loop_control = True
 
@@ -248,9 +225,6 @@ class WebappInternal(Base):
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
-        
-        if not password_value.strip():
-            self.log_error("Couldn't fill User input element.")
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
@@ -1317,8 +1291,13 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
 
-    def print_in (self):        #test
-        print ("Got access")
+    def print_in (self):
+        """
+        [Internal]
+
+        Test function, only for print that calling is OK
+        """
+        print ("function print_in, prints OK")
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -1673,7 +1652,18 @@ class WebappInternal(Base):
         return int(self.driver.execute_script(script))
 
     def Randomex (self, rand_val):
+        """
+        Method that return random digits of number
 
+        :param rand_val: required number of digits
+        :type rand_val: int
+        :returns str number
+
+        Usage:
+
+        >>> # Calling the method to get random digits of number to put it in form.
+        >>> self.oHelper.SetValue('B1_COD', self.oHelper.Randomex(7))
+        """
         try:
             if (int(rand_val) < 1):
                 print("Error, amount can't be 0 -or- less")
@@ -1690,6 +1680,19 @@ class WebappInternal(Base):
 
 
     def FindButton(self, csource, cposition):
+        """
+        Method that gets string label of button from [name_module.tres]
+
+        :param csource: name of the module in lowercase
+        :type csource: str
+        :param cposition: the [STRxxxx] of the button from [name_module.tres]
+        :type cposition: str
+
+        Usage:
+
+        >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
+        >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
+        """
         existsfile = 0                                  # flag
         cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
 
@@ -1733,6 +1736,41 @@ class WebappInternal(Base):
 
         return c_ret
 
+    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+        """
+        $x("//td[@id='11'][contains(concat(@class, ''), 'worktime-block ui-selectee')]")     <- orig xpath (need to be between ("expression generates"))
+        
+        Method that clicks on a scale on the screen.
+
+        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :type head_node: str
+        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
+        :type sub_item: str
+        :param index: Quantity of elements <id> for iteration. - **Default:** 1
+        :type index: int
+        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :type attr_name: str
+
+        Usage:
+
+        >>> # Calling the method to click on scale/dial:
+        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        """
+        if attr_name:
+            mass_WebElement = []   # storage for webelements
+
+            for x in range (start_index, end_index+1):
+                result = "//" + head_node + "[@id=" + str(x) + "][contains(@" + attr_name + ",\'" + attr_contains + "\')]"
+                mass_WebElement.append (self.driver.find_element_by_xpath (result))
+
+            for z in range (start_index, end_index+1):
+                self.click (mass_WebElement[z])
+
+        else:
+            print ("Error, attr_name not set up!")
+            #self.log_error(f"Parameter")
+
+
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -1743,12 +1781,6 @@ class WebappInternal(Base):
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-        
-        :test
-        :param nbutton: STR value from .tres file
-        :type nbutton <-> cposition: str
-        :csource: source path to .tres file
-        :type csource: str(PATH)
 
         Usage:
 
@@ -3687,13 +3719,10 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
-        elif self.config.coverage and self.config.initial_program != '':
-            self.restart()
         else:
             self.driver.close()
 
-        # if self.config.num_exec:
-        if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
+        if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
@@ -4037,6 +4066,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Index the Ckeckbox invalid.")
 
+    #ошибка (3998 if 'tcombobox' <- tcheckbox, clicktype = SELENIUM JS) not SELENiUMJS
     def ClickComboBox (self, label_comboBox_name, flagX=0, Xpath_1="", position = 1):
         """
         Clicks on a Label in ComboBox on the screen.

@@ -505,6 +505,26 @@ class Webapp():
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
         return self.__webapp.FindButton (csource, cposition)
+
+    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+        """
+        Method that clicks on a scale on the screen.
+
+        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :type head_node: str
+        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
+        :type sub_item: str
+        :param index: Quantity of elements <id> for iteration. - **Default:** 1
+        :type index: int
+        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :type attr_name: str
+
+        Usage:
+
+        >>> # Calling the method to click on scale/dial:
+        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        """
+        self.__webapp.SetDial (end_index, head_node, start_index, attr_name, attr_contains)
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
@@ -655,13 +675,13 @@ class Webapp():
         >>> #-----------------------------------------
         >>> # Calling method to checkbox value on a field that is a grid:
         >>> oHelper.SetValue('Confirmado?', True, grid=True)
-        >>> oHelper.LoadGrid()
+        >>> oHelper.LoadGrid() 
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
+        return self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
