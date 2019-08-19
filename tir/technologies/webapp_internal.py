@@ -1833,6 +1833,7 @@ class WebappInternal(Base):
 
 
                 if soup_objects and len(soup_objects) - 1 >= position:
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
@@ -1861,7 +1862,6 @@ class WebappInternal(Base):
                     self.log_error(f"Element {button} not found!")
 
             if soup_element:
-
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
 
@@ -1873,6 +1873,7 @@ class WebappInternal(Base):
                 
                 if soup_objects:
                     soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects_filtered[0]))
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
                 else:
                     self.log_error(f"Couldn't find element {sub_item}")
 
@@ -4024,7 +4025,7 @@ class WebappInternal(Base):
         """
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
-        time.sleep(0.5)
+        time.sleep(1)
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
         has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
