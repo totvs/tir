@@ -5,8 +5,6 @@ import inspect
 import os
 import random
 import uuid
-import codecs
-from codecs import encode,decode
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -1793,6 +1791,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
+
         container = self.get_current_container()
 
         if container:
@@ -2746,7 +2745,7 @@ class WebappInternal(Base):
         >>> x3_dictionaries = self.create_x3_tuple()
         """
         x3_dictionaries = ()
-        inputs = list(map(lambda x: x[0], self.grid_input))     # returns 1 element from initializated list to every value in list
+        inputs = list(map(lambda x: x[0], self.grid_input))
         checks = list(map(lambda x: x[1], self.grid_check))
         fields = list(filter(lambda x: "_" in x, inputs + checks))
         if fields:
@@ -3231,7 +3230,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -4465,9 +4464,10 @@ class WebappInternal(Base):
         self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
         if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
             self.errors.append(f"{self.language.messages.text_not_found}({text})")
-            self.SetButton(button, check_error=False)
+            return False
         else:
             self.SetButton(button, check_error=False)
+            return True
 
     def get_single_button(self):
         """
@@ -4479,3 +4479,29 @@ class WebappInternal(Base):
         if not button_filtered:
             self.log_error(f"Couldn't find button")
         return button_filtered
+
+    def LoopValues(self, field, input_value, error_msg):
+        '''
+        Loops through input values until unused one is found (if no error pop-up accures)
+
+        :param field: string (as in SetValue)
+        :param input_value: string (as in SetValue)
+        :param error_msg: string (as in CheckHelp)
+        :return: input_value that will be used
+        '''
+
+        def rewrite_string(string):
+            string_str = re.split(r'(\d+)(?!.*\d)', string)
+            if len(string_str) == 3:
+                return string_str[0] + str(int(string_str[1]) + 1) + string_str[2]
+            else:
+                return '{}_{}'.format(string, 1)
+
+        self.SetValue(field=field, value=input_value)
+        bool_pop_up = self.CheckHelp(error_msg, self.language.close)
+        if bool_pop_up:
+            input_value = rewrite_string(input_value)
+            result = self.LoopValues(field, input_value, error_msg)
+        else:
+            result = input_value
+        return result
