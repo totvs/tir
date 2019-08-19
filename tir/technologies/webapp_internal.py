@@ -160,6 +160,16 @@ class WebappInternal(Base):
         if start_prog_element is None:
             self.log_error("Couldn't find Initial Program input element.")
         start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
+        start_prog_value = self.get_web_value(start_prog())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
+            self.set_element_focus(start_prog())
+            start_prog().clear()
+            self.send_keys(start_prog(), initial_program)
+            start_prog_value = self.get_web_value(start_prog())
+
+        if (start_prog_value.strip() != initial_program.strip()):
+            self.log_error("Couldn't fill Program input element.")
         start_prog().clear()
         self.send_keys(start_prog(), initial_program)
 
@@ -168,6 +178,16 @@ class WebappInternal(Base):
         if env_element is None:
             self.log_error("Couldn't find Environment input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(env_element))
+        env_value = self.get_web_value(env())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
+            self.set_element_focus(env())
+            env().clear()
+            self.send_keys(env(), self.config.environment)
+            env_value = self.get_web_value(env())
+
+        if (env_value.strip() != self.config.environment.strip()):
+            self.log_error("Couldn't fill Environment input element.")
         env().clear()
         self.send_keys(env(), self.config.environment)
 
@@ -196,6 +216,19 @@ class WebappInternal(Base):
             self.log_error("Couldn't find User input element.")
 
         user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
+        user_value = self.get_web_value(user())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
+            self.set_element_focus(user())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+            self.double_click(user())
+            # self.send_keys(user(), Keys.HOME)
+            self.send_keys(user(), self.config.user)
+            self.send_keys(user(), Keys.ENTER)
+            user_value = self.get_web_value(user())
+
+        if (user_value.strip() != self.config.user.strip()):
+            self.log_error("Couldn't fill User input element.")
         self.set_element_focus(user())
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
         self.double_click(user())
@@ -223,6 +256,9 @@ class WebappInternal(Base):
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
+            
+        if not password_value.strip():
+            self.log_error("Couldn't fill User input element.")
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
@@ -3718,9 +3754,12 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
+        elif self.config.coverage and self.config.initial_program != '':
+            self.restart()
         else:
             self.driver.close()
 
+        #if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
