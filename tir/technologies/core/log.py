@@ -105,7 +105,6 @@ class Log:
                 open("log_exec_file.txt", "w")
             
             testcases = self.list_of_testcases()
-
             if len(self.table_rows[1:]) == len(testcases) or self.config.initial_program == '':
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="utf-8") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
