@@ -4293,6 +4293,8 @@ class WebappInternal(Base):
                                     self.click(element_click(), enum.ClickType.SELENIUM)
                                     if self.check_toggler(label_filtered):
                                         success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                        if success and right_click:
+                                            self.click(element_click(), right_click=right_click)
                                     else:
                                         if right_click:
                                             self.click(element_click(), right_click=right_click)
