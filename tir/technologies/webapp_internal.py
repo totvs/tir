@@ -5,8 +5,6 @@ import inspect
 import os
 import random
 import uuid
-import codecs
-from codecs import encode,decode
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -1317,9 +1315,6 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
 
-    def print_in (self):        #test
-        print ("Got access")
-
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
         [Internal]
@@ -1672,67 +1667,6 @@ class WebappInternal(Base):
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
-    def Randomex (self, rand_val):
-
-        try:
-            if (int(rand_val) < 1):
-                print("Error, amount can't be 0 -or- less")
-                return -1
-            else:
-                mass_rand = [str(random.randint(0, 9)) for i in range (int(rand_val))]     # implicit assignment str cause .join() waits for STR!
-                z = str("".join(mass_rand))
-
-        except ValueError:
-            print("Error, no amount numbers for randomizing entered")
-
-        else:
-            return z
-
-
-    def FindButton(self, csource, cposition):
-        existsfile = 0                                  # flag
-        cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
-
-        path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
-        path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
-
-        if (os.path.exists(path_encoding) == 0):                                # if not exists new
-
-            if (os.path.exists(path2)):                                         # if exists orig
-                with open(path2, "r", encoding='cp1251') as z:
-                    str_1251 = z.read()
-                    z.close()
-
-                with open(path_encoding, "w+", encoding='utf-8') as x:
-                    x.write(str_1251)
-                    x.close()
-                    existsfile = 1
-            else:
-                existsfile = 0
-                print ("\nNo tres file for this test\n")
-        else:
-            existsfile = 2                  
-        
-        if (existsfile):
-            with codecs.open (path_encoding, 'r','utf-8') as p:
-                str_original = p.read()
-                nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
-
-                if nstart < 0:
-                    nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
-
-                if nstart > 0:
-                    nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
-                    
-                    if nend < 0:
-                        c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
-                    else:
-                        c_ret = str_original[nstart+12 : nend].replace(" ", "")
-
-                p.close()
-
-        return c_ret
-
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -1743,12 +1677,6 @@ class WebappInternal(Base):
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-        
-        :test
-        :param nbutton: STR value from .tres file
-        :type nbutton <-> cposition: str
-        :csource: source path to .tres file
-        :type csource: str(PATH)
 
         Usage:
 
@@ -1761,6 +1689,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
+
         container = self.get_current_container()
 
         if container:
@@ -2714,7 +2643,7 @@ class WebappInternal(Base):
         >>> x3_dictionaries = self.create_x3_tuple()
         """
         x3_dictionaries = ()
-        inputs = list(map(lambda x: x[0], self.grid_input))     # returns 1 element from initializated list to every value in list
+        inputs = list(map(lambda x: x[0], self.grid_input))
         checks = list(map(lambda x: x[1], self.grid_check))
         fields = list(filter(lambda x: "_" in x, inputs + checks))
         if fields:
@@ -3199,7 +3128,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -4037,55 +3966,6 @@ class WebappInternal(Base):
         else:
             self.log_error("Index the Ckeckbox invalid.")
 
-    def ClickComboBox (self, label_comboBox_name, flagX=0, Xpath_1="", position = 1):
-        """
-        Clicks on a Label in ComboBox on the screen.
-
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
-        :type position: int
-
-        Usage:
-
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
-        """
-        if position > 0:
-
-            self.wait_element (label_comboBox_name)
-
-            container = self.get_current_container()
-            if not container:
-                self.log_error ("Couldn't locate container.")
-
-            labels_boxs = container.select("span")
-            filtered_labels_boxs = list (filter (lambda x: label_comboBox_name.lower() in x.text.lower(), labels_boxs))
-        
-            if position <= len(filtered_labels_boxs):
-                position -= 1
-                label_box = filtered_labels_boxs[position].parent
-
-                if 'tcombobox' in label_box.get_attribute_list('class'):
-                    label_box_element = lambda: self.soup_to_selenium(label_box)                
-                    self.click (element = label_box_element(), click_type = enum.ClickType.SELENIUM)
-                    
-                    if flagX > 0:
-                        #self.SetButton("Все блокировки")
-                        #это на крайний случай, вставь xpath до элемента сюда если не работает SetValue(..)
-                        element_1 = self.driver.find_element_by_xpath(Xpath_1)
-                        self.click (element = element_1, click_type = enum.ClickType.SELENIUM)
-                else:
-                    self.log_error ("Index the ComboBox invalid.")                
-            else:
-                self.log_error ("Index the ComboBox invalid.")
-        else:
-            self.log_error ("Index the ComboBox invalid.")
-
 
     def ClickLabel(self, label_name):
         """
@@ -4435,9 +4315,10 @@ class WebappInternal(Base):
         self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
         if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
             self.errors.append(f"{self.language.messages.text_not_found}({text})")
-            self.SetButton(button, check_error=False)
+            return False
         else:
             self.SetButton(button, check_error=False)
+            return True
 
     def get_single_button(self):
         """
@@ -4449,3 +4330,29 @@ class WebappInternal(Base):
         if not button_filtered:
             self.log_error(f"Couldn't find button")
         return button_filtered
+
+    def LoopValues(self, field, input_value, error_msg):
+        '''
+        Loops through input values until unused one is found (if no error pop-up accures)
+
+        :param field: string (as in SetValue)
+        :param input_value: string (as in SetValue)
+        :param error_msg: string (as in CheckHelp)
+        :return: input_value that will be used
+        '''
+
+        def rewrite_string(string):
+            string_str = re.split(r'(\d+)(?!.*\d)', string)
+            if len(string_str) == 3:
+                return string_str[0] + str(int(string_str[1]) + 1) + string_str[2]
+            else:
+                return '{}_{}'.format(string, 1)
+
+        self.SetValue(field=field, value=input_value)
+        bool_pop_up = self.CheckHelp(error_msg, self.language.close)
+        if bool_pop_up:
+            input_value = rewrite_string(input_value)
+            result = self.LoopValues(field, input_value, error_msg)
+        else:
+            result = input_value
+        return result
