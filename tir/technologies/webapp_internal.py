@@ -4586,3 +4586,45 @@ class WebappInternal(Base):
         if not button_filtered:
             self.log_error(f"Couldn't find button")
         return button_filtered
+
+    def ClickMenuPopUpItem(self, label, right_click):
+        """
+        Clicks on MenuPopUp Item based in a text
+
+        :param text: Text in MenuPopUp to be clicked.
+        :type text: str
+        :param right_click: Button to be clicked.
+        :type button: bool
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickMenuPopUpItem("Label")
+        """
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup")
+
+        label = label.lower().strip()
+
+        endtime = time.time() + self.config.time_out
+
+        tmenupopupitem_filtered = ""
+
+        while(time.time() < endtime and not tmenupopupitem_filtered):
+
+            soup = self.get_current_DOM()
+
+            body = next(iter(soup.select("body")))
+
+            tmenupopupitem = body.select(".tmenupopupitem")
+
+            tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem))))
+
+        if not tmenupopupitem_filtered:
+            self.log_error(f"Couldn't find tmenupopupitem: {label}")
+
+        tmenupopupitem_element = lambda: self.soup_to_selenium(tmenupopupitem_filtered)
+
+        if right_click:
+            self.click(tmenupopupitem_element(), right_click=right_click)
+        else:
+            self.click(tmenupopupitem_element())
