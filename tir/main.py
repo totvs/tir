@@ -824,7 +824,22 @@ class Webapp():
         """
 
         return self.__webapp.CheckHelp(text, button)
-    
+
+    def ClickMenuPopUpItem(self, text, right_click=False):
+        """
+        Clicks on MenuPopUp Item based in a text
+
+        :param text: Text in MenuPopUp to be clicked.
+        :type text: str
+        :param right_click: Button to be clicked.
+        :type button: bool
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickMenuPopUpItem("Label")
+        """
+        return self.__webapp.ClickMenuPopUpItem(text, right_click)
         
 class Apw():
 
