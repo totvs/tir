@@ -3097,7 +3097,14 @@ class WebappInternal(Base):
                 if field[0] > len(rows):
                     self.log_error(self.language.messages.grid_line_error)
 
-                columns = rows[field[0]].select("td")
+                field_element = next(iter(field), None)
+                if field_element == None:
+                    self.log_error("Couldn't find rows.")
+                
+                if len(rows) -1 >= field_element:
+                    columns = rows[field_element].select("td")
+                    
+                # columns = rows[field[0]].select("td")
                 if columns:
                     if "_" in field[1]:
                         column_name = field_to_label[field[1]].lower()
@@ -4185,6 +4192,8 @@ class WebappInternal(Base):
             self.log_error("Couldn't find any labels.")
 
         label_element = lambda: self.soup_to_selenium(label)
+        self.scroll_to_element(label_element())
+        self.set_element_focus(label_element())
         self.click(label_element())
 
     def get_current_container(self):
