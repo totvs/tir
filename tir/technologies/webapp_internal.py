@@ -4365,7 +4365,10 @@ class WebappInternal(Base):
         tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
         
         if tree_selected.find_all_next("span"):
-            return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            try:
+                return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            except:
+                return False
         else:
             return False
                 
