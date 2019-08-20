@@ -3147,10 +3147,10 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.new_grid_line(["", "", 0, True])
         """
-        grid = ''
+        grids = ''
         endtime = time.time() + self.config.time_out
         self.down_loop_grid = True
-        while(not grid and time.time() < endtime):
+        while(not grids and time.time() < endtime):
             soup = self.get_current_DOM()
 
             containers = soup.select(".tmodaldialog.twidget")
