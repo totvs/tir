@@ -2815,7 +2815,7 @@ class WebappInternal(Base):
             field_to_valtype = x3_dictionaries[0]
             field_to_len = x3_dictionaries[1]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             print("Waiting for container to be active")
             time.sleep(1)
             
@@ -3069,10 +3069,11 @@ class WebappInternal(Base):
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
         field_to_label = {}
+        endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body") and time.time() < endtime):
             if self.config.debug_log:
                 print("Waiting for container to be active")
             time.sleep(1)
@@ -3146,44 +3147,48 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.new_grid_line(["", "", 0, True])
         """
+        grid = ''
+        endtime = time.time() + self.config.time_out
         self.down_loop_grid = True
+        while(not grid and time.time() < endtime):
+            soup = self.get_current_DOM()
 
-        soup = self.get_current_DOM()
+            containers = soup.select(".tmodaldialog.twidget")
+            if containers:
+                containers = self.zindex_sort(containers, True)
+                grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
 
-        containers = soup.select(".tmodaldialog.twidget")
-        if containers:
+            time.sleep(1)
 
-            containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
-            if grids:
-                if field[2] > len(grids):
-                    self.log_error(self.language.messages.grid_number_error)
-                rows = grids[field[2]].select("tbody tr")
-                row = self.get_selected_row(rows)
-                if row:
-                    columns = row.select("td")
-                    if columns:
-                        second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
-                        # self.scroll_to_element(second_column())
-                        self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
-                        self.set_element_focus(second_column())
-                        self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
-                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+        if grids:
+            if field[2] > len(grids):
+                self.log_error(self.language.messages.grid_number_error)
+            rows = grids[field[2]].select("tbody tr")
+            row = self.get_selected_row(rows)
+            if row:
+                columns = row.select("td")
+                if columns:
+                    second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
+                    # self.scroll_to_element(second_column())
+                    self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
+                    self.set_element_focus(second_column())
+                    self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
+                    ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
-                        endtime = time.time() + self.config.time_out
-                        while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1) and time.time() < endtime):
-                            if self.config.debug_log:
-                                print("Waiting for the new line to show")
-                            time.sleep(1)
+                    endtime = time.time() + self.config.time_out
+                    while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1) and time.time() < endtime):
+                        if self.config.debug_log:
+                            print("Waiting for the new line to show")
+                        time.sleep(1)
 
-                        if (add_grid_line_counter):
-                            self.add_grid_row_counter(grids[field[2]])
-                    else:
-                        self.log_error("Couldn't find columns.")
+                    if (add_grid_line_counter):
+                        self.add_grid_row_counter(grids[field[2]])
                 else:
-                    self.log_error("Couldn't find rows.")
+                    self.log_error("Couldn't find columns.")
             else:
-                self.log_error("Couldn't find grids.")
+                self.log_error("Couldn't find rows.")
+        else:
+            self.log_error("Couldn't find grids.")
 
     def ClickGridCell(self, column, row_number=1, grid_number=1):
         """
@@ -4215,7 +4220,7 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def ClickTree(self, treepath, right_click):
+    def ClickTree(self, treepath, right_click = False):
         """
         Clicks on TreeView component.
 
