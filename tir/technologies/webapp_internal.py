@@ -2090,7 +2090,7 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(3)
+            time.sleep(0.5)
             
         self.log_error(f"Element {string} not found")
 
@@ -2120,7 +2120,7 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(3)
+            time.sleep(0.5)
 
         self.log_error(f"Element {string} not found")
 
