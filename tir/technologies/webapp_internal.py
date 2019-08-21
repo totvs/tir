@@ -900,7 +900,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class"), list_in_range or 'readonly focus' not in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
