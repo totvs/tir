@@ -4636,7 +4636,9 @@ class WebappInternal(Base):
 
             tmenupopupitem = body.select(".tmenupopupitem")
 
-            tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem))))
+            tmenupopupitem_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), tmenupopupitem))
+
+            tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))))
 
         if not tmenupopupitem_filtered:
             self.log_error(f"Couldn't find tmenupopupitem: {label}")
