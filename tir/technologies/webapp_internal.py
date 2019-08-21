@@ -2297,7 +2297,7 @@ class WebappInternal(Base):
                 if not self.get_single_button():
                     get_current_filtered = next(iter(get_current()),None)
                     current = get_current_filtered
-                current = get_current_filtered
+                current = next(iter(get_current()),None)
                 time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
