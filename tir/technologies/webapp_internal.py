@@ -4181,13 +4181,12 @@ class WebappInternal(Base):
         """
         label = ''
         self.wait_element(label_name)
-
-        container = self.get_current_container()
-        if not container:
-            self.log_error("Couldn't locate container.")
-        
         endtime = time.time() + self.config.time_out
         while(not label and time.time() < endtime):
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Couldn't locate container.")
+                
             labels = container.select("label")
             filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
             filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
