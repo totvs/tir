@@ -2275,10 +2275,19 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
-            while(last != current and contents):
+            while(current.text[:len(content_list[0])] != content_list[0]):
                 td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                time.sleep(2)
+                last = current
+                scroll_down()
+                time.sleep(0.5)
+                if not self.get_single_button():
+                    get_current_filtered = next(iter(get_current()), None)
+                    current = get_current_filtered
+                current = next(iter(get_current()), None)
+                time.sleep(0.5)
                 text = td.text.strip() if td else ""
-                if text in contents:
+                if current.text[:len(content_list[0])] == content_list[0]:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
                         clicking_row_element_bs = current
@@ -2289,16 +2298,7 @@ class WebappInternal(Base):
                         self.send_keys(clicking_row_element(),Keys.ENTER)
                     else:
                         self.double_click(clicking_row_element())
-                    contents.remove(text)
-                time.sleep(2)
-                last = current
-                scroll_down()
-                time.sleep(0.5)
-                if not self.get_single_button():
-                    get_current_filtered = next(iter(get_current()),None)
-                    current = get_current_filtered
-                current = get_current_filtered
-                time.sleep(0.5)
+                    #contents.remove(text)
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
