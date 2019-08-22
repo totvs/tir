@@ -227,25 +227,21 @@ class Webapp():
         """
         self.__webapp.ClickCheckBox(label_box_name,position)
 
-    def ClickComboBox(self, label_comboBox_name, flagX=0, Xpath_1="", position=1):
+    def ClickComboBox(self, position=1, label_comboBox=""):
         """
-        Clicks on a Label in ComboBox on the screen.
+        Clicks on a Label in box on the screen.
 
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
+        :param position: Position of text in the combobox, that need to be pressed
         :type position: int
+        :param label_comboBox: Arguement for detecting combobox by default value in it
+        :type label_comboBox: str
 
         Usage:
 
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        >>> # Call the method:
+        >>> oHelper.ClickComboBox (position=2, label_comboBox = "Все блокировки")
         """
-        self.__webapp.ClickComboBox(label_comboBox_name, flagX, Xpath_1, position)
+        self.__webapp.ClickComboBox (position, label_comboBox)
 
     def ClickLabel(self, label_name):
         """

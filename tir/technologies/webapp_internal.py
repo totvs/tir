@@ -4104,53 +4104,45 @@ class WebappInternal(Base):
         else:
             self.log_error("Index the Ckeckbox invalid.")
 
-    #ошибка (3998 if 'tcombobox' <- tcheckbox, clicktype = SELENIUM JS) not SELENiUMJS
-    def ClickComboBox (self, label_comboBox_name, flagX=0, Xpath_1="", position = 1):
+    def ClickComboBox (self, position = 1, label_comboBox = ""):
         """
-        Clicks on a Label in ComboBox on the screen.
+        Clicks on a Label in box on the screen.
 
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
+        :param position: Position of text in the combobox, that need to be pressed
         :type position: int
+        :param label_comboBox: Arguement for detecting combobox by default value in it
+        :type label_comboBox: str
 
         Usage:
 
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        >>> # Call the method:
+        >>> oHelper.ClickComboBox (position = 2, label_comboBox = "Все блокировки")
         """
         if position > 0:
 
-            self.wait_element (label_comboBox_name)
+            position -= 1
+            mass_labels = []
 
-            container = self.get_current_container()
+            self.wait_element (label_comboBox)
+
+            container = self.get_current_container ()
             if not container:
                 self.log_error ("Couldn't locate container.")
+            try:
+                labels_boxs = container.select ("option")
+                
+                if not labels_boxs:
+                    raise Exception("No such label")
 
-            labels_boxs = container.select("span")
-            filtered_labels_boxs = list (filter (lambda x: label_comboBox_name.lower() in x.text.lower(), labels_boxs))
-        
-            if position <= len(filtered_labels_boxs):
-                position -= 1
-                label_box = filtered_labels_boxs[position].parent
+            except Exception:
+                labels_boxs = container.select ("select")
+            
+            for l in labels_boxs:
+                mass_labels += [l]
 
-                if 'tcombobox' in label_box.get_attribute_list('class'):
-                    label_box_element = lambda: self.soup_to_selenium(label_box)                
-                    self.click (element = label_box_element(), click_type = enum.ClickType.SELENIUM)
-                    
-                    if flagX > 0:
-                        #self.SetButton("Все блокировки")
-                        #это на крайний случай, вставь xpath до элемента сюда если не работает SetValue(..)
-                        element_1 = self.driver.find_element_by_xpath(Xpath_1)
-                        self.click (element = element_1, click_type = enum.ClickType.SELENIUM)
-                else:
-                    self.log_error ("Index the ComboBox invalid.")                
-            else:
-                self.log_error ("Index the ComboBox invalid.")
+            sbox = (self.soup_to_selenium (labels_boxs[position]))
+            self.click (sbox, click_type = enum.ClickType.SELENIUM)
+            
         else:
             self.log_error ("Index the ComboBox invalid.")
 
