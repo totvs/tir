@@ -2227,6 +2227,8 @@ class WebappInternal(Base):
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
+        text = ''
+        endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
             self.wait_element_timeout(field)
@@ -2275,7 +2277,7 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
-            while(current.text[:len(content_list[0])] != content_list[0]):
+            while(time.time() < endtime and text != content_list[0]):
                 td = next(iter(current.select(f"td[id='{column_index}']")), None)
                 time.sleep(2)
                 last = current
@@ -2287,7 +2289,7 @@ class WebappInternal(Base):
                 current = next(iter(get_current()), None)
                 time.sleep(0.5)
                 text = td.text.strip() if td else ""
-                if current.text[:len(content_list)] == content_list[0] or text == content_list[0]:
+                if text == content_list[0]:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
                         clicking_row_element_bs = current
