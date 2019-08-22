@@ -227,25 +227,21 @@ class Webapp():
         """
         self.__webapp.ClickCheckBox(label_box_name,position)
 
-    def ClickComboBox(self, label_comboBox_name, flagX=0, Xpath_1="", position=1):
+    def ClickComboBox(self, position=1, label_comboBox=""):
         """
-        Clicks on a Label in ComboBox on the screen.
+        Clicks on a Label in box on the screen.
 
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
+        :param position: Position of text in the combobox, that need to be pressed
         :type position: int
+        :param label_comboBox: Arguement for detecting combobox by default value in it
+        :type label_comboBox: str
 
         Usage:
 
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        >>> # Call the method:
+        >>> oHelper.ClickComboBox (position=2, label_comboBox = "Все блокировки")
         """
-        self.__webapp.ClickComboBox(label_comboBox_name, flagX, Xpath_1, position)
+        self.__webapp.ClickComboBox (position, label_comboBox)
 
     def ClickLabel(self, label_name):
         """
@@ -506,25 +502,27 @@ class Webapp():
         """
         return self.__webapp.FindButton (csource, cposition)
 
-    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+    def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
         Method that clicks on a scale on the screen.
 
-        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :param head_node: Tag container for searching out the elements.
         :type head_node: str
-        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
-        :type sub_item: str
-        :param index: Quantity of elements <id> for iteration. - **Default:** 1
-        :type index: int
-        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :param end_index:  - a finite number of fragments of the scale to fill
+        :type end_index: int
+        :param start_index: Starting index of the first element. - **Default:** 0
+        :type start_index: int
+        :param attr_name: Unique attribute name to search all scale indices- **Default:** "" (empty string)
         :type attr_name: str
+        :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
+        :type attr_contains: str
 
         Usage:
 
         >>> # Calling the method to click on scale/dial:
-        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
-        self.__webapp.SetDial (end_index, head_node, start_index, attr_name, attr_contains)
+        self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
