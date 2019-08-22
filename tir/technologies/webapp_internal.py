@@ -3802,7 +3802,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
             self.restart_counter = 0
 
-        if self.config.num_exec and (len(self.log.table_rows[1:]) == len(self.log.list_of_testcases())):
+        if self.config.num_exec and stack_item == "setUpClass":
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
