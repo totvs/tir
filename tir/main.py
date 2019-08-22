@@ -853,8 +853,9 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.get_release()
         >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
         >>> if self.oHelper.get_release() >= '12.1.023':
-        >>> do something
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
         """
 
         return self.__webapp.get_release()
