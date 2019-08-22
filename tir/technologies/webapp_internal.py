@@ -4544,3 +4544,29 @@ class WebappInternal(Base):
         else:
             result = input_value
         return result
+
+    def LoopValues(self, field, input_value, error_msg):
+        '''
+        Loops through input values until unused one is found (if no error pop-up accures)
+
+        :param field: string (as in SetValue)
+        :param input_value: string (as in SetValue)
+        :param error_msg: string (as in CheckHelp)
+        :return: input_value that will be used
+        '''
+
+        def rewrite_string(string):
+            string_str = re.split(r'(\d+)(?!.*\d)', string)
+            if len(string_str) == 3:
+                return string_str[0] + str(int(string_str[1]) + 1) + string_str[2]
+            else:
+                return '{}_{}'.format(string, 1)
+
+        self.SetValue(field=field, value=input_value)
+        bool_pop_up = self.CheckHelp(error_msg, self.language.close)
+        if bool_pop_up:
+            input_value = rewrite_string(input_value)
+            result = self.LoopValues(field, input_value, error_msg)
+        else:
+            result = input_value
+        return result
