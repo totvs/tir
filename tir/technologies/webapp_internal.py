@@ -2281,7 +2281,6 @@ class WebappInternal(Base):
                 td = next(iter(current.select(f"td[id='{column_index}']")), None)
                 time.sleep(2)
                 last = current
-                scroll_down()
                 time.sleep(0.5)
                 if not self.get_single_button():
                     get_current_filtered = next(iter(get_current()), None)
@@ -2301,6 +2300,7 @@ class WebappInternal(Base):
                     else:
                         self.double_click(clicking_row_element())
                     #contents.remove(text)
+                scroll_down()
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
