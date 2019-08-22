@@ -4652,16 +4652,18 @@ class WebappInternal(Base):
     
     def get_release(self):
         """
-        [Internal]
+        Gets the current release of the Protheus.
 
-        Gets the current release of the html.
-
-        :return: The current release of the html.
-        :rtype: str
+        :return: The current release of the Protheus.
+        :type: str
+        
         Usage:
 
         >>> # Calling the method:
-        >>> self.get_release()
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> if self.oHelper.get_release() >= '12.1.023':
+        >>> do something
         """
 
         return self.log.release
