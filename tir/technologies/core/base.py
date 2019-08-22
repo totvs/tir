@@ -876,9 +876,12 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
         """
-        print(f"Setting config: {config_name} = {value}")
-        normalized_config = self.normalize_config_name(config_name)
-        setattr(self.config, normalized_config, value)
+        if 'TimeOut' in config_name:
+            print('TimeOut setting has been disabled in SetTirConfig')
+        else:
+            print(f"Setting config: {config_name} = {value}")
+            normalized_config = self.normalize_config_name(config_name)
+            setattr(self.config, normalized_config, value)
 
     def Start(self):
         """
