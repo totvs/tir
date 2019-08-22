@@ -840,6 +840,22 @@ class Webapp():
         >>> oHelper.ClickMenuPopUpItem("Label")
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click)
+
+    def get_release(self):
+        """
+        [Internal]
+
+        Gets the current release of the html.
+
+        :return: The current release of the html.
+        :rtype: str
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.get_release()
+        """
+
+        return self.__webapp.get_release()
         
 class Apw():
 

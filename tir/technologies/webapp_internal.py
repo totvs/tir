@@ -4649,3 +4649,19 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+    
+    def get_release(self):
+        """
+        [Internal]
+
+        Gets the current release of the html.
+
+        :return: The current release of the html.
+        :rtype: str
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.get_release()
+        """
+
+        return self.log.release
