@@ -1354,7 +1354,8 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
-            while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
                 self.close_modal()
 
             if ">" in self.config.routine:
@@ -1803,7 +1804,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
-
+        self.wait_blocker_ajax()
         container = self.get_current_container()
 
         if container:
