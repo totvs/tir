@@ -1782,6 +1782,7 @@ class WebappInternal(Base):
         :type attr_name: str
         :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
         :type attr_contains: str
+        
         Usage:
         >>> # Calling the method to click on scale/dial:
         >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
