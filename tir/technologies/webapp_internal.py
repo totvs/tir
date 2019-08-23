@@ -1043,86 +1043,87 @@ class WebappInternal(Base):
             if "tmultiget" in element.attrs['class'] if element.name == 'div' else None:
                 textarea = element.select("textarea")
                 if not textarea:
-                    input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    input_field = lambda : self.soup_to_selenium(element)
                 else:
                     input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
             else:
-                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                input_field = lambda : self.soup_to_selenium(element)
+            
+            if input_field:
+                valtype = "C"
+                main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
-            valtype = "C"
-            main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
+                interface_value = self.get_web_value(input_field())
+                current_value = interface_value.strip()
+                interface_value_size = len(interface_value)
+                user_value_size = len(value)
 
-            interface_value = self.get_web_value(input_field())
-            current_value = interface_value.strip()
-            interface_value_size = len(interface_value)
-            user_value_size = len(value)
+                if not input_field().is_enabled() or "disabled" in element.attrs:
+                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
-            if not input_field().is_enabled() or "disabled" in element.attrs:
-                self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
+                if element.name == "input":
+                    valtype = element.attrs["valuetype"]
 
-            if element.name == "input":
-                valtype = element.attrs["valuetype"]
+                self.scroll_to_element(input_field())
 
-            self.scroll_to_element(input_field())
-
-            try:
-                #Action for Combobox elements
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    #self.wait.until(EC.visibility_of(input_field()))
-                    self.set_element_focus(input_field())
-                    self.select_combo(element, main_value)
-                    current_value = self.get_web_value(input_field()).strip()
-                #Action for Input elements
-                else:
-                    self.wait.until(EC.visibility_of(input_field()))
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
-                    self.double_click(input_field())
-
-                    #if Character input
-                    if valtype != 'N':
+                try:
+                    #Action for Combobox elements
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
-                        self.send_keys(input_field(), Keys.HOME)
-                        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-                        input_field().send_keys(main_value)
-                    #if Number input
-                    else:
-                        tries = 0
-                        try_counter = 0
-                        while(tries < 3):
-                            self.set_element_focus(input_field())
-                            self.try_send_keys(input_field, main_value, try_counter)
-                            current_number_value = self.get_web_value(input_field())
-                            if self.remove_mask(current_number_value).strip() == main_value:
-                                break
-                            tries+=1
-                            try_counter+=1
-
-                    if user_value_size < interface_value_size:
-                        self.send_keys(input_field(), Keys.ENTER)
-
-                    if self.check_mask(input_field()):
-                        current_value = self.remove_mask(self.get_web_value(input_field()).strip())
-                        if re.findall(r"\s", current_value):
-                            current_value = re.sub(r"\s", "", current_value)
-                    else:
+                        self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
+                    #Action for Input elements
+                    else:
+                        self.wait.until(EC.visibility_of(input_field()))
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.double_click(input_field())
 
-                    if current_value != "":
-                        print(f"Current field value: {current_value}")
+                        #if Character input
+                        if valtype != 'N':
+                            self.set_element_focus(input_field())
+                            self.send_keys(input_field(), Keys.HOME)
+                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            input_field().send_keys(main_value)
+                        #if Number input
+                        else:
+                            tries = 0
+                            try_counter = 0
+                            while(tries < 3):
+                                self.set_element_focus(input_field())
+                                self.try_send_keys(input_field, main_value, try_counter)
+                                current_number_value = self.get_web_value(input_field())
+                                if self.remove_mask(current_number_value).strip() == main_value:
+                                    break
+                                tries+=1
+                                try_counter+=1
 
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    current_value = current_value[0:len(str(value))]
+                        if user_value_size < interface_value_size:
+                            self.send_keys(input_field(), Keys.ENTER)
 
-                if re.match(r"^●+$", current_value):
-                    success = len(current_value) == len(str(value).strip())
-                elif ignore_case:
-                    success = current_value.lower() == main_value.lower()
-                else:
-                    success = current_value == main_value
-            except:
-                continue
+                        if self.check_mask(input_field()):
+                            current_value = self.remove_mask(self.get_web_value(input_field()).strip())
+                            if re.findall(r"\s", current_value):
+                                current_value = re.sub(r"\s", "", current_value)
+                        else:
+                            current_value = self.get_web_value(input_field()).strip()
+
+                        if current_value != "":
+                            print(f"Current field value: {current_value}")
+
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        current_value = current_value[0:len(str(value))]
+
+                    if re.match(r"^●+$", current_value):
+                        success = len(current_value) == len(str(value).strip())
+                    elif ignore_case:
+                        success = current_value.lower() == main_value.lower()
+                    else:
+                        success = current_value == main_value
+                except:
+                    continue
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
@@ -1872,7 +1873,7 @@ class WebappInternal(Base):
                 soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 if soup_objects:
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects_filtered[0]))
+                    soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
                 else:
                     self.log_error(f"Couldn't find element {sub_item}")
@@ -1888,10 +1889,10 @@ class WebappInternal(Base):
                         self.log_error(f"Couldn't find element {sub_item}")
                     for i in range(len(soup_objects)):
                         if soup_objects[i].text == filtered_sub_itens[0]:
-                            soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[i]))
+                            soup_element = lambda : self.soup_to_selenium(soup_objects[i])
                         
                     if not soup_element:
-                        soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                        soup_element = lambda : self.soup_to_selenium(soup_objects[0])
 
                     self.move_to_element(soup_element())
                     filtered_sub_itens.remove(filtered_sub_itens[0])
