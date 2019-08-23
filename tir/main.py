@@ -230,14 +230,12 @@ class Webapp():
     def ClickComboBox(self, position=1, label_comboBox=""):
         """
         Clicks on a Label in box on the screen.
-
         :param position: Position of text in the combobox, that need to be pressed
         :type position: int
         :param label_comboBox: Arguement for detecting combobox by default value in it
         :type label_comboBox: str
-
+        
         Usage:
-
         >>> # Call the method:
         >>> oHelper.ClickComboBox (position=2, label_comboBox = "Все блокировки")
         """
@@ -505,7 +503,6 @@ class Webapp():
     def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
         Method that clicks on a scale on the screen.
-
         :param head_node: Tag container for searching out the elements.
         :type head_node: str
         :param end_index:  - a finite number of fragments of the scale to fill
@@ -518,7 +515,6 @@ class Webapp():
         :type attr_contains: str
 
         Usage:
-
         >>> # Calling the method to click on scale/dial:
         >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
@@ -527,16 +523,14 @@ class Webapp():
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
-
         :param button: Button to be clicked.
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-
+        
         Usage:
-
         >>> # Calling the method to click on a regular button:
         >>> oHelper.SetButton("Add")
         >>> #-------------------------------------------------
