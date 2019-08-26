@@ -809,21 +809,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
-
+        endtime = time.time() + self.config.time_out
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
         current_value = self.get_element_value(sel_browse_input())
 
-        while (current_value.rstrip() != term.strip()):
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
-            self.click(sel_browse_input())
-            self.set_element_focus(sel_browse_input())
-            self.send_keys(sel_browse_input(), Keys.DELETE)
-            sel_browse_input().clear()
-            self.set_element_focus(sel_browse_input())
-            sel_browse_input().send_keys(term.strip())
-            current_value = self.get_element_value(sel_browse_input())
+        while (time.time() < endtime and current_value.rstrip() != term.strip()):
+            try:
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
+                self.click(sel_browse_input())
+                self.set_element_focus(sel_browse_input())
+                self.send_keys(sel_browse_input(), Keys.DELETE)
+                sel_browse_input().clear()
+                self.set_element_focus(sel_browse_input())
+                sel_browse_input().send_keys(term.strip())
+                current_value = self.get_element_value(sel_browse_input())
+            except StaleElementReferenceException:
+                    self.get_search_browse_elements()
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker_ajax()
         self.double_click(sel_browse_icon())
@@ -3815,7 +3818,10 @@ class WebappInternal(Base):
         if self.config.num_exec and stack_item == "setUpClass":
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
-        self.assertTrue(False, log_message)
+        if len(self.log.table_rows[1:]) == len(self.log.list_of_testcases()):
+            self.TearDown() 
+        else:
+            self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
