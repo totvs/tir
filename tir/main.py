@@ -502,30 +502,29 @@ class Webapp():
         """
         return self.__webapp.FindButton (csource, cposition)
 
-    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+    def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
         Method that clicks on a scale on the screen.
-
-        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :param head_node: Tag container for searching out the elements.
         :type head_node: str
-        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
-        :type sub_item: str
-        :param index: Quantity of elements <id> for iteration. - **Default:** 1
-        :type index: int
-        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :param end_index:  - a finite number of fragments of the scale to fill
+        :type end_index: int
+        :param start_index: Starting index of the first element. - **Default:** 0
+        :type start_index: int
+        :param attr_name: Unique attribute name to search all scale indices- **Default:** "" (empty string)
         :type attr_name: str
+        :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
+        :type attr_contains: str
 
         Usage:
-
         >>> # Calling the method to click on scale/dial:
-        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
-        self.__webapp.SetDial (end_index, head_node, start_index, attr_name, attr_contains)
+        self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
-
         :param button: Button to be clicked.
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)

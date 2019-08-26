@@ -1331,7 +1331,8 @@ class WebappInternal(Base):
 
         Test function, only for print that calling is OK
         """
-        print ("function print_in, prints OK")
+        print ("Function print_in, class WebappInternal, OK")
+
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -1716,14 +1717,12 @@ class WebappInternal(Base):
     def FindButton(self, csource, cposition):
         """
         Method that gets string label of button from [name_module.tres]
-
         :param csource: name of the module in lowercase
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
         :type cposition: str
-
+        
         Usage:
-
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
@@ -1770,25 +1769,23 @@ class WebappInternal(Base):
 
         return c_ret
 
-    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+    def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
-        $x("//td[@id='11'][contains(concat(@class, ''), 'worktime-block ui-selectee')]")     <- orig xpath (need to be between ("expression generates"))
-        
         Method that clicks on a scale on the screen.
-
-        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :param head_node: Tag container for searching out the elements.
         :type head_node: str
-        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
-        :type sub_item: str
-        :param index: Quantity of elements <id> for iteration. - **Default:** 1
-        :type index: int
-        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :param end_index:  - a finite number of fragments of the scale to fill
+        :type end_index: int
+        :param start_index: Starting index of the first element. - **Default:** 0
+        :type start_index: int
+        :param attr_name: Unique attribute name to search all scale indices- **Default:** "" (empty string)
         :type attr_name: str
-
+        :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
+        :type attr_contains: str
+        
         Usage:
-
         >>> # Calling the method to click on scale/dial:
-        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
         if attr_name:
             mass_WebElement = []   # storage for webelements
@@ -1801,8 +1798,7 @@ class WebappInternal(Base):
                 self.click (mass_WebElement[z])
 
         else:
-            print ("Error, attr_name not set up!")
-            #self.log_error(f"Parameter")
+            self.log_error ("Error, def SetDial(), attr_name not set up!")
 
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
