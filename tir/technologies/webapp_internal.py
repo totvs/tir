@@ -2281,7 +2281,7 @@ class WebappInternal(Base):
             contents = content_list[:]
             container = self.get_current_container()
             id_container = next(iter(container.get_attribute_list('id')), None)
-            while(time.time() < endtime and last != current and contents):
+            while(time.time() < endtime and last != current or contents):
                 if text in contents:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
@@ -2294,18 +2294,19 @@ class WebappInternal(Base):
                     else:
                         self.double_click(clicking_row_element())
                     contents.remove(text)
-                time.sleep(2)
-                last = current
-                if text not in contents:
-                    scroll_down()
-                time.sleep(0.5)
-                get_current_filtered = next(iter(get_current()),None)
-                current = get_current_filtered
-                time.sleep(0.5)
-                td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                text = td.text.strip() if td else ""
-                soup = self.get_current_DOM()
-                containers = soup.select(".tmodaldialog")
+                if contents:
+                    time.sleep(2)
+                    last = current
+                    if text not in contents and text != '':
+                        scroll_down()
+                    time.sleep(0.5)
+                    get_current_filtered = next(iter(get_current()),None)
+                    current = get_current_filtered
+                    time.sleep(0.5)
+                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                    text = td.text.strip() if td else ""
+                    soup = self.get_current_DOM()
+                    containers = soup.select(".tmodaldialog")
                 if len(containers) > 1:
                     containers = self.zindex_sort(containers, True)
                     if containers[0].get_attribute_list('id') != id_container and containers[1].get_attribute_list('id') == id_container:
