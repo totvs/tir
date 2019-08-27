@@ -110,7 +110,7 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if len(self.table_rows[1:]) == len(testcases) or self.get_testcase_stack() == "setUpClass" and self.get_testcase_stack() not in self.csv_log:
+            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass")) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])

@@ -1758,6 +1758,8 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
+        except AssertionError as error:
+            raise error
         except Exception as error:
             print(error)
             self.restart_counter += 1
