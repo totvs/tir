@@ -3820,10 +3820,7 @@ class WebappInternal(Base):
         if self.config.num_exec and stack_item == "setUpClass":
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
-        if len(self.log.table_rows[1:]) == len(self.log.list_of_testcases()):
-            self.TearDown() 
-        else:
-            self.assertTrue(False, log_message)
+        self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
