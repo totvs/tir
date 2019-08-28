@@ -913,7 +913,9 @@ class WebappInternal(Base):
                 self.log_error("Element wasn't found.")
 
             return elem
-       
+            
+        except AssertionError as error:
+            raise error
         except Exception as error:
             print(error)
             self.log_error(str(error))
@@ -2284,9 +2286,7 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
-            container = self.get_current_container()
-            id_container = next(iter(container.get_attribute_list('id')), None)
-            while(time.time() < endtime and last != current or contents):
+            while(last != current or contents):
                 if text in contents:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
@@ -2310,12 +2310,11 @@ class WebappInternal(Base):
                     time.sleep(0.5)
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
                     text = td.text.strip() if td else ""
-                    soup = self.get_current_DOM()
-                    containers = soup.select(".tmodaldialog")
-                if len(containers) > 1:
-                    containers = self.zindex_sort(containers, True)
-                    if containers[0].get_attribute_list('id') != id_container and containers[1].get_attribute_list('id') == id_container:
-                        break
+                if time.time() > endtime:
+                    self.log_error("Couldn't click in the box")
+                if not contents:
+                    break
+
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
