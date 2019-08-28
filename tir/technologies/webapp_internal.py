@@ -4405,12 +4405,10 @@ class WebappInternal(Base):
             
             self.Finish()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
-            self.driver.close()
-        else:
-            self.driver.close()
             
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
+        self.driver.close()
             
     def containers_filter(self, containers):
         """
