@@ -1077,6 +1077,7 @@ class WebappInternal(Base):
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -1088,6 +1089,7 @@ class WebappInternal(Base):
                         #if Character input
                         if valtype != 'N':
                             self.set_element_focus(input_field())
+                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             input_field().send_keys(main_value)
@@ -1097,6 +1099,7 @@ class WebappInternal(Base):
                             try_counter = 0
                             while(tries < 3):
                                 self.set_element_focus(input_field())
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
