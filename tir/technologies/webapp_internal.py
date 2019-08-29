@@ -2878,7 +2878,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                        while(self.remove_mask(current_value).strip().replace(',\'','') != field_one.replace(',','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2890,7 +2890,12 @@ class WebappInternal(Base):
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                # ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                ActionChains(self.driver).move_to_element(selenium_column()).perform()
+                                # self.set_element_focus(selenium_column())
+                                ActionChains(self.driver).key_up(Keys.ENTER).perform()
+                                ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                                # ActionChains(self.driver).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
                                 if(field[1] == True):
                                     field_one = ''
