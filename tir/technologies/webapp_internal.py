@@ -1092,6 +1092,7 @@ class WebappInternal(Base):
                             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            time.sleep(0.1)
                             input_field().send_keys(main_value)
                         #if Number input
                         else:
