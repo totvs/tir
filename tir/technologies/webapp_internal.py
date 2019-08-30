@@ -1841,7 +1841,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog")
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
 
@@ -1851,7 +1851,7 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
                 self.scroll_to_element(element)
                 time.sleep(2)
@@ -1881,7 +1881,7 @@ class WebappInternal(Base):
             # if button != self.language.other_actions:
 
             if sub_item and ',' not in sub_item:
-                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                 soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 if soup_objects:
@@ -1896,7 +1896,7 @@ class WebappInternal(Base):
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
                 while(len(filtered_sub_itens) > 0):
-                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                     if not soup_objects:
                         self.log_error(f"Couldn't find element {sub_item}")
                     for i in range(len(soup_objects)):
