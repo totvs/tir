@@ -3088,6 +3088,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
+        columns = None
         field_to_label = {}
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
