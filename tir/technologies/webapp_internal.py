@@ -1764,7 +1764,7 @@ class WebappInternal(Base):
                     if nend < 0:
                         c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
                     else:
-                        c_ret = str_original[nstart+12 : nend].replace(" ", "")
+                        c_ret = str_original[nstart+12 : nend].strip()  # FIX, (30.08 -> .replace(" ", ""))
 
                 p.close()
 
@@ -1830,7 +1830,7 @@ class WebappInternal(Base):
         if container:
             id_container = container.attrs['id']
 
-        print(f"Clicking on {button}")
+        print("Clicking on {}".format(button))
 
         try:
             soup_element  = ""
@@ -2697,8 +2697,8 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        if row > 0:     #test
-            row = 0
+        # if row > 0:     #test
+        #     row = 0
 
         self.grid_input.append([column, value, grid_number, new, row])
 
@@ -2882,6 +2882,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
+                        # FIX, quotes (\') error
                         while(self.remove_mask(current_value).strip().replace(',\'','') != field_one.replace(',\'','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
@@ -2898,6 +2899,7 @@ class WebappInternal(Base):
                                 #ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 #ActionChains(self.driver).move_to_element(selenium_column()).perform()
                                 
+                                # FIX, specific ActionChains actions for Browser (Chrome+Firefox)
                                 ActionChains(self.driver).move_to_element (selenium_column()).perform()
                                 
                                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
@@ -3276,6 +3278,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
+        # encoding latin-1 -> utf-8
         data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
