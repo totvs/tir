@@ -5,6 +5,7 @@ import inspect
 import os
 import random
 import uuid
+import codecs
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -2696,6 +2697,9 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
+        if row > 0:     #test
+            row = 0
+
         self.grid_input.append([column, value, grid_number, new, row])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
@@ -2878,7 +2882,7 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip().replace(',\'','') != field_one.replace(',','')):
+                        while(self.remove_mask(current_value).strip().replace(',\'','') != field_one.replace(',\'','')):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
@@ -2890,11 +2894,16 @@ class WebappInternal(Base):
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                                # ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
-                                ActionChains(self.driver).move_to_element(selenium_column()).perform()
-                                # self.set_element_focus(selenium_column())
-                                ActionChains(self.driver).key_up(Keys.ENTER).perform()
+                                
+                                #ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                #ActionChains(self.driver).move_to_element(selenium_column()).perform()
+                                
+                                ActionChains(self.driver).move_to_element (selenium_column()).perform()
+                                
                                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                                ActionChains(self.driver).pause("1")
+                                ActionChains(self.driver).key_up(Keys.ENTER)
+                                ActionChains(self.driver).perform()
                                 # ActionChains(self.driver).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
                                 if(field[1] == True):
@@ -3267,7 +3276,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:

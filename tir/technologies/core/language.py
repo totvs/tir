@@ -18,6 +18,7 @@ class LanguagePack:
         self.edit = languagepack["Edit"]
         self.editar = languagepack["Editar"]
         self.cancel = languagepack["Cancel"]
+        self.Set = languagepack["Set"]
         self.view = languagepack["View"]
         self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
@@ -31,7 +32,6 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
-        self.OK = languagepack["OK"]
         self.OkeyWordH = languagepack["OkeyWordH"]
         self.OkeyWordL = languagepack["OkeyWordL"]
         self.copy = languagepack["Copy"]
@@ -253,7 +253,8 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Add": "Добавить",
+            "Set": "Вставить",
             "Delete": "Удалить",
             "Edit": "редактировать",
             "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
@@ -275,7 +276,6 @@ class LanguagePack:
             #"Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
-            "OK": "Да",
             "OkeyWordH" : "OK",
             "OkeyWordL" : "Ok",     # test add
             "Copy": "Copy",
