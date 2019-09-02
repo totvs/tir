@@ -25,7 +25,8 @@ class NumExec:
 
             status = json_data["status"]
 
-            time.sleep(1)
+            if status != 200:
+                time.sleep(12)
 
         if status != 200:
             with open(f"E:\\smart_test\\logs_tir\\{time.time()}_json_data_response.txt", "w") as json_log:
