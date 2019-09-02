@@ -129,7 +129,7 @@ class Base(unittest.TestCase):
         else:
             self.assertFalse(expected, msg)
 
-    def click(self, element, click_type=enum.ClickType.JS):
+    def click(self, element, click_type=enum.ClickType.JS, right_click=False):
         """
         [Internal]
 
@@ -143,27 +143,38 @@ class Base(unittest.TestCase):
         :type element: Selenium object
         :param click_type: ClickType enum. - **Default:** enum.ClickType.JS
         :type click_type: enum.ClickType
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
 
         Usage:
 
         >>> #Defining the element:
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
-        >>> self.click(element(), type=enum.ClickType.JS)
-        """
-        try:
-            self.scroll_to_element(element)
-            if click_type == enum.ClickType.JS:
-                self.driver.execute_script("arguments[0].click()", element)
-            elif click_type == enum.ClickType.SELENIUM:
-                element.click()
-            elif click_type == enum.ClickType.ACTIONCHAINS:
-                ActionChains(self.driver).move_to_element(element).click().perform()
-        except StaleElementReferenceException:
-            print("********Element Stale click*********")
-            pass
-        except Exception as error:
-            self.log_error(str(error))
+        >>> self.click(element(), click_type=enum.ClickType.JS)
+        """        
+        if right_click:
+            try:
+                ActionChains(self.driver).context_click(element).click().perform()
+            except StaleElementReferenceException:
+                print("********Element Stale click*********")
+                pass
+            except Exception as error:
+                self.log_error(str(error))
+        else:
+            try:
+                self.scroll_to_element(element)
+                if click_type == enum.ClickType.JS:
+                    self.driver.execute_script("arguments[0].click()", element)
+                elif click_type == enum.ClickType.SELENIUM:
+                    element.click()
+                elif click_type == enum.ClickType.ACTIONCHAINS:
+                    ActionChains(self.driver).move_to_element(element).click().perform()
+            except StaleElementReferenceException:
+                print("********Element Stale click*********")
+                pass
+            except Exception as error:
+                self.log_error(str(error))
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -865,9 +876,12 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
         """
-        print(f"Setting config: {config_name} = {value}")
-        normalized_config = self.normalize_config_name(config_name)
-        setattr(self.config, normalized_config, value)
+        if 'TimeOut' in config_name:
+            print('TimeOut setting has been disabled in SetTirConfig')
+        else:
+            print(f"Setting config: {config_name} = {value}")
+            normalized_config = self.normalize_config_name(config_name)
+            setattr(self.config, normalized_config, value)
 
     def Start(self):
         """
