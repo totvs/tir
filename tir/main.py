@@ -765,7 +765,7 @@ class Webapp():
         """
         self.__webapp.WaitShow(string)
 
-    def ClickTree(self, treepath, right_click=False, position=None):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 

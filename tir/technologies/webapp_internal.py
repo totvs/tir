@@ -4240,7 +4240,7 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def ClickTree(self, treepath, right_click=False, position=None):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 
@@ -4265,6 +4265,8 @@ class WebappInternal(Base):
         """
 
         hierarchy=None
+
+        position -= 1
 
         labels = list(map(str.strip, treepath.split(">")))
 
@@ -4295,8 +4297,8 @@ class WebappInternal(Base):
                 else:
                     elements = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
 
-                if hierarchy:
-                    elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+                    if hierarchy:
+                        elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
 
                 if not elements:
                     self.log_error("Couldn't find elements.")
@@ -4331,9 +4333,10 @@ class WebappInternal(Base):
                                     try_counter += 1
                                 except:                                
                                     pass
-
-            treenode_selected = self.treenode_selected(label_filtered)
-            hierarchy = treenode_selected.attrs['hierarchy']
+            
+            if not last_item:
+                treenode_selected = self.treenode_selected(label_filtered)
+                hierarchy = treenode_selected.attrs['hierarchy']
                             
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
