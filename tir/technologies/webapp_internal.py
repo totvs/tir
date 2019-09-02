@@ -4241,26 +4241,106 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def ClickTree(self, treepath, right_click = False):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 
         :param treepath: String that contains the access path for the item separate by ">" .
         :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
-        """ 
+        >>> # Right Click example:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
+        """
+        self.click_tree(treepath, right_click, position)
+        
+    def click_tree(self, treepath, right_click, position):
+        """
+        [Internal]
+        Take treenode and label to filter and click in the toggler element to expand the TreeView.
+        """
+
+        hierarchy=None
+
+        position -= 1
 
         labels = list(map(str.strip, treepath.split(">")))
 
-        for label in labels:
+        for row, label in enumerate(labels):
 
-            last_item = True if labels.index(label) == len(labels)-1 else False
+            last_item = True if row == len(labels)-1 else False
 
-            self.click_tree(label, last_item, right_click)
+            success = False
+
+            try_counter = 0
+
+            label_filtered = label.lower().strip()        
+
+            endtime = time.time() + self.config.time_out
+
+            while((time.time() < endtime) and (try_counter < 3 and not success)):
+
+                tree_node = self.find_tree_bs(label_filtered)
+
+                tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+
+                elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))
+
+                if position:
+                    elements = elements[position] if self.soup_to_selenium(elements[position]).is_displayed else None
+                    if hierarchy:
+                         elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
+                else:
+                    elements = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+                    if hierarchy:
+                        elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+
+                if not elements:
+                    self.log_error("Couldn't find elements.")
+
+                for element in elements:
+                    if not success:
+                        element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+
+                        if "data" in element_class.get_attribute_list("class"):
+                            element_class =  element_class.select("img, span")
+
+                        for element_class_item in element_class:
+                        
+                            if "expanded" not in element_class_item.attrs['class'] and not success:
+                                element_click = lambda: self.soup_to_selenium(element_class_item)
+                                
+                                try:
+                                    if last_item:
+                                        self.click(element_click(), enum.ClickType.SELENIUM)
+                                        if self.check_toggler(label_filtered):
+                                            success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                            if success and right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                        else:
+                                            if right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                            success = self.clicktree_status_selected(label_filtered)
+                                    else:
+                                        element_click().click()
+                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                    
+                                    try_counter += 1
+                                except:                                
+                                    pass
+            
+            if not last_item:
+                treenode_selected = self.treenode_selected(label_filtered)
+                hierarchy = treenode_selected.attrs['hierarchy']
+                            
+        if not success:
+            self.log_error(f"Couldn't click on tree element {label}.")
 
     def find_tree_bs(self, label):
         """
@@ -4285,65 +4365,6 @@ class WebappInternal(Base):
             self.log_error("Couldn't find tree element.")
 
         return(tree_node)
-
-    def click_tree(self, label, last_item, right_click):
-        """
-        [Internal]
-        Take treenode and label to filter and click in the toggler element to expand the TreeView.
-        """
-
-        success = False
-
-        try_counter = 0
-
-        label_filtered = label.lower().strip()        
-
-        endtime = time.time() + self.config.time_out
-
-        while((time.time() < endtime) and (try_counter < 3 and not success)):
-
-            tree_node = self.find_tree_bs(label_filtered)
-
-            tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
-
-            elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
-
-            if not elements:
-                self.log_error("Couldn't find elements.")
-
-            for element in elements:
-                if not success:
-                    element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
-
-                    if "data" in element_class.get_attribute_list("class"):
-                        element_class =  element_class.select("img, span")
-
-                    for element_class_item in element_class:
-                    
-                        if "expanded" not in element_class_item.attrs['class'] and not success:
-                            element_click = lambda: self.soup_to_selenium(element_class_item)
-                            
-                            try:
-                                if last_item:
-                                    self.click(element_click(), enum.ClickType.SELENIUM)
-                                    if self.check_toggler(label_filtered):
-                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                        if success and right_click:
-                                            self.click(element_click(), right_click=right_click)
-                                    else:
-                                        if right_click:
-                                            self.click(element_click(), right_click=right_click)
-                                        success = self.clicktree_status_selected(label_filtered)
-                                else:
-                                    element_click().click()
-                                    success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                
-                                try_counter += 1
-                            except:                                
-                                pass
-                        
-        if not success:
-            self.log_error(f"Couldn't click on tree element {label}.")
     
     def clicktree_status_selected(self, label_filtered, check_expanded=False):
         """
@@ -4360,18 +4381,33 @@ class WebappInternal(Base):
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
         if not check_expanded:
-            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
         else:
-            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
             if tree_selected.find_all_next("span"):
                 if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
-                    return "expanded" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+                    return "expanded" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
             else:
                 return False
     
     def check_toggler(self, label_filtered):
         """
         [Internal]
+        """
+        tree_selected = self.treenode_selected(label_filtered)
+        
+        if tree_selected.find_all_next("span"):
+            try:
+                return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+            except:
+                return False
+        else:
+            return False
+
+    def treenode_selected(self, label_filtered):
+        """
+        [Internal]
+        Returns a tree node selected by label
         """
         container = self.get_current_container()
 
@@ -4383,15 +4419,7 @@ class WebappInternal(Base):
 
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
-        tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
-        
-        if tree_selected.find_all_next("span"):
-            try:
-                return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
-            except:
-                return False
-        else:
-            return False
+        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
                 
     def TearDown(self):
         """
