@@ -809,21 +809,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
-
+        endtime = time.time() + self.config.time_out
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
         current_value = self.get_element_value(sel_browse_input())
 
-        while (current_value.rstrip() != term.strip()):
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
-            self.click(sel_browse_input())
-            self.set_element_focus(sel_browse_input())
-            self.send_keys(sel_browse_input(), Keys.DELETE)
-            sel_browse_input().clear()
-            self.set_element_focus(sel_browse_input())
-            sel_browse_input().send_keys(term.strip())
-            current_value = self.get_element_value(sel_browse_input())
+        while (time.time() < endtime and current_value.rstrip() != term.strip()):
+            try:
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
+                self.click(sel_browse_input())
+                self.set_element_focus(sel_browse_input())
+                self.send_keys(sel_browse_input(), Keys.DELETE)
+                sel_browse_input().clear()
+                self.set_element_focus(sel_browse_input())
+                sel_browse_input().send_keys(term.strip())
+                current_value = self.get_element_value(sel_browse_input())
+            except StaleElementReferenceException:
+                    self.get_search_browse_elements()
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker_ajax()
         self.double_click(sel_browse_icon())
@@ -910,7 +913,9 @@ class WebappInternal(Base):
                 self.log_error("Element wasn't found.")
 
             return elem
-       
+            
+        except AssertionError as error:
+            raise error
         except Exception as error:
             print(error)
             self.log_error(str(error))
@@ -1072,6 +1077,7 @@ class WebappInternal(Base):
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -1083,8 +1089,10 @@ class WebappInternal(Base):
                         #if Character input
                         if valtype != 'N':
                             self.set_element_focus(input_field())
+                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            time.sleep(0.1)
                             input_field().send_keys(main_value)
                         #if Number input
                         else:
@@ -1092,6 +1100,7 @@ class WebappInternal(Base):
                             try_counter = 0
                             while(tries < 3):
                                 self.set_element_focus(input_field())
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
@@ -1354,7 +1363,8 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
-            while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
                 self.close_modal()
 
             if ">" in self.config.routine:
@@ -1713,6 +1723,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
+        endtime = time.time() + self.config.time_out
         if save_input:
             self.config.routine = menu_itens
 
@@ -1733,11 +1744,10 @@ class WebappInternal(Base):
                 self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
                 self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                 subMenuElements = menu.select(".tmenuitem")
-                endTime =   time.time() + 90
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(".tmenuitem")
-                    if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                    if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
                 submenu = ""
@@ -1754,6 +1764,8 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
+        except AssertionError as error:
+            raise error
         except Exception as error:
             print(error)
             self.restart_counter += 1
@@ -1803,7 +1815,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
-
+        self.wait_blocker_ajax()
         container = self.get_current_container()
 
         if container:
@@ -1829,7 +1841,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog")
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
 
@@ -1839,7 +1851,7 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
                 self.scroll_to_element(element)
                 time.sleep(2)
@@ -1864,12 +1876,13 @@ class WebappInternal(Base):
 
             if soup_element:
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
                 self.click(soup_element())
 
             # if button != self.language.other_actions:
 
             if sub_item and ',' not in sub_item:
-                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                 soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 if soup_objects:
@@ -1884,7 +1897,7 @@ class WebappInternal(Base):
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
                 while(len(filtered_sub_itens) > 0):
-                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
+                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                     if not soup_objects:
                         self.log_error(f"Couldn't find element {sub_item}")
                     for i in range(len(soup_objects)):
@@ -2229,7 +2242,7 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         text = ''
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out +30
         grid_number -= 1
         if content_list:
             self.wait_element_timeout(field)
@@ -2278,18 +2291,8 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
-            while(time.time() < endtime and text != content_list[0]):
-                td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                time.sleep(2)
-                last = current
-                time.sleep(0.5)
-                if not self.get_single_button():
-                    get_current_filtered = next(iter(get_current()), None)
-                    current = get_current_filtered
-                current = next(iter(get_current()), None)
-                time.sleep(0.5)
-                text = td.text.strip() if td else ""
-                if text == content_list[0]:
+            while(last != current or contents):
+                if text in contents:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
                         clicking_row_element_bs = current
@@ -2300,8 +2303,23 @@ class WebappInternal(Base):
                         self.send_keys(clicking_row_element(),Keys.ENTER)
                     else:
                         self.double_click(clicking_row_element())
-                    #contents.remove(text)
-                scroll_down()
+                    contents.remove(text)
+                if contents:
+                    time.sleep(2)
+                    last = current
+                    if text not in contents and text != '':
+                        scroll_down()
+                    time.sleep(0.5)
+                    get_current_filtered = next(iter(get_current()),None)
+                    current = get_current_filtered
+                    time.sleep(0.5)
+                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                    text = td.text.strip() if td else ""
+                if time.time() > endtime:
+                    self.log_error("Couldn't click in the box")
+                if not contents:
+                    break
+
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
@@ -3071,6 +3089,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
+        columns = None
         field_to_label = {}
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -3179,7 +3198,7 @@ class WebappInternal(Base):
                     ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
                     endtime = time.time() + self.config.time_out
-                    while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1) and time.time() < endtime):
+                    while (time.time() < endtime and not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1))):
                         if self.config.debug_log:
                             print("Waiting for the new line to show")
                         time.sleep(1)
@@ -4222,26 +4241,106 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def ClickTree(self, treepath, right_click = False):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 
         :param treepath: String that contains the access path for the item separate by ">" .
         :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
-        """ 
+        >>> # Right Click example:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
+        """
+        self.click_tree(treepath, right_click, position)
+        
+    def click_tree(self, treepath, right_click, position):
+        """
+        [Internal]
+        Take treenode and label to filter and click in the toggler element to expand the TreeView.
+        """
+
+        hierarchy=None
+
+        position -= 1
 
         labels = list(map(str.strip, treepath.split(">")))
 
-        for label in labels:
+        for row, label in enumerate(labels):
 
-            last_item = True if labels.index(label) == len(labels)-1 else False
+            last_item = True if row == len(labels)-1 else False
 
-            self.click_tree(label, last_item, right_click)
+            success = False
+
+            try_counter = 0
+
+            label_filtered = label.lower().strip()        
+
+            endtime = time.time() + self.config.time_out
+
+            while((time.time() < endtime) and (try_counter < 3 and not success)):
+
+                tree_node = self.find_tree_bs(label_filtered)
+
+                tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+
+                elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))
+
+                if position:
+                    elements = elements[position] if self.soup_to_selenium(elements[position]).is_displayed else None
+                    if hierarchy:
+                         elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
+                else:
+                    elements = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+                    if hierarchy:
+                        elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+
+                if not elements:
+                    self.log_error("Couldn't find elements.")
+
+                for element in elements:
+                    if not success:
+                        element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+
+                        if "data" in element_class.get_attribute_list("class"):
+                            element_class =  element_class.select("img, span")
+
+                        for element_class_item in element_class:
+                        
+                            if "expanded" not in element_class_item.attrs['class'] and not success:
+                                element_click = lambda: self.soup_to_selenium(element_class_item)
+                                
+                                try:
+                                    if last_item:
+                                        self.click(element_click(), enum.ClickType.SELENIUM)
+                                        if self.check_toggler(label_filtered):
+                                            success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                            if success and right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                        else:
+                                            if right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                            success = self.clicktree_status_selected(label_filtered)
+                                    else:
+                                        element_click().click()
+                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                    
+                                    try_counter += 1
+                                except:                                
+                                    pass
+            
+            if not last_item:
+                treenode_selected = self.treenode_selected(label_filtered)
+                hierarchy = treenode_selected.attrs['hierarchy']
+                            
+        if not success:
+            self.log_error(f"Couldn't click on tree element {label}.")
 
     def find_tree_bs(self, label):
         """
@@ -4266,65 +4365,6 @@ class WebappInternal(Base):
             self.log_error("Couldn't find tree element.")
 
         return(tree_node)
-
-    def click_tree(self, label, last_item, right_click):
-        """
-        [Internal]
-        Take treenode and label to filter and click in the toggler element to expand the TreeView.
-        """
-
-        success = False
-
-        try_counter = 0
-
-        label_filtered = label.lower().strip()        
-
-        endtime = time.time() + self.config.time_out
-
-        while((time.time() < endtime) and (try_counter < 3 and not success)):
-
-            tree_node = self.find_tree_bs(label_filtered)
-
-            tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
-
-            elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
-
-            if not elements:
-                self.log_error("Couldn't find elements.")
-
-            for element in elements:
-                if not success:
-                    element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
-
-                    if "data" in element_class.get_attribute_list("class"):
-                        element_class =  element_class.select("img, span")
-
-                    for element_class_item in element_class:
-                    
-                        if "expanded" not in element_class_item.attrs['class'] and not success:
-                            element_click = lambda: self.soup_to_selenium(element_class_item)
-                            
-                            try:
-                                if last_item:
-                                    self.click(element_click(), enum.ClickType.SELENIUM)
-                                    if self.check_toggler(label_filtered):
-                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                        if success and right_click:
-                                            self.click(element_click(), right_click=right_click)
-                                    else:
-                                        if right_click:
-                                            self.click(element_click(), right_click=right_click)
-                                        success = self.clicktree_status_selected(label_filtered)
-                                else:
-                                    element_click().click()
-                                    success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                
-                                try_counter += 1
-                            except:                                
-                                pass
-                        
-        if not success:
-            self.log_error(f"Couldn't click on tree element {label}.")
     
     def clicktree_status_selected(self, label_filtered, check_expanded=False):
         """
@@ -4341,18 +4381,33 @@ class WebappInternal(Base):
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
         if not check_expanded:
-            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
         else:
-            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
             if tree_selected.find_all_next("span"):
                 if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
-                    return "expanded" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+                    return "expanded" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
             else:
                 return False
     
     def check_toggler(self, label_filtered):
         """
         [Internal]
+        """
+        tree_selected = self.treenode_selected(label_filtered)
+        
+        if tree_selected.find_all_next("span"):
+            try:
+                return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+            except:
+                return False
+        else:
+            return False
+
+    def treenode_selected(self, label_filtered):
+        """
+        [Internal]
+        Returns a tree node selected by label
         """
         container = self.get_current_container()
 
@@ -4364,15 +4419,7 @@ class WebappInternal(Base):
 
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
-        tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
-        
-        if tree_selected.find_all_next("span"):
-            try:
-                return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
-            except:
-                return False
-        else:
-            return False
+        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
                 
     def TearDown(self):
         """
@@ -4392,12 +4439,10 @@ class WebappInternal(Base):
             
             self.Finish()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
-            self.driver.close()
-        else:
-            self.driver.close()
             
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
+        self.driver.close()
             
     def containers_filter(self, containers):
         """
