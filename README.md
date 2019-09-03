@@ -44,7 +44,7 @@ OBS: Our installation wizard will install our package in the current active Pyth
 
 ### 2. via Terminal
 
-You can install TIR via terminal. Make sure your Python is installed and run this command:
+You can install TIR via terminal. Make sure your Python and Git is installed and run this command:
 
 ```shell
 pip install git+https://github.com/totvs/tir.git --upgrade
