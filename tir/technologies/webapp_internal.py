@@ -4291,6 +4291,9 @@ class WebappInternal(Base):
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))
 
+                if not elements:
+                    self.log_error("Couldn't find elements.")
+
                 if position:
                     elements = elements[position] if self.soup_to_selenium(elements[position]).is_displayed else None
                     if hierarchy:
@@ -4300,9 +4303,6 @@ class WebappInternal(Base):
 
                     if hierarchy:
                         elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
-
-                if not elements:
-                    self.log_error("Couldn't find elements.")
 
                 for element in elements:
                     if not success:
