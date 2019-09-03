@@ -1876,6 +1876,7 @@ class WebappInternal(Base):
 
             if soup_element:
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.set_element_focus(soup_element())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
                 self.click(soup_element())
 
