@@ -501,21 +501,21 @@ class Webapp():
         """
         return self.__webapp.Randomex (rand_val)
 
-    def FindButton (self, csource, cposition):
+    def FindButton (self, csource, cposition, flag=False):
         """
         Method that gets string label of button from [name_module.tres]
-
+        :param flag: flag that toggles FindButton to search in all tres file [tres25.csv] or in tres folder with all tres's
+        :type flag: int
         :param csource: name of the module in lowercase
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
         :type cposition: str
-
+        
         Usage:
-
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
-        return self.__webapp.FindButton (csource, cposition)
+        return self.__webapp.FindButton (csource, cposition, flag)
 
     def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
@@ -909,8 +909,6 @@ class Webapp():
         :param self: Instance of Webapp class
         :type self: instance
         """
-        inst_1 = self.oHelper.GiveMeAccess()
-        inst_1.print_in()                        #calling private method which isn't initialized in main.py directly
         x = self.__webapp                       # object model here, x is link to instance
         return x
 

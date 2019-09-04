@@ -1841,9 +1841,11 @@ class WebappInternal(Base):
             return z
 
 
-    def FindButton(self, csource, cposition):
+    def FindButton(self, csource, cposition, flag):
         """
         Method that gets string label of button from [name_module.tres]
+        :param flag: flag that toggles FindButton to search in all tres file [tres25.csv] or in tres folder with all tres's
+        :type flag: int
         :param csource: name of the module in lowercase
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
@@ -1870,47 +1872,58 @@ class WebappInternal(Base):
                 if (os.path.exists(path2)):                                         # if exists orig
                     with open(path2, "r", encoding='cp1251') as z:
                         str_1251 = z.read()
-                        # z.close() с менеджером контекста не нужен
+                        z.close()
 
                     with open(path_encoding, "w+", encoding='utf-8') as x:
                         x.write(str_1251)
-                        # x.close() с менеджером контекста не нужен
+                        x.close()
                         existsfile = 1
                 else:
                     existsfile = 0
                     print ("\nNo tres file for this test\n")
             else:
-                existsfile = 2
-
+                existsfile = 2                  
+        
             if (existsfile):
                 with codecs.open (path_encoding, 'r','utf-8') as p:
                     str_original = p.read()
                     nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
 
-                existsfile = 0
-                print ("\nNo tres file for this test\n")
-        else:
-            existsfile = 2                  
-        
-        if (existsfile):
-            with codecs.open (path_encoding, 'r','utf-8') as p:
-                str_original = p.read()
-                nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
+                    if nstart < 0:
+                        nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
 
-                if nstart < 0:
-                    nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
-
-                if nstart > 0:
-                    nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
-                    
-                    if nend < 0:
-                        c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
-                    else:
-                        c_ret = str_original[nstart+12 : nend].strip()  # FIX, (30.08 -> .replace(" ", ""))
+                    if nstart > 0:
+                        nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
+                        
+                        if nend < 0:
+                            c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
+                        else:
+                            c_ret = str_original[nstart+12 : nend].strip()  # FIX, (30.08 -> .replace(" ", ""))
 
                     p.close()
 
             return c_ret
+
+    def NewRowGrid (self, sI):
+        """
+        [Internal]
+
+        Creates new row/line in the grid
+
+        :param sI: container of where the focus cell settled (from her the new row will be created)
+        :type sI: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> access = self.oHelper.GiveMeAccess ()
+        >>> access.NewRowGrid (sI = "0")
+        """
+        line_focus = self.driver.find_element_by_xpath ("(//div[@class=\"horizontal-scroll\"]//tr[@id=\"{}\"])//td[@id=\"1\"]//*".format(sI))
+        action = ActionChains(self.driver)
+        
+        row_new = lambda: action.move_to_element(line_focus)
+        action.send_keys_to_element(row_new(), Keys.DOWN).perform()
 
     def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
