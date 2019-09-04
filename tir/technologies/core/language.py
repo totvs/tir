@@ -18,6 +18,7 @@ class LanguagePack:
         self.edit = languagepack["Edit"]
         self.editar = languagepack["Editar"]
         self.cancel = languagepack["Cancel"]
+        self.Set = languagepack["Set"]
         self.view = languagepack["View"]
         self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
@@ -31,7 +32,6 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
-        self.OK = languagepack["OK"]
         self.OkeyWordH = languagepack["OkeyWordH"]
         self.OkeyWordL = languagepack["OkeyWordL"]
         self.copy = languagepack["Copy"]
@@ -58,6 +58,7 @@ class LanguagePack:
         self.To = languagepack["To"]
         self.coins = languagepack["Coins"]
         self.next = languagepack["Next"]
+        self.logOff = languagepack["LogOff"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -121,7 +122,8 @@ class LanguagePack:
             "From": "From",
             "To": "To",
             "Coins": "Coins",
-            "Next": "Next >>" 
+            "Next": "Next >>",
+            "LogOff": "Log Off"
         }
 
         brazilian_portuguese = {
@@ -183,7 +185,8 @@ class LanguagePack:
             "From": "De",
             "To": "Ate",
             "Coins": "Moedas",
-            "Next": "Avançar >>"
+            "Next": "Avançar >>",
+            "LogOff": "Log Off"
         }
         spanish = {
             "User": "Usuário",
@@ -244,7 +247,8 @@ class LanguagePack:
             "From": "De",
             "To": "Ate",
             "Coins": "Monedas",
-            "Next": "Avançar >>"
+            "Next": "Avançar >>",
+            "LogOff": "Log Off"
         }
         russian = {
             "User": "Пользователь",
@@ -253,7 +257,8 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Add": "Добавить",
+            "Set": "Вставить",
             "Delete": "Удалить",
             "Edit": "редактировать",
             "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
@@ -275,7 +280,6 @@ class LanguagePack:
             #"Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
-            "OK": "Да",
             "OkeyWordH" : "OK",
             "OkeyWordL" : "Ok",     # test add
             "Copy": "Copy",
@@ -312,7 +316,8 @@ class LanguagePack:
             "From": "De",
             "To": "Ate",
             "Coins": "Monedas",
-            "Next": "Avançar >>"
+            "Next": "Avançar >>",
+            "LogOff": "Log Off"
         }
 
         if language.lower() == "en-us":

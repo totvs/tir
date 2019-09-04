@@ -5,6 +5,7 @@ import pandas as panda
 import uuid
 import csv
 import inspect
+import re
 from datetime import datetime
 from tir.technologies.core.config import ConfigLoader
 
@@ -32,6 +33,8 @@ class Log:
         self.suite_datetime = suite_datetime
 
         self.table_rows = []
+        self.test_case_log = []
+        self.csv_log = []
         self.invalid_fields = []
         self.table_rows.append(self.generate_header())
         self.folder = folder
@@ -74,9 +77,10 @@ class Log:
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
-
-        line.extend([self.suite_datetime, self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, printable_message, self.database, self.issue, self.execution_id, self.country, self.test_type])
-        self.table_rows.append(line)
+        if self.get_testcase_stack() not in self.test_case_log:
+            line.extend([self.suite_datetime, self.user, self.station, self.program, self.program_date, total_cts, passed, failed, self.seconds, self.version, self.release, printable_message, self.database, self.issue, self.execution_id, self.country, self.test_type])
+            self.table_rows.append(line)
+            self.test_case_log.append(self.get_testcase_stack())
 
     def save_file(self, filename):
         """
@@ -106,7 +110,7 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if len(self.table_rows[1:]) == len(testcases) or self.config.initial_program == '':
+            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass")) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="utf-8") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -115,6 +119,8 @@ class Log:
                         csv_writer.writerow(line)
 
                 print(f"Log file created successfully: {path}\\{log_file}")
+                            
+                self.csv_log.append(self.get_testcase_stack())
 
     def set_seconds(self):
         """
@@ -134,3 +140,10 @@ class Log:
         """
         runner = next(iter(list(filter(lambda x: "runner.py" in x.filename, inspect.stack()))))
         return list(runner.frame.f_locals['test'])
+
+    def get_testcase_stack(self):
+        """
+        Returns a string with the current testcase name
+        [Internal]
+        """
+        return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass', x.function) or re.search('test_', x.function), inspect.stack())))), None)
