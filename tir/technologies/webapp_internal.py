@@ -5,6 +5,7 @@ import inspect
 import os
 import random
 import uuid
+import codecs
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -1726,48 +1727,54 @@ class WebappInternal(Base):
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
-        existsfile = 0                                  # flag
-        cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
-
-        path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
-        path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
-
-        if (os.path.exists(path_encoding) == 0):                                # if not exists new
-
-            if (os.path.exists(path2)):                                         # if exists orig
-                with open(path2, "r", encoding='cp1251') as z:
-                    str_1251 = z.read()
-                    z.close()
-
-                with open(path_encoding, "w+", encoding='utf-8') as x:
-                    x.write(str_1251)
-                    x.close()
-                    existsfile = 1
-            else:
-                existsfile = 0
-                print ("\nNo tres file for this test\n")
+        if flag:
+            path_to_file = os.path.join(os.path.dirname(__file__), r'core\\data\\tres25.csv')
+            df = pd.read_csv(path_to_file)
+            data = df.loc[(df['Module'] == csource) & (df['STRNumbers'] == cposition)]
+            return data['Text'].item()
         else:
-            existsfile = 2                  
-        
-        if (existsfile):
-            with codecs.open (path_encoding, 'r','utf-8') as p:
-                str_original = p.read()
-                nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
+            existsfile = 0                                  # flag
+            cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
 
-                if nstart < 0:
-                    nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
+            path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
+            path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
 
-                if nstart > 0:
-                    nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
-                    
-                    if nend < 0:
-                        c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
-                    else:
-                        c_ret = str_original[nstart+12 : nend].replace(" ", "")
+            if (os.path.exists(path_encoding) == 0):                                # if not exists new
 
-                p.close()
+                if (os.path.exists(path2)):                                         # if exists orig
+                    with open(path2, "r", encoding='cp1251') as z:
+                        str_1251 = z.read()
+                        # z.close() с менеджером контекста не нужен
 
-        return c_ret
+                    with open(path_encoding, "w+", encoding='utf-8') as x:
+                        x.write(str_1251)
+                        # x.close() с менеджером контекста не нужен
+                        existsfile = 1
+                else:
+                    existsfile = 0
+                    print ("\nNo tres file for this test\n")
+            else:
+                existsfile = 2
+
+            if (existsfile):
+                with codecs.open (path_encoding, 'r','utf-8') as p:
+                    str_original = p.read()
+                    nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
+
+                    if nstart < 0:
+                        nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
+
+                    if nstart > 0:
+                        nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n
+
+                        if nend < 0:
+                            c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
+                        else:
+                            c_ret = str_original[nstart+12 : nend].replace(" ", "")
+
+                    p.close()
+
+            return c_ret
 
     def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
@@ -3267,7 +3274,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
