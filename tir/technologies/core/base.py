@@ -23,6 +23,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import WebDriverException
 
 class Base(unittest.TestCase):
     """
@@ -128,7 +129,7 @@ class Base(unittest.TestCase):
         else:
             self.assertFalse(expected, msg)
 
-    def click(self, element, click_type=enum.ClickType.JS):
+    def click(self, element, click_type=enum.ClickType.JS, right_click=False):
         """
         [Internal]
 
@@ -142,27 +143,38 @@ class Base(unittest.TestCase):
         :type element: Selenium object
         :param click_type: ClickType enum. - **Default:** enum.ClickType.JS
         :type click_type: enum.ClickType
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
 
         Usage:
 
         >>> #Defining the element:
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
-        >>> self.click(element(), type=enum.ClickType.JS)
-        """
-        try:
-            self.scroll_to_element(element)
-            if click_type == enum.ClickType.JS:
-                self.driver.execute_script("arguments[0].click()", element)
-            elif click_type == enum.ClickType.SELENIUM:
-                element.click()
-            elif click_type == enum.ClickType.ACTIONCHAINS:
-                ActionChains(self.driver).move_to_element(element).click().perform()
-        except StaleElementReferenceException:
-            print("********Element Stale click*********")
-            pass
-        except Exception as error:
-            self.log_error(str(error))
+        >>> self.click(element(), click_type=enum.ClickType.JS)
+        """        
+        if right_click:
+            try:
+                ActionChains(self.driver).context_click(element).click().perform()
+            except StaleElementReferenceException:
+                print("********Element Stale click*********")
+                pass
+            except Exception as error:
+                self.log_error(str(error))
+        else:
+            try:
+                self.scroll_to_element(element)
+                if click_type == enum.ClickType.JS:
+                    self.driver.execute_script("arguments[0].click()", element)
+                elif click_type == enum.ClickType.SELENIUM:
+                    element.click()
+                elif click_type == enum.ClickType.ACTIONCHAINS:
+                    ActionChains(self.driver).move_to_element(element).click().perform()
+            except StaleElementReferenceException:
+                print("********Element Stale click*********")
+                pass
+            except Exception as error:
+                self.log_error(str(error))
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -380,7 +392,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-        return BeautifulSoup(self.driver.page_source,"html.parser")
+        try:
+            return BeautifulSoup(self.driver.page_source,"html.parser")
+        except WebDriverException:
+            pass
 
     def get_element_text(self, element):
         """
@@ -633,14 +648,17 @@ class Base(unittest.TestCase):
         >>> self.send_keys(element(), Keys.ENTER)
         """
         try:
-            element.send_keys("")
-            element.click()
+            if arg.isprintable():
+                element.clear()
+                element.send_keys(Keys.CONTROL, 'a')
             element.send_keys(arg)
         except Exception:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
-            actions.send_keys("")
             actions.click()
+            if arg.isprintable():
+                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
+            actions.send_keys(Keys.HOME)
             actions.send_keys(arg)
             actions.perform()
 
@@ -701,7 +719,7 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
-        return self.driver.find_element_by_xpath(xpath_soup(soup_object))
+        return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
@@ -858,9 +876,12 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
         """
-        print(f"Setting config: {config_name} = {value}")
-        normalized_config = self.normalize_config_name(config_name)
-        setattr(self.config, normalized_config, value)
+        if 'TimeOut' in config_name:
+            print('TimeOut setting has been disabled in SetTirConfig')
+        else:
+            print(f"Setting config: {config_name} = {value}")
+            normalized_config = self.normalize_config_name(config_name)
+            setattr(self.config, normalized_config, value)
 
     def Start(self):
         """

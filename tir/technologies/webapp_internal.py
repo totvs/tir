@@ -64,7 +64,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-
+        self.restart_counter = 0
         self.used_ids = {}
 
         self.parameters = []
@@ -92,6 +92,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+        if not initial_program:
+            self.log_error("Couldn't find The initial program")
+
+        if self.config.smart_erp:
+            self.wait_smart_erp_environment()
 
         if not self.log.program:
             self.log.program = self.get_program_name()
@@ -146,6 +151,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
+        try_counter = 0
         self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
@@ -153,18 +159,55 @@ class WebappInternal(Base):
         print("Filling Initial Program")
         start_prog_element = next(iter(soup.select("#inputStartProg")), None)
         if start_prog_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Initial Program input element.")
-        start_prog = lambda: self.driver.find_element_by_xpath(xpath_soup(start_prog_element))
-        start_prog().clear()
-        self.send_keys(start_prog(), initial_program)
+
+        start_prog = lambda: self.soup_to_selenium(start_prog_element)
+        start_prog_value = self.get_web_value(start_prog())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
+
+            if try_counter == 0:
+                start_prog = lambda: self.soup_to_selenium(start_prog_element)
+            else:
+                start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+
+            self.set_element_focus(start_prog())
+            start_prog().clear()
+            self.send_keys(start_prog(), initial_program)
+            start_prog_value = self.get_web_value(start_prog())
+            try_counter += 1 if(try_counter < 1) else -1
+        
+        if (start_prog_value.strip() != initial_program.strip()):
+            self.restart_counter += 1
+            self.log_error("Couldn't fill Program input element.")
 
         print("Filling Environment")
         env_element = next(iter(soup.select("#inputEnv")), None)
         if env_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Environment input element.")
-        env = lambda: self.driver.find_element_by_xpath(xpath_soup(env_element))
-        env().clear()
-        self.send_keys(env(), self.config.environment)
+
+        env = lambda: self.soup_to_selenium(env_element)
+        env_value = self.get_web_value(env())
+        endtime = time.time() + self.config.time_out
+        try_counter = 0
+        while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
+
+            if try_counter == 0:
+                env = lambda: self.soup_to_selenium(env_element)
+            else:
+                env = lambda: self.soup_to_selenium(env_element.parent)
+
+            self.set_element_focus(env())
+            env().clear()
+            self.send_keys(env(), self.config.environment)
+            env_value = self.get_web_value(env())
+            try_counter += 1 if(try_counter < 1) else -1
+
+        if (env_value.strip() != self.config.environment.strip()):
+            self.restart_counter += 1
+            self.log_error("Couldn't fill Environment input element.")
 
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
         self.click(button)
@@ -182,37 +225,76 @@ class WebappInternal(Base):
         """
         self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
+        try_counter = 0
         soup = self.get_current_DOM()
 
         print("Filling User")
-        user_element = next(iter(soup.select("[name='cGetUser']")), None)
+        user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
+
         if user_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find User input element.")
 
-        user = lambda: self.driver.find_element_by_xpath(xpath_soup(user_element))
-        self.set_element_focus(user())
-        self.double_click(user())
-        self.send_keys(user(), Keys.HOME)
-        self.send_keys(user(), self.config.user)
-        self.send_keys(user(), Keys.ENTER)
+        user = lambda: self.soup_to_selenium(user_element)
+        user_value = self.get_web_value(user())
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
+
+            if try_counter == 0:
+                user = lambda: self.soup_to_selenium(user_element)
+            else:
+                user = lambda: self.soup_to_selenium(user_element.parent)
+
+            self.set_element_focus(user())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+            self.double_click(user())
+            # self.send_keys(user(), Keys.HOME)
+            self.send_keys(user(), self.config.user)
+            self.send_keys(user(), Keys.ENTER)
+            user_value = self.get_web_value(user())
+            try_counter += 1 if(try_counter < 1) else -1
+
+        if (user_value.strip() != self.config.user.strip()):
+            self.restart_counter += 1
+            self.log_error("Couldn't fill User input element.")
 
         # loop_control = True
 
         # while(loop_control):
         print("Filling Password")
-        password_element = next(iter(soup.select("[name='cGetPsw']")), None)
+        password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
         if password_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find User input element.")
 
-        password = lambda: self.driver.find_element_by_xpath(xpath_soup(password_element.find_parent()))
-        self.set_element_focus(password())
-        self.click(password())
-        self.send_keys(password(), Keys.HOME)
-        self.send_keys(password(), self.config.password)
-        self.send_keys(password(), Keys.ENTER)
+        password = lambda: self.soup_to_selenium(password_element)
+        password_value = self.get_web_value(password())
+        endtime = time.time() + self.config.time_out
+        try_counter = 0
+        while (time.time() < endtime and not password_value.strip()):
+
+            if try_counter == 0:
+                password = lambda: self.soup_to_selenium(password_element)
+            else:
+                password = lambda: self.soup_to_selenium(password_element.parent)
+
+            self.set_element_focus(password())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(password_element))))
+            self.click(password())
+            self.send_keys(password(), Keys.HOME)
+            self.send_keys(password(), self.config.password)
+            self.send_keys(password(), Keys.ENTER)
+            password_value = self.get_web_value(password())
+            self.wait_blocker_ajax()
+            try_counter += 1 if(try_counter < 1) else -1
+        
+        if not password_value.strip():
+            self.restart_counter += 1
+            self.log_error("Couldn't fill User input element.")
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Enter button.")
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
@@ -251,6 +333,7 @@ class WebappInternal(Base):
         print("Filling Date")
         base_date = next(iter(self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if base_date is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Date input element.")
         date = lambda: self.driver.find_element_by_xpath(xpath_soup(base_date))
         self.double_click(date())
@@ -260,6 +343,7 @@ class WebappInternal(Base):
         print("Filling Group")
         group_element = next(iter(self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if group_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Group input element.")
         group = lambda: self.driver.find_element_by_xpath(xpath_soup(group_element))
         self.double_click(group())
@@ -269,6 +353,7 @@ class WebappInternal(Base):
         print("Filling Branch")
         branch_element = next(iter(self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if branch_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Branch input element.")
         branch = lambda: self.driver.find_element_by_xpath(xpath_soup(branch_element))
         self.double_click(branch())
@@ -278,6 +363,7 @@ class WebappInternal(Base):
         print("Filling Environment")
         environment_element = next(iter(self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
         if environment_element is None:
+            self.restart_counter += 1
             self.log_error("Couldn't find Module input element.")
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
@@ -293,6 +379,7 @@ class WebappInternal(Base):
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
         if button_element is None:
+            self.restart_counter += 1
             self.log_error(f"Couldn't find {label} button.")
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
@@ -376,6 +463,24 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
             self.SetButton(self.language.confirm)
+        
+    def close_resolution_screen(self):
+        """
+        [Internal]
+
+        Closes the Alert of resolution screen.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.close_resolution_screen()
+        """
+        endtime = time.time() + self.config.time_out
+        container = self.get_current_container()
+        while (time.time() < endtime and container and self.element_exists(term="img[src*='fwskin_alert_ico.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+            self.SetButton(self.language.close)
+            time.sleep(1)
+        self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out, main_container='body')
 
     def set_log_info(self):
         """
@@ -463,16 +568,17 @@ class WebappInternal(Base):
         self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         soup = self.get_current_DOM()
         tget = next(iter(soup.select("[name=cGet]")), None)
+        tget_input = next(iter(tget.select("input")), None)
         if tget:
             tget_img = next(iter(tget.select("img")), None)
 
             if tget_img is None:
                 self.log_error("Couldn't find Program field.")
 
-            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget))
+            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
             s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
 
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget))))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
             self.double_click(s_tget())
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
@@ -703,21 +809,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
-
+        endtime = time.time() + self.config.time_out
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
         current_value = self.get_element_value(sel_browse_input())
 
-        while (current_value.rstrip() != term.strip()):
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
-            self.click(sel_browse_input())
-            self.set_element_focus(sel_browse_input())
-            self.send_keys(sel_browse_input(), Keys.DELETE)
-            sel_browse_input().clear()
-            self.set_element_focus(sel_browse_input())
-            sel_browse_input().send_keys(term.strip())
-            current_value = self.get_element_value(sel_browse_input())
+        while (time.time() < endtime and current_value.rstrip() != term.strip()):
+            try:
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
+                self.click(sel_browse_input())
+                self.set_element_focus(sel_browse_input())
+                self.send_keys(sel_browse_input(), Keys.DELETE)
+                sel_browse_input().clear()
+                self.set_element_focus(sel_browse_input())
+                sel_browse_input().send_keys(term.strip())
+                current_value = self.get_element_value(sel_browse_input())
+            except StaleElementReferenceException:
+                    self.get_search_browse_elements()
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker_ajax()
         self.double_click(sel_browse_icon())
@@ -730,6 +839,7 @@ class WebappInternal(Base):
         Wait ajax blocker disappear
 
         """
+        print("Waiting ajax blocker to continue...")
         result = True
         while(result):
             soup = self.get_current_DOM()
@@ -763,7 +873,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self,field):
+    def search_element_position(self, field, position=1):
         """
         [Internal]
         Usage:
@@ -777,7 +887,11 @@ class WebappInternal(Base):
 
             labels = container.select("label")
             labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
-            label  = next(iter(list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))),None)
+            labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+            position -= 1
+            if labels_list and len(labels_list) -1 >= position:
+                label = labels_list[position]
+
             if not label:
                 self.log_error("Label wasn't found.")
             
@@ -789,7 +903,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
@@ -799,7 +913,9 @@ class WebappInternal(Base):
                 self.log_error("Element wasn't found.")
 
             return elem
-       
+            
+        except AssertionError as error:
+            raise error
         except Exception as error:
             print(error)
             self.log_error(str(error))
@@ -833,7 +949,7 @@ class WebappInternal(Base):
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
         Sets value of an input element.
         
@@ -875,11 +991,11 @@ class WebappInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row=row)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value)
+            self.click_check_radio_button(field, value, name_attr, position)
         else:
-            self.input_value(field, value, ignore_case, name_attr=name_attr)
+            self.input_value(field, value, ignore_case, name_attr, position)
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False):
+    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1):
         """
         [Internal]
 
@@ -924,100 +1040,104 @@ class WebappInternal(Base):
             elif field.lower() == self.language.To.lower():
                 element = self.get_field("cAteCond", name_attr=True)
             else:
-                element = self.get_field(field, name_attr)
+                element = self.get_field(field, name_attr, position)
 
             if not element:
                 continue
 
-            input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-
-            valtype = "C"
-            main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
-
-            interface_value = self.get_web_value(input_field())
-            current_value = interface_value.strip()
-            interface_value_size = len(interface_value)
-            user_value_size = len(value)
-
-            if not input_field().is_enabled() or "disabled" in element.attrs:
-                self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
-
-            if element.name == "input":
-                valtype = element.attrs["valuetype"]
-
-            self.scroll_to_element(input_field())
-
-            try:
-                #Action for Combobox elements
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    #self.wait.until(EC.visibility_of(input_field()))
-                    self.set_element_focus(input_field())
-                    self.select_combo(element, main_value)
-                    current_value = self.get_web_value(input_field()).strip()
-                #Action for Input elements
+            if "tmultiget" in element.attrs['class'] if element.name == 'div' else None:
+                textarea = element.select("textarea")
+                if not textarea:
+                    input_field = lambda : self.soup_to_selenium(element)
                 else:
-                    self.wait.until(EC.visibility_of(input_field()))
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
-                    self.double_click(input_field())
+                    input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
+            else:
+                input_field = lambda : self.soup_to_selenium(element)
+            
+            if input_field:
+                valtype = "C"
+                main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
-                    #if Character input
-                    if valtype != 'N':
+                interface_value = self.get_web_value(input_field())
+                current_value = interface_value.strip()
+                interface_value_size = len(interface_value)
+                user_value_size = len(value)
+
+                if not input_field().is_enabled() or "disabled" in element.attrs:
+                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
+
+                if element.name == "input":
+                    valtype = element.attrs["valuetype"]
+
+                self.scroll_to_element(input_field())
+
+                try:
+                    #Action for Combobox elements
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
-                        self.send_keys(input_field(), Keys.DELETE)
-                        self.send_keys(input_field(), Keys.HOME)
-                        self.send_keys(input_field(), main_value)
-                    #if Number input
-                    else:
-                        tries = 0
-                        try_counter = 0
-                        while(tries < 3):
-                            self.set_element_focus(input_field())
-                            self.send_keys(input_field(), Keys.DELETE)
-                            self.send_keys(input_field(), Keys.BACK_SPACE)
-                            if interface_value_size == 1:
-                                self.double_click(input_field())
-                                self.send_keys(input_field(), Keys.HOME)
-                            else:
-                                self.click(input_field())
-                            self.set_element_focus(input_field())
-                            self.try_send_keys(input_field, main_value, try_counter)
-                            current_number_value = self.get_web_value(input_field())
-                            if self.remove_mask(current_number_value).strip() == main_value:
-                                break
-                            tries+=1
-                            try_counter+=1
-
-                    if user_value_size < interface_value_size:
-                        self.send_keys(input_field(), Keys.ENTER)
-
-                    if self.check_mask(input_field()):
-                        current_value = self.remove_mask(self.get_web_value(input_field()).strip())
-                        if re.findall(r"\s", current_value):
-                            current_value = re.sub(r"\s", "", current_value)
-                    else:
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
+                    #Action for Input elements
+                    else:
+                        self.wait.until(EC.visibility_of(input_field()))
+                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.double_click(input_field())
 
-                    if current_value != "":
-                        print(f"Current field value: {current_value}")
+                        #if Character input
+                        if valtype != 'N':
+                            self.set_element_focus(input_field())
+                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                            self.send_keys(input_field(), Keys.HOME)
+                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            time.sleep(0.1)
+                            input_field().send_keys(main_value)
+                        #if Number input
+                        else:
+                            tries = 0
+                            try_counter = 0
+                            while(tries < 3):
+                                self.set_element_focus(input_field())
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                                self.try_send_keys(input_field, main_value, try_counter)
+                                current_number_value = self.get_web_value(input_field())
+                                if self.remove_mask(current_number_value).strip() == main_value:
+                                    break
+                                tries+=1
+                                try_counter+=1
 
-                if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                    current_value = current_value[0:len(str(value))]
+                        if user_value_size < interface_value_size:
+                            self.send_keys(input_field(), Keys.ENTER)
 
-                if re.match(r"^●+$", current_value):
-                    success = len(current_value) == len(str(value).strip())
-                elif ignore_case:
-                    success = current_value.lower() == main_value.lower()
-                else:
-                    success = current_value == main_value
-            except:
-                continue
+                        if self.check_mask(input_field()):
+                            current_value = self.remove_mask(self.get_web_value(input_field()).strip())
+                            if re.findall(r"\s", current_value):
+                                current_value = re.sub(r"\s", "", current_value)
+                        else:
+                            current_value = self.get_web_value(input_field()).strip()
+
+                        if current_value != "":
+                            print(f"Current field value: {current_value}")
+
+                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
+                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                        current_value = current_value[0:len(str(value))]
+
+                    if re.match(r"^●+$", current_value):
+                        success = len(current_value) == len(str(value).strip())
+                    elif ignore_case:
+                        success = current_value.lower() == main_value.lower()
+                    else:
+                        success = current_value == main_value
+                except:
+                    continue
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
 
-    def get_field(self, field, name_attr=False):
+    def get_field(self, field, name_attr=False, position=1):
         """
         [Internal]
 
@@ -1040,11 +1160,18 @@ class WebappInternal(Base):
         """
         endtime = time.time() + 60
         element =  None
+        position -= 1
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            else:
+                ##element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                if element_list and len(element_list) -1 >= position:
+                    element = element_list[position]
+                
+            elif position == 0:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+            else:
+                element = self.find_label_element(label_text = field, position = position)
 
         if element:
             element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
@@ -1207,6 +1334,7 @@ class WebappInternal(Base):
 
         return value
 
+
     def restart(self):
         """
         [Internal]
@@ -1220,7 +1348,7 @@ class WebappInternal(Base):
         """
         self.driver.refresh()
         
-        if self.config.coverage:
+        if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         try:
@@ -1228,27 +1356,30 @@ class WebappInternal(Base):
         except:
             pass
 
-        if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program)
-        self.user_screen()
-        self.environment_screen()
+        if self.config.initial_program != ''  and self.restart_counter < 3:
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
-            self.close_modal()
+            if not self.config.skip_environment and not self.config.coverage:
+                self.program_screen(self.config.initial_program)
+            self.user_screen()
+            self.environment_screen()
 
-        if ">" in self.config.routine:
-            self.SetLateralMenu(self.config.routine, save_input=False)
-        else:
-            self.set_program(self.config.routine)
+            endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+                self.close_modal()
 
-    def LogOff(self):
+            if ">" in self.config.routine:
+                self.SetLateralMenu(self.config.routine, save_input=False)
+            else:
+                self.set_program(self.config.routine)
+
+    def Finish(self):
         """
-        Logs out of the Protheus Webapp.
+        Exit the protheus Webapp.
 
         Usage:
 
         >>> # Calling the method.
-        >>> oHelper.LogOff()
+        >>> oHelper.Finish()
         """
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
@@ -1270,6 +1401,37 @@ class WebappInternal(Base):
         else:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
             self.SetButton(self.language.finish)
+
+    def LogOff(self):
+        """
+        Logs out of the Protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.LogOff()
+        """
+        element = ""
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+
+        if self.config.coverage:
+            timeout = 900
+            endtime = time.time() + timeout
+            while(time.time() < endtime and not element):
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                self.SetButton(self.language.logOff)
+
+                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+
+                element = self.search_text(selector=".tsay", text=string)
+                if element:
+                    print(string)
+
+        else:
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+            self.SetButton(self.language.logOff)
+
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -1312,7 +1474,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1353,20 +1515,20 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
 
-    def search_for_errors(self,soup):
+    def search_for_errors(self):
         """
         [Internal]
 
         Searches for errors and alerts in the screen.
 
-        :param soup: Beautiful Soup object to be checked.
-        :type soup: Beautiful Soup object
-
         Usage:
 
         >>> # Calling the method:
-        >>> self.search_for_errors(soup)
+        >>> self.search_for_errors()
         """
+
+        soup = self.get_current_DOM()
+        
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
         if not top_layer:
@@ -1374,8 +1536,7 @@ class WebappInternal(Base):
 
         icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
         icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
-        critical_box = next(iter(top_layer.select(".tmessagebox")), None)
-        if not icon_alert and not icon_error_log and not critical_box:
+        if not icon_alert and not icon_error_log:
             return None
 
         if icon_alert:
@@ -1399,11 +1560,6 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
-        elif critical_box:
-            error_paragraphs = critical_box.text.split("\n\n")
-            error_message = f"Error Log: {error_paragraphs[0]}" if len(error_paragraphs) > 2 else "Error Log: Server down."
-            message = error_message.replace("\n", " ")
 
         self.log_error(message)
 
@@ -1485,6 +1641,10 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+
+        element_list = []
+        containers = None
+
         if self.config.debug_log:
             with open("debug_log.txt", "a", ) as debug_log:
                 debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
@@ -1506,13 +1666,17 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors(soup)
+                    self.search_for_errors()
 
                 container_selector = self.base_container
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                try:
+                    containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                except Exception as e:
+                    print(e)
+                    pass
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
@@ -1559,6 +1723,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
+        endtime = time.time() + self.config.time_out
         if save_input:
             self.config.routine = menu_itens
 
@@ -1573,29 +1738,38 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        for menuitem in menu_itens:
-            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
-            self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
-            self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
-            subMenuElements = menu.select(".tmenuitem")
-            endTime =   time.time() + 90
-            while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
-                menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
+        try:
+            for menuitem in menu_itens:
+                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
+                self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
+                self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                 subMenuElements = menu.select(".tmenuitem")
-                if time.time() > endTime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
-                    self.log_error(f"Couldn't find menu item: {menuitem}")
-            submenu = ""
-            child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
-            submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
-            if subMenuElements and submenu():
-                self.scroll_to_element(submenu())
-                ActionChains(self.driver).move_to_element(submenu()).click().perform()
-                if count < len(menu_itens) - 1:
-                    self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
-            else:
-                self.log_error(f"Error - Menu Item does not exist: {menuitem}")
-            count+=1
+                    subMenuElements = menu.select(".tmenuitem")
+                    if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                        self.restart_counter += 1
+                        self.log_error(f"Couldn't find menu item: {menuitem}")
+                submenu = ""
+                child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                if subMenuElements and submenu():
+                    self.scroll_to_element(submenu())
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
+                    ActionChains(self.driver).move_to_element(submenu()).click().perform()
+                    if count < len(menu_itens) - 1:
+                        self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                        menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
+                else:
+                    self.restart_counter += 1
+                    self.log_error(f"Error - Menu Item does not exist: {menuitem}")
+                count+=1
+        except AssertionError as error:
+            raise error
+        except Exception as error:
+            print(error)
+            self.restart_counter += 1
+            self.log_error(str(error))
 
     def children_element_count(self, element_selector, children_selector):
         """
@@ -1619,7 +1793,7 @@ class WebappInternal(Base):
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
-    def SetButton(self, button, sub_item="", position=1):
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
 
@@ -1637,8 +1811,11 @@ class WebappInternal(Base):
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+        >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
+        >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
-
+        self.wait_blocker_ajax()
         container = self.get_current_container()
 
         if container:
@@ -1649,12 +1826,12 @@ class WebappInternal(Base):
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
+                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
                 if not wait_button:
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     return
             else:
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1)
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1, check_error=check_error)
                 position -= 1
 
             layers = 0
@@ -1664,13 +1841,17 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element and button.lower() != "x"): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton")
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
-                if soup_objects and len(soup_objects) - 1 >= position:
-                    soup_element = lambda : self.soup_to_selenium(soup_objects[position])
 
-            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR)):
+                if soup_objects and len(soup_objects) - 1 >= position:
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
+                    soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                    parent_element = self.soup_to_selenium(soup_objects[0].parent)
+                    id_parent_element = parent_element.get_attribute('id')
+
+            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)):
                 element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
                 self.scroll_to_element(element)
                 time.sleep(2)
@@ -1678,7 +1859,7 @@ class WebappInternal(Base):
                 return
 
             if not soup_element:
-                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button")), None)
+                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
                 if other_action is None:
                     self.log_error(f"Couldn't find element: {button}")
 
@@ -1694,25 +1875,48 @@ class WebappInternal(Base):
                     self.log_error(f"Element {button} not found!")
 
             if soup_element:
-
                 self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                 self.click(soup_element())
 
             # if button != self.language.other_actions:
 
-            if sub_item:
-                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body")
-
+            if sub_item and ',' not in sub_item:
+                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
+                soup_objects_filtered = self.filter_is_displayed(soup_objects)
+                
                 if soup_objects:
-                    soup_element = lambda : self.driver.find_element_by_xpath(xpath_soup(soup_objects[0]))
+                    soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
                 else:
                     self.log_error(f"Couldn't find element {sub_item}")
 
                 self.click(soup_element())
 
+            elif ',' in sub_item:
+                list_sub_itens = sub_item.split(',')
+                filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
+                while(len(filtered_sub_itens) > 0):
+                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
+                    if not soup_objects:
+                        self.log_error(f"Couldn't find element {sub_item}")
+                    for i in range(len(soup_objects)):
+                        if soup_objects[i].text == filtered_sub_itens[0]:
+                            soup_element = lambda : self.soup_to_selenium(soup_objects[i])
+                        
+                    if not soup_element:
+                        soup_element = lambda : self.soup_to_selenium(soup_objects[0])
+
+                    self.move_to_element(soup_element())
+                    filtered_sub_itens.remove(filtered_sub_itens[0])
+
+                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.click(soup_element())
+
+
+
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
-            buttons_filtered = list(map(lambda x: x.lower(), buttons))
+            buttons_filtered = list(map(lambda x: x.lower(), buttons)) 
 
             if button.lower() in buttons_filtered:
 
@@ -1722,10 +1926,10 @@ class WebappInternal(Base):
                 elif self.grid_counters:
                     self.grid_counters = {}
 
-            if button == self.language.save and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            if button == self.language.save and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
-            elif button == self.language.confirm and soup_objects[0].parent.attrs["id"] in self.get_enchoice_button_ids(layers):
+            elif button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
@@ -1888,7 +2092,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
         
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -1899,7 +2103,7 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(3)
+            time.sleep(0.5)
             
         self.log_error(f"Element {string} not found")
 
@@ -1918,7 +2122,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -1929,7 +2133,7 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(3)
+            time.sleep(0.5)
 
         self.log_error(f"Element {string} not found")
 
@@ -1946,7 +2150,7 @@ class WebappInternal(Base):
         >>> oHelper.WaitProcessing("Processing")
         """
         if not timeout:
-            timeout = self.config.time_out
+            timeout = 1200
 
         self.WaitShow(itens, timeout)
 
@@ -1997,9 +2201,10 @@ class WebappInternal(Base):
         #try:#Tento pegar o elemento da aba de forma direta sem webscraping
         #    element = lambda: self.driver.find_element_by_link_text(item)
         #except:#caso contrário efetuo o clique na aba com webscraping
-        soup = self.get_current_DOM()
-        panels = soup.select(".button-bar a")
-        panel = next(iter(list(filter(lambda x: x.text == folder_name, panels))))
+        container = self.get_current_container()
+        panels = container.select(".button-bar a")
+        panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
+        panel = next(iter(self.filter_is_displayed(panels_filtered)))
         element = ""
         if panel:
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
@@ -2035,6 +2240,8 @@ class WebappInternal(Base):
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
+        text = ''
+        endtime = time.time() + self.config.time_out +30
         grid_number -= 1
         if content_list:
             self.wait_element_timeout(field)
@@ -2083,9 +2290,7 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
-            while(last != current and contents):
-                td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                text = td.text.strip() if td else ""
+            while(last != current or contents):
                 if text in contents:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
                     if not clicking_row_element_bs:
@@ -2098,13 +2303,22 @@ class WebappInternal(Base):
                     else:
                         self.double_click(clicking_row_element())
                     contents.remove(text)
-                time.sleep(2)
-                last = current
-                scroll_down()
-                time.sleep(0.5)
-                get_current_filtered = next(iter(get_current()),None)
-                current = get_current_filtered
-                time.sleep(0.5)
+                if contents:
+                    time.sleep(2)
+                    last = current
+                    if text not in contents and text != '':
+                        scroll_down()
+                    time.sleep(0.5)
+                    get_current_filtered = next(iter(get_current()),None)
+                    current = get_current_filtered
+                    time.sleep(0.5)
+                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
+                    text = td.text.strip() if td else ""
+                if time.time() > endtime:
+                    self.log_error("Couldn't click in the box")
+                if not contents:
+                    break
+
         else:
             self.log_error(f"Couldn't locate content: {content_list}")
 
@@ -2139,7 +2353,8 @@ class WebappInternal(Base):
             self.log_error("Couldn't find chosen column.")
             
         sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
-        sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
+        sd_button_list_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), sd_button_list))
+        sd_button = sd_button_list_displayed[grid_number] if len(sd_button_list_displayed) - 1 >= grid_number else None
         scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
         scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
@@ -2178,7 +2393,7 @@ class WebappInternal(Base):
         endtime = time.time() + 60
         grids = None
         while(time.time() < endtime and not grids):
-            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
             if len(grids) > 1:
@@ -2249,6 +2464,9 @@ class WebappInternal(Base):
     def SetKey(self, key, grid=False, grid_number=1,additional_key=""):
         """
         Press the desired key on the keyboard on the focused element.
+
+        .. note::
+            If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
 
         Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
@@ -2344,7 +2562,7 @@ class WebappInternal(Base):
         except Exception as error:
             self.log_error(str(error))
 
-    def SetFocus(self, field, grid_cell):
+    def SetFocus(self, field, grid_cell, row_number):
         """
         Sets the current focus on the desired field.
 
@@ -2360,7 +2578,8 @@ class WebappInternal(Base):
         """
         if grid_cell:
             self.wait_element(field)
-            self.ClickGridCell(field)
+            
+            self.ClickGridCell(field, row_number)
             time.sleep(1)
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)
@@ -2369,7 +2588,7 @@ class WebappInternal(Base):
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
             self.set_element_focus(element())
 
-    def click_check_radio_button(self, field, value):
+    def click_check_radio_button(self, field, value, name_attr = False, position = 1):
         """
         [Internal]
         Identify and click on check or radio button.
@@ -2387,19 +2606,35 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
+        print(f'Clicking in {field}')
+        
+        element_list = []
 
-        if re.match(r"\w+(_)", field):
-            self.wait_element(field)
-            element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-        else:
-            self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-            element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not element_list):
+            if re.match(r"\w+(_)", field):
+                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+                #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
+                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
 
-
-        if not element:
+        if not element_list:
             self.log_error("Couldn't find span element")
 
-        input_element = next(iter(element.find_parent().select("input")), None)
+        position -= 1
+
+        if not element_list:
+            self.log_error("Couldn't find span element")
+
+        #if soup_objects and len(soup_objects) - 1 >= position:
+        if element_list and len(element_list) -1 >= position:
+            element = element_list[position]
+
+        if 'input' not in element and element:
+            input_element = next(iter(element.find_parent().select("input")), None)
 
         if not input_element:
             self.log_error("Couldn't find input element")
@@ -2593,12 +2828,14 @@ class WebappInternal(Base):
         field_to_valtype = {}
         field_to_len = {}
 
+        endtime = time.time() + self.config.time_out
+
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
             field_to_valtype = x3_dictionaries[0]
             field_to_len = x3_dictionaries[1]
 
-        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             print("Waiting for container to be active")
             time.sleep(1)
             
@@ -2611,7 +2848,7 @@ class WebappInternal(Base):
         if containers:
             containers = self.zindex_sort(containers, True)
 
-            grids = containers[0].select(".tgetdados, .tgrid")
+            grids = containers[0].select(".tgetdados, .tgrid, .tcbrowse")
 
             grids = self.filter_displayed_elements(grids)
             if grids:
@@ -2632,7 +2869,7 @@ class WebappInternal(Base):
                 row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
 
                 if row:
-                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None:
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop+=1
@@ -2665,14 +2902,15 @@ class WebappInternal(Base):
                         elif(isinstance(field[1],str)):
                             field_one = self.remove_mask(field[1]).strip()
 
-                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                        endtime = time.time() + self.config.time_out
+                        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column())
                             self.set_element_focus(selenium_column())
 
-                            while(not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+                            while(time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
                                 time.sleep(1)
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
@@ -2730,6 +2968,7 @@ class WebappInternal(Base):
                                             else:
                                                 self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
                                                 if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                     self.send_keys(selenium_input(), Keys.ENTER)
 
                                 self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
@@ -2750,6 +2989,8 @@ class WebappInternal(Base):
                                 else:
                                     self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                     current_value = field[1]
+                        if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+                            self.log_error("Couldn't fill input value.")
                     else:
                         self.log_error("Couldn't find columns.")
                 else:
@@ -2840,66 +3081,76 @@ class WebappInternal(Base):
         :type get_value: bool
 
         :return: If get_value flag is True, it will return the captured value.
-        :rtype: str
+        :return type: str
 
         Usage:
 
         >>> # Calling the method:
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
+        columns = None
         field_to_label = {}
+        endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
-        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body")):
+        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body") and time.time() < endtime):
             if self.config.debug_log:
                 print("Waiting for container to be active")
             time.sleep(1)
 
-        soup = self.get_current_DOM()
+        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        container = next(iter(self.zindex_sort(containers, True)), None)
 
-        containers = soup.select(".tmodaldialog.twidget")
-        if containers:
+        if not container:
+            self.log_error('Container not found')
+            
+        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
 
-            containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid, .tcbrowse"))
-            if grids:
+        if grids:
+            headers = self.get_headers_from_grids(grids)
+            column_name = ""
 
-                headers = self.get_headers_from_grids(grids)
-                column_name = ""
-                if field[3] > len(grids):
-                    self.log_error(self.language.messages.grid_number_error)
+            if field[3] > len(grids):
+                self.log_error(self.language.messages.grid_number_error)
 
-                rows = grids[field[3]].select("tbody tr")
-                if rows:
-                    if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error)
+            rows = grids[field[3]].select("tbody tr")
+            if rows:
+                if field[0] > len(rows):
+                    self.log_error(self.language.messages.grid_line_error)
 
-                    columns = rows[field[0]].select("td")
-                    if columns:
-                        if "_" in field[1]:
-                            column_name = field_to_label[field[1]].lower()
-                        else:
-                            column_name = field[1].lower()
-
-                        if column_name not in headers[field[3]]:
-                            self.log_error(self.language.messages.grid_column_error)
-
-                        column_number = headers[field[3]][column_name]
-                        text = columns[column_number].text.strip()
-
-                        if get_value:
-                            return text
-
-                        field_name = f"({field[0]}, {column_name})"
-                        self.log_result(field_name, field[2], text)
-                        print(f"Collected value: {text}")
-                    else:
-                        self.log_error("Couldn't find columns.")
-                else:
+                field_element = next(iter(field), None)
+                if field_element == None:
                     self.log_error("Couldn't find rows.")
+                
+                if len(rows) -1 >= field_element:
+                    columns = rows[field_element].select("td")
+                    
+                # columns = rows[field[0]].select("td")
+                if columns:
+                    if "_" in field[1]:
+                        column_name = field_to_label[field[1]].lower()
+                    else:
+                        column_name = field[1].lower()
+
+                    if column_name not in headers[field[3]]:
+                        self.log_error(self.language.messages.grid_column_error)
+
+                    column_number = headers[field[3]][column_name]
+                    text = columns[column_number].text.strip()
+
+                    if get_value:
+                        return text
+
+                    field_name = f"({field[0]}, {column_name})"
+                    self.log_result(field_name, field[2], text)
+                    print(f"Collected value: {text}")
+                else:
+                    self.log_error("Couldn't find columns.")
             else:
-                self.log_error("Couldn't find grids.")
+                self.log_error("Couldn't find rows.")
+        else:
+            self.log_error("Couldn't find grids.")
 
     def new_grid_line(self, field, add_grid_line_counter=True):
         """
@@ -2917,43 +3168,48 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.new_grid_line(["", "", 0, True])
         """
+        grids = ''
+        endtime = time.time() + self.config.time_out
         self.down_loop_grid = True
+        while(not grids and time.time() < endtime):
+            soup = self.get_current_DOM()
 
-        soup = self.get_current_DOM()
+            containers = soup.select(".tmodaldialog.twidget")
+            if containers:
+                containers = self.zindex_sort(containers, True)
+                grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
 
-        containers = soup.select(".tmodaldialog.twidget")
-        if containers:
+            time.sleep(1)
 
-            containers = self.zindex_sort(containers, True)
-            grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
-            if grids:
-                if field[2] > len(grids):
-                    self.log_error(self.language.messages.grid_number_error)
-                rows = grids[field[2]].select("tbody tr")
-                row = self.get_selected_row(rows)
-                if row:
-                    columns = row.select("td")
-                    if columns:
-                        second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
-                        # self.scroll_to_element(second_column())
-                        self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
-                        self.set_element_focus(second_column())
-                        self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
-                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+        if grids:
+            if field[2] > len(grids):
+                self.log_error(self.language.messages.grid_number_error)
+            rows = grids[field[2]].select("tbody tr")
+            row = self.get_selected_row(rows)
+            if row:
+                columns = row.select("td")
+                if columns:
+                    second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
+                    # self.scroll_to_element(second_column())
+                    self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
+                    self.set_element_focus(second_column())
+                    self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
+                    ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
-                        while not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1)):
-                            if self.config.debug_log:
-                                print("Waiting for the new line to show")
-                            time.sleep(1)
+                    endtime = time.time() + self.config.time_out
+                    while (time.time() < endtime and not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1))):
+                        if self.config.debug_log:
+                            print("Waiting for the new line to show")
+                        time.sleep(1)
 
-                        if (add_grid_line_counter):
-                            self.add_grid_row_counter(grids[field[2]])
-                    else:
-                        self.log_error("Couldn't find columns.")
+                    if (add_grid_line_counter):
+                        self.add_grid_row_counter(grids[field[2]])
                 else:
-                    self.log_error("Couldn't find rows.")
+                    self.log_error("Couldn't find columns.")
             else:
-                self.log_error("Couldn't find grids.")
+                self.log_error("Couldn't find rows.")
+        else:
+            self.log_error("Couldn't find grids.")
 
     def ClickGridCell(self, column, row_number=1, grid_number=1):
         """
@@ -2971,24 +3227,29 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
+        grids = None
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        endtime = time.time() + self.config.time_out
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if re.match(r"\w+(_)", column):
             column_name = self.get_x3_dictionaries([column])[2][column].lower()
         else:
             column_name = column.lower()
 
-        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        while(not grids and time.time() < endtime):
+            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
+            grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+            grids = list(filter(lambda x:x.select("tbody tr"), grids))
+            time.sleep(1)
+
         if not containers:
             self.log_error("Couldn't find controller.")
-
-        container = next(iter(self.zindex_sort(containers, True)), None)
-        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid"))
-        grids = list(filter(lambda x:x.select("tbody tr"), grids))
+            
         if not grids:
             self.log_error("Couldn't find any grid.")
 
@@ -3013,6 +3274,7 @@ class WebappInternal(Base):
         column_number = headers[grid_number][column_name]
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
 
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
     def get_x3_dictionaries(self, fields):
@@ -3166,19 +3428,36 @@ class WebappInternal(Base):
                 time.sleep(0.1)
 
         if time.time() > endtime:
-            if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
-                return False
-            self.log_error(f"Element {term} not found!")
+            if term == "[name='cGetUser']":
+                self.close_resolution_screen()
+            else:
+                if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
+                    return False
+                self.restart_counter += 1
+                self.log_error(f"Element {term} not found!")
 
         presence_endtime = time.time() + 10
         if presence:
+
             if self.config.debug_log:
                 print("Element found! Waiting for element to be displayed.")
+
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
+            
             if element is not None:
-                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                while(not sel_element().is_displayed() and time.time() < presence_endtime):
-                    time.sleep(0.1)
+
+                sel_element = lambda:self.soup_to_selenium(element)
+                sel_element_isdisplayed = False
+
+                while(not sel_element_isdisplayed and time.time() < presence_endtime):
+                    try:
+                        if sel_element != None:
+                            sel_element_isdisplayed = sel_element().is_displayed()
+                        else:
+                            sel_element = lambda:self.soup_to_selenium(element)
+                        time.sleep(0.1)
+                    except AttributeError:
+                        pass
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
@@ -3378,13 +3657,19 @@ class WebappInternal(Base):
         """
         self.wait.until(EC.visibility_of(element_function()))
         if try_counter == 0:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
         elif try_counter == 1:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
         else:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
-    def find_label_element(self, label_text, container):
+    def find_label_element(self, label_text, container= None, position = 1):
         """
         [Internal]
 
@@ -3403,80 +3688,83 @@ class WebappInternal(Base):
         >>> self.find_label_element("User:", container_object)
         """
         try:
-            elements = self.filter_label_element(label_text, container)
+            if container:
+                elements = self.filter_label_element(label_text, container)
+            if elements:
+                for element in elements:
+                    elem = self.search_element_position(label_text, position)
+                    if elem:
+                        return elem
 
-            for element in elements:
-                elem = self.search_element_position(label_text)
-                if elem:
-                    return elem
+                    #Checking previous and next element:
+                    next_sibling = element.find_next_sibling("div")
+                    second_next_sibling = next_sibling.find_next_sibling("div")
 
-                #Checking previous and next element:
-                next_sibling = element.find_next_sibling("div")
-                second_next_sibling = next_sibling.find_next_sibling("div")
+                    previous_sibling = element.find_next_sibling("div")
+                    second_previous_sibling = previous_sibling.find_next_sibling("div")
 
-                previous_sibling = element.find_next_sibling("div")
-                second_previous_sibling = previous_sibling.find_next_sibling("div")
+                    #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
+                    if (hasattr(element, "attrs") and "class" in element.attrs
+                        and "tsay" in element.attrs["class"]
+                        and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
+                        and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
+                        and next_sibling.attrs["id"] not in self.used_ids)
+                        or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
+                        and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
+                        and second_next_sibling.attrs["id"] not in self.used_ids)):
 
-                #If current element is tsay and next or second next element is tget or tcombobox => return tget or tcombobox
-                if (hasattr(element, "attrs") and "class" in element.attrs
-                    and "tsay" in element.attrs["class"]
-                    and (hasattr(next_sibling, "attrs") and "class" in next_sibling.attrs and "id" in next_sibling.attrs
-                    and ("tget" in next_sibling.attrs["class"] or "tcombobox" in next_sibling.attrs["class"])
-                    and next_sibling.attrs["id"] not in self.used_ids)
-                    or (hasattr(second_next_sibling, "attrs") and "class" in second_next_sibling.attrs and "id" in second_next_sibling.attrs
-                    and ("tget" in second_next_sibling.attrs["class"] or "tcombobox" in second_next_sibling.attrs["class"])
-                    and second_next_sibling.attrs["id"] not in self.used_ids)):
+                        if (("tget" in next_sibling.attrs["class"]
+                                or "tcombobox" in next_sibling.attrs["class"])
+                                and next_sibling.attrs["id"] not in self.used_ids):
+                            self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
+                            return [next_sibling]
+                        elif (("tget" in second_next_sibling.attrs["class"]
+                                or "tcombobox" in second_next_sibling.attrs["class"])
+                                and second_next_sibling.attrs["id"] not in self.used_ids):
+                            self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
+                            return [second_next_sibling]
+                        else:
+                            return[]
 
-                    if (("tget" in next_sibling.attrs["class"]
-                            or "tcombobox" in next_sibling.attrs["class"])
-                            and next_sibling.attrs["id"] not in self.used_ids):
-                        self.used_ids[next_sibling.attrs["id"]] = container.attrs["id"]
-                        return [next_sibling]
-                    elif (("tget" in second_next_sibling.attrs["class"]
-                            or "tcombobox" in second_next_sibling.attrs["class"])
-                            and second_next_sibling.attrs["id"] not in self.used_ids):
-                        self.used_ids[second_next_sibling.attrs["id"]] = container.attrs["id"]
-                        return [second_next_sibling]
-                    else:
-                        return[]
+                    #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
+                    elif (hasattr(element, "attrs") and "class" in element.attrs
+                        and "tsay" in element.attrs["class"]
+                        and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
+                        and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
+                        and previous_sibling.attrs["id"] not in self.used_ids)
+                        or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
+                        and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
+                        and second_previous_sibling.attrs["id"] not in self.used_ids)):
 
-                #If current element is tsay and previous or second previous element is tget or tcombobox => return tget or tcombobox
-                elif (hasattr(element, "attrs") and "class" in element.attrs
-                    and "tsay" in element.attrs["class"]
-                    and (hasattr(previous_sibling, "attrs") and "class" in previous_sibling.attrs and "id" in previous_sibling.attrs
-                    and ("tget" in previous_sibling.attrs["class"] or "tcombobox" in previous_sibling.attrs["class"])
-                    and previous_sibling.attrs["id"] not in self.used_ids)
-                    or (hasattr(second_previous_sibling, "attrs") and "class" in second_previous_sibling.attrs and "id" in second_previous_sibling.attrs
-                    and ("tget" in second_previous_sibling.attrs["class"] or "tcombobox" in second_previous_sibling.attrs["class"])
-                    and second_previous_sibling.attrs["id"] not in self.used_ids)):
+                        if (("tget" in previous_sibling.attrs["class"]
+                                or "tcombobox" in previous_sibling.attrs["class"])
+                                and previous_sibling.attrs["id"] not in self.used_ids):
+                            self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
+                            return [previous_sibling]
+                        elif (("tget" in second_previous_sibling.attrs["class"]
+                                or "tcombobox" in second_previous_sibling.attrs["class"])
+                                and second_previous_sibling.attrs["id"] not in self.used_ids):
+                            self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
+                            return [second_previous_sibling]
+                        else:
+                            return []
 
-                    if (("tget" in previous_sibling.attrs["class"]
-                            or "tcombobox" in previous_sibling.attrs["class"])
-                            and previous_sibling.attrs["id"] not in self.used_ids):
-                        self.used_ids[previous_sibling.attrs["id"]] = container.attrs["id"]
-                        return [previous_sibling]
-                    elif (("tget" in second_previous_sibling.attrs["class"]
-                            or "tcombobox" in second_previous_sibling.attrs["class"])
-                            and second_previous_sibling.attrs["id"] not in self.used_ids):
-                        self.used_ids[second_previous_sibling.attrs["id"]] = container.attrs["id"]
-                        return [second_previous_sibling]
-                    else:
-                        return []
-
-                #If element is not tsay => return it
-                elif (hasattr(element, "attrs") and "class" in element.attrs
-                    and "tsay" not in element.attrs["class"]):
+                    #If element is not tsay => return it
+                    elif (hasattr(element, "attrs") and "class" in element.attrs
+                        and "tsay" not in element.attrs["class"]):
+                        return self.search_element_position(label_text)
+                        
+                #If label exists but there is no element associated with it => return empty list
+                if not element:
+                    return []
+                else:
                     return self.search_element_position(label_text)
-                    
-            #If label exists but there is no element associated with it => return empty list
-            if not element:
-                return []
             else:
-                return self.search_element_position(label_text)
+                return []
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
@@ -3498,7 +3786,7 @@ class WebappInternal(Base):
         routine_name = routine_name if routine_name else "error"
 
         
-        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
+        stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
         self.log.set_seconds()
@@ -3516,18 +3804,27 @@ class WebappInternal(Base):
                     os.makedirs(f"Log\\{self.log.station}")
             except OSError:
                 pass
-
-            self.driver.save_screenshot(path)
+            
+            if self.log.get_testcase_stack() not in self.log.test_case_log:
+                self.driver.save_screenshot(path)
 
         if new_log_line:
             self.log.new_line(False, log_message)
         self.log.save_file(routine_name)
-        if not self.config.skip_restart:
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
-        self.assertTrue(False, log_message)
+        elif self.config.coverage and self.config.initial_program != '':
+            self.restart()
+        else:
+            self.driver.close()
 
-        if self.config.num_exec:
+        if self.restart_counter > 2:
+            self.restart_counter = 0
+
+        if self.config.num_exec and stack_item == "setUpClass":
             self.num_exec.post_exec(self.config.url_set_end_exec)
+            
+        self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
@@ -3542,20 +3839,25 @@ class WebappInternal(Base):
         >>> oHelper.ClickIcon("Add")
         >>> oHelper.ClickIcon("Edit")
         """
-        self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        soup = self.get_current_DOM()
-        container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
-        container = container if container else soup
-        buttons = container.select("button[style]")
-        print("Searching for Icon")
-        filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-        #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+        button = ""
+        # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not button):
+            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            soup = self.get_current_DOM()
+            container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
+            container = container if container else soup
+            buttons = container.select("button[style]")
+            print("Searching for Icon")
+            filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+            #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
 
-        button = next(iter(filtered_buttons), None)
+            button = next(iter(filtered_buttons), None)
+
+            button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
+        
         if not button:
             self.log_error("Couldn't find Icon button.")
-
-        button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
 
         self.click(button_element())
 
@@ -3579,7 +3881,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
-        self.parameters.append([parameter, branch, portuguese_value, english_value, spanish_value])
+        self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
     def SetParameters(self):
         """
@@ -3631,18 +3933,40 @@ class WebappInternal(Base):
 
         self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
         self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
+
+        self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+
+        if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
+            container = self.get_current_container()
+            img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
+            label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+            
+            if not label_serv1:
+                self.log_error(f"Couldn't find Icon")
+
+            self.ClickTree(label_serv1.text.strip())
+            self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+            container = self.get_current_container()
+            img_param = next(iter(container.select("img[src*='bmpparam']")), None )
+            label_param = next(iter(img_param.parent.select('label')), None)
+
+            if not label_param:
+                self.log_error(f"Couldn't find Icon")
+
+            self.ClickTree(label_param.text.strip())
+
         self.ClickIcon(self.language.search)
 
         self.fill_parameters(restore_backup=restore_backup)
         self.parameters = []
+        self.ClickIcon(self.language.exit)
+        time.sleep(1)
 
         if self.config.coverage:
-            self.ClickIcon(self.language.exit)
-            time.sleep(1)
             self.driver.refresh()
-
         else:
-            self.LogOff()
+            self.Finish()
 
         self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
@@ -3734,7 +4058,7 @@ class WebappInternal(Base):
         """
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
-        time.sleep(0.5)
+        time.sleep(1)
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
         has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
@@ -3876,19 +4200,25 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
+        label = ''
         self.wait_element(label_name)
-
-        container = self.get_current_container()
-        if not container:
-            self.log_error("Couldn't locate container.")
-
-        labels = container.select("label")
-        filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
-        label = next(iter(filtered_labels), None)
+        endtime = time.time() + self.config.time_out
+        while(not label and time.time() < endtime):
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Couldn't locate container.")
+                
+            labels = container.select("label")
+            filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
+            filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
+            label = next(iter(filtered_labels), None)
+            
         if not label:
             self.log_error("Couldn't find any labels.")
 
         label_element = lambda: self.soup_to_selenium(label)
+        self.scroll_to_element(label_element())
+        self.set_element_focus(label_element())
         self.click(label_element())
 
     def get_current_container(self):
@@ -3910,7 +4240,7 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
         return next(iter(containers), None)
 
-    def ClickTree(self, treepath):
+    def ClickTree(self, treepath, right_click = False):
         """
         Clicks on TreeView component.
 
@@ -3925,35 +4255,37 @@ class WebappInternal(Base):
 
         labels = list(map(str.strip, treepath.split(">")))
 
-        self.find_tree_bs(labels)
+        for label in labels:
 
-    def find_tree_bs(self, labels):
+            last_item = True if labels.index(label) == len(labels)-1 else False
+
+            self.click_tree(label, last_item, right_click)
+
+    def find_tree_bs(self, label):
         """
         [Internal]
 
         Search the label string in current container and return a treenode element.
         """
 
-        for label in labels:
+        tree_node = ""
+        
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
 
-            tree_node = ""
-            
-            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
+        endtime = time.time() + self.config.time_out
 
-            endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not tree_node):
 
-            while (time.time() < endtime and not tree_node):
+            container = self.get_current_container()
 
-                container = self.get_current_container()
+            tree_node = container.select(".ttreenode")
 
-                tree_node = container.select(".ttreenode")
+        if not tree_node:
+            self.log_error("Couldn't find tree element.")
 
-            if not tree_node:
-                self.log_error("Couldn't find tree element.")
+        return(tree_node)
 
-            self.click_tree(tree_node, label)
-
-    def click_tree(self, tree_node, label):
+    def click_tree(self, label, last_item, right_click):
         """
         [Internal]
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
@@ -3961,37 +4293,104 @@ class WebappInternal(Base):
 
         success = False
 
-        label_filtered = label.lower().strip()
+        try_counter = 0
 
-        tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+        label_filtered = label.lower().strip()        
 
-        elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
+        endtime = time.time() + self.config.time_out
 
-        if not elements:
-            self.log_error("Couldn't find elements.")
+        while((time.time() < endtime) and (try_counter < 3 and not success)):
 
-        for element in elements:
-            if not success:
-                element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+            tree_node = self.find_tree_bs(label_filtered)
 
-                if "data" in element_class.get_attribute_list("class"):
-                    element_class =  element_class.select_one("img")
-                
-                if "expanded" not in element_class.attrs['class'] and not success:
-                    element_click = lambda: self.driver.find_element_by_xpath(xpath_soup(element_class))
+            tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-                    endtime = time.time() + self.config.time_out
+            elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))        
 
-                    while(time.time() < endtime):
-                        try:
-                            element_click().click()
-                            success = True
-                            break
-                        except:
-                            pass
+            if not elements:
+                self.log_error("Couldn't find elements.")
+
+            for element in elements:
+                if not success:
+                    element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+
+                    if "data" in element_class.get_attribute_list("class"):
+                        element_class =  element_class.select("img, span")
+
+                    for element_class_item in element_class:
+                    
+                        if "expanded" not in element_class_item.attrs['class'] and not success:
+                            element_click = lambda: self.soup_to_selenium(element_class_item)
+                            
+                            try:
+                                if last_item:
+                                    self.click(element_click(), enum.ClickType.SELENIUM)
+                                    if self.check_toggler(label_filtered):
+                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                        if success and right_click:
+                                            self.click(element_click(), right_click=right_click)
+                                    else:
+                                        if right_click:
+                                            self.click(element_click(), right_click=right_click)
+                                        success = self.clicktree_status_selected(label_filtered)
+                                else:
+                                    element_click().click()
+                                    success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                
+                                try_counter += 1
+                            except:                                
+                                pass
                         
         if not success:
-            self.log_error("Couldn't click on element.")
+            self.log_error(f"Couldn't click on tree element {label}.")
+    
+    def clicktree_status_selected(self, label_filtered, check_expanded=False):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+
+        tr = container.select("tr")
+
+        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+
+        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+
+        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+
+        if not check_expanded:
+            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+        else:
+            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+            if tree_selected.find_all_next("span"):
+                if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
+                    return "expanded" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            else:
+                return False
+    
+    def check_toggler(self, label_filtered):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+
+        tr = container.select("tr")
+
+        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+
+        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+
+        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+
+        tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))))
+        
+        if tree_selected.find_all_next("span"):
+            try:
+                return "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']
+            except:
+                return False
+        else:
+            return False
                 
     def TearDown(self):
         """
@@ -4005,16 +4404,16 @@ class WebappInternal(Base):
 
         if self.config.coverage:
 
+            self.driver.refresh()
+            self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             timeout = 900
             
-            self.LogOff()
+            self.Finish()
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
-            self.driver.close()
-        else:
-            self.driver.close()
             
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
+        self.driver.close()
             
     def containers_filter(self, containers):
         """
@@ -4173,3 +4572,99 @@ class WebappInternal(Base):
             return text[:-len(string_right)].strip()
         else:
             return text.strip()
+
+    def wait_smart_erp_environment(self):
+        """
+        [Internal]
+        """
+        content = False
+        endtime = time.time() + self.config.time_out
+
+        print("Waiting for SmartERP environment assembly")
+
+        while not content and (time.time() < endtime):
+            try:
+                soup = self.get_current_DOM()
+
+                content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
+            except AttributeError:
+                pass
+    def CheckHelp(self, text, button):
+        """
+        Checks if some help screen is present in the screen at the time and takes an action.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param button: Button to be clicked.
+        :type button: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        """
+        if not button:
+            button = self.get_single_button().text
+
+        print(f"Checking Help on screen: {text}")
+        self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
+        if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+            self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            self.SetButton(button, check_error=False)
+        else:
+            self.SetButton(button, check_error=False)
+
+    def get_single_button(self):
+        """
+        [Internal]
+        """
+        container = self.get_current_container()
+        buttons = container.select("button")
+        button_filtered = next(iter(filter(lambda x: x.text != "", buttons)))
+        if not button_filtered:
+            self.log_error(f"Couldn't find button")
+        return button_filtered
+
+    def ClickMenuPopUpItem(self, label, right_click):
+        """
+        Clicks on MenuPopUp Item based in a text
+
+        :param text: Text in MenuPopUp to be clicked.
+        :type text: str
+        :param right_click: Button to be clicked.
+        :type button: bool
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickMenuPopUpItem("Label")
+        """
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup")
+
+        label = label.lower().strip()
+
+        endtime = time.time() + self.config.time_out
+
+        tmenupopupitem_filtered = ""
+
+        while(time.time() < endtime and not tmenupopupitem_filtered):
+
+            soup = self.get_current_DOM()
+
+            body = next(iter(soup.select("body")))
+
+            tmenupopupitem = body.select(".tmenupopupitem")
+
+            tmenupopupitem_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), tmenupopupitem))
+
+            tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))))
+
+        if not tmenupopupitem_filtered:
+            self.log_error(f"Couldn't find tmenupopupitem: {label}")
+
+        tmenupopupitem_element = lambda: self.soup_to_selenium(tmenupopupitem_filtered)
+
+        if right_click:
+            self.click(tmenupopupitem_element(), right_click=right_click)
+        else:
+            self.click(tmenupopupitem_element())

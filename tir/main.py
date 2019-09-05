@@ -150,6 +150,8 @@ class Webapp():
         :type select_all: bool
         :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param ignore_current: Boolean to ignore the get_current_filtered on loop case of box click. - **Default:** False
+        :type ignore_current: bool
 
         Usage:
 
@@ -283,6 +285,8 @@ class Webapp():
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
+        .. note::
+            .Do not use this method in any routine. Use on home screen
 
         Usage:
 
@@ -290,6 +294,17 @@ class Webapp():
         >>> oHelper.LogOff()
         """
         self.__webapp.LogOff()
+
+    def Finish(self):
+        """
+        Exit the Protheus Webapp.
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.Finish()
+        """
+        self.__webapp.Finish()
 
     def MessageBoxClick(self, button_text):
         """
@@ -455,7 +470,7 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
-    def SetButton(self, button, sub_item="", position=1):
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
 
@@ -474,7 +489,7 @@ class Webapp():
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
         """
-        self.__webapp.SetButton(button, sub_item, position)
+        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
     def SetFilePath(self, value):
         """
@@ -490,7 +505,7 @@ class Webapp():
         """
         self.__webapp.SetFilePath(value)
 
-    def SetFocus(self, field, grid_cell=False):
+    def SetFocus(self, field, grid_cell=False, row_number=1):
         """
         Sets the current focus on the desired field.
 
@@ -502,7 +517,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
         """
-        self.__webapp.SetFocus(field,grid_cell)
+        self.__webapp.SetFocus(field,grid_cell,row_number)
 
     def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
         """
@@ -574,9 +589,12 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
         Sets value of an input element.
+
+        .. note::
+            Attention don't use  position parameter with  grid parameter True.
 
         :param field: The field name or label to receive the value
         :type field: str
@@ -592,11 +610,19 @@ class Webapp():
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by label name:
+        >>> oHelper.SetValue("Codigo", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by an existing label name:
+        >>> oHelper.SetValue(field = "Codigo", value = "000002", position = 2)
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
@@ -610,7 +636,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr=name_attr)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
@@ -750,19 +776,23 @@ class Webapp():
         """
         self.__webapp.WaitShow(string)
 
-    def ClickTree(self, treepath):
+    def ClickTree(self, treepath, right_click=False):
         """
         Clicks on TreeView component.
 
         :param treepath: String that contains the access path for the item separate by ">" .
         :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
+        >>> # Right Click example:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
-        self.__webapp.ClickTree(treepath)
+        self.__webapp.ClickTree(treepath, right_click)
     
     def GetText(self, string_left="", string_right=""):
         """
@@ -788,6 +818,39 @@ class Webapp():
         """
 
         return self.__webapp.GetText(string_left, string_right)
+    
+    def CheckHelp(self, text, button=""):
+        """
+        Checks if some help screen is present in the screen at the time and takes an action.
+
+        :param text: Text to be checked.
+        :type text: str
+        :param button: Button to be clicked.
+        :type button: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        """
+
+        return self.__webapp.CheckHelp(text, button)
+
+    def ClickMenuPopUpItem(self, text, right_click=False):
+        """
+        Clicks on MenuPopUp Item based in a text
+
+        :param text: Text in MenuPopUp to be clicked.
+        :type text: str
+        :param right_click: Button to be clicked.
+        :type button: bool
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickMenuPopUpItem("Label")
+        """
+        return self.__webapp.ClickMenuPopUpItem(text, right_click)
         
 class Apw():
 
