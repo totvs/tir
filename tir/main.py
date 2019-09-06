@@ -782,6 +782,13 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
         self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
+
+    def GridTree(self, column, value):
+        """
+        Clicks on a TreeView-Grid component.
+
+        """
+        self.__webapp.GridTree(column, value)
     
     def GetText(self, string_left="", string_right=""):
         """

@@ -3279,6 +3279,22 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
+    def GridTree(self, column, value):
+        tds_list = self.get_current_container().find_all('td', attrs={'class':'image-cell'})
+        td_element = next(iter(list(filter(lambda x: 'pmsexpall_mdi' in self.soup_to_selenium(x).get_attribute('style'), tds_list))),None)
+        #self.set_element_focus(self.soup_to_selen iutd_element)
+        grid = next(iter(td_element.find_parents('div', 'tcbrowse')), None)
+        if grid:
+            grid_lines = grid.select('tr')
+
+        labels = list(filter(map(str.strip, column.split(">"))))
+        td_lines = list(map(lambda x: x.select('div')[0].parent, grid_lines))
+        while(labels):
+            list(filter(lambda x: x.text == labels[0] ,td_lines))
+            td_lines.index(tt)
+
+        td = next(iter(list(map(lambda x: self.acha_label(column, x.select('label')) ,grid_lines))),None)
+        
     def get_x3_dictionaries(self, fields):
         """
         [Internal]
