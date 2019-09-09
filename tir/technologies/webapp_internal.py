@@ -4704,3 +4704,13 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+
+    def on_screen_enabled(self, elements):
+        """
+        [Internal]
+
+        Returns a list if selenium displayed and enabled methods is True.
+        """
+        is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+        
+        return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
