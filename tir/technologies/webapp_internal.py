@@ -3830,9 +3830,9 @@ class WebappInternal(Base):
 
     def ClickIcon(self, icon_text):
         """
-        Clicks on an Icon button based on its tooltip text.
+        Clicks on an Icon button based on its tooltip text or Alt attribute title.
 
-        :param icon_text: The tooltip text.
+        :param icon_text: The tooltip/title text.
         :type icon_text: str
 
         Usage:
@@ -3841,27 +3841,33 @@ class WebappInternal(Base):
         >>> oHelper.ClickIcon("Add")
         >>> oHelper.ClickIcon("Edit")
         """
-        button = ""
+        icon = ""
         # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not button):
-            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        while(time.time() < endtime and not icon):
+            self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
-            buttons = container.select("button[style]")
-            print("Searching for Icon")
-            filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-            #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+            tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+            
+            if tbtnbmp_img:
+                icon = next(iter(list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))), None)
 
-            button = next(iter(filtered_buttons), None)
+            else:
+                buttons = self.on_screen_enabled(container.select("button[style]"))
+                print("Searching for Icon")
+                filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+                #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
 
-            button_element = lambda: self.driver.find_element_by_xpath(xpath_soup(button))
-        
-        if not button:
-            self.log_error("Couldn't find Icon button.")
+                icon = next(iter(filtered_buttons), None)
 
-        self.click(button_element())
+        if not icon:
+            self.log_error(f"Couldn't find Icon: {icon_text}.")
+
+        element = lambda: self.soup_to_selenium(icon)
+
+        self.click(element())
 
     def AddParameter(self, parameter, branch, portuguese_value, english_value="", spanish_value=""):
         """
@@ -4698,3 +4704,13 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+
+    def on_screen_enabled(self, elements):
+        """
+        [Internal]
+
+        Returns a list if selenium displayed and enabled methods is True.
+        """
+        is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+        
+        return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
