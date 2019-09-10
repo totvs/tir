@@ -1088,7 +1088,11 @@ class WebappInternal(Base):
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+
+                        #Error! 04.09 (CTBA161 module). No need to wait element, if focused already
+                        #self.wait.until (EC.element_to_be_clickable ((By.XPATH, xpath_soup(element))))
+                        time.sleep(4)
+
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -1850,6 +1854,9 @@ class WebappInternal(Base):
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
         :type cposition: str
+
+        Dependencies:
+        >>> (lib)codecs, (file)tres25.csv, (file)ROUTINE.tres
         
         Usage:
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
@@ -1955,7 +1962,87 @@ class WebappInternal(Base):
 
         else:
             self.log_error ("Error, def SetDial(), attr_name not set up!")
+    
+    # Don't work yet
+    def F3G (self, tbl_row, tbl_cell):
+        """
 
+        """
+        time.sleep (4)
+        #MATA632 (0, 1) -> (1, 1)
+        table = self.driver.find_elements_by_xpath ("//div[@class = \"horizontal-scroll\"]/table/tbody/tr[@id=\"{}\"][contains(@class, \"selected-row\")]/td[contains(@class, \"\")][@id = \"{}\"]".format (tbl_row, tbl_cell))[1]    # find the table
+        
+        # STOP HERE
+        print (table)
+
+        self.click (table, click_type=enum.ClickType.SELENIUM)
+
+        if not table:
+            self.log_error(f"Couldn't find element: {table}")
+
+        cell0 = table.find_elements (By.CSS_SELECTOR, "td:first-child")
+
+        time.sleep (4)
+        cell_0 = self.driver.find_element_by_xpath("")   # selected after click
+        action = ActionChains(ac.driver)
+        action.move_to_element(elem_ced_2)
+        action.perform()
+        ac.click (elem_ced_2, click_type = enum.ClickType.SELENIUM)
+        time.sleep(3)
+        action.double_click(elem_ced_2)
+        action.perform()                                  # just in case
+        action.perform()
+        action.perform()
+        action.perform()
+        action.perform()
+        action.perform()
+        action.perform()
+
+        time.sleep (4)
+        elem_magnif_2 = ac.driver.find_element_by_xpath ("//div[@class = \"tget twidget dict-tget focus\"]/img")
+        ac.click (elem_magnif_2, click_type=enum.ClickType.SELENIUM)
+
+    def GetModuleName (self, search_function):
+        """
+        Method that load lines from xlsx(MS Excell) file, and return the module name (SIGAPCP) by function (MATA632).
+
+        :param search_function: Name of routine to search their module.
+        :type search_function: str
+
+        Dependencies:
+        >>> (lib)Pandas, (file)MODULE_NAME.xlsx
+
+        Usage:
+
+        >>> # Calling the method to search module name by routine name:
+        >>> oHelper.Setup(inst.oHelper.GetModuleName("MATA632"), '09/09/2019', '00', '102030', '01')
+        """
+        path_xsl = os.path.join(os.path.dirname(__file__), r'core\\data\\' + 'MODULE_NAME' + '.xlsx')
+        
+        try:
+            df = pd.read_excel(path_xsl, sheet_name='Sheet1')
+
+            modules = df['Module']
+            functions = df['Function']
+
+            displayed = []
+            module = []
+            function = []
+
+            # Revert type [pandas] -> [list]
+            for m in modules:
+                module.append(m)
+            for f in functions:
+                function.append(f)
+
+            for e, f in enumerate(function):
+                if search_function == f:
+                    displayed.append(module[e])
+            
+            return displayed[0]                     # if first needed [?]
+
+        except FileNotFoundError:
+            self.log_error(f"Couldn't find excell file for obtaining module name")
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
@@ -2881,9 +2968,6 @@ class WebappInternal(Base):
         """
         if row is not None:
             row -= 1
-
-        # if row > 0:     #test
-        #     row = 0
 
         self.grid_input.append([column, value, grid_number, new, row])
 
@@ -4372,7 +4456,7 @@ class WebappInternal(Base):
         """
         Clicks on a Label in box on the screen.
 
-        :param position: Position of text in the combobox, that need to be pressed
+        :param position: Position of text in the combobox, that need to be pressed(will be set)
         :type position: int
         :param label_comboBox: Arguement for detecting combobox by default value in it
         :type label_comboBox: str

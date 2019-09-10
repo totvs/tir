@@ -233,7 +233,7 @@ class Webapp():
         """
         Clicks on a Label in box on the screen.
 
-        :param position: Position of text in the combobox, that need to be pressed
+        :param position: Position of text in the combobox, that need to be pressed(will be set)
         :type position: int
         :param label_comboBox: Arguement for detecting combobox by default value in it
         :type label_comboBox: str
@@ -536,6 +536,26 @@ class Webapp():
         >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
         self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
+
+    def F3G (self, tbl_row, tbl_cell):
+        self.__webapp.F3G (tbl_row, tbl_cell)
+
+    def GetModuleName (self, search_function):
+        """
+        Method that load lines from xlsx(MS Excell) file, and return the module name (SIGAPCP) by function (MATA632).
+
+        :param search_function: Name of routine to search their module.
+        :type search_function: str
+
+        Dependencies:
+        >>> (lib)Pandas, (file)MODULE_NAME.xlsx
+
+        Usage:
+
+        >>> # Calling the method to search module name by routine name:
+        >>> oHelper.Setup(inst.oHelper.GetModuleName("MATA632"), '09/09/2019', '00', '102030', '01')
+        """
+        return self.__webapp.GetModuleName (search_function)
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """

@@ -12,6 +12,7 @@ class LanguagePack:
         self.group = languagepack["Group"]
         self.branch = languagepack["Branch"]
         self.environment = languagepack["Environment"]
+        self.create = languagepack["Create"]
         self.add = languagepack["Add"]
         self.delete= languagepack["Delete"]
         self.no_actions = {languagepack["Confirm"],languagepack["Save"],languagepack["Cancel"],languagepack["Close"],languagepack["Finish"]}
@@ -257,6 +258,7 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
+            "Create": "Создать",
             "Add": "Добавить",
             "Set": "Вставить",
             "Delete": "Удалить",
