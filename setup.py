@@ -9,7 +9,7 @@ config = {
     'author': 'TOTVS Automation Team',
     'url': 'https://github.com/totvs/tir',
     'download_url': 'https://github.com/totvs/tir',
-    'author_email': 'squad.automacaoprotheus@totvs.com.br',
+    'author_email': '',
     'version': '1.12.0',
     'install_requires': [
         'beautifulsoup4==4.7.1',
