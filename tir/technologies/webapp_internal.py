@@ -2377,7 +2377,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
 
-    def get_grid(self, grid_number=0):
+    def get_grid(self, grid_number=0, grid_element = None):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -2395,7 +2395,10 @@ class WebappInternal(Base):
         endtime = time.time() + 60
         grids = None
         while(time.time() < endtime and not grids):
-            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if not grid_element:
+                grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
             if len(grids) > 1:
@@ -3279,23 +3282,88 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
-    def GridTree(self, column, value):
-        tds_list = self.get_current_container().find_all('td', attrs={'class':'image-cell'})
-        td_element = next(iter(list(filter(lambda x: 'pmsexpall_mdi' in self.soup_to_selenium(x).get_attribute('style'), tds_list))),None)
-        #self.set_element_focus(self.soup_to_selen iutd_element)
-        grid = next(iter(td_element.find_parents('div', 'tcbrowse')), None)
-        if grid:
-            grid_lines = grid.select('tr')
+    def GridTree(self, column , tree_path):
+        tree_list = list(map(str.strip, tree_path.split(">")))
+        last_item = tree_list.pop()
+        while(tree_list):
+            # grid = self.get_grid(grid_element = '.tcbrowse')
+            # column_index = self.search_column_index(grid, column)
+            # len_grid_lines = self.lenght_grid_lines(grid)
+            # div = self.tree_grid_div_text(grid, tree_list[0], column_index)
+            # line = div.parent.parent
+            # td = next(iter(line.select('td')), None)
+            # self.expand_tree_grid_line(td)
+            # self.wait_gridTree(len_grid_lines)
+            len_grid_lines = self.expand_tree(column, tree_list[0])
+            grid = self.get_grid(grid_element = '.tcbrowse')
+            if self.lenght_grid_lines(grid) > len_grid_lines:
+                tree_list.remove(tree_list[0])
+            else:
+                len_grid_lines = self.expand_tree(column, tree_list[0])
+                # grid = self.get_grid(grid_element = '.tcbrowse')
+                # len_grid_lines = self.lenght_grid_lines(grid)
+                # div = self.tree_grid_div_text(grid, labels[0], column_index)
+                # line = div.parent.parent
+                # td = next(iter(line.select('td')), None)
+                # self.expand_tree_grid_line(self.soup_to_selenium(td))
+                # self.wait_gridTree(len_grid_lines)
+                tree_list.remove(tree_list[0])
+                
+        div = self.tree_grid_div_text(grid, last_item, column_index)
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(div))))
+        div_s = self.soup_to_selenium(div)
+        self.wait.until(EC.visibility_of(div_s))
+        self.move_to_element(div_s)
+        div_s.click()
 
-        labels = list(filter(map(str.strip, column.split(">"))))
-        td_lines = list(map(lambda x: x.select('div')[0].parent, grid_lines))
-        while(labels):
-            list(filter(lambda x: x.text == labels[0] ,td_lines))
-            td_lines.index(tt)
+    def expand_tree(self, column, item):
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+        len_grid_lines = self.lenght_grid_lines(grid)
+        div = self.tree_grid_div_text(grid, item, column_index)
+        line = div.parent.parent
+        td = next(iter(line.select('td')), None)
+        self.expand_tree_grid_line(td)
+        self.wait_gridTree(len_grid_lines)
+        return len_grid_lines
 
-        td = next(iter(list(map(lambda x: self.acha_label(column, x.select('label')) ,grid_lines))),None)
-        
-    def get_x3_dictionaries(self, fields):
+
+
+    def search_column_index(self, grid, column):
+        column_enumeration = list(enumerate(grid.select("thead label")))
+        chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+        if chosen_column:
+            column_index = chosen_column[0]
+        else: 
+            self.log_error("Couldn't find chosen column.")
+
+        return column_index
+
+    
+    def wait_gridTree(self, n_lines):
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        while (n_lines == self.lenght_grid_lines(grid) ):
+            grid = self.get_grid(grid_element = '.tcbrowse')
+
+    def expand_tree_grid_line(self, element_soup):
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        element_selenium = self.soup_to_selenium(element_soup)
+        element_selenium.click()
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.send_keys(element_selenium, Keys.ENTER)
+
+    def tree_grid_div_text(self, grid, text, column_index):
+        columns_list = grid.select('td')
+        columns_list_filtered = list(filter(lambda x: int(x.attrs['id']) == column_index  ,columns_list))
+        div_list = list(map(lambda x: next(iter(x.select('div')), None)  ,columns_list_filtered))
+        div = next(iter(list(filter(lambda x: (text.strip() == x.text.strip() and x.parent.parent.attrs['id'] != '0') ,div_list))), None)
+        return div
+    
+    def lenght_grid_lines(self, grid):
+        grid_lines = grid.select("tbody tr")
+        return len(grid_lines)
+
+    def get_x3_dictionaries(self, fields): 
         """
         [Internal]
 

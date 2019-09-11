@@ -789,7 +789,7 @@ class Webapp():
 
         """
         self.__webapp.GridTree(column, value)
-    
+        
     def GetText(self, string_left="", string_right=""):
         """
         This method returns a string from modal based on the string in the left or right position that you send on parameter.
