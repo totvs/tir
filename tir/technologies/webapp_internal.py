@@ -1826,10 +1826,8 @@ class WebappInternal(Base):
         try:
             soup_element  = ""
             if (button.lower() == "x"):
-                wait_button = self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
-                if not wait_button:
-                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                    return
+                self.set_button_x(position, check_error)
+                return
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1, check_error=check_error)
                 position -= 1
@@ -1840,7 +1838,7 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not soup_element and button.lower() != "x"): 
+            while(time.time() < endtime and not soup_element): 
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
                 soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
 
@@ -1851,12 +1849,6 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-            if (button.lower() == "x" and self.element_exists(term=".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']", scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)):
-                element = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']")
-                self.scroll_to_element(element)
-                time.sleep(2)
-                self.click(element)
-                return
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
@@ -1943,7 +1935,25 @@ class WebappInternal(Base):
             print(error)
             self.log_error(str(error))
 
+    def set_button_x(self, position=1, check_error=True):
+        position -= 1
+        term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
+        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
+        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
 
+        close_list = soup.select(term_button)
+        if not close_list:
+            self.log_error(f"Element not found")
+        if len(close_list) < position+1:
+            self.log_error(f"Element x position: {position} not found")
+        if position == 0:
+            element_soup = close_list.pop()
+        else:
+            element_soup = close_list.pop(position)
+        element_selenium = self.soup_to_selenium(element_soup)
+        self.scroll_to_element(element_selenium)
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.click(element_selenium)
     def click_sub_menu(self, sub_item):
         """
         [Internal]
