@@ -783,12 +783,24 @@ class Webapp():
         """ 
         self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
 
-    def GridTree(self, column, value):
+    def GridTree(self, column, treepath,  right_click=False):
         """
-        Clicks on a TreeView-Grid component.
+        Clicks on Grid TreeView component.
 
-        """
-        self.__webapp.GridTree(column, value)
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3")
+        >>> # Right GridTree example:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3", right_click=True)
+        
+        """ 
+        self.__webapp.GridTree(column, treepath, right_click)
         
     def GetText(self, string_left="", string_right=""):
         """
