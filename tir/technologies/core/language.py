@@ -33,7 +33,7 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
-        self.OkeyWordH = languagepack["OkeyWordH"]
+        self.OkeyWordU = languagepack["OkeyWordU"]
         self.OkeyWordL = languagepack["OkeyWordL"]
         self.copy = languagepack["Copy"]
         self.cut = languagepack["Cut"]
@@ -282,8 +282,8 @@ class LanguagePack:
             #"Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
-            "OkeyWordH" : "OK",
-            "OkeyWordL" : "Ok",     # test add
+            "OkeyWordU" : "OK",
+            "OkeyWordL" : "Ok",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",

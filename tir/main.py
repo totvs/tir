@@ -229,7 +229,7 @@ class Webapp():
         """
         self.__webapp.ClickCheckBox(label_box_name,position)
 
-    def ClickComboBox(self, position=1, label_comboBox=""):
+    def ClickComboBox(self, position=1, label_comboBox="", flag_cb = False, box_numb = 0):
         """
         Clicks on a Label in box on the screen.
 
@@ -237,13 +237,20 @@ class Webapp():
         :type position: int
         :param label_comboBox: Arguement for detecting combobox by default value in it
         :type label_comboBox: str
+        :flag_cb: If set to <True>, then function search specific combobox by xpath on the screen
+        :type flag_cb: bool
+        :param box_numb: Number of combobox on the screen from <1>
+        :type box_numb: int
 
         Usage:
 
-        >>> # Call the method:
-        >>> oHelper.ClickComboBox (position=2, label_comboBox = "Все блокировки")
+        >>> # Call the method for one combobox on the screen:
+        >>> oHelper.ClickComboBox (position = 2, label_comboBox = "Все блокировки")
+
+        >>> # Call the method for multiple (xpath):
+        >>> oHelper.ClickComboBox (position = 2, flag_cb = True, box_numb = 2)
         """
-        self.__webapp.ClickComboBox (position, label_comboBox)
+        self.__webapp.ClickComboBox (position, label_comboBox, flag_cb, box_numb)
 
     def ClickLabel(self, label_name):
         """
@@ -537,8 +544,9 @@ class Webapp():
         """
         self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
 
-    def F3G (self, tbl_row, tbl_cell):
-        self.__webapp.F3G (tbl_row, tbl_cell)
+    # Don't work yet
+    # def F3G (self, tbl_row, tbl_cell):
+    #     self.__webapp.F3G (tbl_row, tbl_cell)
 
     def GetModuleName (self, search_function):
         """

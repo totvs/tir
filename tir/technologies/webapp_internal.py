@@ -1907,10 +1907,16 @@ class WebappInternal(Base):
                         else:
                             c_ret = str_original[nstart+12 : nend].strip()  # FIX, (30.08 -> .replace(" ", ""))
 
+                        return c_ret
+
+                    else:
+                        self.log_error ("No such Button: [{}] in [{}] file, try another tres".format(cposition, csource))
+                    
                     p.close()
 
-            return c_ret
-
+            else:
+                self.log_error ("No such file: [{}] or cannot create [{}_utf.tres] file".format(path_encoding, csource))
+                    
     def NewRowGrid (self, sI):
         """
         [Internal]
@@ -1962,45 +1968,6 @@ class WebappInternal(Base):
 
         else:
             self.log_error ("Error, def SetDial(), attr_name not set up!")
-    
-    # Don't work yet
-    def F3G (self, tbl_row, tbl_cell):
-        """
-
-        """
-        time.sleep (4)
-        #MATA632 (0, 1) -> (1, 1)
-        table = self.driver.find_elements_by_xpath ("//div[@class = \"horizontal-scroll\"]/table/tbody/tr[@id=\"{}\"][contains(@class, \"selected-row\")]/td[contains(@class, \"\")][@id = \"{}\"]".format (tbl_row, tbl_cell))[1]    # find the table
-        
-        # STOP HERE
-        print (table)
-
-        self.click (table, click_type=enum.ClickType.SELENIUM)
-
-        if not table:
-            self.log_error(f"Couldn't find element: {table}")
-
-        cell0 = table.find_elements (By.CSS_SELECTOR, "td:first-child")
-
-        time.sleep (4)
-        cell_0 = self.driver.find_element_by_xpath("")   # selected after click
-        action = ActionChains(ac.driver)
-        action.move_to_element(elem_ced_2)
-        action.perform()
-        ac.click (elem_ced_2, click_type = enum.ClickType.SELENIUM)
-        time.sleep(3)
-        action.double_click(elem_ced_2)
-        action.perform()                                  # just in case
-        action.perform()
-        action.perform()
-        action.perform()
-        action.perform()
-        action.perform()
-        action.perform()
-
-        time.sleep (4)
-        elem_magnif_2 = ac.driver.find_element_by_xpath ("//div[@class = \"tget twidget dict-tget focus\"]/img")
-        ac.click (elem_magnif_2, click_type=enum.ClickType.SELENIUM)
 
     def GetModuleName (self, search_function):
         """
@@ -4452,7 +4419,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Index the Ckeckbox invalid.")
 
-    def ClickComboBox (self, position = 1, label_comboBox = ""):
+    def ClickComboBox (self, position = 1, label_comboBox = "", flag_cb = False, box_numb = 0):
         """
         Clicks on a Label in box on the screen.
 
@@ -4460,40 +4427,66 @@ class WebappInternal(Base):
         :type position: int
         :param label_comboBox: Arguement for detecting combobox by default value in it
         :type label_comboBox: str
+        :flag_cb: If set to <True>, then function search specific combobox by xpath on the screen
+        :type flag_cb: bool
+        :param box_numb: Number of combobox on the screen from <1>
+        :type box_numb: int
 
         Usage:
 
-        >>> # Call the method:
+        >>> # Call the method for one combobox on the screen:
         >>> oHelper.ClickComboBox (position = 2, label_comboBox = "Все блокировки")
+
+        >>> # Call the method for multiple (xpath):
+        >>> oHelper.ClickComboBox (position = 2, flag_cb = True, box_numb = 2)
         """
-        if position > 0:
 
-            position -= 1
-            mass_labels = []
+        if not isinstance(flag_cb, bool):
+            self.log_error ("Wrong type of flag_cb arg")
 
-            self.wait_element (label_comboBox)
+        if not flag_cb:
+            if position > 0:
 
-            container = self.get_current_container ()
-            if not container:
-                self.log_error ("Couldn't locate container.")
-            try:
-                labels_boxs = container.select ("option")
+                position -= 1
+                mass_labels = []
+
+                self.wait_element (label_comboBox)
+
+                container = self.get_current_container ()
+                if not container:
+                    self.log_error ("Couldn't locate container.")
+                try:
+                    labels_boxs = container.select ("option")
+                    
+                    if not labels_boxs:
+                        raise Exception("No such label")
+
+                except Exception:
+                    labels_boxs = container.select ("select")
                 
-                if not labels_boxs:
-                    raise Exception("No such label")
+                for l in labels_boxs:
+                    mass_labels += [l]
 
-            except Exception:
-                labels_boxs = container.select ("select")
-            
-            for l in labels_boxs:
-                mass_labels += [l]
+                sbox = (self.soup_to_selenium (labels_boxs[position]))
+                self.click (sbox, click_type = enum.ClickType.SELENIUM)
+                
+            else:
+                self.log_error ("Index the ComboBox invalid.")
 
-            sbox = (self.soup_to_selenium (labels_boxs[position]))
-            self.click (sbox, click_type = enum.ClickType.SELENIUM)
-            
-        else:
-            self.log_error ("Index the ComboBox invalid.")
+        if flag_cb:
+            box_numb -= 1
+            position -= 1
 
+            cb_xp = self.driver.find_elements_by_xpath ("//div[contains (@class, \"tcombobox twidget dict-tcombobox\")]/select")[box_numb] # find all boxes
+            action = ActionChains(self.driver)
+            action.move_to_element(cb_xp)
+            action.perform()
+            self.click (cb_xp, click_type = enum.ClickType.SELENIUM)  # click box
+
+            cb_el = cb_xp.find_elements_by_css_selector ("option")[position]
+            action.move_to_element(cb_el)
+            action.perform()
+            self.click (cb_el, click_type = enum.ClickType.SELENIUM)  # click value
 
     def ClickLabel(self, label_name):
         """
