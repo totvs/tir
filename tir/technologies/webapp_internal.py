@@ -1889,23 +1889,7 @@ class WebappInternal(Base):
             elif ',' in sub_item:
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
-                while(len(filtered_sub_itens) > 0):
-                    soup_objects = self.web_scrap(term=filtered_sub_itens[0], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
-                    if not soup_objects:
-                        self.log_error(f"Couldn't find element {sub_item}")
-                    for i in range(len(soup_objects)):
-                        if soup_objects[i].text == filtered_sub_itens[0]:
-                            soup_element = lambda : self.soup_to_selenium(soup_objects[i])
-                        
-                    if not soup_element:
-                        soup_element = lambda : self.soup_to_selenium(soup_objects[0])
-
-                    self.move_to_element(soup_element())
-                    filtered_sub_itens.remove(filtered_sub_itens[0])
-
-                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
-                self.click(soup_element())
-
+                self.click_sub_menu(filtered_sub_itens[len(filtered_sub_itens)-1])
 
 
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
