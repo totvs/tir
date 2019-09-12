@@ -2849,6 +2849,7 @@ class WebappInternal(Base):
         containers = soup.select(".tmodaldialog")
         if containers:
             containers = self.zindex_sort(containers, True)
+            container_id = containers[0].attrs['id']
 
             grids = containers[0].select(".tgetdados, .tgrid, .tcbrowse")
 
@@ -2972,11 +2973,17 @@ class WebappInternal(Base):
                                                 if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
                                                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                     self.send_keys(selenium_input(), Keys.ENTER)
-
-                                self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, presence=False)
-                                time.sleep(1)
-                                current_value = self.get_element_text(selenium_column())
-
+                                endtime = self.config.time_out
+                                while endtime > 0:
+                                    element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
+                                    time.sleep(1)
+                                    if element_exist:
+                                        current_value = self.get_element_text(selenium_column())
+                                    else:
+                                        endtime = endtime - 10
+                                        container_current = self.get_current_container()
+                                        if container_current.attrs['id'] != container_id:
+                                            return
                             else:
                                 option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text ,child[0].select('option'))))
                                 option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
@@ -3520,6 +3527,7 @@ class WebappInternal(Base):
                             break
                     except:
                         continue
+        return success
 
     def get_selected_row(self, rows):
         """
