@@ -2983,6 +2983,7 @@ class WebappInternal(Base):
                                         endtime = endtime - 10
                                         container_current = self.get_current_container()
                                         if container_current.attrs['id'] != container_id:
+                                            print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                             return
                             else:
                                 option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text ,child[0].select('option'))))
