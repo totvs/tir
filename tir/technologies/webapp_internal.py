@@ -4474,7 +4474,10 @@ class WebappInternal(Base):
             else:
                 len_grid_lines = self.expand_treeGird(column, tree_list[0])
                 tree_list.remove(tree_list[0])
-    
+
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+        
         div = self.search_grid_by_text(grid, last_item, column_index)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(div))))
         div_s = self.soup_to_selenium(div)
