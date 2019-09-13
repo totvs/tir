@@ -4459,6 +4459,9 @@ class WebappInternal(Base):
         tree_list = list(map(str.strip, tree_path.split(">")))
         last_item = tree_list.pop()
 
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+
         while(time.time() < endtime and tree_list ):
 
             len_grid_lines = self.expand_treeGird(column, tree_list[0])
