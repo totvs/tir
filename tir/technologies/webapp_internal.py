@@ -118,7 +118,7 @@ class WebappInternal(Base):
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program)
 
-        self.user_screen()
+        self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
         self.environment_screen()
 
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
@@ -212,7 +212,7 @@ class WebappInternal(Base):
         button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
         self.click(button)
 
-    def user_screen(self):
+    def user_screen(self, admin_user = False):
         """
         [Internal]
 
@@ -223,6 +223,13 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
+        user_text = self.config.user if not admin_user and not self.config.user_cfg else self.config.user_cfg
+        password_text = self.config.password if not admin_user and not self.config.password_cfg else self.config.password_cfg
+
+        if self.config.smart_test and admin_user and not self.config.user_cfg :
+            user_text = "admin"
+            password_text = "1234"
+
         self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
         try_counter = 0
@@ -238,7 +245,7 @@ class WebappInternal(Base):
         user = lambda: self.soup_to_selenium(user_element)
         user_value = self.get_web_value(user())
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (user_value.strip() != self.config.user.strip())):
+        while (time.time() < endtime and (user_value.strip() != user_text.strip())):
 
             if try_counter == 0:
                 user = lambda: self.soup_to_selenium(user_element)
@@ -249,12 +256,12 @@ class WebappInternal(Base):
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
             self.double_click(user())
             # self.send_keys(user(), Keys.HOME)
-            self.send_keys(user(), self.config.user)
+            self.send_keys(user(), user_text)
             self.send_keys(user(), Keys.ENTER)
             user_value = self.get_web_value(user())
             try_counter += 1 if(try_counter < 1) else -1
 
-        if (user_value.strip() != self.config.user.strip()):
+        if (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
             self.log_error("Couldn't fill User input element.")
 
@@ -282,7 +289,7 @@ class WebappInternal(Base):
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(password_element))))
             self.click(password())
             self.send_keys(password(), Keys.HOME)
-            self.send_keys(password(), self.config.password)
+            self.send_keys(password(), password_text)
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
             self.wait_blocker_ajax()
@@ -2843,7 +2850,7 @@ class WebappInternal(Base):
             self.log_error("Could't find")
 
         container_id = self.soup_to_selenium(container).get_attribute("id")
-
+ 
         grids = container.select(".tgetdados, .tgrid, .tcbrowse")
 
         grids = self.filter_displayed_elements(grids)
