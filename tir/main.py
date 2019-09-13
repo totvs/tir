@@ -780,7 +780,7 @@ class Webapp():
         """
         Clicks on TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" .
+        :param treepath: String that contains the access path for the item separate by ">" . 
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
