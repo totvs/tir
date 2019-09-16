@@ -793,7 +793,26 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
         self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
-    
+
+    def GridTree(self, column, treepath,  right_click=False):
+        """
+        Clicks on Grid TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3")
+        >>> # Right GridTree example:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3", right_click=True)
+        
+        """ 
+        self.__webapp.GridTree(column, treepath, right_click)
+        
     def GetText(self, string_left="", string_right=""):
         """
         This method returns a string from modal based on the string in the left or right position that you send on parameter.

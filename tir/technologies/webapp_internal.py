@@ -2380,7 +2380,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
 
-    def get_grid(self, grid_number=0):
+    def get_grid(self, grid_number=0, grid_element = None):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -2398,7 +2398,10 @@ class WebappInternal(Base):
         endtime = time.time() + 60
         grids = None
         while(time.time() < endtime and not grids):
-            grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if not grid_element:
+                grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
             grids = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), grids))
@@ -3286,7 +3289,17 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
-    def get_x3_dictionaries(self, fields):
+    def search_column_index(self, grid, column):
+        column_enumeration = list(enumerate(grid.select("thead label")))
+        chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+        if chosen_column:
+            column_index = chosen_column[0]
+        else: 
+            self.log_error("Couldn't find chosen column.")
+
+        return column_index
+
+    def get_x3_dictionaries(self, fields): 
         """
         [Internal]
 
@@ -4439,6 +4452,120 @@ class WebappInternal(Base):
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
         return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+            
+            
+    def GridTree(self, column , tree_path, right_click = False):
+        """
+        Clicks on Grid TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3")
+        >>> # Right GridTree example:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3", right_click=True)
+        
+        """ 
+
+        endtime = time.time() + self.config.time_out
+
+        tree_list = list(map(str.strip, tree_path.split(">")))
+        last_item = tree_list.pop()
+
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+
+        while(time.time() < endtime and tree_list ):
+
+            len_grid_lines = self.expand_treeGird(column, tree_list[0])
+
+            grid = self.get_grid(grid_element = '.tcbrowse')
+            column_index = self.search_column_index(grid, column)
+
+            if self.lenght_grid_lines(grid) > len_grid_lines:
+                tree_list.remove(tree_list[0])
+            else:
+                len_grid_lines = self.expand_treeGird(column, tree_list[0])
+                tree_list.remove(tree_list[0])
+
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+        
+        div = self.search_grid_by_text(grid, last_item, column_index)
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(div))))
+        div_s = self.soup_to_selenium(div)
+        self.click((div_s), enum.ClickType.SELENIUM , right_click)
+
+    def expand_treeGird(self, column, item):
+        """
+        [Internal]
+          
+        Search for a column and expand the tree
+        Returns len of grid lines
+
+        """
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        column_index = self.search_column_index(grid, column)
+        len_grid_lines = self.lenght_grid_lines(grid)
+        div = self.search_grid_by_text(grid, item, column_index)
+        line = div.parent.parent
+        td = next(iter(line.select('td')), None)
+        self.expand_tree_grid_line(td)
+        self.wait_gridTree(len_grid_lines)
+        return len_grid_lines
+
+    def expand_tree_grid_line(self, element_soup):
+        """
+        [Internal]
+        Click on a column and send the ENTER key
+        
+        """
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        element_selenium = lambda: self.soup_to_selenium(element_soup)
+        element_selenium().click()
+        self.wait_blocker_ajax()
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.send_keys(element_selenium(), Keys.ENTER)
+
+    def wait_gridTree(self, n_lines):
+        """
+        [Internal]
+        Wait until the GridTree line count increases or decreases.
+        
+        """
+        endtime = time.time() + self.config.time_out
+        grid = self.get_grid(grid_element = '.tcbrowse')
+
+        while (time.time() < endtime and n_lines == self.lenght_grid_lines(grid) ):
+            grid = self.get_grid(grid_element = '.tcbrowse')
+
+
+    def search_grid_by_text(self, grid, text, column_index):
+        """
+        [Internal]
+        Searches for text in grid columns
+        Returns the div containing the text
+        
+        """
+        columns_list = grid.select('td')
+        columns_list_filtered = list(filter(lambda x: int(x.attrs['id']) == column_index  ,columns_list))
+        div_list = list(map(lambda x: next(iter(x.select('div')), None)  ,columns_list_filtered))
+        div = next(iter(list(filter(lambda x: (text.strip() == x.text.strip() and x.parent.parent.attrs['id'] != '0') ,div_list))), None)
+        return div
+    
+    def lenght_grid_lines(self, grid):
+        """
+        [Internal]
+        Returns the leght of grid.
+        
+        """
+        grid_lines = grid.select("tbody tr")
+        return len(grid_lines)
                 
     def TearDown(self):
         """
