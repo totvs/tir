@@ -2102,7 +2102,7 @@ class WebappInternal(Base):
 
             element = None
             
-            element = self.search_text(selector=".tsay", text=string)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
 
             if not element:
                 return
@@ -2131,8 +2131,8 @@ class WebappInternal(Base):
         while(time.time() < endtime):
 
             element = None
-            
-            element = self.search_text(selector=".tsay", text=string)
+
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
 
             if element:
                 return
