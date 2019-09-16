@@ -901,6 +901,8 @@ class WebappInternal(Base):
 
             if not label:
                 self.log_error("Label wasn't found.")
+
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
             
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
@@ -2981,6 +2983,7 @@ class WebappInternal(Base):
                                 time.sleep(1)
                                 if element_exist:
                                     current_value = self.get_element_text(selenium_column())
+                                    break
                                 else:
                                     endtime = endtime - 10
                                     container_current = self.get_current_container()
