@@ -4656,11 +4656,17 @@ class WebappInternal(Base):
 
         print(f"Checking Help on screen: {text}")
         self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-        if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
-            self.errors.append(f"{self.language.messages.text_not_found}({text})")
+        container = self.get_current_container()
+        container = container.select(".tsay")
+        container_text = ''
+        for x in range(len(container)):
+            container_text += container[x].text          
+        if text in container_text:
+            print(f"Help on screen Checked: {text}")
             self.SetButton(button, check_error=False)
         else:
-            self.SetButton(button, check_error=False)
+            print(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
+            self.log_error("Couldn't find param")
 
     def get_single_button(self):
         """
