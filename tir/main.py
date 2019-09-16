@@ -593,6 +593,9 @@ class Webapp():
         """
         Sets value of an input element.
 
+        .. note::
+            Attention don't use  position parameter with  grid parameter True.
+
         :param field: The field name or label to receive the value
         :type field: str
         :param value: The value to be inputted on the element.
@@ -607,11 +610,19 @@ class Webapp():
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by label name:
+        >>> oHelper.SetValue("Codigo", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by an existing label name:
+        >>> oHelper.SetValue(field = "Codigo", value = "000002", position = 2)
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
@@ -769,7 +780,7 @@ class Webapp():
         """
         Clicks on TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" .
+        :param treepath: String that contains the access path for the item separate by ">" . 
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
