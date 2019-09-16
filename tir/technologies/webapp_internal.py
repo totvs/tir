@@ -2981,6 +2981,7 @@ class WebappInternal(Base):
                                 time.sleep(1)
                                 if element_exist:
                                     current_value = self.get_element_text(selenium_column())
+                                    break
                                 else:
                                     endtime = endtime - 10
                                     container_current = self.get_current_container()
