@@ -2362,15 +2362,17 @@ class WebappInternal(Base):
         get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
         current = get_current()
         while(last != current and match_value):
-            td = next(iter(current.select(f"td[id='{column_index}']")), None)
-            text = td.text.strip() if td else ""
+            td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+            text = td().text.strip() if td() else ""
             if text in match_value:
+                self.try_click(td())
                 break
             time.sleep(2)
             last = current
             scroll_down()
             time.sleep(0.5)
             current = get_current()
+            self.try_click(td())
             time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
@@ -2396,10 +2398,7 @@ class WebappInternal(Base):
             grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
-            if len(grids) > 1:
-                grids = self.filter_displayed_elements(grids,False)
-            else:
-                grids = self.filter_displayed_elements(grids,True)
+            grids = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), grids))
         else:
             self.log_error("Couldn't find grid.")
 
@@ -3539,6 +3538,10 @@ class WebappInternal(Base):
         filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
         if filtered_rows:
             return next(iter(filtered_rows))
+        else:
+            filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
+            if filtered_rows:
+                return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
 
     def SetFilePath(self, value):
         """
@@ -4668,3 +4671,12 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+
+    def try_click(self, element):
+        """
+        [Internal]
+        """
+        try:
+            self.soup_to_selenium(element).click()
+        except:
+            pass
