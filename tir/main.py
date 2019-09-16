@@ -776,11 +776,11 @@ class Webapp():
         """
         self.__webapp.WaitShow(string)
 
-    def ClickTree(self, treepath, right_click=False):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" .
+        :param treepath: String that contains the access path for the item separate by ">" . 
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
@@ -792,7 +792,7 @@ class Webapp():
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
-        self.__webapp.ClickTree(treepath, right_click)
+        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
     
     def GetText(self, string_left="", string_right=""):
         """
