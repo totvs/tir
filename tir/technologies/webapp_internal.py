@@ -278,7 +278,7 @@ class WebappInternal(Base):
         password_value = self.get_web_value(password())
         endtime = time.time() + self.config.time_out
         try_counter = 0
-        while (time.time() < endtime and not password_value.strip()):
+        while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
 
             if try_counter == 0:
                 password = lambda: self.soup_to_selenium(password_element)
@@ -295,7 +295,7 @@ class WebappInternal(Base):
             self.wait_blocker_ajax()
             try_counter += 1 if(try_counter < 1) else -1
         
-        if not password_value.strip():
+        if not password_value.strip() and self.config.password != '':
             self.restart_counter += 1
             self.log_error("Couldn't fill User input element.")
 
