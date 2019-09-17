@@ -2838,14 +2838,21 @@ class WebappInternal(Base):
         field_to_label = {}
         field_to_valtype = {}
         field_to_len = {}
+        current_value = ""
 
-        endtime = time.time() + self.config.time_out
+        if(field[1] == True):
+            field_one = 'is a boolean value'
+        elif(field[1] == False):
+            field_one = ''
+        elif(isinstance(field[1],str)):
+            field_one = self.remove_mask(field[1]).strip()
 
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
             field_to_valtype = x3_dictionaries[0]
             field_to_len = x3_dictionaries[1]
 
+        endtime = time.time() + self.config.time_out
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             print("Waiting for container to be active")
             time.sleep(1)
@@ -2853,68 +2860,61 @@ class WebappInternal(Base):
         if "tget" in self.get_current_container().next.attrs['class']:
             self.wait_element(field[0])
 
-        container = self.get_current_container()
-        if not container:
-            self.log_error("Could't find")
+        endtime = time.time() + self.config.time_out
+        while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
-        container_id = self.soup_to_selenium(container).get_attribute("id")
- 
-        grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+            container = self.get_current_container()
+            if not container:
+                self.log_error("Could't find")
 
-        grids = self.filter_displayed_elements(grids)
-        if grids:
-            headers = self.get_headers_from_grids(grids)
-            grid_id = grids[field[2]].attrs["id"]
-            if grid_id not in self.grid_counters:
-                self.grid_counters[grid_id] = 0
+            container_id = self.soup_to_selenium(container).get_attribute("id")
+    
+            grids = container.select(".tgetdados, .tgrid, .tcbrowse")
 
-            column_name = ""
-            if field[2] > len(grids):
-                self.log_error(self.language.messages.grid_number_error)
-            down_loop = 0
-            rows = grids[field[2]].select("tbody tr")
+            grids = self.filter_displayed_elements(grids)
+            if grids:
+                headers = self.get_headers_from_grids(grids)
+                grid_id = grids[field[2]].attrs["id"]
+                if grid_id not in self.grid_counters:
+                    self.grid_counters[grid_id] = 0
 
-            if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
-                self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
+                column_name = ""
+                if field[2] > len(grids):
+                    self.log_error(self.language.messages.grid_number_error)
+                down_loop = 0
+                rows = grids[field[2]].select("tbody tr")
 
-            row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
+                if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
+                    self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
-            if row:
-                while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
-                    self.new_grid_line(field, False)
-                    row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
-                    down_loop+=1
-                self.down_loop_grid = False
-                columns = row.select("td")
-                if columns:
-                    if "_" in field[0]:
-                        try:
-                            column_name = field_to_label[field[0]].lower()
-                        except:
-                            self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
-                    else:
-                        column_name = field[0].lower()
+                row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
 
-                    if column_name not in headers[field[2]]:
-                        self.log_error(self.language.messages.grid_column_error)
+                if row:
+                    while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
+                        self.new_grid_line(field, False)
+                        row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+                        down_loop+=1
+                    self.down_loop_grid = False
+                    columns = row.select("td")
+                    if columns:
+                        if "_" in field[0]:
+                            try:
+                                column_name = field_to_label[field[0]].lower()
+                            except:
+                                self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
+                        else:
+                            column_name = field[0].lower()
 
-                    column_number = headers[field[2]][column_name]
+                        if column_name not in headers[field[2]]:
+                            self.log_error(self.language.messages.grid_column_error)
 
-                    current_value = columns[column_number].text.strip()
-                    xpath = xpath_soup(columns[column_number])
+                        column_number = headers[field[2]][column_name]
 
-                    try_counter = 0
-                    current_value = self.remove_mask(current_value).strip()
+                        current_value = columns[column_number].text.strip()
+                        xpath = xpath_soup(columns[column_number])
 
-                    if(field[1] == True):
-                        field_one = 'is a boolean value'
-                    elif(field[1] == False):
-                        field_one = ''
-                    elif(isinstance(field[1],str)):
-                        field_one = self.remove_mask(field[1]).strip()
-
-                    endtime = time.time() + self.config.time_out
-                    while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
+                        try_counter = 0
+                        current_value = self.remove_mask(current_value).strip()
 
                         selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                         self.scroll_to_element(selenium_column())
@@ -3008,14 +3008,15 @@ class WebappInternal(Base):
                             else:
                                 self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                 current_value = field[1]
-                    if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
-                        self.log_error("Couldn't fill input value.")
+                    else:
+                        self.log_error("Couldn't find columns.")
                 else:
-                    self.log_error("Couldn't find columns.")
+                    self.log_error("Couldn't find rows.")
             else:
-                self.log_error("Couldn't find rows.")
-        else:
-            self.log_error("Fill grid couldn't find grids.")
+                self.log_error("Fill grid couldn't find grids.")
+
+        if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+            self.log_error(f"Couldn't fill input: {field_one} value.")
 
     def get_selenium_column_element(self, xpath):
         """
