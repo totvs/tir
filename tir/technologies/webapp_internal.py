@@ -718,17 +718,17 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
-        endtime = time.time() + self.config.time_out
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         container = None
-
-        while (time.time() < endtime and not container):
-            container = self.get_current_container()
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not container): 
+            soup = self.get_current_DOM()
+            search_index = self.get_panel_name_index(panel_name) if panel_name else 0
+            containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True) 
+            container = next(iter(containers), None)
 
         if not container:
-            self.log_error("Couldn't find container")
-
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        search_index = self.get_panel_name_index(panel_name) if panel_name else 0
+            self.log_error("Couldn't find container of element.")
 
         try:
             browse_div = container.select("[style*='fwskin_seekbar_ico']")[search_index].find_parent().find_parent()
