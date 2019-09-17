@@ -223,8 +223,8 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
-        user_text = self.config.user if not admin_user and not self.config.user_cfg else self.config.user_cfg
-        password_text = self.config.password if not admin_user and not self.config.password_cfg else self.config.password_cfg
+        user_text = self.config.user_cfg if  admin_user and self.config.user_cfg else self.config.user
+        password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
         if self.config.smart_test and admin_user and not self.config.user_cfg :
             user_text = "admin"
