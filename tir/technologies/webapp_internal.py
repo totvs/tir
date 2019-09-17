@@ -718,13 +718,17 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        soup = self.get_current_DOM()
-        search_index = self.get_panel_name_index(panel_name) if panel_name else 0
-        containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True)
-        container = next(iter(containers), None)
+        endtime = time.time() + self.config.time_out
+        container = None
+
+        while (time.time() < endtime and not container):
+            container = self.get_current_container()
+
         if not container:
-            self.log_error("Couldn't find container of element.")
+            self.log_error("Couldn't find container")
+
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        search_index = self.get_panel_name_index(panel_name) if panel_name else 0
 
         try:
             browse_div = container.select("[style*='fwskin_seekbar_ico']")[search_index].find_parent().find_parent()
@@ -1477,7 +1481,7 @@ class WebappInternal(Base):
         """
 
         try:
-            endtime = time.time() + 60
+            endtime = time.time() + self.config.time_out
             container =  None
             while(time.time() < endtime and container is None):
                 soup = self.get_current_DOM()
@@ -1493,7 +1497,7 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True) 
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
@@ -1501,7 +1505,7 @@ class WebappInternal(Base):
                 container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
-                raise Exception("Couldn't find container")
+                raise Exception("Web Scrap couldn't find container")
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
@@ -3011,7 +3015,7 @@ class WebappInternal(Base):
             else:
                 self.log_error("Couldn't find rows.")
         else:
-            self.log_error("Couldn't find grids.")
+            self.log_error("Fill grid couldn't find grids.")
 
     def get_selenium_column_element(self, xpath):
         """
