@@ -4637,7 +4637,7 @@ class WebappInternal(Base):
                 content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
             except AttributeError:
                 pass
-    def CheckHelp(self, text, button):
+    def CheckHelp(self, text, button, texthelp, textproblem, textsolution, verbosity):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
 
@@ -4656,17 +4656,80 @@ class WebappInternal(Base):
 
         print(f"Checking Help on screen: {text}")
         self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-        container = self.get_current_container()
-        container = container.select(".tsay")
+        container      = self.get_current_container()
+        container      = container.select(".tsay")
         container_text = ''
         for x in range(len(container)):
-            container_text += container[x].text          
-        if text in container_text:
-            print(f"Help on screen Checked: {text}")
+            container_text += container[x].text + ' '
+
+        text_help     = container_text[container_text.index("Help:"):container_text.index("Problema:")]
+        text_problem  = container_text[container_text.index("Problema:"):container_text.index("Solução:")]
+        text_solution = container_text[container_text.index("Solução:"):]
+
+        if texthelp:
+            self.check_text_help(texthelp, text_help, container_text, verbosity)
+            self.SetButton(button, check_error=False)
+        elif textproblem:
+            self.check_text_problem(textproblem, text_problem, container_text, verbosity)
+            self.SetButton(button, check_error=False)
+        elif textsolution:
+            self.check_text_solution(textsolution, text_solution, container_text, verbosity)
             self.SetButton(button, check_error=False)
         else:
-            print(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
-            self.log_error("Couldn't find param")
+            if text in container_text or text.replace(" ","") in container_text.replace(" ",""):
+                print(f"Help on screen Checked: {text}")
+                self.SetButton(button, check_error=False)
+            else:
+                print(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+
+    def check_text_help(self, texthelp, text_help, container_text, verbosity):
+        if verbosity == False:
+            if texthelp.replace(" ","") in text_help.replace(" ",""):
+                print(f"Help on screen Checked: {texthelp}")
+                return
+            else:
+                print(f"Couldn't find: '{texthelp}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+        else:
+            if texthelp in text_help:
+                print(f"Help on screen Checked: {texthelp}")
+                return
+            else:
+                print(f"Couldn't find: '{texthelp}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+
+    def check_text_problem(self, textproblem, text_problem, container_text, verbosity):
+        if verbosity == False:
+            if textproblem.replace(" ","") in text_problem.replace(" ",""):
+                print(f"Help on screen Checked: {textproblem}")
+                return
+            else:
+                print(f"Couldn't find: '{textproblem}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+        else:
+            if textproblem in text_problem:
+                print(f"Help on screen Checked: {textproblem}")
+                return
+            else:
+                print(f"Couldn't find: '{textproblem}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+
+    def check_text_solution(self, textsolution, text_solution, container_text, verbosity):
+        if verbosity == False:
+            if textsolution.replace(" ","") in text_solution.replace(" ",""):
+                print(f"Help on screen Checked: {textsolution}")
+                return
+            else:
+                print(f"Couldn't find: '{textsolution}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
+        else:
+            if textsolution in text_solution:
+                print(f"Help on screen Checked: {textsolution}")
+                return
+            else:
+                print(f"Couldn't find: '{textsolution}', text on display window is: '{container_text}'")
+                self.log_error("Couldn't find param")
 
     def get_single_button(self):
         """

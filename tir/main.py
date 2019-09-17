@@ -819,7 +819,7 @@ class Webapp():
 
         return self.__webapp.GetText(string_left, string_right)
     
-    def CheckHelp(self, text, button=""):
+    def CheckHelp(self, text="", button="", texthelp="", textproblem="", textsolution="", verbosity=False):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
 
@@ -834,7 +834,7 @@ class Webapp():
         >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
         """
 
-        return self.__webapp.CheckHelp(text, button)
+        return self.__webapp.CheckHelp(text, button, texthelp, textproblem, textsolution, verbosity)
 
     def ClickMenuPopUpItem(self, text, right_click=False):
         """
