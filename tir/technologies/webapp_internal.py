@@ -4687,7 +4687,7 @@ class WebappInternal(Base):
         if texthelp:
             text = texthelp
             container_text = text_help
-        elif texthelp:
+        elif textproblem:
             text = textproblem
             container_text = text_problem
         elif textsolution:
