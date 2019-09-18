@@ -2108,7 +2108,7 @@ class WebappInternal(Base):
 
             element = None
             
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", main_container="body, .tmodaldialog")
 
             if not element:
                 return
