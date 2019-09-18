@@ -4683,68 +4683,32 @@ class WebappInternal(Base):
         text_solution = container_text[container_text.index("Solução:"):]
 
         if texthelp:
-            self.check_text_help(texthelp, text_help, container_text, verbosity)
+            self.check_text_container(texthelp, text_help, container_text, verbosity)
             self.SetButton(button, check_error=False)
         elif textproblem:
-            self.check_text_problem(textproblem, text_problem, container_text, verbosity)
+            self.check_text_container(textproblem, text_problem, container_text, verbosity)
             self.SetButton(button, check_error=False)
         elif textsolution:
-            self.check_text_solution(textsolution, text_solution, container_text, verbosity)
+            self.check_text_container(textsolution, text_solution, container_text, verbosity)
             self.SetButton(button, check_error=False)
         else:
-            if text in container_text or text.replace(" ","") in container_text.replace(" ",""):
-                print(f"Help on screen Checked: {text}")
-                self.SetButton(button, check_error=False)
-            else:
-                print(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
+            self.check_text_container(text, container_text, container_text, verbosity)
+            self.SetButton(button, check_error=False)
 
-    def check_text_help(self, texthelp, text_help, container_text, verbosity):
+    def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
-            if texthelp.replace(" ","") in text_help.replace(" ",""):
-                print(f"Help on screen Checked: {texthelp}")
+            if text_user.replace(" ","") in text_extracted.replace(" ",""):
+                print(f"Help on screen Checked: {text_user}")
                 return
             else:
-                print(f"Couldn't find: '{texthelp}', text on display window is: '{container_text}'")
+                print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
                 self.log_error("Couldn't find param")
         else:
-            if texthelp in text_help:
-                print(f"Help on screen Checked: {texthelp}")
+            if text_user in text_extracted:
+                print(f"Help on screen Checked: {text_user}")
                 return
             else:
-                print(f"Couldn't find: '{texthelp}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
-
-    def check_text_problem(self, textproblem, text_problem, container_text, verbosity):
-        if verbosity == False:
-            if textproblem.replace(" ","") in text_problem.replace(" ",""):
-                print(f"Help on screen Checked: {textproblem}")
-                return
-            else:
-                print(f"Couldn't find: '{textproblem}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
-        else:
-            if textproblem in text_problem:
-                print(f"Help on screen Checked: {textproblem}")
-                return
-            else:
-                print(f"Couldn't find: '{textproblem}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
-
-    def check_text_solution(self, textsolution, text_solution, container_text, verbosity):
-        if verbosity == False:
-            if textsolution.replace(" ","") in text_solution.replace(" ",""):
-                print(f"Help on screen Checked: {textsolution}")
-                return
-            else:
-                print(f"Couldn't find: '{textsolution}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
-        else:
-            if textsolution in text_solution:
-                print(f"Help on screen Checked: {textsolution}")
-                return
-            else:
-                print(f"Couldn't find: '{textsolution}', text on display window is: '{container_text}'")
+                print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
                 self.log_error("Couldn't find param")
 
     def get_single_button(self):
