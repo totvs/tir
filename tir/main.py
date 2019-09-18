@@ -838,22 +838,38 @@ class Webapp():
 
         return self.__webapp.GetText(string_left, string_right)
     
-    def CheckHelp(self, text, button=""):
+    def CheckHelp(self, text="", button="", texthelp="", textproblem="", textsolution="", verbosity=False):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
 
         :param text: Text to be checked.
         :type text: str
+        :param texthelp: Only the help text will be checked.
+        :type texthelp: str
+        :param textproblem: Only the problem text will be checked.
+        :type textproblem: str
+        :param textsolution: Only the solution text will be checked.
+        :type textsolution: str
         :param button: Button to be clicked.
         :type button: str
+        :param verbosity: Check the text with high accuracy.
+        :type verbosity: bool
 
         Usage:
-
-        >>> # Calling the method.
-        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        
+        >>> # Calling method to check all window text.
+        >>> oHelper.CheckHelp("TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
+        >>> # Calling method to check help text only.
+        >>> oHelper.CheckHelp(texthelp="TK250CADRE", "Fechar")
+        >>> # Calling method to check problem text only.
+        >>> oHelper.CheckHelp(textproblem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar")
+        >>> # Calling method to check problem text only.
+        >>> oHelper.CheckHelp(textsolution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
+        >>> # Calling the method to check only the problem text with high precision.
+        >>> oHelper.CheckHelp(textproblem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar", verbosity=True)
         """
 
-        return self.__webapp.CheckHelp(text, button)
+        return self.__webapp.CheckHelp(text, button, texthelp, textproblem, textsolution, verbosity)
 
     def ClickMenuPopUpItem(self, text, right_click=False):
         """

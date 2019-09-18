@@ -56,6 +56,9 @@ class LanguagePack:
         self.coins = languagepack["Coins"]
         self.next = languagepack["Next"]
         self.logOff = languagepack["LogOff"]
+        self.checkhelp = languagepack["Checkhelp"]
+        self.checkproblem = languagepack["Checkproblem"]
+        self.checksolution = languagepack["Checksolution"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -119,7 +122,10 @@ class LanguagePack:
             "To": "To",
             "Coins": "Coins",
             "Next": "Next >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problem:",
+            "Checksolution": "Solution:"
         }
 
         brazilian_portuguese = {
@@ -181,7 +187,11 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Moedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problema:",
+            "Checksolution": "Solução:"
+            
         }
         spanish = {
             "User": "Usuário",
@@ -242,7 +252,10 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Monedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problema:",
+            "Checksolution": "Solucion:"
         }
         russian = {
             "User": "Пользователь",
