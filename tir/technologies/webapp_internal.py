@@ -1845,7 +1845,7 @@ class WebappInternal(Base):
             return z
 
 
-    def FindButton(self, csource, cposition, flag):
+    def FindButton(self, csource, cposition, flag = False):
         """
         Method that gets string label of button from [name_module.tres]
         :param flag: flag that toggles FindButton to search in all tres file [tres25.csv] or in tres folder with all tres's
