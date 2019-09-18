@@ -4678,9 +4678,9 @@ class WebappInternal(Base):
         for x in range(len(container)):
             container_text += container[x].text + ' '
         try:
-            text_help     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.problem)]
-            text_problem  = container_text[container_text.index(self.language.problem):container_text.index(self.language.solution)]
-            text_solution = container_text[container_text.index(self.language.solution):]
+            text_help     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
+            text_problem  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+            text_solution = container_text[container_text.index(self.language.checksolution):]
         except:
             pass
         
@@ -4693,7 +4693,7 @@ class WebappInternal(Base):
         elif textsolution:
             text = textsolution
             container_text = text_solution
-            
+
         if text:
             self.check_text_container(text, container_text, container_text, verbosity)
             self.SetButton(button, check_error=False)
