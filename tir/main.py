@@ -834,7 +834,7 @@ class Webapp():
         :param button: Button to be clicked.
         :type button: str
         :param verbosity: Check the text with high accuracy.
-        :type verbosity: boolean
+        :type verbosity: bool
 
         Usage:
         
