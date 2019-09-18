@@ -2906,7 +2906,7 @@ class WebappInternal(Base):
                             column_name = field[0].lower()
 
                         if column_name not in headers[field[2]]:
-                            self.log_error(self.language.messages.grid_column_error)
+                            self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
 
                         column_number = headers[field[2]][column_name]
 
@@ -3076,7 +3076,7 @@ class WebappInternal(Base):
                 column_name = field[0]
 
             if column_name not in headers[field[2]]:
-                self.log_error(self.language.messages.grid_column_error)
+                self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
 
             column_number = headers[field[2]][column_name]
             xpath = xpath_soup(columns[column_number])
@@ -3154,7 +3154,7 @@ class WebappInternal(Base):
                         column_name = field[1].lower()
 
                     if column_name not in headers[field[3]]:
-                        self.log_error(self.language.messages.grid_column_error)
+                        self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[3]].keys()}'")
 
                     column_number = headers[field[3]][column_name]
                     text = columns[column_number].text.strip()
@@ -3289,7 +3289,7 @@ class WebappInternal(Base):
             self.log_error("Couldn't find columns.")
 
         if column_name not in headers[grid_number]:
-            self.log_error(self.language.messages.grid_column_error)
+            self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[grid_number].keys()}'")
 
         column_number = headers[grid_number][column_name]
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
