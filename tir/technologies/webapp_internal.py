@@ -4677,21 +4677,24 @@ class WebappInternal(Base):
         container_text = ''
         for x in range(len(container)):
             container_text += container[x].text + ' '
-
-        text_help     = container_text[container_text.index("Help:"):container_text.index("Problema:")]
-        text_problem  = container_text[container_text.index("Problema:"):container_text.index("Solução:")]
-        text_solution = container_text[container_text.index("Solução:"):]
-
+        try:
+            text_help     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.problem)]
+            text_problem  = container_text[container_text.index(self.language.problem):container_text.index(self.language.solution)]
+            text_solution = container_text[container_text.index(self.language.solution):]
+        except:
+            pass
+        
         if texthelp:
-            self.check_text_container(texthelp, text_help, container_text, verbosity)
-            self.SetButton(button, check_error=False)
-        elif textproblem:
-            self.check_text_container(textproblem, text_problem, container_text, verbosity)
-            self.SetButton(button, check_error=False)
+            text = texthelp
+            container_text = text_help
+        elif texthelp:
+            text = textproblem
+            container_text = text_problem
         elif textsolution:
-            self.check_text_container(textsolution, text_solution, container_text, verbosity)
-            self.SetButton(button, check_error=False)
-        else:
+            text = textsolution
+            container_text = text_solution
+            
+        if text:
             self.check_text_container(text, container_text, container_text, verbosity)
             self.SetButton(button, check_error=False)
 
