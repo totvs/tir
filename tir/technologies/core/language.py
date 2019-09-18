@@ -12,12 +12,14 @@ class LanguagePack:
         self.group = languagepack["Group"]
         self.branch = languagepack["Branch"]
         self.environment = languagepack["Environment"]
+        self.create = languagepack["Create"]
         self.add = languagepack["Add"]
         self.delete= languagepack["Delete"]
         self.no_actions = {languagepack["Confirm"],languagepack["Save"],languagepack["Cancel"],languagepack["Close"],languagepack["Finish"]}
         self.edit = languagepack["Edit"]
         self.editar = languagepack["Editar"]
         self.cancel = languagepack["Cancel"]
+        self.Set = languagepack["Set"]
         self.view = languagepack["View"]
         self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
@@ -31,7 +33,8 @@ class LanguagePack:
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
-        self.OK = languagepack["OK"]
+        self.OkeyWordU = languagepack["OkeyWordU"]
+        self.OkeyWordL = languagepack["OkeyWordL"]
         self.copy = languagepack["Copy"]
         self.cut = languagepack["Cut"]
         self.paste = languagepack["Paste"]
@@ -255,7 +258,9 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Create": "Создать",
+            "Add": "Добавить",
+            "Set": "Вставить",
             "Delete": "Удалить",
             "Edit": "редактировать",
             "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
@@ -277,7 +282,8 @@ class LanguagePack:
             #"Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
-            "OK": "Да",
+            "OkeyWordU" : "OK",
+            "OkeyWordL" : "Ok",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",

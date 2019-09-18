@@ -229,25 +229,28 @@ class Webapp():
         """
         self.__webapp.ClickCheckBox(label_box_name,position)
 
-    def ClickComboBox(self, label_comboBox_name, flagX=0, Xpath_1="", position=1):
+    def ClickComboBox(self, position=1, label_comboBox="", flag_cb = False, box_numb = 0):
         """
-        Clicks on a Label in ComboBox on the screen.
+        Clicks on a Label in box on the screen.
 
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
+        :param position: Position of text in the combobox, that need to be pressed(will be set)
         :type position: int
+        :param label_comboBox: Arguement for detecting combobox by default value in it
+        :type label_comboBox: str
+        :flag_cb: If set to <True>, then function search specific combobox by xpath on the screen
+        :type flag_cb: bool
+        :param box_numb: Number of combobox on the screen from <1>
+        :type box_numb: int
 
         Usage:
 
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        >>> # Call the method for one combobox on the screen:
+        >>> oHelper.ClickComboBox (position = 2, label_comboBox = "Все блокировки")
+
+        >>> # Call the method for multiple (xpath):
+        >>> oHelper.ClickComboBox (position = 2, flag_cb = True, box_numb = 2)
         """
-        self.__webapp.ClickComboBox(label_comboBox_name, flagX, Xpath_1, position)
+        self.__webapp.ClickComboBox (position, label_comboBox, flag_cb, box_numb)
 
     def ClickLabel(self, label_name):
         """
@@ -505,46 +508,66 @@ class Webapp():
         """
         return self.__webapp.Randomex (rand_val)
 
-    def FindButton (self, csource, cposition):
+    def FindButton (self, csource, cposition, flag=False):
         """
         Method that gets string label of button from [name_module.tres]
-
+        :param flag: flag that toggles FindButton to search in all tres file [tres25.csv] or in tres folder with all tres's
+        :type flag: int
         :param csource: name of the module in lowercase
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
         :type cposition: str
-
+        
         Usage:
-
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
-        return self.__webapp.FindButton (csource, cposition)
+        return self.__webapp.FindButton (csource, cposition, flag)
 
-    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+    def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
         """
         Method that clicks on a scale on the screen.
-
-        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
+        :param head_node: Tag container for searching out the elements.
         :type head_node: str
-        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
-        :type sub_item: str
-        :param index: Quantity of elements <id> for iteration. - **Default:** 1
-        :type index: int
-        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
+        :param end_index:  - a finite number of fragments of the scale to fill
+        :type end_index: int
+        :param start_index: Starting index of the first element. - **Default:** 0
+        :type start_index: int
+        :param attr_name: Unique attribute name to search all scale indices- **Default:** "" (empty string)
         :type attr_name: str
+        :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
+        :type attr_contains: str
+
+        Usage:
+        >>> # Calling the method to click on scale/dial:
+        >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
+        """
+        self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
+
+    # Don't work yet
+    # def F3G (self, tbl_row, tbl_cell):
+    #     self.__webapp.F3G (tbl_row, tbl_cell)
+
+    def GetModuleName (self, search_function):
+        """
+        Method that load lines from xlsx(MS Excell) file, and return the module name (SIGAPCP) by function (MATA632).
+
+        :param search_function: Name of routine to search their module.
+        :type search_function: str
+
+        Dependencies:
+        >>> (lib)Pandas, (file)MODULE_NAME.xlsx
 
         Usage:
 
-        >>> # Calling the method to click on scale/dial:
-        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        >>> # Calling the method to search module name by routine name:
+        >>> oHelper.Setup(inst.oHelper.GetModuleName("MATA632"), '09/09/2019', '00', '102030', '01')
         """
-        self.__webapp.SetDial (end_index, head_node, start_index, attr_name, attr_contains)
+        return self.__webapp.GetModuleName (search_function)
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
-
         :param button: Button to be clicked.
         :type button: str
         :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
@@ -914,8 +937,6 @@ class Webapp():
         :param self: Instance of Webapp class
         :type self: instance
         """
-        inst_1 = self.oHelper.GiveMeAccess()
-        inst_1.print_in()                        #calling private method which isn't initialized in main.py directly
         x = self.__webapp                       # object model here, x is link to instance
         return x
 

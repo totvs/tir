@@ -5,6 +5,7 @@ import inspect
 import os
 import random
 import uuid
+import codecs
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -1087,7 +1088,11 @@ class WebappInternal(Base):
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+
+                        #Error! 04.09 (CTBA161 module). No need to wait element, if focused already
+                        #self.wait.until (EC.element_to_be_clickable ((By.XPATH, xpath_soup(element))))
+                        time.sleep(4)
+
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -1449,7 +1454,8 @@ class WebappInternal(Base):
 
         Test function, only for print that calling is OK
         """
-        print ("function print_in, prints OK")
+        print ("Function print_in, class WebappInternal, OK")
+
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
         """
@@ -1839,82 +1845,116 @@ class WebappInternal(Base):
             return z
 
 
-    def FindButton(self, csource, cposition):
+    def FindButton(self, csource, cposition, flag = False):
         """
         Method that gets string label of button from [name_module.tres]
-
+        :param flag: flag that toggles FindButton to search in all tres file [tres25.csv] or in tres folder with all tres's
+        :type flag: int
         :param csource: name of the module in lowercase
         :type csource: str
         :param cposition: the [STRxxxx] of the button from [name_module.tres]
         :type cposition: str
 
+        Dependencies:
+        >>> (lib)codecs, (file)tres25.csv, (file)ROUTINE.tres
+        
         Usage:
-
         >>> # Calling the method to get string label of button, that may be changed for old_test <-> new_translation:
         >>> oHelper.FindButton(csource='mata010', cposition='STR0005')
         """
-        existsfile = 0                                  # flag
-        cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
-
-        path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
-        path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
-
-        if (os.path.exists(path_encoding) == 0):                                # if not exists new
-
-            if (os.path.exists(path2)):                                         # if exists orig
-                with open(path2, "r", encoding='cp1251') as z:
-                    str_1251 = z.read()
-                    z.close()
-
-                with open(path_encoding, "w+", encoding='utf-8') as x:
-                    x.write(str_1251)
-                    x.close()
-                    existsfile = 1
-            else:
-                existsfile = 0
-                print ("\nNo tres file for this test\n")
+        if flag:
+            path_to_file = os.path.join(os.path.dirname(__file__), r'core\\data\\tres25.csv')
+            df = pd.read_csv(path_to_file)
+            data = df.loc[(df['Module'] == csource) & (df['STRNumbers'] == cposition)]
+            return data['Text'].item()
         else:
-            existsfile = 2                  
+            existsfile = 0                                  # flag
+            cext = self.config.language.replace("-ru", "")  # ru_ru -> ru
+
+            path2 = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '.tres')                       # orig cp1251
+            path_encoding = os.path.join(os.path.dirname(__file__), r'core\\data\\tres\\'+ csource + '_' + cext + '_utf' + '.tres')      # new 4 utf
+
+            if (os.path.exists(path_encoding) == 0):                                # if not exists new
+
+                if (os.path.exists(path2)):                                         # if exists orig
+                    with open(path2, "r", encoding='cp1251') as z:
+                        str_1251 = z.read()
+                        z.close()
+
+                    with open(path_encoding, "w+", encoding='utf-8') as x:
+                        x.write(str_1251)
+                        x.close()
+                        existsfile = 1
+                else:
+                    existsfile = 0
+                    print ("\nNo tres file for this test\n")
+            else:
+                existsfile = 2                  
         
-        if (existsfile):
-            with codecs.open (path_encoding, 'r','utf-8') as p:
-                str_original = p.read()
-                nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
+            if (existsfile):
+                with codecs.open (path_encoding, 'r','utf-8') as p:
+                    str_original = p.read()
+                    nstart = str_original.find (cposition + "#RUS#")        # =index -> ('STR0005' 'RUS')
 
-                if nstart < 0:
-                    nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
+                    if nstart < 0:
+                        nstart = str_original.find(cposition + "#ALL#")     # search default ALL locale
 
-                if nstart > 0:
-                    nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
-                    
-                    if nend < 0:
-                        c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
+                    if nstart > 0:
+                        nend = str_original.find ("\r\n", nstart + 12)      # search the end of the string from str_original[68] to \r\n 
+                        
+                        if nend < 0:
+                            c_ret = str_original[nstart+12:]                # if no [\r\n] in the end return all
+                        else:
+                            c_ret = str_original[nstart+12 : nend].strip()  # FIX, (30.08 -> .replace(" ", ""))
+
+                        return c_ret
+
                     else:
-                        c_ret = str_original[nstart+12 : nend].replace(" ", "")
+                        self.log_error ("No such Button: [{}] in [{}] file, try another tres".format(cposition, csource))
+                    
+                    p.close()
 
-                p.close()
-
-        return c_ret
-
-    def SetDial (self, end_index, head_node, start_index = 0, attr_name="", attr_contains=""):
+            else:
+                self.log_error ("No such file: [{}] or cannot create [{}_utf.tres] file".format(path_encoding, csource))
+                    
+    def NewRowGrid (self, sI):
         """
-        $x("//td[@id='11'][contains(concat(@class, ''), 'worktime-block ui-selectee')]")     <- orig xpath (need to be between ("expression generates"))
-        
-        Method that clicks on a scale on the screen.
+        [Internal]
 
-        :param head_node: Tag container for searching out the elements.  - **Default:** "" (empty string)
-        :type head_node: str
-        :param focused_node: Set the first focused element of the scale, by sending XPath parameter - **Default:** "" (empty string)
-        :type sub_item: str
-        :param index: Quantity of elements <id> for iteration. - **Default:** 1
-        :type index: int
-        :param attr_name: Uniq identity of elements, where id initialized. XPath parameter too - **Default:** "" (empty string)
-        :type attr_name: str
+        Creates new row/line in the grid
+
+        :param sI: container of where the focus cell settled (from her the new row will be created)
+        :type sI: str
 
         Usage:
 
+        >>> # Calling the method:
+        >>> access = self.oHelper.GiveMeAccess ()
+        >>> access.NewRowGrid (sI = "0")
+        """
+        line_focus = self.driver.find_element_by_xpath ("(//div[@class=\"horizontal-scroll\"]//tr[@id=\"{}\"])//td[@id=\"1\"]//*".format(sI))
+        action = ActionChains(self.driver)
+        
+        row_new = lambda: action.move_to_element(line_focus)
+        action.send_keys_to_element(row_new(), Keys.DOWN).perform()
+
+    def SetDial (self, head_node, end_index, start_index = 0, attr_name="", attr_contains=""):
+        """
+        Method that clicks on a scale on the screen.
+        :param head_node: Tag container for searching out the elements.
+        :type head_node: str
+        :param end_index:  - a finite number of fragments of the scale to fill
+        :type end_index: int
+        :param start_index: Starting index of the first element. - **Default:** 0
+        :type start_index: int
+        :param attr_name: Unique attribute name to search all scale indices- **Default:** "" (empty string)
+        :type attr_name: str
+        :param attr_contains: Contents of the unique attribute, of all scale indices- **Default:** "" (empty string)
+        :type attr_contains: str
+        
+        Usage:
         >>> # Calling the method to click on scale/dial:
-        >>> # oHelper.SetDial (head_node = "td", focused_node="class=\'worktime-block focused ui-selectee\'", attr_name="class=\'worktime-block ui-selectee\'", index=24)
+        >>> # oHelper.SetDial (head_node="td", end_index = 23, start_index = 0, attr_name="class", attr_contains="worktime-block")
         """
         if attr_name:
             mass_WebElement = []   # storage for webelements
@@ -1927,9 +1967,49 @@ class WebappInternal(Base):
                 self.click (mass_WebElement[z])
 
         else:
-            print ("Error, attr_name not set up!")
-            #self.log_error(f"Parameter")
+            self.log_error ("Error, def SetDial(), attr_name not set up!")
 
+    def GetModuleName (self, search_function):
+        """
+        Method that load lines from xlsx(MS Excell) file, and return the module name (SIGAPCP) by function (MATA632).
+
+        :param search_function: Name of routine to search their module.
+        :type search_function: str
+
+        Dependencies:
+        >>> (lib)Pandas, (file)MODULE_NAME.xlsx
+
+        Usage:
+
+        >>> # Calling the method to search module name by routine name:
+        >>> oHelper.Setup(inst.oHelper.GetModuleName("MATA632"), '09/09/2019', '00', '102030', '01')
+        """
+        path_xsl = os.path.join(os.path.dirname(__file__), r'core\\data\\' + 'MODULE_NAME' + '.xlsx')
+        
+        try:
+            df = pd.read_excel(path_xsl, sheet_name='Sheet1')
+
+            modules = df['Module']
+            functions = df['Function']
+
+            displayed = []
+            module = []
+            function = []
+
+            # Revert type [pandas] -> [list]
+            for m in modules:
+                module.append(m)
+            for f in functions:
+                function.append(f)
+
+            for e, f in enumerate(function):
+                if search_function == f:
+                    displayed.append(module[e])
+            
+            return displayed[0]                     # if first needed [?]
+
+        except FileNotFoundError:
+            self.log_error(f"Couldn't find excell file for obtaining module name")
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
@@ -1959,7 +2039,7 @@ class WebappInternal(Base):
         if container:
             id_container = container.attrs['id']
 
-        print(f"Clicking on {button}")
+        print("Clicking on {}".format(button))
 
         try:
             soup_element  = ""
@@ -3053,7 +3133,18 @@ class WebappInternal(Base):
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                
+                                #ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                #ActionChains(self.driver).move_to_element(selenium_column()).perform()
+                                
+                                # FIX, specific ActionChains actions for Browser (Chrome+Firefox)
+                                ActionChains(self.driver).move_to_element (selenium_column()).perform()
+                                
+                                ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                                ActionChains(self.driver).pause("1")
+                                ActionChains(self.driver).key_up(Keys.ENTER)
+                                ActionChains(self.driver).perform()
+                                # ActionChains(self.driver).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 time.sleep(1)
                                 if(field[1] == True):
                                     field_one = ''
@@ -3441,7 +3532,8 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
+        # encoding latin-1 -> utf-8
+        data = pd.read_csv(path, sep=';', encoding='utf-8', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -3950,9 +4042,11 @@ class WebappInternal(Base):
             self.log.new_line(False, log_message)
         self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
-            self.restart()
+            self.LogOff()
+            self.driver.close()
         elif self.config.coverage and self.config.initial_program != '':
-            self.restart()
+            self.LogOff()
+            self.driver.close()
         else:
             self.driver.close()
 
@@ -4325,56 +4419,74 @@ class WebappInternal(Base):
         else:
             self.log_error("Index the Ckeckbox invalid.")
 
-    #ошибка (3998 if 'tcombobox' <- tcheckbox, clicktype = SELENIUM JS) not SELENiUMJS
-    def ClickComboBox (self, label_comboBox_name, flagX=0, Xpath_1="", position = 1):
+    def ClickComboBox (self, position = 1, label_comboBox = "", flag_cb = False, box_numb = 0):
         """
-        Clicks on a Label in ComboBox on the screen.
+        Clicks on a Label in box on the screen.
 
-        :param label_comboBox_name: The label box name
-        :type label_comboBox_name: str
-        :param flagX: Flag that must be activated(=1) if we want to search nested button by XPath in the label_comboBox_name
-        :type flagX: int
-        :param Xpath_1: Path to the necessary button under main label_comboBox_name
-        :type Xpath_1: str
-        :param position: position of label box on interface(!number of field!)
+        :param position: Position of text in the combobox, that need to be pressed(will be set)
         :type position: int
+        :param label_comboBox: Arguement for detecting combobox by default value in it
+        :type label_comboBox: str
+        :flag_cb: If set to <True>, then function search specific combobox by xpath on the screen
+        :type flag_cb: bool
+        :param box_numb: Number of combobox on the screen from <1>
+        :type box_numb: int
 
         Usage:
 
-        >>> # To call the method:
-        >>> oHelper.ClickComboBox (label_comboBox_name = "Нет ограничений", flagX = 1, Xpath_1 = "/html/body/div[1]/div[3]/div[2]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]/div/div[2]/select/option[2]", position=1)
+        >>> # Call the method for one combobox on the screen:
+        >>> oHelper.ClickComboBox (position = 2, label_comboBox = "Все блокировки")
+
+        >>> # Call the method for multiple (xpath):
+        >>> oHelper.ClickComboBox (position = 2, flag_cb = True, box_numb = 2)
         """
-        if position > 0:
 
-            self.wait_element (label_comboBox_name)
+        if not isinstance(flag_cb, bool):
+            self.log_error ("Wrong type of flag_cb arg")
 
-            container = self.get_current_container()
-            if not container:
-                self.log_error ("Couldn't locate container.")
+        if not flag_cb:
+            if position > 0:
 
-            labels_boxs = container.select("span")
-            filtered_labels_boxs = list (filter (lambda x: label_comboBox_name.lower() in x.text.lower(), labels_boxs))
-        
-            if position <= len(filtered_labels_boxs):
                 position -= 1
-                label_box = filtered_labels_boxs[position].parent
+                mass_labels = []
 
-                if 'tcombobox' in label_box.get_attribute_list('class'):
-                    label_box_element = lambda: self.soup_to_selenium(label_box)                
-                    self.click (element = label_box_element(), click_type = enum.ClickType.SELENIUM)
+                self.wait_element (label_comboBox)
+
+                container = self.get_current_container ()
+                if not container:
+                    self.log_error ("Couldn't locate container.")
+                try:
+                    labels_boxs = container.select ("option")
                     
-                    if flagX > 0:
-                        #self.SetButton("Все блокировки")
-                        #это на крайний случай, вставь xpath до элемента сюда если не работает SetValue(..)
-                        element_1 = self.driver.find_element_by_xpath(Xpath_1)
-                        self.click (element = element_1, click_type = enum.ClickType.SELENIUM)
-                else:
-                    self.log_error ("Index the ComboBox invalid.")                
+                    if not labels_boxs:
+                        raise Exception("No such label")
+
+                except Exception:
+                    labels_boxs = container.select ("select")
+                
+                for l in labels_boxs:
+                    mass_labels += [l]
+
+                sbox = (self.soup_to_selenium (labels_boxs[position]))
+                self.click (sbox, click_type = enum.ClickType.SELENIUM)
+                
             else:
                 self.log_error ("Index the ComboBox invalid.")
-        else:
-            self.log_error ("Index the ComboBox invalid.")
 
+        if flag_cb:
+            box_numb -= 1
+            position -= 1
+
+            cb_xp = self.driver.find_elements_by_xpath ("//div[contains (@class, \"tcombobox twidget dict-tcombobox\")]/select")[box_numb] # find all boxes
+            action = ActionChains(self.driver)
+            action.move_to_element(cb_xp)
+            action.perform()
+            self.click (cb_xp, click_type = enum.ClickType.SELENIUM)  # click box
+
+            cb_el = cb_xp.find_elements_by_css_selector ("option")[position]
+            action.move_to_element(cb_el)
+            action.perform()
+            self.click (cb_el, click_type = enum.ClickType.SELENIUM)  # click value
 
     def ClickLabel(self, label_name):
         """
