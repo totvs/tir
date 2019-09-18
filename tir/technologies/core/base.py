@@ -160,7 +160,7 @@ class Base(unittest.TestCase):
                 print("********Element Stale click*********")
                 pass
             except Exception as error:
-                self.log_error(str(error))
+                pass
         else:
             try:
                 self.scroll_to_element(element)
