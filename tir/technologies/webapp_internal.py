@@ -655,7 +655,7 @@ class WebappInternal(Base):
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
             else:
-                print("Sucess")
+                print("success")
         except Exception as e:
             self.log_error(str(e))
    
@@ -3110,7 +3110,7 @@ class WebappInternal(Base):
         """
         text = ""
         columns = None
-        sucess  = False
+        success  = False
         field_to_label = {}
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -3121,7 +3121,7 @@ class WebappInternal(Base):
                 print("Waiting for container to be active")
             time.sleep(1)
 
-        while(time.time() < endtime and not sucess):
+        while(time.time() < endtime and not success):
 
             containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             container = next(iter(self.zindex_sort(containers, True)), None)
@@ -3158,15 +3158,15 @@ class WebappInternal(Base):
                     if column_name in headers[field[3]]:
                         column_number = headers[field[3]][column_name]
                         text = columns[column_number].text.strip()
-                        sucess = True
+                        success = True
 
-                    if get_value and text:
+                    if success and get_value and text:
                         return text
 
         field_name = f"({field[0]}, {column_name})"
         self.log_result(field_name, field[2], text)
         print(f"Collected value: {text}")
-        if not sucess:
+        if not success:
             self.check_grid_error( grids, headers, column_name, rows, columns, field )
 
     def check_grid_error(self, grid, headers, column_name, rows, columns, field):
