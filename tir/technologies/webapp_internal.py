@@ -4772,18 +4772,18 @@ class WebappInternal(Base):
                 content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
             except AttributeError:
                 pass
-    def CheckHelp(self, text, button, texthelp, textproblem, textsolution, verbosity):
+    def CheckHelp(self, text, button, text_help, text_problem, text_solution, verbosity):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
 
         :param text: Text to be checked.
         :type text: str
-        :param texthelp: Only the help text will be checked.
-        :type texthelp: str
-        :param textproblem: Only the problem text will be checked.
-        :type textproblem: str
-        :param textsolution: Only the solution text will be checked.
-        :type textsolution: str
+        :param text_help: Only the help text will be checked.
+        :type text_help: str
+        :param text_problem: Only the problem text will be checked.
+        :type text_problem: str
+        :param text_solution: Only the solution text will be checked.
+        :type text_solution: str
         :param button: Button to be clicked.
         :type button: str
         :param verbosity: Check the text with high accuracy.
@@ -4794,43 +4794,46 @@ class WebappInternal(Base):
         >>> # Calling method to check all window text.
         >>> oHelper.CheckHelp("TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
         >>> # Calling method to check help text only.
-        >>> oHelper.CheckHelp(texthelp="TK250CADRE", "Fechar")
+        >>> oHelper.CheckHelp(text_help="TK250CADRE", button="Fechar")
         >>> # Calling method to check problem text only.
-        >>> oHelper.CheckHelp(textproblem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar")
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar")
         >>> # Calling method to check problem text only.
-        >>> oHelper.CheckHelp(textsolution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
+        >>> oHelper.CheckHelp(text_solution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", button="Fechar")
         >>> # Calling the method to check only the problem text with high precision.
-        >>> oHelper.CheckHelp(textproblem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar", verbosity=True)
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar", verbosity=True)
         """
         if not button:
             button = self.get_single_button().text
 
         print(f"Checking Help on screen: {text}")
         self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-        container      = self.get_current_container()
-        container      = container.select(".tsay")
+        container = self.get_current_container()
+        container_filtered = container.select(".tsay")
         container_text = ''
-        for x in range(len(container)):
-            container_text += container[x].text + ' '
+        for x in range(len(container_filtered)):
+            container_text += container_filtered[x].text + ' '
+
         try:
-            text_help     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-            text_problem  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
-            text_solution = container_text[container_text.index(self.language.checksolution):]
+            text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
+            text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+            text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
         except:
             pass
         
-        if texthelp:
-            text = texthelp
-            container_text = text_help
-        elif textproblem:
-            text = textproblem
-            container_text = text_problem
-        elif textsolution:
-            text = textsolution
-            container_text = text_solution
+        if text_help:
+            text = text_help
+            text_extracted = text_help_extracted
+        elif text_problem:
+            text = text_problem
+            text_extracted = text_problem_extracted
+        elif text_solution:
+            text = text_solution
+            text_extracted = text_solution_extracted
+        else:
+            text_extracted = container_text
 
         if text:
-            self.check_text_container(text, container_text, container_text, verbosity)
+            self.check_text_container(text, text_extracted, container_text, verbosity)
             self.SetButton(button, check_error=False)
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
