@@ -655,7 +655,7 @@ class WebappInternal(Base):
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
             else:
-                print("Sucess")
+                print("success")
         except Exception as e:
             self.log_error(str(e))
    
@@ -3108,7 +3108,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
+        text = ""
         columns = None
+        success  = False
         field_to_label = {}
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -3119,58 +3121,78 @@ class WebappInternal(Base):
                 print("Waiting for container to be active")
             time.sleep(1)
 
-        containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        container = next(iter(self.zindex_sort(containers, True)), None)
+        while(time.time() < endtime and not success):
 
-        if not container:
-            self.log_error('Container not found')
-            
-        grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
 
-        if grids:
-            headers = self.get_headers_from_grids(grids)
-            column_name = ""
+            if container:
+                grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+                grids = self.filter_displayed_elements(grids)
 
-            if field[3] > len(grids):
-                self.log_error(self.language.messages.grid_number_error)
+            if grids:
+                headers = self.get_headers_from_grids(grids)
+                column_name = ""
 
-            rows = grids[field[3]].select("tbody tr")
-            if rows:
-                if field[0] > len(rows):
-                    self.log_error(self.language.messages.grid_line_error)
+                if field[3] > len(grids):
+                    self.log_error(self.language.messages.grid_number_error)
 
-                field_element = next(iter(field), None)
-                if field_element == None:
-                    self.log_error("Couldn't find rows.")
+                rows = grids[field[3]].select("tbody tr")
                 
-                if len(rows) -1 >= field_element:
-                    columns = rows[field_element].select("td")
-                    
-                # columns = rows[field[0]].select("td")
+                if rows:
+                    if field[0] > len(rows):
+                        self.log_error(self.language.messages.grid_line_error) 
+
+                    field_element = next(iter(field), None)
+                   
+                    if field_element != None and len(rows) -1 >= field_element:
+                        columns = rows[field_element].select("td")
+                        
                 if columns:
+
                     if "_" in field[1]:
                         column_name = field_to_label[field[1]].lower()
                     else:
                         column_name = field[1].lower()
 
-                    if column_name not in headers[field[3]]:
-                        self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[3]].keys()}'")
+                    if column_name in headers[field[3]]:
+                        column_number = headers[field[3]][column_name]
+                        text = columns[column_number].text.strip()
+                        success = True
 
-                    column_number = headers[field[3]][column_name]
-                    text = columns[column_number].text.strip()
-
-                    if get_value:
+                    if success and get_value and text:
                         return text
 
-                    field_name = f"({field[0]}, {column_name})"
-                    self.log_result(field_name, field[2], text)
-                    print(f"Collected value: {text}")
-                else:
-                    self.log_error("Couldn't find columns.")
-            else:
-                self.log_error("Couldn't find rows.")
-        else:
+        field_name = f"({field[0]}, {column_name})"
+        self.log_result(field_name, field[2], text)
+        print(f"Collected value: {text}")
+        if not success:
+            self.check_grid_error( grids, headers, column_name, rows, columns, field )
+
+    def check_grid_error(self, grid, headers, column_name, rows, columns, field):
+        """
+        [Internal]
+
+        """
+        error = False
+
+        if not grid:
             self.log_error("Couldn't find grids.")
+            error = True
+
+        if not error and column_name not in headers[field[3]]:
+            self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[3]].keys()}'")
+            error = True
+        
+        if not error and not rows:
+            self.log_error("Couldn't find rows.")
+            error = True
+
+        if not error and not columns:
+            self.log_error("Couldn't find columns.")
+
+        return
+        
 
     def new_grid_line(self, field, add_grid_line_counter=True):
         """
