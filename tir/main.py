@@ -841,13 +841,13 @@ class Webapp():
         >>> # Calling method to check all window text.
         >>> oHelper.CheckHelp("TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
         >>> # Calling method to check help text only.
-        >>> oHelper.CheckHelp(text_help="TK250CADRE", "Fechar")
+        >>> oHelper.CheckHelp(text_help="TK250CADRE", button="Fechar")
         >>> # Calling method to check problem text only.
-        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar")
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar")
         >>> # Calling method to check problem text only.
-        >>> oHelper.CheckHelp(text_solution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
+        >>> oHelper.CheckHelp(text_solution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", button="Fechar")
         >>> # Calling the method to check only the problem text with high precision.
-        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", "Fechar", verbosity=True)
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar", verbosity=True)
         """
 
         return self.__webapp.CheckHelp(text, button, text_help, text_problem, text_solution, verbosity)
