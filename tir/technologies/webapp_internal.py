@@ -3141,7 +3141,7 @@ class WebappInternal(Base):
                 
                 if rows:
                     if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error)
+                        self.log_error(self.language.messages.grid_line_error) 
 
                     field_element = next(iter(field), None)
                    
@@ -3156,25 +3156,20 @@ class WebappInternal(Base):
                         column_name = field[1].lower()
 
                     if column_name in headers[field[3]]:
+                        column_number = headers[field[3]][column_name]
+                        text = columns[column_number].text.strip()
                         sucess = True
 
-                    column_number = headers[field[3]][column_name]
-                    text = columns[column_number].text.strip()
+                    if get_value and text:
+                        return text
 
-                    if get_value:
-                        sucess = True
-
+        field_name = f"({field[0]}, {column_name})"
+        self.log_result(field_name, field[2], text)
+        print(f"Collected value: {text}")
         if not sucess:
-            self.check_grid_error( grids, headers, column_name, rows, columns )
-            field_name = f"({field[0]}, {column_name})"
-            self.log_result(field_name, field[2], text)
-            print(f"Collected value: {text}")
+            self.check_grid_error( grids, headers, column_name, rows, columns, field )
 
-        return text
-
-
-
-    def check_grid_error(self, grid, headers, column_name, rows, columns):
+    def check_grid_error(self, grid, headers, column_name, rows, columns, field):
         """
         [Internal]
 
