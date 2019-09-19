@@ -3016,7 +3016,7 @@ class WebappInternal(Base):
                 self.log_error("Fill grid couldn't find grids.")
 
         if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
-            self.log_error(f"Couldn't fill input: {field_one} value.")
+            self.log_error(f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
 
     def get_selenium_column_element(self, xpath):
         """
