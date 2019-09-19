@@ -314,10 +314,14 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.filter_displayed_elements(elements, True)
         """
+        #0 - elements filtered
+        elements = list(filter(lambda x: self.soup_to_selenium(x) is not None ,elements ))
+        if not elements:
+            return
         #1 - Create an enumerated list from the original elements
         indexed_elements = list(enumerate(elements))
         #2 - Convert every element from the original list to selenium objects
-        selenium_elements = list(map(lambda x : self.driver.find_element_by_xpath(xpath_soup(x)), elements))
+        selenium_elements = list(map(lambda x : self.soup_to_selenium(x), elements))
         #3 - Create an enumerated list from the selenium objects
         indexed_selenium_elements = list(enumerate(selenium_elements))
         #4 - Filter elements based on "is_displayed()" and gets the filtered elements' enumeration
