@@ -2981,15 +2981,15 @@ class WebappInternal(Base):
                                             if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
                                                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                 self.send_keys(selenium_input(), Keys.ENTER)
-                            endtime = self.config.time_out
-                            while endtime > 0:
+                            try_endtime = self.config.time_out
+                            while try_endtime > 0:
                                 element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
                                 time.sleep(1)
                                 if element_exist:
                                     current_value = self.get_element_text(selenium_column())
                                     break
                                 else:
-                                    endtime = endtime - 10
+                                    try_endtime = try_endtime - 10
                                     container_current = self.get_current_container()
                                     if container_current.attrs['id'] != container_id:
                                         print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
@@ -3014,7 +3014,6 @@ class WebappInternal(Base):
                     self.log_error("Couldn't find rows.")
             else:
                 self.log_error("Fill grid couldn't find grids.")
-
         if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
             self.log_error(f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
 
@@ -3837,12 +3836,10 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
-
+        
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
-
         routine_name = routine_name if routine_name else "error"
 
-        
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
