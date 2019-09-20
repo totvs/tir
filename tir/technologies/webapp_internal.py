@@ -3821,7 +3821,7 @@ class WebappInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True, skip_restart=False, check_help=True):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
