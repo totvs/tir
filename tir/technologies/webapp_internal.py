@@ -1446,7 +1446,7 @@ class WebappInternal(Base):
             self.SetButton(self.language.logOff)
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True):
         """
         [Internal]
 
@@ -1487,7 +1487,7 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
 
                 if check_error:
-                    self.search_for_errors()
+                    self.search_for_errors(check_help)
 
                 if self.config.log_file:
                     with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
@@ -1528,7 +1528,7 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
 
-    def search_for_errors(self):
+    def search_for_errors(self, check_help=True):
         """
         [Internal]
 
@@ -1549,7 +1549,7 @@ class WebappInternal(Base):
 
         icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
         icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
-        if not icon_alert and not icon_error_log:
+        if (not icon_alert or not check_help) and not icon_error_log:
             return None
 
         if icon_alert:
@@ -2108,7 +2108,7 @@ class WebappInternal(Base):
 
             element = None
             
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", main_container="body, .tmodaldialog")
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", main_container="body, .tmodaldialog", check_help=False)
 
             if not element:
                 return
@@ -2138,7 +2138,7 @@ class WebappInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_help=False)
 
             if element:
                 return
@@ -3821,7 +3821,7 @@ class WebappInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True, skip_restart=False):
+    def log_error(self, message, new_log_line=True, skip_restart=False, check_help=True):
         """
         [Internal]
 
