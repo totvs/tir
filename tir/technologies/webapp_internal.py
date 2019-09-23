@@ -2864,14 +2864,12 @@ class WebappInternal(Base):
         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
 
             container = self.get_current_container()
-            if not container:
-                self.log_error("Could't find")
 
-            container_id = self.soup_to_selenium(container).get_attribute("id")
-    
-            grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+            if container:
+                container_id = self.soup_to_selenium(container).get_attribute("id")
+                grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+                grids = self.filter_displayed_elements(grids)
 
-            grids = self.filter_displayed_elements(grids)
             if grids:
                 headers = self.get_headers_from_grids(grids)
                 grid_id = grids[field[2]].attrs["id"]
@@ -2905,115 +2903,108 @@ class WebappInternal(Base):
                         else:
                             column_name = field[0].lower()
 
-                        if column_name not in headers[field[2]]:
-                            self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
+                        if column_name in headers[field[2]]:
+                            column_number = headers[field[2]][column_name]
 
-                        column_number = headers[field[2]][column_name]
+                            current_value = columns[column_number].text.strip()
+                            xpath = xpath_soup(columns[column_number])
 
-                        current_value = columns[column_number].text.strip()
-                        xpath = xpath_soup(columns[column_number])
+                            try_counter = 0
+                            current_value = self.remove_mask(current_value).strip()
 
-                        try_counter = 0
-                        current_value = self.remove_mask(current_value).strip()
-
-                        selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
-                        self.scroll_to_element(selenium_column())
-                        self.click(selenium_column())
-                        self.set_element_focus(selenium_column())
-
-                        while(time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
-                            time.sleep(1)
+                            selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
                             self.scroll_to_element(selenium_column())
-                            self.set_element_focus(selenium_column())
                             self.click(selenium_column())
-                            ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
-                            time.sleep(1)
-                            if(field[1] == True):
-                                field_one = ''
-                                break
+                            self.set_element_focus(selenium_column())
 
-                        if(field[1] == True): break # if boolean field finish here.
-                        self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
-                        soup = self.get_current_DOM()
-                        new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
-                        child = new_container.select("input")
-                        child_type = "input"
-                        option_text = ""
-                        if not child:
-                            child = new_container.select("select")
-                            child_type = "select"
+                            while(time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+                                time.sleep(1)
+                                self.scroll_to_element(selenium_column())
+                                self.set_element_focus(selenium_column())
+                                self.click(selenium_column())
+                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                time.sleep(1)
+                                if(field[1] == True):
+                                    field_one = ''
+                                    break
 
-                        if child_type == "input":
+                            if(field[1] == True): break # if boolean field finish here.
+                            self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
+                            soup = self.get_current_DOM()
+                            new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
+                            child = new_container.select("input")
+                            child_type = "input"
+                            option_text = ""
+                            if not child:
+                                child = new_container.select("select")
+                                child_type = "select"
 
-                            time.sleep(2)
-                            selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child[0]))
-                            self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
-                            valtype = selenium_input().get_attribute("valuetype")
-                            lenfield = len(self.get_element_value(selenium_input()))
-                            user_value = field[1]
-                            check_mask = self.check_mask(selenium_input())
-                            if check_mask:
-                                if (check_mask[0].startswith('@D') and user_value == ''):
-                                    user_value = '00000000'
-                                user_value = self.remove_mask(user_value)
+                            if child_type == "input":
 
-                            self.wait.until(EC.visibility_of(selenium_input()))
-                            self.set_element_focus(selenium_input())
-                            self.click(selenium_input())
-                            if "tget" in self.get_current_container().next.attrs['class']:
-                                bsoup_element = self.get_current_container().next
-                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
-                                self.try_send_keys(selenium_input, user_value, try_counter)
+                                time.sleep(2)
+                                selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child[0]))
+                                self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+                                valtype = selenium_input().get_attribute("valuetype")
+                                lenfield = len(self.get_element_value(selenium_input()))
+                                user_value = field[1]
+                                check_mask = self.check_mask(selenium_input())
+                                if check_mask:
+                                    if (check_mask[0].startswith('@D') and user_value == ''):
+                                        user_value = '00000000'
+                                    user_value = self.remove_mask(user_value)
 
-                                if try_counter < 2:
-                                    try_counter += 1
-                                else:
-                                    try_counter = 0
+                                self.wait.until(EC.visibility_of(selenium_input()))
+                                self.set_element_focus(selenium_input())
+                                self.click(selenium_input())
+                                if "tget" in self.get_current_container().next.attrs['class']:
+                                    bsoup_element = self.get_current_container().next
+                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                    self.try_send_keys(selenium_input, user_value, try_counter)
 
-                                if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
-                                        self.send_keys(selenium_input(), Keys.ENTER)
+                                    if try_counter < 2:
+                                        try_counter += 1
                                     else:
-                                        if not (re.match(r"[0-9]+,[0-9]+", user_value)):
+                                        try_counter = 0
+
+                                    if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
+                                        if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         else:
-                                            self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
-                                            if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
-                                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                            if not (re.match(r"[0-9]+,[0-9]+", user_value)):
                                                 self.send_keys(selenium_input(), Keys.ENTER)
-                            try_endtime = self.config.time_out
-                            while try_endtime > 0:
-                                element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
-                                time.sleep(1)
-                                if element_exist:
-                                    current_value = self.get_element_text(selenium_column())
-                                    break
-                                else:
-                                    try_endtime = try_endtime - 10
-                                    container_current = self.get_current_container()
-                                    if container_current.attrs['id'] != container_id:
-                                        print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
-                                        return
-                        else:
-                            option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text ,child[0].select('option'))))
-                            option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                            option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
-                            option_text = next(iter(option_text_list), None)
-                            if not option_text:
-                                self.log_error("Couldn't find option")
-                            if (option_text != option_value_dict[option_value]):
-                                self.select_combo(child[0], field[1])
-                                if field[1] in option_text[0:len(field[1])]:
-                                    current_value = field[1]
+                                            else:
+                                                self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
+                                                if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
+                                                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                                    self.send_keys(selenium_input(), Keys.ENTER)
+                                try_endtime = self.config.time_out / 4
+                                while try_endtime > 0:
+                                    element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
+                                    time.sleep(1)
+                                    if element_exist:
+                                        current_value = self.get_element_text(selenium_column())
+                                        break
+                                    else:
+                                        try_endtime = try_endtime - 10
+                                        container_current = self.get_current_container()
+                                        if container_current.attrs['id'] != container_id:
+                                            print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
+                                            return
                             else:
-                                self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
-                                current_value = field[1]
-                    else:
-                        self.log_error("Couldn't find columns.")
-                else:
-                    self.log_error("Couldn't find rows.")
-            else:
-                self.log_error("Fill grid couldn't find grids.")
+                                option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text ,child[0].select('option'))))
+                                option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                option_text = next(iter(option_text_list), None)
+                                if not option_text:
+                                    self.log_error("Couldn't find option")
+                                if (option_text != option_value_dict[option_value]):
+                                    self.select_combo(child[0], field[1])
+                                    if field[1] in option_text[0:len(field[1])]:
+                                        current_value = field[1]
+                                else:
+                                    self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                    current_value = field[1]
+
         if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
             self.log_error(f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
 
