@@ -119,6 +119,11 @@ class WebappInternal(Base):
             self.program_screen(initial_program)
 
         self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
+
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
+            self.update_password()
+
         self.environment_screen()
 
         while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
@@ -1517,7 +1522,7 @@ class WebappInternal(Base):
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
-                return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
+                return list(filter(lambda x: term.lower() in x.text.lower(), self.on_screen_enabled(container.select(optional_term))))
             elif (scrap_type == enum.ScrapType.SCRIPT):
                 script_result = self.driver.execute_script(term)
                 return script_result if isinstance(script_result, list) else []
@@ -4947,3 +4952,17 @@ class WebappInternal(Base):
         is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
         
         return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
+
+    def update_password(self):
+        """
+        [Internal]
+        Update the password in the Protheus password change request screen
+        """
+        container = self.get_current_container()
+        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
+            user_login = self.GetValue(self.language.user_login)
+            if user_login == self.config.user:
+                self.SetValue(self.language.current_password, self.config.password)
+                self.SetValue(self.language.nem_password, self.config.password)
+                self.SetValue(self.language.confirm_new_password, self.config.password)
+                self.SetButton(self.language.finish)

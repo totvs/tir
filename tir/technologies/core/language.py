@@ -56,9 +56,14 @@ class LanguagePack:
         self.coins = languagepack["Coins"]
         self.next = languagepack["Next"]
         self.logOff = languagepack["LogOff"]
-        self.checkhelp = languagepack["CheckHelp"]
-        self.checkproblem = languagepack["CheckProblem"]
-        self.checksolution = languagepack["CheckSolution"]
+        self.checkhelp = languagepack["Checkhelp"]
+        self.checkproblem = languagepack["Checkproblem"]
+        self.checksolution = languagepack["Checksolution"]
+        self.change_password = languagepack["ChangePassword"]
+        self.user_login = languagepack["UserLogin"]
+        self.current_password = languagepack["CurrentPassword"]
+        self.nem_password = languagepack["NewPassword"]
+        self.confirm_new_password = languagepack["ConfirmNewPassword"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -123,9 +128,15 @@ class LanguagePack:
             "Coins": "Coins",
             "Next": "Next >>",
             "LogOff": "Log Off",
-            "CheckHelp": "Help:",
-            "CheckProblem": "Problem:",
-            "CheckSolution": "Solution:"
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problem:",
+            "Checksolution": "Solution:",
+            "ChangePassword": "Reserved",
+            "UserLogin": "Reserved",
+            "CurrentPassword": "Reserved",
+            "NewPassword": "Reserved",
+            "ConfirmNewPassword": "Reserved"
+            
         }
 
         brazilian_portuguese = {
@@ -188,9 +199,14 @@ class LanguagePack:
             "Coins": "Moedas",
             "Next": "Avançar >>",
             "LogOff": "Log Off",
-            "CheckHelp": "Help:",
-            "CheckProblem": "Problema:",
-            "CheckSolution": "Solução:"
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problema:",
+            "Checksolution": "Solução:",
+            "ChangePassword": "Alterar Senha",
+            "UserLogin": "Login do usuário",
+            "CurrentPassword": "Senha atual",
+            "NewPassword": "Nova senha",
+            "ConfirmNewPassword": "Confirmar nova senha"
             
         }
         spanish = {
@@ -253,9 +269,14 @@ class LanguagePack:
             "Coins": "Monedas",
             "Next": "Avançar >>",
             "LogOff": "Log Off",
-            "CheckHelp": "Help:",
-            "CheckProblem": "Problema:",
-            "CheckSolution": "Solucion:"
+            "Checkhelp": "Help:",
+            "Checkproblem": "Problema:",
+            "Checksolution": "Solucion:",
+            "ChangePassword": "Reserved",
+            "UserLogin": "Reserved",
+            "CurrentPassword": "Reserved",
+            "NewPassword": "Reserved",
+            "ConfirmNewPassword": "Reserved"
         }
         russian = {
             "User": "Пользователь",
