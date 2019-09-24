@@ -319,7 +319,7 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Monedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Завершить"
         }
 
         if language.lower() == "en-us":

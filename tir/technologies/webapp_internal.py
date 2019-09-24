@@ -1429,24 +1429,28 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
-        if self.config.coverage:
-            timeout = 900
-            endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.logOff)
+        # if self.config.coverage:
+        #     timeout = 900
+        #     endtime = time.time() + timeout
+        #     while(time.time() < endtime and not element):
+        #         ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        #         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+        #         self.SetButton(self.language.logOff)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+        #         self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
 
-                element = self.search_text(selector=".tsay", text=string)
-                if element:
-                    print(string)
+        #         element = self.search_text(selector=".tsay", text=string)
+        #         if element:
+        #             print(string)
 
-        else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.logOff)
-
+        # else:
+        act = ActionChains(self.driver)
+        act.key_down (Keys.LEFT_CONTROL)
+        act.send_keys('q')
+        act.key_up (Keys.LEFT_CONTROL)
+        act.perform()
+        time.sleep(5)   # test
+        self.SetButton ("Завершить")
 
     def print_in (self):
         """
@@ -4701,19 +4705,25 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> self.TearDown()
         """
+        # if self.config.coverage:
 
-        if self.config.coverage:
-
-            self.driver.refresh()
-            self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-            timeout = 900
+        #     self.driver.refresh()
+        #     self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        #     timeout = 900
             
-            self.Finish()
-            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
+        #     self.Finish()
+        #     self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
             
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-        self.driver.close()
+        # if self.config.num_exec:
+        #     self.num_exec.post_exec(self.config.url_set_end_exec)
+        
+        act = ActionChains(self.driver)
+        act.key_down (Keys.LEFT_CONTROL)
+        act.send_keys('q')
+        act.key_up (Keys.LEFT_CONTROL)
+        act.perform()
+        time.sleep(5)   # test
+        self.SetButton ("Завершить")
             
     def containers_filter(self, containers):
         """
