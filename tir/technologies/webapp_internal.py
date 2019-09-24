@@ -594,14 +594,21 @@ class WebappInternal(Base):
             self.double_click(s_tget())
             self.set_element_focus(s_tget())
             self.send_keys(s_tget(), Keys.BACK_SPACE)
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
             self.send_keys(s_tget(), program)
             current_value = self.get_web_value(s_tget()).strip()
+
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and current_value != program):
                 self.send_keys(s_tget(), Keys.BACK_SPACE)
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
                 self.send_keys(s_tget(), program)
                 current_value = self.get_web_value(s_tget()).strip()
-                
+            
+            if current_value.strip() != program.strip():
+                self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
+            self.set_element_focus(s_tget_img())
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
             self.click(s_tget_img())
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
