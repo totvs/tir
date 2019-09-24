@@ -730,24 +730,32 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        success = False
         container = None
+
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not container): 
+        
+        while (time.time() < endtime and not success): 
             soup = self.get_current_DOM()
             search_index = self.get_panel_name_index(panel_name) if panel_name else 0
             containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True) 
             container = next(iter(containers), None)
+            
+            if container:
+                elements_soup = container.select("[style*='fwskin_seekbar_ico']")
+
+            if elements_soup and len(elements_soup) -1 >= search_index:
+                browse_div = elements_soup[search_index].find_parent().find_parent()
+                success = True
 
         if not container:
             self.log_error("Couldn't find container of element.")
 
-        try:
-            browse_div = container.select("[style*='fwskin_seekbar_ico']")[search_index].find_parent().find_parent()
-        except IndexError:
-            self.log_error("Search element wasn't found.")
-        browse_tget = browse_div.select(".tget")[0]
+        if not success:
+            self.log_error("Get search browse elements couldn't find browser div")
 
+        browse_tget = browse_div.select(".tget")[0]
         browse_key = browse_div.select(".tbutton button")[0]
         browse_input = browse_tget.select("input")[0]
         browse_icon = browse_tget.select("img")[0]
@@ -846,10 +854,13 @@ class WebappInternal(Base):
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 sel_browse_input().clear()
                 self.set_element_focus(sel_browse_input())
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[1]))))
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
+        if current_value.rstrip() != term.strip():
+            self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker_ajax()
         self.double_click(sel_browse_icon())
