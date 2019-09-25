@@ -3920,7 +3920,7 @@ class WebappInternal(Base):
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img)
 
             if icon_text not in tbtnbmp_img_str:
-                container = next(iter(self.zindex_sort(soup.select(".ttoolbar"))), None)
+                container = self.get_current_container()
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             
             if tbtnbmp_img:
