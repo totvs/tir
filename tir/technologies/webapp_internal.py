@@ -1429,28 +1429,28 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
-        # if self.config.coverage:
-        #     timeout = 900
-        #     endtime = time.time() + timeout
-        #     while(time.time() < endtime and not element):
-        #         ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        #         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-        #         self.SetButton(self.language.logOff)
+        if self.config.coverage:
+            timeout = 900
+            endtime = time.time() + timeout
+            while(time.time() < endtime and not element):
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                self.SetButton(self.language.logOff)
 
-        #         self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
 
-        #         element = self.search_text(selector=".tsay", text=string)
-        #         if element:
-        #             print(string)
+                element = self.search_text(selector=".tsay", text=string)
+                if element:
+                    print(string)
 
-        # else:
-        act = ActionChains(self.driver)
-        act.key_down (Keys.LEFT_CONTROL)
-        act.send_keys('q')
-        act.key_up (Keys.LEFT_CONTROL)
-        act.perform()
-        time.sleep(5)   # test
-        self.SetButton ("Завершить")
+        else:
+            act = ActionChains(self.driver)
+            act.key_down (Keys.LEFT_CONTROL)
+            act.send_keys('q')
+            act.key_up (Keys.LEFT_CONTROL)
+            act.perform()
+            time.sleep(5)   # test
+            self.oHelper.SetButton (self.oHelper.FindButton ("msfinal", "STR0006"))     # Завершить
 
     def print_in (self):
         """
@@ -4350,7 +4350,7 @@ class WebappInternal(Base):
         >>> self.assert_result(True)
         """
         expected_assert = expected
-        msg = "Passed"
+        msg = "Passed\n"
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number}"
@@ -4717,13 +4717,14 @@ class WebappInternal(Base):
         # if self.config.num_exec:
         #     self.num_exec.post_exec(self.config.url_set_end_exec)
         
+        # Work variant, 99.9%
         act = ActionChains(self.driver)
         act.key_down (Keys.LEFT_CONTROL)
         act.send_keys('q')
         act.key_up (Keys.LEFT_CONTROL)
         act.perform()
-        time.sleep(5)   # test
-        self.SetButton ("Завершить")
+        time.sleep(5)
+        self.oHelper.SetButton (self.oHelper.FindButton ("msfinal", "STR0006"))     # Завершить
             
     def containers_filter(self, containers):
         """
