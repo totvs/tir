@@ -1745,6 +1745,8 @@ class WebappInternal(Base):
                 selector = "div"
 
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
+            if not element_list:
+                return None
         if position == 0:
             return len(element_list) > 0
         else:
