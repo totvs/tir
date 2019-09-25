@@ -3917,6 +3917,11 @@ class WebappInternal(Base):
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
             tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+            tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img)
+
+            if icon_text not in tbtnbmp_img_str:
+                container = next(iter(self.zindex_sort(soup.select(".ttoolbar"))), None)
+                tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             
             if tbtnbmp_img:
                 icon = next(iter(list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))), None)
