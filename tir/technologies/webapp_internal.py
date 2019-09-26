@@ -914,17 +914,19 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.search_element_position(field)
         """
-        try:
-            container = self.get_current_container()
-            if not container:
-                self.log_error("Container wasn't found.")
+        endtime = (time.time() + self.config.time_out)
+        label = None
+        position -= 1
 
-            labels = container.select("label")
-            labels_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(),labels))
-            labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-            position -= 1
-            if labels_list and len(labels_list) -1 >= position:
-                label = labels_list[position]
+        try:
+            while( time.time() < endtime and not label ):
+                container = self.get_current_container()
+                labels = container.select("label")
+                labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
+                labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                labels_list_filtered = list(filter(lambda x: 'th' not in x.parent.parent.name , labels_list))
+                if labels_list_filtered and len(labels_list_filtered) -1 >= position:
+                    label = labels_list_filtered[position]
 
             if not label:
                 self.log_error("Label wasn't found.")
@@ -4693,6 +4695,17 @@ class WebappInternal(Base):
         >>> elements = self.filter_is_displayed(elements)
         """
         return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+
+    def element_is_displayed(self, element):
+        """
+        [Internal]
+
+        """
+        element_selenium = self.soup_to_selenium(element)
+        if element_selenium:
+            return element_selenium.is_displayed()
+        else:
+            return False
 
     def search_text(self, selector, text):
         """
