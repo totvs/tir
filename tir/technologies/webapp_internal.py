@@ -2139,7 +2139,7 @@ class WebappInternal(Base):
 
             element = None
             
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", main_container="body, .tmodaldialog", check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container="body, .tmodaldialog", check_help=False)
 
             if not element:
                 return
@@ -3925,7 +3925,7 @@ class WebappInternal(Base):
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
             tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
-            tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img)
+            tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
 
             if icon_text not in tbtnbmp_img_str:
                 container = self.get_current_container()
