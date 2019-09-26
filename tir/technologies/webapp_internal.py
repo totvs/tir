@@ -1562,8 +1562,12 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.search_for_errors()
         """
+        endtime = time.time() + self.config.time_out
+        soup = None
 
-        soup = self.get_current_DOM()
+        while(time.time() < endtime and not soup):
+            soup = self.get_current_DOM()
+            
         if not soup:
             self.log_error("Search for erros cound't find DOM")
         
