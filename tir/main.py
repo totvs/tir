@@ -18,6 +18,7 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.program = ""   # test remarks 26.09 (variable)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -65,7 +66,7 @@ class Webapp():
         >>> #Calling the method
         >>> inst.oHelper.AssertTrue()
         """
-        self.__webapp.AssertTrue()
+        self.__webapp.AssertTrue(self.program)
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
@@ -358,6 +359,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
+        self.program = program_name
         self.__webapp.Program(program_name)
 
     def RestoreParameters(self):

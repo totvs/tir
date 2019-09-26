@@ -1449,8 +1449,8 @@ class WebappInternal(Base):
             act.send_keys('q')
             act.key_up (Keys.LEFT_CONTROL)
             act.perform()
-            time.sleep(5)   # test
-            self.oHelper.SetButton (self.oHelper.FindButton ("msfinal", "STR0006"))     # Завершить
+            time.sleep(5)
+            self.SetButton (self.FindButton ("msfinal", "STR0006"))     # Завершить
 
     def print_in (self):
         """
@@ -4335,7 +4335,8 @@ class WebappInternal(Base):
                 success = True
             time.sleep(0.5)
 
-    def assert_result(self, expected):
+    # test remarks 26.09 (parameter from <def Program> -> main.py)
+    def assert_result(self, expected, p_name=""):
         """
         [Internal]
 
@@ -4350,7 +4351,7 @@ class WebappInternal(Base):
         >>> self.assert_result(True)
         """
         expected_assert = expected
-        msg = "Passed\n"
+        msg = "Test [{}] → ".format(p_name)
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number}"
@@ -4378,10 +4379,12 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
 
         self.errors = []
-        print(msg)
+        
         if expected_assert:
+            print(msg + "Passed\n")         # test remarks 26.09 (print)
             self.assertTrue(expected, msg)
         else:
+            print(msg + "Not passed\n")     # test remarks 26.09
             self.assertFalse(expected, msg)
 
     
@@ -4718,13 +4721,16 @@ class WebappInternal(Base):
         #     self.num_exec.post_exec(self.config.url_set_end_exec)
         
         # Work variant, 99.9%
+        # Last tests in 26.09
         act = ActionChains(self.driver)
         act.key_down (Keys.LEFT_CONTROL)
         act.send_keys('q')
         act.key_up (Keys.LEFT_CONTROL)
         act.perform()
         time.sleep(5)
-        self.oHelper.SetButton (self.oHelper.FindButton ("msfinal", "STR0006"))     # Завершить
+        self.SetButton (self.FindButton ("msfinal", "STR0006"))     # Завершить
+        time.sleep(2)
+        self.driver.close()
             
     def containers_filter(self, containers):
         """

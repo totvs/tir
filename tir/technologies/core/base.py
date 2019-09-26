@@ -832,7 +832,7 @@ class Base(unittest.TestCase):
         """
         self.assert_result(False)
 
-    def AssertTrue(self):
+    def AssertTrue(self, program_name=""):
         """
         Defines that the test case expects a True response to pass
 
@@ -841,7 +841,7 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> oHelper.AssertTrue()
         """
-        self.assert_result(True)
+        self.assert_result(True, program_name)
 
     def SetTIRConfig(self, config_name, value):
         """
