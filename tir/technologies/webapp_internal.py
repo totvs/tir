@@ -1540,7 +1540,11 @@ class WebappInternal(Base):
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
-                return list(filter(lambda x: term.lower() in x.text.lower(), self.on_screen_enabled(container.select(optional_term))))
+                try:
+                    return list(filter(lambda x: term.lower() in x.text.lower(), self.on_screen_enabled(container.select(optional_term))))
+                except AttributeError:
+                    return []
+
             elif (scrap_type == enum.ScrapType.SCRIPT):
                 script_result = self.driver.execute_script(term)
                 return script_result if isinstance(script_result, list) else []
@@ -1564,6 +1568,8 @@ class WebappInternal(Base):
         """
 
         soup = self.get_current_DOM()
+        if not soup:
+            self.log_error("Search for erros cound't find DOM")
         
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
@@ -1739,6 +1745,8 @@ class WebappInternal(Base):
                 selector = "div"
 
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
+            if not element_list:
+                return None
         if position == 0:
             return len(element_list) > 0
         else:
@@ -4961,9 +4969,10 @@ class WebappInternal(Base):
 
         Returns a list if selenium displayed and enabled methods is True.
         """
-        is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
-        
-        return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
+        if elements:
+            is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+            
+            return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
 
     def update_password(self):
         """
