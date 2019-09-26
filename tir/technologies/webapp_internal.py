@@ -1540,11 +1540,7 @@ class WebappInternal(Base):
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
-                try:
-                    return list(filter(lambda x: term.lower() in x.text.lower(), self.on_screen_enabled(container.select(optional_term))))
-                except AttributeError:
-                    return []
-
+                return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
                 script_result = self.driver.execute_script(term)
                 return script_result if isinstance(script_result, list) else []
