@@ -886,6 +886,21 @@ class Webapp():
         >>> oHelper.ClickMenuPopUpItem("Label")
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click)
+    
+    def ClickListBox(self, text):
+        """
+        Clicks on Item based in a text in a window tlistbox
+
+        :param text: Text in windows to be clicked.
+        :type text: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickListBox("text")
+        """
+        
+        return self.__webapp.ClickListBox(self, text)
         
 class Apw():
 
