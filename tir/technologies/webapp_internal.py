@@ -4987,3 +4987,26 @@ class WebappInternal(Base):
                 self.SetValue(self.language.nem_password, self.config.password)
                 self.SetValue(self.language.confirm_new_password, self.config.password)
                 self.SetButton(self.language.finish)
+    
+    def ClickListBox(self, text):
+        """
+        Clicks on Item based in a text in a window tlistbox
+
+        :param text: Text in windows to be clicked.
+        :type text: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickListBox("text")
+        """
+
+        self.wait_element(term='.tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog")
+        container = self.get_current_container()
+        tlist = container.select(".tlistbox")
+        list_option = tlist[0].select("option")
+        list_option_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_option))
+        element = next(iter(filter(lambda x: x.text == text, list_option_filtered)), None)
+        element_selenium = self.soup_to_selenium(element)
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+        element_selenium.click()
