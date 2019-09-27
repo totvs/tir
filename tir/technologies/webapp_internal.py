@@ -2960,7 +2960,7 @@ class WebappInternal(Base):
                             self.click(selenium_column())
                             self.set_element_focus(selenium_column())
 
-                            while(time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
+                            while(time.time() < endtime and not self.element_exists(term=".tmodaldialog twidget borderless", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")):
                                 time.sleep(1)
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
