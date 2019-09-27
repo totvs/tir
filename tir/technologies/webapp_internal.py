@@ -2293,7 +2293,7 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         text = ''
-        endtime = time.time() + self.config.time_out +30
+        endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
             self.wait_element_timeout(field)
@@ -2342,6 +2342,7 @@ class WebappInternal(Base):
             get_current_filtered = next(iter(get_current()),None)
             current = get_current_filtered
             contents = content_list[:]
+            endtime = time.time() + self.config.time_out
             while(last != current or contents):
                 if text in contents:
                     clicking_row_element_bs = next(iter(current.select("td")), None)
