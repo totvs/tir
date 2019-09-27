@@ -3145,7 +3145,6 @@ class WebappInternal(Base):
         columns = None
         success  = False
         field_to_label = {}
-        endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
@@ -3154,6 +3153,7 @@ class WebappInternal(Base):
                 print("Waiting for container to be active")
             time.sleep(1)
 
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
 
             containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -3181,7 +3181,7 @@ class WebappInternal(Base):
                     if field_element != None and len(rows) -1 >= field_element:
                         columns = rows[field_element].select("td")
                         
-                if columns:
+                if columns and rows:
 
                     if "_" in field[1]:
                         column_name = field_to_label[field[1]].lower()
