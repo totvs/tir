@@ -924,7 +924,7 @@ class WebappInternal(Base):
                 labels = container.select("label")
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in x.parent.parent.name , labels_list))
+                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
@@ -986,6 +986,16 @@ class WebappInternal(Base):
         script = f'return document.getElementById("{id}").offsetWidth;'
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
+
+    def element_name(self, element_soup):
+        """
+        [internal]
+
+        """
+        result = ''
+        if element_soup:
+            result = element_soup.name
+        return result
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
