@@ -941,7 +941,7 @@ class WebappInternal(Base):
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
@@ -1896,7 +1896,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element): 
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
-                soup_objects = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), soup_objects ))
+                soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
 
                 if soup_objects and len(soup_objects) - 1 >= position:
@@ -2406,7 +2406,7 @@ class WebappInternal(Base):
             self.log_error("Couldn't find chosen column.")
             
         sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
-        sd_button_list_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), sd_button_list))
+        sd_button_list_displayed = list(filter(lambda x: self.element_is_displayed(x), sd_button_list))
         sd_button = sd_button_list_displayed[grid_number] if len(sd_button_list_displayed) - 1 >= grid_number else None
         scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
         scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
@@ -2454,7 +2454,7 @@ class WebappInternal(Base):
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if grids:
-            grids = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), grids))
+            grids = list(filter(lambda x: self.element_is_displayed(x), grids))
         else:
             self.log_error("Couldn't find grid.")
 
@@ -4399,7 +4399,7 @@ class WebappInternal(Base):
                     if hierarchy:
                          elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
                 else:
-                    elements = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+                    elements = list(filter(lambda x: self.element_is_displayed(x), elements))
 
                     if hierarchy:
                         elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
@@ -4693,7 +4693,7 @@ class WebappInternal(Base):
         """
         
         elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
-        return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements)) if len(elements) > 1 else elements
+        return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
 
     def filter_is_displayed(self, elements):
         """
@@ -4705,7 +4705,7 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> elements = self.filter_is_displayed(elements)
         """
-        return list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+        return list(filter(lambda x: self.element_is_displayed(x), elements))
 
     def element_is_displayed(self, element):
         """
@@ -4964,7 +4964,7 @@ class WebappInternal(Base):
 
             tmenupopupitem = body.select(".tmenupopupitem")
 
-            tmenupopupitem_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), tmenupopupitem))
+            tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
             tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))))
 
@@ -4994,7 +4994,7 @@ class WebappInternal(Base):
         Returns a list if selenium displayed and enabled methods is True.
         """
         if elements:
-            is_displayed = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), elements))
+            is_displayed = list(filter(lambda x: self.element_is_displayed(x), elements))
             
             return list(filter(lambda x: self.soup_to_selenium(x).is_enabled(), is_displayed))
 
@@ -5029,7 +5029,7 @@ class WebappInternal(Base):
         container = self.get_current_container()
         tlist = container.select(".tlistbox")
         list_option = tlist[0].select("option")
-        list_option_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), list_option))
+        list_option_filtered = list(filter(lambda x: self.element_is_displayed(x), list_option))
         element = next(iter(filter(lambda x: x.text == text, list_option_filtered)), None)
         element_selenium = self.soup_to_selenium(element)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
