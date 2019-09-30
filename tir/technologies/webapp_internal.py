@@ -3108,6 +3108,8 @@ class WebappInternal(Base):
                 column_name = field_to_label[field[0]]
             else:
                 column_name = field[0]
+            
+            column_name = column_name.lower()
 
             if column_name not in headers[field[2]]:
                 self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
