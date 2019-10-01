@@ -2969,7 +2969,10 @@ class WebappInternal(Base):
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                try:
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                except StaleElementReferenceException:
+                                    pass
                                 time.sleep(1)
                                 if(field[1] == True):
                                     field_one = ''
