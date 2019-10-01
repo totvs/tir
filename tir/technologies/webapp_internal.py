@@ -4409,27 +4409,27 @@ class WebappInternal(Base):
 
                         for element_class_item in element_class:
                         
-                            if "expanded" not in element_class_item.attrs['class'] and not success:
-                                element_click = lambda: self.soup_to_selenium(element_class_item)
+                            # if "expanded" not in element_class_item.attrs['class'] and not success:
+                            element_click = lambda: self.soup_to_selenium(element_class_item)
                                 
-                                try:
-                                    if last_item:
-                                        element_click().click()
-                                        if self.check_toggler(label_filtered):
-                                            success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                            if success and right_click:
-                                                self.click(element_click(), right_click=right_click)
-                                        else:
-                                            if right_click:
-                                                self.click(element_click(), right_click=right_click)
-                                            success = self.clicktree_status_selected(label_filtered)
-                                    else:
-                                        element_click().click()
+                            try:
+                                if last_item:
+                                    element_click().click()
+                                    if self.check_toggler(label_filtered):
                                         success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                    
-                                    try_counter += 1
-                                except:                                
-                                    pass
+                                        if success and right_click:
+                                            self.click(element_click(), right_click=right_click)
+                                    else:
+                                        if right_click:
+                                            self.click(element_click(), right_click=right_click)
+                                        success = self.clicktree_status_selected(label_filtered)
+                                else:
+                                    element_click().click()
+                                    success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                
+                                try_counter += 1
+                            except:                                
+                                pass
             
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
@@ -4477,7 +4477,10 @@ class WebappInternal(Base):
         treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
 
         if not check_expanded:
-            return next(iter(list(map(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+            if list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected)):
+                return True
+            else:
+                return False
         else:
             tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
             if tree_selected.find_all_next("span"):
