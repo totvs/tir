@@ -3308,49 +3308,40 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
+        success = False
         grids = None
         row_number -= 1
         grid_number -= 1
         column_name = ""
-        endtime = time.time() + self.config.time_out
-
+        
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        
+        endtime = time.time() + self.config.time_out
 
         if re.match(r"\w+(_)", column):
             column_name = self.get_x3_dictionaries([column])[2][column].lower()
         else:
             column_name = column.lower()
 
-        while(not grids and time.time() < endtime):
+        while(not success and time.time() < endtime):
+
             containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             container = next(iter(self.zindex_sort(containers, True)), None)
-            grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
-            grids = list(filter(lambda x:x.select("tbody tr"), grids))
-            time.sleep(1)
+            if container:
+                grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+                grids = list(filter(lambda x:x.select("tbody tr"), grids))      
 
-        if not containers:
-            self.log_error("Couldn't find controller.")
-            
-        if not grids:
-            self.log_error("Couldn't find any grid.")
+                if grids:
+                    headers = self.get_headers_from_grids(grids)
+                    rows = grids[grid_number].select("tbody tr")
+                    if rows:
+                        columns = rows[row_number].select("td")
+                    if columns:
+                        if column_name in headers[grid_number]:
+                            success = True
 
-        headers = self.get_headers_from_grids(grids)
-        if grid_number > len(grids):
-            self.log_error(self.language.messages.grid_number_error)
-
-        rows = grids[grid_number].select("tbody tr")
-        if not rows:
-            self.log_error("Couldn't find rows.")
-
-        if row_number > len(rows):
-            self.log_error(self.language.messages.grid_line_error)
-
-        columns = rows[row_number].select("td")
-        if not columns:
-            self.log_error("Couldn't find columns.")
-
-        if column_name not in headers[grid_number]:
-            self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[grid_number].keys()}'")
+        if not success:
+            self.log_error("Couldn't Click on grid cell ")
 
         column_number = headers[grid_number][column_name]
         column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
