@@ -1093,7 +1093,7 @@ class WebappInternal(Base):
             if not element:
                 continue
 
-            if "tmultiget" in element.attrs['class'] if element.name == 'div' else None:
+            if "tmultiget" in element.attrs['class'] if self.element_name(element) == 'div' else None:
                 textarea = element.select("textarea")
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
@@ -1114,7 +1114,7 @@ class WebappInternal(Base):
                 if not input_field().is_enabled() or "disabled" in element.attrs:
                     self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
-                if element.name == "input":
+                if self.element_name(element) == "input":
                     valtype = element.attrs["valuetype"]
 
                 self.scroll_to_element(input_field())
@@ -1222,7 +1222,7 @@ class WebappInternal(Base):
                 element = self.find_label_element(label_text = field, position = position)
 
         if element:
-            element_children = next((x for x in element.contents if x.name in ["input", "select"]), None)
+            element_children = next((x for x in element.contents if self.element_name(x) in ["input", "select"]), None)
             return element_children if element_children is not None else element
         else:
             self.log_error("Element wasn't found.")
