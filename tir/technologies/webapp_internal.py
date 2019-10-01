@@ -2883,6 +2883,11 @@ class WebappInternal(Base):
         field_to_valtype = {}
         field_to_len = {}
         current_value = ""
+        column_name = ""
+        grids = None
+        rows = ""
+        headers = ""
+        columns = ""
 
         if(field[1] == True):
             field_one = 'is a boolean value'
@@ -2969,7 +2974,10 @@ class WebappInternal(Base):
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                try:
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                except StaleElementReferenceException:
+                                    pass
                                 time.sleep(1)
                                 if(field[1] == True):
                                     field_one = ''
@@ -3053,6 +3061,8 @@ class WebappInternal(Base):
                                     current_value = field[1]
 
         if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+            self.search_for_errors()
+            self.check_grid_error(grids, headers, column_name, rows, columns, field)
             self.log_error(f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
 
     def get_selenium_column_element(self, xpath):
@@ -3223,12 +3233,12 @@ class WebappInternal(Base):
             self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[3]].keys()}'")
             error = True
         
+        if not error and not columns:
+            self.log_error("Couldn't find columns.")
+
         if not error and not rows:
             self.log_error("Couldn't find rows.")
             error = True
-
-        if not error and not columns:
-            self.log_error("Couldn't find columns.")
 
         return
         
