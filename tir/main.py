@@ -546,10 +546,6 @@ class Webapp():
         """
         self.__webapp.SetDial (head_node, end_index, start_index, attr_name, attr_contains)
 
-    # Don't work yet
-    # def F3G (self, tbl_row, tbl_cell):
-    #     self.__webapp.F3G (tbl_row, tbl_cell)
-
     def GetModuleName (self, search_function):
         """
         Method that load lines from xlsx(MS Excell) file, and return the module name (SIGAPCP) by function (MATA632).
@@ -566,6 +562,17 @@ class Webapp():
         >>> oHelper.Setup(inst.oHelper.GetModuleName("MATA632"), '09/09/2019', '00', '102030', '01')
         """
         return self.__webapp.GetModuleName (search_function)
+
+    def ClickEditButton (self):
+        """
+        Method selects correct button before checking result with <def CheckResult(), def AssertTrue()>
+
+        Usage:
+
+        >>> # Calling the method to click on a specific button:
+        >>> oHelper.ClickEditButton()
+        """
+        self.__webapp.ClickEditButton()
         
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """

@@ -473,7 +473,7 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
-            self.SetButton(self.language.confirm)
+            self.SetButton(self.language.shortconfirm)
         
     def close_resolution_screen(self):
         """
@@ -1968,6 +1968,7 @@ class WebappInternal(Base):
                 mass_WebElement.append (self.driver.find_element_by_xpath (result))
 
             for z in range (start_index, end_index+1):
+                time.sleep(1)
                 self.click (mass_WebElement[z])
 
         else:
@@ -2014,6 +2015,43 @@ class WebappInternal(Base):
 
         except FileNotFoundError:
             self.log_error(f"Couldn't find excell file for obtaining module name")
+
+    def ClickEditButton (self):
+        """
+        Method selects correct button before checking result with <def CheckResult(), def AssertTrue()>
+
+        Usage:
+
+        >>> # Calling the method to click on a specific button:
+        >>> oHelper.ClickEditButton()
+        """
+        time.sleep (2)
+
+        buttons = self.driver.find_elements_by_xpath ("//button[text()]")     # find all buttons on the page here (need function)
+        for b in buttons:
+            if b.text.strip() == "Изменить":
+                self.SetButton (self.FindButton ("mata360", "STR0004")) #изменить
+                break
+            
+            elif b.text.strip() == "Изменять":
+                self.SetButton (self.FindButton ("veicm540", "STR0004"))  # Изменять
+                break
+
+            elif b.text.strip() == "Ред.":
+                self.SetButton (self.FindButton ("mata370", "STR0004"))  # Ред.
+                break
+
+            elif b.text.strip() == "Редактировать":
+                self.SetButton (self.FindButton ("pcpa104", "STR0042"))    # Редактировать
+                break
+
+            elif b.text.strip() == "Редакт.":
+                self.SetButton (self.FindButton ("mdta621", "STR0010"))    # Редакт.
+                break
+
+            elif b.text.strip() == "Просмотр":
+                self.SetButton(self.FindButton(csource="ru07d03", cposition="STR0005"))  # Просмотр
+                break
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
@@ -4719,11 +4757,13 @@ class WebappInternal(Base):
             
         # if self.config.num_exec:
         #     self.num_exec.post_exec(self.config.url_set_end_exec)
+        # .<selenium.webdriver.chrome.webdriver.WebDriver (session="ed5959cd3d6fd421bd4cd6c9b05aaa17")>
         
         # Work variant, 99.9%
-        # Last tests in 26.09
+        # Last tests in 26.09 on Firefox
         act = ActionChains(self.driver)
         act.key_down (Keys.LEFT_CONTROL)
+        time.sleep(5)
         act.send_keys('q')
         act.key_up (Keys.LEFT_CONTROL)
         act.perform()
@@ -4906,6 +4946,7 @@ class WebappInternal(Base):
                 content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
             except AttributeError:
                 pass
+    
     def CheckHelp(self, text, button):
         """
         Checks if some help screen is present in the screen at the time and takes an action.

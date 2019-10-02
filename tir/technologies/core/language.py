@@ -24,6 +24,7 @@ class LanguagePack:
         self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
         self.confirm = languagepack["Confirm"]
+        self.shortconfirm = languagepack["shortConfirm"]
         self.save = languagepack["Save"]
         self.close = languagepack["Close"]
         self.exit = languagepack["Exit"]
@@ -270,6 +271,7 @@ class LanguagePack:
             #"Other Actions": "Другие Действия",
             "Other Actions": "Др. действия",
             "Confirm": "Подтвердить",
+            "shortConfirm": "Подтв.",
             "Save": "Сохранить",
             "Close": "Закрыть",
             "Exit": "Выход",
@@ -317,7 +319,7 @@ class LanguagePack:
             "Search By": "Search by:",
             "From": "De",
             "To": "Ate",
-            "Coins": "Monedas",
+            "Coins": "Валюта",
             "Next": "Avançar >>",
             "LogOff": "Завершить"
         }
