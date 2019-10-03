@@ -273,10 +273,10 @@ class LanguagePack:
             "Checkproblem": "Problema:",
             "Checksolution": "Solucion:",
             "ChangePassword": "Reserved",
-            "UserLogin": "Reserved",
-            "CurrentPassword": "Reserved",
-            "NewPassword": "Reserved",
-            "ConfirmNewPassword": "Reserved"
+            "UserLogin": "Login del usuario*",
+            "CurrentPassword": "Contrasena actual*",
+            "NewPassword": "Nueva contrasena*",
+            "ConfirmNewPassword": "Confirmar nueva contrasena*"
         }
         russian = {
             "User": "Пользователь",
