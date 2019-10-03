@@ -350,9 +350,19 @@ class Base(unittest.TestCase):
         >>> parent_element = self.find_first_div_parent(my_element)
         """
         current = element
-        while(hasattr(current, "name") and current.name != "div"):
+        while(hasattr(current, "name") and self.element_name(current) != "div"):
             current = current.find_parent()
         return current
+
+    def element_name(self, element_soup):
+        """
+        [internal]
+
+        """
+        result = ''
+        if element_soup:
+            result = element_soup.name
+        return result
 
     def find_label_element(self, label_text, container):
         """
