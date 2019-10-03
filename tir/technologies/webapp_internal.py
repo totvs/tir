@@ -126,7 +126,7 @@ class WebappInternal(Base):
 
         self.environment_screen()
 
-        while(not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+        while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
             self.close_coin_screen()
             self.close_modal()
 
