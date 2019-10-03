@@ -987,15 +987,6 @@ class WebappInternal(Base):
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
 
-    def element_name(self, element_soup):
-        """
-        [internal]
-
-        """
-        result = ''
-        if element_soup:
-            result = element_soup.name
-        return result
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
         """
@@ -3339,9 +3330,9 @@ class WebappInternal(Base):
             container = next(iter(self.zindex_sort(containers, True)), None)
             if container:
                 grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
-                grids = list(filter(lambda x:x.select("tbody tr"), grids))      
 
                 if grids:
+                    grids = list(filter(lambda x:x.select("tbody tr"), grids))      
                     headers = self.get_headers_from_grids(grids)
                     rows = grids[grid_number].select("tbody tr")
                     if rows:
@@ -3956,8 +3947,9 @@ class WebappInternal(Base):
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
                 print("Searching for Icon")
-                filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+                if buttons:
+                    filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+                    #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
 
                 icon = next(iter(filtered_buttons), None)
 
