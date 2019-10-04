@@ -576,40 +576,43 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_program("MATA020")
         """
-        print(f"Setting program: {program}")
-        self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        soup = self.get_current_DOM()
-        tget = next(iter(soup.select("[name=cGet]")), None)
-        tget_input = next(iter(tget.select("input")), None)
-        if tget:
-            tget_img = next(iter(tget.select("img")), None)
+        try:
+            print(f"Setting program: {program}")
+            self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            soup = self.get_current_DOM()
+            tget = next(iter(soup.select("[name=cGet]")), None)
+            tget_input = next(iter(tget.select("input")), None)
+            if tget:
+                tget_img = next(iter(tget.select("img")), None)
 
-            if tget_img is None:
-                self.log_error("Couldn't find Program field.")
+                if tget_img is None:
+                    self.log_error("Couldn't find Program field.")
 
-            s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
-            s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
+                s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
+                s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
 
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
-            self.double_click(s_tget())
-            self.set_element_focus(s_tget())
-            self.send_keys(s_tget(), Keys.BACK_SPACE)
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
-            self.send_keys(s_tget(), program)
-            current_value = self.get_web_value(s_tget()).strip()
-
-            endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and current_value != program):
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
+                self.double_click(s_tget())
+                self.set_element_focus(s_tget())
                 self.send_keys(s_tget(), Keys.BACK_SPACE)
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
                 self.send_keys(s_tget(), program)
                 current_value = self.get_web_value(s_tget()).strip()
-            
-            if current_value.strip() != program.strip():
-                self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
-            self.set_element_focus(s_tget_img())
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
-            self.click(s_tget_img())
+
+                endtime = time.time() + self.config.time_out
+                while(time.time() < endtime and current_value != program):
+                    self.send_keys(s_tget(), Keys.BACK_SPACE)
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
+                    self.send_keys(s_tget(), program)
+                    current_value = self.get_web_value(s_tget()).strip()
+                
+                if current_value.strip() != program.strip():
+                    self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
+                self.set_element_focus(s_tget_img())
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
+                self.click(s_tget_img())
+        except Exception as e:
+            self.log_error(str(e))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
