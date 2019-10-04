@@ -139,7 +139,10 @@ class Log:
         Returns a list of test cases from suite 
         """
         runner = next(iter(list(filter(lambda x: "runner.py" in x.filename, inspect.stack()))))
-        return list(runner.frame.f_locals['test'])
+        try:
+            return list(runner.frame.f_locals['test'])
+        except KeyError:
+            return []
 
     def get_testcase_stack(self):
         """
