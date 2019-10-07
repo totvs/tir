@@ -1035,7 +1035,7 @@ class WebappInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row=row)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position, check_value)
+            self.click_check_radio_button(field, value, name_attr, position)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value)
 
