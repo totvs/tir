@@ -611,6 +611,8 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
+        except AssertionError as error:
+            raise error
         except Exception as e:
             self.log_error(str(e))
 
@@ -3160,6 +3162,7 @@ class WebappInternal(Base):
         columns = None
         success  = False
         field_to_label = {}
+        endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
 
@@ -3168,7 +3171,6 @@ class WebappInternal(Base):
                 print("Waiting for container to be active")
             time.sleep(1)
 
-        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
 
             containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
