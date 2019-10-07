@@ -991,7 +991,7 @@ class WebappInternal(Base):
         return {'height': height, 'width':width}
 
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
         """
         Sets value of an input element.
         
@@ -1008,6 +1008,8 @@ class WebappInternal(Base):
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
+        :param check_value: Boolean ignore input check - **Default:** True
+        :type name_attr: bool
         :param row: Row number that will be filled
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
@@ -1033,11 +1035,11 @@ class WebappInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row=row)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position)
+            self.click_check_radio_button(field, value, name_attr, position, check_value)
         else:
-            self.input_value(field, value, ignore_case, name_attr, position)
+            self.input_value(field, value, ignore_case, name_attr, position, check_value)
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1):
+    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True):
         """
         [Internal]
 
@@ -1052,7 +1054,8 @@ class WebappInternal(Base):
         :type ignore_case: bool
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
-
+        :param check_value: Boolean ignore input check - **Default:** True
+        :type name_attr: bool
         :returns: True if succeeded, False if it failed.
         :rtype: bool
 
@@ -1152,6 +1155,8 @@ class WebappInternal(Base):
 
                         if user_value_size < interface_value_size:
                             self.send_keys(input_field(), Keys.ENTER)
+                            if not check_value:
+                                return
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip())

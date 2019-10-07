@@ -589,7 +589,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
         """
         Sets value of an input element.
 
@@ -609,6 +609,8 @@ class Webapp():
         :param row: Row number that will be filled
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
+        :type name_attr: bool
+        :param check_value: Boolean ignore input check - **Default:** True
         :type name_attr: bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
