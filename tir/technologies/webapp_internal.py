@@ -5010,7 +5010,7 @@ class WebappInternal(Base):
         container = self.get_current_container()
         if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
             user_login = self.GetValue(self.language.user_login)
-            if user_login != "":
+            if user_login == self.language.user_login or self.language.user_login.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
                 self.SetValue(self.language.nem_password, self.config.password)
                 self.SetValue(self.language.confirm_new_password, self.config.password)
