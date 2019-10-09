@@ -34,7 +34,7 @@ class ConfigLoader:
         self.log_folder = str(data["LogFolder"]) if "LogFolder" in data else ""
         self.log_file = ("LogFile" in data and bool(data["LogFile"]))
         self.debug_log = ("DebugLog" in data and bool(data["DebugLog"]))
-        self.time_out = int(data["TimeOut"]) if "TimeOut" in data else 360
+        self.time_out = int(data["TimeOut"]) if "TimeOut" in data else 90
         self.parameter_menu = str(data["ParameterMenu"]) if "ParameterMenu" in data else ""
         self.screenshot_folder = str(data["ScreenshotFolder"]) if "ScreenshotFolder" in data else ""
         self.coverage = ("Coverage" in data  and bool(data["Coverage"]))
