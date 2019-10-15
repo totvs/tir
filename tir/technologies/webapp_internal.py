@@ -4533,6 +4533,27 @@ class WebappInternal(Base):
             action.perform()
             self.click (cb_el, click_type = enum.ClickType.SELENIUM)  # click value
 
+    def ClickCellGrid(self, xpath_ext):
+        """
+        Function opens cell in grid, if SetValue(grid=True) doesn't work.
+        
+        :param xpath_ext: Xpath for unactivated cell
+        :type xpath_ext: str
+
+        >>> # Call the method:
+        >>> oHelper.ClickCellGrid('//div[contains(@class, "tgetdados twidget dict-msbrgetdbase\")]/div/table/tbody/tr/td[3]')
+        >>> oHelper.SetValue('D2_COD', '1016187')
+        """
+        time.sleep(5)
+        if not xpath_ext:
+            self.log_error("No Argument [xpath_ext] in ClickCellGrid")
+            return      
+        element = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, xpath_ext))
+        )
+        self.click (element, click_type=enum.ClickType.SELENIUM)
+        ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.

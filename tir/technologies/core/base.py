@@ -907,7 +907,7 @@ class Base(unittest.TestCase):
 
         self.driver.maximize_window()
         self.driver.get(self.config.url)
-        self.wait = WebDriverWait(self.driver,5)
+        self.wait = WebDriverWait(self.driver,10)
 
     def TearDown(self):
         """
