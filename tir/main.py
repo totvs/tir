@@ -416,6 +416,24 @@ class Webapp():
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         self.__webapp.standard_search_field( field, name_attr, send_key )
+    
+    def SetupTSS(self, initial_program="", environment=""):
+        """
+        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+        .. note::
+            This method use the user and password from config.json.
+
+        :param initial_program: The initial program to load.
+        :type initial_program: str
+        :param environment: The initial environment to load.
+        :type environment: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
+        """
+        self.__webapp.SetupTSS(initial_program, environment)
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """

@@ -21,6 +21,9 @@ from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
 from selenium.common.exceptions import StaleElementReferenceException
+from contextlib import contextmanager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.expected_conditions import staleness_of
 
 class WebappInternal(Base):
     """
@@ -69,6 +72,62 @@ class WebappInternal(Base):
 
         self.parameters = []
         self.backup_parameters = []
+
+    def SetupTSS( self, initial_program = "", enviroment = ""):
+        """
+        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+        .. note::
+            This method use the user and password from config.json.
+
+        :param initial_program: The initial program to load.
+        :type initial_program: str
+        :param environment: The initial environment to load.
+        :type environment: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
+        """
+        print("Starting Setup")
+        self.config.initial_program = initial_program
+
+        if not self.config.skip_environment and not self.config.coverage:
+            self.program_screen(initial_program, enviroment)
+
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+
+        self.user_screen_tss()
+
+    @contextmanager
+    def wait_for_page_load(self, timeout=30):
+        old_page = self.driver.find_element_by_tag_name('html')
+        yield
+        WebDriverWait(self.driver, timeout).until(
+            staleness_of(old_page)
+        )
+
+    def user_screen_tss(self):
+        """
+        [Internal]
+
+        Fills the user login screen of Protheus with the user and password located on config.json.
+
+        Usage:
+
+        >>> # Calling the method
+        >>> self.user_screen()
+        """
+        print("Fill user Screen")
+        self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
+        self.SetValue('cUser', 'caique', name_attr = True)
+        self.SetValue('cPass', '123', name_attr = True)
+        self.SetButton("Entrar")
+        with self.wait_for_page_load(timeout=10):
+            print("wait")
+        
 
     def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
         """
@@ -737,8 +796,9 @@ class WebappInternal(Base):
         """
         success = False
         container = None
-
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        
+        self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out)
+        self.take_screenshot(f"fwskin")
         endtime = time.time() + self.config.time_out
         
         while (time.time() < endtime and not success): 
@@ -1995,6 +2055,7 @@ class WebappInternal(Base):
         self.scroll_to_element(element_selenium)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
         self.click(element_selenium)
+        
     def click_sub_menu(self, sub_item):
         """
         [Internal]
@@ -2175,7 +2236,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = 1200
+            timeout = 100
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -4346,7 +4407,7 @@ class WebappInternal(Base):
         >>> container = self.get_current_container()
         """
         soup = self.get_current_DOM()
-        containers = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        containers = self.zindex_sort(soup.select(".tmodaldialog, body"), True)
         return next(iter(containers), None)
 
     def ClickTree(self, treepath, right_click=False, position=1):
