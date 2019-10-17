@@ -61,7 +61,8 @@ class WebappInternal(Base):
         super().__init__(config_path, autostart)
 
         self.containers_selectors = {
-            "SetButton" : ".tmodaldialog,.ui-dialog"
+            "SetButton" : ".tmodaldialog,.ui-dialog",
+            "GetCurrentContainer": ".tmodaldialog"
         }
         self.base_container = ".tmodaldialog"
 
@@ -95,6 +96,7 @@ class WebappInternal(Base):
         print("Starting Setup")
         self.config.initial_program = initial_program
         self.containers_selectors["SetButton"] = "body"
+        self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program, enviroment)
@@ -820,7 +822,6 @@ class WebappInternal(Base):
         container = None
         
         self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out)
-        self.take_screenshot(f"fwskin")
         endtime = time.time() + self.config.time_out
         
         while (time.time() < endtime and not success): 
@@ -2258,7 +2259,7 @@ class WebappInternal(Base):
         print("Waiting processing...")
 
         if not timeout:
-            timeout = 100
+            timeout = 1200
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -4429,7 +4430,7 @@ class WebappInternal(Base):
         >>> container = self.get_current_container()
         """
         soup = self.get_current_DOM()
-        containers = self.zindex_sort(soup.select(".tmodaldialog, body"), True)
+        containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
 
     def ClickTree(self, treepath, right_click=False, position=1):
