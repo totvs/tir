@@ -71,6 +71,7 @@ class WebappInternal(Base):
         self.num_exec = NumExec()
         self.restart_counter = 0
         self.used_ids = {}
+        self.DB_engine, self.DB_instance = self.connect_DB()
 
         self.parameters = []
         self.backup_parameters = []
@@ -4613,48 +4614,46 @@ class WebappInternal(Base):
             actions.move_to_element(icon).send_keys_to_element(icon, Keys.ENTER).perform()        
 
     def CheckValuesDB(self, table, field, value, dbg_print=0):
-        # table = nnr000, value = 22, field = NNR_CODIGO
         """
-        Clicks 
+        Function gets value from DB for comparing with recently created value by SetValue() in ma3-GUI testcase
 
-        :param label_name: The label name
-        :type label_name: str
+        :param table: Table from DB
+        :type table: str
+        :param field: Column from DB (in ma3 - field)
+        :type field: str
+        :param value: Value recently inserted in testcase (for search record in DB column)
+        :type value: str
+        :param dbg_print: Print in stdout founded record row by value from DB table? (1/0 = Y/N)
+        :type dbg_print: int
 
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickLabel("Search")
+        >>> oHelper.CheckValuesDB(table="sb5000", field="B5_CEME", value='22', dbg_print=1)
         """
-        username = self.config.DBusername   # json
-        password = self.config.DBpassword
-        ip = self.config.DBconnection
-        if not self.config.DBconnection:
-            username = "postgres"       
-            password = "12345678"
-            ip = "192.168.56.102"
-        
         new_list = []
         metadata = db.MetaData()                            # get poles, cells, etc...
+        column = field.lower()
 
-        engine = db.create_engine(f'postgresql://{username}:{password}@{ip}/ma3-appliance')
-        connection = engine.connect()                       # connect with creds
-        if connection:print('[INFO] Successfully connected\n')
+        engine = self.DB_engine                             # initialize connection to DB
+        instance = self.DB_instance
+
+        if instance: print('[SYS] Successfully connected to DB [{}]'.format(engine))
         table_init = db.Table(table, metadata, autoload=True, autoload_with=engine)
 
-        # qw = connection.execute("select * from nnr000 where nnr_codigo = '22' order by nnr_filial, nnr_codigo;")
-        var = field.lower()
-        getDB_data = db.select([db.text("*"), table_init]).where(getattr(table_init.columns, var) == value)  # getattr (table_init.columns + var)
-        # +.order_by(table_init.columns.nnr_filial
-        qw = connection.execute(getDB_data)
+        # instance.execute("select * from nnr000 where nnr_codigo = '22' order by nnr_filial, nnr_codigo;")  # RAW query
+        getDB_data = db.select([db.text("*"), table_init]).where(getattr(table_init.columns, column) == value)  # getattr (table_init.columns + column)
+        query_result = instance.execute(getDB_data)
 
         # make array from trashy execute result:
-        if qw:
-            print("Value {} from field {} founded".format(value.split(), field))
-            qw = qw.fetchall()
+        if query_result:
+            print('[SYS] DB query executed succesfully')
+            print("[INFO] Value {} from field {} founded in DB".format(value.split(), field))
+            query_result = query_result.fetchall()
             if dbg_print:
-                print(qw)     # dbg print string from DBase
+                print(query_result)     # dbg print string from DBase
         else:
-            print("Value {} from field {} not found".format(value.split(), field))
+            print("[INFO] Value {} from field {} not found in DB".format(value.split(), field))
 
         # Table of concordance (field[ex.] <-> table)
         #       NNR_CODIGO <-> nnr000
@@ -4664,8 +4663,22 @@ class WebappInternal(Base):
         #       H6_OPERAC <-> sn6000
         #       DB_LOCALIZ <-> sdb000
 
-    def ConnectDB(self):
-        pass
+    def connect_DB(self):
+        """
+        [Internal]
+        Function provides connection to database, return an instance for futher use
+
+        :return: [db_engine - connection credentials, db_inst - sqlalchemy instance/object of DB]
+        :rtype: [str, inst]
+        """
+        username = self.config.DBusername   # json
+        password = self.config.DBpassword
+        ip = self.config.DBconnection
+
+        db_engine = db.create_engine(f'postgresql://{username}:{password}@{ip}/ma3-appliance')
+        db_inst = db_engine.connect()                       # connect with creds
+
+        return db_engine, db_inst
 
     def ClickLabel(self, label_name):
         """

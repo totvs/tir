@@ -282,6 +282,26 @@ class Webapp():
         """
         self.__webapp.SearchBySearchBox(search_txt, search_box_index, filter_index)
 
+    def CheckValuesDB(self, table, field, value, dbg_print=0):
+        """
+        Function gets value from DB for comparing with recently created value by SetValue() in ma3-GUI testcase
+
+        :param table: Table from DB
+        :type table: str
+        :param field: Column from DB (in ma3 - field)
+        :type field: str
+        :param value: Value recently inserted in testcase (for search record in DB column)
+        :type value: str
+        :param dbg_print: Print in stdout founded record row by value from DB table? (1/0 = Y/N)
+        :type dbg_print: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.CheckValuesDB(table="sb5000", field="B5_CEME", value='22', dbg_print=1)
+        """
+        self.__webapp.CheckValuesDB(table, field, value, dbg_print)
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
