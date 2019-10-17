@@ -28,6 +28,9 @@ class ConfigLoader:
         self.environment = str(data["Environment"])  if "Environment" in data else ""
         self.user = str(data["User"]) if "User" in data else ""
         self.password = str(data["Password"]) if "Password" in data else ""
+        self.DBusername = str(data["DBusername"]) if "DBusername" in data else ""
+        self.DBpassword = str(data["DBpassword"]) if "DBpassword" in data else ""
+        self.DBconnection = str(data["DBconnection"]) if "DBconnection" in data else ""
         self.language = str(data["Language"]) if "Language" in data else ""
         self.skip_environment = ("SkipEnvironment" in data and bool(data["SkipEnvironment"]))
         self.headless = ("Headless" in data and bool(data["Headless"]))

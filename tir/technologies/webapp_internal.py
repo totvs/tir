@@ -6,6 +6,10 @@ import os
 import random
 import uuid
 import codecs
+#_!_
+import sqlalchemy as db
+import sqlalchemy_utils as sqlutils
+#_!_
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -4553,6 +4557,61 @@ class WebappInternal(Base):
         )
         self.click (element, click_type=enum.ClickType.SELENIUM)
         ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+
+    def CheckValuesDB(self, table, field, value, dbg_print=0):
+        # table = nnr000, value = 22, field = NNR_CODIGO
+        """
+        Clicks 
+
+        :param label_name: The label name
+        :type label_name: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickLabel("Search")
+        """
+        username = self.config.DBusername   # json
+        password = self.config.DBpassword
+        ip = self.config.DBconnection
+        if not self.config.DBconnection:
+            username = "postgres"       
+            password = "12345678"
+            ip = "192.168.56.102"
+        
+        new_list = []
+        metadata = db.MetaData()                            # get poles, cells, etc...
+
+        engine = db.create_engine(f'postgresql://{username}:{password}@{ip}/ma3-appliance')
+        connection = engine.connect()                       # connect with creds
+        if connection:print('[INFO] Successfully connected\n')
+        table_init = db.Table(table, metadata, autoload=True, autoload_with=engine)
+
+        # qw = connection.execute("select * from nnr000 where nnr_codigo = '22' order by nnr_filial, nnr_codigo;")
+        var = field.lower()
+        query = db.select([db.text("*"), table_init]).where(getattr(table_init.columns, var) == value)  # getattr (table_init.columns + var)
+        # +.order_by(table_init.columns.nnr_filial
+        qw = connection.execute(query)
+
+        # make array from trashy execute result:
+        if qw:
+            print("Value {} from field {} founded".format(value.split(), field))
+            qw = qw.fetchall()
+            if dbg_print:
+                print(qw)     # dbg print string from DBase
+        else:
+            print("Value {} from field {} not found".format(value.split(), field))
+
+        # Table of concordance (field[ex.] <-> table)
+        #       NNR_CODIGO <-> nnr000
+        #       A1_NATUREZ <-> sa1000
+        #       B5_CEME <-> sb5000
+        #       FN6_SERIE <-> fn6000
+        #       H6_OPERAC <-> sn6000
+        #       DB_LOCALIZ <-> sdb000
+
+    def ConnectDB(self):
+        pass
 
     def ClickLabel(self, label_name):
         """
