@@ -198,6 +198,9 @@ class Webapp():
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
 
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        self.__webapp.ClickGridHeader(column, column_name, grid_number)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.

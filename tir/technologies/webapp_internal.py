@@ -3405,6 +3405,23 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
 
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        
+        grid_number -= 1
+        column -=1 if column > 0 else 0
+
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        grid  = self.get_grid(grid_number)
+        header = self.get_headers_from_grids(grid)
+        if not column_name:
+            column_element = grid.select('thead label')[column].parent.parent
+            column_element_selenium = self.soup_to_selenium(column_element)
+            self.set_element_focus(column_element_selenium)
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            column_element_selenium.click()
+            
+        
+
     def search_column_index(self, grid, column):
         column_enumeration = list(enumerate(grid.select("thead label")))
         chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
