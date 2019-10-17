@@ -4558,6 +4558,60 @@ class WebappInternal(Base):
         self.click (element, click_type=enum.ClickType.SELENIUM)
         ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
 
+    def SearchBySearchBox(self, search_txt, search_box_index = 0, filter_index = 0):
+        """
+        Function searches for data record by selecting between key or column
+        
+        :param search_txt: String to insert in field to search for recently created data record
+        :type search_txt: str
+        :param search_box_index: Selecting between type of search (key and column)
+        :type search_box_index: int
+        :param filter_index: Select search mask
+        :type filter_index: int
+
+        >>> # Call the method:
+        >>> oHelper.SearchBySearchBox("14/34", 2, 2)
+        """
+        if search_box_index and filter:
+            button = WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, '(//div[@class=\"tpanel twidget dict-tpanel\"]/div[@class=\"tbutton twidget dict-tbutton\"]/button)[11]')))
+            actions = ActionChains(self.driver)
+            actions.move_to_element(button)
+            self.click (button, click_type=enum.ClickType.SELENIUM)
+        
+            label = self.driver.find_element_by_xpath('(//div[@class=\"button-container\"]/table/tbody/tr[@class=\"button-bar\"]/td)[{}]'.format(search_box_index))
+            actions.move_to_element(label)
+            self.click (label, click_type=enum.ClickType.SELENIUM)
+
+            if search_box_index == 1:
+                key = self.driver.find_element_by_xpath('(//div[contains(@class, \"tradiobuttonitem\")])[{}]'.format(filter_index))
+                actions.move_to_element(key)
+                self.click (key, click_type=enum.ClickType.SELENIUM)
+                self.click (key, click_type=enum.ClickType.SELENIUM)
+
+            elif search_box_index == 2:
+                column = self.driver.find_element_by_xpath('(//div[@class=\"tscrollbox twidget dict-tscrollbox hscroll-off no-border\"]/label[contains(@class, \"tcheckbox twidget dict-tcheckbox\")]/input)[{}]'.format(filter_index))
+                actions.move_to_element(column)
+                self.click (column, click_type=enum.ClickType.SELENIUM)
+                self.click (column, click_type=enum.ClickType.SELENIUM) 
+        
+                enter = self.driver.find_elements_by_xpath('//div[contains(@class, \"tget twidget dict-tget\")]/input[@class=\"placeHolder\"]')[0]
+                actions.move_to_element(enter)
+                self.click(enter, click_type=enum.ClickType.SELENIUM)
+                enter.clear()
+                enter.send_keys(search_txt, Keys.ENTER)
+
+                icon = self.driver.find_element_by_xpath("//div[@class=\"tpanel twidget dict-tpanel\"]/div[contains(@class, \"tget twidget dict-tget\")]/img[@src=\"cache/ma3-appliance/fwskin_icon_lookup.png\"]")
+                actions.move_to_element(icon).send_keys_to_element(icon, Keys.ENTER).perform()
+        else:
+            enter = WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, ('//div[contains(@class, \"tget twidget dict-tget\")]/input[@class=\"placeHolder\"]')[0])))
+            actions.move_to_element(enter)
+            self.click(enter, click_type=enum.ClickType.SELENIUM)
+            enter.clear()
+            enter.send_keys(search_txt, Keys.ENTER)
+
+            icon = self.driver.find_element_by_xpath("//div[@class=\"tpanel twidget dict-tpanel\"]/div[contains(@class, \"tget twidget dict-tget\")]/img[@src=\"cache/ma3-appliance/fwskin_icon_lookup.png\"]")
+            actions.move_to_element(icon).send_keys_to_element(icon, Keys.ENTER).perform()        
+
     def CheckValuesDB(self, table, field, value, dbg_print=0):
         # table = nnr000, value = 22, field = NNR_CODIGO
         """

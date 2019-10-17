@@ -266,6 +266,22 @@ class Webapp():
         """
         self.__webapp.ClickCellGrid(xpath_ext)
 
+    def SearchBySearchBox(self, search_txt, search_box_index = 0, filter_index = 0):
+        """
+        Function searches for data record by selecting between key or column
+        
+        :param search_txt: String to insert in field to search for recently created data record
+        :type search_txt: str
+        :param search_box_index: Selecting between type of search (key and column)
+        :type search_box_index: int
+        :param filter_index: Select search mask
+        :type filter_index: int
+
+        >>> # Call the method:
+        >>> oHelper.SearchBySearchBox("14/34", 2, 2)
+        """
+        self.__webapp.SearchBySearchBox(search_txt, search_box_index, filter_index)
+
     def ClickLabel(self, label_name):
         """
         Clicks on a Label on the screen.
