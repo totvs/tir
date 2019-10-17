@@ -3406,7 +3406,23 @@ class WebappInternal(Base):
         self.click(column_element())
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
-        
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
         grid_number -= 1
         column -=1 if column > 0 else 0
 
@@ -3419,7 +3435,20 @@ class WebappInternal(Base):
             self.set_element_focus(column_element_selenium)
             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
             column_element_selenium.click()
+        else:
+            column_name =column_name.lower()
+            header = self.get_headers_from_grids(grid)
+
+            if column_name in header[grid_number]:
+                column_number = header[grid_number][column_name]
+
+            column_element = grid.select('thead label')[column_number].parent.parent
+            column_element_selenium = self.soup_to_selenium(column_element)
+            self.set_element_focus(column_element_selenium)
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            column_element_selenium.click()
             
+                
         
 
     def search_column_index(self, grid, column):
