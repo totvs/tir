@@ -60,6 +60,9 @@ class WebappInternal(Base):
         """
         super().__init__(config_path, autostart)
 
+        self.containers_selectors = {
+            "SetButton" : ".tmodaldialog,.ui-dialog"
+        }
         self.base_container = ".tmodaldialog"
 
         self.grid_check = []
@@ -91,6 +94,7 @@ class WebappInternal(Base):
         """
         print("Starting Setup")
         self.config.initial_program = initial_program
+        self.containers_selectors["SetButton"] = "body"
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program, enviroment)
@@ -99,14 +103,10 @@ class WebappInternal(Base):
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
 
         self.user_screen_tss()
+        self.set_log_info_tss()
 
-    @contextmanager
-    def wait_for_page_load(self, timeout=30):
-        old_page = self.driver.find_element_by_tag_name('html')
-        yield
-        WebDriverWait(self.driver, timeout).until(
-            staleness_of(old_page)
-        )
+        if self.config.num_exec:
+            self.num_exec.post_exec(self.config.url_set_start_exec)
 
     def user_screen_tss(self):
         """
@@ -122,11 +122,9 @@ class WebappInternal(Base):
         print("Fill user Screen")
         self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
-        self.SetValue('cUser', 'caique', name_attr = True)
-        self.SetValue('cPass', '123', name_attr = True)
+        self.SetValue('cUser', self.config.user, name_attr = True)
+        self.SetValue('cPass', self.config.password, name_attr = True)
         self.SetButton("Entrar")
-        with self.wait_for_page_load(timeout=10):
-            print("wait")
         
 
     def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
@@ -583,6 +581,30 @@ class WebappInternal(Base):
 
         self.SetButton(self.language.close)
 
+    def set_log_info_tss(self):
+
+        self.log.country = self.config.country
+        self.log.execution_id = self.config.execution_id
+        self.log.issue = self.config.issue
+
+        label_element = None
+
+        self.SetButton("Sobre")
+        
+        soup = self.get_current_DOM()
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not label_element):
+            soup = self.get_current_DOM()
+            label_element = soup.find_all("label", string="Versão do TSS:") 
+               
+        if not label_element:
+            self.log_error("SetupTss fail about screen not found")
+            
+        labels = list(map(lambda x: x.text, soup.select("label")))
+        self.log.release = labels[labels.index("Versão do TSS:")+1]
+
+        self.SetButton('x')
+
     def get_language(self):
         """
         [Internal]
@@ -1000,7 +1022,7 @@ class WebappInternal(Base):
             
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
-            width_safe  = (container_size['width']  * 0.01)
+            width_safe  = (container_size['width']  * 0.015)
             height_safe = (container_size['height'] * 0.01)
 
             label_s  = lambda:self.soup_to_selenium(label)
@@ -1935,7 +1957,7 @@ class WebappInternal(Base):
         self.wait_blocker_ajax()
         container = self.get_current_container()
 
-        if container:
+        if 'id' in container.attrs:
             id_container = container.attrs['id']
 
         print(f"Clicking on {button}")
@@ -1956,7 +1978,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
 
@@ -3613,7 +3635,7 @@ class WebappInternal(Base):
                     except AttributeError:
                         pass
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True):
         """
         [Internal]
 
@@ -3662,9 +3684,9 @@ class WebappInternal(Base):
                 print("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
-                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                #sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 endtime = time.time() + timeout
-                while(time.time() < endtime and not sel_element().is_displayed()):
+                while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
                         time.sleep(0.1)
                         self.scroll_to_element(sel_element())
