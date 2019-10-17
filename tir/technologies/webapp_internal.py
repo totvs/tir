@@ -4589,9 +4589,9 @@ class WebappInternal(Base):
 
         # qw = connection.execute("select * from nnr000 where nnr_codigo = '22' order by nnr_filial, nnr_codigo;")
         var = field.lower()
-        query = db.select([db.text("*"), table_init]).where(getattr(table_init.columns, var) == value)  # getattr (table_init.columns + var)
+        getDB_data = db.select([db.text("*"), table_init]).where(getattr(table_init.columns, var) == value)  # getattr (table_init.columns + var)
         # +.order_by(table_init.columns.nnr_filial
-        qw = connection.execute(query)
+        qw = connection.execute(getDB_data)
 
         # make array from trashy execute result:
         if qw:
