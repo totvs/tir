@@ -6,10 +6,8 @@ import os
 import random
 import uuid
 import codecs
-#_!_
 import sqlalchemy as db
 import sqlalchemy_utils as sqlutils
-#_!_
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
