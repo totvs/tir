@@ -1896,7 +1896,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not soup_element): 
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=".tmodaldialog,.ui-dialog", check_error=check_error)
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton, .tmenupopupitem", main_container=".tmodaldialog, .ui-dialog, .tmenupopup", check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
 
