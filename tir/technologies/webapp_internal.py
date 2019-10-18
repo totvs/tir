@@ -95,6 +95,7 @@ class WebappInternal(Base):
         """
         print("Starting Setup")
         self.config.initial_program = initial_program
+        self.config.environment = enviroment
         self.containers_selectors["SetButton"] = "body"
         self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
 
