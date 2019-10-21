@@ -4334,10 +4334,11 @@ class WebappInternal(Base):
 
             msg = log_message
 
-            self.log.new_line(False, log_message)
+        if expected:
+            self.log.new_line(True, "") if not log_message else self.log.new_line(True, log_message)
         else:
-            self.log.new_line(True, "")
-
+            self.log.new_line(False, log_message)
+            
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
 
         routine_name = routine_name if routine_name else "error"
