@@ -2156,8 +2156,9 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(0.5)
-            
+            if endtime - time.time() < 1180:
+                time.sleep(0.5)
+
         self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string, timeout=None):
@@ -2186,7 +2187,9 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(0.5)
+
+            if endtime - time.time() < 1180:
+                time.sleep(0.5)
 
         self.log_error(f"Element {string} not found")
 
