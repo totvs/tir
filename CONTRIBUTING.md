@@ -44,6 +44,11 @@ Pull requests are really helpful. They must be in the project's scope and avoid 
 
 **Ask us first** before starting to work on a pull request of great impact (e.g. big features, code refactory, changing language), as it will require many working hours and it might not be interesting for the developers to merge at the current phase of the project.
 
+**Pull Request by funcionality** is necessary, this facilitates the analysis of impact that funcionality generate and also speeds approval proccess.
+
+| WARNING: If your pull request doesn't meet the requirements mentioned above it can be closed.|
+| --- |
+
 Make sure to read the [Architecture](doc_files/ARCHITECTURE.md) document
 to understand how the tool was designed.
 
