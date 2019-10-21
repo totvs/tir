@@ -80,7 +80,7 @@ class LanguagePack:
             "View": "View",
             "Visualizar": "View", #usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Other Actions",
-            "Confirm": "Confirm",
+            "Confirm": "Подтвердить",
             "Save": "Save",
             "Close": "Close",
             "Exit": "Exit",

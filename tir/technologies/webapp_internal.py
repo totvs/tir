@@ -7,7 +7,6 @@ import random
 import uuid
 import codecs
 import sqlalchemy as db
-import sqlalchemy_utils as sqlutils
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -15,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait as wait
 import tir.technologies.core.enumerations as enum
 from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
@@ -4907,14 +4907,32 @@ class WebappInternal(Base):
         # Work variant, 99.9%
         # Last tests in 26.09 on Firefox
         act = ActionChains(self.driver)
-        act.key_down (Keys.LEFT_CONTROL)
-        time.sleep(5)
-        act.send_keys('q')
-        act.key_up (Keys.LEFT_CONTROL)
-        act.perform()
-        time.sleep(5)
-        self.SetButton (self.FindButton ("msfinal", "STR0006"))     # Завершить
+        try:
+            ext = self.driver.find_element_by_xpath("//div[contains(@class, \"tget twidget dict-tget\")][@name = \"cGet\"]/input")
+        except:
+            ext = self.driver.find_element_by_xpath("//label[@title = \"Избранное \"]")
+        act.move_to_element(ext)
+        self.click(ext, click_type = enum.ClickType.SELENIUM)
         time.sleep(2)
+        act.key_down (Keys.LEFT_CONTROL)
+        time.sleep(2)
+        act.send_keys('q')
+        act.key_up (Keys.LEFT_CONTROL).perform()
+        
+        wait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[@class = \"tsay twidget dict-tsay align-left transparent\"]/label[contains(text(), \"Завершить\")]"))
+        )
+        ext_window = self.driver.find_elements_by_xpath ("//div[@class = \"tsay twidget dict-tsay align-left transparent\"]/label")
+        for e in ext_window:
+            if e.text == "Завершить":
+                try:
+                    self.SetButton (self.FindButton ("msfinal", "STR0006"))     # Завершить
+                except:
+                    self.log_error ("Exit window not founded")
+            else:
+                continue
+        
+        time.sleep(1)
         self.driver.close()
             
     def containers_filter(self, containers):
