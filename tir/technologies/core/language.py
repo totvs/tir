@@ -64,6 +64,7 @@ class LanguagePack:
         self.current_password = languagepack["CurrentPassword"]
         self.nem_password = languagepack["NewPassword"]
         self.confirm_new_password = languagepack["ConfirmNewPassword"]
+        self.yes = languagepack["Yes"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
