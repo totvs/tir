@@ -73,6 +73,7 @@ class WebappInternal(Base):
         self.num_exec = NumExec()
         self.restart_counter = 0
         self.used_ids = {}
+        self.tss = False
 
         self.parameters = []
         self.backup_parameters = []
@@ -93,7 +94,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
         """
-        print("Starting Setup")
+        self.tss = True
+        print("Starting Setup TSS")
         self.config.initial_program = initial_program
         self.config.environment = enviroment
         self.containers_selectors["SetButton"] = "body"
@@ -4744,12 +4746,19 @@ class WebappInternal(Base):
         if self.config.coverage:
 
             self.driver.refresh()
-            self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             timeout = 900
-            
-            self.Finish()
+
+            if not self.tss:
+                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+
+                self.Finish()
+            else:
+                self.SetupTSS(self.config.initial_program, self.config.environment )
+                self.SetButton(self.language.exit)
+                self.SetButton(self.language.yes)
+
             self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
-            
+
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
         self.driver.close()

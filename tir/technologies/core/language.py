@@ -135,7 +135,8 @@ class LanguagePack:
             "UserLogin": "Reserved",
             "CurrentPassword": "Reserved",
             "NewPassword": "Reserved",
-            "ConfirmNewPassword": "Reserved"
+            "ConfirmNewPassword": "Reserved",
+            "Yes": "Sim"
             
         }
 
@@ -206,7 +207,8 @@ class LanguagePack:
             "UserLogin": "Login do usuário",
             "CurrentPassword": "Senha atual",
             "NewPassword": "Nova senha",
-            "ConfirmNewPassword": "Confirmar nova senha"
+            "ConfirmNewPassword": "Confirmar nova senha",
+            "Yes": "Sim"
             
         }
         spanish = {
@@ -276,7 +278,8 @@ class LanguagePack:
             "UserLogin": "Login del usuario*",
             "CurrentPassword": "Contrasena actual*",
             "NewPassword": "Nueva contrasena*",
-            "ConfirmNewPassword": "Confirmar nueva contrasena*"
+            "ConfirmNewPassword": "Confirmar nueva contrasena*",
+            "Yes":"Reserved"
         }
         russian = {
             "User": "Пользователь",
@@ -342,7 +345,8 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Monedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Yes":"Reserved"
         }
 
         if language.lower() == "en-us":
