@@ -94,15 +94,20 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
         """
-        self.tss = True
         print("Starting Setup TSS")
+        self.tss = True
+
         self.config.initial_program = initial_program
         self.config.environment = enviroment
+
         self.containers_selectors["SetButton"] = "body"
         self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(initial_program, enviroment)
+
+        if not self.log.program:
+            self.log.program = self.get_program_name()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
