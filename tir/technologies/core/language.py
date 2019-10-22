@@ -64,6 +64,7 @@ class LanguagePack:
         self.current_password = languagepack["CurrentPassword"]
         self.nem_password = languagepack["NewPassword"]
         self.confirm_new_password = languagepack["ConfirmNewPassword"]
+        self.yes = languagepack["Yes"]
         self.assert_false_message = languagepack["AssertFalseMessage"]
 
         self.messages = Messages(languagepack)
@@ -137,6 +138,7 @@ class LanguagePack:
             "CurrentPassword": "Reserved",
             "NewPassword": "Reserved",
             "ConfirmNewPassword": "Reserved",
+            "Yes": "Sim",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script."
             
         }
@@ -209,6 +211,7 @@ class LanguagePack:
             "CurrentPassword": "Senha atual",
             "NewPassword": "Nova senha",
             "ConfirmNewPassword": "Confirmar nova senha",
+            "Yes": "Sim",
             "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script."
             
         }
@@ -280,6 +283,7 @@ class LanguagePack:
             "CurrentPassword": "Contrasena actual*",
             "NewPassword": "Nueva contrasena*",
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
+            "Yes":"Reserved",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script."
         }
         russian = {
@@ -346,7 +350,8 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Monedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Yes":"Reserved"
         }
 
         if language.lower() == "en-us":
