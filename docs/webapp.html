@@ -252,19 +252,31 @@ fills the environment screen.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.CheckHelp">
-<code class="sig-name descname">CheckHelp</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">button=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">CheckHelp</code><span class="sig-paren">(</span><em class="sig-param">text=''</em>, <em class="sig-param">button=''</em>, <em class="sig-param">text_help=''</em>, <em class="sig-param">text_problem=''</em>, <em class="sig-param">text_solution=''</em>, <em class="sig-param">verbosity=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text to be checked.</p></li>
+<li><p><strong>text_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the help text will be checked.</p></li>
+<li><p><strong>text_problem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the problem text will be checked.</p></li>
+<li><p><strong>text_solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the solution text will be checked.</p></li>
 <li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</p></li>
+<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Check the text with high accuracy.</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;EXISTCLI Problema: Não pode haver mais...&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check all window text.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check help text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_help</span><span class="o">=</span><span class="s2">&quot;TK250CADRE&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check problem text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_problem</span><span class="o">=</span><span class="s2">&quot;Problema: Essa reclamação já foi informada anteriormente.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check problem text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_solution</span><span class="o">=</span><span class="s2">&quot;Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to check only the problem text with high precision.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_problem</span><span class="o">=</span><span class="s2">&quot;Problema: Essa reclamação já foi informada anteriormente.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -437,6 +449,22 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.ClickListBox">
+<code class="sig-name descname">ClickListBox</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickListBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on Item based in a text in a window tlistbox</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text in windows to be clicked.</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickListBox</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.ClickMenuPopUpItem">
 <code class="sig-name descname">ClickMenuPopUpItem</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">right_click=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuPopUpItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on MenuPopUp Item based in a text</p>
@@ -457,7 +485,7 @@ fills the environment screen.</p>
 
 <dl class="method">
 <dt id="tir.main.Webapp.ClickTree">
-<code class="sig-name descname">ClickTree</code><span class="sig-paren">(</span><em class="sig-param">treepath</em>, <em class="sig-param">right_click=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ClickTree</code><span class="sig-paren">(</span><em class="sig-param">treepath</em>, <em class="sig-param">right_click=False</em>, <em class="sig-param">position=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on TreeView component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -567,6 +595,27 @@ this method
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.main.Webapp.GridTree">
+<code class="sig-name descname">GridTree</code><span class="sig-paren">(</span><em class="sig-param">column</em>, <em class="sig-param">treepath</em>, <em class="sig-param">right_click=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GridTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on Grid TreeView component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p></li>
+<li><p><strong>right_click</strong> – Clicks with the right button of the mouse in the last element of the tree.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Right GridTree example:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">,</span> <span class="n">right_click</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.main.Webapp.LoadGrid">
 <code class="sig-name descname">LoadGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LoadGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is responsible for running all actions of the input and check queues
@@ -631,6 +680,25 @@ of a grid. After running, the queues would be empty.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.main.Webapp.ProgramScreen">
+<code class="sig-name descname">ProgramScreen</code><span class="sig-paren">(</span><em class="sig-param">initial_program=''</em>, <em class="sig-param">envirionment=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ProgramScreen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fills the first screen of Protheus with the first program to run and the environment to connect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The initial program to load</p></li>
+<li><p><strong>environment</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The environment to connect</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">program_screen</span><span class="p">(</span><span class="s2">&quot;SIGAADV&quot;</span><span class="p">,</span> <span class="s2">&quot;MYENVIRONMENT&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

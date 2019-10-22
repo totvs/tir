@@ -198,6 +198,26 @@ class Webapp():
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
 
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
+        self.__webapp.ClickGridHeader(column, column_name, grid_number)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
@@ -920,7 +940,7 @@ class Webapp():
         >>> oHelper.ClickListBox("text")
         """
         
-        return self.__webapp.ClickListBox(self, text)
+        return self.__webapp.ClickListBox(text)
         
 class Apw():
 

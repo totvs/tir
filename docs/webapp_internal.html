@@ -234,19 +234,31 @@ fills the environment screen.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.CheckHelp">
-<code class="sig-name descname">CheckHelp</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">button</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckHelp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">CheckHelp</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">button</em>, <em class="sig-param">text_help</em>, <em class="sig-param">text_problem</em>, <em class="sig-param">text_solution</em>, <em class="sig-param">verbosity</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.CheckHelp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text to be checked.</p></li>
+<li><p><strong>text_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the help text will be checked.</p></li>
+<li><p><strong>text_problem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the problem text will be checked.</p></li>
+<li><p><strong>text_solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Only the solution text will be checked.</p></li>
 <li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Button to be clicked.</p></li>
+<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Check the text with high accuracy.</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;EXISTCLI Problema: Não pode haver mais...&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check all window text.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="s2">&quot;TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.&quot;</span><span class="p">,</span> <span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check help text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_help</span><span class="o">=</span><span class="s2">&quot;TK250CADRE&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check problem text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_problem</span><span class="o">=</span><span class="s2">&quot;Problema: Essa reclamação já foi informada anteriormente.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to check problem text only.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_solution</span><span class="o">=</span><span class="s2">&quot;Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to check only the problem text with high precision.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">CheckHelp</span><span class="p">(</span><span class="n">text_problem</span><span class="o">=</span><span class="s2">&quot;Problema: Essa reclamação já foi informada anteriormente.&quot;</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="s2">&quot;Fechar&quot;</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -387,10 +399,10 @@ fills the environment screen.</p>
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.ClickIcon">
 <code class="sig-name descname">ClickIcon</code><span class="sig-paren">(</span><em class="sig-param">icon_text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickIcon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicks on an Icon button based on its tooltip text.</p>
+<dd><p>Clicks on an Icon button based on its tooltip text or Alt attribute title.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>icon_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The tooltip text.</p>
+<dd class="field-odd"><p><strong>icon_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The tooltip/title text.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -418,6 +430,22 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.ClickListBox">
+<code class="sig-name descname">ClickListBox</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickListBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on Item based in a text in a window tlistbox</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Text in windows to be clicked.</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickListBox</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.ClickMenuPopUpItem">
 <code class="sig-name descname">ClickMenuPopUpItem</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">right_click</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickMenuPopUpItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on MenuPopUp Item based in a text</p>
@@ -438,16 +466,21 @@ fills the environment screen.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.ClickTree">
-<code class="sig-name descname">ClickTree</code><span class="sig-paren">(</span><em class="sig-param">treepath</em>, <em class="sig-param">right_click=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickTree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ClickTree</code><span class="sig-paren">(</span><em class="sig-param">treepath</em>, <em class="sig-param">right_click=False</em>, <em class="sig-param">position=1</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ClickTree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clicks on TreeView component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p></li>
+<li><p><strong>right_click</strong> – Clicks with the right button of the mouse in the last element of the tree.</p></li>
+</ul>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Right Click example:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">,</span> <span class="n">right_click</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -504,6 +537,27 @@ fills the environment screen.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">current_value</span> <span class="o">=</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.GridTree">
+<code class="sig-name descname">GridTree</code><span class="sig-paren">(</span><em class="sig-param">column</em>, <em class="sig-param">tree_path</em>, <em class="sig-param">right_click=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.GridTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clicks on Grid TreeView component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p></li>
+<li><p><strong>right_click</strong> – Clicks with the right button of the mouse in the last element of the tree.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Right GridTree example:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">,</span> <span class="n">right_click</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1053,6 +1107,12 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.check_grid_error">
+<code class="sig-name descname">check_grid_error</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">headers</em>, <em class="sig-param">column_name</em>, <em class="sig-param">rows</em>, <em class="sig-param">columns</em>, <em class="sig-param">field</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_grid_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.check_mask">
 <code class="sig-name descname">check_mask</code><span class="sig-paren">(</span><em class="sig-param">element</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1171,7 +1231,7 @@ Internal method of SetButton.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.click_tree">
-<code class="sig-name descname">click_tree</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">last_item</em>, <em class="sig-param">right_click</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_tree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">click_tree</code><span class="sig-paren">(</span><em class="sig-param">treepath</em>, <em class="sig-param">right_click</em>, <em class="sig-param">position</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.click_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]
 Take treenode and label to filter and click in the toggler element to expand the TreeView.</p>
 </dd></dl>
@@ -1305,6 +1365,12 @@ Filter and remove tsvg class an return a container_filtered</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.element_is_displayed">
+<code class="sig-name descname">element_is_displayed</code><span class="sig-paren">(</span><em class="sig-param">element</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.element_is_displayed" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.environment_screen">
 <code class="sig-name descname">environment_screen</code><span class="sig-paren">(</span><em class="sig-param">change_env=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.environment_screen" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -1320,6 +1386,21 @@ Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">environment_screen</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.expand_treeGrid">
+<code class="sig-name descname">expand_treeGrid</code><span class="sig-paren">(</span><em class="sig-param">column</em>, <em class="sig-param">item</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.expand_treeGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Search for a column and expand the tree
+Returns len of grid lines</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.expand_tree_grid_line">
+<code class="sig-name descname">expand_tree_grid_line</code><span class="sig-paren">(</span><em class="sig-param">element_soup</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.expand_tree_grid_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Click on a column and send the ENTER key</p>
 </dd></dl>
 
 <dl class="method">
@@ -1637,7 +1718,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.get_grid">
-<code class="sig-name descname">get_grid</code><span class="sig-paren">(</span><em class="sig-param">grid_number=0</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_grid</code><span class="sig-paren">(</span><em class="sig-param">grid_number=0</em>, <em class="sig-param">grid_element=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]
 Gets a grid BeautifulSoup object from the screen.</p>
 <dl class="field-list simple">
@@ -1942,6 +2023,13 @@ Returns True if succeeded, False if it failed.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.lenght_grid_lines">
+<code class="sig-name descname">lenght_grid_lines</code><span class="sig-paren">(</span><em class="sig-param">grid</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.lenght_grid_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Returns the leght of grid.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.log_error">
 <code class="sig-name descname">log_error</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">new_log_line=True</em>, <em class="sig-param">skip_restart=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -2000,6 +2088,13 @@ Returns True if succeeded, False if it failed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">new_grid_line</span><span class="p">([</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.on_screen_enabled">
+<code class="sig-name descname">on_screen_enabled</code><span class="sig-paren">(</span><em class="sig-param">elements</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.on_screen_enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Returns a list if selenium displayed and enabled methods is True.</p>
 </dd></dl>
 
 <dl class="method">
@@ -2141,7 +2236,7 @@ Usage:
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.search_for_errors">
-<code class="sig-name descname">search_for_errors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_for_errors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">search_for_errors</code><span class="sig-paren">(</span><em class="sig-param">check_help=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_for_errors" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Searches for errors and alerts in the screen.</p>
 <p>Usage:</p>
@@ -2149,6 +2244,14 @@ Usage:
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_for_errors</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.search_grid_by_text">
+<code class="sig-name descname">search_grid_by_text</code><span class="sig-paren">(</span><em class="sig-param">grid</em>, <em class="sig-param">text</em>, <em class="sig-param">column_index</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_grid_by_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Searches for text in grid columns
+Returns the div containing the text</p>
 </dd></dl>
 
 <dl class="method">
@@ -2225,6 +2328,19 @@ this method
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.treenode_selected">
+<code class="sig-name descname">treenode_selected</code><span class="sig-paren">(</span><em class="sig-param">label_filtered</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.treenode_selected" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Returns a tree node selected by label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.try_click">
+<code class="sig-name descname">try_click</code><span class="sig-paren">(</span><em class="sig-param">element</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.try_recover_lost_line">
 <code class="sig-name descname">try_recover_lost_line</code><span class="sig-paren">(</span><em class="sig-param">field</em>, <em class="sig-param">grid_id</em>, <em class="sig-param">row</em>, <em class="sig-param">headers</em>, <em class="sig-param">field_to_label</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_recover_lost_line" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -2271,8 +2387,15 @@ Meant to be used inside of a loop.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.update_password">
+<code class="sig-name descname">update_password</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.update_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Update the password in the Protheus password change request screen</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.user_screen">
-<code class="sig-name descname">user_screen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.user_screen" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">user_screen</code><span class="sig-paren">(</span><em class="sig-param">admin_user=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.user_screen" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Fills the user login screen of Protheus with the user and password located on config.json.</p>
 <p>Usage:</p>
@@ -2340,6 +2463,13 @@ Meant to be used inside of a loop.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.wait_gridTree">
+<code class="sig-name descname">wait_gridTree</code><span class="sig-paren">(</span><em class="sig-param">n_lines</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_gridTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]
+Wait until the GridTree line count increases or decreases.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.wait_smart_erp_environment">
 <code class="sig-name descname">wait_smart_erp_environment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_smart_erp_environment" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -2347,7 +2477,7 @@ Meant to be used inside of a loop.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.web_scrap">
-<code class="sig-name descname">web_scrap</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em class="sig-param">optional_term=None</em>, <em class="sig-param">label=False</em>, <em class="sig-param">main_container=None</em>, <em class="sig-param">check_error=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.web_scrap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">web_scrap</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">scrap_type=&lt;ScrapType.TEXT: 1&gt;</em>, <em class="sig-param">optional_term=None</em>, <em class="sig-param">label=False</em>, <em class="sig-param">main_container=None</em>, <em class="sig-param">check_error=True</em>, <em class="sig-param">check_help=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.web_scrap" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Returns a BeautifulSoup object list based on the search parameters.</p>
 <p>Does not support ScrapType.XPATH as scrap_type parameter value.</p>

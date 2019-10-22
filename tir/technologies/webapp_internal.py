@@ -1341,7 +1341,7 @@ class WebappInternal(Base):
         if element.tag_name == "label":
             web_value = element.get_attribute("text")
         elif element.tag_name == "select":
-            current_select = int(element.get_attribute('value'))
+            current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value')) 
             selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
             web_value = selected_element.text
         else:
@@ -2245,8 +2245,9 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(0.5)
-            
+            if endtime - time.time() < 1180:
+                time.sleep(0.5)
+
         self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string, timeout=None):
@@ -2275,7 +2276,9 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(0.5)
+
+            if endtime - time.time() < 1180:
+                time.sleep(0.5)
 
         self.log_error(f"Element {string} not found")
 
@@ -2651,13 +2654,58 @@ class WebappInternal(Base):
             "F12" : Keys.F12,
             "UP" : Keys.UP,
             "DOWN" : Keys.DOWN,
-            "LEFT": Keys.LEFT,
-            "RIGHT": Keys.RIGHT,
+            "LEFT" : Keys.LEFT,
+            "RIGHT" : Keys.RIGHT,
             "DELETE" : Keys.DELETE,
-            "ENTER": Keys.ENTER,
-            "ESC": Keys.ESCAPE,
-            "CTRL": Keys.CONTROL,
-            "ALT": Keys.ALT
+            "ENTER" : Keys.ENTER,
+            "ESC" : Keys.ESCAPE,
+            "CTRL" : Keys.CONTROL,
+            "ALT" : Keys.ALT,
+            "NUMPAD0" : Keys.NUMPAD0,
+            "NUMPAD1" : Keys.NUMPAD1,
+            "NUMPAD2" : Keys.NUMPAD2,
+            "NUMPAD3" : Keys.NUMPAD3,
+            "NUMPAD4" : Keys.NUMPAD4,
+            "NUMPAD5" : Keys.NUMPAD5,
+            "NUMPAD6" : Keys.NUMPAD6,
+            "NUMPAD7" : Keys.NUMPAD7,
+            "NUMPAD8" : Keys.NUMPAD8,
+            "NUMPAD9" : Keys.NUMPAD9,
+            "MULTIPLY" : Keys.MULTIPLY,
+            "ADD" : Keys.ADD,
+            "SEPARATOR" : Keys.SEPARATOR,
+            "SUBTRACT" : Keys.SUBTRACT,
+            "DECIMAL" : Keys.DECIMAL,
+            "DIVIDE" : Keys.DIVIDE,  
+            "META" : Keys.META,
+            "COMMAND" : Keys.COMMAND,
+            "NULL" : Keys.NULL, 
+            "CANCEL" : Keys.CANCEL, 
+            "HELP" : Keys.HELP,
+            "BACKSPACE" : Keys.BACKSPACE, 
+            "TAB" : Keys.TAB, 
+            "CLEAR" : Keys.CLEAR, 
+            "RETURN" : Keys.RETURN, 
+            "SHIFT" : Keys.SHIFT, 
+            "PAUSE" : Keys.PAUSE, 
+            "ESCAPE" : Keys.ESCAPE, 
+            "SPACE" : Keys.SPACE,
+            "END" : Keys.END,
+            "HOME" : Keys.HOME,
+            "INSERT" : Keys.INSERT,
+            "SEMICOLON" : Keys.SEMICOLON,
+            "EQUALS" : Keys.EQUALS,
+            "ARROW_LEFT" : Keys.ARROW_LEFT,
+            "ARROW_UP" : Keys.ARROW_UP,
+            "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
+            "ARROW_DOWN" : Keys.ARROW_DOWN,
+            "BACK_SPACE" : Keys.BACK_SPACE,
+            "LEFT_SHIFT" : Keys.LEFT_SHIFT,
+            "LEFT_CONTROL" : Keys.LEFT_CONTROL,
+            "LEFT_ALT" : Keys.LEFT_ALT, 
+            "PAGE_UP" : Keys.PAGE_UP ,
+            "PAGE_DOWN" : Keys.PAGE_DOWN 
+
         }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
@@ -3448,6 +3496,52 @@ class WebappInternal(Base):
 
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
         self.click(column_element())
+
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
+        grid_number -= 1
+        column -=1 if column > 0 else 0
+
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        grid  = self.get_grid(grid_number)
+        header = self.get_headers_from_grids(grid)
+        if not column_name:
+            column_element = grid.select('thead label')[column].parent.parent
+            column_element_selenium = self.soup_to_selenium(column_element)
+            self.set_element_focus(column_element_selenium)
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            column_element_selenium.click()
+        else:
+            column_name =column_name.lower()
+            header = self.get_headers_from_grids(grid)
+
+            if column_name in header[grid_number]:
+                column_number = header[grid_number][column_name]
+
+            column_element = grid.select('thead label')[column_number].parent.parent
+            column_element_selenium = self.soup_to_selenium(column_element)
+            self.set_element_focus(column_element_selenium)
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            column_element_selenium.click()
+            
+                
+        
 
     def search_column_index(self, grid, column):
         column_enumeration = list(enumerate(grid.select("thead label")))
@@ -4329,10 +4423,11 @@ class WebappInternal(Base):
 
             msg = log_message
 
-            self.log.new_line(False, log_message)
+        if expected:
+            self.log.new_line(True, "") if not self.errors else self.log.new_line(True, log_message)
         else:
-            self.log.new_line(True, "")
-
+            self.log.new_line(False, self.language.assert_false_message) if not self.errors else self.log.new_line(False, log_message)
+            
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
 
         routine_name = routine_name if routine_name else "error"
@@ -5113,11 +5208,12 @@ class WebappInternal(Base):
         container = self.get_current_container()
         if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
             user_login = self.GetValue(self.language.user_login)
-            if user_login == self.language.user_login or self.language.user_login.lower() == "admin":
+            if user_login == self.config.user or self.config.user.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
                 self.SetValue(self.language.nem_password, self.config.password)
                 self.SetValue(self.language.confirm_new_password, self.config.password)
                 self.SetButton(self.language.finish)
+                self.wait_element(self.language.database, main_container=".twindow")
     
     def ClickListBox(self, text):
         """
