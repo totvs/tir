@@ -20,10 +20,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
-from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
-from contextlib import contextmanager
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.expected_conditions import staleness_of
+from selenium.common.exceptions import StaleElementReferenceException
 
 class WebappInternal(Base):
     """
@@ -702,6 +699,7 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
+                self.wait_element_is_not_displayed(tget_img)
         except AssertionError as error:
             raise error
         except Exception as e:
@@ -1966,7 +1964,7 @@ class WebappInternal(Base):
         self.wait_blocker_ajax()
         container = self.get_current_container()
 
-        if 'id' in container.attrs:
+        if container and 'id' in container.attrs:
             id_container = container.attrs['id']
 
         print(f"Clicking on {button}")
@@ -2640,126 +2638,125 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """
-        with self.wait_for_page_load(timeout=10):     
-            print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
-            supported_keys = {
-                "F1" : Keys.F1,
-                "F2" : Keys.F2,
-                "F3" : Keys.F3,
-                "F4" : Keys.F4,
-                "F5" : Keys.F5,
-                "F6" : Keys.F6,
-                "F7" : Keys.F7,
-                "F8" : Keys.F8,
-                "F9" : Keys.F9,
-                "F10" : Keys.F10,
-                "F11" : Keys.F11,
-                "F12" : Keys.F12,
-                "UP" : Keys.UP,
-                "DOWN" : Keys.DOWN,
-                "LEFT" : Keys.LEFT,
-                "RIGHT" : Keys.RIGHT,
-                "DELETE" : Keys.DELETE,
-                "ENTER" : Keys.ENTER,
-                "ESC" : Keys.ESCAPE,
-                "CTRL" : Keys.CONTROL,
-                "ALT" : Keys.ALT,
-                "NUMPAD0" : Keys.NUMPAD0,
-                "NUMPAD1" : Keys.NUMPAD1,
-                "NUMPAD2" : Keys.NUMPAD2,
-                "NUMPAD3" : Keys.NUMPAD3,
-                "NUMPAD4" : Keys.NUMPAD4,
-                "NUMPAD5" : Keys.NUMPAD5,
-                "NUMPAD6" : Keys.NUMPAD6,
-                "NUMPAD7" : Keys.NUMPAD7,
-                "NUMPAD8" : Keys.NUMPAD8,
-                "NUMPAD9" : Keys.NUMPAD9,
-                "MULTIPLY" : Keys.MULTIPLY,
-                "ADD" : Keys.ADD,
-                "SEPARATOR" : Keys.SEPARATOR,
-                "SUBTRACT" : Keys.SUBTRACT,
-                "DECIMAL" : Keys.DECIMAL,
-                "DIVIDE" : Keys.DIVIDE,  
-                "META" : Keys.META,
-                "COMMAND" : Keys.COMMAND,
-                "NULL" : Keys.NULL, 
-                "CANCEL" : Keys.CANCEL, 
-                "HELP" : Keys.HELP,
-                "BACKSPACE" : Keys.BACKSPACE, 
-                "TAB" : Keys.TAB, 
-                "CLEAR" : Keys.CLEAR, 
-                "RETURN" : Keys.RETURN, 
-                "SHIFT" : Keys.SHIFT, 
-                "PAUSE" : Keys.PAUSE, 
-                "ESCAPE" : Keys.ESCAPE, 
-                "SPACE" : Keys.SPACE,
-                "END" : Keys.END,
-                "HOME" : Keys.HOME,
-                "INSERT" : Keys.INSERT,
-                "SEMICOLON" : Keys.SEMICOLON,
-                "EQUALS" : Keys.EQUALS,
-                "ARROW_LEFT" : Keys.ARROW_LEFT,
-                "ARROW_UP" : Keys.ARROW_UP,
-                "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
-                "ARROW_DOWN" : Keys.ARROW_DOWN,
-                "BACK_SPACE" : Keys.BACK_SPACE,
-                "LEFT_SHIFT" : Keys.LEFT_SHIFT,
-                "LEFT_CONTROL" : Keys.LEFT_CONTROL,
-                "LEFT_ALT" : Keys.LEFT_ALT, 
-                "PAGE_UP" : Keys.PAGE_UP ,
-                "PAGE_DOWN" : Keys.PAGE_DOWN 
+        """  
+        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
+        supported_keys = {
+            "F1" : Keys.F1,
+            "F2" : Keys.F2,
+            "F3" : Keys.F3,
+            "F4" : Keys.F4,
+            "F5" : Keys.F5,
+            "F6" : Keys.F6,
+            "F7" : Keys.F7,
+            "F8" : Keys.F8,
+            "F9" : Keys.F9,
+            "F10" : Keys.F10,
+            "F11" : Keys.F11,
+            "F12" : Keys.F12,
+            "UP" : Keys.UP,
+            "DOWN" : Keys.DOWN,
+            "LEFT" : Keys.LEFT,
+            "RIGHT" : Keys.RIGHT,
+            "DELETE" : Keys.DELETE,
+            "ENTER" : Keys.ENTER,
+            "ESC" : Keys.ESCAPE,
+            "CTRL" : Keys.CONTROL,
+            "ALT" : Keys.ALT,
+            "NUMPAD0" : Keys.NUMPAD0,
+            "NUMPAD1" : Keys.NUMPAD1,
+            "NUMPAD2" : Keys.NUMPAD2,
+            "NUMPAD3" : Keys.NUMPAD3,
+            "NUMPAD4" : Keys.NUMPAD4,
+            "NUMPAD5" : Keys.NUMPAD5,
+            "NUMPAD6" : Keys.NUMPAD6,
+            "NUMPAD7" : Keys.NUMPAD7,
+            "NUMPAD8" : Keys.NUMPAD8,
+            "NUMPAD9" : Keys.NUMPAD9,
+            "MULTIPLY" : Keys.MULTIPLY,
+            "ADD" : Keys.ADD,
+            "SEPARATOR" : Keys.SEPARATOR,
+            "SUBTRACT" : Keys.SUBTRACT,
+            "DECIMAL" : Keys.DECIMAL,
+            "DIVIDE" : Keys.DIVIDE,  
+            "META" : Keys.META,
+            "COMMAND" : Keys.COMMAND,
+            "NULL" : Keys.NULL, 
+            "CANCEL" : Keys.CANCEL, 
+            "HELP" : Keys.HELP,
+            "BACKSPACE" : Keys.BACKSPACE, 
+            "TAB" : Keys.TAB, 
+            "CLEAR" : Keys.CLEAR, 
+            "RETURN" : Keys.RETURN, 
+            "SHIFT" : Keys.SHIFT, 
+            "PAUSE" : Keys.PAUSE, 
+            "ESCAPE" : Keys.ESCAPE, 
+            "SPACE" : Keys.SPACE,
+            "END" : Keys.END,
+            "HOME" : Keys.HOME,
+            "INSERT" : Keys.INSERT,
+            "SEMICOLON" : Keys.SEMICOLON,
+            "EQUALS" : Keys.EQUALS,
+            "ARROW_LEFT" : Keys.ARROW_LEFT,
+            "ARROW_UP" : Keys.ARROW_UP,
+            "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
+            "ARROW_DOWN" : Keys.ARROW_DOWN,
+            "BACK_SPACE" : Keys.BACK_SPACE,
+            "LEFT_SHIFT" : Keys.LEFT_SHIFT,
+            "LEFT_CONTROL" : Keys.LEFT_CONTROL,
+            "LEFT_ALT" : Keys.LEFT_ALT, 
+            "PAGE_UP" : Keys.PAGE_UP ,
+            "PAGE_DOWN" : Keys.PAGE_DOWN 
 
-            }
+        }
 
-            #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
+        #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
 
-            script = """
-            var getActiveElement = () => {
-                if(document.activeElement.tagName.toLowerCase() == "input" || document.activeElement.tagName.toLowerCase() == "div"){
-                    if(document.activeElement.attributes["id"]){
-                        return document.activeElement.attributes["id"].value
-                    }else if(document.activeElement.parentElement.attributes["id"]){
-                        return document.activeElement.parentElement.attributes["id"].value
-                    }
+        script = """
+        var getActiveElement = () => {
+            if(document.activeElement.tagName.toLowerCase() == "input" || document.activeElement.tagName.toLowerCase() == "div"){
+                if(document.activeElement.attributes["id"]){
+                    return document.activeElement.attributes["id"].value
+                }else if(document.activeElement.parentElement.attributes["id"]){
+                    return document.activeElement.parentElement.attributes["id"].value
                 }
-                return ""
             }
+            return ""
+        }
 
-            return getActiveElement()
-            """
-            grid_number-=1
-            hotkey = ["CTRL","ALT"]
-            key = key.upper()
-            try:
-                if key in supported_keys:      
+        return getActiveElement()
+        """
+        grid_number-=1
+        hotkey = ["CTRL","ALT"]
+        key = key.upper()
+        try:
+            if key in supported_keys:      
 
-                    if key not in hotkey:
-                        Id = self.driver.execute_script(script)
-                        if Id:
-                            element = self.driver.find_element_by_id(Id)
-                        else:
-                            element = self.driver.find_element(By.TAG_NAME, "html")
-
-                        if key == "DOWN" and grid:
-                            if grid_number is None:
-                                grid_number = 0
-                            self.grid_input.append(["", "", grid_number, True])
-                            self.set_element_focus(element)
-                        else:
-                            self.set_element_focus(element)
-                            self.send_keys(element, supported_keys[key])
+                if key not in hotkey:
+                    Id = self.driver.execute_script(script)
+                    if Id:
+                        element = self.driver.find_element_by_id(Id)
                     else:
-                        if additional_key != "":
-                            ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
-                        else:
-                            self.log_error("Additional key is empty")  
+                        element = self.driver.find_element(By.TAG_NAME, "html")
+
+                    if key == "DOWN" and grid:
+                        if grid_number is None:
+                            grid_number = 0
+                        self.grid_input.append(["", "", grid_number, True])
+                        self.set_element_focus(element)
+                    else:
+                        self.set_element_focus(element)
+                        self.send_keys(element, supported_keys[key])
                 else:
-                    self.log_error("Key is not supported")
-            except WebDriverException as e:
-                print(f"*** SetKey - Screen is not load  ***\n {e}")
-            except Exception as error:
-                self.log_error(str(error))
+                    if additional_key != "":
+                        ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
+                    else:
+                        self.log_error("Additional key is empty")  
+            else:
+                self.log_error("Key is not supported")
+        except WebDriverException as e:
+            print(f"*** SetKey - Screen is not load  ***\n {e}")
+        except Exception as error:
+            self.log_error(str(error))
 
 
     def SetFocus(self, field, grid_cell, row_number):
@@ -3674,14 +3671,31 @@ class WebappInternal(Base):
             self.grid_counters[grid_id] = 0
         else:
             self.grid_counters[grid_id]+=1
-        
-    @contextmanager
-    def wait_for_page_load(self, timeout=30):
-        old_page = self.driver.find_element_by_tag_name('html')
-        yield
-        WebDriverWait(self.driver, timeout).until(
-            staleness_of(old_page)
-        )
+
+    def wait_element_is_not_displayed(self, element_soup, timeout = 5 , step=0.3):
+        """
+        [Internal]
+
+        Wait element.is_displayed() return false
+        :param element_soup: The element soup.
+        :type element_soup: BeautifulSoup object.
+        :param timeout: The maximum amount of time of wait. - **Default:** 5.0
+        :type timeout: float
+        :param step: The amount of time each step should wait. - **Default:** 0.1
+        :type step: float
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_element_is_not_displayed(soup_element, 10, 0.5)
+        """
+        endtime = time.time() + timeout
+        try:
+            print('Waiting for element to disappear')
+            while(self.element_is_displayed(element_soup) and time.time() <= endtime):
+                time.sleep(pulse)
+        except Exception:
+            return  
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
