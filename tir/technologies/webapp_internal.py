@@ -2754,7 +2754,7 @@ class WebappInternal(Base):
             else:
                 self.log_error("Key is not supported")
         except WebDriverException as e:
-            print(f"*** SetKey - Screen is not load  ***\n {e}")
+            self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             self.log_error(str(error))
 
