@@ -3442,12 +3442,12 @@ class WebappInternal(Base):
                             column_number = headers[grid_number][column_name]
                             column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
                             if column_element_old_class == None:
-                                column_element_old_class = column_element.get_attribute("class")
+                                column_element_old_class = column_element().get_attribute("class")
 
                             self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
                             self.click(column_element())
 
-                            if column_element_old_class != column_element.get_attribute("class"):
+                            if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
                                 success = True
 
         if not success:
