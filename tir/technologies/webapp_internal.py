@@ -1228,7 +1228,10 @@ class WebappInternal(Base):
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
-                            input_field().send_keys(main_value)
+                            if main_value == '':
+                                input_field().send_keys(" ")
+                            else:
+                                input_field().send_keys(main_value)
                         #if Number input
                         else:
                             tries = 0
@@ -4843,7 +4846,7 @@ class WebappInternal(Base):
         if self.config.coverage:
 
             self.driver.refresh()
-            timeout = 900
+            timeout = 1500
 
             if not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
