@@ -2610,8 +2610,11 @@ class WebappInternal(Base):
         """
         Press the desired key on the keyboard on the focused element.
 
-        .. note::
+        .. warning::
             If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
+        .. warning::           
+            Before using this method, set focus on any element
 
         Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
@@ -2636,29 +2639,6 @@ class WebappInternal(Base):
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """        
         print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
-        supported_keys = {
-            "F1" : Keys.F1,
-            "F2" : Keys.F2,
-            "F3" : Keys.F3,
-            "F4" : Keys.F4,
-            "F5" : Keys.F5,
-            "F6" : Keys.F6,
-            "F7" : Keys.F7,
-            "F8" : Keys.F8,
-            "F9" : Keys.F9,
-            "F10" : Keys.F10,
-            "F11" : Keys.F11,
-            "F12" : Keys.F12,
-            "UP" : Keys.UP,
-            "DOWN" : Keys.DOWN,
-            "LEFT": Keys.LEFT,
-            "RIGHT": Keys.RIGHT,
-            "DELETE" : Keys.DELETE,
-            "ENTER": Keys.ENTER,
-            "ESC": Keys.ESCAPE,
-            "CTRL": Keys.CONTROL,
-            "ALT": Keys.ALT
-        }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
 
@@ -2680,33 +2660,60 @@ class WebappInternal(Base):
         hotkey = ["CTRL","ALT"]
         key = key.upper()
         try:
-            if key in supported_keys:      
+            if key not in hotkey and self.supported_keys(key):
 
-                if key not in hotkey:
-                    Id = self.driver.execute_script(script)
-                    if Id:
-                        element = self.driver.find_element_by_id(Id)
-                    else:
-                        element = self.driver.find_element(By.TAG_NAME, "html")
+                Id = self.driver.execute_script(script)
+                element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
+                self.set_element_focus(element)
 
-                    if key == "DOWN" and grid:
-                        if grid_number is None:
-                            grid_number = 0
-                        self.grid_input.append(["", "", grid_number, True])
-                        self.set_element_focus(element)
-                    else:
-                        self.set_element_focus(element)
-                        self.send_keys(element, supported_keys[key])
+                if key == "DOWN" and grid:
+                    grid_number = 0 if grid_number is None else grid_number
+                    self.grid_input.append(["", "", grid_number, True])
                 else:
-                    if additional_key != "":
-                        ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
-                    else:
-                        self.log_error("Additional key is empty")  
+                    self.send_keys(element, self.supported_keys(key))
+
+            elif additional_key:
+                ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
             else:
-                self.log_error("Key is not supported")
+                self.log_error("Additional key is empty")  
+
         except Exception as error:
             self.log_error(str(error))
 
+    def supported_keys(self, key = ""):
+        """
+        [Internal]
+        """
+        try:
+            supported_keys = {
+                "F1" : Keys.F1,
+                "F2" : Keys.F2,
+                "F3" : Keys.F3,
+                "F4" : Keys.F4,
+                "F5" : Keys.F5,
+                "F6" : Keys.F6,
+                "F7" : Keys.F7,
+                "F8" : Keys.F8,
+                "F9" : Keys.F9,
+                "F10" : Keys.F10,
+                "F11" : Keys.F11,
+                "F12" : Keys.F12,
+                "UP" : Keys.UP,
+                "DOWN" : Keys.DOWN,
+                "LEFT": Keys.LEFT,
+                "RIGHT": Keys.RIGHT,
+                "DELETE" : Keys.DELETE,
+                "ENTER": Keys.ENTER,
+                "ESC": Keys.ESCAPE,
+                "CTRL": Keys.CONTROL,
+                "ALT": Keys.ALT
+            }
+
+            return supported_keys[key.upper()]
+
+        except KeyError:
+            self.log_error("Key is not supported")
+        
     def SetFocus(self, field, grid_cell, row_number):
         """
         Sets the current focus on the desired field.
