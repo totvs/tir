@@ -3693,7 +3693,7 @@ class WebappInternal(Base):
         try:
             print('Waiting for element to disappear')
             while(self.element_is_displayed(element_soup) and time.time() <= endtime):
-                time.sleep(pulse)
+                time.sleep(step)
         except Exception:
             return  
 
