@@ -1341,7 +1341,7 @@ class WebappInternal(Base):
         if element.tag_name == "label":
             web_value = element.get_attribute("text")
         elif element.tag_name == "select":
-            current_select = int(element.get_attribute('value'))
+            current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value'))
             selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
             web_value = selected_element.text
         else:
@@ -2245,7 +2245,8 @@ class WebappInternal(Base):
 
             if not element:
                 return
-            time.sleep(0.5)
+            if (endtime - time.time() < 1180):
+                time.sleep(0.5)
             
         self.log_error(f"Element {string} not found")
 
@@ -2275,7 +2276,8 @@ class WebappInternal(Base):
 
             if element:
                 return
-            time.sleep(0.5)
+            if (endtime - time.time() < 1180):
+                time.sleep(0.5)
 
         self.log_error(f"Element {string} not found")
 
@@ -2700,13 +2702,58 @@ class WebappInternal(Base):
                 "F12" : Keys.F12,
                 "UP" : Keys.UP,
                 "DOWN" : Keys.DOWN,
-                "LEFT": Keys.LEFT,
-                "RIGHT": Keys.RIGHT,
+                "LEFT" : Keys.LEFT,
+                "RIGHT" : Keys.RIGHT,
                 "DELETE" : Keys.DELETE,
-                "ENTER": Keys.ENTER,
-                "ESC": Keys.ESCAPE,
-                "CTRL": Keys.CONTROL,
-                "ALT": Keys.ALT
+                "ENTER" : Keys.ENTER,
+                "ESC" : Keys.ESCAPE,
+                "CTRL" : Keys.CONTROL,
+                "ALT" : Keys.ALT,
+                "NUMPAD0" : Keys.NUMPAD0,
+                "NUMPAD1" : Keys.NUMPAD1,
+                "NUMPAD2" : Keys.NUMPAD2,
+                "NUMPAD3" : Keys.NUMPAD3,
+                "NUMPAD4" : Keys.NUMPAD4,
+                "NUMPAD5" : Keys.NUMPAD5,
+                "NUMPAD6" : Keys.NUMPAD6,
+                "NUMPAD7" : Keys.NUMPAD7,
+                "NUMPAD8" : Keys.NUMPAD8,
+                "NUMPAD9" : Keys.NUMPAD9,
+                "MULTIPLY" : Keys.MULTIPLY,
+                "ADD" : Keys.ADD,
+                "SEPARATOR" : Keys.SEPARATOR,
+                "SUBTRACT" : Keys.SUBTRACT,
+                "DECIMAL" : Keys.DECIMAL,
+                "DIVIDE" : Keys.DIVIDE,  
+                "META" : Keys.META,
+                "COMMAND" : Keys.COMMAND,
+                "NULL" : Keys.NULL, 
+                "CANCEL" : Keys.CANCEL, 
+                "HELP" : Keys.HELP,
+                "BACKSPACE" : Keys.BACKSPACE, 
+                "TAB" : Keys.TAB, 
+                "CLEAR" : Keys.CLEAR, 
+                "RETURN" : Keys.RETURN, 
+                "SHIFT" : Keys.SHIFT, 
+                "PAUSE" : Keys.PAUSE, 
+                "ESCAPE" : Keys.ESCAPE, 
+                "SPACE" : Keys.SPACE,
+                "END" : Keys.END,
+                "HOME" : Keys.HOME,
+                "INSERT" : Keys.INSERT,
+                "SEMICOLON" : Keys.SEMICOLON,
+                "EQUALS" : Keys.EQUALS,
+                "ARROW_LEFT" : Keys.ARROW_LEFT,
+                "ARROW_UP" : Keys.ARROW_UP,
+                "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
+                "ARROW_DOWN" : Keys.ARROW_DOWN,
+                "BACK_SPACE" : Keys.BACK_SPACE,
+                "LEFT_SHIFT" : Keys.LEFT_SHIFT,
+                "LEFT_CONTROL" : Keys.LEFT_CONTROL,
+                "LEFT_ALT" : Keys.LEFT_ALT, 
+                "PAGE_UP" : Keys.PAGE_UP ,
+                "PAGE_DOWN" : Keys.PAGE_DOWN 
+
             }
 
             return supported_keys[key.upper()]
@@ -5126,7 +5173,7 @@ class WebappInternal(Base):
         container = self.get_current_container()
         if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
             user_login = self.GetValue(self.language.user_login)
-            if user_login == self.language.user_login or self.language.user_login.lower() == "admin":
+            if user_login == self.config.user or self.config.user.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
                 self.SetValue(self.language.nem_password, self.config.password)
                 self.SetValue(self.language.confirm_new_password, self.config.password)
