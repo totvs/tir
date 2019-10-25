@@ -97,11 +97,11 @@ class Log:
         if len(self.table_rows) > 0:
             try:
                 if self.folder:
-                    path = f"{self.folder}\\{self.station}"
-                    os.makedirs(f"{self.folder}\\{self.station}")
+                    path = f"{self.folder}\\{self.station}_v6"
+                    os.makedirs(path)
                 else:
                     path = f"Log\\{self.station}"
-                    os.makedirs(f"Log\\{self.station}")
+                    os.makedirs(path)
             except OSError:
                 pass
 
