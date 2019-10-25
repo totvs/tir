@@ -20,7 +20,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
 
 class WebappInternal(Base):
     """
@@ -1966,7 +1966,7 @@ class WebappInternal(Base):
         self.wait_blocker_ajax()
         container = self.get_current_container()
 
-        if 'id' in container.attrs:
+        if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
         print(f"Clicking on {button}")
@@ -2616,8 +2616,11 @@ class WebappInternal(Base):
         """
         Press the desired key on the keyboard on the focused element.
 
-        .. note::
+        .. warning::
             If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
+        .. warning::           
+            Before using this method, set focus on any element
 
         Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
 
@@ -2642,74 +2645,6 @@ class WebappInternal(Base):
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
         """        
         print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
-        supported_keys = {
-            "F1" : Keys.F1,
-            "F2" : Keys.F2,
-            "F3" : Keys.F3,
-            "F4" : Keys.F4,
-            "F5" : Keys.F5,
-            "F6" : Keys.F6,
-            "F7" : Keys.F7,
-            "F8" : Keys.F8,
-            "F9" : Keys.F9,
-            "F10" : Keys.F10,
-            "F11" : Keys.F11,
-            "F12" : Keys.F12,
-            "UP" : Keys.UP,
-            "DOWN" : Keys.DOWN,
-            "LEFT" : Keys.LEFT,
-            "RIGHT" : Keys.RIGHT,
-            "DELETE" : Keys.DELETE,
-            "ENTER" : Keys.ENTER,
-            "ESC" : Keys.ESCAPE,
-            "CTRL" : Keys.CONTROL,
-            "ALT" : Keys.ALT,
-            "NUMPAD0" : Keys.NUMPAD0,
-            "NUMPAD1" : Keys.NUMPAD1,
-            "NUMPAD2" : Keys.NUMPAD2,
-            "NUMPAD3" : Keys.NUMPAD3,
-            "NUMPAD4" : Keys.NUMPAD4,
-            "NUMPAD5" : Keys.NUMPAD5,
-            "NUMPAD6" : Keys.NUMPAD6,
-            "NUMPAD7" : Keys.NUMPAD7,
-            "NUMPAD8" : Keys.NUMPAD8,
-            "NUMPAD9" : Keys.NUMPAD9,
-            "MULTIPLY" : Keys.MULTIPLY,
-            "ADD" : Keys.ADD,
-            "SEPARATOR" : Keys.SEPARATOR,
-            "SUBTRACT" : Keys.SUBTRACT,
-            "DECIMAL" : Keys.DECIMAL,
-            "DIVIDE" : Keys.DIVIDE,  
-            "META" : Keys.META,
-            "COMMAND" : Keys.COMMAND,
-            "NULL" : Keys.NULL, 
-            "CANCEL" : Keys.CANCEL, 
-            "HELP" : Keys.HELP,
-            "BACKSPACE" : Keys.BACKSPACE, 
-            "TAB" : Keys.TAB, 
-            "CLEAR" : Keys.CLEAR, 
-            "RETURN" : Keys.RETURN, 
-            "SHIFT" : Keys.SHIFT, 
-            "PAUSE" : Keys.PAUSE, 
-            "ESCAPE" : Keys.ESCAPE, 
-            "SPACE" : Keys.SPACE,
-            "END" : Keys.END,
-            "HOME" : Keys.HOME,
-            "INSERT" : Keys.INSERT,
-            "SEMICOLON" : Keys.SEMICOLON,
-            "EQUALS" : Keys.EQUALS,
-            "ARROW_LEFT" : Keys.ARROW_LEFT,
-            "ARROW_UP" : Keys.ARROW_UP,
-            "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
-            "ARROW_DOWN" : Keys.ARROW_DOWN,
-            "BACK_SPACE" : Keys.BACK_SPACE,
-            "LEFT_SHIFT" : Keys.LEFT_SHIFT,
-            "LEFT_CONTROL" : Keys.LEFT_CONTROL,
-            "LEFT_ALT" : Keys.LEFT_ALT, 
-            "PAGE_UP" : Keys.PAGE_UP ,
-            "PAGE_DOWN" : Keys.PAGE_DOWN 
-
-        }
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
 
@@ -2731,32 +2666,106 @@ class WebappInternal(Base):
         hotkey = ["CTRL","ALT"]
         key = key.upper()
         try:
-            if key in supported_keys:      
+            if key not in hotkey and self.supported_keys(key):
 
-                if key not in hotkey:
-                    Id = self.driver.execute_script(script)
-                    if Id:
-                        element = self.driver.find_element_by_id(Id)
-                    else:
-                        element = self.driver.find_element(By.TAG_NAME, "html")
+                Id = self.driver.execute_script(script)
+                element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
+                self.set_element_focus(element)
 
-                    if key == "DOWN" and grid:
-                        if grid_number is None:
-                            grid_number = 0
-                        self.grid_input.append(["", "", grid_number, True])
-                        self.set_element_focus(element)
-                    else:
-                        self.set_element_focus(element)
-                        self.send_keys(element, supported_keys[key])
+                if key == "DOWN" and grid:
+                    grid_number = 0 if grid_number is None else grid_number
+                    self.grid_input.append(["", "", grid_number, True])
                 else:
-                    if additional_key != "":
-                        ActionChains(self.driver).key_down(supported_keys[key]).send_keys(additional_key.lower()).key_up(supported_keys[key]).perform()
-                    else:
-                        self.log_error("Additional key is empty")  
+                    self.send_keys(element, self.supported_keys(key))
+
+            elif additional_key:
+                ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
             else:
-                self.log_error("Key is not supported")
+                self.log_error("Additional key is empty")  
+
+        except WebDriverException as e:
+            self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             self.log_error(str(error))
+
+    def supported_keys(self, key = ""):
+        """
+        [Internal]
+        """
+        try:
+            supported_keys = {
+                "F1" : Keys.F1,
+                "F2" : Keys.F2,
+                "F3" : Keys.F3,
+                "F4" : Keys.F4,
+                "F5" : Keys.F5,
+                "F6" : Keys.F6,
+                "F7" : Keys.F7,
+                "F8" : Keys.F8,
+                "F9" : Keys.F9,
+                "F10" : Keys.F10,
+                "F11" : Keys.F11,
+                "F12" : Keys.F12,
+                "UP" : Keys.UP,
+                "DOWN" : Keys.DOWN,
+                "LEFT" : Keys.LEFT,
+                "RIGHT" : Keys.RIGHT,
+                "DELETE" : Keys.DELETE,
+                "ENTER" : Keys.ENTER,
+                "ESC" : Keys.ESCAPE,
+                "CTRL" : Keys.CONTROL,
+                "ALT" : Keys.ALT,
+                "NUMPAD0" : Keys.NUMPAD0,
+                "NUMPAD1" : Keys.NUMPAD1,
+                "NUMPAD2" : Keys.NUMPAD2,
+                "NUMPAD3" : Keys.NUMPAD3,
+                "NUMPAD4" : Keys.NUMPAD4,
+                "NUMPAD5" : Keys.NUMPAD5,
+                "NUMPAD6" : Keys.NUMPAD6,
+                "NUMPAD7" : Keys.NUMPAD7,
+                "NUMPAD8" : Keys.NUMPAD8,
+                "NUMPAD9" : Keys.NUMPAD9,
+                "MULTIPLY" : Keys.MULTIPLY,
+                "ADD" : Keys.ADD,
+                "SEPARATOR" : Keys.SEPARATOR,
+                "SUBTRACT" : Keys.SUBTRACT,
+                "DECIMAL" : Keys.DECIMAL,
+                "DIVIDE" : Keys.DIVIDE,  
+                "META" : Keys.META,
+                "COMMAND" : Keys.COMMAND,
+                "NULL" : Keys.NULL, 
+                "CANCEL" : Keys.CANCEL, 
+                "HELP" : Keys.HELP,
+                "BACKSPACE" : Keys.BACKSPACE, 
+                "TAB" : Keys.TAB, 
+                "CLEAR" : Keys.CLEAR, 
+                "RETURN" : Keys.RETURN, 
+                "SHIFT" : Keys.SHIFT, 
+                "PAUSE" : Keys.PAUSE, 
+                "ESCAPE" : Keys.ESCAPE, 
+                "SPACE" : Keys.SPACE,
+                "END" : Keys.END,
+                "HOME" : Keys.HOME,
+                "INSERT" : Keys.INSERT,
+                "SEMICOLON" : Keys.SEMICOLON,
+                "EQUALS" : Keys.EQUALS,
+                "ARROW_LEFT" : Keys.ARROW_LEFT,
+                "ARROW_UP" : Keys.ARROW_UP,
+                "ARROW_RIGHT" : Keys.ARROW_RIGHT, 
+                "ARROW_DOWN" : Keys.ARROW_DOWN,
+                "BACK_SPACE" : Keys.BACK_SPACE,
+                "LEFT_SHIFT" : Keys.LEFT_SHIFT,
+                "LEFT_CONTROL" : Keys.LEFT_CONTROL,
+                "LEFT_ALT" : Keys.LEFT_ALT, 
+                "PAGE_UP" : Keys.PAGE_UP ,
+                "PAGE_DOWN" : Keys.PAGE_DOWN 
+
+            }
+
+            return supported_keys[key.upper()]
+
+        except KeyError:
+            self.log_error("Key is not supported")
 
     def SetFocus(self, field, grid_cell, row_number):
         """
@@ -3464,6 +3473,7 @@ class WebappInternal(Base):
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        column_element_old_class = None
         
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
         
@@ -3489,16 +3499,20 @@ class WebappInternal(Base):
                         columns = rows[row_number].select("td")
                     if columns:
                         if column_name in headers[grid_number]:
-                            success = True
+                            column_number = headers[grid_number][column_name]
+                            column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
+                            if column_element_old_class == None:
+                                column_element_old_class = column_element().get_attribute("class")
+
+                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
+                            self.click(column_element())
+
+                            if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
+                                success = True
 
         if not success:
             self.log_error("Couldn't Click on grid cell ")
 
-        column_number = headers[grid_number][column_name]
-        column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
-
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
-        self.click(column_element())
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
         """
