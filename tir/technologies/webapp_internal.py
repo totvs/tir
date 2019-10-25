@@ -1229,10 +1229,8 @@ class WebappInternal(Base):
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                repeat_number = interface_value_size - 2
                                 if '/' in current_value:
-                                    for x in range(repeat_number):
-                                        input_field().send_keys("9")
+                                    input_field().send_keys("999999")
                                 else:
                                     input_field().send_keys(" ")
                             else:
