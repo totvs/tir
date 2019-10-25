@@ -699,6 +699,8 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
+                self.wait_element_is_not_displayed(tget_img)
+
         except AssertionError as error:
             raise error
         except Exception as e:
@@ -3684,6 +3686,31 @@ class WebappInternal(Base):
             self.grid_counters[grid_id] = 0
         else:
             self.grid_counters[grid_id]+=1
+    
+    def wait_element_is_not_displayed(self, element_soup, timeout = 5 , step=0.3):
+        """
+        [Internal]
+
+        Wait element.is_displayed() return false
+        :param element_soup: The element soup.
+        :type element_soup: BeautifulSoup object.
+        :param timeout: The maximum amount of time of wait. - **Default:** 5.0
+        :type timeout: float
+        :param step: The amount of time each step should wait. - **Default:** 0.1
+        :type step: float
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_element_is_not_displayed(soup_element, 10, 0.5)
+        """
+        endtime = time.time() + timeout
+        try:
+            print('Waiting for element to disappear')
+            while(self.element_is_displayed(element_soup) and time.time() <= endtime):
+                time.sleep(step)
+        except Exception:
+            return
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
