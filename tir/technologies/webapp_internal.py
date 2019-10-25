@@ -1229,7 +1229,12 @@ class WebappInternal(Base):
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                input_field().send_keys(" ")
+                                repeat_number = interface_value_size - 2
+                                if 'data' in field.lower():
+                                    for x in range(repeat_number):
+                                        input_field().send_keys("9")
+                                else:
+                                    input_field().send_keys(" ")
                             else:
                                 input_field().send_keys(main_value)
                         #if Number input
