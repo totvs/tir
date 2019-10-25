@@ -1230,7 +1230,7 @@ class WebappInternal(Base):
                             time.sleep(0.1)
                             if main_value == '':
                                 repeat_number = interface_value_size - 2
-                                if 'data' in field.lower():
+                                if '/' in current_value:
                                     for x in range(repeat_number):
                                         input_field().send_keys("9")
                                 else:
