@@ -156,6 +156,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+        self.service_process_bat_file()
+        
         if not initial_program:
             self.log_error("Couldn't find The initial program")
 
@@ -203,6 +205,18 @@ class WebappInternal(Base):
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_start_exec)
+
+    def service_process_bat_file(self):
+        """
+        [Internal]
+        This method creates a batfile in the root path to kill the process and its children.
+        """
+        if self.config.smart_test:
+            with open("fox_death.bat", "w", ) as fox_file_death:
+                fox_file_death.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
+
+
+
 
     def program_screen(self, initial_program="", environment=""):
         """
