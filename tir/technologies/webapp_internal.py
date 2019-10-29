@@ -3511,6 +3511,8 @@ class WebappInternal(Base):
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
                                 success = True
+                            elif grids[grid_number] and "tcbrowse" in grids[grid_number].attrs['class']:
+                                success = True
 
         if not success:
             self.log_error("Couldn't Click on grid cell ")
