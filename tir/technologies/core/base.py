@@ -909,7 +909,7 @@ class Base(unittest.TestCase):
         print("Starting the browser")
         if self.config.browser.lower() == "firefox":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
-            log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
+            log_path = os.devnull
             options = FirefoxOpt()
             options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
