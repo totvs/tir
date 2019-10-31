@@ -910,10 +910,7 @@ class Base(unittest.TestCase):
         if self.config.browser.lower() == "firefox":
             if sys.platform == 'linux':
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers/linux64/geckodriver')
-                log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
-                os.system(f"touch {log_path}")
-                os.system(f"chmod 007 {log_path}")
-
+                log_path = os.devnull
             else:
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
                 log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
@@ -922,7 +919,7 @@ class Base(unittest.TestCase):
             options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             options = ChromeOpt()
             options.set_headless(self.config.headless)
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
