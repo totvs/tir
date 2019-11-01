@@ -213,8 +213,8 @@ class WebappInternal(Base):
         This method creates a batfile in the root path to kill the process and its children.
         """
         if self.config.smart_test:
-            with open("firefox_death.bat", "w", ) as firefox_file_death:
-                firefox_file_death.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
+            with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
+                firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
 
 
