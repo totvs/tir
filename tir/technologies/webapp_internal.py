@@ -93,6 +93,7 @@ class WebappInternal(Base):
         """
         print("Starting Setup TSS")
         self.tss = True
+        self.service_process_bat_file()
 
         self.config.initial_program = initial_program
         self.config.environment = enviroment
@@ -156,6 +157,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+        self.service_process_bat_file()
+        
         if not initial_program:
             self.log_error("Couldn't find The initial program")
 
@@ -203,6 +206,18 @@ class WebappInternal(Base):
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_start_exec)
+
+    def service_process_bat_file(self):
+        """
+        [Internal]
+        This method creates a batfile in the root path to kill the process and its children.
+        """
+        if self.config.smart_test:
+            with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
+                firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
+
+
+
 
     def program_screen(self, initial_program="", environment=""):
         """
