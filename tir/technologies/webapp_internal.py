@@ -2510,7 +2510,7 @@ class WebappInternal(Base):
         scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
 
         last = None
-        get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")[0]
+        get_current = lambda: self.selected_row(grid_number)
         current = get_current()
         while(last != current and match_value):
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
@@ -2527,6 +2527,30 @@ class WebappInternal(Base):
             time.sleep(0.5)
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
+
+    def selected_row(self, grid_number = 0):
+        """
+        [Internal]
+
+        Returns the selected row in the grid.
+
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method to return the selected row:
+        >>> oHelper.selected_row(grid_number = 0)
+
+        """
+        row_selected = None
+        grid = self.get_grid(grid_number)
+        if grid:
+            row = next(iter(grid.select('tbody tr.selected-row')), None)
+            column = next(iter(grid.select('td.selected-cell')), None)
+            row_selected = column.parent  if column else row
+
+        return row_selected
 
     def get_grid(self, grid_number=0, grid_element = None):
         """
