@@ -4512,7 +4512,7 @@ class WebappInternal(Base):
             self.assertTrue(expected, msg)
         else:
             self.log.new_line(False, self.language.assert_false_message) if not self.errors else self.log.new_line(False, log_message)
-            self.assertFalse(expected, msg)
+            self.assertTrue(expected, msg)
             
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
 
