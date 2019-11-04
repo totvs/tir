@@ -4490,7 +4490,6 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
-        expected_assert = expected
         msg = "Passed"
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
@@ -4510,8 +4509,10 @@ class WebappInternal(Base):
 
         if expected:
             self.log.new_line(True, "") if not self.errors else self.log.new_line(True, log_message)
+            self.assertTrue(expected, msg)
         else:
             self.log.new_line(False, self.language.assert_false_message) if not self.errors else self.log.new_line(False, log_message)
+            self.assertFalse(expected, msg)
             
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
 
@@ -4521,12 +4522,7 @@ class WebappInternal(Base):
 
         self.errors = []
         print(msg)
-        if expected_assert:
-            self.assertTrue(expected, msg)
-        else:
-            self.assertFalse(expected, msg)
-
-    
+        
     def ClickCheckBox(self, label_box_name, position=1):
         """
         Clicks on a Label in box on the screen.
