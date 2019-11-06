@@ -4490,7 +4490,7 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
-        msg = "Passed"
+        msg = ""
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number}"
@@ -4505,20 +4505,23 @@ class WebappInternal(Base):
             for field_msg in self.errors:
                 log_message += (" " + field_msg)
 
-            msg = log_message
-
         if expected:
-            self.log.new_line(True, "") if not self.errors else self.log.new_line(True, log_message)
-            self.assertTrue(expected, msg)
+            msg = "" if not self.errors else log_message
+            self.log.new_line(True, msg)
         else:
-            self.log.new_line(False, self.language.assert_false_message) if not self.errors else self.log.new_line(False, log_message)
-            self.assertTrue(expected, msg)
+            msg = self.language.assert_false_message if not self.errors else log_message
+            self.log.new_line(False, msg)
             
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
 
         routine_name = routine_name if routine_name else "error"
 
         self.log.save_file(routine_name)
+
+        if expected:
+            self.assertTrue(True, "Passed" if not self.errors else log_message)
+        else:
+            self.assertTrue(False, msg)
 
         self.errors = []
         print(msg)
