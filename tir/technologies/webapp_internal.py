@@ -4228,9 +4228,7 @@ class WebappInternal(Base):
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
-
-                icon = next(iter(filtered_buttons), None)
+                    icon = next(iter(filtered_buttons), None)
 
             if icon:
                 element = lambda: self.soup_to_selenium(icon)
