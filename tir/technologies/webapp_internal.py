@@ -4205,9 +4205,10 @@ class WebappInternal(Base):
         >>> oHelper.ClickIcon("Edit")
         """
         icon = ""
+        success = False
         # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not icon):
+        while(time.time() < endtime and not icon and not success):
             self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
@@ -4227,16 +4228,17 @@ class WebappInternal(Base):
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+                    icon = next(iter(filtered_buttons), None)
 
-                icon = next(iter(filtered_buttons), None)
+            if icon:
+                element = lambda: self.soup_to_selenium(icon)
+                self.set_element_focus(element())
+                success = self.click(element())
 
         if not icon:
             self.log_error(f"Couldn't find Icon: {icon_text}.")
-
-        element = lambda: self.soup_to_selenium(icon)
-
-        self.click(element())
+        if not success:
+            self.log_error(f"Couldn't click Icon: {icon_text}.")
 
     def AddParameter(self, parameter, branch, portuguese_value, english_value="", spanish_value=""):
         """
