@@ -2527,6 +2527,8 @@ class WebappInternal(Base):
         last = None
         get_current = lambda: self.selected_row(grid_number)
         current = get_current()
+        td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+        self.try_click(td())
         while(last != current and match_value):
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
             text = td().text.strip() if td() else ""
@@ -2536,10 +2538,10 @@ class WebappInternal(Base):
             time.sleep(2)
             last = current
             scroll_down()
-            time.sleep(0.5)
+            time.sleep(1)
             current = get_current()
             self.try_click(td())
-            time.sleep(0.5)
+            time.sleep(1)
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
 
