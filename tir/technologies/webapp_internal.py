@@ -1909,6 +1909,7 @@ class WebappInternal(Base):
                 self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
                 self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
                 subMenuElements = menu.select(".tmenuitem")
+                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(".tmenuitem")
@@ -1916,7 +1917,7 @@ class WebappInternal(Base):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
                 submenu = ""
-                child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
                     self.scroll_to_element(submenu())
