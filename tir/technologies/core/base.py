@@ -24,6 +24,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
+from tir.technologies.core.third_party.screen_size import size
 
 class Base(unittest.TestCase):
     """
@@ -910,10 +911,9 @@ class Base(unittest.TestCase):
         if self.config.browser.lower() == "firefox":
             if sys.platform == 'linux':
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers/linux64/geckodriver')
-                log_path = os.devnull
             else:
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
-                log_path = os.devnull
+            log_path = os.devnull
 
             options = FirefoxOpt()
             options.set_headless(self.config.headless)
@@ -922,10 +922,27 @@ class Base(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             options = ChromeOpt()
             options.set_headless(self.config.headless)
+            options.add_argument('--log-level=3')
+            if self.config.headless:
+                options.add_argument('force-device-scale-factor=0.77')
+                
+            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+        elif self.config.browser.lower() == "electron":
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')# TODO chromedriver electron version
+            options = ChromeOpt()
+            options.add_argument('--log-level=3')
+            options.binary_location = "C:\\selenium_electron\\smartclientelectron\SmartClient.exe"
+            #TODO self.config_electron_binary_path
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
-        self.driver.maximize_window()
-        self.driver.get(self.config.url)
+        if not self.config.browser.lower() == "electron":
+            if self.config.headless:
+                self.driver.set_window_size(size()[0], size()[1])
+            else:
+                self.driver.maximize_window()
+                
+            self.driver.get(self.config.url)
+
         self.wait = WebDriverWait(self.driver,5)
 
     def TearDown(self):
