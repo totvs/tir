@@ -96,7 +96,7 @@ class WebappInternal(Base):
         self.service_process_bat_file()
 
         self.config.initial_program = initial_program
-        self.config.environment = enviroment
+        enviroment = self.config.environment if self.config.environment else enviroment
 
         self.containers_selectors["SetButton"] = "body"
         self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
@@ -1907,7 +1907,9 @@ class WebappInternal(Base):
             for menuitem in menu_itens:
                 self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
                 self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
-                self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
+                if not menuitem_presence:
+                    submenu().click()
                 subMenuElements = menu.select(".tmenuitem")
                 subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
@@ -1936,6 +1938,11 @@ class WebappInternal(Base):
             print(error)
             self.restart_counter += 1
             self.log_error(str(error))
+    
+    def tmenuitem_element(self, menu):
+        subMenuElements = menu.select(".tmenuitem")
+        subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+
 
     def children_element_count(self, element_selector, children_selector):
         """
