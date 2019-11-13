@@ -153,17 +153,11 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
-        """        
-        if right_click:
-            try:
+        """
+        try:
+            if right_click:
                 ActionChains(self.driver).context_click(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                pass
-        else:
-            try:
+            else:
                 self.scroll_to_element(element)
                 if click_type == enum.ClickType.JS:
                     self.driver.execute_script("arguments[0].click()", element)
@@ -171,11 +165,14 @@ class Base(unittest.TestCase):
                     element.click()
                 elif click_type == enum.ClickType.ACTIONCHAINS:
                     ActionChains(self.driver).move_to_element(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                self.log_error(str(error))
+            
+            return True
+
+        except StaleElementReferenceException:
+            print("********Element Stale click*********")
+            return False
+        except Exception:
+            return False
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """

@@ -96,7 +96,7 @@ class WebappInternal(Base):
         self.service_process_bat_file()
 
         self.config.initial_program = initial_program
-        self.config.environment = enviroment
+        enviroment = self.config.environment if self.config.environment else enviroment
 
         self.containers_selectors["SetButton"] = "body"
         self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
@@ -1907,8 +1907,11 @@ class WebappInternal(Base):
             for menuitem in menu_itens:
                 self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
                 self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
-                self.wait_element(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
+                if not menuitem_presence:
+                    submenu().click()
                 subMenuElements = menu.select(".tmenuitem")
+                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(".tmenuitem")
@@ -1916,7 +1919,7 @@ class WebappInternal(Base):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
                 submenu = ""
-                child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
                     self.scroll_to_element(submenu())
@@ -1935,6 +1938,11 @@ class WebappInternal(Base):
             print(error)
             self.restart_counter += 1
             self.log_error(str(error))
+    
+    def tmenuitem_element(self, menu):
+        subMenuElements = menu.select(".tmenuitem")
+        subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+
 
     def children_element_count(self, element_selector, children_selector):
         """
@@ -2527,6 +2535,8 @@ class WebappInternal(Base):
         last = None
         get_current = lambda: self.selected_row(grid_number)
         current = get_current()
+        td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+        self.try_click(td())
         while(last != current and match_value):
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
             text = td().text.strip() if td() else ""
@@ -2536,10 +2546,10 @@ class WebappInternal(Base):
             time.sleep(2)
             last = current
             scroll_down()
-            time.sleep(0.5)
+            time.sleep(1)
             current = get_current()
             self.try_click(td())
-            time.sleep(0.5)
+            time.sleep(1)
         else:
             self.log_error(f"Couldn't locate content: {match_value}")
 
@@ -4208,9 +4218,10 @@ class WebappInternal(Base):
         >>> oHelper.ClickIcon("Edit")
         """
         icon = ""
+        success = False
         # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not icon):
+        while(time.time() < endtime and not icon and not success):
             self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
@@ -4230,16 +4241,17 @@ class WebappInternal(Base):
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    #filtered_buttons = list(filter(lambda x: self.check_element_tooltip(x, icon_text), buttons))
+                    icon = next(iter(filtered_buttons), None)
 
-                icon = next(iter(filtered_buttons), None)
+            if icon:
+                element = lambda: self.soup_to_selenium(icon)
+                self.set_element_focus(element())
+                success = self.click(element())
 
         if not icon:
             self.log_error(f"Couldn't find Icon: {icon_text}.")
-
-        element = lambda: self.soup_to_selenium(icon)
-
-        self.click(element())
+        if not success:
+            self.log_error(f"Couldn't click Icon: {icon_text}.")
 
     def AddParameter(self, parameter, branch, portuguese_value, english_value="", spanish_value=""):
         """
