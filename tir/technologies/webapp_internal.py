@@ -624,7 +624,7 @@ class WebappInternal(Base):
             
         labels = list(map(lambda x: x.text, soup.select("label")))
         label = labels[labels.index("Versão do TSS:")+1]
-        self.log.release = re.findall(r"[\d.]*\d+", label)
+        self.log.release = next(iter(re.findall(r"[\d.]*\d+", label)), None)
 
         self.SetButton('x')
 
