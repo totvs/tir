@@ -623,7 +623,8 @@ class WebappInternal(Base):
             self.log_error("SetupTss fail about screen not found")
             
         labels = list(map(lambda x: x.text, soup.select("label")))
-        self.log.release = labels[labels.index("Versão do TSS:")+1]
+        label = labels[labels.index("Versão do TSS:")+1]
+        self.log.release = next(iter(re.findall(r"[\d.]*\d+", label)), None)
 
         self.SetButton('x')
 
