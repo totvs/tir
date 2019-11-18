@@ -2516,35 +2516,35 @@ class WebappInternal(Base):
         >>> # Calling the method to scroll to a column match of the second grid:
         >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
         """
+
         grid_number -= 1
         result = None
         actions = ActionChains(self.driver)
+        endtime = time.time() +self.config.time_out
 
         grid = self.get_grid(grid_number)
+        get_current = lambda: self.selected_row(grid_number)
+
         column_enumeration = list(enumerate(grid.select("thead label")))
         chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
-
-        if chosen_column:
-            column_index = chosen_column[0]
-        else:
-            self.log_error("Couldn't find chosen column.")
+        column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
             
-        get_current = lambda: self.selected_row(grid_number)
         current = get_current()
         td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
         self.try_click(td())
-        while( not  result ):
+        while( time.time() < endtime and  not result ):
+            
             grid = self.get_grid(grid_number)
-            get_current = lambda: self.selected_row(grid_number)
             current = get_current()
+
             td_list = grid.select(f"td[id='{column_index}']")
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
             result = next(iter(td_list_filtered), None)
 
             if not result:
                 actions.key_down(Keys.PAGE_DOWN).perform()
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(td().parent))))
-                
+                self.wait_element_is_not_displayed(td().parent)
+
         if not result:
             self.log_error("Could't locate the element ")
 
