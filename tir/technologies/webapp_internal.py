@@ -2517,42 +2517,38 @@ class WebappInternal(Base):
         >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
         """
         grid_number -= 1
-        self.wait_element_timeout(column)
+        result = None
+        actions = ActionChains(self.driver)
 
         grid = self.get_grid(grid_number)
         column_enumeration = list(enumerate(grid.select("thead label")))
         chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+
         if chosen_column:
             column_index = chosen_column[0]
         else:
             self.log_error("Couldn't find chosen column.")
             
-        sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
-        sd_button_list_displayed = list(filter(lambda x: self.element_is_displayed(x), sd_button_list))
-        sd_button = sd_button_list_displayed[grid_number] if len(sd_button_list_displayed) - 1 >= grid_number else None
-        scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
-        scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
-
-        last = None
         get_current = lambda: self.selected_row(grid_number)
         current = get_current()
         td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
         self.try_click(td())
-        while(last != current and match_value):
-            td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
-            text = td().text.strip() if td() else ""
-            if text in match_value:
-                self.try_click(td())
-                break
-            time.sleep(2)
-            last = current
-            scroll_down()
-            time.sleep(1)
+        while( not  result ):
+            grid = self.get_grid(grid_number)
+            get_current = lambda: self.selected_row(grid_number)
             current = get_current()
-            self.try_click(td())
-            time.sleep(1)
-        else:
-            self.log_error(f"Couldn't locate content: {match_value}")
+            td_list = grid.select(f"td[id='{column_index}']")
+            td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
+            result = next(iter(td_list_filtered), None)
+
+            if not result:
+                actions.key_down(Keys.PAGE_DOWN).perform()
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(td().parent))))
+                
+        if not result:
+            self.log_error("Could't locate the element ")
+
+        self.try_click(result)
 
     def selected_row(self, grid_number = 0):
         """
