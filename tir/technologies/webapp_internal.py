@@ -2516,11 +2516,11 @@ class WebappInternal(Base):
         >>> # Calling the method to scroll to a column match of the second grid:
         >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
         """
-
+        td_history = set()
         grid_number -= 1
-        result = None
+        td_element = None
         actions = ActionChains(self.driver)
-        endtime = time.time() +self.config.time_out
+        endtime = time.time() + self.config.time_out
 
         grid = self.get_grid(grid_number)
         get_current = lambda: self.selected_row(grid_number)
@@ -2531,24 +2531,72 @@ class WebappInternal(Base):
             
         current = get_current()
         td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
-        self.try_click(td())
-        while( time.time() < endtime and  not result ):
+
+        if not self.click_grid_td(td()):
+            self.log_error(" Couldn't click on column, td class or tr is noit selected ")
+
+        while( time.time() < endtime and  not td_element ):
             
             grid = self.get_grid(grid_number)
             current = get_current()
 
             td_list = grid.select(f"td[id='{column_index}']")
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
-            result = next(iter(td_list_filtered), None)
+            td_element = next(iter(td_list_filtered), None)
 
-            if not result:
+            if not td_element and next(self.scroll_grid_check_elements_change(next(iter(td_list), None))):
                 actions.key_down(Keys.PAGE_DOWN).perform()
                 self.wait_element_is_not_displayed(td().parent)
 
-        if not result:
-            self.log_error("Could't locate the element ")
+        if not td_element:
+            self.log_error("Scroll Grid couldn't find the element")
 
-        self.try_click(result)
+        self.try_click(td_element)
+
+    def click_grid_td(self, td_soup):
+        """
+         Click on a td element and checks if is selected
+
+        :param td: The column to be matched.
+        :type td: bs4 element
+        
+        >>> # Calling the method to click on td and check if is selected:
+        >>> oHelper.click_grid_td(td)
+        """
+        success = None
+        endtime = time.time() + 10
+
+        while ( not success and time.time() < endtime ):
+            try:
+                td_selenium = lambda: self.soup_to_selenium(td_soup)
+                tr_selenium_class = lambda: self.soup_to_selenium(td_soup.parent).get_attribute('class')
+                td_is_selected = lambda: True if 'selected' in td_selenium().get_attribute('class') or 'selected' in tr_selenium_class() else False
+                self.set_element_focus(td_selenium())
+                td_selenium().click()
+                if not td_is_selected():
+                    self.wait.until(EC.visibility_of(td_selenium()))
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(td))))
+                    success = td_is_selected()
+                else:
+                    success = td_is_selected()
+            except:
+                pass
+        return success
+
+    def scroll_grid_check_elements_change(self, xpath):
+        """
+        [Internal]
+        Used to check PG_DOWN correct execute. 
+
+        """
+        elements_set = set()
+        elements_set.add(xpath)
+        yield True if xpath else False
+        while(True):
+            old_lenght = len(elements_set)
+            elements_set.add(xpath)
+            yield True if len(elements_set) > old_lenght and xpath  else False
+
 
     def selected_row(self, grid_number = 0):
         """
