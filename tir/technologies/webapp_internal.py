@@ -2516,7 +2516,6 @@ class WebappInternal(Base):
         >>> # Calling the method to scroll to a column match of the second grid:
         >>> oHelper.ScrollGrid(column="Branch", match_value="D MG 01 ", grid_number=2)
         """
-        td_history = set()
         grid_number -= 1
         td_element = None
         actions = ActionChains(self.driver)
@@ -2541,10 +2540,11 @@ class WebappInternal(Base):
             current = get_current()
 
             td_list = grid.select(f"td[id='{column_index}']")
+            td_element_not_filtered = next(iter(td_list), None)
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
             td_element = next(iter(td_list_filtered), None)
 
-            if not td_element and next(self.scroll_grid_check_elements_change(next(iter(td_list), None))):
+            if not td_element and next(self.scroll_grid_check_elements_change(xpath_soup(td_element_not_filtered))):
                 actions.key_down(Keys.PAGE_DOWN).perform()
                 self.wait_element_is_not_displayed(td().parent)
 
@@ -4722,13 +4722,13 @@ class WebappInternal(Base):
 
                 tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-                elements = list(filter(lambda x: label_filtered in x.text.lower().strip(), tree_node_filtered))
+                elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
                 if not elements:
                     self.log_error("Couldn't find elements.")
 
                 if position:
-                    elements = elements[position] if self.soup_to_selenium(elements[position]).is_displayed else None
+                    elements = elements[position] if len(elements) >= position + 1 else next(iter(elements))
                     if hierarchy:
                          elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
                 else:
@@ -4745,28 +4745,34 @@ class WebappInternal(Base):
                             element_class =  element_class.select("img, span")
 
                         for element_class_item in element_class:
+                            if not success:
                         
-                            # if "expanded" not in element_class_item.attrs['class'] and not success:
-                            element_click = lambda: self.soup_to_selenium(element_class_item)
-                                
-                            try:
-                                if last_item:
-                                    element_click().click()
-                                    if self.check_toggler(label_filtered):
-                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                        if success and right_click:
-                                            self.click(element_click(), right_click=right_click)
+                                # if "expanded" not in element_class_item.attrs['class'] and not success:
+                                element_click = lambda: self.soup_to_selenium(element_class_item)
+                                    
+                                try:
+                                    if last_item:
+                                        element_click().click()
+                                        if self.check_toggler(label_filtered):
+                                            success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                            if success and right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                        else:
+                                            if right_click:
+                                                self.click(element_click(), right_click=right_click)
+                                            success = self.clicktree_status_selected(label_filtered)
                                     else:
-                                        if right_click:
-                                            self.click(element_click(), right_click=right_click)
-                                        success = self.clicktree_status_selected(label_filtered)
-                                else:
-                                    element_click().click()
-                                    success = self.clicktree_status_selected(label_filtered, check_expanded=True)
-                                
-                                try_counter += 1
-                            except:                                
-                                pass
+                                        element_click().click()
+                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                    
+                                    try_counter += 1
+                                except:
+                                    pass
+
+                        if not success:
+                            element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                            element_click().click()
+                            success = self.clicktree_status_selected(label_filtered)
             
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
