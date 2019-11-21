@@ -4776,7 +4776,7 @@ class WebappInternal(Base):
                         if not success:
                             element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                             element_click().click()
-                            success = self.clicktree_status_selected(label_filtered)
+                            success = self.clicktree_status_selected(label_filtered) if last_item else self.clicktree_status_selected(label_filtered, check_expanded=True)
             
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
