@@ -928,8 +928,7 @@ class Base(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')# TODO chromedriver electron version
             options = ChromeOpt()
             options.add_argument('--log-level=3')
-            options.binary_location = "C:\\selenium_electron\\smartclientelectron\SmartClient.exe"
-            #TODO self.config_electron_binary_path
+            options.binary_location = self.config.electron_binary_path
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
         if not self.config.browser.lower() == "electron":
