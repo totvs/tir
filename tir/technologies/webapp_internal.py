@@ -2553,7 +2553,7 @@ class WebappInternal(Base):
             self.log_error("Scroll Grid couldn't find the element")
 
         if frozen_table:
-            self.soup_to_selenium(td_element.nextSibling).click()
+            self.soup_to_selenium(td_element.next_sibling).click()
             
         self.try_click(td_element)
 
