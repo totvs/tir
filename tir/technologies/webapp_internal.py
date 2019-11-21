@@ -2531,7 +2531,8 @@ class WebappInternal(Base):
         current = get_current()
         td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
 
-        if not self.click_grid_td(td()):
+        frozen_table = next(iter(grid.select('table.frozen-table')),None)
+        if (not self.click_grid_td(td()) and not frozen_table):
             self.log_error(" Couldn't click on column, td class or tr is noit selected ")
 
         while( time.time() < endtime and  not td_element ):
@@ -2551,6 +2552,9 @@ class WebappInternal(Base):
         if not td_element:
             self.log_error("Scroll Grid couldn't find the element")
 
+        if frozen_table:
+            self.soup_to_selenium(td_element.next_sibling).click()
+            
         self.try_click(td_element)
 
     def click_grid_td(self, td_soup):
