@@ -2520,6 +2520,8 @@ class WebappInternal(Base):
         td_element = None
         actions = ActionChains(self.driver)
         endtime = time.time() + self.config.time_out
+        
+        self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
 
         grid = self.get_grid(grid_number)
         get_current = lambda: self.selected_row(grid_number)
