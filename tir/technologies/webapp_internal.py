@@ -2519,10 +2519,10 @@ class WebappInternal(Base):
         grid_number -= 1
         td_element = None
         actions = ActionChains(self.driver)
-        endtime = time.time() + self.config.time_out
         
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
-
+        endtime = time.time() + self.config.time_out
+        
         grid = self.get_grid(grid_number)
         get_current = lambda: self.selected_row(grid_number)
 
@@ -3578,6 +3578,7 @@ class WebappInternal(Base):
         column_element_old_class = None
         
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
         
         endtime = time.time() + self.config.time_out
 
@@ -3588,7 +3589,7 @@ class WebappInternal(Base):
 
         while(not success and time.time() < endtime):
 
-            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             container = next(iter(self.zindex_sort(containers, True)), None)
             if container:
                 grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
@@ -4776,9 +4777,12 @@ class WebappInternal(Base):
                                     pass
 
                         if not success:
-                            element_click = lambda: self.soup_to_selenium(element_class_item.parent)
-                            element_click().click()
-                            success = self.clicktree_status_selected(label_filtered) if last_item else self.clicktree_status_selected(label_filtered, check_expanded=True)
+                            try:
+                                element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                                element_click().click()
+                                success = self.clicktree_status_selected(label_filtered) if last_item else self.clicktree_status_selected(label_filtered, check_expanded=True)
+                            except:
+                                pass
             
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
