@@ -1230,7 +1230,7 @@ class WebappInternal(Base):
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.try_element_to_be_clickable(element)
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -3230,6 +3230,9 @@ class WebappInternal(Base):
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                                 except StaleElementReferenceException:
                                     pass
+                                except WebDriverException:
+                                    self.send_keys(selenium_column(), Keys.ENTER)
+
                                 time.sleep(1)
                                 if(field[1] == True):
                                     field_one = ''
@@ -5394,3 +5397,15 @@ class WebappInternal(Base):
         element_selenium = self.soup_to_selenium(element)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
         element_selenium.click()
+
+    def try_element_to_be_clickable(self, element):
+        """
+        Try excpected condition element_to_be_clickable by XPATH or ID 
+        """
+        try:
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+        except:
+            if 'id' in element.find_parent('div').attrs:
+                self.wait.until(EC.element_to_be_clickable((By.ID, element.find_previous("div").attrs['id'])))
+            else:
+                pass
