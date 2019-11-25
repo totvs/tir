@@ -15,7 +15,7 @@ config = {
         'beautifulsoup4==4.7.1',
         'bs4==0.0.1',
         'numpy',
-        'pandas==0.25.3',
+        'pandas==0.23.4',
         'python-dateutil==2.6.1',
         'pytz==2017.3',
         'selenium==3.8.0',
