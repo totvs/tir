@@ -4783,7 +4783,8 @@ class WebappInternal(Base):
                             try:
                                 element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                 element_click().click()
-                                success = self.clicktree_status_selected(label_filtered) if last_item else self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.clicktree_status_selected(label_filtered, check_expanded=True)
+
                             except:
                                 pass
             
