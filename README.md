@@ -66,6 +66,7 @@ Here you can find all the supported keys: [Config.json keys](https://totvs.githu
 
 Just pass the path as a parameter in your script:
 
+#### Protheus WebApp Class example:
 ```python
 #To use a custom path for your config.json
 test_helper = Webapp("C:\PATH_HERE\config.json")
@@ -74,8 +75,7 @@ test_helper = Webapp("C:\PATH_HERE\config.json")
 ## Usage
 
 After the module is installed, you could just import it on your Test Case.
-See the following example:
-
+See the following **Protheus WebApp Class** example:
 ```python
 # Import from our package the class you're going to use
 from tir import Webapp

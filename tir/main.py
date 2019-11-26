@@ -906,16 +906,14 @@ class Webapp():
 
     def ClickImage(self, img_name):
         """
-        Clicks on an Icon button based on its tooltip text.
-
-        :param icon_text: The tooltip text.
-        :type icon_text: str
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
 
         Usage:
 
-        >>> # Call the method:
-        >>> oHelper.ClickIcon("Add")
-        >>> oHelper.ClickIcon("Edit")
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
         """
         self.__webapp.ClickImage(img_name)
         
