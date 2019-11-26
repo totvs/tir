@@ -5045,3 +5045,43 @@ class WebappInternal(Base):
         element_selenium = self.soup_to_selenium(element)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
         element_selenium.click()
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.wait_element(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
+
+        success = None
+        endtime = time.time() + self.config.time_out
+
+        while(time.time() < endtime and not success):
+
+            img_list = self.web_scrap(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
+            img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
+            img_soup = next(iter(img_list_filtered), None)
+
+            if img_soup:
+                    element_selenium = lambda: self.soup_to_selenium(img_soup)
+                    self.set_element_focus(element_selenium())
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(img_soup))))
+                    success = self.click(element_selenium())
+
+        return success
+
+    def img_src_filtered(self, img_soup):
+        
+        """
+        [Internal]
+        Return an image source filtered.
+        """
+
+        img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
+        return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
