@@ -2012,7 +2012,7 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not soup_element): 
+            while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
@@ -3934,7 +3934,7 @@ class WebappInternal(Base):
                 print("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
-                #sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
