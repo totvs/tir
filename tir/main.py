@@ -946,7 +946,7 @@ class Webapp():
         >>> oHelper.ClickListBox("text")
         """
         
-        return self.__webapp.ClickListBox(self, text)
+        return self.__webapp.ClickListBox(text)
 
     def ClickImage(self, img_name):
         """
