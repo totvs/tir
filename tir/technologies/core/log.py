@@ -154,13 +154,13 @@ class Log:
     def checks_empty_line(self):
         """
         Checks if the log file is not empty.
-        03 - 'Programa' 06 - 'Passou' 07 - 'Falhou' 10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
+        03 - 'Programa'  10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
         [Internal]
         """
         table_rows_has_line = False
 
         if len(self.table_rows) > 1:
-            for x in [ 3, 6, 7, 10, 15 ]:
+            for x in [ 3, 10, 15 ]:
                 if (self.table_rows[1][x]):
                     table_rows_has_line = True
                 else:
