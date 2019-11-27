@@ -110,7 +110,7 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass")) :
+            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -150,3 +150,25 @@ class Log:
         [Internal]
         """
         return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass', x.function) or re.search('test_', x.function), inspect.stack())))), None)
+
+    def checks_empty_line(self):
+        """
+        Checks if the log file is not empty.
+        03 - 'Programa' 06 - 'Passou' 07 - 'Falhou' 10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
+        [Internal]
+        """
+        table_rows_has_line = False
+
+        if len(self.table_rows) > 1:
+            for x in [ 3, 6, 7, 10, 15 ]:
+                if (self.table_rows[1][x]):
+                    table_rows_has_line = True
+                else:
+                    table_rows_has_line = False
+                    break
+            if self.config.smart_test and self.table_rows[1][14] and table_rows_has_line:
+                table_rows_has_line = True
+            elif self.config.smart_test:
+                table_rows_has_line = False
+
+        return table_rows_has_line
