@@ -4251,7 +4251,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
             self.restart_counter = 0
 
-        if self.config.num_exec and stack_item == "setUpClass":
+        if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
