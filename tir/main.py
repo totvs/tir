@@ -947,6 +947,19 @@ class Webapp():
         """
         
         return self.__webapp.ClickListBox(text)
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.__webapp.ClickImage(img_name)
         
 class Apw():
 
