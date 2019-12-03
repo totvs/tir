@@ -3186,7 +3186,7 @@ class WebappInternal(Base):
                 if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                     self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
-                row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
+                row = self.get_selected_row(rows) if self.get_selected_row(rows) else(rows[field[4]] if field[4] else next(iter(rows), None))
 
                 if row:
                     while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
@@ -5269,6 +5269,7 @@ class WebappInternal(Base):
         if text:
             self.check_text_container(text, text_extracted, container_text, verbosity)
             self.SetButton(button, check_error=False)
+            self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
