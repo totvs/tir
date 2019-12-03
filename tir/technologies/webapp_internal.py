@@ -4917,6 +4917,7 @@ class WebappInternal(Base):
         if text:
             self.check_text_container(text, text_extracted, container_text, verbosity)
             self.SetButton(button, check_error=False)
+            self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
