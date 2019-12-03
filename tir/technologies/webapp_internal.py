@@ -3287,6 +3287,13 @@ class WebappInternal(Base):
                                                 if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
                                                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                     self.send_keys(selenium_input(), Keys.ENTER)
+                                    
+                                    elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
+                                        try:
+                                            self.send_keys(selenium_input(), Keys.ENTER)
+                                        except:
+                                            pass
+                                        
                                 try_endtime = self.config.time_out / 4
                                 while try_endtime > 0:
                                     element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
