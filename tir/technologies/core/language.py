@@ -231,7 +231,7 @@ class LanguagePack:
             "Leave Page": "Sair da página",
             "Enter": "Entrar",
             "Finish": "Terminar",
-            "Details": "Detalhes",
+            "Details": "Detalles",
             "Search": "Buscar",
             "Ok": "Ok",
             "Copy": "Copiar",

@@ -1582,7 +1582,7 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             
         if not soup:
-            self.log_error("Search for erros cound't find DOM")
+            self.log_error("Search for erros couldn't find DOM")
         
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
