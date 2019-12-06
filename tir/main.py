@@ -198,6 +198,26 @@ class Webapp():
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
 
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
+        self.__webapp.ClickGridHeader(column, column_name, grid_number)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
@@ -416,6 +436,24 @@ class Webapp():
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         self.__webapp.standard_search_field( field, name_attr, send_key )
+    
+    def SetupTSS(self, initial_program="", environment=""):
+        """
+        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+        .. note::
+            This method use the user and password from config.json.
+
+        :param initial_program: The initial program to load.
+        :type initial_program: str
+        :param environment: The initial environment to load.
+        :type environment: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
+        """
+        self.__webapp.SetupTSS(initial_program, environment)
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
@@ -523,7 +561,13 @@ class Webapp():
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
+        .. warning::
+            If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
+        .. warning::           
+            Before using this method, set focus on any element.
+
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete ...
 
         :param key: Key that would be pressed
         :type key: str
@@ -589,9 +633,12 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
         """
         Sets value of an input element.
+
+        .. note::
+            Attention don't use  position parameter with  grid parameter True.
 
         :param field: The field name or label to receive the value
         :type field: str
@@ -607,11 +654,21 @@ class Webapp():
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param check_value: Boolean ignore input check - **Default:** True
+        :type name_attr: bool
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by label name:
+        >>> oHelper.SetValue("Codigo", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field using by an existing label name:
+        >>> oHelper.SetValue(field = "Codigo", value = "000002", position = 2)
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
@@ -765,11 +822,11 @@ class Webapp():
         """
         self.__webapp.WaitShow(string)
 
-    def ClickTree(self, treepath, right_click=False):
+    def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" .
+        :param treepath: String that contains the access path for the item separate by ">" . 
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
@@ -781,8 +838,27 @@ class Webapp():
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
-        self.__webapp.ClickTree(treepath, right_click)
-    
+        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
+
+    def GridTree(self, column, treepath,  right_click=False):
+        """
+        Clicks on Grid TreeView component.
+
+        :param treepath: String that contains the access path for the item separate by ">" .
+        :type string: str
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3")
+        >>> # Right GridTree example:
+        >>> oHelper.GridTree("element 1 > element 2 > element 3", right_click=True)
+        
+        """ 
+        self.__webapp.GridTree(column, treepath, right_click)
+        
     def GetText(self, string_left="", string_right=""):
         """
         This method returns a string from modal based on the string in the left or right position that you send on parameter.
@@ -808,22 +884,38 @@ class Webapp():
 
         return self.__webapp.GetText(string_left, string_right)
     
-    def CheckHelp(self, text, button=""):
+    def CheckHelp(self, text="", button="", text_help="", text_problem="", text_solution="", verbosity=False):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
 
         :param text: Text to be checked.
         :type text: str
+        :param text_help: Only the help text will be checked.
+        :type text_help: str
+        :param text_problem: Only the problem text will be checked.
+        :type text_problem: str
+        :param text_solution: Only the solution text will be checked.
+        :type text_solution: str
         :param button: Button to be clicked.
         :type button: str
+        :param verbosity: Check the text with high accuracy.
+        :type verbosity: bool
 
         Usage:
-
-        >>> # Calling the method.
-        >>> oHelper.CheckHelp("EXISTCLI Problema: Não pode haver mais...", "Fechar")
+        
+        >>> # Calling method to check all window text.
+        >>> oHelper.CheckHelp("TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
+        >>> # Calling method to check help text only.
+        >>> oHelper.CheckHelp(text_help="TK250CADRE", button="Fechar")
+        >>> # Calling method to check problem text only.
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar")
+        >>> # Calling method to check problem text only.
+        >>> oHelper.CheckHelp(text_solution="Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", button="Fechar")
+        >>> # Calling the method to check only the problem text with high precision.
+        >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar", verbosity=True)
         """
 
-        return self.__webapp.CheckHelp(text, button)
+        return self.__webapp.CheckHelp(text, button, text_help, text_problem, text_solution, verbosity)
 
     def ClickMenuPopUpItem(self, text, right_click=False):
         """
@@ -859,6 +951,34 @@ class Webapp():
         """
 
         return self.__webapp.get_release()
+    
+    def ClickListBox(self, text):
+        """
+        Clicks on Item based in a text in a window tlistbox
+
+        :param text: Text in windows to be clicked.
+        :type text: str
+
+        Usage:
+
+        >>> # Calling the method.
+        >>> oHelper.ClickListBox("text")
+        """
+        
+        return self.__webapp.ClickListBox(text)
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.__webapp.ClickImage(img_name)
         
 class Apw():
 
