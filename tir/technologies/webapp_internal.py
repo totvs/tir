@@ -894,6 +894,7 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
+
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
@@ -905,31 +906,37 @@ class WebappInternal(Base):
 
         soup = self.get_current_DOM()
         if not index:
-            tradiobuttonitens = soup.select(".tradiobuttonitem")
-            tradio_index = 0
-            tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_texts_filtered = list(map(lambda x: x.lower(), tradiobutton_texts))
-            tradiobutton_text = next(iter(list(filter(lambda x: search_key.lower() in x, tradiobutton_texts_filtered))), None)
-            if not tradiobutton_text:
-                tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
-                if not tradiobutton_text:
-                    self.log_error(f"Key not found: {search_key}")
 
-            tradio_index = tradiobutton_texts_filtered.index(tradiobutton_text)
+            search_key = re.sub(r"\.+$", '', search_key).lower()
 
-            tradiobuttonitem = tradiobuttonitens[tradio_index]
-            trb_input = next(iter(tradiobuttonitem.select("input")), None)
-            if not trb_input:
-                self.log_error("Couldn't find key input.")
+            tradiobuttonitens = soup.select(".tradiobuttonitem input")
+
+            for element in tradiobuttonitens:
+
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                selenium_input = lambda : self.soup_to_selenium(element)
+                self.click(selenium_input())
+                time.sleep(1)
+
+                success = self.check_element_tooltip(element, search_key, contains=True)
+
+                if success:
+                    break
+                else:
+                    pass
+
+            if not success:
+                self.log_error(f"Couldn't search the key: {search_key} on screen.")
+                    
         else:
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
             if len(tradiobuttonitens) < search_key + 1:
                 self.log_error("Key index out of range.")
             trb_input = tradiobuttonitens[search_key]
 
-        sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
-        self.click(sel_input())
+            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
+            self.click(sel_input())
 
 
 
@@ -4485,7 +4492,7 @@ class WebappInternal(Base):
         """
         return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
 
-    def check_element_tooltip(self, element, expected_text):
+    def check_element_tooltip(self, element, expected_text, contains=False):
         """
         [Internal]
 
@@ -4507,11 +4514,14 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
+        has_text = False
+
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
         time.sleep(1)
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
-        has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
+        if tooltips:
+            has_text = (expected_text.lower() in tooltips[0].text.lower()) if contains else (tooltips[0].text.lower() == expected_text.lower())
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
