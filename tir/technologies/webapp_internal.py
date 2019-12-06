@@ -789,8 +789,6 @@ class WebappInternal(Base):
 
         """
 
-        search_key = re.sub(r"\.+$", '', search_key).lower()
-
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
@@ -803,6 +801,8 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         if not index:
 
+            search_key = re.sub(r"\.+$", '', search_key).lower()
+
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
 
             for element in tradiobuttonitens:
@@ -810,6 +810,7 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                 selenium_input = lambda : self.soup_to_selenium(element)
                 self.click(selenium_input())
+                time.sleep(1)
 
                 success = self.check_element_tooltip(element, search_key, contains=True)
 
