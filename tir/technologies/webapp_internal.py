@@ -918,8 +918,15 @@ class WebappInternal(Base):
                 self.click(selenium_input())
                 time.sleep(1)
 
-                success = self.check_element_tooltip(element, search_key, contains=True)
+                try_get_tooltip = 0
+                success = False
 
+                while (not success and try_get_tooltip < 3):
+                    success = self.check_element_tooltip(element, search_key, contains=True)
+                    print(f"SUCCESS: {success}")
+                    print(f"TRYING GET TOOLTIP: {try_get_tooltip}")
+                    try_get_tooltip += 1
+                    
                 if success:
                     break
                 else:

@@ -939,7 +939,7 @@ class Base(unittest.TestCase):
                 
             self.driver.get(self.config.url)
 
-        self.wait = WebDriverWait(self.driver,5)
+        self.wait = WebDriverWait(self.driver, 90)
 
     def TearDown(self):
         """
