@@ -5358,6 +5358,25 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+    
+    def get_release(self):
+        """
+        Gets the current release of the Protheus.
+
+        :return: The current release of the Protheus.
+        :type: str
+        
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
+        >>> if self.oHelper.get_release() >= '12.1.023':
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        """
+
+        return self.log.release
 
     def try_click(self, element):
         """
