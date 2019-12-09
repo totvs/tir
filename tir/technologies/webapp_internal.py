@@ -4519,6 +4519,7 @@ class WebappInternal(Base):
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
         time.sleep(1)
+        self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".ttooltip")))
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
         if tooltips:
             has_text = (expected_text.lower() in tooltips[0].text.lower()) if contains else (tooltips[0].text.lower() == expected_text.lower())
