@@ -4528,7 +4528,7 @@ class WebappInternal(Base):
         time.sleep(1)
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
         if tooltips:
-            has_text = (expected_text.lower() in tooltips[0].text.lower()) if contains else (tooltips[0].text.lower() == expected_text.lower())
+            has_text = (len(list(filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
