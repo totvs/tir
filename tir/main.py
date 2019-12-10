@@ -932,6 +932,25 @@ class Webapp():
         >>> oHelper.ClickMenuPopUpItem("Label")
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click)
+
+    def get_release(self):
+        """
+        Gets the current release of the Protheus.
+
+        :return: The current release of the Protheus.
+        :type: str
+        
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
+        >>> if self.oHelper.get_release() >= '12.1.023':
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        """
+
+        return self.__webapp.get_release()
     
     def ClickListBox(self, text):
         """
@@ -947,6 +966,19 @@ class Webapp():
         """
         
         return self.__webapp.ClickListBox(text)
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.__webapp.ClickImage(img_name)
         
 class Apw():
 

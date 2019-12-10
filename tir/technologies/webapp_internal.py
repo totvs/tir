@@ -894,6 +894,7 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
+
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
@@ -905,31 +906,44 @@ class WebappInternal(Base):
 
         soup = self.get_current_DOM()
         if not index:
-            tradiobuttonitens = soup.select(".tradiobuttonitem")
-            tradio_index = 0
-            tradiobutton_texts = list(map(lambda x: x.text[0:-3].strip() if re.match(r"\.\.\.$", x.text) else x.text.strip(), tradiobuttonitens))
-            tradiobutton_texts_filtered = list(map(lambda x: x.lower(), tradiobutton_texts))
-            tradiobutton_text = next(iter(list(filter(lambda x: search_key.lower() in x, tradiobutton_texts_filtered))), None)
-            if not tradiobutton_text:
-                tradiobutton_text = self.filter_by_tooltip_value(tradiobuttonitens, search_key)
-                if not tradiobutton_text:
-                    self.log_error(f"Key not found: {search_key}")
 
-            tradio_index = tradiobutton_texts_filtered.index(tradiobutton_text)
+            search_key = re.sub(r"\.+$", '', search_key).lower()
 
-            tradiobuttonitem = tradiobuttonitens[tradio_index]
-            trb_input = next(iter(tradiobuttonitem.select("input")), None)
-            if not trb_input:
-                self.log_error("Couldn't find key input.")
+            tradiobuttonitens = soup.select(".tradiobuttonitem input")
+
+            for element in tradiobuttonitens:
+
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                selenium_input = lambda : self.soup_to_selenium(element)
+                self.click(selenium_input())
+                time.sleep(1)
+
+                try_get_tooltip = 0
+                success = False
+
+                while (not success and try_get_tooltip < 3):
+                    success = self.check_element_tooltip(element, search_key, contains=True)
+                    print(f"SUCCESS: {success}")
+                    print(f"TRYING GET TOOLTIP: {try_get_tooltip}")
+                    try_get_tooltip += 1
+                    
+                if success:
+                    break
+                else:
+                    pass
+
+            if not success:
+                self.log_error(f"Couldn't search the key: {search_key} on screen.")
+                    
         else:
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
             if len(tradiobuttonitens) < search_key + 1:
                 self.log_error("Key index out of range.")
             trb_input = tradiobuttonitens[search_key]
 
-        sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
-        self.click(sel_input())
+            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
+            self.click(sel_input())
 
 
 
@@ -1691,7 +1705,7 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             
         if not soup:
-            self.log_error("Search for erros cound't find DOM")
+            self.log_error("Search for erros couldn't find DOM")
         
         message = ""
         top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
@@ -3186,7 +3200,7 @@ class WebappInternal(Base):
                 if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                     self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
-                row = self.get_selected_row(rows) if field[4] == None else rows[field[4]]
+                row = self.get_selected_row(rows) if self.get_selected_row(rows) else(rows[field[4]] if field[4] else next(iter(rows), None))
 
                 if row:
                     while (int(row.attrs["id"]) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[4] is None and time.time() < endtime:
@@ -3287,6 +3301,13 @@ class WebappInternal(Base):
                                                 if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
                                                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
                                                     self.send_keys(selenium_input(), Keys.ENTER)
+                                    
+                                    elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
+                                        try:
+                                            self.send_keys(selenium_input(), Keys.ENTER)
+                                        except:
+                                            pass
+                                        
                                 try_endtime = self.config.time_out / 4
                                 while try_endtime > 0:
                                     element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
@@ -4251,7 +4272,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
             self.restart_counter = 0
 
-        if self.config.num_exec and stack_item == "setUpClass":
+        if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
@@ -4478,7 +4499,7 @@ class WebappInternal(Base):
         """
         return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
 
-    def check_element_tooltip(self, element, expected_text):
+    def check_element_tooltip(self, element, expected_text, contains=False):
         """
         [Internal]
 
@@ -4500,11 +4521,15 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
+        has_text = False
+
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
         time.sleep(1)
+        self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".ttooltip")))
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
-        has_text = (tooltips and tooltips[0].text.lower() == expected_text.lower())
+        if tooltips:
+            has_text = (expected_text.lower() in tooltips[0].text.lower()) if contains else (tooltips[0].text.lower() == expected_text.lower())
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
@@ -5269,6 +5294,7 @@ class WebappInternal(Base):
         if text:
             self.check_text_container(text, text_extracted, container_text, verbosity)
             self.SetButton(button, check_error=False)
+            self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
@@ -5340,6 +5366,25 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+    
+    def get_release(self):
+        """
+        Gets the current release of the Protheus.
+
+        :return: The current release of the Protheus.
+        :type: str
+        
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
+        >>> if self.oHelper.get_release() >= '12.1.023':
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        """
+
+        return self.log.release
 
     def try_click(self, element):
         """
@@ -5399,6 +5444,45 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
         element_selenium.click()
 
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.wait_element(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
+
+        success = None
+        endtime = time.time() + self.config.time_out
+
+        while(time.time() < endtime and not success):
+
+            img_list = self.web_scrap(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
+            img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
+            img_soup = next(iter(img_list_filtered), None)
+
+            if img_soup:
+                    element_selenium = lambda: self.soup_to_selenium(img_soup)
+                    self.set_element_focus(element_selenium())
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(img_soup))))
+                    success = self.click(element_selenium())
+
+        return success
+
+    def img_src_filtered(self, img_soup):
+        
+        """
+        [Internal]
+        Return an image source filtered.
+        """
+
+        img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
+        return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
     def try_element_to_be_clickable(self, element):
         """
         Try excpected condition element_to_be_clickable by XPATH or ID 
