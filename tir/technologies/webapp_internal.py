@@ -1290,7 +1290,7 @@ class WebappInternal(Base):
                         else:
                             current_value = self.get_web_value(input_field()).strip()
 
-                        if current_value != "" and current_value.isascii():
+                        if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             print(f"Current field value: {current_value}")
 
                     if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
