@@ -5482,6 +5482,7 @@ class WebappInternal(Base):
 
         img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
         return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
+
     def try_element_to_be_clickable(self, element):
         """
         Try excpected condition element_to_be_clickable by XPATH or ID 
@@ -5493,3 +5494,32 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.ID, element.find_previous("div").attrs['id'])))
             else:
                 pass
+
+    def open_csv(self, csv_file, delimiter, column, header, filter_column, filter_value, filter_data):
+        """
+        """
+        has_header = 'infer' if header else None
+        
+        data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False)
+        df = pd.DataFrame(data)
+        df = df.dropna(axis=1, how='all')
+        
+        if filter_data:
+            if (filter_column or isinstance(filter_column, int)) and filter_value:
+                df = self.filter_dataframe(df, filter_column, filter_value)
+            else:
+                print('WARNING: filter_column and filter_value is necessary to filter rows by column content')
+    
+        return self.return_data(df, has_header, column)
+
+    def filter_dataframe(self, df, column, value):
+        """
+        """
+        return df[df[column] == value]
+
+    def return_data(self, df, has_header, column):
+
+        if has_header == 'infer':
+            return df[column].to_dict() if column else df.to_dict()
+        else:
+            return df[column].values.tolist() if isinstance(column, int) else df.values.tolist()
