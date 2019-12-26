@@ -2381,21 +2381,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
         """
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
-        #Retira o ToolTip dos elementos focados.
-        #self.move_to_element(self.driver.find_element_by_tag_name("html"))
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
 
-        #try:#Tento pegar o elemento da aba de forma direta sem webscraping
-        #    element = lambda: self.driver.find_element_by_link_text(item)
-        #except:#caso contrário efetuo o clique na aba com webscraping
-        container = self.get_current_container()
-        panels = container.select(".button-bar a")
+        panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
         panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
-        panel = next(iter(self.filter_is_displayed(panels_filtered)))
+        panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
+        if not panel and panels_filtered:
+
+            for panel in panels_filtered:
+                self.scroll_to_element(self.soup_to_selenium(panel))
+                
+            panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
         element = ""
+
         if panel:
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
+
         if element:
             self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
             self.set_element_focus(element())
