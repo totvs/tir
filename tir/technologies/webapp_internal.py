@@ -998,17 +998,22 @@ class WebappInternal(Base):
         Wait ajax blocker disappear
 
         """
+
         print("Waiting ajax blocker to continue...")
+        soup = None
         result = True
         while(result):
             soup = self.get_current_DOM()
-            blocker = soup.select('.ajax-blocker')
+            if soup:
+                blocker = soup.select('.ajax-blocker')
+            else:
+                result = False   
             if blocker:
                 result = True
             else:
                 result = False
         return result
-
+            
     def get_panel_name_index(self, panel_name):
         """
         [Internal]
