@@ -1200,7 +1200,7 @@ class WebappInternal(Base):
             self.wait_element(field)
 
         success = False
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
             unmasked_value = self.remove_mask(value)
