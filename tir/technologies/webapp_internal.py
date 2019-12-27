@@ -1268,6 +1268,8 @@ class WebappInternal(Base):
                             if main_value == '':
                                 input_field().send_keys(" ")
                             else:
+                                self.wait_blocker_ajax()
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                                 input_field().send_keys(main_value)
                         #if Number input
                         else:
