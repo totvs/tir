@@ -999,7 +999,7 @@ class WebappInternal(Base):
 
         """
 
-        print("Waiting ajax blocker to continue...")
+        print("Waiting blocker to continue...")
         soup = None
         result = True
         while(result):
@@ -1200,7 +1200,7 @@ class WebappInternal(Base):
             self.wait_element(field)
 
         success = False
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
             unmasked_value = self.remove_mask(value)
@@ -1268,6 +1268,8 @@ class WebappInternal(Base):
                             if main_value == '':
                                 input_field().send_keys(" ")
                             else:
+                                self.wait_blocker_ajax()
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                                 input_field().send_keys(main_value)
                         #if Number input
                         else:
