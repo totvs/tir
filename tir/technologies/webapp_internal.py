@@ -999,7 +999,7 @@ class WebappInternal(Base):
 
         """
 
-        print("Waiting ajax blocker to continue...")
+        print("Waiting blocker to continue...")
         soup = None
         result = True
         while(result):
