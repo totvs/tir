@@ -1738,7 +1738,7 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
+        self.restart_counter += 1
         self.log_error(message)
 
     def get_function_from_stack(self):
