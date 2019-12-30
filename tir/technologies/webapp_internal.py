@@ -4280,6 +4280,11 @@ class WebappInternal(Base):
             self.restart()
         else:
             self.driver.close()
+            
+        try:
+            self.driver.close()
+        except:
+            pass
 
         if self.restart_counter > 2:
             self.restart_counter = 0
