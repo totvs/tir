@@ -159,6 +159,15 @@ class Log:
         """
         table_rows_has_line = False
 
+        if self.table_rows[1][10] == '':
+            self.table_rows[1][10] = '12.1.25'
+
+        if self.table_rows[1][15] == '':
+            self.table_rows[1][15] = 'BRA'
+
+        if self.table_rows[1][11] == '':
+            self.table_rows[1][11] = 'TIMEOUT'
+
         if len(self.table_rows) > 1:
             for x in [ 3, 10, 15 ]:
                 if (self.table_rows[1][x]):
