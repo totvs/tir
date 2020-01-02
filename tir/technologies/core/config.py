@@ -51,3 +51,4 @@ class ConfigLoader:
         self.user_cfg = str(data["UserCfg"]) if "UserCfg" in data else ""
         self.password_cfg = str(data["PasswordCfg"]) if "PasswordCfg" in data else ""
         self.electron_binary_path = (str(data["BinPath"]) if "BinPath" in data else "")
+        self.csv_path = (str(data["CSVPath"]) if "CSVPath" in data else "")

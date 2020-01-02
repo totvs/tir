@@ -5499,6 +5499,7 @@ class WebappInternal(Base):
 
         img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
         return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
+
     def try_element_to_be_clickable(self, element):
         """
         Try excpected condition element_to_be_clickable by XPATH or ID 
@@ -5510,3 +5511,76 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.ID, element.find_previous("div").attrs['id'])))
             else:
                 pass
+
+    def open_csv(self, csv_file, delimiter, column, header, filter_column, filter_value):
+        """
+        Returns a dictionary when the file has a header in another way returns a list
+        The folder must be entered in the CSVPath parameter in the config.json. Ex:
+
+        >>> config.json
+        >>> "CsvPath" : "C:\\temp"
+
+        :param csv_file: .csv file name
+        :type csv_file: str
+        :param delimiter: Delimiter option such like ';' or ',' or '|'
+        :type delimiter: str
+        :param column: To files with Header is possible return only a column by header name or Int value for no header files 
+        :type column: str
+        :param header: Indicate with the file contains a Header or not default is Header None
+        :type header: bool
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with number 1
+        :type filter_column: str or int
+        :param filter_value: Value used in pair with filter_column parameter
+        :type filter_value: str
+
+        >>> # Call the method:
+        >>> file_csv = test_helper.OpenCSV(delimiter=";", csv_file="no_header.csv")
+
+        >>> file_csv_no_header_column = self.oHelper.OpenCSV(column=0, delimiter=";", csv_file="no_header_column.csv")
+
+        >>> file_csv_column = self.oHelper.OpenCSV(column='CAMPO', delimiter=";", csv_file="header_column.csv", header=True)
+
+        >>> file_csv_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_no_header.csv")
+
+        >>> file_csv_header = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_column = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_header.csv", header=True)
+
+        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL')
+
+        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
+        """
+
+        has_header = 'infer' if header else None
+        
+        if self.config.csv_path:
+            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False)
+            df = pd.DataFrame(data)
+            df = df.dropna(axis=1, how='all')
+
+            filter_column_user = filter_column
+            
+            if filter_column and filter_value:
+                if isinstance(filter_column, int):
+                    filter_column_user = filter_column - 1
+                df = self.filter_dataframe(df, filter_column_user, filter_value)
+            elif (filter_column and not filter_value) or (filter_value and not filter_column):
+                print('WARNING: filter_column and filter_value is necessary to filter rows by column content. Data wasn\'t filtered') 
+                
+            return self.return_data(df, has_header, column)
+        else:
+            self.log_error("CSV Path wasn't found, please check 'CSVPath' key in the config.json.")
+
+    def filter_dataframe(self, df, column, value):
+        """
+        """
+        return df[df[column] == value]
+
+    def return_data(self, df, has_header, column):
+
+        if has_header == 'infer':
+            return df[column].to_dict() if column else df.to_dict()
+        else:
+            return df[column].values.tolist() if isinstance(column, int) else df.values.tolist()

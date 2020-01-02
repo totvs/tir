@@ -979,6 +979,48 @@ class Webapp():
         >>> oHelper.ClickImage("img_name")
         """
         self.__webapp.ClickImage(img_name)
+    
+    def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
+        """
+        Returns a dictionary when the file has a header in another way returns a list
+        The folder must be entered in the CSVPath parameter in the config.json.
+
+        :param csv_file: .csv file name
+        :type csv_file: str
+        :param delimiter: Delimiter option such like ';' or ',' or '|'
+        :type delimiter: str
+        :param column: To files with Header is possible return only a column by header name or Int value for no header files 
+        :type column: str
+        :param header: Indicate with the file contains a Header or not default is Header None
+        :type header: bool
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with number 1
+        :type filter_column: str or int
+        :param filter_value: Value used in pair with filter_column parameter
+        :type filter_value: str
+        :param filter_data: If you want filter a value by column, this parameter need to be a True value
+        :type filter_data: bool
+
+        >>> # Call the method:
+        >>> file_csv = test_helper.OpenCSV(delimiter=";", csv_file="no_header.csv")
+
+        >>> file_csv_no_header_column = self.oHelper.OpenCSV(column=0, delimiter=";", csv_file="no_header_column.csv")
+
+        >>> file_csv_column = self.oHelper.OpenCSV(column='CAMPO', delimiter=";", csv_file="header_column.csv", header=True)
+
+        >>> file_csv_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_no_header.csv")
+
+        >>> file_csv_header = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_column = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_header.csv", header=True)
+
+        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL')
+
+        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
+        """
+        return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
+    
         
 class Apw():
 
