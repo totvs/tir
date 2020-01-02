@@ -980,7 +980,7 @@ class Webapp():
         """
         self.__webapp.ClickImage(img_name)
     
-    def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value='', filter_data=False):
+    def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
         """
         Returns a dictionary when the file has a header in another way returns a list
         The folder must be entered in the CSVPath parameter in the config.json.
@@ -1015,11 +1015,11 @@ class Webapp():
 
         >>> file_csv_header_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_header.csv", header=True)
 
-        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL', filter_data=True)
+        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL')
 
-        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL', filter_data=True)
+        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
         """
-        return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value, filter_data)
+        return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
     
         
 class Apw():
