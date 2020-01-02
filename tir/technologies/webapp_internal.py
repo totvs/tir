@@ -5528,7 +5528,7 @@ class WebappInternal(Base):
         :type column: str
         :param header: Indicate with the file contains a Header or not default is Header None
         :type header: bool
-        :param filter_column: Is possible to filter a specific value by column and value content
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with 1
         :type filter_column: str or int
         :param filter_value: Value used in pair with filter_column parameter
         :type filter_value: str
@@ -5555,16 +5555,23 @@ class WebappInternal(Base):
 
         has_header = 'infer' if header else None
         
-        data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latçin-1', error_bad_lines=False, header=has_header, index_col=False)
-        df = pd.DataFrame(data)
-        df = df.dropna(axis=1, how='all')
-        
-        if filter_column and filter_value:
-            df = self.filter_dataframe(df, filter_column, filter_value)
-        else:
-            print('WARNING: filter_column and filter_value is necessary to filter rows by column content')
+        if self.config.csv_path:
+            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False)
+            df = pd.DataFrame(data)
+            df = df.dropna(axis=1, how='all')
 
-        return self.return_data(df, has_header, column)
+            filter_column_user = filter_column
+            
+            if filter_column and filter_value:
+                if isinstance(filter_column, int):
+                    filter_column_user = filter_column - 1
+                df = self.filter_dataframe(df, filter_column_user, filter_value)
+            elif (filter_column and not filter_value) or (filter_value and not filter_column):
+                print('WARNING: filter_column and filter_value is necessary to filter rows by column content. Data wasn\'t filtered') 
+                
+            return self.return_data(df, has_header, column)
+        else:
+            self.log_error("CSV Path wasn't found, please check 'CSVPath' key in the config.json.")
 
     def filter_dataframe(self, df, column, value):
         """
