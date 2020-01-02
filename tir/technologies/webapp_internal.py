@@ -998,17 +998,22 @@ class WebappInternal(Base):
         Wait ajax blocker disappear
 
         """
-        print("Waiting ajax blocker to continue...")
+
+        print("Waiting blocker to continue...")
+        soup = None
         result = True
         while(result):
             soup = self.get_current_DOM()
-            blocker = soup.select('.ajax-blocker')
+            if soup:
+                blocker = soup.select('.ajax-blocker')
+            else:
+                result = False   
             if blocker:
                 result = True
             else:
                 result = False
         return result
-
+            
     def get_panel_name_index(self, panel_name):
         """
         [Internal]
@@ -1195,7 +1200,7 @@ class WebappInternal(Base):
             self.wait_element(field)
 
         success = False
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
             unmasked_value = self.remove_mask(value)
@@ -1263,6 +1268,8 @@ class WebappInternal(Base):
                             if main_value == '':
                                 input_field().send_keys(" ")
                             else:
+                                self.wait_blocker_ajax()
+                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
                                 input_field().send_keys(main_value)
                         #if Number input
                         else:
@@ -1290,7 +1297,7 @@ class WebappInternal(Base):
                         else:
                             current_value = self.get_web_value(input_field()).strip()
 
-                        if current_value != "":
+                        if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             print(f"Current field value: {current_value}")
 
                     if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
@@ -1738,7 +1745,7 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
+        self.restart_counter += 1
         self.log_error(message)
 
     def get_function_from_stack(self):
@@ -2381,21 +2388,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
         """
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget")
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".button-bar a")
-        #Retira o ToolTip dos elementos focados.
-        #self.move_to_element(self.driver.find_element_by_tag_name("html"))
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
 
-        #try:#Tento pegar o elemento da aba de forma direta sem webscraping
-        #    element = lambda: self.driver.find_element_by_link_text(item)
-        #except:#caso contrário efetuo o clique na aba com webscraping
-        container = self.get_current_container()
-        panels = container.select(".button-bar a")
+        panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
         panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
-        panel = next(iter(self.filter_is_displayed(panels_filtered)))
+        panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
+        if not panel and panels_filtered:
+
+            for panel in panels_filtered:
+                self.scroll_to_element(self.soup_to_selenium(panel))
+                
+            panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
         element = ""
+
         if panel:
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
+
         if element:
             self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
             self.set_element_focus(element())
@@ -3621,9 +3631,11 @@ class WebappInternal(Base):
                 if grids:
                     grids = list(filter(lambda x:x.select("tbody tr"), grids))      
                     headers = self.get_headers_from_grids(grids)
-                    rows = grids[grid_number].select("tbody tr")
+                    if grid_number <= len(grids):
+                        rows = grids[grid_number].select("tbody tr")
                     if rows:
-                        columns = rows[row_number].select("td")
+                        if row_number <= len(rows):
+                            columns = rows[row_number].select("td")
                     if columns:
                         if column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
@@ -4268,6 +4280,11 @@ class WebappInternal(Base):
             self.restart()
         else:
             self.driver.close()
+            
+        try:
+            self.driver.close()
+        except:
+            pass
 
         if self.restart_counter > 2:
             self.restart_counter = 0
