@@ -5528,7 +5528,7 @@ class WebappInternal(Base):
         :type column: str
         :param header: Indicate with the file contains a Header or not default is Header None
         :type header: bool
-        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with 1
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with number 1
         :type filter_column: str or int
         :param filter_value: Value used in pair with filter_column parameter
         :type filter_value: str
