@@ -1006,12 +1006,10 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             if soup:
                 blocker = soup.select('.ajax-blocker')
+                result = True if blocker else False
             else:
                 result = False   
-            if blocker:
-                result = True
-            else:
-                result = False
+
         return result
             
     def get_panel_name_index(self, panel_name):
@@ -4273,18 +4271,14 @@ class WebappInternal(Base):
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        self.log.save_file(routine_name)
-        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 2)):
+            self.log.save_file(routine_name)
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '' and not self.restart_counter == 2:
             self.restart()
-        elif self.config.coverage and self.config.initial_program != '':
+        elif self.config.coverage and self.config.initial_program != '' and not self.restart_counter == 2:
             self.restart()
         else:
             self.driver.close()
-            
-        try:
-            self.driver.close()
-        except:
-            pass
 
         if self.restart_counter > 2:
             self.restart_counter = 0
@@ -4293,7 +4287,7 @@ class WebappInternal(Base):
             self.num_exec.post_exec(self.config.url_set_end_exec)
             
         self.assertTrue(False, log_message)
-
+        
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text or Alt attribute title.
