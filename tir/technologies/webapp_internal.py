@@ -4271,22 +4271,25 @@ class WebappInternal(Base):
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 2)):
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
             self.log.save_file(routine_name)
-        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '' and not self.restart_counter == 2:
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
-        elif self.config.coverage and self.config.initial_program != '' and not self.restart_counter == 2:
+        elif self.config.coverage and self.config.initial_program != '':
             self.restart()
         else:
             self.driver.close()
 
         if self.restart_counter > 2:
-            self.restart_counter = 0
 
-        if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-            
-        self.assertTrue(False, log_message)
+            if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
+                self.num_exec.post_exec(self.config.url_set_end_exec)
+                
+            if (stack_item == "setUpClass") :
+                self.driver.close()
+
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            self.assertTrue(False, log_message)
         
     def ClickIcon(self, icon_text):
         """
