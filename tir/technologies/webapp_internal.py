@@ -856,9 +856,13 @@ class WebappInternal(Base):
             if container:
                 elements_soup = container.select("[style*='fwskin_seekbar_ico']")
 
-            if elements_soup and len(elements_soup) -1 >= search_index:
-                browse_div = elements_soup[search_index].find_parent().find_parent()
-                success = True
+            if elements_soup:
+                if elements_soup and len(elements_soup) -1 >= search_index:
+                    browse_div = elements_soup[search_index].find_parent().find_parent()
+                    success = True
+            
+        if not elements_soup:
+            self.log_error("Couldn't find element_soup.")
 
         if not container:
             self.log_error("Couldn't find container of element.")
