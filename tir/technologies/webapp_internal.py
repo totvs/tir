@@ -843,6 +843,7 @@ class WebappInternal(Base):
         """
         success = False
         container = None
+        elements_soup = None
         
         self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out)
         endtime = time.time() + self.config.time_out
