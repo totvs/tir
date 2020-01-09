@@ -55,7 +55,12 @@ class WebappInternal(Base):
 
         used_ids: Dictionary of element ids and container already captured by a label search.
         """
-        super().__init__(config_path, autostart)
+        webdriver_exception = None
+
+        try:
+            super().__init__(config_path, autostart)
+        except WebDriverException as e:
+            webdriver_exception = e
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
@@ -74,6 +79,11 @@ class WebappInternal(Base):
 
         self.parameters = []
         self.backup_parameters = []
+
+        if webdriver_exception:
+            message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+            self.log_error(message)
+            self.assertTrue(False, message)
 
     def SetupTSS( self, initial_program = "", enviroment = ""):
         """
@@ -1528,7 +1538,16 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.restart()
         """
-        self.driver.refresh()
+        webdriver_exception = None
+
+        try:
+            self.driver.refresh()
+        except WebDriverException as e:
+            webdriver_exception = e
+
+        if webdriver_exception:
+            message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+            self.assertTrue(False, message)
         
         if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
@@ -5044,9 +5063,19 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
-        if self.config.coverage:
+        webdriver_exception = None
 
-            self.driver.refresh()
+        if self.config.coverage:
+            try:
+                self.driver.refresh()
+            except WebDriverException as e:
+                webdriver_exception = e
+
+            if webdriver_exception:
+                message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+                self.log_error(message)
+                self.assertTrue(False, message)
+
             timeout = 1500
 
             if not self.tss:
