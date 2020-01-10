@@ -1017,7 +1017,9 @@ class WebappInternal(Base):
         print("Waiting blocker to continue...")
         soup = None
         result = True
-        while(result):
+        endtime = time.time() + 1200
+
+        while(time.time() < endtime and result):
             soup = self.get_current_DOM()
             if soup:
                 blocker = soup.select('.ajax-blocker')
