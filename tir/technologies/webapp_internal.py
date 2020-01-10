@@ -341,7 +341,7 @@ class WebappInternal(Base):
 
             user = lambda: self.soup_to_selenium(user_element)
             user_value = self.get_web_value(user())
-        except AttributeError:
+        except AttributeError as e:
             self.log_error(str(e))
             
         endtime = time.time() + self.config.time_out
