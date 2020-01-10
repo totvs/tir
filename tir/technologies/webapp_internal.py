@@ -317,6 +317,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
+
         user_text = self.config.user_cfg if  admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
@@ -324,20 +325,25 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        self.wait_element(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
         try_counter = 0
         soup = self.get_current_DOM()
 
         print("Filling User")
-        user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
-        if user_element is None:
-            self.restart_counter += 1
-            self.log_error("Couldn't find User input element.")
+        try:
+            user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
-        user = lambda: self.soup_to_selenium(user_element)
-        user_value = self.get_web_value(user())
+            if user_element is None:
+                self.restart_counter += 1
+                self.log_error("Couldn't find User input element.")
+
+            user = lambda: self.soup_to_selenium(user_element)
+            user_value = self.get_web_value(user())
+        except AttributeError as e:
+            self.log_error(str(e))
+            
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
 
@@ -400,11 +406,6 @@ class WebappInternal(Base):
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
-
-            # self.wait_element_timeout(term=self.language.password, scrap_type=enum.ScrapType.MIXED, timeout=10, step=1, presence=False, optional_term="label", main_container="body")
-            # loop_control = self.element_exists(term=self.language.password, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body")
-
-        # self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="label", main_container="body")
 
     def environment_screen(self, change_env=False):
         """
