@@ -480,7 +480,7 @@ class WebappInternal(Base):
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
-        if button_element is None:
+        if button_element is None or not hasattr(button_element, "name") and not hasattr(button_element, "parent"):
             self.restart_counter += 1
             self.log_error(f"Couldn't find {label} button.")
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
@@ -2072,7 +2072,7 @@ class WebappInternal(Base):
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
-                if other_action is None:
+                if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
