@@ -3942,6 +3942,9 @@ class WebappInternal(Base):
                         time.sleep(0.1)
                     except AttributeError:
                         pass
+                    except StaleElementReferenceException:
+                        pass
+
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True):
         """
