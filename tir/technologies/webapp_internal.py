@@ -2072,7 +2072,7 @@ class WebappInternal(Base):
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
-                if other_action is None:
+                if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
