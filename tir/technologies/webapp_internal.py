@@ -328,6 +328,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
+
         user_text = self.config.user_cfg if  admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
@@ -335,22 +336,27 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        self.wait_element(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
         try_counter = 0
         soup = self.get_current_DOM()
 
         print("Filling User")
-        user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
-        if user_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find User input element."
-            self.log_error(message)
-            raise ValueError(message)
+        try:
+            user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
-        user = lambda: self.soup_to_selenium(user_element)
-        user_value = self.get_web_value(user())
+            if user_element is None:
+                self.restart_counter += 1
+                message = "Couldn't find User input element."
+                self.log_error(message)
+                raise ValueError(message)
+
+            user = lambda: self.soup_to_selenium(user_element)
+            user_value = self.get_web_value(user())
+        except AttributeError as e:
+            self.log_error(str(e))
+            
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
 
@@ -413,11 +419,6 @@ class WebappInternal(Base):
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
-
-            # self.wait_element_timeout(term=self.language.password, scrap_type=enum.ScrapType.MIXED, timeout=10, step=1, presence=False, optional_term="label", main_container="body")
-            # loop_control = self.element_exists(term=self.language.password, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body")
-
-        # self.wait_element(term=self.language.user, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="label", main_container="body")
 
     def environment_screen(self, change_env=False):
         """
@@ -504,7 +505,7 @@ class WebappInternal(Base):
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
         button_element = next(iter(buttons), None)
-        if button_element is None:
+        if button_element is None or not hasattr(button_element, "name") and not hasattr(button_element, "parent"):
             self.restart_counter += 1
             message = f"Couldn't find {label} button."
             self.log_error(message)
@@ -2101,7 +2102,7 @@ class WebappInternal(Base):
 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
-                if other_action is None:
+                if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
@@ -3971,6 +3972,9 @@ class WebappInternal(Base):
                         time.sleep(0.1)
                     except AttributeError:
                         pass
+                    except StaleElementReferenceException:
+                        pass
+
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True):
         """
