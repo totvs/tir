@@ -221,8 +221,11 @@ class WebappInternal(Base):
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
             self.log.issue = self.config.issue
+            
         except ValueError as error:
             self.log_error(error)
+        except Exception as e:
+            self.log_error(str(e))
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_start_exec)
