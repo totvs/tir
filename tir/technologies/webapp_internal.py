@@ -101,30 +101,37 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
         """
-        print("Starting Setup TSS")
-        self.tss = True
-        self.service_process_bat_file()
+        try:
 
-        self.config.initial_program = initial_program
-        enviroment = self.config.environment if self.config.environment else enviroment
+            print("Starting Setup TSS")
+            self.tss = True
+            self.service_process_bat_file()
 
-        self.containers_selectors["SetButton"] = "body"
-        self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
+            self.config.initial_program = initial_program
+            enviroment = self.config.environment if self.config.environment else enviroment
 
-        if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(initial_program, enviroment)
+            self.containers_selectors["SetButton"] = "body"
+            self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
 
-        if not self.log.program:
-            self.log.program = self.get_program_name()
+            if not self.config.skip_environment and not self.config.coverage:
+                self.program_screen(initial_program, enviroment)
 
-        if self.config.coverage:
-            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+            if not self.log.program:
+                self.log.program = self.get_program_name()
 
-        self.user_screen_tss()
-        self.set_log_info_tss()
+            if self.config.coverage:
+                self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
 
-        if self.config.num_exec:
-            self.num_exec.post_exec(self.config.url_set_start_exec)
+            self.user_screen_tss()
+            self.set_log_info_tss()
+
+            if self.config.num_exec:
+                self.num_exec.post_exec(self.config.url_set_start_exec)
+
+        except ValueError as e:
+            self.log_error(str(e))
+        except Exception as e:
+            self.log_error(str(e))
 
     def user_screen_tss(self):
         """
@@ -668,7 +675,7 @@ class WebappInternal(Base):
             label_element = soup.find_all("label", string="Versão do TSS:") 
                
         if not label_element:
-            self.log_error("SetupTss fail about screen not found")
+            raise ValueError("SetupTss fail about screen not found")
             
         labels = list(map(lambda x: x.text, soup.select("label")))
         label = labels[labels.index("Versão do TSS:")+1]
