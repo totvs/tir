@@ -20,7 +20,7 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
-from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
+from selenium.common.exceptions import *
 
 class WebappInternal(Base):
     """
@@ -82,6 +82,7 @@ class WebappInternal(Base):
 
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+            self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)
 
@@ -4344,8 +4345,11 @@ class WebappInternal(Base):
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
             self.restart()
-        else:
-            self.driver.close()
+        else:            
+            try:
+                self.driver.close()
+            except InvalidSessionIdException:
+                pass
 
         if self.restart_counter > 2:
 
@@ -4353,7 +4357,10 @@ class WebappInternal(Base):
                 self.num_exec.post_exec(self.config.url_set_end_exec)
                 
             if (stack_item == "setUpClass") :
-                self.driver.close()
+                try:
+                    self.driver.close()
+                except InvalidSessionIdException:
+                    pass
 
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
             self.assertTrue(False, log_message)
@@ -5134,7 +5141,10 @@ class WebappInternal(Base):
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_end_exec)
-        self.driver.close()
+        try:
+            self.driver.close()
+        except InvalidSessionIdException:
+            pass
             
     def containers_filter(self, containers):
         """
