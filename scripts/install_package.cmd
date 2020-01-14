@@ -13,5 +13,5 @@ taskkill /f /im chromedriver.exe
 echo -------------------------
 echo Installing project...
 echo -------------------------
-pip install -U dist/tir-1.13.5.tar.gz
+pip install -U dist/tir-1.13.6.tar.gz
 pause >nul | set/p = Press any key to exit ...
