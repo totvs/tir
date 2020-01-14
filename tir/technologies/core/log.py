@@ -163,6 +163,9 @@ class Log:
         """
         table_rows_has_line = False
 
+        if self.table_rows[1][3] == '':
+            self.table_rows[1][3] = 'NO PROGRAM'
+
         if self.table_rows[1][10] == '':
             self.table_rows[1][10] = '12.1.25'
 
