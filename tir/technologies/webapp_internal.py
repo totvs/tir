@@ -221,8 +221,11 @@ class WebappInternal(Base):
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
             self.log.issue = self.config.issue
-        except:
-            pass
+            
+        except ValueError as error:
+            self.log_error(error)
+        except Exception as e:
+            self.log_error(str(e))
 
         if self.config.num_exec:
             self.num_exec.post_exec(self.config.url_set_start_exec)
@@ -363,6 +366,7 @@ class WebappInternal(Base):
             user_value = self.get_web_value(user())
         except AttributeError as e:
             self.log_error(str(e))
+            raise AttributeError(e)
             
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
@@ -383,7 +387,9 @@ class WebappInternal(Base):
 
         if (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
-            self.log_error("Couldn't fill User input element.")
+            message = "Couldn't fill User input element."
+            self.log_error(message)
+            raise ValueError(message)
 
         # loop_control = True
 
@@ -392,7 +398,9 @@ class WebappInternal(Base):
         password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
         if password_element is None:
             self.restart_counter += 1
-            self.log_error("Couldn't find User input element.")
+            message = "Couldn't find User input element."
+            self.log_error(message)
+            raise ValueError(message)
 
         password = lambda: self.soup_to_selenium(password_element)
         password_value = self.get_web_value(password())
@@ -417,12 +425,16 @@ class WebappInternal(Base):
         
         if not password_value.strip() and self.config.password != '':
             self.restart_counter += 1
-            self.log_error("Couldn't fill User input element.")
+            message = "Couldn't fill User input element."
+            self.log_error(message)
+            raise ValueError(message)
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
         if button_element is None:
             self.restart_counter += 1
-            self.log_error("Couldn't find Enter button.")
+            message = "Couldn't find Enter button."
+            self.log_error(message)
+            raise ValueError(message)
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
