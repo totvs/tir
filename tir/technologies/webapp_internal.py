@@ -4347,7 +4347,10 @@ class WebappInternal(Base):
                 pass
             
             if self.log.get_testcase_stack() not in self.log.test_case_log:
-                self.driver.save_screenshot(path)
+                try:
+                    self.driver.save_screenshot(path)
+                except Exception as e:
+                    print(f"Warning Log Error save_screenshot exception {str(e)}")
 
         if new_log_line:
             self.log.new_line(False, log_message)
@@ -4360,8 +4363,8 @@ class WebappInternal(Base):
         else:            
             try:
                 self.driver.close()
-            except InvalidSessionIdException:
-                pass
+            except Exception as e:
+                print(f"Warning Log Error Close {str(e)}")
 
         if self.restart_counter > 2:
 
@@ -4371,8 +4374,8 @@ class WebappInternal(Base):
             if (stack_item == "setUpClass") :
                 try:
                     self.driver.close()
-                except InvalidSessionIdException:
-                    pass
+                except Exception as e:
+                    print(f"Warning Log Error Close {str(e)}")
 
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
             self.assertTrue(False, log_message)
@@ -5155,8 +5158,8 @@ class WebappInternal(Base):
             self.num_exec.post_exec(self.config.url_set_end_exec)
         try:
             self.driver.close()
-        except InvalidSessionIdException:
-            pass
+        except Exception as e:
+            print(f"Warning tearDown Close {str(e)}")
             
     def containers_filter(self, containers):
         """
