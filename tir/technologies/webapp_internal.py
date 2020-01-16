@@ -1401,7 +1401,7 @@ class WebappInternal(Base):
         >>> element1 = self.get_field("A1_COD")
         >>> element2 = self.get_field("Product")
         """
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
         element =  None
         position -= 1
         while(time.time() < endtime and element is None):
@@ -1564,17 +1564,22 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> current_value = oHelper.GetValue("A1_COD")
         """
+        endtime = time.time() + self.config.time_out
+        element = None
+
         if not grid:
-            element = self.get_field(field)
-
-            selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-
-            value = self.get_web_value(selenium_element())
+            while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
+                element = self.get_field(field)
+                selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
             value = self.check_grid(field_array, x3_dictionaries, get_value=True)
 
+        if ( not value ):
+            self.log_error("GetValue element is none")
+       
         return value
 
 
