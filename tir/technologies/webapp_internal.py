@@ -3475,33 +3475,33 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
         """
-        if self.config.debug_log:
-            print("Recovering lost line")
-        while int(row.attrs["id"]) < self.grid_counters[grid_id]:
-            self.new_grid_line(field, False)
-            row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+        ret = None
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not ret):
+            if self.config.debug_log:
+                print("Recovering lost line")
+            while ( time.time() < endtime and int(row.attrs["id"]) < self.grid_counters[grid_id]):
+                self.new_grid_line(field, False)
+                row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
 
-        columns = row.select("td")
-        if columns:
-            if "_" in field[0]:
-                column_name = field_to_label[field[0]]
-            else:
-                column_name = field[0]
-            
-            column_name = column_name.lower()
+            columns = row.select("td")
+            if columns:
+                if "_" in field[0]:
+                    column_name = field_to_label[field[0]]
+                else:
+                    column_name = field[0]
+                
+                column_name = column_name.lower()
 
-            if column_name not in headers[field[2]]:
-                self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
+                if column_name not in headers[field[2]]:
+                    self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
 
-            column_number = headers[field[2]][column_name]
-            xpath = xpath_soup(columns[column_number])
-            ret = self.get_selenium_column_element(xpath)
-            while not ret:
-                ret = self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
-            return ret
-        else:
-            return False
+                column_number = headers[field[2]][column_name]
+                xpath = xpath_soup(columns[column_number])
+                ret = self.get_selenium_column_element(xpath)
 
+        return ret
+ 
     def check_grid(self, field, x3_dictionaries, get_value=False):
         """
         [Internal]
