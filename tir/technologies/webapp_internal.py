@@ -3480,33 +3480,33 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
         """
-        if self.config.debug_log:
-            print("Recovering lost line")
-        while int(row.attrs["id"]) < self.grid_counters[grid_id]:
-            self.new_grid_line(field, False)
-            row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+        ret = None
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not ret):
+            if self.config.debug_log:
+                print("Recovering lost line")
+            while ( time.time() < endtime and int(row.attrs["id"]) < self.grid_counters[grid_id]):
+                self.new_grid_line(field, False)
+                row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
 
-        columns = row.select("td")
-        if columns:
-            if "_" in field[0]:
-                column_name = field_to_label[field[0]]
-            else:
-                column_name = field[0]
-            
-            column_name = column_name.lower()
+            columns = row.select("td")
+            if columns:
+                if "_" in field[0]:
+                    column_name = field_to_label[field[0]]
+                else:
+                    column_name = field[0]
+                
+                column_name = column_name.lower()
 
-            if column_name not in headers[field[2]]:
-                self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
+                if column_name not in headers[field[2]]:
+                    self.log_error(f"{self.language.messages.grid_column_error} Coluna: '{column_name}' Grid: '{headers[field[2]].keys()}'")
 
-            column_number = headers[field[2]][column_name]
-            xpath = xpath_soup(columns[column_number])
-            ret = self.get_selenium_column_element(xpath)
-            while not ret:
-                ret = self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
-            return ret
-        else:
-            return False
+                column_number = headers[field[2]][column_name]
+                xpath = xpath_soup(columns[column_number])
+                ret = self.get_selenium_column_element(xpath)
 
+        return ret
+ 
     def check_grid(self, field, x3_dictionaries, get_value=False):
         """
         [Internal]
@@ -4501,6 +4501,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_screen(restore_backup=False)
         """
+        label_param = None
+
         self.driver.refresh()
         if self.config.browser.lower() == "chrome":
             try:
@@ -4516,23 +4518,29 @@ class WebappInternal(Base):
         self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
 
         if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
-            container = self.get_current_container()
-            img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
-            label_serv1 = next(iter(img_serv1.parent.select('label')), None)
             
-            if not label_serv1:
-                self.log_error(f"Couldn't find Icon")
+            endtime = time.time() + self.config.time_out
 
-            self.ClickTree(label_serv1.text.strip())
-            self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
-            container = self.get_current_container()
-            img_param = next(iter(container.select("img[src*='bmpparam']")), None )
-            label_param = next(iter(img_param.parent.select('label')), None)
+            while(time.time() < endtime and not label_param):
+
+                container = self.get_current_container()
+                img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
+                label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+                
+                if not label_serv1:
+                    self.log_error(f"Couldn't find Icon")
+
+                self.ClickTree(label_serv1.text.strip())
+                self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+                container = self.get_current_container()
+                img_param = next(iter(container.select("img[src*='bmpparam']")), None )
+                if img_param.parent.__bool__():
+                    label_param = next(iter(img_param.parent.select('label')), None)
+
+                    self.ClickTree(label_param.text.strip())
 
             if not label_param:
                 self.log_error(f"Couldn't find Icon")
-
-            self.ClickTree(label_param.text.strip())
 
         self.ClickIcon(self.language.search)
 
