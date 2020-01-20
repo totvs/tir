@@ -4514,12 +4514,12 @@ class WebappInternal(Base):
         >>> self.parameter_screen(restore_backup=False)
         """
         label_param = None
-
         exception = None
+        stack = None
 
         try:
             self.driver.refresh()
-        except Excpetion as error:
+        except Exception as error:
             exception = error
 
         if not exception:
@@ -4579,6 +4579,12 @@ class WebappInternal(Base):
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
                 self.Program(self.config.routine)
+        else:
+            stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
+            if(stack and not stack.lower()  == "teardownclass"):
+                self.restart_counter += 1
+                self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
 
     def fill_parameters(self, restore_backup):
         """
@@ -5174,22 +5180,21 @@ class WebappInternal(Base):
                 webdriver_exception = e
 
             if webdriver_exception:
-                message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                self.log_error(message)
-                self.assertTrue(False, message)
+                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
+                print(message)
 
             timeout = 1500
 
-            if not self.tss:
+            if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
                 self.Finish()
-            else:
+            elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-
-            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
+            if not webdriver_exception:
+                self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
 
         if self.config.num_exec:
             try:
