@@ -130,6 +130,7 @@ class WebappInternal(Base):
                 try:
                     self.num_exec.post_exec(self.config.url_set_start_exec)
                 except Exception as error:
+                    self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
 
         except ValueError as e:
@@ -235,6 +236,7 @@ class WebappInternal(Base):
             try:
                 self.num_exec.post_exec(self.config.url_set_start_exec)
             except Exception as error:
+                self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
 
     def service_process_bat_file(self):
@@ -4388,6 +4390,7 @@ class WebappInternal(Base):
                 try:
                     self.num_exec.post_exec(self.config.url_set_end_exec)
                 except Exception as error:
+                    self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
                 
             if (stack_item == "setUpClass") :
@@ -5185,6 +5188,7 @@ class WebappInternal(Base):
             try:
                 self.num_exec.post_exec(self.config.url_set_end_exec)
             except Exception as error:
+                self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error})
 
         try:
