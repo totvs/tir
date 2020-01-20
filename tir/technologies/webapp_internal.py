@@ -1793,15 +1793,20 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         soup = None
+        top_layer = None
 
         while(time.time() < endtime and not soup):
             soup = self.get_current_DOM()
-            
-        if not soup:
-            self.log_error("Search for erros couldn't find DOM")
-        
-        message = ""
-        top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        try:   
+            if not soup:
+                self.log_error("Search for erros couldn't find DOM")
+            message = ""
+            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        except AttributeError as e:
+            self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
+
         if not top_layer:
             return None
 
