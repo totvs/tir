@@ -130,7 +130,8 @@ class WebappInternal(Base):
                 try:
                     self.num_exec.post_exec(self.config.url_set_start_exec)
                 except Exception as error:
-                    print(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                    self.restart_counter = 3
+                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
 
         except ValueError as e:
             self.log_error(str(e))
@@ -235,7 +236,8 @@ class WebappInternal(Base):
             try:
                 self.num_exec.post_exec(self.config.url_set_start_exec)
             except Exception as error:
-                print(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                self.restart_counter = 3
+                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
 
     def service_process_bat_file(self):
         """
@@ -4388,7 +4390,8 @@ class WebappInternal(Base):
                 try:
                     self.num_exec.post_exec(self.config.url_set_end_exec)
                 except Exception as error:
-                    print(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                    self.restart_counter = 3
+                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
                 
             if (stack_item == "setUpClass") :
                 try:
@@ -5185,7 +5188,9 @@ class WebappInternal(Base):
             try:
                 self.num_exec.post_exec(self.config.url_set_end_exec)
             except Exception as error:
-                print(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                self.restart_counter = 3
+                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error})
+
         try:
             self.driver.close()
         except Exception as e:
