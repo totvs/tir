@@ -4514,64 +4514,77 @@ class WebappInternal(Base):
         >>> self.parameter_screen(restore_backup=False)
         """
         label_param = None
+        exception = None
+        stack = None
 
-        self.driver.refresh()
-        if self.config.browser.lower() == "chrome":
-            try:
-                self.wait.until(EC.alert_is_present())
-                self.driver.switch_to_alert().accept()
-            except:
-                pass
+        try:
+            self.driver.refresh()
+        except Exception as error:
+            exception = error
 
-        self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
-        self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait.until(EC.alert_is_present())
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
 
-        self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
 
-        if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
-            
-            endtime = time.time() + self.config.time_out
+            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
 
-            while(time.time() < endtime and not label_param):
-
-                container = self.get_current_container()
-                img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
-                label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+            if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
                 
-                if not label_serv1:
+                endtime = time.time() + self.config.time_out
+
+                while(time.time() < endtime and not label_param):
+
+                    container = self.get_current_container()
+                    img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
+                    label_serv1 = next(iter(img_serv1.parent.select('label')), None)
+                    
+                    if not label_serv1:
+                        self.log_error(f"Couldn't find Icon")
+
+                    self.ClickTree(label_serv1.text.strip())
+                    self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+                    container = self.get_current_container()
+                    img_param = next(iter(container.select("img[src*='bmpparam']")), None )
+                    if img_param.parent.__bool__():
+                        label_param = next(iter(img_param.parent.select('label')), None)
+
+                        self.ClickTree(label_param.text.strip())
+
+                if not label_param:
                     self.log_error(f"Couldn't find Icon")
 
-                self.ClickTree(label_serv1.text.strip())
-                self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
-                container = self.get_current_container()
-                img_param = next(iter(container.select("img[src*='bmpparam']")), None )
-                if img_param.parent.__bool__():
-                    label_param = next(iter(img_param.parent.select('label')), None)
+            self.ClickIcon(self.language.search)
 
-                    self.ClickTree(label_param.text.strip())
+            self.fill_parameters(restore_backup=restore_backup)
+            self.parameters = []
+            self.ClickIcon(self.language.exit)
+            time.sleep(1)
 
-            if not label_param:
-                self.log_error(f"Couldn't find Icon")
+            if self.config.coverage:
+                self.driver.refresh()
+            else:
+                self.Finish()
 
-        self.ClickIcon(self.language.search)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
-        self.fill_parameters(restore_backup=restore_backup)
-        self.parameters = []
-        self.ClickIcon(self.language.exit)
-        time.sleep(1)
-
-        if self.config.coverage:
-            self.driver.refresh()
+            if ">" in self.config.routine:
+                self.SetLateralMenu(self.config.routine, save_input=False)
+            else:
+                self.Program(self.config.routine)
         else:
-            self.Finish()
+            stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
+            if(stack and not stack.lower()  == "teardownclass"):
+                self.restart_counter += 1
+                self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
 
-        self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
-
-        if ">" in self.config.routine:
-            self.SetLateralMenu(self.config.routine, save_input=False)
-        else:
-            self.Program(self.config.routine)
 
     def fill_parameters(self, restore_backup):
         """
@@ -5167,29 +5180,28 @@ class WebappInternal(Base):
                 webdriver_exception = e
 
             if webdriver_exception:
-                message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                self.log_error(message)
-                self.assertTrue(False, message)
+                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
+                print(message)
 
             timeout = 1500
 
-            if not self.tss:
+            if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
                 self.Finish()
-            else:
+            elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-
-            self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
+            if not webdriver_exception:
+                self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
 
         if self.config.num_exec:
             try:
                 self.num_exec.post_exec(self.config.url_set_end_exec)
             except Exception as error:
                 self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error})
+                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
 
         try:
             self.driver.close()
