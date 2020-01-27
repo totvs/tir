@@ -1020,7 +1020,26 @@ class Webapp():
         >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
         """
         return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
-    
+
+    def StartDB(self):
+        """
+        :return: connection object
+        Usage:
+        >>> # Call the method:
+        >>> self.oHelper.StartDB()
+        """
+        return self.__webapp.connect_database()
+
+    def StopDB(self, connection):
+        """
+        :param connection: connection object
+        :type param: object
+        :return:
+        Usage:
+        >>> # Call the method:
+        >>> self.oHelper.StopDB(connection)
+        """
+        self.__webapp.disconnect_database(connection)
         
 class Apw():
 

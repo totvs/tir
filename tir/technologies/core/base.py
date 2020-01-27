@@ -7,6 +7,7 @@ import sys
 import os
 import random
 import string
+import pyodbc
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -953,3 +954,58 @@ class Base(unittest.TestCase):
         >>> oHelper.TearDown()
         """
         self.driver.close()
+
+    def odbc_connect(self):
+        """
+        :return:
+        """
+        driver_database = self.config.driver_database
+        server_database = self.config.server_database
+        name_database = self.config.name_database
+        user_database = self.config.user_database
+        password_database = self.config.password_database
+
+        self.check_pyodbc_drivers(driver_database)
+
+        connection = pyodbc.connect(f'DRIVER={driver_database}; server={server_database}; database={name_database}; uid={user_database}; pwd={password_database}')
+
+        return connection
+
+    def test_odbc_connection(self, connection):
+        """
+        :param connection:
+        :return: cursor attribute if connection ok else return False
+        """
+        try:
+            return connection.cursor()
+        except:
+            return False
+
+    def connect_database(self):
+
+        connection = self.odbc_connect()
+
+        if self.test_odbc_connection(connection):
+            print('DataBase connection started')
+        else:
+            print('DataBase connection is stopped')
+
+        return connection
+
+    def disconnect_database(self, connection):
+
+        if not connection:
+            connection = self.odbc_connect()
+
+        cursor = self.test_odbc_connection(connection)
+        if cursor:
+            cursor.close()
+            connection.close()
+            if not self.test_odbc_connection(connection):
+                print('DataBase connection stopped')
+        else:
+            print('DataBase connection already stopped')
+
+    def check_pyodbc_drivers(self, driver_database):
+        if not next(iter(list(filter(lambda x: x == driver_database, pyodbc.drivers()))), None):
+            raise ValueError(f"Driver: '{driver_database}' isn't a valid driver name!")

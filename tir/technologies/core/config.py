@@ -52,3 +52,8 @@ class ConfigLoader:
         self.password_cfg = str(data["PasswordCfg"]) if "PasswordCfg" in data else ""
         self.electron_binary_path = (str(data["BinPath"]) if "BinPath" in data else "")
         self.csv_path = (str(data["CSVPath"]) if "CSVPath" in data else "")
+        self.driver_database = str(data["DriverDB"]) if "DriverDB" in data else ""
+        self.server_database = str(data["ServerDB"]) if "ServerDB" in data else ""
+        self.name_database = str(data["NameDB"]) if "NameDB" in data else ""
+        self.user_database = str(data["UserDB"]) if "UserDB" in data else ""
+        self.password_database = str(data["PasswordDB"]) if "PasswordDB" in data else ""

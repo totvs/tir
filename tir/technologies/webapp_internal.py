@@ -5721,12 +5721,16 @@ class WebappInternal(Base):
 
     def filter_dataframe(self, df, column, value):
         """
+        [Internal]
         """
         return df[df[column] == value]
 
     def return_data(self, df, has_header, column):
-
+        """
+        [Internal]
+        """
         if has_header == 'infer':
             return df[column].to_dict() if column else df.to_dict()
         else:
             return df[column].values.tolist() if isinstance(column, int) else df.values.tolist()
+            
