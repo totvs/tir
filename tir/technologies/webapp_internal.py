@@ -1307,7 +1307,7 @@ class WebappInternal(Base):
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
-                if not input_field().is_enabled() or "disabled" in element.attrs:
+                if "disabled" in element.attrs:
                     self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
                 if self.element_name(element) == "input":
