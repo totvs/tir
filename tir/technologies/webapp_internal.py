@@ -3307,7 +3307,7 @@ class WebappInternal(Base):
                     down_loop = 0
                     rows = grids[field[2]].select("tbody tr")
                 
-                if not (field[4] > len(rows) - 1 or field[4] < 0):
+                if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
                     user_rows = False
 
             if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
