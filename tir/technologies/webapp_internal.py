@@ -2166,7 +2166,7 @@ class WebappInternal(Base):
                 soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                 soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
-                if soup_objects:
+                if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
                 else:
