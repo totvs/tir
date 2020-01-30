@@ -1338,11 +1338,11 @@ class WebappInternal(Base):
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                input_field().send_keys(" ")
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
                             else:
                                 self.wait_blocker_ajax()
                                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
-                                input_field().send_keys(main_value)
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
                         #if Number input
                         else:
                             tries = 0
