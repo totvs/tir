@@ -3257,6 +3257,7 @@ class WebappInternal(Base):
         rows = ""
         headers = ""
         columns = ""
+        try_counter = 1
 
         if(field[1] == True):
             field_one = 'is a boolean value'
@@ -3326,8 +3327,7 @@ class WebappInternal(Base):
 
                             current_value = columns[column_number].text.strip()
                             xpath = xpath_soup(columns[column_number])
-
-                            try_counter = 0
+                            
                             current_value = self.remove_mask(current_value).strip()
 
                             selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
