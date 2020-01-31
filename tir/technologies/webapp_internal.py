@@ -2145,7 +2145,7 @@ class WebappInternal(Base):
 
                 other_action_element = lambda : self.soup_to_selenium(other_action)
 
-                self.scroll_to_element(other_action_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.scroll_to_element(other_action_element())
                 self.click(other_action_element())
 
                 success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
@@ -2155,30 +2155,49 @@ class WebappInternal(Base):
                     self.log_error(f"Element {button} not found!")
 
             if soup_element:
-                self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
                 self.click(soup_element())
 
-            # if button != self.language.other_actions:
-
             if sub_item and ',' not in sub_item:
-                soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
-                soup_objects_filtered = self.filter_is_displayed(soup_objects)
+
+                soup_objects_filtered = None
+                while(time.time() < endtime and not soup_objects_filtered):
+                    soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
+                    soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 if soup_objects:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
+                    self.click(soup_element())
                 else:
-                    self.log_error(f"Couldn't find element {sub_item}")
 
-                self.click(soup_element())
+                    result = False
+
+                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
+                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+                    if soup_objects and len(soup_objects) - 1 >= position:
+                        soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                    else:
+                        self.log_error(f"Couldn't find element {button}")
+                    
+                    self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                    self.set_element_focus(soup_element())
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
+                    self.click(soup_element())
+
+                    result  = self.click_sub_menu(sub_item)
+ 
+                    if not result:
+                        self.log_error(f"Couldn't find element {sub_item}")
+                    else:
+                        return
 
             elif ',' in sub_item:
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
                 self.click_sub_menu(filtered_sub_itens[len(filtered_sub_itens)-1])
-
 
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
