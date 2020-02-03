@@ -2301,6 +2301,7 @@ class WebappInternal(Base):
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
+        self.wait_blocker()
         text = ''
         endtime = time.time() + self.config.time_out
         grid_number -= 1
