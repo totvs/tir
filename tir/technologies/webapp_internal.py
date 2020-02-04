@@ -1387,6 +1387,8 @@ class WebappInternal(Base):
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
+        else:
+            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
 
     def get_field(self, field, name_attr=False, position=1):
         """
@@ -3742,6 +3744,7 @@ class WebappInternal(Base):
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
                                 success = True
                             elif grids[grid_number] and "tcbrowse" in grids[grid_number].attrs['class']:
+                                time.sleep(0.5)
                                 success = True
 
         if not success:
