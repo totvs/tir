@@ -4853,8 +4853,11 @@ class WebappInternal(Base):
             self.log_error("Couldn't find any labels.")
 
         label_element = lambda: self.soup_to_selenium(label)
+        
         self.scroll_to_element(label_element())
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
         self.set_element_focus(label_element())
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
         self.click(label_element())
 
     def get_current_container(self):
