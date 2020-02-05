@@ -198,6 +198,26 @@ class Webapp():
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
 
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
+        self.__webapp.ClickGridHeader(column, column_name, grid_number)
+
     def ClickIcon(self, icon_text):
         """
         Clicks on an Icon button based on its tooltip text.
@@ -416,6 +436,24 @@ class Webapp():
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         self.__webapp.standard_search_field( field, name_attr, send_key )
+    
+    def SetupTSS(self, initial_program="", environment=""):
+        """
+        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+        .. note::
+            This method use the user and password from config.json.
+
+        :param initial_program: The initial program to load.
+        :type initial_program: str
+        :param environment: The initial environment to load.
+        :type environment: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
+        """
+        self.__webapp.SetupTSS(initial_program, environment)
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False):
         """
@@ -523,7 +561,13 @@ class Webapp():
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
+        .. warning::
+            If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
+        .. warning::           
+            Before using this method, set focus on any element.
+
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete ...
 
         :param key: Key that would be pressed
         :type key: str
@@ -888,6 +932,25 @@ class Webapp():
         >>> oHelper.ClickMenuPopUpItem("Label")
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click)
+
+    def GetRelease(self):
+        """
+        Get the current release from Protheus.
+
+        :return: The current release from Protheus.
+        :type: str
+        
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.027
+        >>> if self.oHelper.get_release() >= '12.1.027':
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigo_CT001')
+        """
+
+        return self.__webapp.get_release()
     
     def ClickListBox(self, text):
         """
@@ -903,6 +966,61 @@ class Webapp():
         """
         
         return self.__webapp.ClickListBox(text)
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.__webapp.ClickImage(img_name)
+    
+    def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
+        """
+        Returns a dictionary when the file has a header in another way returns a list
+        The folder must be entered in the CSVPath parameter in the config.json.
+
+        :param csv_file: .csv file name
+        :type csv_file: str
+        :param delimiter: Delimiter option such like ';' or ',' or '|'
+        :type delimiter: str
+        :param column: To files with Header is possible return only a column by header name or Int value for no header files 
+        :type column: str
+        :param header: Indicate with the file contains a Header or not default is Header None
+        :type header: bool
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with number 1
+        :type filter_column: str or int
+        :param filter_value: Value used in pair with filter_column parameter
+        :type filter_value: str
+        :param filter_data: If you want filter a value by column, this parameter need to be a True value
+        :type filter_data: bool
+
+        >>> # Call the method:
+        >>> file_csv = test_helper.OpenCSV(delimiter=";", csv_file="no_header.csv")
+
+        >>> file_csv_no_header_column = self.oHelper.OpenCSV(column=0, delimiter=";", csv_file="no_header_column.csv")
+
+        >>> file_csv_column = self.oHelper.OpenCSV(column='CAMPO', delimiter=";", csv_file="header_column.csv", header=True)
+
+        >>> file_csv_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_no_header.csv")
+
+        >>> file_csv_header = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_column = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_header.csv", header=True)
+
+        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL')
+
+        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
+        """
+        return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
+    
         
 class Apw():
 

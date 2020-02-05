@@ -64,6 +64,8 @@ class LanguagePack:
         self.current_password = languagepack["CurrentPassword"]
         self.nem_password = languagepack["NewPassword"]
         self.confirm_new_password = languagepack["ConfirmNewPassword"]
+        self.yes = languagepack["Yes"]
+        self.assert_false_message = languagepack["AssertFalseMessage"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -135,7 +137,9 @@ class LanguagePack:
             "UserLogin": "Reserved",
             "CurrentPassword": "Reserved",
             "NewPassword": "Reserved",
-            "ConfirmNewPassword": "Reserved"
+            "ConfirmNewPassword": "Reserved",
+            "Yes": "Sim",
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script."
             
         }
 
@@ -206,7 +210,9 @@ class LanguagePack:
             "UserLogin": "Login do usuário",
             "CurrentPassword": "Senha atual",
             "NewPassword": "Nova senha",
-            "ConfirmNewPassword": "Confirmar nova senha"
+            "ConfirmNewPassword": "Confirmar nova senha",
+            "Yes": "Sim",
+            "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script."
             
         }
         spanish = {
@@ -231,7 +237,7 @@ class LanguagePack:
             "Leave Page": "Sair da página",
             "Enter": "Entrar",
             "Finish": "Terminar",
-            "Details": "Detalhes",
+            "Details": "Detalles",
             "Search": "Buscar",
             "Ok": "Ok",
             "Copy": "Copiar",
@@ -276,7 +282,9 @@ class LanguagePack:
             "UserLogin": "Login del usuario*",
             "CurrentPassword": "Contrasena actual*",
             "NewPassword": "Nueva contrasena*",
-            "ConfirmNewPassword": "Confirmar nueva contrasena*"
+            "ConfirmNewPassword": "Confirmar nueva contrasena*",
+            "Yes":"Reserved",
+            "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script."
         }
         russian = {
             "User": "Пользователь",
@@ -342,7 +350,8 @@ class LanguagePack:
             "To": "Ate",
             "Coins": "Monedas",
             "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "LogOff": "Log Off",
+            "Yes":"Reserved"
         }
 
         if language.lower() == "en-us":

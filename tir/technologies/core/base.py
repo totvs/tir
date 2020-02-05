@@ -24,6 +24,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
+from tir.technologies.core.third_party.screen_size import size
 
 class Base(unittest.TestCase):
     """
@@ -152,17 +153,11 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
-        """        
-        if right_click:
-            try:
+        """
+        try:
+            if right_click:
                 ActionChains(self.driver).context_click(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                pass
-        else:
-            try:
+            else:
                 self.scroll_to_element(element)
                 if click_type == enum.ClickType.JS:
                     self.driver.execute_script("arguments[0].click()", element)
@@ -170,11 +165,14 @@ class Base(unittest.TestCase):
                     element.click()
                 elif click_type == enum.ClickType.ACTIONCHAINS:
                     ActionChains(self.driver).move_to_element(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                self.log_error(str(error))
+            
+            return True
+
+        except StaleElementReferenceException:
+            print("********Element Stale click*********")
+            return False
+        except Exception:
+            return False
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -733,6 +731,8 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
+        if soup_object is None:
+            raise AttributeError
         return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
@@ -908,20 +908,40 @@ class Base(unittest.TestCase):
         """
         print("Starting the browser")
         if self.config.browser.lower() == "firefox":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
-            log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
+            if sys.platform == 'linux':
+                driver_path = os.path.join(os.path.dirname(__file__), r'drivers/linux64/geckodriver')
+            else:
+                driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
+            log_path = os.devnull
+
             options = FirefoxOpt()
             options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             options = ChromeOpt()
             options.set_headless(self.config.headless)
+            options.add_argument('--log-level=3')
+            if self.config.headless:
+                options.add_argument('force-device-scale-factor=0.77')
+                
+            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+        elif self.config.browser.lower() == "electron":
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')# TODO chromedriver electron version
+            options = ChromeOpt()
+            options.add_argument('--log-level=3')
+            options.binary_location = self.config.electron_binary_path
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 
-        self.driver.maximize_window()
-        self.driver.get(self.config.url)
-        self.wait = WebDriverWait(self.driver,5)
+        if not self.config.browser.lower() == "electron":
+            if self.config.headless:
+                self.driver.set_window_size(size()[0], size()[1])
+            else:
+                self.driver.maximize_window()
+                
+            self.driver.get(self.config.url)
+
+        self.wait = WebDriverWait(self.driver, 90)
 
     def TearDown(self):
         """
