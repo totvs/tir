@@ -784,6 +784,10 @@ class WebappInternal(Base):
                 self.click(s_tget_img())
                 self.wait_element_is_not_displayed(tget_img)
 
+            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                self.close_coin_screen()
+                self.close_modal()
+
         except AssertionError as error:
             raise error
         except Exception as e:
@@ -2049,6 +2053,11 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
+
+            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                self.close_coin_screen()
+                self.close_modal()
+
         except AssertionError as error:
             raise error
         except Exception as error:
