@@ -347,7 +347,6 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
-
         user_text = self.config.user_cfg if  admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
@@ -355,7 +354,9 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        self.wait_element(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        if not self.wait_element_timeout(term="[name='cGetUser'] > input",
+         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out * 3 , main_container='body'):
+            self.reload_user_screen()
 
         try_counter = 0
         soup = self.get_current_DOM()
@@ -447,6 +448,24 @@ class WebappInternal(Base):
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
         self.click(button())
+
+    def reload_user_screen(self):
+        """
+        [Internal]
+
+        Refresh the page - retry load user_screen
+        """
+
+        self.driver.refresh()
+
+        if self.config.coverage:
+            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+
+        if not self.config.skip_environment and not self.config.coverage:
+            self.program_screen(self.config.initial_program)
+
+        self.wait_element_timeout(term="[name='cGetUser'] > input",
+         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
 
     def environment_screen(self, change_env=False):
         """
