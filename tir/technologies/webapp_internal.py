@@ -3328,7 +3328,7 @@ class WebappInternal(Base):
         headers = ""
         columns = ""
         try_counter = 1
-        user_rows = True
+        grid_reload = True
 
         if(field[1] == True):
             field_one = 'is a boolean value'
@@ -3354,35 +3354,49 @@ class WebappInternal(Base):
         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
             
             endtime_row = time.time() + self.config.time_out
-            while(time.time() < endtime_row and user_rows):
+            while(time.time() < endtime_row and grid_reload):
                 
                 if not field[4]:
-                    user_rows = False
+                    grid_reload = False
 
                 container = self.get_current_container()
 
                 if container:
-                    container_id = self.soup_to_selenium(container).get_attribute("id")
+                    try:
+                        container_id = self.soup_to_selenium(container).get_attribute("id") if self.soup_to_selenium(container) else None
+                    except Exception as err:
+                        container_id = None
+                        print(err)
+                        pass
                     grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                     grids = self.filter_displayed_elements(grids)
 
                 if grids:
                     headers = self.get_headers_from_grids(grids)
-                    grid_id = grids[field[2]].attrs["id"]
-                    if grid_id not in self.grid_counters:
-                        self.grid_counters[grid_id] = 0
+                    if field[2] + 1 > len(grids):
+                        grid_reload = True
+                    else:
+                        grid_id = grids[field[2]].attrs["id"]
+                        if grid_id not in self.grid_counters:
+                            self.grid_counters[grid_id] = 0
 
-                    column_name = ""
-                    if field[2] > len(grids):
-                        self.log_error(self.language.messages.grid_number_error)
-                    down_loop = 0
-                    rows = grids[field[2]].select("tbody tr")
+                        column_name = ""
+                        down_loop = 0
+                        rows = grids[field[2]].select("tbody tr")
+                else:
+                    grid_reload = True
                 
                 if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
-                    user_rows = False
+                    grid_reload = False
 
             if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                 self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
+
+            if grids:
+                if field[2] + 1 > len(grids):
+                    self.log_error(f'{self.language.messages.grid_number_error} Grid number: {field[2] + 1} Grids in the screen: {len(grids)}')
+            else:
+                self.log_error("Grid element doesn't appear in DOM")
 
             row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else(next(iter(rows), None))
 
