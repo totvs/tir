@@ -2055,6 +2055,8 @@ class WebappInternal(Base):
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
 
+            self.slm_click_last_item(f"#{child.attrs['id']} > label")
+
             while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                 self.close_coin_screen()
                 self.close_modal()
@@ -2092,6 +2094,23 @@ class WebappInternal(Base):
         """
         script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
+
+    def slm_click_last_item(self, sub_menu_child_label):
+        """
+        [Internal]
+
+        SetLateralMenu, this method retry click in the last sub item
+        """
+        try:
+            child_label = next(iter(self.web_scrap(term=sub_menu_child_label,
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")), None)
+            child_label_s = self.soup_to_selenium(child_label)
+            child_label_s.click()
+        except Exception as e:
+            print(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
+
+        
+
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
