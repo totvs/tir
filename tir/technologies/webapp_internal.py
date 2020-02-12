@@ -3062,7 +3062,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
-        print(f'Clicking in {field}')
+        print(f'Clicking in "{self.returns_printable_string(field)}"')
         
         element_list = []
 
@@ -5766,12 +5766,24 @@ class WebappInternal(Base):
 
     def filter_dataframe(self, df, column, value):
         """
+        [Internal]
         """
         return df[df[column] == value]
 
     def return_data(self, df, has_header, column):
-
+        """
+        [Internal]
+        """
         if has_header == 'infer':
             return df[column].to_dict() if column else df.to_dict()
         else:
             return df[column].values.tolist() if isinstance(column, int) else df.values.tolist()
+
+    def returns_printable_string(self, string):
+        """
+        Returns a string only is printable characters
+        [Internal]
+        :param string: string value
+        :type string: str
+        """
+        return "".join(list(filter(lambda x: x.isprintable(), string)))
