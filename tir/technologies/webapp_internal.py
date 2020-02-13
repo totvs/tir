@@ -2029,6 +2029,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
+        submenu = ""
         endtime = time.time() + self.config.time_out
         if save_input:
             self.config.routine = menu_itens
@@ -2049,7 +2050,7 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
                 self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
                 menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
-                if not menuitem_presence:
+                if not menuitem_presence and submenu:
                     submenu().click()
                 subMenuElements = menu.select(".tmenuitem")
                 subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
@@ -2059,7 +2060,6 @@ class WebappInternal(Base):
                     if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
-                submenu = ""
                 child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
