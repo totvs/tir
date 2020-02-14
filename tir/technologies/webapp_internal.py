@@ -2210,6 +2210,7 @@ class WebappInternal(Base):
                 self.set_element_focus(soup_element())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
                 self.click(soup_element())
+                self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
 
@@ -4038,6 +4039,15 @@ class WebappInternal(Base):
                 time.sleep(step)
         except Exception:
             return
+
+    def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
+        """
+        [ Internal ]
+        Wait element Lose focus
+        """
+        endtime = time.time() + time_out
+        while( element_selenium and time.time() < endtime and self.driver.switch_to_active_element() == element_selenium() ):
+            time.sleep(step)
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
