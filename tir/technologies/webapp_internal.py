@@ -387,7 +387,7 @@ class WebappInternal(Base):
                 user = lambda: self.soup_to_selenium(user_element.parent)
 
             self.set_element_focus(user())
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(user_element))))
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH )
             self.double_click(user())
             # self.send_keys(user(), Keys.HOME)
             self.send_keys(user(), user_text)
@@ -424,7 +424,7 @@ class WebappInternal(Base):
                 password = lambda: self.soup_to_selenium(password_element.parent)
 
             self.set_element_focus(password())
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(password_element))))
+            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH )
             self.click(password())
             self.send_keys(password(), Keys.HOME)
             self.send_keys(password(), password_text)
@@ -620,7 +620,7 @@ class WebappInternal(Base):
                 selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
                     try:
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(close_button))))
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = close_button , locator = By.XPATH)
                         self.click(selenium_close_button())
                     except:
                         pass
@@ -671,7 +671,7 @@ class WebappInternal(Base):
         """
         self.SetLateralMenu(self.language.menu_about, save_input=False)
         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmodaldialog")))
+        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = ".tmodaldialog", locator= By.CSS_SELECTOR)
 
         soup = self.get_current_DOM()
         labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
@@ -768,7 +768,7 @@ class WebappInternal(Base):
         """
         try:
             print(f"Setting program: {program}")
-            self.wait_element(term="[name=cGet]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
             tget = next(iter(soup.select("[name=cGet]")), None)
             tget_input = next(iter(tget.select("input")), None)
@@ -781,25 +781,25 @@ class WebappInternal(Base):
                 s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
                 s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
 
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.double_click(s_tget())
                 self.set_element_focus(s_tget())
                 self.send_keys(s_tget(), Keys.BACK_SPACE)
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.send_keys(s_tget(), program)
                 current_value = self.get_web_value(s_tget()).strip()
 
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_input))))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
                 
                 if current_value.strip() != program.strip():
                     self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
                 self.set_element_focus(s_tget_img())
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.click(s_tget_img())
                 self.wait_element_is_not_displayed(tget_img)
 
@@ -995,7 +995,7 @@ class WebappInternal(Base):
 
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[0]))))
+        self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
 
@@ -1008,7 +1008,7 @@ class WebappInternal(Base):
 
             for element in tradiobuttonitens:
 
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
                 selenium_input = lambda : self.soup_to_selenium(element)
                 self.click(selenium_input())
                 time.sleep(1)
@@ -1037,7 +1037,7 @@ class WebappInternal(Base):
             trb_input = tradiobuttonitens[search_key]
 
             sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(trb_input))))
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
             self.click(sel_input())
 
 
@@ -1068,13 +1068,13 @@ class WebappInternal(Base):
 
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[2]))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH )
                 self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 sel_browse_input().clear()
                 self.set_element_focus(sel_browse_input())
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(search_elements[1]))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
             except StaleElementReferenceException:
@@ -1157,7 +1157,7 @@ class WebappInternal(Base):
             if not label:
                 self.log_error("Label wasn't found.")
 
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
             
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
@@ -1343,21 +1343,20 @@ class WebappInternal(Base):
                     #Action for Combobox elements
                     if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                        #self.wait.until(EC.visibility_of(input_field()))
                         self.set_element_focus(input_field())
                         self.try_element_to_be_clickable(element)
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
                     else:
-                        self.wait.until(EC.visibility_of(input_field()))
-                        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                        self.wait_until_to( expected_condition = "visibility_of", element = input_field )
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
                         self.double_click(input_field())
 
                         #if Character input
                         if valtype != 'N':
                             self.set_element_focus(input_field())
-                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
@@ -1365,7 +1364,7 @@ class WebappInternal(Base):
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
                             else:
                                 self.wait_blocker()
-                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
                         #if Number input
                         else:
@@ -1373,7 +1372,7 @@ class WebappInternal(Base):
                             try_counter = 1
                             while(tries < 3):
                                 self.set_element_focus(input_field())
-                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
@@ -1412,7 +1411,7 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
         else:
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
 
     def get_field(self, field, name_attr=False, position=1):
         """
@@ -2046,8 +2045,8 @@ class WebappInternal(Base):
         count = 0
         try:
             for menuitem in menu_itens:
-                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".tmenu")))
-                self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tmenu .tmenuitem")))
+                self.wait_until_to(expected_condition="element_to_be_clickable", element = ".tmenu", locator=By.CSS_SELECTOR )
+                self.wait_until_to(expected_condition="presence_of_all_elements_located", element = ".tmenu .tmenuitem", locator = By.CSS_SELECTOR )
                 menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
                 if not menuitem_presence:
                     submenu().click()
@@ -2064,7 +2063,7 @@ class WebappInternal(Base):
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
                     self.scroll_to_element(submenu())
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = child, locator = By.XPATH )
                     ActionChains(self.driver).move_to_element(submenu()).click().perform()
                     if count < len(menu_itens) - 1:
                         self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
@@ -2182,7 +2181,7 @@ class WebappInternal(Base):
 
 
                 if soup_objects and len(soup_objects) - 1 >= position:
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
@@ -2207,7 +2206,7 @@ class WebappInternal(Base):
             if soup_element:
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
                 self.click(soup_element())
 
             if sub_item and ',' not in sub_item:
@@ -2219,7 +2218,7 @@ class WebappInternal(Base):
                 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects_filtered[0]))))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects_filtered[0], locator = By.XPATH )
                     self.click(soup_element())
                 else:
 
@@ -2234,7 +2233,7 @@ class WebappInternal(Base):
                     
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(soup_objects[position]))))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
                     self.click(soup_element())
 
                     result  = self.click_sub_menu(sub_item)
@@ -2293,7 +2292,8 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         self.scroll_to_element(element_selenium)
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element_soup, locator = By.XPATH )
+        
         self.click(element_selenium)
         
     def click_sub_menu(self, sub_item):
@@ -2767,8 +2767,9 @@ class WebappInternal(Base):
                 self.set_element_focus(td_selenium())
                 td_selenium().click()
                 if not td_is_selected():
-                    self.wait.until(EC.visibility_of(td_selenium()))
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(td))))
+                    self.wait_until_to( expected_condition = "visibility_of", element = td_selenium )
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH )
+                    
                     success = td_is_selected()
                 else:
                     success = td_is_selected()
@@ -3473,12 +3474,12 @@ class WebappInternal(Base):
                                     user_value = '00000000'
                                 user_value = self.remove_mask(user_value)
 
-                            self.wait.until(EC.visibility_of(selenium_input()))
+                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input )
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
                             if "tget" in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
-                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
                                 self.try_send_keys(selenium_input, user_value, try_counter)
 
                                 if try_counter < 2:
@@ -3495,7 +3496,7 @@ class WebappInternal(Base):
                                         else:
                                             self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
                                             if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
-                                                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(bsoup_element))))
+                                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
                                                 self.send_keys(selenium_input(), Keys.ENTER)
                                 
                                 elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
@@ -3756,7 +3757,8 @@ class WebappInternal(Base):
                     # self.scroll_to_element(second_column())
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
-                    self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath_soup(columns[0]))))
+                    self.wait_until_to(expected_condition="visibility_of_element_located", element = columns[0], locator=By.XPATH )
+                    
                     ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
 
                     endtime = time.time() + self.config.time_out
@@ -3829,7 +3831,7 @@ class WebappInternal(Base):
                             if column_element_old_class == None:
                                 column_element_old_class = column_element().get_attribute("class")
 
-                            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(columns[column_number]))))
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
                             self.click(column_element())
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
@@ -3870,7 +3872,7 @@ class WebappInternal(Base):
             column_element = grid.select('thead label')[column].parent.parent
             column_element_selenium = self.soup_to_selenium(column_element)
             self.set_element_focus(column_element_selenium)
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = column_element, locator = By.XPATH )
             column_element_selenium.click()
         else:
             column_name =column_name.lower()
@@ -3882,7 +3884,7 @@ class WebappInternal(Base):
             column_element = grid.select('thead label')[column_number].parent.parent
             column_element_selenium = self.soup_to_selenium(column_element)
             self.set_element_focus(column_element_selenium)
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(column_element))))
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = column_element, locator = By.XPATH )
             column_element_selenium.click()
             
                 
@@ -4309,7 +4311,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
-        self.wait.until(EC.visibility_of(element_function()))
+        self.wait_until_to( expected_condition = "visibility_of", element = element_function )
+        
         if try_counter == 0:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
@@ -4619,7 +4622,7 @@ class WebappInternal(Base):
         if not exception:
             if self.config.browser.lower() == "chrome":
                 try:
-                    self.wait.until(EC.alert_is_present())
+                    self.wait_until_to( expected_condition = "alert_is_present" )
                     self.driver.switch_to_alert().accept()
                 except:
                     pass
@@ -4927,9 +4930,9 @@ class WebappInternal(Base):
         label_element = lambda: self.soup_to_selenium(label)
         
         self.scroll_to_element(label_element())
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
         self.set_element_focus(label_element())
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(label))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
         self.click(label_element())
 
     def get_current_container(self):
@@ -5188,7 +5191,7 @@ class WebappInternal(Base):
         column_index = self.search_column_index(grid, column)
         
         div = self.search_grid_by_text(grid, last_item, column_index)
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(div))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = div, locator = By.XPATH )
         div_s = self.soup_to_selenium(div)
         self.click((div_s), enum.ClickType.SELENIUM , right_click)
 
@@ -5216,11 +5219,11 @@ class WebappInternal(Base):
         Click on a column and send the ENTER key
         
         """
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
         element_selenium = lambda: self.soup_to_selenium(element_soup)
         element_selenium().click()
         self.wait_blocker()
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
         self.send_keys(element_selenium(), Keys.ENTER)
 
     def wait_gridTree(self, n_lines):
@@ -5490,6 +5493,40 @@ class WebappInternal(Base):
                 content = True if next(iter(soup.select("img[src*='resources/images/parametersform.png']")), None) else False
             except AttributeError:
                 pass
+
+    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None ):
+        """
+        [Internal]
+        
+        This method is responsible for encapsulating "wait.until".
+        """
+
+        expected_conditions_dictionary = {
+
+            "element_to_be_clickable" : EC.element_to_be_clickable,
+            "presence_of_all_elements_located" : EC.presence_of_all_elements_located,
+            "visibility_of" : EC.visibility_of,
+            "alert_is_present" : EC.alert_is_present,
+            "visibility_of_element_located" : EC.visibility_of_element_located
+        }
+
+        if not element and expected_condition != "alert_is_present" : self.log_error("Error method wait_until_to() - element is None")
+
+        element = xpath_soup(element) if locator == By.XPATH else element
+        try:
+
+            if locator:
+                self.wait.until(expected_conditions_dictionary[expected_condition]((locator, element)))
+            elif element:
+                self.wait.until(expected_conditions_dictionary[expected_condition]( element() ))
+            elif expected_condition == "alert_is_present":
+                self.wait.until(expected_conditions_dictionary[expected_condition]())
+
+        except TimeoutException as e:
+            print(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
+            pass
+
+
     def CheckHelp(self, text, button, text_help, text_problem, text_solution, verbosity):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
@@ -5700,7 +5737,7 @@ class WebappInternal(Base):
         list_option_filtered = list(filter(lambda x: self.element_is_displayed(x), list_option))
         element = next(iter(filter(lambda x: x.text == text, list_option_filtered)), None)
         element_selenium = self.soup_to_selenium(element)
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
         element_selenium.click()
 
     def ClickImage(self, img_name):
@@ -5728,7 +5765,7 @@ class WebappInternal(Base):
             if img_soup:
                     element_selenium = lambda: self.soup_to_selenium(img_soup)
                     self.set_element_focus(element_selenium())
-                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(img_soup))))
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH )
                     success = self.click(element_selenium())
 
         return success
@@ -5748,10 +5785,10 @@ class WebappInternal(Base):
         Try excpected condition element_to_be_clickable by XPATH or ID 
         """
         try:
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH)
         except:
             if 'id' in element.find_parent('div').attrs:
-                self.wait.until(EC.element_to_be_clickable((By.ID, element.find_previous("div").attrs['id'])))
+                self.wait_until_to(expected_condition="element_to_be_clickable", element = element.find_previous("div").attrs['id'], locator = By.ID )
             else:
                 pass
 
