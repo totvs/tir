@@ -5520,6 +5520,11 @@ class WebappInternal(Base):
         >>> # Calling the method to check only the problem text with high precision.
         >>> oHelper.CheckHelp(text_problem="Problema: Essa reclamação já foi informada anteriormente.", button="Fechar", verbosity=True)
         """
+
+        text_help_extracted     = ""
+        text_problem_extracted  = ""
+        text_solution_extracted = ""
+
         if not button:
             button = self.get_single_button().text
 
@@ -5562,14 +5567,14 @@ class WebappInternal(Base):
                 return
             else:
                 print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
+                self.log_error(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
         else:
             if text_user in text_extracted:
                 print(f"Help on screen Checked: {text_user}")
                 return
             else:
                 print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-                self.log_error("Couldn't find param")
+                self.log_error(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
 
     def get_single_button(self):
         """
