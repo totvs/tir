@@ -1,5 +1,6 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
+from tir.technologies.core.config import ConfigLoader
 
 """
 This file must contain the definition of all User Classes.
@@ -18,6 +19,8 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.config = ConfigLoader()
+        self.coverage = self.config.coverage
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -979,6 +982,17 @@ class Webapp():
         >>> oHelper.ClickImage("img_name")
         """
         self.__webapp.ClickImage(img_name)
+
+    def ProgramScreen(self, initial_program=""):
+        """
+        Fills the first screen of Protheus with the first program to run.
+        :param initial_program: The initial program to load
+        :type initial_program: str
+        Usage:
+        >>> # Calling the method
+        >>> self.ProgramScreen("SIGAADV")
+        """
+        self.__webapp.program_screen(initial_program, coverage=self.coverage)
     
     def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
         """
