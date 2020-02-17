@@ -432,7 +432,7 @@ class WebappInternal(Base):
             self.send_keys(password(), password_text)
             self.send_keys(password(), Keys.ENTER)
             password_value = self.get_web_value(password())
-            self.wait_blocker_ajax()
+            self.wait_blocker()
             try_counter += 1 if(try_counter < 1) else -1
         
         if not password_value.strip() and self.config.password != '':
@@ -1066,15 +1066,15 @@ class WebappInternal(Base):
         if current_value.rstrip() != term.strip():
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
-        self.wait_blocker_ajax()
+        self.wait_blocker()
         self.double_click(sel_browse_icon())
         return True
     
-    def wait_blocker_ajax(self):
+    def wait_blocker(self):
         """
         [Internal]
         
-        Wait ajax blocker disappear
+        Wait blocker disappear
 
         """
 
@@ -1085,12 +1085,13 @@ class WebappInternal(Base):
 
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
-            if soup:
-                blocker = soup.select('.ajax-blocker')
-                result = True if blocker else False
+            container = self.get_current_container()
+            blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else 'blocked' in container.attrs['class'] if container and hasattr(container, 'attrs') else None
+            
+            if blocker:
+                result = True
             else:
-                result = False   
-
+                result = False
         return result
             
     def get_panel_name_index(self, panel_name):
@@ -1345,15 +1346,15 @@ class WebappInternal(Base):
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                input_field().send_keys(" ")
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
                             else:
-                                self.wait_blocker_ajax()
+                                self.wait_blocker()
                                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
-                                input_field().send_keys(main_value)
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
                         #if Number input
                         else:
                             tries = 0
-                            try_counter = 0
+                            try_counter = 1
                             while(tries < 3):
                                 self.set_element_focus(input_field())
                                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element))))
@@ -2117,7 +2118,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
-        self.wait_blocker_ajax()
+        self.wait_blocker()
         container = self.get_current_container()
 
         if container  and 'id' in container.attrs:
@@ -2564,6 +2565,7 @@ class WebappInternal(Base):
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
+        self.wait_blocker()
         text = ''
         endtime = time.time() + self.config.time_out
         grid_number -= 1
@@ -3290,6 +3292,7 @@ class WebappInternal(Base):
         rows = ""
         headers = ""
         columns = ""
+        try_counter = 1
         user_rows = True
 
         if(field[1] == True):
@@ -3369,8 +3372,6 @@ class WebappInternal(Base):
 
                         current_value = columns[column_number].text.strip()
                         xpath = xpath_soup(columns[column_number])
-
-                        try_counter = 0
                         current_value = self.remove_mask(current_value).strip()
 
                         selenium_column = lambda: self.get_selenium_column_element(xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field, grid_id, row, headers, field_to_label)
@@ -5169,7 +5170,7 @@ class WebappInternal(Base):
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
         element_selenium = lambda: self.soup_to_selenium(element_soup)
         element_selenium().click()
-        self.wait_blocker_ajax()
+        self.wait_blocker()
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
         self.send_keys(element_selenium(), Keys.ENTER)
 
