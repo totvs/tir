@@ -1445,9 +1445,10 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
+        timeout = 900
+        endtime = time.time() + timeout
+
         if self.config.coverage:
-            timeout = 900
-            endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1460,8 +1461,16 @@ class WebappInternal(Base):
                     print(string)
 
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish)
+            endtime = time.time() + timeout
+            while( time.time() < endtime and not element ):
+
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                soup = self.get_current_DOM()
+                element = soup.find_all(text=self.language.finish)
+
+                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            self.driver.refresh() if not element else self.SetButton(self.language.finish)
 
     def LogOff(self):
         """
@@ -2012,7 +2021,7 @@ class WebappInternal(Base):
         element_selenium = self.soup_to_selenium(element_soup)
         self.scroll_to_element(element_selenium)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
-        self.click(element_selenium)
+        self.click(element_selenium)    
     def click_sub_menu(self, sub_item):
         """
         [Internal]
