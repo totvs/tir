@@ -612,10 +612,11 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
             
-            endtime = time.time() + self.config.time_out
-            while(time.time() < endtime):
-                self.close_coin_screen()
-                self.close_modal()
+            if self.config.initial_program.lower() == "sigaadv":
+                endtime = time.time() + self.config.time_out
+                while(time.time() < endtime):
+                    self.close_coin_screen()
+                    self.close_modal()
 
 
         except AssertionError as error:
@@ -1846,7 +1847,7 @@ class WebappInternal(Base):
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
 
-            if wait_coin_screen:
+            if wait_coin_screen and self.config.initial_program.lower() == "sigaadv":
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime):
                     self.close_coin_screen()
