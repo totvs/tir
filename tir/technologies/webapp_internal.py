@@ -1591,25 +1591,27 @@ class WebappInternal(Base):
     def search_for_errors(self, check_help=True):
         """
         [Internal]
-
         Searches for errors and alerts in the screen.
-
         Usage:
-
         >>> # Calling the method:
         >>> self.search_for_errors()
         """
         endtime = time.time() + self.config.time_out
         soup = None
+        top_layer = None
 
         while(time.time() < endtime and not soup):
             soup = self.get_current_DOM()
-            
-        if not soup:
-            self.log_error("Search for erros cound't find DOM")
-        
-        message = ""
-        top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        try:   
+            if not soup:
+                self.log_error("Search for erros couldn't find DOM")
+            message = ""
+            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        except AttributeError as e:
+            self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
+
         if not top_layer:
             return None
 
@@ -1639,7 +1641,7 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
+        self.restart_counter += 1
         self.log_error(message)
 
     def get_function_from_stack(self):
@@ -3938,25 +3940,42 @@ class WebappInternal(Base):
                 pass
             
             if self.log.get_testcase_stack() not in self.log.test_case_log:
-                self.driver.save_screenshot(path)
+                try:
+                    self.driver.save_screenshot(path)
+                except Exception as e:
+                    print(f"Warning Log Error save_screenshot exception {str(e)}")
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        self.log.save_file(routine_name)
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
             self.restart()
-        else:
-            self.driver.close()
+        else:            
+            try:
+                self.driver.close()
+            except Exception as e:
+                print(f"Warning Log Error Close {str(e)}")
 
         if self.restart_counter > 2:
-            self.restart_counter = 0
 
-        if self.config.num_exec and stack_item == "setUpClass":
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-            
-        self.assertTrue(False, log_message)
+            if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
+                try:
+                    self.num_exec.post_exec(self.config.url_set_end_exec)
+                except Exception as error:
+                    self.restart_counter = 3
+                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                
+            if (stack_item == "setUpClass") :
+                try:
+                    self.driver.close()
+                except Exception as e:
+                    print(f"Warning Log Error Close {str(e)}")
+
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
