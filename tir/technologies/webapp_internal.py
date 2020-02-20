@@ -473,8 +473,34 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body"):
             self.SetButton(self.language.confirm)
+
+    def close_coin_screen_after_routine():
+        """
+        [internal]
+        This method is responsible for closing the "coin screen" that opens after searching for the routine
+        """
+        endtime = time.time() + self.config.time_out
+        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out, main_container="body")
+
+        tmodaldialog_list = []
+
+        while(time.time() < endtime and not tmodaldialog_list):
+
+            soup = self.get_current_DOM()
+            tmodaldialog_list = soup.select('.tmodaldialog')
+
+            tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body")), None)
+
+            if tmodal_coin_screen:
+                tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
+                
+            self.close_coin_screen()
+            self.close_modal()
+        
         
     def close_resolution_screen(self):
         """
@@ -612,12 +638,25 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
             
-            if self.config.initial_program.lower() == "sigaadv":
-                endtime = time.time() + self.config.time_out
-                while(time.time() < endtime):
-                    self.close_coin_screen()
-                    self.close_modal()
+            endtime = time.time() + self.config.time_out
+            self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+             timeout = self.config.time_out, main_container="body")
 
+            tmodaldialog_list = []
+
+            while(time.time() < endtime and not tmodaldialog_list):
+
+                soup = self.get_current_DOM()
+                tmodaldialog_list = soup.select('.tmodaldialog')
+
+                tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body")), None)
+
+                if tmodal_coin_screen:
+                    tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
+                    
+                self.close_coin_screen()
+                self.close_modal()
 
         except AssertionError as error:
             raise error
@@ -1849,11 +1888,7 @@ class WebappInternal(Base):
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
 
-            if wait_coin_screen and self.config.initial_program.lower() == "sigaadv":
-                endtime = time.time() + self.config.time_out
-                while(time.time() < endtime):
-                    self.close_coin_screen()
-                    self.close_modal()
+            self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             raise error
