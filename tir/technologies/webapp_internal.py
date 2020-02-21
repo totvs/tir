@@ -122,7 +122,7 @@ class WebappInternal(Base):
                 self.log.program = self.get_program_name()
 
             if self.config.coverage:
-                self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+                self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
 
             self.user_screen_tss()
             self.set_log_info_tss()
@@ -200,14 +200,14 @@ class WebappInternal(Base):
                 self.config.module = module
 
             if self.config.coverage:
-                self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={initial_program}&Env={self.config.environment}")
+                self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
 
             if not self.config.valid_language:
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program)
+                self.program_screen(initial_program=initial_program, coverage=False)
 
             self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
@@ -252,7 +252,7 @@ class WebappInternal(Base):
 
 
 
-    def program_screen(self, initial_program="", environment=""):
+    def program_screen(self, initial_program="", environment="", coverage=False):
         """
         [Internal]
 
@@ -268,74 +268,77 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
-        try_counter = 0
-        self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        soup = self.get_current_DOM()
+        if coverage:
+            self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
+        else:
+            try_counter = 0
+            self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            soup = self.get_current_DOM()
 
-        print("Filling Initial Program")
-        start_prog_element = next(iter(soup.select("#inputStartProg")), None)
-        if start_prog_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find Initial Program input element."
-            self.log_error(message)
-            raise ValueError(message)
+            print("Filling Initial Program")
+            start_prog_element = next(iter(soup.select("#inputStartProg")), None)
+            if start_prog_element is None:
+                self.restart_counter += 1
+                message = "Couldn't find Initial Program input element."
+                self.log_error(message)
+                raise ValueError(message)
 
-        start_prog = lambda: self.soup_to_selenium(start_prog_element)
-        start_prog_value = self.get_web_value(start_prog())
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
-
-            if try_counter == 0:
-                start_prog = lambda: self.soup_to_selenium(start_prog_element)
-            else:
-                start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
-
-            self.set_element_focus(start_prog())
-            start_prog().clear()
-            self.send_keys(start_prog(), initial_program)
+            start_prog = lambda: self.soup_to_selenium(start_prog_element)
             start_prog_value = self.get_web_value(start_prog())
-            try_counter += 1 if(try_counter < 1) else -1
-        
-        if (start_prog_value.strip() != initial_program.strip()):
-            self.restart_counter += 1
-            message = "Couldn't fill Program input element."
-            self.log_error(message)
-            raise ValueError(message)
+            endtime = time.time() + self.config.time_out
+            while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
 
-        print("Filling Environment")
-        env_element = next(iter(soup.select("#inputEnv")), None)
-        if env_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find Environment input element."
-            self.log_error(message)
-            raise ValueError(message)
+                if try_counter == 0:
+                    start_prog = lambda: self.soup_to_selenium(start_prog_element)
+                else:
+                    start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
 
-        env = lambda: self.soup_to_selenium(env_element)
-        env_value = self.get_web_value(env())
-        endtime = time.time() + self.config.time_out
-        try_counter = 0
-        while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
+                self.set_element_focus(start_prog())
+                start_prog().clear()
+                self.send_keys(start_prog(), initial_program)
+                start_prog_value = self.get_web_value(start_prog())
+                try_counter += 1 if(try_counter < 1) else -1
+            
+            if (start_prog_value.strip() != initial_program.strip()):
+                self.restart_counter += 1
+                message = "Couldn't fill Program input element."
+                self.log_error(message)
+                raise ValueError(message)
 
-            if try_counter == 0:
-                env = lambda: self.soup_to_selenium(env_element)
-            else:
-                env = lambda: self.soup_to_selenium(env_element.parent)
+            print("Filling Environment")
+            env_element = next(iter(soup.select("#inputEnv")), None)
+            if env_element is None:
+                self.restart_counter += 1
+                message = "Couldn't find Environment input element."
+                self.log_error(message)
+                raise ValueError(message)
 
-            self.set_element_focus(env())
-            env().clear()
-            self.send_keys(env(), self.config.environment)
+            env = lambda: self.soup_to_selenium(env_element)
             env_value = self.get_web_value(env())
-            try_counter += 1 if(try_counter < 1) else -1
+            endtime = time.time() + self.config.time_out
+            try_counter = 0
+            while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
 
-        if (env_value.strip() != self.config.environment.strip()):
-            self.restart_counter += 1
-            message = "Couldn't fill Environment input element."
-            self.log_error(message)
-            raise ValueError(message)
+                if try_counter == 0:
+                    env = lambda: self.soup_to_selenium(env_element)
+                else:
+                    env = lambda: self.soup_to_selenium(env_element.parent)
 
-        button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
-        self.click(button)
+                self.set_element_focus(env())
+                env().clear()
+                self.send_keys(env(), self.config.environment)
+                env_value = self.get_web_value(env())
+                try_counter += 1 if(try_counter < 1) else -1
+
+            if (env_value.strip() != self.config.environment.strip()):
+                self.restart_counter += 1
+                message = "Couldn't fill Environment input element."
+                self.log_error(message)
+                raise ValueError(message)
+
+            button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
+            self.click(button)
 
     def user_screen(self, admin_user = False):
         """
@@ -1640,7 +1643,7 @@ class WebappInternal(Base):
             self.assertTrue(False, message)
         
         if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
-            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            self.open_url_coverage(url=self.config.url, initial_program=self.config.initial_program, environment=self.config.environment)
 
         try:
             self.driver.switch_to_alert().accept()
@@ -5884,6 +5887,22 @@ class WebappInternal(Base):
         else:
             return df[column].values.tolist() if isinstance(column, int) else df.values.tolist()
 
+    def open_url_coverage(self, url='', initial_program='', environment=''):
+        """
+        [Internal]
+        Open a webapp url with line parameters
+        :param url: server url.
+        :type url: str
+        :param initial_program: program name.
+        :type initial_program: str
+        :param environment: environment server.
+        :type environment: str
+        Usage:
+        >>> # Call the method:  
+        >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
+        """
+        self.driver.get(f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}") 
+        
     def returns_printable_string(self, string):
         """
         Returns a string only is printable characters
