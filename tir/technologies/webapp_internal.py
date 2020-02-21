@@ -1695,8 +1695,16 @@ class WebappInternal(Base):
                     print(string)
 
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish)
+            endtime = time.time() + timeout
+            while( time.time() < endtime and not element ):
+
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                soup = self.get_current_DOM()
+                element = soup.find_all(text=self.language.finish)
+
+                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            self.driver.refresh() if not element else self.SetButton(self.language.finish)
 
     def LogOff(self):
         """
