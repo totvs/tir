@@ -476,7 +476,7 @@ class WebappInternal(Base):
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body"):
             self.SetButton(self.language.confirm)
 
-    def close_coin_screen_after_routine():
+    def close_coin_screen_after_routine(self):
         """
         [internal]
         This method is responsible for closing the "coin screen" that opens after searching for the routine
@@ -638,11 +638,11 @@ class WebappInternal(Base):
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
             
-            endtime = time.time() + self.config.time_out
             self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
              timeout = self.config.time_out, main_container="body")
 
             tmodaldialog_list = []
+            endtime = time.time() + self.config.time_out
 
             while(time.time() < endtime and not tmodaldialog_list):
 
@@ -654,7 +654,8 @@ class WebappInternal(Base):
 
                 if tmodal_coin_screen:
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
-                    
+                
+    
                 self.close_coin_screen()
                 self.close_modal()
 
@@ -1885,8 +1886,8 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
-
-            self.close_coin_screen_after_routine()
+            if wait_coin_screen:
+                self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             raise error
