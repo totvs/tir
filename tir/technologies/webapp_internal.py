@@ -1679,10 +1679,10 @@ class WebappInternal(Base):
         """
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        timeout = 900
+        endtime = time.time() + timeout
 
         if self.config.coverage:
-            timeout = 900
-            endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1695,7 +1695,6 @@ class WebappInternal(Base):
                     print(string)
 
         else:
-            endtime = time.time() + timeout
             while( time.time() < endtime and not element ):
 
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1717,9 +1716,9 @@ class WebappInternal(Base):
         """
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        timeout = 900
 
         if self.config.coverage:
-            timeout = 900
             endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
