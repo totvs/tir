@@ -3364,6 +3364,17 @@ class WebappInternal(Base):
             field_to_label = x3_dictionaries[2]
             field_to_valtype = x3_dictionaries[0]
             field_to_len = x3_dictionaries[1]
+            
+        if "_" in field[0]:
+            try:
+                column_name = field_to_label[field[0]].lower()
+            except:
+                self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
+        else:
+            column_name = field[0].lower()
+
+        self.wait_element_timeout(term = column_name,
+            scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term = 'th label', main_container = 'body')
 
         endtime = time.time() + self.config.time_out
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
@@ -3403,7 +3414,6 @@ class WebappInternal(Base):
                         if grid_id not in self.grid_counters:
                             self.grid_counters[grid_id] = 0
 
-                        column_name = ""
                         down_loop = 0
                         rows = grids[field[2]].select("tbody tr")
                 else:
@@ -3431,14 +3441,6 @@ class WebappInternal(Base):
                 self.down_loop_grid = False
                 columns = row.select("td")
                 if columns:
-                    if "_" in field[0]:
-                        try:
-                            column_name = field_to_label[field[0]].lower()
-                        except:
-                            self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
-                    else:
-                        column_name = field[0].lower()
-
                     if column_name in headers[field[2]]:
                         column_number = headers[field[2]][column_name]
 
