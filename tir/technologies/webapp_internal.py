@@ -1980,6 +1980,9 @@ class WebappInternal(Base):
             if scrap_type != enum.ScrapType.XPATH:
                 soup = self.get_current_DOM()
 
+                if not soup:
+                    return False
+
                 if check_error:
                     self.search_for_errors()
 
@@ -1988,9 +1991,15 @@ class WebappInternal(Base):
                     container_selector = main_container
 
                 try:
-                    containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                    containers_soup = soup.select(container_selector)
+
+                    if not containers_soup:
+                        return False
+
+                    containers = self.zindex_sort(containers_soup, reverse=True)
+
                 except Exception as e:
-                    print(e)
+                    print(f"Warning element_exists containers exception:\n {str(e)}")
                     pass
 
                 if self.base_container in container_selector:
