@@ -171,7 +171,8 @@ class Base(unittest.TestCase):
         except StaleElementReferenceException:
             print("********Element Stale click*********")
             return False
-        except Exception:
+        except Exception as e:
+            print(f"Warning click method Exception: {str(e)}")
             return False
 
     def compare_field_values(self, field, user_value, captured_value, message):

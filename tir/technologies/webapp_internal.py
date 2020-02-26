@@ -3855,6 +3855,7 @@ class WebappInternal(Base):
 
                             self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
                             self.click(column_element())
+                            self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
                                 success = True
@@ -3863,7 +3864,7 @@ class WebappInternal(Base):
                                 success = True
 
         if not success:
-            self.log_error("Couldn't Click on grid cell ")
+            self.log_error(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
 
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
@@ -4061,6 +4062,15 @@ class WebappInternal(Base):
                 time.sleep(step)
         except Exception:
             return
+
+    def wait_element_is_focused(self, element_selenium = None, time_out = 5, step = 0.1):
+        """
+        [ Internal ]
+        Wait element Lose focus
+        """
+        endtime = time.time() + time_out
+        while( element_selenium and time.time() < endtime and self.driver.switch_to_active_element() != element_selenium() ):
+            time.sleep(step)
 
     def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
         """
