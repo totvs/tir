@@ -493,7 +493,9 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
                 tmodaldialog_list = soup.select('.tmodaldialog')
 
-                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, check_error = False)
+                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
+                 
                 tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
                     optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
 
@@ -645,6 +647,7 @@ class WebappInternal(Base):
             self.close_coin_screen_after_routine()
 
         except AssertionError as error:
+            print(f"Warning set program raise AssertionError: {str(e)}")
             raise error
         except Exception as e:
             self.log_error(str(e))
@@ -1435,6 +1438,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.restart()
         """
+        print(f"Trying to restart: {self.restart_counter}")
         self.driver.refresh()
         
         if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
@@ -1497,6 +1501,9 @@ class WebappInternal(Base):
                 element = soup.find_all(text=self.language.finish)
 
                 self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            if not element:
+                print("Warning method finish use driver.refresh. element not found")
 
             self.driver.refresh() if not element else self.SetButton(self.language.finish)
 
@@ -1590,7 +1597,7 @@ class WebappInternal(Base):
                 container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
-                raise Exception("Web Scrap couldn't find container")
+                raise Exception(f"Web Scrap couldn't find container - term: {term}")
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
@@ -3937,6 +3944,7 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
         self.clear_grid()
+        print(f"Warning log_error {message}")
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
         routine_name = routine_name if routine_name else "error"
@@ -4158,6 +4166,8 @@ class WebappInternal(Base):
             self.SetLateralMenu(self.config.routine, save_input=False)
         else:
             self.Program(self.config.routine)
+
+        print("Terminou o parameter_screen")
 
     def fill_parameters(self, restore_backup):
         """
