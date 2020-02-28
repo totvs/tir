@@ -1,6 +1,6 @@
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -14,7 +14,7 @@ setup(
     project_urls={
     'Script Samples': 'https://github.com/totvs/tir-script-samples'
     },
-    version='1.13.0.post7',
+    version='1.13.0-2',
     license='MIT',
     keywords='test automation selenium tir totvs protheus framework',
     classifiers=[
@@ -29,18 +29,17 @@ setup(
         'Topic :: Software Development :: Testing'
     ],
     install_requires=[
-        'beautifulsoup4>=4.7.1',
-        'bs4>=0.0.1',
+        'beautifulsoup4',
         'numpy',
-        'pandas>=0.23.4',
-        'python-dateutil>=2.6.1',
-        'pytz>=2017.3',
-        'selenium>=3.8.0',
-        'six==1.11.0',
+        'pandas',
+        'python-dateutil',
+        'pytz',
+        'selenium',
+        'six',
         'enum34',
         'requests'
     ],
-    packages=['tir'],
+    packages=find_packages(),
     scripts=[],
     name='tir_framework'
 )
