@@ -473,7 +473,8 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+         optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
 
     def close_coin_screen_after_routine(self):
@@ -483,7 +484,7 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out, main_container="body")
+            timeout = self.config.time_out, main_container="body", check_error = False)
 
         tmodaldialog_list = []
 
@@ -492,9 +493,9 @@ class WebappInternal(Base):
                 soup = self.get_current_DOM()
                 tmodaldialog_list = soup.select('.tmodaldialog')
 
-                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10)
+                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, check_error = False)
                 tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body")), None)
+                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
 
                 if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
