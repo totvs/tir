@@ -4167,8 +4167,6 @@ class WebappInternal(Base):
         else:
             self.Program(self.config.routine)
 
-        print("Terminou o parameter_screen")
-
     def fill_parameters(self, restore_backup):
         """
         [Internal]
