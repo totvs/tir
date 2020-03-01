@@ -1127,6 +1127,10 @@ class WebappInternal(Base):
         """
 
         print("Waiting blocker to continue...")
+        soup = None
+        result = True
+        endtime = time.time() + 1200
+
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
             container = self.get_current_container()
@@ -2341,6 +2345,10 @@ class WebappInternal(Base):
         
     def click_sub_menu(self, sub_item):
         """
+        [Internal]
+
+        Clicks on the sub menu of buttons. Returns True if succeeded.
+        Internal method of SetButton.
 
         :param sub_item: The menu item that should be clicked.
         :type sub_item: str
@@ -5286,7 +5294,15 @@ class WebappInternal(Base):
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
         self.send_keys(element_selenium(), Keys.ENTER)
         
+    def wait_gridTree(self, n_lines):
+        """
+        [Internal]
+        Wait until the GridTree line count increases or decreases.
 
+        """
+        endtime = time.time() + self.config.time_out
+        grid = self.get_grid(grid_element = '.tcbrowse')
+        
         while (time.time() < endtime and n_lines == self.lenght_grid_lines(grid) ):
             grid = self.get_grid(grid_element = '.tcbrowse')
 
