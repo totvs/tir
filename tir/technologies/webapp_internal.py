@@ -642,8 +642,37 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body"):
             self.SetButton(self.language.confirm)
+
+    def close_coin_screen_after_routine(self):
+        """
+        [internal]
+        This method is responsible for closing the "coin screen" that opens after searching for the routine
+        """
+        endtime = time.time() + self.config.time_out
+        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out, main_container="body")
+
+        tmodaldialog_list = []
+
+        while(time.time() < endtime and not tmodaldialog_list):
+            try:
+                soup = self.get_current_DOM()
+                tmodaldialog_list = soup.select('.tmodaldialog')
+
+                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10)
+                tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body")), None)
+
+                if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
+                    tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
+                    
+                self.close_coin_screen()
+                self.close_modal()
+            except Exception as e:
+                print(str(e))
+        
         
     def close_resolution_screen(self):
         """
@@ -805,11 +834,10 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.click(s_tget_img())
+                
                 self.wait_element_is_not_displayed(tget_img)
 
-            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_coin_screen()
-                self.close_modal()
+            self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             raise error
@@ -1099,10 +1127,6 @@ class WebappInternal(Base):
         """
 
         print("Waiting blocker to continue...")
-        soup = None
-        result = True
-        endtime = time.time() + 1200
-
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
             container = self.get_current_container()
@@ -1822,11 +1846,8 @@ class WebappInternal(Base):
     def search_for_errors(self, check_help=True):
         """
         [Internal]
-
         Searches for errors and alerts in the screen.
-
         Usage:
-
         >>> # Calling the method:
         >>> self.search_for_errors()
         """
@@ -2051,6 +2072,7 @@ class WebappInternal(Base):
         """
         submenu = ""
         endtime = time.time() + self.config.time_out
+        wait_coin_screen = True if menu_itens != self.language.menu_about else False
         if save_input:
             self.config.routine = menu_itens
 
@@ -2096,9 +2118,8 @@ class WebappInternal(Base):
 
             self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
-            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_coin_screen()
-                self.close_modal()
+            if wait_coin_screen:
+                self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             raise error
@@ -2320,10 +2341,6 @@ class WebappInternal(Base):
         
     def click_sub_menu(self, sub_item):
         """
-        [Internal]
-
-        Clicks on the sub menu of buttons. Returns True if succeeded.
-        Internal method of SetButton.
 
         :param sub_item: The menu item that should be clicked.
         :type sub_item: str
@@ -5268,15 +5285,7 @@ class WebappInternal(Base):
         self.wait_blocker()
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
         self.send_keys(element_selenium(), Keys.ENTER)
-
-    def wait_gridTree(self, n_lines):
-        """
-        [Internal]
-        Wait until the GridTree line count increases or decreases.
         
-        """
-        endtime = time.time() + self.config.time_out
-        grid = self.get_grid(grid_element = '.tcbrowse')
 
         while (time.time() < endtime and n_lines == self.lenght_grid_lines(grid) ):
             grid = self.get_grid(grid_element = '.tcbrowse')

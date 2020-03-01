@@ -406,7 +406,29 @@ class Base(unittest.TestCase):
         >>> soup = self.get_current_DOM()
         """
         try:
-            return BeautifulSoup(self.driver.page_source,"html.parser")
+
+            soup = BeautifulSoup(self.driver.page_source,"html.parser")
+
+            if soup and soup.select('.session'):
+
+                script = """
+                var getIframe = () => {
+                    if(document.querySelector(".session")){
+                        var iframeObject = document.querySelector(".session")
+                        var contet = iframeObject.contentDocument;
+                        var serializer = new XMLSerializer();
+                        return serializer.serializeToString(contet);
+                    }
+                    return ""
+                }
+
+                return getIframe()
+                """
+                soup = BeautifulSoup(self.driver.execute_script(script),'html.parser')
+                self.driver.switch_to.frame(self.driver.find_element_by_css_selector("iframe[class=session]"))
+
+            return soup
+            
         except WebDriverException:
             pass
 
