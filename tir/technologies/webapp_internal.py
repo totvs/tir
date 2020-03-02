@@ -503,7 +503,7 @@ class WebappInternal(Base):
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
                     
                 self.close_coin_screen()
-                self.close_modal()
+                
             except Exception as e:
                 print(str(e))
         
