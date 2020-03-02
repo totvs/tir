@@ -4103,7 +4103,7 @@ class WebappInternal(Base):
         Wait element Lose focus
         """
         endtime = time.time() + time_out
-        while( element_selenium and time.time() < endtime and self.driver.switch_to_active_element() != element_selenium() ):
+        while( element_selenium and time.time() < endtime and self.switch_to_active_element() != element_selenium() ):
             time.sleep(step)
 
     def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
@@ -4112,8 +4112,21 @@ class WebappInternal(Base):
         Wait element Lose focus
         """
         endtime = time.time() + time_out
-        while( element_selenium and time.time() < endtime and self.driver.switch_to_active_element() == element_selenium() ):
+        while( element_selenium and time.time() < endtime and self.switch_to_active_element() == element_selenium() ):
             time.sleep(step)
+
+    def switch_to_active_element(self):
+        """
+        [Internal]
+        Call switch_to_active_element method
+        """
+        try:
+            self.driver.switch_to_active_element()
+        except NoSuchElementException:
+            return None
+        except Exception as e:
+            print(f"Warning switch_to_active_element() exception : {str(e)}")
+            return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
         """
