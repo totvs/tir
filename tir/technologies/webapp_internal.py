@@ -4590,7 +4590,8 @@ class WebappInternal(Base):
         """
         icon = ""
         success = False
-        # self.wait_element(term=".tmodaldialog button[style]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        filtered_buttons = None
+        
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
             self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4612,7 +4613,8 @@ class WebappInternal(Base):
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    icon = next(iter(filtered_buttons), None)
+                    if filtered_buttons:
+                        icon = next(iter(filtered_buttons), None)
 
             if icon:
                 element = lambda: self.soup_to_selenium(icon)
