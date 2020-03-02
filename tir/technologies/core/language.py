@@ -300,8 +300,8 @@ class LanguagePack:
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
             "Enter": "Ввод",
-            #"Finish": "Завершить",
-            "Finish": "3акрыть",
+            "Finish": "Завершить",
+            #"Finish": "3акрыть",
             #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
             #"Search": "Поиск",
@@ -340,9 +340,17 @@ class LanguagePack:
             "Search By": "Search by:",
             "From": "De",
             "To": "Ate",
-            "Coins": "Monedas",
-            "Next": "Avançar >>",
-            "LogOff": "Log Off"
+            "Coins": "Валюта",
+            "Next": "Далее >>",
+            "LogOff": "Завершить",
+            "Checkhelp": "Помощь:",
+            "Checkproblem": "Проблема:",
+            "Checksolution": "Решение:",
+            "ChangePassword": "Смена пароля",
+            "UserLogin": "Пользователь (логин)",
+            "CurrentPassword": "Текущий пароль*",
+            "NewPassword": "Нов. пароль*",
+            "ConfirmNewPassword": "Подтв. новый пароль*"
         }
 
         if language.lower() == "en-us":
