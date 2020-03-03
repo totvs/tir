@@ -843,7 +843,7 @@ class WebappInternal(Base):
             self.close_coin_screen_after_routine()
 
         except AssertionError as error:
-            print(f"Warning set program raise AssertionError: {str(e)}")
+            print(f"Warning set program raise AssertionError: {str(error)}")
             raise error
         except Exception as e:
             self.log_error(str(e))
