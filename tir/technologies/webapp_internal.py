@@ -1835,9 +1835,9 @@ class WebappInternal(Base):
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
-                    return self.find_label_element(term, container)
+                    return self.find_label_element(term, container) if self.find_label_element(term, container) else []
                 elif not re.match(r"\w+(_)", term):
-                    return self.filter_label_element(term, container)
+                    return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
