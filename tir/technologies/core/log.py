@@ -110,7 +110,7 @@ class Log:
             
             testcases = self.list_of_testcases()
 
-            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass")) :
+            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -138,10 +138,14 @@ class Log:
         """
         Returns a list of test cases from suite 
         """
-        runner = next(iter(list(filter(lambda x: "runner.py" in x.filename, inspect.stack()))))
-        try:
-            return list(runner.frame.f_locals['test'])
-        except KeyError:
+        runner = next(iter(list(filter(lambda x: "runner.py" in x.filename, inspect.stack()))), None)
+
+        if runner:
+            try:
+                return list(runner.frame.f_locals['test'])
+            except KeyError:
+                return []
+        else:
             return []
 
     def get_testcase_stack(self):
@@ -150,3 +154,37 @@ class Log:
         [Internal]
         """
         return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass', x.function) or re.search('test_', x.function), inspect.stack())))), None)
+
+    def checks_empty_line(self):
+        """
+        Checks if the log file is not empty.
+        03 - 'Programa'  10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
+        [Internal]
+        """
+        table_rows_has_line = False
+
+        if self.table_rows[1][3] == '':
+            self.table_rows[1][3] = 'NO PROGRAM'
+
+        if self.table_rows[1][10] == '':
+            self.table_rows[1][10] = '12.1.25'
+
+        if self.table_rows[1][15] == '':
+            self.table_rows[1][15] = 'BRA'
+
+        if self.table_rows[1][11] == '':
+            self.table_rows[1][11] = 'TIMEOUT'
+
+        if len(self.table_rows) > 1:
+            for x in [ 3, 10, 15 ]:
+                if (self.table_rows[1][x]):
+                    table_rows_has_line = True
+                else:
+                    table_rows_has_line = False
+                    break
+            if self.config.smart_test and self.table_rows[1][14] and table_rows_has_line:
+                table_rows_has_line = True
+            elif self.config.smart_test:
+                table_rows_has_line = False
+
+        return table_rows_has_line

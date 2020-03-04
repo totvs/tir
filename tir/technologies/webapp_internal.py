@@ -447,7 +447,7 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
+        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error = False):
             buttons = modals[0].select(".tbrowsebutton")
             if buttons:
                 close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
@@ -473,8 +473,40 @@ class WebappInternal(Base):
         """
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED, optional_term="label", main_container="body"):
+        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+         optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
+
+    def close_coin_screen_after_routine(self):
+        """
+        [internal]
+        This method is responsible for closing the "coin screen" that opens after searching for the routine
+        """
+        endtime = time.time() + self.config.time_out
+        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out, main_container="body", check_error = False)
+
+        tmodaldialog_list = []
+
+        while(time.time() < endtime and not tmodaldialog_list):
+            try:
+                soup = self.get_current_DOM()
+                tmodaldialog_list = soup.select('.tmodaldialog')
+
+                self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
+                 
+                tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
+
+                if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
+                    tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
+                    
+                self.close_coin_screen()
+                
+            except Exception as e:
+                print(str(e))
+        
         
     def close_resolution_screen(self):
         """
@@ -611,12 +643,11 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(tget_img))))
                 self.click(s_tget_img())
-
-            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_coin_screen()
-                self.close_modal()
+            
+            self.close_coin_screen_after_routine()
 
         except AssertionError as error:
+            print(f"Warning set program raise AssertionError: {str(e)}")
             raise error
         except Exception as e:
             self.log_error(str(e))
@@ -1407,6 +1438,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.restart()
         """
+        print(f"Trying to restart: {self.restart_counter}")
         self.driver.refresh()
         
         if self.config.coverage and self.config.initial_program != ''  and self.restart_counter < 3:
@@ -1445,9 +1477,10 @@ class WebappInternal(Base):
         element = ""
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
+        timeout = 900
+        endtime = time.time() + timeout
+
         if self.config.coverage:
-            timeout = 900
-            endtime = time.time() + timeout
             while(time.time() < endtime and not element):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
@@ -1460,8 +1493,19 @@ class WebappInternal(Base):
                     print(string)
 
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.finish)
+            endtime = time.time() + timeout
+            while( time.time() < endtime and not element ):
+
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                soup = self.get_current_DOM()
+                element = soup.find_all(text=self.language.finish)
+
+                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            if not element:
+                print("Warning method finish use driver.refresh. element not found")
+
+            self.driver.refresh() if not element else self.SetButton(self.language.finish)
 
     def LogOff(self):
         """
@@ -1553,7 +1597,7 @@ class WebappInternal(Base):
                 container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
-                raise Exception("Web Scrap couldn't find container")
+                raise Exception(f"Web Scrap couldn't find container - term: {term}")
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
@@ -1579,25 +1623,27 @@ class WebappInternal(Base):
     def search_for_errors(self, check_help=True):
         """
         [Internal]
-
         Searches for errors and alerts in the screen.
-
         Usage:
-
         >>> # Calling the method:
         >>> self.search_for_errors()
         """
         endtime = time.time() + self.config.time_out
         soup = None
+        top_layer = None
 
         while(time.time() < endtime and not soup):
             soup = self.get_current_DOM()
-            
-        if not soup:
-            self.log_error("Search for erros cound't find DOM")
-        
-        message = ""
-        top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        try:   
+            if not soup:
+                self.log_error("Search for erros couldn't find DOM")
+            message = ""
+            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+
+        except AttributeError as e:
+            self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
+
         if not top_layer:
             return None
 
@@ -1627,7 +1673,7 @@ class WebappInternal(Base):
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
             self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
-
+        self.restart_counter += 1
         self.log_error(message)
 
     def get_function_from_stack(self):
@@ -1793,6 +1839,7 @@ class WebappInternal(Base):
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
         endtime = time.time() + self.config.time_out
+        wait_coin_screen = True if menu_itens != self.language.menu_about else False
         if save_input:
             self.config.routine = menu_itens
 
@@ -1833,10 +1880,8 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
-
-            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_coin_screen()
-                self.close_modal()
+            if wait_coin_screen:
+                self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             raise error
@@ -2012,7 +2057,7 @@ class WebappInternal(Base):
         element_selenium = self.soup_to_selenium(element_soup)
         self.scroll_to_element(element_selenium)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(element_soup))))
-        self.click(element_selenium)
+        self.click(element_selenium)    
     def click_sub_menu(self, sub_item):
         """
         [Internal]
@@ -3899,6 +3944,7 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
         self.clear_grid()
+        print(f"Warning log_error {message}")
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
         routine_name = routine_name if routine_name else "error"
@@ -3923,25 +3969,42 @@ class WebappInternal(Base):
                 pass
             
             if self.log.get_testcase_stack() not in self.log.test_case_log:
-                self.driver.save_screenshot(path)
+                try:
+                    self.driver.save_screenshot(path)
+                except Exception as e:
+                    print(f"Warning Log Error save_screenshot exception {str(e)}")
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        self.log.save_file(routine_name)
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            self.log.save_file(routine_name)
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
             self.restart()
-        else:
-            self.driver.close()
+        else:            
+            try:
+                self.driver.close()
+            except Exception as e:
+                print(f"Warning Log Error Close {str(e)}")
 
         if self.restart_counter > 2:
-            self.restart_counter = 0
 
-        if self.config.num_exec and stack_item == "setUpClass":
-            self.num_exec.post_exec(self.config.url_set_end_exec)
-            
-        self.assertTrue(False, log_message)
+            if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
+                try:
+                    self.num_exec.post_exec(self.config.url_set_end_exec)
+                except Exception as error:
+                    self.restart_counter = 3
+                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                
+            if (stack_item == "setUpClass") :
+                try:
+                    self.driver.close()
+                except Exception as e:
+                    print(f"Warning Log Error Close {str(e)}")
+
+        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            self.assertTrue(False, log_message)
 
     def ClickIcon(self, icon_text):
         """
