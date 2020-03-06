@@ -1,31 +1,46 @@
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
-config = {
-    'description': 'TOTVS Interface Robot',
-    'author': 'TOTVS Automation Team',
-    'url': 'https://github.com/totvs/tir',
-    'download_url': 'https://github.com/totvs/tir',
-    'author_email': '',
-    'version': '1.13.12',
-    'install_requires': [
-        'beautifulsoup4==4.7.1',
-        'bs4==0.0.1',
+setup(
+    description='TOTVS Interface Robot',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
+    author='tir_engpro',
+    url='https://github.com/totvs/tir',
+    download_url='https://github.com/totvs/tir',
+    project_urls={
+    'Script Samples': 'https://github.com/totvs/tir-script-samples'
+    },
+    version='1.14.0',
+    license='MIT',
+    keywords='test automation selenium tir totvs protheus framework',
+    classifiers=[
+        'Environment :: Web Environment',
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Documentation :: Sphinx',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Quality Assurance',
+        'Topic :: Software Development :: Testing'
+    ],
+    install_requires=[
+        'beautifulsoup4',
         'numpy',
-        'pandas==0.23.4',
-        'python-dateutil==2.6.1',
-        'pytz==2017.3',
-        'selenium==3.8.0',
-        'six==1.11.0',
+        'pandas',
+        'python-dateutil',
+        'pytz',
+        'selenium',
+        'six',
         'enum34',
         'requests'
     ],
-    'packages': ['tir'],
-    'scripts': [],
-    'name': 'tir'
-}
-
-setup(**config, include_package_data=True)
+    packages=find_packages(),
+    scripts=[],
+    name='tir_framework',
+    include_package_data=True
+)
