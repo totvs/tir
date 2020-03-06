@@ -967,7 +967,10 @@ class Base(unittest.TestCase):
 
         self.check_pyodbc_drivers(driver_database)
 
-        connection = pyodbc.connect(f'DRIVER={driver_database}; server={server_database}; database={name_database}; uid={user_database}; pwd={password_database}')
+        try:
+            connection = pyodbc.connect(f'DRIVER={driver_database}; server={server_database}; database={name_database}; uid={user_database}; pwd={password_database}')
+        except Exception as error:
+            self.log_error(str(error))
 
         return connection
 
