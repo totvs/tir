@@ -1,7 +1,7 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.core.config import ConfigLoader
-
+from tir.technologies.core.database import Database
 """
 This file must contain the definition of all User Classes.
 
@@ -19,6 +19,7 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__database = Database()
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
@@ -1042,7 +1043,7 @@ class Webapp():
         >>> # Call the method:
         >>> self.oHelper.StartDB()
         """
-        return self.__webapp.connect_database()
+        return self.__database.connect_database()
 
     def StopDB(self, connection):
         """
@@ -1053,7 +1054,7 @@ class Webapp():
         >>> # Call the method:
         >>> self.oHelper.StopDB(connection)
         """
-        self.__webapp.disconnect_database(connection)
+        self.__database.connect_database()
         
 class Apw():
 
