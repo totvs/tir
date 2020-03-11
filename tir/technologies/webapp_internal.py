@@ -840,7 +840,8 @@ class WebappInternal(Base):
                 
                 self.wait_element_is_not_displayed(tget_img)
 
-            self.close_coin_screen_after_routine()
+            if self.config.initial_program.lower() == 'sigaadv':
+                self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             print(f"Warning set program raise AssertionError: {str(error)}")
@@ -2135,7 +2136,7 @@ class WebappInternal(Base):
 
             self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
-            if wait_coin_screen:
+            if wait_coin_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_coin_screen_after_routine()
 
         except AssertionError as error:
@@ -2721,7 +2722,7 @@ class WebappInternal(Base):
                     self.set_element_focus(clicking_row_element())
                     time.sleep(1)
                     if class_grid != "tgrid":
-                        self.send_keys(clicking_row_element(),Keys.ENTER)
+                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(clicking_row_element(), Keys.ENTER).perform()
                     else:
                         self.double_click(clicking_row_element())
                     contents.remove(text)
