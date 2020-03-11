@@ -1710,23 +1710,29 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
-        element = ""
+        element = None
+        text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
         
         if self.config.coverage:
             endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
+
+            while(time.time() < endtime and not element and not text_cover):
+
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.finish)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=2, step=0.5, main_container="body")
 
-                element = self.search_text(selector=".tsay", text=string)
                 if element:
-                    print(string)
-
+                    self.SetButton(self.language.finish)
+                    text_cover = self.search_text(selector=".tsay", text=string)
+                    if text_cover:
+                        print(string)
+                        timeout = endtime - time.time()
+                        if timeout > 0:
+                            self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=timeout, step=0.1)
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
