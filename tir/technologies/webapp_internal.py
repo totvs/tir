@@ -1640,8 +1640,9 @@ class WebappInternal(Base):
         if not grid:
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
                 element = self.get_field(field)
-                selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                value = self.get_web_value(selenium_element())
+                if ( hasattr(element, "name") and hasattr(element, "parent") ):
+                    selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
