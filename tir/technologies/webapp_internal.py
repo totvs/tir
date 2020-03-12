@@ -1723,7 +1723,8 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
 
-                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=2, step=0.5, main_container="body")
+                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
 
                 if element:
                     self.SetButton(self.language.finish)
@@ -1732,7 +1733,8 @@ class WebappInternal(Base):
                         print(string)
                         timeout = endtime - time.time()
                         if timeout > 0:
-                            self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=timeout, step=0.1)
+                            self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
+                             optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
