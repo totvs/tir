@@ -5372,6 +5372,7 @@ class WebappInternal(Base):
 
         webdriver_exception = None
         timeout = 1500
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
         if self.config.coverage:
             try:
@@ -5390,7 +5391,9 @@ class WebappInternal(Base):
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-                self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
+
+            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
+                self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
             try:
