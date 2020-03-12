@@ -5368,6 +5368,7 @@ class WebappInternal(Base):
         """
 
         webdriver_exception = None
+        timeout = 1500
 
         if self.config.coverage:
             try:
@@ -5379,17 +5380,13 @@ class WebappInternal(Base):
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
                 print(message)
 
-            timeout = 1500
-
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-            if not webdriver_exception:
                 self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
 
         if self.config.num_exec:
