@@ -1719,10 +1719,11 @@ class WebappInternal(Base):
         if self.config.coverage:
             endtime = time.time() + timeout
 
-            while(time.time() < endtime and not element and not text_cover):
+            while((time.time() < endtime) and (not element or not text_cover)):
 
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down('q').perform()
+                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
 
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
                  optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
