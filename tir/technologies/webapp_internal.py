@@ -1729,7 +1729,7 @@ class WebappInternal(Base):
                  optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
 
                 if element:
-                    self.SetButton(self.language.finish)
+                    self.click_button_finish()
                     text_cover = self.search_text(selector=".tsay", text=string)
                     if text_cover:
                         print(string)
@@ -1751,6 +1751,23 @@ class WebappInternal(Base):
                 print("Warning method finish use driver.refresh. element not found")
 
             self.driver.refresh() if not element else self.SetButton(self.language.finish)
+
+    def click_button_finish(self):
+        """
+        [internal]
+
+        This method is reponsible to click on button finish
+
+        """
+        button = None
+        listButtons = []
+        try:
+            soup = self.get_current_DOM()
+            listButtons = soup.select('button')
+            button = next(iter(list(filter(lambda x: x.text == self.language.finish ,listButtons ))), None)
+            if button: self.soup_to_selenium(button).click()
+        except Exception as e:
+            print(f"Warning Finish method exception - {str(e)}")
 
     def LogOff(self):
         """
