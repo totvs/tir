@@ -3401,15 +3401,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_grid(["A1_COD", "000001", 0, False], x3_dictionaries, 0)
         """
+
         field_to_label = {}
         field_to_valtype = {}
         field_to_len = {}
+
         current_value = ""
         column_name = ""
-        grids = None
         rows = ""
         headers = ""
         columns = ""
+
+        grids = None
+
         try_counter = 1
         grid_reload = True
 
@@ -3715,9 +3719,17 @@ class WebappInternal(Base):
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
         text = ""
-        columns = None
-        success  = False
+        column_name = ""
+
         field_to_label = {}
+        
+        grids = None
+        columns = None
+        headers = None
+        rows = None
+
+        success  = False
+
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
