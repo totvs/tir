@@ -1719,16 +1719,17 @@ class WebappInternal(Base):
         if self.config.coverage:
             endtime = time.time() + timeout
 
-            while(time.time() < endtime and not element and not text_cover):
+            while((time.time() < endtime) and (not element or not text_cover)):
 
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down('q').perform()
+                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
 
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
                  optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
 
                 if element:
-                    self.SetButton(self.language.finish)
+                    self.click_button_finish()
                     text_cover = self.search_text(selector=".tsay", text=string)
                     if text_cover:
                         print(string)
@@ -1750,6 +1751,23 @@ class WebappInternal(Base):
                 print("Warning method finish use driver.refresh. element not found")
 
             self.driver.refresh() if not element else self.SetButton(self.language.finish)
+
+    def click_button_finish(self):
+        """
+        [internal]
+
+        This method is reponsible to click on button finish
+
+        """
+        button = None
+        listButtons = []
+        try:
+            soup = self.get_current_DOM()
+            listButtons = soup.select('button')
+            button = next(iter(list(filter(lambda x: x.text == self.language.finish ,listButtons ))), None)
+            if button: self.soup_to_selenium(button).click()
+        except Exception as e:
+            print(f"Warning Finish method exception - {str(e)}")
 
     def LogOff(self):
         """
@@ -3383,15 +3401,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_grid(["A1_COD", "000001", 0, False], x3_dictionaries, 0)
         """
+
         field_to_label = {}
         field_to_valtype = {}
         field_to_len = {}
+
         current_value = ""
         column_name = ""
-        grids = None
         rows = ""
         headers = ""
         columns = ""
+
+        grids = None
+
         try_counter = 1
         grid_reload = True
 
@@ -3697,9 +3719,17 @@ class WebappInternal(Base):
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
         text = ""
-        columns = None
-        success  = False
+        column_name = ""
+
         field_to_label = {}
+        
+        grids = None
+        columns = None
+        headers = None
+        rows = None
+
+        success  = False
+
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
@@ -5386,6 +5416,8 @@ class WebappInternal(Base):
 
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+                self.user_screen()
+                self.environment_screen()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
