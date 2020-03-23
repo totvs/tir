@@ -1134,7 +1134,7 @@ class WebappInternal(Base):
         print("Waiting blocker to continue...")
         soup = None
         result = True
-        endtime = time.time() + 1200
+        endtime = time.time() + 300
 
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
