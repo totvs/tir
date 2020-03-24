@@ -840,7 +840,8 @@ class WebappInternal(Base):
                 
                 self.wait_element_is_not_displayed(tget_img)
 
-            self.close_coin_screen_after_routine()
+            if self.config.initial_program.lower() == 'sigaadv':
+                self.close_coin_screen_after_routine()
 
         except AssertionError as error:
             print(f"Warning set program raise AssertionError: {str(error)}")
@@ -1133,7 +1134,7 @@ class WebappInternal(Base):
         print("Waiting blocker to continue...")
         soup = None
         result = True
-        endtime = time.time() + 1200
+        endtime = time.time() + 300
 
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
@@ -1639,8 +1640,9 @@ class WebappInternal(Base):
         if not grid:
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
                 element = self.get_field(field)
-                selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                value = self.get_web_value(selenium_element())
+                if ( hasattr(element, "name") and hasattr(element, "parent") ):
+                    selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
@@ -1709,23 +1711,32 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
-        element = ""
+        element = None
+        text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
         
         if self.config.coverage:
             endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.finish)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+            while((time.time() < endtime) and (not element or not text_cover)):
 
-                element = self.search_text(selector=".tsay", text=string)
+                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down('q').perform()
+                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
+
+                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
+
                 if element:
-                    print(string)
-
+                    self.click_button_finish()
+                    text_cover = self.search_text(selector=".tsay", text=string)
+                    if text_cover:
+                        print(string)
+                        timeout = endtime - time.time()
+                        if timeout > 0:
+                            self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
+                             optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -1740,6 +1751,23 @@ class WebappInternal(Base):
                 print("Warning method finish use driver.refresh. element not found")
 
             self.driver.refresh() if not element else self.SetButton(self.language.finish)
+
+    def click_button_finish(self):
+        """
+        [internal]
+
+        This method is reponsible to click on button finish
+
+        """
+        button = None
+        listButtons = []
+        try:
+            soup = self.get_current_DOM()
+            listButtons = soup.select('button')
+            button = next(iter(list(filter(lambda x: x.text == self.language.finish ,listButtons ))), None)
+            if button: self.soup_to_selenium(button).click()
+        except Exception as e:
+            print(f"Warning Finish method exception - {str(e)}")
 
     def LogOff(self):
         """
@@ -2129,7 +2157,7 @@ class WebappInternal(Base):
 
             self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
-            if wait_coin_screen:
+            if wait_coin_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_coin_screen_after_routine()
 
         except AssertionError as error:
@@ -2715,7 +2743,7 @@ class WebappInternal(Base):
                     self.set_element_focus(clicking_row_element())
                     time.sleep(1)
                     if class_grid != "tgrid":
-                        self.send_keys(clicking_row_element(),Keys.ENTER)
+                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(clicking_row_element(), Keys.ENTER).perform()
                     else:
                         self.double_click(clicking_row_element())
                     contents.remove(text)
@@ -3373,15 +3401,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_grid(["A1_COD", "000001", 0, False], x3_dictionaries, 0)
         """
+
         field_to_label = {}
         field_to_valtype = {}
         field_to_len = {}
+
         current_value = ""
         column_name = ""
-        grids = None
         rows = ""
         headers = ""
         columns = ""
+
+        grids = None
+
         try_counter = 1
         grid_reload = True
 
@@ -3687,9 +3719,17 @@ class WebappInternal(Base):
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
         text = ""
-        columns = None
-        success  = False
+        column_name = ""
+
         field_to_label = {}
+        
+        grids = None
+        columns = None
+        headers = None
+        rows = None
+
+        success  = False
+
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
@@ -5361,6 +5401,8 @@ class WebappInternal(Base):
         """
 
         webdriver_exception = None
+        timeout = 1500
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
 
         if self.config.coverage:
             try:
@@ -5372,18 +5414,18 @@ class WebappInternal(Base):
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
                 print(message)
 
-            timeout = 1500
-
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-
+                self.user_screen()
+                self.environment_screen()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-            if not webdriver_exception:
-                self.WaitProcessing("Aguarde... Coletando informacoes de cobertura de codigo.", timeout)
+
+            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
+                self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
             try:

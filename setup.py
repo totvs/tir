@@ -14,7 +14,7 @@ setup(
     project_urls={
     'Script Samples': 'https://github.com/totvs/tir-script-samples'
     },
-    version='1.14.1',
+    version='1.14.7',
     license='MIT',
     keywords='test automation selenium tir totvs protheus framework',
     classifiers=[
@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'numpy',
-        'pandas',
+        'pandas==1.0.1',
         'python-dateutil',
         'pytz',
         'selenium==3.8.0',
