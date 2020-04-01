@@ -1,7 +1,7 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.core.config import ConfigLoader
-
+from tir.technologies.core.base_database import BaseDatabase
 """
 This file must contain the definition of all User Classes.
 
@@ -19,6 +19,7 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__database = BaseDatabase()
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
@@ -1015,7 +1016,7 @@ class Webapp():
         :type filter_data: bool
 
         >>> # Call the method:
-        >>> file_csv = test_helper.OpenCSV(delimiter=";", csv_file="no_header.csv")
+        >>> file_csv = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv")
 
         >>> file_csv_no_header_column = self.oHelper.OpenCSV(column=0, delimiter=";", csv_file="no_header_column.csv")
 
@@ -1034,7 +1035,63 @@ class Webapp():
         >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
         """
         return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
-    
+
+    def StartDB(self):
+        """
+        :return: connection object
+        Usage:
+        >>> # Call the method:
+        >>> self.oHelper.StartDB()
+        """
+        return self.__database.connect_database()
+
+    def StopDB(self, connection):
+        """
+        :param connection: connection object
+        :type param: object
+        :return:
+        Usage:
+        >>> # Call the method:
+        >>> self.oHelper.StopDB(connection)
+        """
+        self.__database.connect_database()
+
+    def QueryExecute(self, query, driver_database="", server_database="", name_database="", user_database="", password_database=""):
+        """
+        Return a dictionary if the query statement is a SELECT otherwise print a number of row 
+        affected in case of INSERT|UPDATE|DELETE statement.
+
+        .. note::  
+            Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
+            Parameters:
+                "DriverDB": "",
+                "ServerDB": "",
+                "NameDB": "",
+                "UserDB": "",
+                "PasswordDB": ""
+
+        .. note::        
+            Must be used an ANSI default SQL statement.
+        
+        :param query: ANSI SQL estatement query
+        :type query: str
+        :param driver_database: ODBC Driver database name
+        :type driver_database: str
+        :param server_database: Database Server Name
+        :type server_database: str
+        :param name_database: Database Name
+        :type name_database: str
+        :param user_database: User Database Name
+        :type user_database: str
+        :param password_database: Database password
+        :type password_database: str
+        Usage:
+        >>> # Call the method:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", 
+		server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
+        """
+        return self.__database.query_execute(query, driver_database, server_database, name_database, user_database, password_database)
         
 class Apw():
 
