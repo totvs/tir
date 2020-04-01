@@ -1715,6 +1715,7 @@ class WebappInternal(Base):
         text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
+        click_counter = 1
         
         if self.config.coverage:
             endtime = time.time() + timeout
@@ -1726,17 +1727,20 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_up(Keys.CONTROL).perform()
 
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=2, step=0.5, main_container="body", check_error = False)
+                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
 
                 if element:
-                    self.click_button_finish()
-                    text_cover = self.search_text(selector=".tsay", text=string)
-                    if text_cover:
-                        print(string)
-                        timeout = endtime - time.time()
-                        if timeout > 0:
-                            self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
-                             optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
+                    if self.click_button_finish(click_counter):                        
+                        text_cover = self.search_text(selector=".tsay", text=string)
+                        if text_cover:
+                            print(string)
+                            timeout = endtime - time.time()
+                            if timeout > 0:
+                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
+                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
+                    click_counter += 1
+                    if click_counter > 3:
+                        click_counter = 1
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -1752,7 +1756,7 @@ class WebappInternal(Base):
 
             self.driver.refresh() if not element else self.SetButton(self.language.finish)
 
-    def click_button_finish(self):
+    def click_button_finish(self, click_counter=None):
         """
         [internal]
 
@@ -1765,9 +1769,17 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             listButtons = soup.select('button')
             button = next(iter(list(filter(lambda x: x.text == self.language.finish ,listButtons ))), None)
-            if button: self.soup_to_selenium(button).click()
+            if button:
+                button_element = lambda : self.soup_to_selenium(button)            
+                self.scroll_to_element(button_element())
+                self.set_element_focus(button_element())
+                if self.click(button_element(), click_type=enum.ClickType(click_counter)):
+                    return True
+                else:
+                    return False
         except Exception as e:
             print(f"Warning Finish method exception - {str(e)}")
+            return False
 
     def LogOff(self):
         """
@@ -5513,6 +5525,10 @@ class WebappInternal(Base):
 
         if container:
             container_selector = container.select(selector)
+
+            if container_selector:
+                self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=10, step=1, main_container="body", check_error = False)
 
             return next(iter(list(filter(lambda x: text in re.sub(r"\t|\n|\r", " ", x.text), container_selector))), None)
 
