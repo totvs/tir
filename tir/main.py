@@ -411,12 +411,13 @@ class Webapp():
 
     def F3(self, field, name_attr=False,send_key=False):
         """
+
         This method is similar to ClickIcon
         1.Clicks on the Selenium element.
 
         [Internal]
-        Do the standard query(F3) 
-        this method 
+        Do the standard query(F3)
+        this method
         1.Search the field
         2.Search icon "lookup"
         3.Click()
@@ -425,9 +426,9 @@ class Webapp():
         :type  term: str
         :param name_attr: True: searchs element by name
         :type  name_attr: bool
-        :param send_key: True: try open standard search field send key F3 
+        :param send_key: True: try open standard search field send key F3
         :type bool
-        
+
         Usage:
 
         >>> # To search using a label name:
@@ -990,7 +991,7 @@ class Webapp():
         :param initial_program: The initial program to load
         :type initial_program: str
         Usage:
-        >>> # Calling the method
+        >>> # Calling the method:
         >>> self.ProgramScreen("SIGAADV")
         """
         self.__webapp.program_screen(initial_program, coverage=self.coverage)
@@ -1038,8 +1039,10 @@ class Webapp():
 
     def StartDB(self):
         """
+
         :return: connection object
         Usage:
+
         >>> # Call the method:
         >>> self.oHelper.StartDB()
         """
@@ -1047,10 +1050,11 @@ class Webapp():
 
     def StopDB(self, connection):
         """
+
         :param connection: connection object
         :type param: object
-        :return:
         Usage:
+
         >>> # Call the method:
         >>> self.oHelper.StopDB(connection)
         """
@@ -1064,11 +1068,11 @@ class Webapp():
         .. note::  
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
-                "DriverDB": "",
-                "ServerDB": "",
-                "NameDB": "",
-                "UserDB": "",
-                "PasswordDB": ""
+            "DriverDB": "",
+            "ServerDB": "",
+            "NameDB": "",
+            "UserDB": "",
+            "PasswordDB": ""
 
         .. note::        
             Must be used an ANSI default SQL statement.
@@ -1085,11 +1089,12 @@ class Webapp():
         :type user_database: str
         :param password_database: Database password
         :type password_database: str
+
         Usage:
+
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", 
-		server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
         """
         return self.__database.query_execute(query, driver_database, server_database, name_database, user_database, password_database)
         

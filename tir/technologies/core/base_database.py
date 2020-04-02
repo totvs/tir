@@ -107,8 +107,7 @@ class BaseDatabase(Base):
         Usage:
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", 
-		server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
         """
         connection = self.connect_database(driver_database, server_database, name_database, user_database, password_database)
         
