@@ -1068,11 +1068,11 @@ class Webapp():
         .. note::  
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
-                "DriverDB": "",
-                "ServerDB": "",
-                "NameDB": "",
-                "UserDB": "",
-                "PasswordDB": ""
+            "DriverDB": "",
+            "ServerDB": "",
+            "NameDB": "",
+            "UserDB": "",
+            "PasswordDB": ""
 
         .. note::        
             Must be used an ANSI default SQL statement.
@@ -1096,7 +1096,9 @@ class Webapp():
         :type database_user: str
         :param database_password: Database password
         :type database_password: str
+
         Usage:
+
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
