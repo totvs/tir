@@ -12,22 +12,27 @@ class BaseDatabase(Base):
         self.webapp_internal = WebappInternal(autostart=False)
         self.restart_counter = self.webapp_internal.restart_counter
 
-    def odbc_connect(self, driver_database=None, server_database=None, name_database=None, user_database=None, password_database=None):
+    def odbc_connect(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
         """
         :return:
         """
         connection = None
         
-        driver_database = self.config.driver_database if not driver_database else driver_database
-        server_database = self.config.server_database if not server_database else server_database
-        name_database = self.config.name_database if not name_database else name_database
-        user_database = self.config.user_database if not user_database else user_database
-        password_database = self.config.password_database if not password_database else password_database
+        database_driver = self.config.database_driver if not database_driver else database_driver
+        database_server = self.config.database_server if not database_server else database_server
+        database_port = self.config.database_port if not database_port else database_port
+        database_name = self.config.database_name if not database_name else database_name
+        database_user = self.config.database_user if not database_user else database_user
+        database_password = self.config.database_password if not database_password else database_password
+        dbq_oracle_server = self.config.dbq_oracle_server if not dbq_oracle_server else dbq_oracle_server
 
-        self.check_pyodbc_drivers(driver_database)
+        self.check_pyodbc_drivers(database_driver)
 
         try:
-            connection = pyodbc.connect(f'DRIVER={driver_database}; server={server_database}; database={name_database}; uid={user_database}; pwd={password_database}')
+            if dbq_oracle_server:
+                connection = pyodbc.connect(f'DRIVER={database_driver};dbq={dbq_oracle_server};database={database_name};uid={database_user};pwd={database_password}')
+            else:
+                connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};database={database_name};uid={database_user};pwd={database_password}')
         except Exception as error:
             self.webapp_internal.restart_counter = 3
             self.webapp_internal.log_error(str(error))
@@ -44,9 +49,9 @@ class BaseDatabase(Base):
         except:
             return False
 
-    def connect_database(self, driver_database=None, server_database=None, name_database=None, user_database=None, password_database=None):
+    def connect_database(self, query="", database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
 
-        connection = self.odbc_connect(driver_database, server_database, name_database, user_database, password_database)
+        connection = self.odbc_connect(database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
 
         if self.test_odbc_connection(connection):
             print('DataBase connection started')
@@ -75,7 +80,7 @@ class BaseDatabase(Base):
             self.webapp_internal.restart_counter = 3
             self.webapp_internal.log_error(error_message)
 
-    def query_execute(self, query, driver_database, server_database, name_database, user_database, password_database):
+    def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
         """
         Return a dictionary if the query statement is a SELECT otherwise print a number of row 
         affected in case of INSERT|UPDATE|DELETE statement.
@@ -83,33 +88,42 @@ class BaseDatabase(Base):
         .. note::  
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
-                "DriverDB": "",
-                "ServerDB": "",
-                "NameDB": "",
-                "UserDB": "",
-                "PasswordDB": ""
+                "DBDriver": "",
+                "DBServer": "",
+                "DBName": "",
+                "DBUser": "",
+                "DBPassword": ""
 
         .. note::        
             Must be used an ANSI default SQL statement.
+
+        .. note::        
+            dbq_oracle_server parameter is necessary only for Oracle connection.
         
         :param query: ANSI SQL estatement query
         :type query: str
-        :param driver_database: ODBC Driver database name
-        :type driver_database: str
-        :param server_database: Database Server Name
-        :type server_database: str
-        :param name_database: Database Name
-        :type name_database: str
-        :param user_database: User Database Name
-        :type user_database: str
-        :param password_database: Database password
-        :type password_database: str
+        :param database_driver: ODBC Driver database name
+        :type database_driver: str
+        :param dbq_oracle_server: Only for Oracle: DBQ format:Host:Port/oracle instance
+        :type dbq_oracle_server: str
+        :param database_server: Database Server Name
+        :type database_server: str
+        :param database_port: Database port default port=1521
+        :type database_port: int
+        :param database_name: Database Name
+        :type database_name: str
+        :param database_user: User Database Name
+        :type database_user: str
+        :param database_password: Database password
+        :type database_password: str
         Usage:
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        >>> # Oracle Example:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server=Host:Port/oracle instance, database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
         """
-        connection = self.connect_database(driver_database, server_database, name_database, user_database, password_database)
+        connection = self.connect_database(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
         
         if re.findall(r'^(SELECT)', query.upper()):
             df = pd.read_sql(sql=query, con=connection)

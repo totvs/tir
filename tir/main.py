@@ -1060,7 +1060,7 @@ class Webapp():
         """
         self.__database.connect_database()
 
-    def QueryExecute(self, query, driver_database="", server_database="", name_database="", user_database="", password_database=""):
+    def QueryExecute(self, query, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
         """
         Return a dictionary if the query statement is a SELECT otherwise print a number of row 
         affected in case of INSERT|UPDATE|DELETE statement.
@@ -1068,36 +1068,43 @@ class Webapp():
         .. note::  
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
-            "DriverDB": "",
-            "ServerDB": "",
-            "NameDB": "",
-            "UserDB": "",
-            "PasswordDB": ""
+                "DriverDB": "",
+                "ServerDB": "",
+                "NameDB": "",
+                "UserDB": "",
+                "PasswordDB": ""
 
         .. note::        
             Must be used an ANSI default SQL statement.
+
+        .. note::        
+            dbq_oracle_server parameter is necessary only for Oracle connection.
         
         :param query: ANSI SQL estatement query
         :type query: str
-        :param driver_database: ODBC Driver database name
-        :type driver_database: str
-        :param server_database: Database Server Name
-        :type server_database: str
-        :param name_database: Database Name
-        :type name_database: str
-        :param user_database: User Database Name
-        :type user_database: str
-        :param password_database: Database password
-        :type password_database: str
-
+        :param database_driver: ODBC Driver database name
+        :type database_driver: str
+        :param dbq_oracle_server: Only for Oracle: DBQ format:Host:Port/oracle instance
+        :type dbq_oracle_server: str
+        :param database_server: Database Server Name
+        :type database_server: str
+        :param database_port: Database port default port=1521
+        :type database_port: int
+        :param database_name: Database Name
+        :type database_name: str
+        :param database_user: User Database Name
+        :type database_user: str
+        :param database_password: Database password
+        :type database_password: str
         Usage:
-
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", driver_database="NOME_DO_DRIVER_ODBC", server_database="NOME_DO_SERVER", name_database="NOME_DO_BANCO", user_database="sa", password_database="123456")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        >>> # Oracle Example:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server=Host:Port/oracle instance, database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
         """
-        return self.__database.query_execute(query, driver_database, server_database, name_database, user_database, password_database)
-        
+        return self.__database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+
 class Apw():
 
     def __init__(self, config_path=""):
