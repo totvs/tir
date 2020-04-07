@@ -896,14 +896,13 @@ Usage:
 affected in case of INSERT|UPDATE|DELETE statement.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
-Parameters:</p>
-<blockquote class="last">
-<div>“DriverDB”: “”,
+<p class="last">Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
+Parameters:
+“DriverDB”: “”,
 “ServerDB”: “”,
 “NameDB”: “”,
 “UserDB”: “”,
-“PasswordDB”: “”</div></blockquote>
+“PasswordDB”: “”</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -931,12 +930,14 @@ Parameters:</p>
 </tr>
 </tbody>
 </table>
-<p>Usage:
-&gt;&gt;&gt; # Call the method:
-&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”)
-&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”, database_driver=”DRIVER_ODBC_NAME”, database_server=”SERVER_NAME”, database_name=”DATABASE_NAME”, database_user=”sa”, database_password=”123456”)
-&gt;&gt;&gt; # Oracle Example:
-&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”, database_driver=”Oracle in OraClient19Home1”, dbq_oracle_server=Host:Port/oracle instance, database_server=”SERVER_NAME”, database_name=”DATABASE_NAME”, database_user=”sa”, database_password=”123456”)</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">QueryExecute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM SA1T10&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">QueryExecute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM SA1T10&quot;</span><span class="p">,</span> <span class="n">database_driver</span><span class="o">=</span><span class="s2">&quot;DRIVER_ODBC_NAME&quot;</span><span class="p">,</span> <span class="n">database_server</span><span class="o">=</span><span class="s2">&quot;SERVER_NAME&quot;</span><span class="p">,</span> <span class="n">database_name</span><span class="o">=</span><span class="s2">&quot;DATABASE_NAME&quot;</span><span class="p">,</span> <span class="n">database_user</span><span class="o">=</span><span class="s2">&quot;sa&quot;</span><span class="p">,</span> <span class="n">database_password</span><span class="o">=</span><span class="s2">&quot;123456&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Oracle Example:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">QueryExecute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM SA1T10&quot;</span><span class="p">,</span> <span class="n">database_driver</span><span class="o">=</span><span class="s2">&quot;Oracle in OraClient19Home1&quot;</span><span class="p">,</span> <span class="n">dbq_oracle_server</span><span class="o">=</span><span class="n">Host</span><span class="p">:</span><span class="n">Port</span><span class="o">/</span><span class="n">oracle</span> <span class="n">instance</span><span class="p">,</span> <span class="n">database_server</span><span class="o">=</span><span class="s2">&quot;SERVER_NAME&quot;</span><span class="p">,</span> <span class="n">database_name</span><span class="o">=</span><span class="s2">&quot;DATABASE_NAME&quot;</span><span class="p">,</span> <span class="n">database_user</span><span class="o">=</span><span class="s2">&quot;sa&quot;</span><span class="p">,</span> <span class="n">database_password</span><span class="o">=</span><span class="s2">&quot;123456&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
