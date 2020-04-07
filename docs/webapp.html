@@ -891,22 +891,27 @@ Usage:
 
 <dl class="method">
 <dt id="tir.main.Webapp.QueryExecute">
-<code class="descname">QueryExecute</code><span class="sig-paren">(</span><em>query</em>, <em>driver_database=''</em>, <em>server_database=''</em>, <em>name_database=''</em>, <em>user_database=''</em>, <em>password_database=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.QueryExecute" title="Permalink to this definition">¶</a></dt>
+<code class="descname">QueryExecute</code><span class="sig-paren">(</span><em>query</em>, <em>database_driver=''</em>, <em>dbq_oracle_server=''</em>, <em>database_server=''</em>, <em>database_port=1521</em>, <em>database_name=''</em>, <em>database_user=''</em>, <em>database_password=''</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.QueryExecute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a dictionary if the query statement is a SELECT otherwise print a number of row 
 affected in case of INSERT|UPDATE|DELETE statement.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
-Parameters:
-“DriverDB”: “”,
+<p>Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
+Parameters:</p>
+<blockquote class="last">
+<div>“DriverDB”: “”,
 “ServerDB”: “”,
 “NameDB”: “”,
 “UserDB”: “”,
-“PasswordDB”: “”</p>
+“PasswordDB”: “”</div></blockquote>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Must be used an ANSI default SQL statement.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">dbq_oracle_server parameter is necessary only for Oracle connection.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -914,22 +919,24 @@ Parameters:
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>query</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – ANSI SQL estatement query</li>
-<li><strong>driver_database</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – ODBC Driver database name</li>
-<li><strong>server_database</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database Server Name</li>
-<li><strong>name_database</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database Name</li>
-<li><strong>user_database</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – User Database Name</li>
-<li><strong>password_database</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database password</li>
+<li><strong>database_driver</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – ODBC Driver database name</li>
+<li><strong>dbq_oracle_server</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Only for Oracle: DBQ format:Host:Port/oracle instance</li>
+<li><strong>database_server</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database Server Name</li>
+<li><strong>database_port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Database port default port=1521</li>
+<li><strong>database_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database Name</li>
+<li><strong>database_user</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – User Database Name</li>
+<li><strong>database_password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Database password</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">QueryExecute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM SA1T10&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">QueryExecute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM SA1T10&quot;</span><span class="p">,</span> <span class="n">driver_database</span><span class="o">=</span><span class="s2">&quot;NOME_DO_DRIVER_ODBC&quot;</span><span class="p">,</span> <span class="n">server_database</span><span class="o">=</span><span class="s2">&quot;NOME_DO_SERVER&quot;</span><span class="p">,</span> <span class="n">name_database</span><span class="o">=</span><span class="s2">&quot;NOME_DO_BANCO&quot;</span><span class="p">,</span> <span class="n">user_database</span><span class="o">=</span><span class="s2">&quot;sa&quot;</span><span class="p">,</span> <span class="n">password_database</span><span class="o">=</span><span class="s2">&quot;123456&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>Usage:
+&gt;&gt;&gt; # Call the method:
+&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”)
+&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”, database_driver=”DRIVER_ODBC_NAME”, database_server=”SERVER_NAME”, database_name=”DATABASE_NAME”, database_user=”sa”, database_password=”123456”)
+&gt;&gt;&gt; # Oracle Example:
+&gt;&gt;&gt; self.oHelper.QueryExecute(“SELECT * FROM SA1T10”, database_driver=”Oracle in OraClient19Home1”, dbq_oracle_server=Host:Port/oracle instance, database_server=”SERVER_NAME”, database_name=”DATABASE_NAME”, database_user=”sa”, database_password=”123456”)</p>
 </dd></dl>
 
 <dl class="method">
