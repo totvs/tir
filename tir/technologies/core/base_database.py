@@ -32,7 +32,7 @@ class BaseDatabase(Base):
             if dbq_oracle_server:
                 connection = pyodbc.connect(f'DRIVER={database_driver};dbq={dbq_oracle_server};database={database_name};uid={database_user};pwd={database_password}')
             else:
-                connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};database={database_name};uid={database_user};pwd={database_password}')
+                connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};port={database_port};database={database_name};uid={database_user};pwd={database_password}')
         except Exception as error:
             self.webapp_internal.restart_counter = 3
             self.webapp_internal.log_error(str(error))
