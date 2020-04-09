@@ -2644,30 +2644,37 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
         """
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
-
-        panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
-        panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
-        panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
-
-        if not panel and panels_filtered:
-
-            for panel in panels_filtered:
-                self.scroll_to_element(self.soup_to_selenium(panel))
-                
-            panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+        self.wait_blocker()
 
         element = ""
 
-        if panel:
-            element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
 
-        if element:
-            self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
-            self.set_element_focus(element())
-            time.sleep(1)
-            self.driver.execute_script("arguments[0].click()", element())
-        else:
+        endtime  = time.time() + self.config.time_out
+
+        while(time.time() < endtime and not element):
+            panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
+            panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
+            panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
+            if not panel and panels_filtered:
+
+                for panel in panels_filtered:
+                    self.scroll_to_element(self.soup_to_selenium(panel))
+                    
+                panel = next(iter(self.filter_is_displayed(panels_filtered)), None)
+
+
+            if panel:
+                element = lambda: self.driver.find_element_by_xpath(xpath_soup(panel))
+
+            if element:
+                self.scroll_to_element(element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                self.set_element_focus(element())
+                time.sleep(1)
+                self.driver.execute_script("arguments[0].click()", element())
+
+        if not element:
             self.log_error("Couldn't find panel item.")
 
     def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
