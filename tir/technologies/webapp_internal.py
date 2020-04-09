@@ -2644,6 +2644,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
         """
+        self.wait_blocker()
+
         element = ""
 
         self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
