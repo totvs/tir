@@ -65,7 +65,8 @@ class WebappInternal(Base):
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
             "GetCurrentContainer": ".tmodaldialog",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog"
+            "AllContainers": "body,.tmodaldialog,.ui-dialog",
+            "ClickImage": ".tmodaldialog"
         }
         self.base_container = ".tmodaldialog"
 
@@ -5910,14 +5911,14 @@ class WebappInternal(Base):
         >>> # Call the method:  
         >>> oHelper.ClickImage("img_name")
         """
-        self.wait_element(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
+        self.wait_element(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
 
         success = None
         endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
 
-            img_list = self.web_scrap(term="div.tbtnbmp > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
+            img_list = self.web_scrap(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
             img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
             img_soup = next(iter(img_list_filtered), None)
 
