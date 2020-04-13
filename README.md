@@ -30,9 +30,17 @@ Our **create_docs.cmd** script handles the installation of dependencies and crea
 
 The installation is pretty simple. All you need as a requirement is Python 3.6 or greater and a browser (Mozilla Firefox/Google Chrome) installed in your system.
 
-There are two ways of installing TIR:
+There are three ways of installing TIR:
 
-### 1. via Installation Wizard
+### 1. Installing from PyPI
+
+TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
+
+```shell
+pip install tir_framework
+```
+
+### 2. via Installation Wizard
 
 Our installation wizard handles the environment setup, the package installation and also it can update your package.
 
@@ -42,7 +50,7 @@ It is also an open-source project, you can see the repository [here](https://git
 
 OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
 
-### 2. via Terminal
+### 3. via Terminal
 
 You can install TIR via terminal. Make sure your Python and Git is installed and run this command:
 

@@ -1,6 +1,8 @@
 include LICENSE
 include tir/technologies/*.py
-include tir/technologies/core/drivers/*.exe
+include tir/technologies/core/drivers/windows/*.exe
+include tir/technologies/core/drivers/windows/electron/*.exe
+include tir/technologies/core/drivers/linux64/geckodriver
 include tir/technologies/core/data/*.csv
 include tir/technologies/core/third_party/*.py
 include tir/technologies/core/*.py

@@ -28,6 +28,7 @@ class NumExec:
             if status != 200:
                 time.sleep(12)
 
+        print(f"Num exec. status: {status} Url: {url}")
         if status != 200:
             with open(f"E:\\smart_test\\logs_tir\\{time.time()}_json_data_response.txt", "w") as json_log:
                 json_log.write(str(f"STATUS: {status}"))
