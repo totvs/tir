@@ -4983,10 +4983,14 @@ class WebappInternal(Base):
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
 
         if self.errors:
+            
+            if expected:
+                for field_msg in self.errors:
+                    log_message += (" " + field_msg)
+            else:
+                log_message = ""
+            
             expected = not expected
-
-            for field_msg in self.errors:
-                log_message += (" " + field_msg)
 
         if expected:
             msg = "" if not self.errors else log_message
@@ -5002,7 +5006,7 @@ class WebappInternal(Base):
         self.log.save_file(routine_name)
 
         if expected:
-            self.assertTrue(True, "Passed" if not self.errors else log_message)
+            self.assertTrue(True, "Passed")
         else:
             self.assertTrue(False, msg)
 
