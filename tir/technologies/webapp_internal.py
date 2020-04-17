@@ -3938,7 +3938,7 @@ class WebappInternal(Base):
                     if grid_number <= len(grids):
                         rows = grids[grid_number].select("tbody tr")
                     if rows:
-                        if row_number <= len(rows):
+                        if row_number < len(rows):
                             columns = rows[row_number].select("td")
                     if columns:
                         if column_name in headers[grid_number]:
