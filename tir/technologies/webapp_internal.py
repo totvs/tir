@@ -3914,6 +3914,7 @@ class WebappInternal(Base):
         grid_number -= 1
         column_name = ""
         column_element_old_class = None
+        columns =  None
         
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
