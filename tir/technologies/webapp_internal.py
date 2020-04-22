@@ -2762,8 +2762,14 @@ class WebappInternal(Base):
                     clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
                     self.set_element_focus(clicking_row_element())
                     time.sleep(1)
-                    if class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(clicking_row_element(), Keys.ENTER).perform()
+                    if class_grid == 'tmsselbr':
+                        ActionChains(self.driver).move_to_element(clicking_row_element()).click(
+                            clicking_row_element()).perform()
+                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(
+                            clicking_row_element(), Keys.ENTER).perform()
+                    elif class_grid != "tgrid":
+                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(
+                            clicking_row_element(), Keys.ENTER).perform()
                     else:
                         self.double_click(clicking_row_element())
                     contents.remove(text)
