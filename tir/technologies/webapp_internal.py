@@ -66,7 +66,8 @@ class WebappInternal(Base):
             "SetButton" : ".tmodaldialog,.ui-dialog",
             "GetCurrentContainer": ".tmodaldialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
-            "ClickImage": ".tmodaldialog"
+            "ClickImage": ".tmodaldialog",
+            "BlockerContainers": ".tmodaldialog,.ui-dialog"
         }
         self.base_container = ".tmodaldialog"
 
@@ -1139,14 +1140,32 @@ class WebappInternal(Base):
 
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
-            container = self.get_current_container()
-            blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else 'blocked' in container.attrs['class'] if container and hasattr(container, 'attrs') else None
+            blocker_container = self.blocker_containers(soup)
+            blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
+                'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
             
             if blocker:
                 result = True
             else:
-                result = False
+                return False
         return result
+
+    def blocker_containers(self, soup):
+        """
+        Return The container index by z-index and filter if it is displayed
+
+        :param soup: soup object
+        :return: The container index by z-index and filter if it is displayed
+        """
+        containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
+
+        if containers:
+            containers_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), containers))
+
+            return next(iter(containers_filtered), None)
+        else:
+            return None
+
             
     def get_panel_name_index(self, panel_name):
         """
