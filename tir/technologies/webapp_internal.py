@@ -1132,6 +1132,8 @@ class WebappInternal(Base):
         Wait blocker disappear
 
         """
+        blocker_container = None
+        blocker = None
 
         print("Waiting blocker to continue...")
         soup = None
@@ -1141,9 +1143,10 @@ class WebappInternal(Base):
         while(time.time() < endtime and result):
             soup = self.get_current_DOM()
             blocker_container = self.blocker_containers(soup)
-            blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
-                'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
-            
+            if blocker_container:
+                blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
+                    'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
+                
             if blocker:
                 result = True
             else:
@@ -1160,9 +1163,7 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
 
         if containers:
-            containers_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed(), containers))
-
-            return next(iter(containers_filtered), None)
+            return next(iter(containers), None)
         else:
             return None
 
