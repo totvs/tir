@@ -1163,7 +1163,11 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
 
         if containers:
-            return next(iter(containers), None)
+            containers_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() if self.soup_to_selenium(x) else None, containers))
+            if containers_filtered:
+                return next(iter(containers_filtered), None)
+            else:
+                return None
         else:
             return None
 
