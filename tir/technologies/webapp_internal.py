@@ -3577,10 +3577,10 @@ class WebappInternal(Base):
                             self.click(selenium_column())
                             try:
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
-                            except StaleElementReferenceException:
-                                pass
                             except WebDriverException:
                                 self.send_keys(selenium_column(), Keys.ENTER)
+                            except:
+                                pass
 
                             time.sleep(1)
                             if(field[1] == True):
