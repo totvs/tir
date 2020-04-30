@@ -170,19 +170,23 @@ class Webapp():
         """
         self.__webapp.ClickBox(fields, contents_list, select_all, grid_number)
 
-    def ClickFolder(self, item):
+    def ClickFolder(self, item, position=1):
         """
         Clicks on folder elements on the screen.
 
         :param folder_name: Which folder item should be clicked.
         :type folder_name: str
+        :param position: In case of two or more folders with the same name in the screen, you could choose by position in order
+        :type position: int
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
+        >>> # Second folder named as Folder1 in the same screen
+        >>> oHelper.ClickFolder("Folder1", position=2)
         """
-        self.__webapp.ClickFolder(item)
+        self.__webapp.ClickFolder(item, position)
 
     def ClickGridCell(self, column, row=1, grid_number=1):
         """
