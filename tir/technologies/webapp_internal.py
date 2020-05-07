@@ -2386,12 +2386,12 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
-            print(error)
+            print(str(error))
             self.log_error(f"Button {button} could not be located.")
         except AssertionError:
             raise
         except Exception as error:
-            print(error)
+            print(str(error))
             self.log_error(str(error))
 
     def set_button_x(self, position=1, check_error=True):
