@@ -500,6 +500,10 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using an index instead of name for the search key:
         >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and a chosen column:
+        >>> oHelper.SearchBrowse("D MG 001", column="Branch+id")
+        >>> #------------------------------------------------------------------------
         """
         self.__webapp.SearchBrowse(term, key, identifier, index, column)
 

@@ -943,6 +943,10 @@ class WebappInternal(Base):
         >>> #------------------------------------------------------------------------
         >>> # To search using a chosen search box and a chosen search key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and a chosen column:
+        >>> oHelper.SearchBrowse("D MG 001", column="Branch+id")
+        >>> #------------------------------------------------------------------------
         """
         print(f"Searching: {term}")
         if index and isinstance(key, int):
