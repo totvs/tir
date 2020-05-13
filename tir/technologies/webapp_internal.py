@@ -911,7 +911,7 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
    
-    def SearchBrowse(self, term, key=None, column=None, identifier=None, index=False):
+    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
         """
         Searchs a term on Protheus Webapp.
 
