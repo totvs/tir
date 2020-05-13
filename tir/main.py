@@ -464,7 +464,7 @@ class Webapp():
         """
         self.__webapp.SetupTSS(initial_program, environment)
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False):
+    def SearchBrowse(self, term, key=None, column=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
 
@@ -501,7 +501,7 @@ class Webapp():
         >>> # To search using an index instead of name for the search key:
         >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
         """
-        self.__webapp.SearchBrowse(term, key, identifier, index)
+        self.__webapp.SearchBrowse(term, key, column, identifier, index)
 
     def SetBranch(self, branch):
         """

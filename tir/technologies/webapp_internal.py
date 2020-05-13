@@ -911,7 +911,7 @@ class WebappInternal(Base):
         except Exception as e:
             self.log_error(str(e))
    
-    def SearchBrowse(self, term, key=None, identifier=None, index=False):
+    def SearchBrowse(self, term, key=None, column=None, identifier=None, index=False):
         """
         Searchs a term on Protheus Webapp.
 
@@ -950,7 +950,13 @@ class WebappInternal(Base):
         browse_elements = self.get_search_browse_elements(identifier)
         if key:
             self.search_browse_key(key, browse_elements, index)
-        self.fill_search_browse(term, browse_elements)
+            self.fill_search_browse(term, browse_elements)
+        elif index and isinstance(column, int):
+            column -= 1
+        browse_elements = self.get_search_browse_elements(identifier)
+        if column:
+            self.search_browse_key(column, browse_elements, index)
+            self.fill_search_browse(term, browse_elements)
 
     def get_search_browse_elements(self, panel_name=None):
         """
