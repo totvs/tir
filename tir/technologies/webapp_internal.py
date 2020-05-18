@@ -951,16 +951,14 @@ class WebappInternal(Base):
         print(f"Searching: {term}")
         if index and isinstance(key, int):
             key -= 1
-        browse_elements = self.get_search_browse_elements(identifier)
-        if key:
-            self.search_browse_key(key, browse_elements, index)
-            self.fill_search_browse(term, browse_elements)
         elif index and isinstance(column, int):
             column -= 1
         browse_elements = self.get_search_browse_elements(identifier)
-        if column:
-            self.search_browse_key(column, browse_elements, index)
-            self.fill_search_browse(term, browse_elements)
+        if key:
+            self.search_browse_key(key, browse_elements, index)
+        elif column:
+            self.search_browse_column(column, browse_elements, index)	
+        self.fill_search_browse(term, browse_elements)
 
     def get_search_browse_elements(self, panel_name=None):
         """
@@ -1089,7 +1087,61 @@ class WebappInternal(Base):
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
             self.click(sel_input())
 
+    def search_browse_column(self, search_column, search_elements, index=False):
+        """
+        [TESTE]
+        """
 
+        if index and not isinstance(search_column, int):
+            self.log_error("If index parameter is True, column must be a number!")
+
+        sel_browse_column = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
+        self.set_element_focus(sel_browse_column())
+        self.click(sel_browse_column())
+
+        soup = self.get_current_DOM()
+        if not index:
+
+            search_column = re.sub(r"\.+$", '', search_column).lower()
+
+            #tscrollboxes = soup.select(".tscrollbox input")
+            tcheckboxes = soup.select(".tcheckbox input")
+
+            for element in tcheckboxes:
+
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                selenium_input = lambda : self.soup_to_selenium(element)
+                self.click(selenium_input())
+                time.sleep(1)
+
+                try_get_tooltip = 0
+                success = False
+
+                while (not success and try_get_tooltip < 3):
+                    success = self.check_element_tooltip(element, search_key, contains=True)
+                    print(f"SUCCESS: {success}")
+                    print(f"TRYING GET TOOLTIP: {try_get_tooltip}")
+                    try_get_tooltip += 1
+                    
+                if success:
+                    break
+                else:
+                    pass
+
+            if not success:
+                self.log_error(f"Couldn't search the key: {search_key} on screen.")
+                    
+        else:
+            tcheckboxes = soup.select(".tcheckbox input")
+            if len(tcheckboxes) < search_key + 1:
+                self.log_error("Key index out of range.")
+            trb_input = tcheckboxes[search_key]
+
+            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
+            self.click(sel_input())
 
     def fill_search_browse(self, term, search_elements):
         """
