@@ -694,8 +694,12 @@ class Webapp():
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :
+        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
+        >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

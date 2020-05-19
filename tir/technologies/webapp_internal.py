@@ -1326,9 +1326,13 @@ class WebappInternal(Base):
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is a grid *Will not attempt to verify the entered value. Run only once.* :
+        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
+        >>> oHelper.LoadGrid()
         """
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row=row)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -3327,7 +3331,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True):
         """
         [Internal]
 
@@ -3355,7 +3359,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row])
+        self.grid_input.append([column, value, grid_number, new, row, check_value])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -3473,9 +3477,9 @@ class WebappInternal(Base):
         columns = ""
 
         grids = None
-
         try_counter = 1
         grid_reload = True
+        check_value = field[5]
 
         if(field[1] == True):
             field_one = 'is a boolean value'
@@ -3659,6 +3663,8 @@ class WebappInternal(Base):
                                 time.sleep(1)
                                 if element_exist:
                                     current_value = self.get_element_text(selenium_column())
+                                    if current_value == None:
+                                        current_value = ''
                                     break
                                 else:
                                     try_endtime = try_endtime - 10
@@ -3680,8 +3686,11 @@ class WebappInternal(Base):
                             else:
                                 self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                 current_value = field[1]
+            
+            if not check_value:
+                break
 
-        if (self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
+        if ( check_value and self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','')):
             self.search_for_errors()
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
             self.log_error(f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
