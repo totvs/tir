@@ -953,9 +953,7 @@ class WebappInternal(Base):
             key -= 1
         browse_elements = self.get_search_browse_elements(identifier)
         if key:
-            self.search_browse_key(column, browse_elements, index)	            
-            self.search_browse_key(key, browse_elements, index)
-            self.fill_search_browse(term, browse_elements)	        
+            self.search_browse_key(key, browse_elements, index)	            
         elif column:
             self.search_browse_column(column, browse_elements, index)	
         self.fill_search_browse(term, browse_elements)
