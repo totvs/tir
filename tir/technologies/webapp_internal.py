@@ -854,6 +854,7 @@ class WebappInternal(Base):
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
         [Internal]
+        
         Do the standard query(F3) 
         this method 
         1.Search the field
@@ -1119,7 +1120,7 @@ class WebappInternal(Base):
         tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
-            self.log_error("SearchBrowse - Column: coul'd not find the new menupopup")
+            self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
         self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
         spans = tmenupopup.select("span")
