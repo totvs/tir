@@ -482,6 +482,8 @@ class Webapp():
         :type identifier: str
         :param index: Whether the key is an index or not. - **Default:** False
         :type index: bool
+        :param column: The search column to be chosen on the search dropdown. - **Default:** None
+        :type column: str
 
         Usage:
 
@@ -502,7 +504,11 @@ class Webapp():
         >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
         >>> #------------------------------------------------------------------------
         >>> # To search using the first search box and a chosen column:
-        >>> oHelper.SearchBrowse("D MG 001", column="Branch+id")
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome")
+        >>> #------------------------------------------------------------------------
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and a chosen columns:
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
         >>> #------------------------------------------------------------------------
         """
         self.__webapp.SearchBrowse(term, key, identifier, index, column)
