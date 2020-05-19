@@ -854,6 +854,7 @@ class WebappInternal(Base):
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
         [Internal]
+        
         Do the standard query(F3) 
         this method 
         1.Search the field
@@ -953,14 +954,10 @@ class WebappInternal(Base):
             key -= 1
         browse_elements = self.get_search_browse_elements(identifier)
         if key:
-            self.search_browse_key(key, browse_elements, index)
-            self.fill_search_browse(term, browse_elements)
-        elif index and isinstance(column, int):
-            column -= 1
-        browse_elements = self.get_search_browse_elements(identifier)
-        if column:
-            self.search_browse_key(column, browse_elements, index)
-            self.fill_search_browse(term, browse_elements)
+            self.search_browse_key(key, browse_elements, index)	            
+        elif column:
+            self.search_browse_column(column, browse_elements, index)	
+        self.fill_search_browse(term, browse_elements)
 
     def get_search_browse_elements(self, panel_name=None):
         """
@@ -1089,7 +1086,54 @@ class WebappInternal(Base):
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
             self.click(sel_input())
 
+    def search_browse_column(self, search_column, search_elements, index=False):
+        """
+        [Internal]
 
+        Chooses the search key to be used during the search.
+
+        :param search_column: The search Column to be chosen on the search dropdown
+        :type search_column: str
+        :param search_elements: Tuple of Search elements
+        :type search_elements: Tuple of Beautiful Soup objects
+        :param index: Whether the key is an index or not.
+        :type index: bool
+
+        Usage:
+
+        >>> #Preparing the tuple:
+        >>> search_elements = self.get_search_browse_elements("Products")
+        >>> # Calling the method:
+        >>> self.search_browse_key("Filial*", search_elements)
+        """
+
+
+        if index and not isinstance(search_column, int):
+            self.log_error("If index parameter is True, column must be a number!")
+        sel_browse_column = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
+        self.set_element_focus(sel_browse_column())
+        self.click(sel_browse_column())
+        
+        self.wait_element_timeout(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
+        tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
+
+        if not tmenupopup:
+            self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
+
+        self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
+        spans = tmenupopup.select("span")
+        
+        if ',' in search_column:
+            search_column_itens = search_column.split(',')
+            filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
+            for  item in filtered_column_itens:
+                span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+                self.click(self.soup_to_selenium(span))
+        else:
+            span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
+            self.click(self.soup_to_selenium(span))
 
     def fill_search_browse(self, term, search_elements):
         """
