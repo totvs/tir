@@ -705,7 +705,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.SearchBrowse">
-<code class="sig-name descname">SearchBrowse</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">key=None</em>, <em class="sig-param">identifier=None</em>, <em class="sig-param">index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">SearchBrowse</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">key=None</em>, <em class="sig-param">identifier=None</em>, <em class="sig-param">index=False</em>, <em class="sig-param">column=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -733,6 +733,10 @@ is provided, it will search on the chosen search box.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a chosen search box and a chosen search key:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen column:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -2449,6 +2453,29 @@ Used to check PG_DOWN correct execute.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.webapp_internal.WebappInternal.search_browse_column">
+<code class="sig-name descname">search_browse_column</code><span class="sig-paren">(</span><em class="sig-param">search_column</em>, <em class="sig-param">search_elements</em>, <em class="sig-param">index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_browse_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internal]</p>
+<p>Chooses the search key to be used during the search.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The search Column to be chosen on the search dropdown</p></li>
+<li><p><strong>search_elements</strong> (<em>Tuple of Beautiful Soup objects</em>) – Tuple of Search elements</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether the key is an index or not.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Preparing the tuple:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_search_browse_elements</span><span class="p">(</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">search_browse_key</span><span class="p">(</span><span class="s2">&quot;Filial*&quot;</span><span class="p">,</span> <span class="n">search_elements</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.search_browse_key">
 <code class="sig-name descname">search_browse_key</code><span class="sig-paren">(</span><em class="sig-param">search_key</em>, <em class="sig-param">search_elements</em>, <em class="sig-param">index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.search_browse_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
@@ -2573,8 +2600,8 @@ Fills the log information needed by opening the About page.</p>
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.standard_search_field">
 <code class="sig-name descname">standard_search_field</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">name_attr=False</em>, <em class="sig-param">send_key=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.standard_search_field" title="Permalink to this definition">¶</a></dt>
-<dd><p>[Internal]
-Do the standard query(F3) 
+<dd><p>[Internal]</p>
+<p>Do the standard query(F3) 
 this method 
 1.Search the field
 2.Search icon “lookup”

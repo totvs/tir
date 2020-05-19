@@ -910,7 +910,7 @@ Parameters:
 
 <dl class="method">
 <dt id="tir.main.Webapp.SearchBrowse">
-<code class="sig-name descname">SearchBrowse</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">key=None</em>, <em class="sig-param">identifier=None</em>, <em class="sig-param">index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">SearchBrowse</code><span class="sig-paren">(</span><em class="sig-param">term</em>, <em class="sig-param">key=None</em>, <em class="sig-param">identifier=None</em>, <em class="sig-param">index=False</em>, <em class="sig-param">column=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -923,6 +923,7 @@ is provided, it will search on the chosen search box.</p>
 <li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
 <li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</p></li>
 <li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether the key is an index or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The search column to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 </dl>
@@ -942,6 +943,14 @@ is provided, it will search on the chosen search box.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using an index instead of name for the search key:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen column:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Nome&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen columns:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Nome, Filial*, ColumnX, AnotherColumnY&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1179,6 +1188,10 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is on the second grid of the screen:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">check_value</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
 </pre></div>
 </div>
