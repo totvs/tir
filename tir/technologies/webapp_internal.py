@@ -3155,6 +3155,8 @@ class WebappInternal(Base):
                 if key == "DOWN" and grid:
                     grid_number = 0 if grid_number is None else grid_number
                     self.grid_input.append(["", "", grid_number, True])
+                elif grid:
+                    ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                 else:
                     self.send_keys(element, self.supported_keys(key))
 
