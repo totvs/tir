@@ -911,6 +911,7 @@ class WebappInternal(Base):
             
             print("Waiting new container ...")
             while( time.time() < endtime and container['id']  == container_end['id']):
+                container_end = self.get_current_container()
                 time.sleep(0.01)
 
             if time.time() > endtime:
