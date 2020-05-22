@@ -415,11 +415,6 @@ class Webapp():
 
     def F3(self, field, name_attr=False,send_key=False):
         """
-
-        This method is similar to ClickIcon
-        1.Clicks on the Selenium element.
-
-        [Internal]
         Do the standard query(F3)
         this method
         1.Search the field
