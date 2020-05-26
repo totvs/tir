@@ -938,6 +938,10 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is on the second grid of the screen:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling method to input value on a field that is a grid *Will not attempt to verify the entered value. Run only once.* :</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">grid_number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">check_value</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">LoadGrid</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -2122,7 +2126,7 @@ Return an image source filtered.</p>
 
 <dl class="method">
 <dt id="tir.technologies.webapp_internal.WebappInternal.input_grid_appender">
-<code class="sig-name descname">input_grid_appender</code><span class="sig-paren">(</span><em class="sig-param">column</em>, <em class="sig-param">value</em>, <em class="sig-param">grid_number=0</em>, <em class="sig-param">new=False</em>, <em class="sig-param">row=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">input_grid_appender</code><span class="sig-paren">(</span><em class="sig-param">column</em>, <em class="sig-param">value</em>, <em class="sig-param">grid_number=0</em>, <em class="sig-param">new=False</em>, <em class="sig-param">row=None</em>, <em class="sig-param">check_value=True</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Permalink to this definition">¶</a></dt>
 <dd><p>[Internal]</p>
 <p>Adds a value to the input queue of a grid.</p>
 <dl class="field-list simple">
