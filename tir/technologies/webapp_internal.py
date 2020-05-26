@@ -1214,16 +1214,23 @@ class WebappInternal(Base):
         :param soup: soup object
         :return: The container index by z-index and filter if it is displayed
         """
-        containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
 
-        if containers:
-            containers_filtered = list(filter(lambda x: self.soup_to_selenium(x).is_displayed() if self.soup_to_selenium(x) else None, containers))
-            if containers_filtered:
-                return next(iter(containers_filtered), None)
+        try:
+            containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
+
+            if containers:
+                containers_filtered = list(filter(lambda x: self.element_is_displayed(x), containers))
+                if containers_filtered:
+                    return next(iter(containers_filtered), None)
+                else:
+                    return None
             else:
                 return None
-        else:
-            return None
+                       
+        except AttributeError as e:
+            print(f"Warning: wait_blocker > blocker_containers Exeception (AttributeError)\n {str(e)}")
+        except Exception as e:
+            print(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
 
             
     def get_panel_name_index(self, panel_name):
