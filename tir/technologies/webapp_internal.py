@@ -880,6 +880,7 @@ class WebappInternal(Base):
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         container = self.get_current_container()
+        endtime = self.config.time_out + time.time()
 
         try:
             #wait element
@@ -907,8 +908,17 @@ class WebappInternal(Base):
                 input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
+            
+            print("Waiting new container ...")
+            while( time.time() < endtime and container['id']  == container_end['id']):
+                container_end = self.get_current_container()
+                time.sleep(0.01)
+
+            if time.time() > endtime:
+                print("Timeout: new container not found.")
             else:
-                print("success")
+                print("Success")
+                
         except Exception as e:
             self.log_error(str(e))
    
