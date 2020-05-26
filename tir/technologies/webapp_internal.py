@@ -4048,7 +4048,7 @@ class WebappInternal(Base):
                 if grids:
                     grids = list(filter(lambda x:x.select("tbody tr"), grids))      
                     headers = self.get_headers_from_grids(grids)
-                    if grid_number <= len(grids):
+                    if grid_number < len(grids):
                         rows = grids[grid_number].select("tbody tr")
                     if rows:
                         if row_number < len(rows):
