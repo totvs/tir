@@ -6087,3 +6087,19 @@ class WebappInternal(Base):
         :type string: str
         """
         return "".join(list(filter(lambda x: x.isprintable(), string)))
+
+    def get_config_value(self, json_key):
+        """
+
+        :param json_key: Json Key in config.json
+        :type json_key: str
+        :return: Json Key item in config.json
+        """
+        json_key = json_key.lower()
+
+        config_dict = dict((k.lower(), v) for k, v in self.config.json_data.items())
+
+        if list(filter(lambda x: json_key in x, config_dict.keys())):
+            return config_dict[json_key]
+        else:
+            self.log_error("Doesn't contain that key in json object")

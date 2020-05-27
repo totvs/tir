@@ -1111,6 +1111,15 @@ class Webapp():
         """
         return self.__database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
 
+    def GetConfigValue(self, json_key):
+        """
+
+        :param json_key: Json Key in config.json
+        :type json_key: str
+        :return: Json Key item in config.json
+        """
+        return self.__webapp.get_config_value(json_key)
+
 class Apw():
 
     def __init__(self, config_path=""):
