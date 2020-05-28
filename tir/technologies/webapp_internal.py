@@ -879,7 +879,6 @@ class WebappInternal(Base):
         >>> # To search using the name of input and do action with a key:
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
-        container = self.get_current_container()
         endtime = self.config.time_out + time.time()
 
         try:
@@ -897,10 +896,12 @@ class WebappInternal(Base):
             if(send_key):
                 input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.set_element_focus(input_field())
+                container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
             else:
                 icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
                 icon_s = self.soup_to_selenium(icon)
+                container = self.get_current_container()
                 self.click(icon_s)
 
             container_end = self.get_current_container()
@@ -910,10 +911,18 @@ class WebappInternal(Base):
                 self.send_keys(input_field(), Keys.F3)
             
             print("Waiting new container ...")
+            print("tempo")
+            print(time.time() < endtime)
+            print(time.time() - endtime)
+            print("Containers ID")
+            print(container['id']  == container_end['id'])
+
             while( time.time() < endtime and container['id']  == container_end['id']):
                 container_end = self.get_current_container()
                 time.sleep(0.01)
-
+            
+            print(f".{container['id']}.")
+            print(f".{container_end['id']}.")
             if time.time() > endtime:
                 print("Timeout: new container not found.")
             else:
