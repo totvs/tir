@@ -14,6 +14,7 @@ class ConfigLoader:
         else:
             data = {}
 
+        self.json_data = data
         self.autostart = True
         self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
         self.url_set_start_exec = str(data["UrlSetStartExec"]) if "UrlSetStartExec" in data else ""
@@ -59,4 +60,4 @@ class ConfigLoader:
         self.database_user = str(data["DBUser"]) if "DBUser" in data else ""
         self.database_password = str(data["DBPassword"]) if "DBPassword" in data else ""
         self.dbq_oracle_server = str(data["DBQOracleServer"]) if "DBQOracleServer" in data else ""
-
+        self.url_tss = str(data["URL_TSS"]) if "URL_TSS" in data else ""
