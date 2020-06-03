@@ -2871,7 +2871,8 @@ class WebappInternal(Base):
                         ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(
                             clicking_row_element(), Keys.ENTER).perform()
                     else:
-                        self.double_click(clicking_row_element())
+                        self.double_click(clicking_row_element(), click_type = enum.ClickType.ACTIONCHAINS)
+                        
                     contents.remove(text)
                 if contents:
                     time.sleep(2)
