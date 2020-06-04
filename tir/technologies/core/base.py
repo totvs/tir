@@ -77,7 +77,12 @@ class Base(unittest.TestCase):
         self.language = LanguagePack(self.config.language) if self.config.language else ""
         self.log = Log(folder=self.config.log_folder)
         self.log.station = socket.gethostname()
-        self.log.user = os.getlogin()
+
+        try:
+            self.log.user = os.getlogin()
+        except FileNotFoundError:
+            import getpass
+            self.log.user = getpass.getuser()
 
         self.base_container = "body"
         self.errors = []
