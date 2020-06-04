@@ -198,7 +198,7 @@ class Base(unittest.TestCase):
         if str(user_value).strip() != str(captured_value).strip():
             self.errors.append(message)
 
-    def double_click(self, element):
+    def double_click(self, element, click_type = enum.ClickType.SELENIUM):
         """
         [Internal]
 
@@ -215,9 +215,20 @@ class Base(unittest.TestCase):
         >>> self.double_click(element())
         """
         try:
-            self.scroll_to_element(element)
-            element.click()
-            element.click()
+            if click_type == enum.ClickType.SELENIUM:
+                self.scroll_to_element(element)
+                element.click()
+                element.click()
+            elif click_type == enum.ClickType.ACTIONCHAINS:
+                self.scroll_to_element(element)
+                actions = ActionChains(self.driver)
+                actions.move_to_element(element)
+                actions.double_click()
+                actions.perform()
+            elif click_type == enum.ClickType.JS:
+                self.driver.execute_script("arguments[0].click()", element)
+                self.driver.execute_script("arguments[0].click()", element)
+
         except Exception:
             self.scroll_to_element(element)
             actions = ActionChains(self.driver)
