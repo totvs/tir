@@ -976,11 +976,10 @@ class Base(unittest.TestCase):
             if self.config.headless:
                 self.driver.set_window_position(0, 0)
                 self.driver.set_window_size(1024, 768)
-
             else:
                 self.driver.maximize_window()
                 
-            self.driver.get(self.config.url)
+        self.driver.get(self.config.url)
 
         self.wait = WebDriverWait(self.driver, 90)
 
