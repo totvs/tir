@@ -959,6 +959,9 @@ class WebappInternal(Base):
         >>> oHelper.SearchBrowse("D MG 001", column="Branch+id")
         >>> #------------------------------------------------------------------------
         """
+
+        self.wait_blocker()
+
         print(f"Searching: {term}")
         if index and isinstance(key, int):
             key -= 1
