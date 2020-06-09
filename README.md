@@ -40,17 +40,7 @@ TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework
 pip install tir_framework
 ```
 
-### 2. via Installation Wizard
-
-Our installation wizard handles the environment setup, the package installation and also it can update your package.
-
-Download [TIR Installer](https://github.com/totvs/tir-installer/blob/master/tir-installer%201.0.0.exe?raw=true)
-
-It is also an open-source project, you can see the repository [here](https://github.com/totvs/tir-installer/)
-
-OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
-
-### 3. via Terminal
+### 2. via Terminal
 
 You can install TIR via terminal. Make sure your Python and Git is installed and run this command:
 
