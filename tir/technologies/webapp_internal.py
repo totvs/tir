@@ -1430,6 +1430,8 @@ class WebappInternal(Base):
 
         field = re.sub(r"([\s\?:\*\.]+)?$", "", field).strip()
 
+        main_element = None
+
         if name_attr:
             self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
@@ -1452,6 +1454,8 @@ class WebappInternal(Base):
 
             if not element:
                 continue
+
+            main_element = element
 
             if "tmultiget" in element.attrs['class'] if self.element_name(element) == 'div' else None:
                 textarea = element.select("textarea")
@@ -1484,7 +1488,8 @@ class WebappInternal(Base):
                     if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
                         self.set_element_focus(input_field())
-                        self.try_element_to_be_clickable(element)
+                        main_element = element.parent
+                        self.try_element_to_be_clickable(main_element)
                         self.select_combo(element, main_value)
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
@@ -1551,7 +1556,7 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
         else:
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
 
     def get_field(self, field, name_attr=False, position=1):
         """
