@@ -2844,7 +2844,6 @@ class WebappInternal(Base):
             th_element.click()
 
         elif content_list or (select_all and not is_select_all_button):
-            self.wait_element(content_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
             sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
