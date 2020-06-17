@@ -491,7 +491,7 @@ class WebappInternal(Base):
 
         if change_env:
             label = self.language.confirm
-            container = None
+            container = "body"
         else:
             label = self.language.enter
             container = ".twindow"
@@ -556,19 +556,20 @@ class WebappInternal(Base):
                 env_value = self.get_web_value(env())
                 time.sleep(1)
 
-        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
-        button_element = next(iter(buttons), None)
-        if button_element is None or not hasattr(button_element, "name") and not hasattr(button_element, "parent"):
+        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
+        button_element = next(iter(buttons), None) if buttons else None
+
+        if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
+            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+            self.click(button())
+        elif not change_env:
             self.restart_counter += 1
             message = f"Couldn't find {label} button."
             self.log_error(message)
             raise ValueError(message)
 
-        button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
-        self.click(button())
-
-        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
-
+        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)             
+            
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
@@ -597,13 +598,38 @@ class WebappInternal(Base):
         if module:
             self.config.module = module
 
-        element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
-        if not element:
-            tbuttons = self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
+        element = self.change_environment_element_home_screen()
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
+        else:
+            self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
+
+        self.close_coin_screen()
+        
+    def change_environment_element_home_screen(self):
+        """
+        [Internal]
+
+        This method wait the element to perform ChangeEnvirionmentm return a soup element.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.change_environment_element_home_screen()
+        """
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime:
+
+            if self.wait_element_timeout(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, timeout = 1, optional_term="button", main_container="body"):
+                return next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
+            elif self.wait_element_timeout(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = 1, main_container="body"):
+                tbuttons = self.filter_displayed_elements(self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"), True)
+                element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
+                if element:
+                    return element
+
+        return False
 
     def close_modal(self):
         """
@@ -654,6 +680,7 @@ class WebappInternal(Base):
         This method is responsible for closing the "coin screen" that opens after searching for the routine
         """
         endtime = time.time() + self.config.time_out
+
         self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
             timeout = self.config.time_out, main_container="body", check_error = False)
 
