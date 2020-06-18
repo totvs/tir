@@ -525,7 +525,11 @@ class WebappInternal(Base):
         self.send_keys(group(), self.config.group)
 
         print("Filling Branch")
-        branch_element = next(iter(self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(branch_elements) > 1:
+            branch_element = branch_elements.pop()
+        else:
+            branch_element = next(iter(branch_elements), None)
         if branch_element is None:
             self.restart_counter += 1
             message = "Couldn't find Branch input element."
@@ -538,13 +542,18 @@ class WebappInternal(Base):
         self.send_keys(branch(), self.config.branch)
 
         print("Filling Environment")
-        environment_element = next(iter(self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(environment_elements) > 1:
+            environment_element = environment_elements.pop()
+        else:
+            environment_element = next(iter(environment_elements), None)
         if environment_element is None:
             self.restart_counter += 1
             message = "Couldn't find Module input element."
             self.log_error(message)
             raise ValueError(message)
-        
+
+
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
             env_value = self.get_web_value(env())
