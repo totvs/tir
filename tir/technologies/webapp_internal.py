@@ -935,7 +935,7 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
             else:
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup]")),None)
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi]")),None)
                 icon_s = self.soup_to_selenium(icon)
                 container = self.get_current_container()
                 self.click(icon_s)
@@ -2880,7 +2880,6 @@ class WebappInternal(Base):
             th_element.click()
 
         elif content_list or (select_all and not is_select_all_button):
-            self.wait_element(content_list[0]) # wait columns
 
             class_grid = grid.attrs['class'][0]
             sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
