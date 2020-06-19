@@ -5174,13 +5174,14 @@ class WebappInternal(Base):
 
         self.log.save_file(routine_name)
 
+        self.errors = []
+        print(msg)
+        
         if expected:
             self.assertTrue(True, "Passed")
         else:
             self.assertTrue(False, msg)
 
-        self.errors = []
-        print(msg)
         
     def ClickCheckBox(self, label_box_name, position=1):
         """
