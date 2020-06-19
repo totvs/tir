@@ -499,7 +499,12 @@ class WebappInternal(Base):
         self.wait_element(self.language.database, main_container=container)
 
         print("Filling Date")
-        base_date = next(iter(self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(base_dates) > 1:
+            base_date = base_dates.pop()
+        else:
+            base_date = next(iter(base_dates), None)
+            
         if base_date is None:
             self.restart_counter += 1
             message = "Couldn't find Date input element."
