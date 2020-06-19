@@ -512,7 +512,12 @@ class WebappInternal(Base):
         self.send_keys(date(), self.config.date)
 
         print("Filling Group")
-        group_element = next(iter(self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(group_elements) > 1:
+            group_element = group_elements.pop()
+        else:
+            group_element = next(iter(group_elements), None)
+
         if group_element is None:
             self.restart_counter += 1
             message = "Couldn't find Group input element."
