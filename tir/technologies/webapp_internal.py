@@ -491,7 +491,7 @@ class WebappInternal(Base):
 
         if change_env:
             label = self.language.confirm
-            container = None
+            container = "body"
         else:
             label = self.language.enter
             container = ".twindow"
@@ -499,7 +499,12 @@ class WebappInternal(Base):
         self.wait_element(self.language.database, main_container=container)
 
         print("Filling Date")
-        base_date = next(iter(self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(base_dates) > 1:
+            base_date = base_dates.pop()
+        else:
+            base_date = next(iter(base_dates), None)
+            
         if base_date is None:
             self.restart_counter += 1
             message = "Couldn't find Date input element."
@@ -512,7 +517,12 @@ class WebappInternal(Base):
         self.send_keys(date(), self.config.date)
 
         print("Filling Group")
-        group_element = next(iter(self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(group_elements) > 1:
+            group_element = group_elements.pop()
+        else:
+            group_element = next(iter(group_elements), None)
+
         if group_element is None:
             self.restart_counter += 1
             message = "Couldn't find Group input element."
@@ -525,7 +535,11 @@ class WebappInternal(Base):
         self.send_keys(group(), self.config.group)
 
         print("Filling Branch")
-        branch_element = next(iter(self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(branch_elements) > 1:
+            branch_element = branch_elements.pop()
+        else:
+            branch_element = next(iter(branch_elements), None)
         if branch_element is None:
             self.restart_counter += 1
             message = "Couldn't find Branch input element."
@@ -538,13 +552,18 @@ class WebappInternal(Base):
         self.send_keys(branch(), self.config.branch)
 
         print("Filling Environment")
-        environment_element = next(iter(self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)), None)
+        environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if len(environment_elements) > 1:
+            environment_element = environment_elements.pop()
+        else:
+            environment_element = next(iter(environment_elements), None)
         if environment_element is None:
             self.restart_counter += 1
             message = "Couldn't find Module input element."
             self.log_error(message)
             raise ValueError(message)
-        
+
+
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
         if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
             env_value = self.get_web_value(env())
@@ -556,19 +575,20 @@ class WebappInternal(Base):
                 env_value = self.get_web_value(env())
                 time.sleep(1)
 
-        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container=container), True)
-        button_element = next(iter(buttons), None)
-        if button_element is None or not hasattr(button_element, "name") and not hasattr(button_element, "parent"):
+        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
+        button_element = next(iter(buttons), None) if buttons else None
+
+        if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
+            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+            self.click(button())
+        elif not change_env:
             self.restart_counter += 1
             message = f"Couldn't find {label} button."
             self.log_error(message)
             raise ValueError(message)
 
-        button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
-        self.click(button())
-
-        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
-
+        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)             
+            
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
@@ -597,13 +617,38 @@ class WebappInternal(Base):
         if module:
             self.config.module = module
 
-        element = next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
-        if not element:
-            tbuttons = self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
+        element = self.change_environment_element_home_screen()
         if element:
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
+        else:
+            self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
+
+        self.close_coin_screen()
+        
+    def change_environment_element_home_screen(self):
+        """
+        [Internal]
+
+        This method wait the element to perform ChangeEnvirionmentm return a soup element.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.change_environment_element_home_screen()
+        """
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime:
+
+            if self.wait_element_timeout(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, timeout = 1, optional_term="button", main_container="body"):
+                return next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
+            elif self.wait_element_timeout(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = 1, main_container="body"):
+                tbuttons = self.filter_displayed_elements(self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"), True)
+                element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
+                if element:
+                    return element
+
+        return False
 
     def close_modal(self):
         """
@@ -654,6 +699,7 @@ class WebappInternal(Base):
         This method is responsible for closing the "coin screen" that opens after searching for the routine
         """
         endtime = time.time() + self.config.time_out
+
         self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
             timeout = self.config.time_out, main_container="body", check_error = False)
 
@@ -3664,7 +3710,10 @@ class WebappInternal(Base):
                             try:
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                             except WebDriverException:
-                                self.send_keys(selenium_column(), Keys.ENTER)
+                                try:
+                                    self.send_keys(selenium_column(), Keys.ENTER)
+                                except WebDriverException:
+                                    pass
                             except:
                                 pass
 
@@ -5128,13 +5177,14 @@ class WebappInternal(Base):
 
         self.log.save_file(routine_name)
 
+        self.errors = []
+        print(msg)
+        
         if expected:
             self.assertTrue(True, "Passed")
         else:
             self.assertTrue(False, msg)
 
-        self.errors = []
-        print(msg)
         
     def ClickCheckBox(self, label_box_name, position=1):
         """
