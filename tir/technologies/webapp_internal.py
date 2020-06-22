@@ -3710,7 +3710,10 @@ class WebappInternal(Base):
                             try:
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
                             except WebDriverException:
-                                self.send_keys(selenium_column(), Keys.ENTER)
+                                try:
+                                    self.send_keys(selenium_column(), Keys.ENTER)
+                                except WebDriverException:
+                                    pass
                             except:
                                 pass
 
