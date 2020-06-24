@@ -975,7 +975,7 @@ class Base(unittest.TestCase):
         if not self.config.browser.lower() == "electron":
             if self.config.headless:
                 self.driver.set_window_position(0, 0)
-                self.driver.set_window_size(1024, 768)
+                self.driver.set_window_size(1366, 768)
             else:
                 self.driver.maximize_window()
                    
