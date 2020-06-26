@@ -2857,7 +2857,6 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         self.wait_blocker()
-        text = ''
         endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
@@ -2981,7 +2980,7 @@ class WebappInternal(Base):
         if frozen_table:
             self.soup_to_selenium(td_element.next_sibling).click()
             
-        self.try_click(td_element)
+        self.click(self.soup_to_selenium(td_element))
 
     def click_grid_td(self, td_soup):
         """
