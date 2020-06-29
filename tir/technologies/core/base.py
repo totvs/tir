@@ -445,8 +445,10 @@ class Base(unittest.TestCase):
 
             return soup
             
-        except WebDriverException:
-            pass
+        except WebDriverException as e:
+            self.driver.switch_to.default_content()
+            soup = BeautifulSoup(self.driver.page_source,"html.parser")
+            return soup
 
     def get_element_text(self, element):
         """
