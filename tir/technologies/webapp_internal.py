@@ -930,7 +930,7 @@ class WebappInternal(Base):
         try:
             #wait element
             if name_attr:
-                self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(term)
             # find element
@@ -1479,7 +1479,7 @@ class WebappInternal(Base):
         main_element = None
 
         if name_attr:
-            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
             self.wait_element(field)
 
@@ -1630,7 +1630,6 @@ class WebappInternal(Base):
         position -= 1
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
-                ##element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
@@ -1717,7 +1716,7 @@ class WebappInternal(Base):
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
             if name_attr:
-                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(field)
                 
@@ -3353,8 +3352,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not element_list):
             if re.match(r"\w+(_)", field):
-                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
