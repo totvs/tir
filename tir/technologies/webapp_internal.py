@@ -2857,6 +2857,7 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         self.wait_blocker()
+        print(f"ClickBox - Clicking on {content_list}")
         endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
@@ -2890,10 +2891,11 @@ class WebappInternal(Base):
 
         elif content_list or (select_all and not is_select_all_button):
             class_grid = grid.attrs['class'][0]
+            initial_containers = self.get_all_containers()
 
             for item in content_list:
-                self.ScrollGrid(column=field, match_value=item, grid_number=grid_number+1)
                 grid = self.get_grid(grid_number)
+                self.ScrollGrid(column=field, match_value=item, grid_number=grid_number+1)
                 get_current = lambda: self.selected_row(grid_number)
                 column_enumeration = list(enumerate(grid.select("thead label")))
                 chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
@@ -2913,8 +2915,13 @@ class WebappInternal(Base):
                         ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
                     else:
                         self.double_click(click_box_item_s, click_type = enum.ClickType.ACTIONCHAINS)
-                    
                     self.wait_element_is_not_displayed(click_box_item)
+
+                    end_containers = self.get_all_containers()
+                    if end_containers and len(end_containers) > len(initial_containers):
+                        print("ClickBox: New container found stopping attempts to click on the checkbox")
+                        break
+
                     new_td = next(iter(get_current().select(f"td[id='{column_index}']")), None)
                     new_click_box_item = new_td.parent.select_one("td")
                     if new_click_box_item != click_box_item:
@@ -5253,6 +5260,25 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
+
+    def get_all_containers(self):
+        """
+        [Internal]
+
+        An internal method designed to get all containers.
+        Returns the List of BeautifulSoup object that represents this containers or NONE if nothing is found.
+
+        :return: List containers object
+        :rtype: List BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_all_containers()
+        """
+        soup = self.get_current_DOM()
+        containers = soup.select(self.containers_selectors["AllContainers"])
+        return containers
 
     def ClickTree(self, treepath, right_click=False, position=1):
         """
