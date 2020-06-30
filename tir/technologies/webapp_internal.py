@@ -1123,8 +1123,6 @@ class WebappInternal(Base):
 
                 while (not success and try_get_tooltip < 3):
                     success = self.check_element_tooltip(element, search_key, contains=True)
-                    print(f"SUCCESS: {success}")
-                    print(f"TRYING GET TOOLTIP: {try_get_tooltip}")
                     try_get_tooltip += 1
                     
                 if success:
