@@ -930,7 +930,7 @@ class WebappInternal(Base):
         try:
             #wait element
             if name_attr:
-                self.wait_element(term=f"[name$={term}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(term)
             # find element
@@ -1123,8 +1123,6 @@ class WebappInternal(Base):
 
                 while (not success and try_get_tooltip < 3):
                     success = self.check_element_tooltip(element, search_key, contains=True)
-                    print(f"SUCCESS: {success}")
-                    print(f"TRYING GET TOOLTIP: {try_get_tooltip}")
                     try_get_tooltip += 1
                     
                 if success:
@@ -1479,7 +1477,7 @@ class WebappInternal(Base):
         main_element = None
 
         if name_attr:
-            self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
             self.wait_element(field)
 
@@ -1630,7 +1628,6 @@ class WebappInternal(Base):
         position -= 1
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
-                ##element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
@@ -1717,7 +1714,7 @@ class WebappInternal(Base):
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
             if name_attr:
-                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(field)
                 
@@ -2857,7 +2854,7 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         self.wait_blocker()
-        text = ''
+        print(f"ClickBox - Clicking on {content_list}")
         endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
@@ -2890,61 +2887,42 @@ class WebappInternal(Base):
             th_element.click()
 
         elif content_list or (select_all and not is_select_all_button):
-
             class_grid = grid.attrs['class'][0]
-            sd_button_list = (self.web_scrap(term="[style*='fwskin_scroll_down.png'], .vcdown", scrap_type=enum.ScrapType.CSS_SELECTOR))
-            sd_button_list = self.filter_is_displayed(sd_button_list)
-            sd_button = sd_button_list[grid_number] if len(sd_button_list) - 1 >= grid_number else None
-            scroll_down_button = lambda: self.soup_to_selenium(sd_button) if sd_button else None
-            scroll_down = lambda: self.click(scroll_down_button()) if scroll_down_button() else None
-            
-            last = None
-            get_current = lambda: self.get_grid(grid_number).select("tbody tr.selected-row")
-            if(not get_current()):
-                get_current = lambda: self.get_grid(grid_number).select("tbody tr")
+            initial_containers = self.get_all_containers()
 
-            get_current_filtered = next(iter(get_current()),None)
-            current = get_current_filtered
-            contents = content_list[:]
-            endtime = time.time() + self.config.time_out
-            while(last != current or contents):
-                if text in contents:
-                    clicking_row_element_bs = next(iter(current.select("td")), None)
-                    if not clicking_row_element_bs:
-                        clicking_row_element_bs = current
-                    clicking_row_element = lambda: self.soup_to_selenium(clicking_row_element_bs)
-                    self.set_element_focus(clicking_row_element())
-                    time.sleep(1)
-                    if class_grid == 'tmsselbr':
-                        ActionChains(self.driver).move_to_element(clicking_row_element()).click(
-                            clicking_row_element()).perform()
-                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(
-                            clicking_row_element(), Keys.ENTER).perform()
-                    elif class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(clicking_row_element()).send_keys_to_element(
-                            clicking_row_element(), Keys.ENTER).perform()
-                    else:
-                        self.double_click(clicking_row_element(), click_type = enum.ClickType.ACTIONCHAINS)
-                        
-                    contents.remove(text)
-                if contents:
-                    time.sleep(2)
-                    last = current
-                    if text not in contents and text != '':
-                        scroll_down()
-                    time.sleep(0.5)
-                    get_current_filtered = next(iter(get_current()),None)
-                    current = get_current_filtered
-                    time.sleep(0.5)
+            for item in content_list:
+                grid = self.get_grid(grid_number)
+                self.ScrollGrid(column=field, match_value=item, grid_number=grid_number+1)
+                get_current = lambda: self.selected_row(grid_number)
+                column_enumeration = list(enumerate(grid.select("thead label")))
+                chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
+                column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
+                current = get_current()
+
+                success = False
+                while( time.time() < endtime and not success):
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                    text = td.text.strip() if td else ""
-                if time.time() > endtime:
-                    self.log_error("Couldn't click in the box")
-                if not contents:
-                    break
+                    click_box_item = td.parent.select_one("td")
+                    click_box_item_s = self.soup_to_selenium(click_box_item)
 
-        else:
-            self.log_error(f"Couldn't locate content: {content_list}")
+                    if class_grid == 'tmsselbr':
+                        ActionChains(self.driver).move_to_element(click_box_item_s).click(click_box_item_s).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                    elif class_grid != "tgrid":
+                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                    else:
+                        self.double_click(click_box_item_s, click_type = enum.ClickType.ACTIONCHAINS)
+                    self.wait_element_is_not_displayed(click_box_item)
+
+                    end_containers = self.get_all_containers()
+                    if end_containers and len(end_containers) > len(initial_containers):
+                        print("ClickBox: New container found stopping attempts to click on the checkbox")
+                        break
+
+                    new_td = next(iter(get_current().select(f"td[id='{column_index}']")), None)
+                    new_click_box_item = new_td.parent.select_one("td")
+                    if new_click_box_item != click_box_item:
+                        success = True
 
     def ScrollGrid(self, column, match_value, grid_number=1):
         """
@@ -3006,7 +2984,7 @@ class WebappInternal(Base):
         if frozen_table:
             self.soup_to_selenium(td_element.next_sibling).click()
             
-        self.try_click(td_element)
+        self.click(self.soup_to_selenium(td_element))
 
     def click_grid_td(self, td_soup):
         """
@@ -3372,8 +3350,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not element_list):
             if re.match(r"\w+(_)", field):
-                self.wait_element(term=f"[name$={field}]", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                #element = next(iter(self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
@@ -5279,6 +5256,25 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
+
+    def get_all_containers(self):
+        """
+        [Internal]
+
+        An internal method designed to get all containers.
+        Returns the List of BeautifulSoup object that represents this containers or NONE if nothing is found.
+
+        :return: List containers object
+        :rtype: List BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_all_containers()
+        """
+        soup = self.get_current_DOM()
+        containers = soup.select(self.containers_selectors["AllContainers"])
+        return containers
 
     def ClickTree(self, treepath, right_click=False, position=1):
         """
