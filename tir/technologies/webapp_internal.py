@@ -2897,6 +2897,7 @@ class WebappInternal(Base):
                 column_enumeration = list(enumerate(grid.select("thead label")))
                 chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
                 column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
+                self.wait_selected_row( grid_number, column_index, field)
                 current = get_current()
 
                 success = False
@@ -3055,6 +3056,31 @@ class WebappInternal(Base):
             row_selected = column.parent  if column else row
 
         return row_selected
+
+    def wait_selected_row(self, grid_number = 0, column_index = 0, text = "default-text", time_out = 5):
+        """
+        [Internal]
+
+        This method expects the selected line to be the line with the text value entered.
+        
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 0
+        :type grid_number: int
+        :param column_index: The column index
+        :type column_index: int
+        :param text: The value of column to be matched
+        :type text: string
+
+        Usage:
+
+        >>> # Calling the method to return the selected row:
+        >>> oHelper.selected_row(grid_number = 0)
+        """
+        success = False
+        endtime = time.time() + time_out
+        while( time.time() < endtime and not success):
+            current = self.selected_row(grid_number)
+            td = next(iter(current.select(f"td[id='{column_index}']")), None)
+            success = td.text in text
 
     def get_grid(self, grid_number=0, grid_element = None):
         """
