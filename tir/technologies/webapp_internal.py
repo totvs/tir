@@ -5915,41 +5915,50 @@ class WebappInternal(Base):
         text_help_extracted     = ""
         text_problem_extracted  = ""
         text_solution_extracted = ""
+        text_extracted = ""
 
         if not button:
             button = self.get_single_button().text
 
-        print(f"Checking Help on screen: {text}")
-        self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-        container = self.get_current_container()
-        container_filtered = container.select(".tsay")
-        container_text = ''
-        for x in range(len(container_filtered)):
-            container_text += container_filtered[x].text + ' '
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime and not text_extracted):
+            
+            print(f"Checking Help on screen: {text}")
+            # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
+            self.wait_element_timeout(term=text_help, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5,
+                                      optional_term=".tsay", check_error=False)
+            container = self.get_current_container()
+            container_filtered = container.select(".tsay")
+            container_text = ''
+            for x in range(len(container_filtered)):
+                container_text += container_filtered[x].text + ' '
 
-        try:
-            text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-            text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
-            text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
-        except:
-            pass
-        
-        if text_help:
-            text = text_help
-            text_extracted = text_help_extracted
-        elif text_problem:
-            text = text_problem
-            text_extracted = text_problem_extracted
-        elif text_solution:
-            text = text_solution
-            text_extracted = text_solution_extracted
-        else:
-            text_extracted = container_text
+            try:
+                text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
+                text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+                text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
+            except:
+                pass
 
-        if text:
-            self.check_text_container(text, text_extracted, container_text, verbosity)
-            self.SetButton(button, check_error=False)
-            self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
+            if text_help:
+                text = text_help
+                text_extracted = text_help_extracted
+            elif text_problem:
+                text = text_problem
+                text_extracted = text_problem_extracted
+            elif text_solution:
+                text = text_solution
+                text_extracted = text_solution_extracted
+            else:
+                text_extracted = container_text
+
+            if text_extracted:
+                self.check_text_container(text, text_extracted, container_text, verbosity)
+                self.SetButton(button, check_error=False)
+                self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
+
+        if not text_help_extracted:
+            self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
@@ -5958,14 +5967,12 @@ class WebappInternal(Base):
                 return
             else:
                 print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-                self.log_error(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
         else:
             if text_user in text_extracted:
                 print(f"Help on screen Checked: {text_user}")
                 return
             else:
                 print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-                self.log_error(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
 
     def get_single_button(self):
         """
