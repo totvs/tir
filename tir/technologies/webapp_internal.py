@@ -3072,8 +3072,8 @@ class WebappInternal(Base):
 
         Usage:
 
-        >>> # Calling the method to return the selected row:
-        >>> oHelper.selected_row(grid_number = 0)
+        >>> # Calling the method to wait the selected row:
+        >>> oHelper.wait_selected_row(grid_number = 0, column_index = 0, text= "value" )
         """
         success = False
         endtime = time.time() + time_out
