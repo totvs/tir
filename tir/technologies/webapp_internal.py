@@ -2905,6 +2905,7 @@ class WebappInternal(Base):
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
                     click_box_item = td.parent.select_one("td")
                     click_box_item_s = self.soup_to_selenium(click_box_item)
+                    self.scroll_to_element(click_box_item_s)
 
                     if class_grid == 'tmsselbr':
                         ActionChains(self.driver).move_to_element(click_box_item_s).click(click_box_item_s).perform()
