@@ -621,10 +621,7 @@ class Base(unittest.TestCase):
         >>> self.scroll_to_element(element())
         """
         try:
-            if element.get_attribute("id"):
-                self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
-            else:
-                self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except StaleElementReferenceException:
             print("********Element Stale scroll_to_element*********")
             pass
