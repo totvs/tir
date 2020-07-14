@@ -5375,15 +5375,14 @@ class WebappInternal(Base):
 
                         for element_class_item in element_class:
                             if not success:
-                        
-                                # if "expanded" not in element_class_item.attrs['class'] and not success:
+
                                 element_click = lambda: self.soup_to_selenium(element_class_item)
-                                    
                                 try:
                                     if last_item:
                                         element_click().click()
                                         if self.check_toggler(label_filtered):
-                                            success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                            success = self.check_hierarchy(label_filtered)
+                                            # success = self.clicktree_status_selected(label_filtered, check_expanded=True)
                                             if success and right_click:
                                                 self.click(element_click(), right_click=right_click)
                                         else:
@@ -5392,7 +5391,7 @@ class WebappInternal(Base):
                                             success = self.clicktree_status_selected(label_filtered)
                                     else:
                                         element_click().click()
-                                        success = self.clicktree_status_selected(label_filtered, check_expanded=True)
+                                        success = self.check_hierarchy(label_filtered)
                                     
                                     try_counter += 1
                                 except:
@@ -5402,8 +5401,7 @@ class WebappInternal(Base):
                             try:
                                 element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                 element_click().click()
-                                success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.clicktree_status_selected(label_filtered, check_expanded=True)
-
+                                success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
                             except:
                                 pass
             
@@ -5484,19 +5482,51 @@ class WebappInternal(Base):
         [Internal]
         Returns a tree node selected by label
         """
+
+        ttreenode = self.treenode()
+
+        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+
+        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+
+    def treenode(self):
+        """
+
+        :return:
+        """
+
         container = self.get_current_container()
 
         tr = container.select("tr")
 
         tr_class = list(filter(lambda x: "class" in x.attrs, tr))
 
-        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+        return list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
 
-        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+    def check_hierarchy(self, label):
+        """
 
-        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
-            
-            
+        :param label:
+        :return:
+        """
+
+        treenode_parent_id = self.return_node_id(self.treenode_selected(label), 'id')
+
+        treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
+
+        node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
+
+        return True if node_check else False
+  
+    def return_node_id(self, treenode, attribute_id):
+        """
+
+        :param treenode:
+        :return:
+        """
+
+        return treenode.attrs[attribute_id]
+
     def GridTree(self, column , tree_path, right_click = False):
         """
         Clicks on Grid TreeView component.
