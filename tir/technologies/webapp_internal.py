@@ -5382,7 +5382,6 @@ class WebappInternal(Base):
                                         element_click().click()
                                         if self.check_toggler(label_filtered):
                                             success = self.check_hierarchy(label_filtered)
-                                            # success = self.clicktree_status_selected(label_filtered, check_expanded=True)
                                             if success and right_click:
                                                 self.click(element_click(), right_click=right_click)
                                         else:
@@ -5492,7 +5491,7 @@ class WebappInternal(Base):
     def treenode(self):
         """
 
-        :return:
+        :return: treenode bs4 object
         """
 
         container = self.get_current_container()
@@ -5507,25 +5506,16 @@ class WebappInternal(Base):
         """
 
         :param label:
-        :return:
+        :return: True or False
         """
 
-        treenode_parent_id = self.return_node_id(self.treenode_selected(label), 'id')
+        treenode_parent_id = self.treenode_selected(label).attrs['id']
 
         treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
 
         node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
 
         return True if node_check else False
-  
-    def return_node_id(self, treenode, attribute_id):
-        """
-
-        :param treenode:
-        :return:
-        """
-
-        return treenode.attrs[attribute_id]
 
     def GridTree(self, column , tree_path, right_click = False):
         """
