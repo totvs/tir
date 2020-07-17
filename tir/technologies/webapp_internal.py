@@ -5327,6 +5327,8 @@ class WebappInternal(Base):
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
         """
 
+        print(f"Clicking on Tree: {treepath}")
+
         hierarchy=None
 
         position -= 1
@@ -5334,6 +5336,8 @@ class WebappInternal(Base):
         labels = list(map(str.strip, treepath.split(">")))
 
         for row, label in enumerate(labels):
+
+            self.wait_blocker()
 
             last_item = True if row == len(labels)-1 else False
 
@@ -5353,57 +5357,56 @@ class WebappInternal(Base):
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
-                if not elements:
-                    self.log_error("Couldn't find elements.")
+                if elements:
 
-                if position:
-                    elements = elements[position] if len(elements) >= position + 1 else next(iter(elements))
-                    if hierarchy:
-                         elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
-                else:
-                    elements = list(filter(lambda x: self.element_is_displayed(x), elements))
+                    if position:
+                        elements = elements[position] if len(elements) >= position + 1 else next(iter(elements))
+                        if hierarchy:
+                             elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
+                    else:
+                        elements = list(filter(lambda x: self.element_is_displayed(x), elements))
 
-                    if hierarchy:
-                        elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+                        if hierarchy:
+                            elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
 
-                for element in elements:
-                    if not success:
-                        element_class = next(iter(element.select(".toggler, .lastchild, .data")), None) 
+                    for element in elements:
+                        if not success:
+                            element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
-                        if "data" in element_class.get_attribute_list("class"):
-                            element_class =  element_class.select("img, span")
+                            if "data" in element_class.get_attribute_list("class"):
+                                element_class =  element_class.select("img, span")
 
-                        for element_class_item in element_class:
-                            if not success:
+                            for element_class_item in element_class:
+                                if not success:
 
-                                element_click = lambda: self.soup_to_selenium(element_class_item)
-                                try:
-                                    if last_item:
-                                        element_click().click()
-                                        if self.check_toggler(label_filtered):
-                                            success = self.check_hierarchy(label_filtered)
-                                            if success and right_click:
-                                                self.click(element_click(), right_click=right_click)
+                                    element_click = lambda: self.soup_to_selenium(element_class_item)
+                                    try:
+                                        if last_item:
+                                            element_click().click()
+                                            if self.check_toggler(label_filtered):
+                                                success = self.check_hierarchy(label_filtered)
+                                                if success and right_click:
+                                                    self.click(element_click(), right_click=right_click)
+                                            else:
+                                                if right_click:
+                                                    self.click(element_click(), right_click=right_click)
+                                                success = self.clicktree_status_selected(label_filtered)
                                         else:
-                                            if right_click:
-                                                self.click(element_click(), right_click=right_click)
-                                            success = self.clicktree_status_selected(label_filtered)
-                                    else:
-                                        element_click().click()
-                                        success = self.check_hierarchy(label_filtered)
-                                    
-                                    try_counter += 1
+                                            element_click().click()
+                                            success = self.check_hierarchy(label_filtered)
+
+                                        try_counter += 1
+                                    except:
+                                        pass
+
+                            if not success:
+                                try:
+                                    element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                                    element_click().click()
+                                    success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
                                 except:
                                     pass
 
-                        if not success:
-                            try:
-                                element_click = lambda: self.soup_to_selenium(element_class_item.parent)
-                                element_click().click()
-                                success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
-                            except:
-                                pass
-            
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
                 hierarchy = treenode_selected.attrs['hierarchy']
@@ -5509,13 +5512,21 @@ class WebappInternal(Base):
         :return: True or False
         """
 
-        treenode_parent_id = self.treenode_selected(label).attrs['id']
+        counter = 1
 
-        treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
+        node_check = None
 
-        node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
+        while (counter <= 3 and not node_check):
 
-        return True if node_check else False
+            treenode_parent_id = self.treenode_selected(label).attrs['id']
+
+            treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
+
+            node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
+
+            counter += 1
+
+        return True if node_check else self.clicktree_status_selected(label, check_expanded=True)
 
     def GridTree(self, column , tree_path, right_click = False):
         """
