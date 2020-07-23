@@ -4540,7 +4540,7 @@ class WebappInternal(Base):
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
         if elements:
             for line in elements:
-                if line.text.strip().upper() == self.language.save:
+                if line.text.strip().upper() == self.language.save.upper():
                     self.click(line)
                     break
 
