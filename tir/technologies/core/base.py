@@ -968,8 +968,9 @@ class Base(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')# TODO chromedriver electron version
             options = ChromeOpt()
             options.add_argument('--log-level=3')
+            options.add_argument('--quiet')
             options.binary_location = self.config.electron_binary_path
-            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+            self.driver = webdriver.Chrome(options=options, executable_path=driver_path)
 
         if not self.config.browser.lower() == "electron":
             if self.config.headless:
