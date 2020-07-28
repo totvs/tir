@@ -4538,7 +4538,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetFilePath(r"C:\\folder")
         """
-        self.wait_element("Nome do Arquivo:")
+        self.wait_element(self.language.file_name)
         element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
         if element:
             self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
@@ -4546,7 +4546,7 @@ class WebappInternal(Base):
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
         if elements:
             for line in elements:
-                if line.text.strip().upper() == "ABRIR":
+                if line.text.strip().upper() == self.language.save.upper():
                     self.click(line)
                     break
 
