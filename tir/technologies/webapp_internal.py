@@ -1232,7 +1232,6 @@ class WebappInternal(Base):
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
             except:
-                print("MAIS UMA TENTATIVA")
                 pass
         if current_value.rstrip() != term.strip():
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
@@ -1711,6 +1710,7 @@ class WebappInternal(Base):
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
         """
+        self.wait_blocker()
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
