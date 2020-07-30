@@ -4540,9 +4540,11 @@ class WebappInternal(Base):
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
         if elements:
             for line in elements:
-                if line.text.strip().upper() == self.language.save.upper():
+                if line.text.strip().upper() == self.language.open():
                     self.click(line)
                     break
+                else:
+                    self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
 
     def MessageBoxClick(self, button_text):
         """
