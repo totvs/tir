@@ -4520,7 +4520,7 @@ class WebappInternal(Base):
             if filtered_rows:
                 return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
 
-    def SetFilePath(self, value, button):
+    def SetFilePath(self, value, button = ""):
         """
         Fills the path screen with the desired path 
         
@@ -4529,7 +4529,7 @@ class WebappInternal(Base):
 
         :param value: Path to be inputted.
         :type value: str
-        :param button: informar .
+        :param button: Name button from path screen.
         :type button: str
 
         Usage:
@@ -4546,8 +4546,8 @@ class WebappInternal(Base):
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
         if elements:
             for line in elements:
-                if button:
-                    if line.text.strip().upper() == self.button.upper():
+                if button != "":
+                    if line.text.strip().upper() == button.upper():
                         self.click(line)
                         break
                 elif line.text.strip().upper() == self.language.open.upper():

@@ -543,7 +543,7 @@ class Webapp():
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
-    def SetFilePath(self, value, button):
+    def SetFilePath(self, value, button = ""):
         """
         Fills the path screen with the desired path 
         
@@ -552,7 +552,7 @@ class Webapp():
 
         :param value: Path to be inputted.
         :type value: str
-        :param button: informar .
+        :param button: Name button from path screen.
         :type button: str
 
         Usage:
