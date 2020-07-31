@@ -543,19 +543,25 @@ class Webapp():
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
-    def SetFilePath(self, value):
+    def SetFilePath(self, value, button):
         """
-        Fills the path screen with desired path.
+        Fills the path screen with the desired path 
+        
+        .. warning::
+        Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
+        :param button: informar .
+        :type button: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFilePath(r"C:\\folder")
+        >>> oHelper.SetFilePath(r"C:\\folder","save")
         """
-        self.__webapp.SetFilePath(value)
+        self.__webapp.SetFilePath(value, button)
 
     def SetFocus(self, field, grid_cell=False, row_number=1):
         """
