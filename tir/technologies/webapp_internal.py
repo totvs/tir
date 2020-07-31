@@ -4520,17 +4520,23 @@ class WebappInternal(Base):
             if filtered_rows:
                 return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
 
-    def SetFilePath(self, value):
+    def SetFilePath(self, value, button = ""):
         """
-        Fills the path screen with desired path.
+        Fills the path screen with the desired path 
+        
+        .. warning::
+        Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
+        :param button: Name button from path screen.
+        :type button: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFilePath(r"C:\\folder")
+        >>> oHelper.SetFilePath(r"C:\\folder","save")
         """
         self.wait_element(self.language.file_name)
         element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
@@ -4540,9 +4546,18 @@ class WebappInternal(Base):
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
         if elements:
             for line in elements:
-                if line.text.strip().upper() == self.language.save.upper():
-                    self.click(line)
-                    break
+                if button != "":
+                    if line.text.strip().upper() == button.upper():
+                        self.click(line)
+                        break
+                elif line.text.strip().upper() == self.language.open.upper():
+                     self.click(line)
+                     break
+                elif line.text.strip().upper() == self.language.save.upper():
+                     self.click(line)
+                     break
+                else:
+                    self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
         """
