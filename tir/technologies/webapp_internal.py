@@ -1210,6 +1210,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
+        self.wait_blocker()
         endtime = time.time() + self.config.time_out
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
@@ -1222,6 +1223,7 @@ class WebappInternal(Base):
                 self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
                 sel_browse_input().clear()
                 self.set_element_focus(sel_browse_input())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
@@ -1229,6 +1231,8 @@ class WebappInternal(Base):
                 current_value = self.get_element_value(sel_browse_input())
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
+            except:
+                pass
         if current_value.rstrip() != term.strip():
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
@@ -1706,6 +1710,7 @@ class WebappInternal(Base):
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
         """
+        self.wait_blocker()
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
@@ -3538,6 +3543,7 @@ class WebappInternal(Base):
             if field[3] and field[0] == "":
                 self.new_grid_line(field)
             else:
+                self.wait_blocker()
                 print(f"Filling grid field: {field[0]}")
                 self.fill_grid(field, x3_dictionaries, initial_layer)
 
