@@ -67,7 +67,8 @@ class WebappInternal(Base):
             "GetCurrentContainer": ".tmodaldialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
-            "BlockerContainers": ".tmodaldialog,.ui-dialog"
+            "BlockerContainers": ".tmodaldialog,.ui-dialog",
+            "Containers": ".tmodaldialog,.ui-dialog"
         }
         self.base_container = ".tmodaldialog"
 
@@ -3354,8 +3355,18 @@ class WebappInternal(Base):
             time.sleep(1)
         else:
             print(f"Setting focus on element {field}.")
-            element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-            self.set_element_focus(element())
+
+            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
+            if not element:
+                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
+            if element and not self.element_is_displayed(element):
+                self.scroll_to_element( self.soup_to_selenium(element) )
+
+            try:
+                element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
+                self.set_element_focus(element())
+            except Exception as e:
+                print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
     def click_check_radio_button(self, field, value, name_attr = False, position = 1):
         """
