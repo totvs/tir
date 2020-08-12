@@ -28,7 +28,7 @@ class Log:
         self.version = version
         self.release = release
         self.database = database
-        self.initial_time = datetime.today()
+        self.initial_time = datetime.today() if not self.config.new_log else None
         self.seconds = 0
         self.suite_datetime = suite_datetime
 
@@ -43,6 +43,8 @@ class Log:
         self.execution_id = execution_id
         self.country = country
         self.config = ConfigLoader()
+        self.start_time = None
+        self.end_time = None
 
     def generate_header(self):
         """
@@ -82,7 +84,7 @@ class Log:
             self.table_rows.append(line)
             self.test_case_log.append(self.get_testcase_stack())
 
-    def save_file(self, filename):
+    def save_file(self):
         """
         Writes the log file to the file system.
 
@@ -142,7 +144,7 @@ class Log:
 
         if runner:
             try:
-                return list(runner.frame.f_locals['test'])
+                return list(filter(lambda x: x is not None, list(runner.frame.f_locals['test']._tests)))
             except KeyError:
                 return []
         else:

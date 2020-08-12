@@ -4802,7 +4802,7 @@ class WebappInternal(Base):
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
-        self.log.set_seconds()
+        self.log.set_seconds() if not self.config.new_log else None
 
         if self.config.screenshot:
 
@@ -5167,7 +5167,7 @@ class WebappInternal(Base):
                 success = True
             time.sleep(0.5)
 
-    def assert_result(self, expected):
+    def assert_result(self, expected=True):
         """
         [Internal]
 
@@ -5181,45 +5181,45 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
-        msg = ""
+        self.expected = expected
         stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number}"
-        self.log.set_seconds()
+        self.log.set_seconds() if not self.config.new_log else None
 
         if self.grid_input or self.grid_check:
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
 
         if self.errors:
             
-            if expected:
+            if self.expected:
                 for field_msg in self.errors:
                     log_message += (" " + field_msg)
             else:
                 log_message = ""
             
-            expected = not expected
+            self.expected = not self.expected
 
-        if expected:
-            msg = "" if not self.errors else log_message
-            self.log.new_line(True, msg)
+        if self.expected:
+            self.message = "" if not self.errors else log_message
+            self.log.new_line(True, self.message) if not self.config.new_log else None
         else:
-            msg = self.language.assert_false_message if not self.errors else log_message
-            self.log.new_line(False, msg)
-            
-        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+            self.message = self.language.assert_false_message if not self.errors else log_message
+            self.log.new_line(False, self.message) if not self.config.new_log else None
 
-        routine_name = routine_name if routine_name else "error"
-
-        self.log.save_file(routine_name)
+        if not self.config.new_log:
+            self.log.save_file()
 
         self.errors = []
-        print(msg)
+
+        print(self.message) if self.message else None
         
-        if expected:
+        if self.expected:
             self.assertTrue(True, "Passed")
         else:
-            self.assertTrue(False, msg)
+            self.assertTrue(False, self.message)
+
+        self.message = ""
 
         
     def ClickCheckBox(self, label_box_name, position=1):
@@ -5682,6 +5682,8 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> self.TearDown()
         """
+
+        self.execution_flow()
 
         webdriver_exception = None
         timeout = 1500
