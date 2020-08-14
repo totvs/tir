@@ -3206,7 +3206,8 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """        
+        """
+        self.wait_blocker()
         print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
