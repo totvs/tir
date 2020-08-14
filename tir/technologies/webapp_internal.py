@@ -6049,7 +6049,7 @@ class WebappInternal(Base):
             self.log_error(f"Couldn't find button")
         return button_filtered
 
-    def ClickMenuPopUpItem(self, label, right_click):
+    def ClickMenuPopUpItem(self, label, right_click, position = 1):
         """
         Clicks on MenuPopUp Item based in a text
 
@@ -6057,12 +6057,18 @@ class WebappInternal(Base):
         :type text: str
         :param right_click: Button to be clicked.
         :type button: bool
-
+        :param position: index item text
+        :type position: int
+        
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.ClickMenuPopUpItem("Label")
+        >>> # Calling the method using position.
+        >>> oHelper.ClickMenuPopUpItem("Label", position = 2)
         """
+        position -= 1
+
         self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup")
 
         label = label.lower().strip()
@@ -6081,7 +6087,10 @@ class WebappInternal(Base):
 
             tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-            tmenupopupitem_filtered = next(iter(list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))))
+            tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
+
+            if tmenupopupitem_filtered and len(tmenupopupitem_filtered) -1 >= position:
+                tmenupopupitem_filtered = tmenupopupitem_filtered[position]
 
         if not tmenupopupitem_filtered:
             self.log_error(f"Couldn't find tmenupopupitem: {label}")
