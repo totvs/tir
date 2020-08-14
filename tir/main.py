@@ -941,7 +941,7 @@ class Webapp():
 
         return self.__webapp.CheckHelp(text, button, text_help, text_problem, text_solution, verbosity)
 
-    def ClickMenuPopUpItem(self, text, right_click=False):
+    def ClickMenuPopUpItem(self, text, right_click=False, position = 1):
         """
         Clicks on MenuPopUp Item based in a text
 
@@ -949,13 +949,17 @@ class Webapp():
         :type text: str
         :param right_click: Button to be clicked.
         :type button: bool
+        :param position: index item text
+        :type position: int
 
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.ClickMenuPopUpItem("Label")
+        >>> # Calling the method using position.
+        >>> oHelper.ClickMenuPopUpItem("Label", position = 2)
         """
-        return self.__webapp.ClickMenuPopUpItem(text, right_click)
+        return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
 
     def GetRelease(self):
         """
