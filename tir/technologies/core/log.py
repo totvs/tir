@@ -45,8 +45,8 @@ class Log:
         self.table_rows.append(self.generate_header())
         self.folder = folder
         self.test_type = test_type
-        self.issue = issue
-        self.execution_id = execution_id
+        self.issue = self.config.issue
+        self.execution_id = self.config.execution_id
         self.country = country
         self.start_time = None
         self.end_time = None
@@ -58,7 +58,7 @@ class Log:
         self.lib_version = ""
         self.webapp_version = ""
         self.date = today.strftime('%Y%m%d')
-        self.hour = ""
+        self.hour = today.strftime('%H:%M:%S')
         self.hash_exec = ""
 
     def generate_header(self):
@@ -220,8 +220,6 @@ class Log:
         >>> # Calling the method:
         >>> self.log.generate_result(True, "Success")
         """
-        total_cts = 1
-        result = 0 if result else 1
         printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
 
         if not self.suite_datetime:
@@ -262,7 +260,7 @@ class Log:
             "DBTYPE": self.database,
             "DBVERSION": "",
             "EXECDATE": self.date,
-            "EXECTIME": "",
+            "EXECTIME": self.hour,
             "FAIL": 0 if result else 1,
             "FAILMSG": message,
             "IDENTI": self.issue,
@@ -283,7 +281,7 @@ class Log:
             "TESTCASE": self.get_file_name('testcase'),
             "TESTSUITE": self.get_file_name('testsuite'),
             "TESTTYPE": "1",
-            "TOKEN": "ADVPR4541c86d1158400092A6c7089cd9e9ae-2019", # ???
+            "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
             "TOOL": self.test_type,
             "USRNAME": self.user,
             "VERSION": self.version
@@ -326,9 +324,10 @@ class Log:
         """
         success = False
         response = None
+        headers = {'content-type': 'application/json'}
 
         try:
-            response = requests.post(server_address.strip(), data=json_data)
+            response = requests.post(server_address.strip(), data=json_data, headers=headers)
         except:
             pass
 

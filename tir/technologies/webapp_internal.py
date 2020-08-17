@@ -212,6 +212,8 @@ class WebappInternal(Base):
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, coverage=False)
 
+            self.log.webapp_version = self.driver.execute_script("return app.VERSION")
+
             self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
             endtime = time.time() + self.config.time_out

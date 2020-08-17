@@ -1018,8 +1018,6 @@ class Base(unittest.TestCase):
                 self.finish_testcase()
             self.start_testcase()
 
-
-
     def start_testcase(self):
         """
 
