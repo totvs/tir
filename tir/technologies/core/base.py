@@ -1029,6 +1029,7 @@ class Base(unittest.TestCase):
         self.log.initial_time = datetime.today()
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
+        self.log.ct_method, self.log.ct_number = self.log.ident_test()
         print("INICIOU O CASO DE TESTE!!!")
 
     def finish_testcase(self):
@@ -1039,4 +1040,5 @@ class Base(unittest.TestCase):
         print("FINALIZOU O CASO DE TESTE")
         print("ENVIANDO LOG")
         self.log.set_seconds()
+        self.log.generate_result(self.expected, self.message)
         print(self.log.seconds)

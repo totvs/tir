@@ -763,6 +763,8 @@ class WebappInternal(Base):
 
         release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
         database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
+        lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
+        build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
 
         if release_element:
             release = release_element.text.split(":")[1].strip()
@@ -771,6 +773,12 @@ class WebappInternal(Base):
 
         if database_element:
             self.log.database = database_element.text.split(":")[1].strip()
+
+        if build_element:
+            self.log.build_version = build_element.text.split(":")[1].strip()
+
+        if lib_element:
+            self.log.lib_version = lib_element.text.split(":")[1].strip()
 
         self.SetButton(self.language.close)
 
@@ -4802,6 +4810,8 @@ class WebappInternal(Base):
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
+        self.message = log_message
+        self.expected = False
         self.log.set_seconds() if not self.config.new_log else None
 
         if self.config.screenshot:
@@ -4825,9 +4835,9 @@ class WebappInternal(Base):
                     print(f"Warning Log Error save_screenshot exception {str(e)}")
 
         if new_log_line:
-            self.log.new_line(False, log_message)
+            self.log.new_line(False, log_message) if not self.config.new_log else None
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
-            self.log.save_file(routine_name)
+            self.log.save_file(routine_name) if not self.config.new_log else None
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -5182,9 +5192,7 @@ class WebappInternal(Base):
         >>> self.assert_result(True)
         """
         self.expected = expected
-        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
-        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
-        log_message = f"{test_number}"
+        log_message = f"{self.log.ident_test()[1]} - "
         self.log.set_seconds() if not self.config.new_log else None
 
         if self.grid_input or self.grid_check:
