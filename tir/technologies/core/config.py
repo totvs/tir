@@ -14,6 +14,7 @@ class ConfigLoader:
         else:
             data = {}
 
+        self.json_data = data
         self.autostart = True
         self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
         self.url_set_start_exec = str(data["UrlSetStartExec"]) if "UrlSetStartExec" in data else ""
@@ -50,3 +51,14 @@ class ConfigLoader:
         self.module = ""
         self.user_cfg = str(data["UserCfg"]) if "UserCfg" in data else ""
         self.password_cfg = str(data["PasswordCfg"]) if "PasswordCfg" in data else ""
+        self.electron_binary_path = (str(data["BinPath"]) if "BinPath" in data else "")
+        self.csv_path = (str(data["CSVPath"]) if "CSVPath" in data else "")
+        self.database_driver = str(data["DBDriver"]) if "DBDriver" in data else ""
+        self.database_server = str(data["DBServer"]) if "DBServer" in data else ""
+        self.database_port = str(data["DBPort"]) if "DBPort" in data else ""
+        self.database_name = str(data["DBName"]) if "DBName" in data else ""
+        self.database_user = str(data["DBUser"]) if "DBUser" in data else ""
+        self.database_password = str(data["DBPassword"]) if "DBPassword" in data else ""
+        self.dbq_oracle_server = str(data["DBQOracleServer"]) if "DBQOracleServer" in data else ""
+        self.url_tss = str(data["URL_TSS"]) if "URL_TSS" in data else ""
+        self.start_program = str(data["StartProgram"]) if "StartProgram" in data else ""

@@ -24,6 +24,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
+from tir.technologies.core.third_party.screen_size import size
 
 class Base(unittest.TestCase):
     """
@@ -76,7 +77,12 @@ class Base(unittest.TestCase):
         self.language = LanguagePack(self.config.language) if self.config.language else ""
         self.log = Log(folder=self.config.log_folder)
         self.log.station = socket.gethostname()
-        self.log.user = os.getlogin()
+
+        try:
+            self.log.user = os.getlogin()
+        except FileNotFoundError:
+            import getpass
+            self.log.user = getpass.getuser()
 
         self.base_container = "body"
         self.errors = []
@@ -152,17 +158,11 @@ class Base(unittest.TestCase):
         >>> element = lambda: self.driver.find_element_by_id("example_id")
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
-        """        
-        if right_click:
-            try:
+        """
+        try:
+            if right_click:
                 ActionChains(self.driver).context_click(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                pass
-        else:
-            try:
+            else:
                 self.scroll_to_element(element)
                 if click_type == enum.ClickType.JS:
                     self.driver.execute_script("arguments[0].click()", element)
@@ -170,11 +170,15 @@ class Base(unittest.TestCase):
                     element.click()
                 elif click_type == enum.ClickType.ACTIONCHAINS:
                     ActionChains(self.driver).move_to_element(element).click().perform()
-            except StaleElementReferenceException:
-                print("********Element Stale click*********")
-                pass
-            except Exception as error:
-                self.log_error(str(error))
+            
+            return True
+
+        except StaleElementReferenceException:
+            print("********Element Stale click*********")
+            return False
+        except Exception as e:
+            print(f"Warning click method Exception: {str(e)}")
+            return False
 
     def compare_field_values(self, field, user_value, captured_value, message):
         """
@@ -199,7 +203,7 @@ class Base(unittest.TestCase):
         if str(user_value).strip() != str(captured_value).strip():
             self.errors.append(message)
 
-    def double_click(self, element):
+    def double_click(self, element, click_type = enum.ClickType.SELENIUM):
         """
         [Internal]
 
@@ -216,9 +220,20 @@ class Base(unittest.TestCase):
         >>> self.double_click(element())
         """
         try:
-            self.scroll_to_element(element)
-            element.click()
-            element.click()
+            if click_type == enum.ClickType.SELENIUM:
+                self.scroll_to_element(element)
+                element.click()
+                element.click()
+            elif click_type == enum.ClickType.ACTIONCHAINS:
+                self.scroll_to_element(element)
+                actions = ActionChains(self.driver)
+                actions.move_to_element(element)
+                actions.double_click()
+                actions.perform()
+            elif click_type == enum.ClickType.JS:
+                self.driver.execute_script("arguments[0].click()", element)
+                self.driver.execute_script("arguments[0].click()", element)
+
         except Exception:
             self.scroll_to_element(element)
             actions = ActionChains(self.driver)
@@ -407,9 +422,33 @@ class Base(unittest.TestCase):
         >>> soup = self.get_current_DOM()
         """
         try:
-            return BeautifulSoup(self.driver.page_source,"html.parser")
-        except WebDriverException:
-            pass
+
+            soup = BeautifulSoup(self.driver.page_source,"html.parser")
+
+            if soup and soup.select('.session'):
+
+                script = """
+                var getIframe = () => {
+                    if(document.querySelector(".session")){
+                        var iframeObject = document.querySelector(".session")
+                        var contet = iframeObject.contentDocument;
+                        var serializer = new XMLSerializer();
+                        return serializer.serializeToString(contet);
+                    }
+                    return ""
+                }
+
+                return getIframe()
+                """
+                soup = BeautifulSoup(self.driver.execute_script(script),'html.parser')
+                self.driver.switch_to.frame(self.driver.find_element_by_css_selector("iframe[class=session]"))
+
+            return soup
+            
+        except WebDriverException as e:
+            self.driver.switch_to.default_content()
+            soup = BeautifulSoup(self.driver.page_source,"html.parser")
+            return soup
 
     def get_element_text(self, element):
         """
@@ -582,10 +621,7 @@ class Base(unittest.TestCase):
         >>> self.scroll_to_element(element())
         """
         try:
-            if element.get_attribute("id"):
-                self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
-            else:
-                self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except StaleElementReferenceException:
             print("********Element Stale scroll_to_element*********")
             pass
@@ -733,6 +769,8 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
+        if soup_object is None:
+            raise AttributeError
         return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
@@ -908,20 +946,45 @@ class Base(unittest.TestCase):
         """
         print("Starting the browser")
         if self.config.browser.lower() == "firefox":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\geckodriver.exe')
-            log_path = os.path.join(os.path.dirname(__file__), r'geckodriver.log')
+            if sys.platform == 'linux':
+                driver_path = os.path.join(os.path.dirname(__file__), r'drivers/linux64/geckodriver')
+            else:
+                driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
+            log_path = os.devnull
+
             options = FirefoxOpt()
             options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\chromedriver.exe')
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             options = ChromeOpt()
             options.set_headless(self.config.headless)
+            options.add_argument('--log-level=3')
+            if self.config.headless:
+                options.add_argument('force-device-scale-factor=0.77')
+                
             self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+        elif self.config.browser.lower() == "electron":
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')# TODO chromedriver electron version
+            options = ChromeOpt()
+            options.add_argument('--log-level=3')
+            options.add_argument(f'--environment="{self.config.environment}"')
+            options.add_argument(f'--url="{self.config.url}"')
+            options.add_argument(f'--program="{self.config.start_program}"')
+            options.add_argument('--quiet')
+            options.binary_location = self.config.electron_binary_path
+            self.driver = webdriver.Chrome(options=options, executable_path=driver_path)
 
-        self.driver.maximize_window()
-        self.driver.get(self.config.url)
-        self.wait = WebDriverWait(self.driver,5)
+        if not self.config.browser.lower() == "electron":
+            if self.config.headless:
+                self.driver.set_window_position(0, 0)
+                self.driver.set_window_size(1366, 768)
+            else:
+                self.driver.maximize_window()
+                   
+            self.driver.get(self.config.url)
+
+        self.wait = WebDriverWait(self.driver, 90)
 
     def TearDown(self):
         """

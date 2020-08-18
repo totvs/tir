@@ -1,6 +1,8 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.mobile_internal import MobileInternal
+from tir.technologies.core.config import ConfigLoader
+from tir.technologies.core.base_database import BaseDatabase
 
 """
 This file must contain the definition of all User Classes.
@@ -19,6 +21,9 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__database = BaseDatabase()
+        self.config = ConfigLoader()
+        self.coverage = self.config.coverage
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -167,19 +172,23 @@ class Webapp():
         """
         self.__webapp.ClickBox(fields, contents_list, select_all, grid_number)
 
-    def ClickFolder(self, item):
+    def ClickFolder(self, item, position=1):
         """
         Clicks on folder elements on the screen.
 
         :param folder_name: Which folder item should be clicked.
         :type folder_name: str
+        :param position: In case of two or more folders with the same name in the screen, you could choose by position in order
+        :type position: int
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.ClickFolder("Folder1")
+        >>> # Second folder named as Folder1 in the same screen
+        >>> oHelper.ClickFolder("Folder1", position=2)
         """
-        self.__webapp.ClickFolder(item)
+        self.__webapp.ClickFolder(item, position)
 
     def ClickGridCell(self, column, row=1, grid_number=1):
         """
@@ -198,6 +207,26 @@ class Webapp():
         >>> oHelper.ClickGridCell("Product", 1)
         """
         self.__webapp.ClickGridCell(column, row, grid_number)
+
+    def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
+        """
+        Clicks on a Cell of a Grid Header.
+
+        :param column: The column index that should be clicked.
+        :type column: int
+        :param column_name: The column index that should be clicked.
+        :type row_number: str
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
+        :type grid_number: int
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column_name = 'Código' , grid_number =  1)
+        >>> oHelper.ClickGridHeader(column = 1 , grid_number =  2)
+        """
+        self.__webapp.ClickGridHeader(column, column_name, grid_number)
 
     def ClickIcon(self, icon_text):
         """
@@ -388,12 +417,8 @@ class Webapp():
 
     def F3(self, field, name_attr=False,send_key=False):
         """
-        This method is similar to ClickIcon
-        1.Clicks on the Selenium element.
-
-        [Internal]
-        Do the standard query(F3) 
-        this method 
+        Do the standard query(F3)
+        this method
         1.Search the field
         2.Search icon "lookup"
         3.Click()
@@ -402,9 +427,9 @@ class Webapp():
         :type  term: str
         :param name_attr: True: searchs element by name
         :type  name_attr: bool
-        :param send_key: True: try open standard search field send key F3 
+        :param send_key: True: try open standard search field send key F3
         :type bool
-        
+
         Usage:
 
         >>> # To search using a label name:
@@ -417,8 +442,26 @@ class Webapp():
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         self.__webapp.standard_search_field( field, name_attr, send_key )
+    
+    def SetupTSS(self, initial_program="", environment=""):
+        """
+        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+        .. note::
+            This method use the user and password from config.json.
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False):
+        :param initial_program: The initial program to load.
+        :type initial_program: str
+        :param environment: The initial environment to load.
+        :type environment: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
+        """
+        self.__webapp.SetupTSS(initial_program, environment)
+
+    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
         """
         Searchs a term on Protheus Webapp.
 
@@ -436,6 +479,8 @@ class Webapp():
         :type identifier: str
         :param index: Whether the key is an index or not. - **Default:** False
         :type index: bool
+        :param column: The search column to be chosen on the search dropdown. - **Default:** None
+        :type column: str
 
         Usage:
 
@@ -454,8 +499,16 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using an index instead of name for the search key:
         >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and a chosen column:
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome")
+        >>> #------------------------------------------------------------------------
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and a chosen columns:
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
+        >>> #------------------------------------------------------------------------
         """
-        self.__webapp.SearchBrowse(term, key, identifier, index)
+        self.__webapp.SearchBrowse(term, key, identifier, index, column)
 
     def SetBranch(self, branch):
         """
@@ -492,19 +545,25 @@ class Webapp():
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
-    def SetFilePath(self, value):
+    def SetFilePath(self, value, button = ""):
         """
-        Fills the path screen with desired path.
+        Fills the path screen with the desired path 
+        
+        .. warning::
+        Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
+        :param button: Name button from path screen.
+        :type button: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFilePath(r"C:\\folder")
+        >>> oHelper.SetFilePath(r"C:\\folder","save")
         """
-        self.__webapp.SetFilePath(value)
+        self.__webapp.SetFilePath(value, button)
 
     def SetFocus(self, field, grid_cell=False, row_number=1):
         """
@@ -524,7 +583,13 @@ class Webapp():
         """
         Press the desired key on the keyboard on the focused element.
 
-        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
+        .. warning::
+            If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
+
+        .. warning::           
+            Before using this method, set focus on any element.
+
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete ...
 
         :param key: Key that would be pressed
         :type key: str
@@ -638,8 +703,12 @@ class Webapp():
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :
+        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
+        >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
@@ -874,7 +943,7 @@ class Webapp():
 
         return self.__webapp.CheckHelp(text, button, text_help, text_problem, text_solution, verbosity)
 
-    def ClickMenuPopUpItem(self, text, right_click=False):
+    def ClickMenuPopUpItem(self, text, right_click=False, position = 1):
         """
         Clicks on MenuPopUp Item based in a text
 
@@ -882,13 +951,36 @@ class Webapp():
         :type text: str
         :param right_click: Button to be clicked.
         :type button: bool
+        :param position: index item text
+        :type position: int
 
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.ClickMenuPopUpItem("Label")
+        >>> # Calling the method using position.
+        >>> oHelper.ClickMenuPopUpItem("Label", position = 2)
         """
-        return self.__webapp.ClickMenuPopUpItem(text, right_click)
+        return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
+
+    def GetRelease(self):
+        """
+        Get the current release from Protheus.
+
+        :return: The current release from Protheus.
+        :type: str
+        
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.get_release()
+        >>> # Conditional with method:
+        >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.027
+        >>> if self.oHelper.get_release() >= '12.1.027':
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigo_CT001')
+        """
+
+        return self.__webapp.get_release()
     
     def ClickListBox(self, text):
         """
@@ -904,7 +996,151 @@ class Webapp():
         """
         
         return self.__webapp.ClickListBox(text)
+
+    def ClickImage(self, img_name):
+        """
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        :param img_name: Image to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.ClickImage("img_name")
+        """
+        self.__webapp.ClickImage(img_name)
+
+    def ProgramScreen(self, initial_program=""):
+        """
+        Fills the first screen of Protheus with the first program to run.
+        :param initial_program: The initial program to load
+        :type initial_program: str
+        Usage:
+        >>> # Calling the method:
+        >>> self.ProgramScreen("SIGAADV")
+        """
+        self.__webapp.program_screen(initial_program, coverage=self.coverage)
+    
+    def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
+        """
+        Returns a dictionary when the file has a header in another way returns a list
+        The folder must be entered in the CSVPath parameter in the config.json.
+
+        :param csv_file: .csv file name
+        :type csv_file: str
+        :param delimiter: Delimiter option such like ';' or ',' or '|'
+        :type delimiter: str
+        :param column: To files with Header is possible return only a column by header name or Int value for no header files 
+        :type column: str
+        :param header: Indicate with the file contains a Header or not default is Header None
+        :type header: bool
+        :param filter_column: Is possible to filter a specific value by column and value content, if value is int starts with number 1
+        :type filter_column: str or int
+        :param filter_value: Value used in pair with filter_column parameter
+        :type filter_value: str
+        :param filter_data: If you want filter a value by column, this parameter need to be a True value
+        :type filter_data: bool
+
+        >>> # Call the method:
+        >>> file_csv = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv")
+
+        >>> file_csv_no_header_column = self.oHelper.OpenCSV(column=0, delimiter=";", csv_file="no_header_column.csv")
+
+        >>> file_csv_column = self.oHelper.OpenCSV(column='CAMPO', delimiter=";", csv_file="header_column.csv", header=True)
+
+        >>> file_csv_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_no_header.csv")
+
+        >>> file_csv_header = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_column = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True)
+
+        >>> file_csv_header_pipe = self.oHelper.OpenCSV(delimiter="|", csv_file="pipe_header.csv", header=True)
+
+        >>> file_csv_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="header.csv", header=True, filter_column='CAMPO', filter_value='A00_FILIAL')
+
+        >>> file_csv _no_header_filter = self.oHelper.OpenCSV(delimiter=";", csv_file="no_header.csv", filter_column=0, filter_value='A00_FILIAL')
+        """
+        return self.__webapp.open_csv(csv_file, delimiter, column, header, filter_column, filter_value)
+
+    def StartDB(self):
+        """
+
+        :return: connection object
+        Usage:
+
+        >>> # Call the method:
+        >>> self.oHelper.StartDB()
+        """
+        return self.__database.connect_database()
+
+    def StopDB(self, connection):
+        """
+
+        :param connection: connection object
+        :type param: object
+        Usage:
+
+        >>> # Call the method:
+        >>> self.oHelper.StopDB(connection)
+        """
+        self.__database.connect_database()
+
+    def QueryExecute(self, query, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
+        """
+        Return a dictionary if the query statement is a SELECT otherwise print a number of row 
+        affected in case of INSERT|UPDATE|DELETE statement.
+
+        .. note::  
+            Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
+            Parameters:
+            "DriverDB": "",
+            "ServerDB": "",
+            "NameDB": "",
+            "UserDB": "",
+            "PasswordDB": ""
+
+        .. note::        
+            Must be used an ANSI default SQL statement.
+
+        .. note::        
+            dbq_oracle_server parameter is necessary only for Oracle connection.
         
+        :param query: ANSI SQL estatement query
+        :type query: str
+        :param database_driver: ODBC Driver database name
+        :type database_driver: str
+        :param dbq_oracle_server: Only for Oracle: DBQ format:Host:Port/oracle instance
+        :type dbq_oracle_server: str
+        :param database_server: Database Server Name
+        :type database_server: str
+        :param database_port: Database port default port=1521
+        :type database_port: int
+        :param database_name: Database Name
+        :type database_name: str
+        :param database_user: User Database Name
+        :type database_user: str
+        :param database_password: Database password
+        :type database_password: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        >>> # Oracle Example:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server="Host:Port/oracle instance", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        """
+        return self.__database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+
+    def GetConfigValue(self, json_key):
+        """
+
+        :param json_key: Json Key in config.json
+        :type json_key: str
+        :return: Json Key item in config.json
+        """
+        return self.__webapp.get_config_value(json_key)
+
 class Apw():
 
     def __init__(self, config_path=""):

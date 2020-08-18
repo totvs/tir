@@ -34,6 +34,18 @@ E.g:
 >
 > Any information you desire to share that is relevant for the problem's solution. Code lines, possible solutions and opinions about the issue can be written here.
 
+## Method Names
+
+We have a standard that we use for naming methods for internal and external use (user level).
+
+For methods that are created for internal use and will not be exposed in the Main class, we can name them as follows, for example:
+get_value_grid ()
+
+For the methods that will be available for use by the user that are exposed in the Main class, name the method as follows, for example:
+GetValueGrid ()
+
+We reinforce the importance of naming the methods as described, so that we have a single standard in the project.
+
 ## Feature Requests
 
 Requesting features is a great way to suggest ideas to the project. If your idea has the same objective and is in the scope of the project, then it's possible that it can be implemented. Include as much information as possible and explain us why it is relevant to the project.
