@@ -34,8 +34,10 @@ class Log:
         self.version = version
         self.release = release
         self.database = database
-        self.initial_time = datetime.today() if not self.config.new_log else None
+        self.initial_time = datetime.today()
+        self.testcase_initial_time = datetime.today()
         self.seconds = 0
+        self.testcase_seconds = 0
         self.suite_datetime = suite_datetime
 
         self.table_rows = []
@@ -59,7 +61,10 @@ class Log:
         self.webapp_version = ""
         self.date = today.strftime('%Y%m%d')
         self.hour = today.strftime('%H:%M:%S')
+        self.last_exec = today.strftime('%Y%m%d%H%M%S%f')[:-3]
         self.hash_exec = ""
+        self.test_case = self.list_of_testcases()
+        self.finish_testcase = []
 
     def generate_header(self):
         """
@@ -124,10 +129,8 @@ class Log:
 
             if self.config.smart_test:
                 open("log_exec_file.txt", "w")
-            
-            testcases = self.list_of_testcases()
 
-            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
+            if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -139,7 +142,7 @@ class Log:
                             
                 self.csv_log.append(self.get_testcase_stack())
 
-    def set_seconds(self):
+    def set_seconds(self, initial_time):
         """
         Sets the seconds variable through a calculation of current time minus the execution start time.
 
@@ -148,8 +151,8 @@ class Log:
         >>> # Calling the method:
         >>> self.log.set_seconds()
         """
-        delta = datetime.today() - self.initial_time
-        self.seconds = round(delta.total_seconds(), 2)
+        delta = datetime.today() - initial_time
+        return round(delta.total_seconds(), 2)
 
     def list_of_testcases(self):
         """
@@ -265,7 +268,7 @@ class Log:
             "FAILMSG": message,
             "IDENTI": self.issue,
             "IDEXEC": self.config.execution_id,
-            "LASTEXEC": "20190930143040986", # ???
+            "LASTEXEC": self.last_exec,
             "LIBVERSION": self.lib_version,
             "OBSERV": "",
             "PASS": 1 if result else 0,
@@ -273,7 +276,7 @@ class Log:
             "PROGRAM": self.program,
             "PROGTIME": "00:00:00",
             "RELEASE": self.release,
-            "SECONDSCT": self.seconds,
+            "SECONDSCT": self.testcase_seconds,
             "SOTYPE": self.so_type,
             "SOVERSION": self.so_version,
             "STATION": self.station,
@@ -284,7 +287,8 @@ class Log:
             "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
             "TOOL": self.test_type,
             "USRNAME": self.user,
-            "VERSION": self.version
+            "VERSION": self.version,
+            "D_E_L_E_T_": " "
         }
 
         return dict_key
@@ -316,7 +320,7 @@ class Log:
             time.sleep(1)
 
         if not success:
-            self.save_file(json_data)
+            self.save_json_file(json_data)
 
     def send_request(self, server_address, json_data):
         """
@@ -357,14 +361,14 @@ class Log:
 
         return success
 
-    def save_file(self, json_data):
+    def save_json_file(self, json_data):
         """
         Writes the log file to the file system.
 
         Usage:
 
         >>> # Calling the method:
-        >>> self.log.save_file()
+        >>> self.log.save_json_file()
         """
 
         try:

@@ -4814,7 +4814,9 @@ class WebappInternal(Base):
         log_message = f"{test_number} {message}"
         self.message = log_message
         self.expected = False
-        self.log.set_seconds() if not self.config.new_log else None
+        self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
+        self.execution_flow()
 
         if self.config.screenshot:
 
@@ -4837,9 +4839,9 @@ class WebappInternal(Base):
                     print(f"Warning Log Error save_screenshot exception {str(e)}")
 
         if new_log_line:
-            self.log.new_line(False, log_message) if not self.config.new_log else None
+            self.log.new_line(False, log_message)
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
-            self.log.save_file(routine_name) if not self.config.new_log else None
+            self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -5195,7 +5197,7 @@ class WebappInternal(Base):
         """
         self.expected = expected
         log_message = f"{self.log.ident_test()[1]} - "
-        self.log.set_seconds() if not self.config.new_log else None
+        self.log.seconds = self.log.set_seconds(self.log.initial_time)
 
         if self.grid_input or self.grid_check:
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
@@ -5212,13 +5214,12 @@ class WebappInternal(Base):
 
         if self.expected:
             self.message = "" if not self.errors else log_message
-            self.log.new_line(True, self.message) if not self.config.new_log else None
+            self.log.new_line(True, self.message)
         else:
             self.message = self.language.assert_false_message if not self.errors else log_message
-            self.log.new_line(False, self.message) if not self.config.new_log else None
+            self.log.new_line(False, self.message)
 
-        if not self.config.new_log:
-            self.log.save_file()
+        self.log.save_file()
 
         self.errors = []
 

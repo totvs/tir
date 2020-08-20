@@ -1009,12 +1009,12 @@ class Base(unittest.TestCase):
 
         :return:
         """
-        if self.search_stack("TearDown"):
+        if self.search_stack("TearDown") or (self.search_stack("setUpClass") and self.restart_counter == 3):
             self.finish_testcase()
-
         elif (self.log.get_testcase_stack() in list(map(lambda x: x._testMethodName, self.log.list_of_testcases()))) and \
                 self.log.get_testcase_stack() not in self.test_case:
-            if self.last_test_case is not None and (self.log.get_testcase_stack() != self.last_test_case):
+            if self.last_test_case is not None and (self.log.get_testcase_stack() != self.last_test_case) and \
+                    (self.last_test_case not in self.log.finish_testcase):
                 self.finish_testcase()
             self.start_testcase()
 
@@ -1024,7 +1024,7 @@ class Base(unittest.TestCase):
         :return:
         """
 
-        self.log.initial_time = datetime.today()
+        self.log.testcase_initial_time = datetime.today()
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
@@ -1035,8 +1035,10 @@ class Base(unittest.TestCase):
 
         :return:
         """
-        print("FINALIZOU O CASO DE TESTE")
-        print("ENVIANDO LOG")
-        self.log.set_seconds()
-        self.log.generate_result(self.expected, self.message)
-        print(self.log.seconds)
+        if self.log.get_testcase_stack() not in self.log.finish_testcase:
+            print("FINALIZOU O CASO DE TESTE")
+            print("ENVIANDO LOG")
+            self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
+            self.log.generate_result(self.expected, self.message)
+            self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())
+            print(self.log.testcase_seconds)
