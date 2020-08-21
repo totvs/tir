@@ -296,11 +296,8 @@ class Log:
     def generate_json(self, dictionary):
         """
         """
-        server_address1 = "http://10.171.67.194:3333/logs/"
+        server_address1 = "http://10.171.67.194:3333/log/"
         server_address2 = ""
-
-        # server_address1 = ""
-        # server_address2 = ""
 
         success = False
 
