@@ -87,6 +87,7 @@ class Base(unittest.TestCase):
         self.base_container = "body"
         self.errors = []
         self.config.log_file = False
+        self.tmenu_out_iframe = False
 
         if autostart:
             self.Start()
@@ -425,7 +426,11 @@ class Base(unittest.TestCase):
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
-            if soup and soup.select('.session'):
+            if self.tmenu_out_iframe:
+                self.driver.switch_to.default_content()
+                soup = BeautifulSoup(self.driver.page_source,"html.parser")
+
+            elif soup and soup.select('.session'):
 
                 script = """
                 var getIframe = () => {

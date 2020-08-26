@@ -2461,6 +2461,8 @@ class WebappInternal(Base):
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
+                if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                    self.tmenu_out_iframe = True
 
                 soup_objects_filtered = None
                 while(time.time() < endtime and not soup_objects_filtered):
@@ -2471,6 +2473,7 @@ class WebappInternal(Base):
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects_filtered[0], locator = By.XPATH )
                     self.click(soup_element())
+                    self.tmenu_out_iframe = False
                 else:
 
                     result = False
@@ -2565,6 +2568,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.click_sub_menu("Process")
         """
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.driver.switch_to.default_content()
+            
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
 
