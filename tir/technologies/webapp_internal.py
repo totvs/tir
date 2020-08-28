@@ -1596,7 +1596,7 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower() == main_value.lower()
+                        success = current_value.lower().strip() == main_value.lower().strip()
                     else:
                         success = current_value == main_value
                 except:
@@ -3370,8 +3370,12 @@ class WebappInternal(Base):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
             try:
-                element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-                self.set_element_focus(element())
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
+                if not element:
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
+                    
+                element = self.soup_to_selenium(element)
+                self.set_element_focus(element)
             except Exception as e:
                 print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
@@ -4844,6 +4848,7 @@ class WebappInternal(Base):
                 self.driver.close()
             except Exception as e:
                 print(f"Warning Log Error Close {str(e)}")
+            self.assertTrue(False, log_message)
 
         if self.restart_counter > 2:
 
