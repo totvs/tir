@@ -3364,8 +3364,12 @@ class WebappInternal(Base):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
             try:
-                element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-                self.set_element_focus(element())
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
+                if not element:
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
+                    
+                element = self.soup_to_selenium(element)
+                self.set_element_focus(element)
             except Exception as e:
                 print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
