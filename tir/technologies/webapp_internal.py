@@ -1596,7 +1596,7 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower() == main_value.lower()
+                        success = current_value.lower().strip() == main_value.lower().strip()
                     else:
                         success = current_value == main_value
                 except:
@@ -4842,6 +4842,7 @@ class WebappInternal(Base):
                 self.driver.close()
             except Exception as e:
                 print(f"Warning Log Error Close {str(e)}")
+            self.assertTrue(False, log_message)
 
         if self.restart_counter > 2:
 
