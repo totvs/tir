@@ -3651,11 +3651,11 @@ class WebappInternal(Base):
             
         if "_" in field[0]:
             try:
-                column_name = field_to_label[field[0]].lower()
+                column_name = field_to_label[field[0]].lower().strip()
             except:
                 self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
         else:
-            column_name = field[0].lower()
+            column_name = field[0].lower().strip()
 
         self.wait_element_timeout(term = column_name,
             scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term = 'th label', main_container = 'body')
@@ -4121,6 +4121,7 @@ class WebappInternal(Base):
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        column = column.strip()
         column_element_old_class = None
         columns =  None
         rows = None

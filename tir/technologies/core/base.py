@@ -167,7 +167,7 @@ class Base(unittest.TestCase):
         """
         try:
             if right_click:
-                ActionChains(self.driver).context_click(element).click().perform()
+                ActionChains(self.driver).context_click(element).perform()
             else:
                 self.scroll_to_element(element)
                 if click_type == enum.ClickType.JS:
