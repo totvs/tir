@@ -131,11 +131,9 @@ class WebappInternal(Base):
             self.set_log_info_tss()
 
             if self.config.num_exec:
-                try:
-                    self.num_exec.post_exec(self.config.url_set_start_exec)
-                except Exception as error:
+                if not self.num_exec.post_exec(self.config.url_set_start_exec):
                     self.restart_counter = 3
-                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                    self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
         except ValueError as e:
             self.log_error(str(e))
@@ -239,11 +237,9 @@ class WebappInternal(Base):
             self.log_error(str(e))
 
         if self.config.num_exec:
-            try:
-                self.num_exec.post_exec(self.config.url_set_start_exec)
-            except Exception as error:
+            if not self.num_exec.post_exec(self.config.url_set_start_exec):
                 self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
     def service_process_bat_file(self):
         """
@@ -4866,11 +4862,9 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
 
             if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-                try:
-                    self.num_exec.post_exec(self.config.url_set_end_exec)
-                except Exception as error:
+                if not self.num_exec.post_exec(self.config.url_set_end_exec):
                     self.restart_counter = 3
-                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                    self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
                 
             if (stack_item == "setUpClass") :
                 try:
@@ -5735,11 +5729,9 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
-            try:
-                self.num_exec.post_exec(self.config.url_set_end_exec)
-            except Exception as error:
+            if not self.num_exec.post_exec(self.config.url_set_end_exec):
                 self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
         try:
             self.driver.close()

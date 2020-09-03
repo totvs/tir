@@ -3,32 +3,50 @@ import requests
 import json
 import time
 
-class NumExec:
+class NumExec(ConfigLoader):
 
     def __init__(self):
-
-        self.config = ConfigLoader()
+        super().__init__()
 
     def post_exec(self, url):
+
+        success_response = [200, 201]
 
         status = None
 
         endtime = time.time() + 120
 
-        while(time.time() < endtime and status != 200):
+        error = None
 
-            data = {'num_exec': self.config.num_exec,'ip_exec': self.config.ipExec}
+        id_error = time.strftime("%Y%m%d%H%M%S")
 
-            response = requests.post(url.strip(), json=data)
+        while(time.time() < endtime and status not in success_response):
 
-            json_data = json.loads(response.text)
+            try:
+                status = self.send_request(url)
+            except Exception as e:
+                error = str(e)
 
-            status = json_data["status"]
+            time.sleep(12)
 
-            if status != 200:
-                time.sleep(12)
+        response = str(f"STATUS: {status} Url: {url} ID: {id_error} Error: {error}")
+        print(response)
+        if status not in success_response:
+            with open(f"{self.log_folder}\{id_error}_json_data_response.txt", "w") as json_log:
+                json_log.write(response)
 
-        print(f"Num exec. status: {status} Url: {url}")
-        if status != 200:
-            with open(f"E:\\smart_test\\logs_tir\\{time.time()}_json_data_response.txt", "w") as json_log:
-                json_log.write(str(f"STATUS: {status}"))
+        return status in success_response
+
+    def send_request(self, url):
+        """
+
+        :return json status response:
+        """
+
+        data = {'num_exec': self.num_exec, 'ip_exec': self.ipExec}
+
+        response = requests.post(url.strip(), json=data)
+
+        json_data = json.loads(response.text)
+
+        return json_data["status"]
