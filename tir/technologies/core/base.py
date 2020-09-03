@@ -87,6 +87,7 @@ class Base(unittest.TestCase):
         self.base_container = "body"
         self.errors = []
         self.config.log_file = False
+        self.tmenu_out_iframe = False
 
         if autostart:
             self.Start()
@@ -425,7 +426,11 @@ class Base(unittest.TestCase):
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
-            if soup and soup.select('.session'):
+            if self.tmenu_out_iframe:
+                self.driver.switch_to.default_content()
+                soup = BeautifulSoup(self.driver.page_source,"html.parser")
+
+            elif soup and soup.select('.session'):
 
                 script = """
                 var getIframe = () => {
@@ -445,8 +450,10 @@ class Base(unittest.TestCase):
 
             return soup
             
-        except WebDriverException:
-            pass
+        except WebDriverException as e:
+            self.driver.switch_to.default_content()
+            soup = BeautifulSoup(self.driver.page_source,"html.parser")
+            return soup
 
     def get_element_text(self, element):
         """
@@ -619,10 +626,7 @@ class Base(unittest.TestCase):
         >>> self.scroll_to_element(element())
         """
         try:
-            if element.get_attribute("id"):
-                self.driver.execute_script("return document.getElementById('{}').scrollIntoView();".format(element.get_attribute("id")))
-            else:
-                self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except StaleElementReferenceException:
             print("********Element Stale scroll_to_element*********")
             pass
@@ -969,13 +973,17 @@ class Base(unittest.TestCase):
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')# TODO chromedriver electron version
             options = ChromeOpt()
             options.add_argument('--log-level=3')
+            options.add_argument(f'--environment="{self.config.environment}"')
+            options.add_argument(f'--url="{self.config.url}"')
+            options.add_argument(f'--program="{self.config.start_program}"')
+            options.add_argument('--quiet')
             options.binary_location = self.config.electron_binary_path
-            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+            self.driver = webdriver.Chrome(options=options, executable_path=driver_path)
 
         if not self.config.browser.lower() == "electron":
             if self.config.headless:
                 self.driver.set_window_position(0, 0)
-                self.driver.set_window_size(1024, 768)
+                self.driver.set_window_size(1366, 768)
             else:
                 self.driver.maximize_window()
                    

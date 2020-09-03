@@ -543,19 +543,25 @@ class Webapp():
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
-    def SetFilePath(self, value):
+    def SetFilePath(self, value, button = ""):
         """
-        Fills the path screen with desired path.
+        Fills the path screen with the desired path 
+        
+        .. warning::
+        Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
+        :param button: Name button from path screen.
+        :type button: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFilePath(r"C:\\folder")
+        >>> oHelper.SetFilePath(r"C:\\folder","save")
         """
-        self.__webapp.SetFilePath(value)
+        self.__webapp.SetFilePath(value, button)
 
     def SetFocus(self, field, grid_cell=False, row_number=1):
         """
@@ -935,7 +941,7 @@ class Webapp():
 
         return self.__webapp.CheckHelp(text, button, text_help, text_problem, text_solution, verbosity)
 
-    def ClickMenuPopUpItem(self, text, right_click=False):
+    def ClickMenuPopUpItem(self, text, right_click=False, position = 1):
         """
         Clicks on MenuPopUp Item based in a text
 
@@ -943,13 +949,17 @@ class Webapp():
         :type text: str
         :param right_click: Button to be clicked.
         :type button: bool
+        :param position: index item text
+        :type position: int
 
         Usage:
 
         >>> # Calling the method.
         >>> oHelper.ClickMenuPopUpItem("Label")
+        >>> # Calling the method using position.
+        >>> oHelper.ClickMenuPopUpItem("Label", position = 2)
         """
-        return self.__webapp.ClickMenuPopUpItem(text, right_click)
+        return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
 
     def GetRelease(self):
         """

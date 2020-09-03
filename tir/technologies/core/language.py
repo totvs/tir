@@ -66,6 +66,8 @@ class LanguagePack:
         self.confirm_new_password = languagepack["ConfirmNewPassword"]
         self.yes = languagepack["Yes"]
         self.assert_false_message = languagepack["AssertFalseMessage"]
+        self.file_name = languagepack["File Name"]
+        self.open = languagepack["Open"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -139,7 +141,9 @@ class LanguagePack:
             "NewPassword": "Reserved",
             "ConfirmNewPassword": "Reserved",
             "Yes": "Sim",
-            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script."
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
+            "File Name": "File Name",
+			"Open": "Open"
             
         }
 
@@ -212,7 +216,10 @@ class LanguagePack:
             "NewPassword": "Nova senha",
             "ConfirmNewPassword": "Confirmar nova senha",
             "Yes": "Sim",
-            "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script."
+            "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
+            "File Name": "Nome do Arquivo:",
+			"Open": "Abrir"
+        
             
         }
         spanish = {
@@ -284,7 +291,9 @@ class LanguagePack:
             "NewPassword": "Nueva contrasena*",
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
             "Yes":"Reserved",
-            "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script."
+            "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
+            "File Name": "Nombre del archivo:",
+			"Open": "Abierto"
         }
         russian = {
             "User": "Пользователь",
@@ -358,7 +367,9 @@ class LanguagePack:
             "UserLogin": "Пользователь (логин)",
             "CurrentPassword": "Текущий пароль*",
             "NewPassword": "Нов. пароль*",
-            "ConfirmNewPassword": "Подтв. новый пароль*"
+            "ConfirmNewPassword": "Подтв. новый пароль*",
+            "File Name": "имя файла",
+			"Open": "открыто"
         }
 
         if language.lower() == "en-us":
@@ -371,7 +382,6 @@ class LanguagePack:
             return spanish
         else:
             return brazilian_portuguese
-
 class Messages():
 
     def __init__(self, languagepack):
