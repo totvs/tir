@@ -62,3 +62,4 @@ class ConfigLoader:
         self.dbq_oracle_server = str(data["DBQOracleServer"]) if "DBQOracleServer" in data else ""
         self.url_tss = str(data["URL_TSS"]) if "URL_TSS" in data else ""
         self.start_program = str(data["StartProgram"]) if "StartProgram" in data else ""
+        self.new_log = ("NewLog" in data  and bool(data["NewLog"]))

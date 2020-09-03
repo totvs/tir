@@ -6,6 +6,9 @@ import uuid
 import csv
 import inspect
 import re
+import platform
+import requests
+import json
 from datetime import datetime
 from tir.technologies.core.config import ConfigLoader
 
@@ -21,6 +24,9 @@ class Log:
     def __init__(self, suite_datetime="", user="", station="", program="", program_date=time.strftime("01/01/1980 12:00:00"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
+        today = datetime.today()
+
+        self.config = ConfigLoader()
         self.user = user
         self.station = station
         self.program = program
@@ -29,7 +35,9 @@ class Log:
         self.release = release
         self.database = database
         self.initial_time = datetime.today()
+        self.testcase_initial_time = datetime.today()
         self.seconds = 0
+        self.testcase_seconds = 0
         self.suite_datetime = suite_datetime
 
         self.table_rows = []
@@ -39,10 +47,24 @@ class Log:
         self.table_rows.append(self.generate_header())
         self.folder = folder
         self.test_type = test_type
-        self.issue = issue
-        self.execution_id = execution_id
+        self.issue = self.config.issue
+        self.execution_id = self.config.execution_id
         self.country = country
-        self.config = ConfigLoader()
+        self.start_time = None
+        self.end_time = None
+        self.ct_method = ""
+        self.ct_number = ""
+        self.so_type = platform.system()
+        self.so_version = f"{self.so_type} {platform.release()}"
+        self.build_version = ""
+        self.lib_version = ""
+        self.webapp_version = ""
+        self.date = today.strftime('%Y%m%d')
+        self.hour = today.strftime('%H:%M:%S')
+        self.last_exec = today.strftime('%Y%m%d%H%M%S%f')[:-3]
+        self.hash_exec = ""
+        self.test_case = self.list_of_testcases()
+        self.finish_testcase = []
 
     def generate_header(self):
         """
@@ -82,7 +104,7 @@ class Log:
             self.table_rows.append(line)
             self.test_case_log.append(self.get_testcase_stack())
 
-    def save_file(self, filename):
+    def save_file(self):
         """
         Writes the log file to the file system.
 
@@ -107,10 +129,8 @@ class Log:
 
             if self.config.smart_test:
                 open("log_exec_file.txt", "w")
-            
-            testcases = self.list_of_testcases()
 
-            if ((len(self.table_rows[1:]) == len(testcases) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
+            if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
                 with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
@@ -122,7 +142,7 @@ class Log:
                             
                 self.csv_log.append(self.get_testcase_stack())
 
-    def set_seconds(self):
+    def set_seconds(self, initial_time):
         """
         Sets the seconds variable through a calculation of current time minus the execution start time.
 
@@ -131,8 +151,8 @@ class Log:
         >>> # Calling the method:
         >>> self.log.set_seconds()
         """
-        delta = datetime.today() - self.initial_time
-        self.seconds = round(delta.total_seconds(), 2)
+        delta = datetime.today() - initial_time
+        return round(delta.total_seconds(), 2)
 
     def list_of_testcases(self):
         """
@@ -142,7 +162,7 @@ class Log:
 
         if runner:
             try:
-                return list(runner.frame.f_locals['test'])
+                return list(filter(lambda x: x is not None, list(runner.frame.f_locals['test']._tests)))
             except KeyError:
                 return []
         else:
@@ -188,3 +208,192 @@ class Log:
                 table_rows_has_line = False
 
         return table_rows_has_line
+
+    def generate_result(self, result, message):
+        """
+        Generate a result of testcase and export to a json.
+
+        :param result: The result of the case.
+        :type result: bool
+        :param message: The message to be logged..
+        :type message: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.log.generate_result(True, "Success")
+        """
+        printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
+
+        if not self.suite_datetime:
+            self.suite_datetime = time.strftime("%d/%m/%Y %X")
+
+        self.generate_json(self.generate_dict(result, printable_message))
+
+    def get_file_name(self, file_name):
+        """
+        Returns a Testsuite name
+        """
+        testsuite_stack = next(iter(list(filter(lambda x: file_name in x.filename.lower(), inspect.stack()))), None)
+
+        if testsuite_stack:
+
+            if '/' in testsuite_stack.filename:
+                split_character = '/'
+            else:
+                split_character = '\\'
+
+            return testsuite_stack.filename.split(split_character)[-1].split(".")[0]
+        else:
+            return ""
+
+    def generate_dict(self, result, message):
+        """
+        Returns a dictionary with the log information
+        """
+        log_version = "20200814"
+
+        dict_key = {
+            "APPVERSION": self.build_version,
+            "CLIVERSION": self.webapp_version,
+            "COUNTRY": self.country,
+            "CTMETHOD": self.ct_method,
+            "CTNUMBER": self.ct_number,
+            "DBACCESS": "",
+            "DBTYPE": self.database,
+            "DBVERSION": "",
+            "EXECDATE": self.date,
+            "EXECTIME": self.hour,
+            "FAIL": 0 if result else 1,
+            "FAILMSG": message,
+            "IDENTI": self.issue,
+            "IDEXEC": self.config.execution_id,
+            "LASTEXEC": self.last_exec,
+            "LIBVERSION": self.lib_version,
+            "OBSERV": "",
+            "PASS": 1 if result else 0,
+            "PROGDATE": self.program_date,
+            "PROGRAM": self.program,
+            "PROGTIME": "00:00:00",
+            "RELEASE": self.release,
+            "SECONDSCT": self.testcase_seconds,
+            "SOTYPE": self.so_type,
+            "SOVERSION": self.so_version,
+            "STATION": self.station,
+            "STATUS": "", # ???
+            "TESTCASE": self.get_file_name('testcase'),
+            "TESTSUITE": self.get_file_name('testsuite'),
+            "TESTTYPE": "1",
+            "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
+            "TOOL": self.test_type,
+            "USRNAME": self.user,
+            "VERSION": self.version,
+            "D_E_L_E_T_": " "
+        }
+
+        return dict_key
+
+    def generate_json(self, dictionary):
+        """
+        """
+        server_address1 = "http://10.171.67.194:3333/log/"
+        server_address2 = ""
+
+        success = False
+
+        data = dictionary
+
+        json_data = json.dumps(data)
+
+        endtime = time.time() + 15
+
+        while (time.time() < endtime and not success):
+
+            success = self.send_request(server_address1, json_data)
+
+            if not success:
+                success = self.send_request(server_address2, json_data)
+
+            time.sleep(1)
+
+        if not success:
+            self.save_json_file(json_data)
+
+    def send_request(self, server_address, json_data):
+        """
+        Send a post request to server
+        """
+        success = False
+        response = None
+        headers = {'content-type': 'application/json'}
+
+        try:
+            response = requests.post(server_address.strip(), data=json_data, headers=headers)
+        except:
+            pass
+
+        try:
+            path = f"{self.folder}\\new_log\\{self.station}"
+            os.makedirs(path)
+        except OSError:
+            pass
+
+        try:
+            with open(f"{path}\\response_log.csv", mode="a", encoding="utf-8", newline='') as response_log:
+                csv_write = csv.writer(response_log, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_write.writerow([f"URL: {server_address}", f"CT: {json.loads(json_data)['CTMETHOD']}",
+                                    {f"Status Code: {response.status_code}"}, f"Message: {response.text}"])
+        except:
+            pass
+
+        if response:
+            if response.status_code == 200:
+                print("Log de execucao enviado com sucesso!")
+                success = True
+            elif response.status_code == 201 or response.status_code == 204:
+                print("Log de execucao enviado com sucesso!")
+                success = True
+        else:
+            return False
+
+        return success
+
+    def save_json_file(self, json_data):
+        """
+        Writes the log file to the file system.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.log.save_json_file()
+        """
+
+        try:
+            if self.folder:
+                path = f"{self.folder}\\new_log\\{self.station}"
+                os.makedirs(path)
+            else:
+                path = f"Log\\{self.station}"
+                os.makedirs(path)
+        except OSError:
+            pass
+
+        log_file = f"{self.user}_{uuid.uuid4().hex}.json"
+
+        if self.config.smart_test:
+            open("log_exec_file.txt", "w")
+
+        with open(f"{path}\\{log_file}", mode="w", encoding="utf-8") as json_file:
+            json_file.write(json_data)
+
+        print(f"Log file created successfully: {path}\\{log_file}")
+
+    def ident_test(self):
+        """
+
+        :return:
+        """
+        ct_method = self.get_testcase_stack()
+        ct_number = ''.join(list(filter(str.isdigit, f"{ct_method.split('_')[-1]}"))) if ct_method else ""
+
+        return (ct_method, ct_number)

@@ -25,6 +25,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
 from tir.technologies.core.third_party.screen_size import size
+from datetime import datetime
 
 class Base(unittest.TestCase):
     """
@@ -77,6 +78,10 @@ class Base(unittest.TestCase):
         self.language = LanguagePack(self.config.language) if self.config.language else ""
         self.log = Log(folder=self.config.log_folder)
         self.log.station = socket.gethostname()
+        self.test_case = []
+        self.last_test_case = None
+        self.message = ""
+        self.expected = True
 
         try:
             self.log.user = os.getlogin()
@@ -422,6 +427,8 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
+
+        self.execution_flow()
         try:
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
@@ -635,7 +642,7 @@ class Base(unittest.TestCase):
         """
         [Internal]
 
-        Returns zindex value of BeautifulSoup object.
+        Returns zindex value of Beautifulget_so object.
 
         Internal function created to be used inside lambda of zindex_sort method.
 
@@ -1001,3 +1008,42 @@ class Base(unittest.TestCase):
         >>> oHelper.TearDown()
         """
         self.driver.close()
+
+    def execution_flow(self):
+        """
+
+        :return:
+        """
+        if self.search_stack("TearDown") or (self.search_stack("setUpClass") and self.restart_counter == 3):
+            self.finish_testcase()
+        elif (self.log.get_testcase_stack() in list(map(lambda x: x._testMethodName, self.log.list_of_testcases()))) and \
+                self.log.get_testcase_stack() not in self.test_case:
+            if self.last_test_case is not None and (self.log.get_testcase_stack() != self.last_test_case) and \
+                    (self.last_test_case not in self.log.finish_testcase):
+                self.finish_testcase()
+            self.start_testcase()
+
+    def start_testcase(self):
+        """
+
+        :return:
+        """
+
+        self.log.testcase_initial_time = datetime.today()
+        self.test_case.append(self.log.get_testcase_stack())
+        self.last_test_case = self.log.get_testcase_stack()
+        self.log.ct_method, self.log.ct_number = self.log.ident_test()
+        print("INICIOU O CASO DE TESTE!!!")
+
+    def finish_testcase(self):
+        """
+
+        :return:
+        """
+        if self.log.get_testcase_stack() not in self.log.finish_testcase:
+            print("FINALIZOU O CASO DE TESTE")
+            print("ENVIANDO LOG")
+            self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
+            self.log.generate_result(self.expected, self.message)
+            self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())
+            print(self.log.testcase_seconds)
