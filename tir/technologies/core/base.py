@@ -979,9 +979,6 @@ class Base(unittest.TestCase):
             options.add_argument('--quiet')
             options.binary_location = self.config.electron_binary_path
             self.driver = webdriver.Chrome(options=options, executable_path=driver_path)
-        elif self.config.browser.lower() == "remote":
-            from selenium.webdriver import Remote
-            self.driver = Remote(desired_capabilities={'browserName': 'firefox'})
 
         if not self.config.browser.lower() == "electron":
             if self.config.headless:
