@@ -1606,7 +1606,7 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower() == main_value.lower()
+                        success = current_value.lower().strip() == main_value.lower().strip()
                     else:
                         success = current_value == main_value
                 except:
@@ -2471,6 +2471,8 @@ class WebappInternal(Base):
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
+                if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                    self.tmenu_out_iframe = True
 
                 soup_objects_filtered = None
                 while(time.time() < endtime and not soup_objects_filtered):
@@ -2481,6 +2483,7 @@ class WebappInternal(Base):
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects_filtered[0], locator = By.XPATH )
                     self.click(soup_element())
+                    self.tmenu_out_iframe = False
                 else:
 
                     result = False
@@ -2575,6 +2578,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.click_sub_menu("Process")
         """
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.driver.switch_to.default_content()
+            
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
 
@@ -3216,7 +3222,8 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
-        """        
+        """
+        self.wait_blocker()
         print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
@@ -3373,8 +3380,12 @@ class WebappInternal(Base):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
             try:
-                element = lambda: self.driver.find_element_by_xpath(xpath_soup(self.get_field(field)))
-                self.set_element_focus(element())
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
+                if not element:
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
+                    
+                element = self.soup_to_selenium(element)
+                self.set_element_focus(element)
             except Exception as e:
                 print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
