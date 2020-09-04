@@ -296,8 +296,8 @@ class Log:
     def generate_json(self, dictionary):
         """
         """
-        server_address1 = "http://10.171.67.194:3333/log/"
-        server_address2 = ""
+        server_address1 = self.config.logurl1
+        server_address2 = self.config.logurl2
 
         success = False
 
@@ -305,7 +305,7 @@ class Log:
 
         json_data = json.dumps(data)
 
-        endtime = time.time() + 15
+        endtime = time.time() + 120
 
         while (time.time() < endtime and not success):
 
@@ -314,7 +314,7 @@ class Log:
             if not success:
                 success = self.send_request(server_address2, json_data)
 
-            time.sleep(1)
+            time.sleep(10)
 
         if not success:
             self.save_json_file(json_data)
@@ -332,6 +332,27 @@ class Log:
         except:
             pass
 
+        if response is not None:
+            if response.status_code == 200:
+                print("Log de execucao enviado com sucesso!")
+                success = True
+            elif response.status_code == 201 or response.status_code == 204:
+                print("Log de execucao enviado com sucesso!")
+                success = True
+            else:
+                self.save_response_log(response, server_address, json_data)
+                return False
+        else:
+            return False
+
+        return success
+
+    def save_response_log(self, response, server_address, json_data):
+        """
+        """
+
+        today = datetime.today()
+        
         try:
             path = f"{self.folder}\\new_log\\{self.station}"
             os.makedirs(path)
@@ -341,22 +362,10 @@ class Log:
         try:
             with open(f"{path}\\response_log.csv", mode="a", encoding="utf-8", newline='') as response_log:
                 csv_write = csv.writer(response_log, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                csv_write.writerow([f"URL: {server_address}", f"CT: {json.loads(json_data)['CTMETHOD']}",
+                csv_write.writerow([f"Time: {today.strftime('%Y%m%d%H%M%S%f')[:-3]}", f"URL: {server_address}", f"CT: {json.loads(json_data)['CTMETHOD']}",
                                     {f"Status Code: {response.status_code}"}, f"Message: {response.text}"])
         except:
             pass
-
-        if response:
-            if response.status_code == 200:
-                print("Log de execucao enviado com sucesso!")
-                success = True
-            elif response.status_code == 201 or response.status_code == 204:
-                print("Log de execucao enviado com sucesso!")
-                success = True
-        else:
-            return False
-
-        return success
 
     def save_json_file(self, json_data):
         """

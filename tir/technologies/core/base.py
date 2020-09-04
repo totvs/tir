@@ -1008,6 +1008,11 @@ class Base(unittest.TestCase):
         >>> oHelper.TearDown()
         """
         self.driver.close()
+    
+    def check_log_url(self):
+        """
+        """
+        return self.config.logurl1 != "" or self.config.logurl2 != ""
 
     def execution_flow(self):
         """
