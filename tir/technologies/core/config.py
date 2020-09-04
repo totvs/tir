@@ -14,6 +14,8 @@ class ConfigLoader:
         else:
             data = {}
 
+        default_log_server = "http://10.171.67.194:3333/log/"
+
         self.json_data = data
         self.autostart = True
         self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
@@ -63,3 +65,5 @@ class ConfigLoader:
         self.url_tss = str(data["URL_TSS"]) if "URL_TSS" in data else ""
         self.start_program = str(data["StartProgram"]) if "StartProgram" in data else ""
         self.new_log = ("NewLog" in data  and bool(data["NewLog"]))
+        self.logurl1 = str(data["LogUrl1"]) if "LogUrl1" in data else default_log_server
+        self.logurl2 = str(data["LogUrl2"]) if "LogUrl2" in data else default_log_server
