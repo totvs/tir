@@ -131,11 +131,9 @@ class WebappInternal(Base):
             self.set_log_info_tss()
 
             if self.config.num_exec:
-                try:
-                    self.num_exec.post_exec(self.config.url_set_start_exec)
-                except Exception as error:
+                if not self.num_exec.post_exec(self.config.url_set_start_exec):
                     self.restart_counter = 3
-                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                    self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
         except ValueError as e:
             self.log_error(str(e))
@@ -212,6 +210,8 @@ class WebappInternal(Base):
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, coverage=False)
 
+            self.log.webapp_version = self.driver.execute_script("return app.VERSION")
+
             self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
             endtime = time.time() + self.config.time_out
@@ -237,11 +237,9 @@ class WebappInternal(Base):
             self.log_error(str(e))
 
         if self.config.num_exec:
-            try:
-                self.num_exec.post_exec(self.config.url_set_start_exec)
-            except Exception as error:
+            if not self.num_exec.post_exec(self.config.url_set_start_exec):
                 self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_start_exec}: Error: {error}")
+                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
     def service_process_bat_file(self):
         """
@@ -763,6 +761,8 @@ class WebappInternal(Base):
 
         release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
         database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
+        lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
+        build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
 
         if release_element:
             release = release_element.text.split(":")[1].strip()
@@ -771,6 +771,12 @@ class WebappInternal(Base):
 
         if database_element:
             self.log.database = database_element.text.split(":")[1].strip()
+
+        if build_element:
+            self.log.build_version = build_element.text.split(":")[1].strip()
+
+        if lib_element:
+            self.log.lib_version = lib_element.text.split(":")[1].strip()
 
         self.SetButton(self.language.close)
 
@@ -3645,11 +3651,11 @@ class WebappInternal(Base):
             
         if "_" in field[0]:
             try:
-                column_name = field_to_label[field[0]].lower()
+                column_name = field_to_label[field[0]].lower().strip()
             except:
                 self.log_error("Couldn't find column '" + field[0] + "' in sx3 file. Try with the field label.")
         else:
-            column_name = field[0].lower()
+            column_name = field[0].lower().strip()
 
         self.wait_element_timeout(term = column_name,
             scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term = 'th label', main_container = 'body')
@@ -4115,6 +4121,7 @@ class WebappInternal(Base):
         row_number -= 1
         grid_number -= 1
         column_name = ""
+        column = column.strip()
         column_element_old_class = None
         columns =  None
         rows = None
@@ -4813,7 +4820,14 @@ class WebappInternal(Base):
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
-        self.log.set_seconds()
+        self.message = log_message
+        self.expected = False
+        self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
+        self.log.ct_method, self.log.ct_number = self.log.ident_test()
+
+        if self.config.new_log:
+            self.execution_flow()
 
         if self.config.screenshot:
 
@@ -4838,7 +4852,7 @@ class WebappInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
-            self.log.save_file(routine_name)
+            self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -4852,11 +4866,9 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
 
             if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-                try:
-                    self.num_exec.post_exec(self.config.url_set_end_exec)
-                except Exception as error:
+                if not self.num_exec.post_exec(self.config.url_set_end_exec):
                     self.restart_counter = 3
-                    self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                    self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
                 
             if (stack_item == "setUpClass") :
                 try:
@@ -5178,7 +5190,7 @@ class WebappInternal(Base):
                 success = True
             time.sleep(0.5)
 
-    def assert_result(self, expected):
+    def assert_result(self, expected=True):
         """
         [Internal]
 
@@ -5192,45 +5204,42 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
-        msg = ""
-        stack_item = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('test_', x.function), inspect.stack())))), None)
-        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
-        log_message = f"{test_number}"
-        self.log.set_seconds()
+        self.expected = expected
+        log_message = f"{self.log.ident_test()[1]} - "
+        self.log.seconds = self.log.set_seconds(self.log.initial_time)
 
         if self.grid_input or self.grid_check:
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
 
         if self.errors:
             
-            if expected:
+            if self.expected:
                 for field_msg in self.errors:
                     log_message += (" " + field_msg)
             else:
                 log_message = ""
             
-            expected = not expected
+            self.expected = not self.expected
 
-        if expected:
-            msg = "" if not self.errors else log_message
-            self.log.new_line(True, msg)
+        if self.expected:
+            self.message = "" if not self.errors else log_message
+            self.log.new_line(True, self.message)
         else:
-            msg = self.language.assert_false_message if not self.errors else log_message
-            self.log.new_line(False, msg)
-            
-        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
+            self.message = self.language.assert_false_message if not self.errors else log_message
+            self.log.new_line(False, self.message)
 
-        routine_name = routine_name if routine_name else "error"
-
-        self.log.save_file(routine_name)
+        self.log.save_file()
 
         self.errors = []
-        print(msg)
+
+        print(self.message) if self.message else None
         
-        if expected:
+        if self.expected:
             self.assertTrue(True, "Passed")
         else:
-            self.assertTrue(False, msg)
+            self.assertTrue(False, self.message)
+
+        self.message = ""
 
         
     def ClickCheckBox(self, label_box_name, position=1):
@@ -5694,6 +5703,9 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
+        if self.config.new_log:
+            self.execution_flow()
+
         webdriver_exception = None
         timeout = 1500
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
@@ -5722,11 +5734,9 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
-            try:
-                self.num_exec.post_exec(self.config.url_set_end_exec)
-            except Exception as error:
+            if not self.num_exec.post_exec(self.config.url_set_end_exec):
                 self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send post to url:{self.config.url_set_end_exec}: Error: {error}")
+                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
         try:
             self.driver.close()
