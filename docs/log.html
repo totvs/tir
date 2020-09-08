@@ -166,7 +166,7 @@
 <span id="log"></span><h1>Log<a class="headerlink" href="#module-tir" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tir.technologies.core.log.Log">
-<em class="property">class </em><code class="sig-prename descclassname">tir.technologies.core.log.</code><code class="sig-name descname">Log</code><span class="sig-paren">(</span><em class="sig-param">suite_datetime=''</em>, <em class="sig-param">user=''</em>, <em class="sig-param">station=''</em>, <em class="sig-param">program=''</em>, <em class="sig-param">program_date='01/01/1980 12:00:00'</em>, <em class="sig-param">version=''</em>, <em class="sig-param">release=''</em>, <em class="sig-param">database=''</em>, <em class="sig-param">issue=''</em>, <em class="sig-param">execution_id=''</em>, <em class="sig-param">country=''</em>, <em class="sig-param">folder=''</em>, <em class="sig-param">test_type='TIR'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tir.technologies.core.log.</code><code class="descname">Log</code><span class="sig-paren">(</span><em>suite_datetime=''</em>, <em>user=''</em>, <em>station=''</em>, <em>program=''</em>, <em>program_date='01/01/1980 12:00:00'</em>, <em>version=''</em>, <em>release=''</em>, <em>database=''</em>, <em>issue=''</em>, <em>execution_id=''</em>, <em>country=''</em>, <em>folder=''</em>, <em>test_type='TIR'</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is instantiated to create the log file and to append the results and failures to it.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instanted inside base.py:</span>
@@ -175,15 +175,21 @@
 </div>
 <dl class="method">
 <dt id="tir.technologies.core.log.Log.checks_empty_line">
-<code class="sig-name descname">checks_empty_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.checks_empty_line" title="Permalink to this definition">¶</a></dt>
+<code class="descname">checks_empty_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.checks_empty_line" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if the log file is not empty.
 03 - ‘Programa’  10 - ‘Release’ 14 - ‘ID Execução’ 15 - ‘Pais’ 
 [Internal]</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.log.Log.generate_dict">
+<code class="descname">generate_dict</code><span class="sig-paren">(</span><em>result</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary with the log information</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.log.Log.generate_header">
-<code class="sig-name descname">generate_header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_header" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates the header line on the log file.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
@@ -193,30 +199,81 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.log.Log.generate_json">
+<code class="descname">generate_json</code><span class="sig-paren">(</span><em>dictionary</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.core.log.Log.generate_result">
+<code class="descname">generate_result</code><span class="sig-paren">(</span><em>result</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a result of testcase and export to a json.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – The result of the case.</li>
+<li><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The message to be logged..</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">generate_result</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Success&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.core.log.Log.get_file_name">
+<code class="descname">get_file_name</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.get_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Testsuite name</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.log.Log.get_testcase_stack">
-<code class="sig-name descname">get_testcase_stack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.get_testcase_stack" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_testcase_stack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.get_testcase_stack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a string with the current testcase name
 [Internal]</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.log.Log.ident_test">
+<code class="descname">ident_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.ident_test" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.log.Log.list_of_testcases">
-<code class="sig-name descname">list_of_testcases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.list_of_testcases" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_of_testcases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.list_of_testcases" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of test cases from suite</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="tir.technologies.core.log.Log.new_line">
-<code class="sig-name descname">new_line</code><span class="sig-paren">(</span><em class="sig-param">result</em>, <em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.new_line" title="Permalink to this definition">¶</a></dt>
+<code class="descname">new_line</code><span class="sig-paren">(</span><em>result</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.new_line" title="Permalink to this definition">¶</a></dt>
 <dd><p>Appends a new line with data on log file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – The result of the case.</p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The message to be logged..</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – The result of the case.</li>
+<li><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The message to be logged..</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">new_line</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Success&quot;</span><span class="p">)</span>
@@ -226,7 +283,7 @@
 
 <dl class="method">
 <dt id="tir.technologies.core.log.Log.save_file">
-<code class="sig-name descname">save_file</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the log file to the file system.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
@@ -236,8 +293,30 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="tir.technologies.core.log.Log.save_json_file">
+<code class="descname">save_json_file</code><span class="sig-paren">(</span><em>json_data</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_json_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the log file to the file system.</p>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">save_json_file</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.core.log.Log.save_response_log">
+<code class="descname">save_response_log</code><span class="sig-paren">(</span><em>response</em>, <em>server_address</em>, <em>json_data</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_response_log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tir.technologies.core.log.Log.send_request">
+<code class="descname">send_request</code><span class="sig-paren">(</span><em>server_address</em>, <em>json_data</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.send_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a post request to server</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="tir.technologies.core.log.Log.set_seconds">
-<code class="sig-name descname">set_seconds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.set_seconds" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_seconds</code><span class="sig-paren">(</span><em>initial_time</em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.set_seconds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the seconds variable through a calculation of current time minus the execution start time.</p>
 <p>Usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
