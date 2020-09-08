@@ -4825,7 +4825,9 @@ class WebappInternal(Base):
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
         self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
-        self.execution_flow()
+
+        if self.config.new_log:
+            self.execution_flow()
 
         if self.config.screenshot:
 
@@ -5701,7 +5703,8 @@ class WebappInternal(Base):
         >>> self.TearDown()
         """
 
-        self.execution_flow()
+        if self.config.new_log:
+            self.execution_flow()
 
         webdriver_exception = None
         timeout = 1500
