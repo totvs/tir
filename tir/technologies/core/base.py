@@ -428,7 +428,9 @@ class Base(unittest.TestCase):
         >>> soup = self.get_current_DOM()
         """
 
-        self.execution_flow()
+        if self.config.new_log:
+            self.execution_flow()
+
         try:
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
@@ -1008,14 +1010,11 @@ class Base(unittest.TestCase):
         >>> oHelper.TearDown()
         """
         self.driver.close()
-    
-    def check_log_url(self):
-        """
-        """
-        return self.config.logurl1 != "" or self.config.logurl2 != ""
 
     def execution_flow(self):
         """
+
+        Method that is responsible to control log flow in an execution 
 
         :return:
         """
@@ -1031,6 +1030,8 @@ class Base(unittest.TestCase):
     def start_testcase(self):
         """
 
+        Method that starts testcase time and testcase info.
+
         :return:
         """
 
@@ -1038,16 +1039,17 @@ class Base(unittest.TestCase):
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
-        print("INICIOU O CASO DE TESTE!!!")
+        print("Starting TestCase")
 
     def finish_testcase(self):
         """
 
+        Method that is responsable to finish testcase and send the log and execution time of testcase.
+
         :return:
         """
         if self.log.get_testcase_stack() not in self.log.finish_testcase:
-            print("FINALIZOU O CASO DE TESTE")
-            print("ENVIANDO LOG")
+            print("Finishing TestCase")
             self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
             self.log.generate_result(self.expected, self.message)
             self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())
