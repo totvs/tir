@@ -1019,6 +1019,7 @@ class Base(unittest.TestCase):
         :return:
         """
         if self.search_stack("TearDown") or (self.search_stack("setUpClass") and self.restart_counter == 3):
+            self.last_test_case = "setUpClass"
             self.finish_testcase()
         elif (self.log.get_testcase_stack() in list(map(lambda x: x._testMethodName, self.log.list_of_testcases()))) and \
                 self.log.get_testcase_stack() not in self.test_case:
@@ -1048,7 +1049,7 @@ class Base(unittest.TestCase):
 
         :return:
         """
-        if self.log.get_testcase_stack() not in self.log.finish_testcase:
+        if self.last_test_case not in self.log.finish_testcase:
             print("Finishing TestCase")
             self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
             self.log.generate_result(self.expected, self.message)
