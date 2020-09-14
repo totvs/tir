@@ -16,6 +16,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+import recommonmark
+from recommonmark.transform import AutoStructify
+
 import tir
 
 # -- Project information -----------------------------------------------------
@@ -42,8 +45,10 @@ release = '1.0.0'
 extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'recommonmark'
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['ytemplates']
@@ -56,7 +61,11 @@ templates_path = ['ytemplates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ['.rst', '.md']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -169,3 +178,13 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+# At the bottom of conf.py
+github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/doc/'
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+            'url_resolver': lambda url: github_doc_root + url,
+            'auto_toc_tree_section': 'Contents',
+            }, True)
+    app.add_transform(AutoStructify)
+

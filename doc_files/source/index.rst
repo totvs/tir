@@ -15,20 +15,14 @@ TOTVS Interface Robot
    :maxdepth: 5
    :caption: User Classes:
 
-   apw
    webapp
+   ComoUsar
 
 .. toctree::
    :maxdepth: 5
-   :caption: Internal Classes:
+   :caption: Dev Classes:
 
-   apw_internal
    webapp_internal
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Core Classes:
-
    base
    config
    enumerations
