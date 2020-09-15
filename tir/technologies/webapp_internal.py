@@ -3255,6 +3255,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         hotkey = ["CTRL","ALT"]
         grid_number-=1
+        tries = 0
         success = False
         
         try:
@@ -3269,11 +3270,15 @@ class WebappInternal(Base):
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+                    elif tries > 0:
+                        ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+                        tries = 0
                     else:
                         Id = self.driver.execute_script(script)
                         element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element)
                         self.send_keys(element, self.supported_keys(key))
+                        tries +=1
 
                 elif additional_key:
                     ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
@@ -3282,6 +3287,7 @@ class WebappInternal(Base):
                     success = self.WaitShow(wait_show, timeout=step, throw_error = True)
                 else:
                     success = True
+
  
         except WebDriverException as e:
             self.log_error(f"SetKey - Screen is not load: {e}")
