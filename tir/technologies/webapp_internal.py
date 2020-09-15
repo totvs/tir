@@ -2726,7 +2726,7 @@ class WebappInternal(Base):
 
         self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string, timeout=None):
+    def WaitShow(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait show the elements.
 
@@ -2738,7 +2738,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        print("Waiting processing...")
+        print(f"Waiting show text '{string}'...")
 
         if not timeout:
             timeout = 1200
@@ -2751,12 +2751,15 @@ class WebappInternal(Base):
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
-                return
+                return element
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
 
-        self.log_error(f"Element {string} not found")
+        if not throw_error:
+            return False
+        else:
+            self.log_error(f"Element {string} not found")
 
     def WaitProcessing(self, itens, timeout=None):
         """
@@ -3187,7 +3190,7 @@ class WebappInternal(Base):
 
             return string
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key=""):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3 ):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -3195,18 +3198,22 @@ class WebappInternal(Base):
             If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
 
         .. warning::           
-            Before using this method, set focus on any element
+            Before using this method, set focus on any element.
 
-        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete
+        Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete ...
 
         :param key: Key that would be pressed
         :type key: str
         :param grid: Boolean if action must be applied on a grid. (Usually with DOWN key)
         :type grid: bool
-        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :param grid_number: Grid number of which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
-        :param additional_key: Key additional that would be pressed. 
-        :type additional_key: str        
+		:param additional_key: Key additional that would be pressed.
+        :type additional_key: str
+        :param wait_show: String that will hold the wait after press a key.
+        :type wait_show: str
+        :param step: The amount of time each step should wait. - **Default:** 3
+        :type step: float
 
         Usage:
 
@@ -3218,9 +3225,15 @@ class WebappInternal(Base):
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
+        >>> #--------------------------------------
+        >>> # Call the method with WaitShow when you expect a new window or text to appear on the screen:
+        >>> oHelper.SetKey( key = "F12", wait_show="Parametros", step = 3 )
+        >>> #--------------------------------------
+        >>> # Calling the method with special keys (using parameter additional_key):
+        >>> oHelper.SetKey(key="CTRL", additional_key="A")
         """
         self.wait_blocker()
-        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else '' }") 
+        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else key }") 
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
 
@@ -3238,29 +3251,38 @@ class WebappInternal(Base):
 
         return getActiveElement()
         """
-        grid_number-=1
-        hotkey = ["CTRL","ALT"]
         key = key.upper()
+        endtime = time.time() + self.config.time_out
+        hotkey = ["CTRL","ALT"]
+        grid_number-=1
+        success = False
+        
         try:
-            if key not in hotkey and self.supported_keys(key):
+            if key in hotkey and not additional_key:
+                self.log_error("Additional key is empty")
 
-                Id = self.driver.execute_script(script)
-                element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
-                self.set_element_focus(element)
+            if key == "DOWN" and grid:
+                grid_number = 0 if grid_number is None else grid_number
+                self.grid_input.append(["", "", grid_number, True])
 
-                if key == "DOWN" and grid:
-                    grid_number = 0 if grid_number is None else grid_number
-                    self.grid_input.append(["", "", grid_number, True])
-                elif grid:
-                    ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+            while(time.time() < endtime and not success):
+                if key not in hotkey and self.supported_keys(key):
+                    if grid:
+                        ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+                    else:
+                        Id = self.driver.execute_script(script)
+                        element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
+                        self.set_element_focus(element)
+                        self.send_keys(element, self.supported_keys(key))
+
+                elif additional_key:
+                    ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
+
+                if wait_show:
+                    success = self.WaitShow(wait_show, timeout=step, throw_error = True)
                 else:
-                    self.send_keys(element, self.supported_keys(key))
-
-            elif additional_key:
-                ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
-            else:
-                self.log_error("Additional key is empty")  
-
+                    success = True
+ 
         except WebDriverException as e:
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
