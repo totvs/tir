@@ -38,7 +38,8 @@ setup(
         'six',
         'enum34',
         'requests',
-        'pyodbc'
+        'pyodbc',
+        'psutil'
     ],
     packages=find_packages(),
     scripts=[],
