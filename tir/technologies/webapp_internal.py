@@ -1535,9 +1535,6 @@ class WebappInternal(Base):
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
-                if "disabled" in element.attrs:
-                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
-
                 if self.element_name(element) == "input":
                     valtype = element.attrs["valuetype"]
 
@@ -1612,6 +1609,9 @@ class WebappInternal(Base):
                         success = current_value == main_value
                 except:
                     continue
+
+        if "disabled" in element.attrs:
+            self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
