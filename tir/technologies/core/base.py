@@ -1040,7 +1040,7 @@ class Base(unittest.TestCase):
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
-        print("Starting TestCase")
+        print(f"Starting TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
 
     def finish_testcase(self):
         """
@@ -1050,7 +1050,7 @@ class Base(unittest.TestCase):
         :return:
         """
         if self.last_test_case not in self.log.finish_testcase:
-            print("Finishing TestCase")
+            print(f"Finishing TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
             self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
             self.log.generate_result(self.expected, self.message)
             self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())

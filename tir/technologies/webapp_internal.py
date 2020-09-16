@@ -17,6 +17,7 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from tir.technologies.core.psutil import system_info
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
@@ -181,6 +182,10 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+
+        print(f"***System Info*** in Setup():")
+        system_info()
+
         try:
             self.service_process_bat_file()
             
@@ -2431,6 +2436,9 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
+            starttime = time.time()
+            print(f"***System Info*** Before Clicking on button:")
+            system_info()
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -2442,7 +2450,7 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-
+            print(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
@@ -2534,6 +2542,9 @@ class WebappInternal(Base):
         except Exception as error:
             print(str(error))
             self.log_error(str(error))
+
+        print(f"***System Info*** After Clicking on button:")
+        system_info()
 
     def set_button_x(self, position=1, check_error=True):
         position -= 1
@@ -4813,6 +4824,8 @@ class WebappInternal(Base):
         """
         self.clear_grid()
         print(f"Warning log_error {message}")
+        print(f"***System Info*** in log_error():")
+        system_info()
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
         routine_name = routine_name if routine_name else "error"
