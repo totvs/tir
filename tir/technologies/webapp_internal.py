@@ -3827,7 +3827,10 @@ class WebappInternal(Base):
                                     break
                                 else:
                                     try_endtime = try_endtime - 10
-                                    container_current = self.get_current_container()
+                                    containers = self.get_current_DOM().select(self.containers_selectors["GetCurrentContainer"])
+                                    if child[0].parent.parent in containers:
+                                        containers.remove(child[0].parent.parent)
+                                    container_current = next(iter(self.zindex_sort(containers, True)))
                                     if container_current.attrs['id'] != container_id:
                                         print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                         return
