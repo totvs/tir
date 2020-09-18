@@ -85,7 +85,7 @@ class Base(unittest.TestCase):
 
         try:
             self.log.user = os.getlogin()
-        except FileNotFoundError:
+        except Exception:
             import getpass
             self.log.user = getpass.getuser()
 
