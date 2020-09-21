@@ -1740,7 +1740,7 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find element: {field}")
 
             field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            self.set_element_focus(label_element())
+            self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
             endtime = time.time() + self.config.time_out
             current_value =  ''
