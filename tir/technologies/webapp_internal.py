@@ -183,7 +183,7 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
-        print(f"***System Info*** in Setup():")
+        print(f"***System Info*** in Setup():") # todo add log control
         system_info()
 
         try:
@@ -2438,7 +2438,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
-            print(f"***System Info*** Before Clicking on button:")
+            print(f"***System Info*** Before Clicking on button:") # todo add log control
             system_info()
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -2544,7 +2544,7 @@ class WebappInternal(Base):
             print(str(error))
             self.log_error(str(error))
 
-        print(f"***System Info*** After Clicking on button:")
+        print(f"***System Info*** After Clicking on button:") # todo add log control
         system_info()
 
     def set_button_x(self, position=1, check_error=True):
@@ -4828,7 +4828,7 @@ class WebappInternal(Base):
         """
         self.clear_grid()
         print(f"Warning log_error {message}")
-        print(f"***System Info*** in log_error():")
+        print(f"***System Info*** in log_error():") # todo add log control
         system_info()
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
@@ -5451,6 +5451,10 @@ class WebappInternal(Base):
                                     element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
                                         if last_item:
+                                            start_time = time.time()
+                                            self.wait_blocker()
+                                            print(f"wait blocker time in clicktree last item: {time.time() - start_time}") #todo add log_control
+                                            self.scroll_to_element(element_click())
                                             element_click().click()
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
@@ -5511,15 +5515,28 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        container = self.get_current_container()
 
-        tr = container.select("tr")
+        treenode_selected = None
 
-        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+        success = True
 
-        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+        container_function = lambda: self.get_current_container() if success else self.get_current_DOM()
 
-        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+        endtime = time.time() + self.config.time_out
+        while ((time.time() < endtime) and not treenode_selected):
+
+            container = container_function()
+
+            tr = container.select("tr")
+
+            tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+
+            ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+
+            treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
+
+            if not treenode_selected:
+                success = not success
 
         if not check_expanded:
             if list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected)):
@@ -5539,11 +5556,14 @@ class WebappInternal(Base):
         [Internal]
         """
         tree_selected = self.treenode_selected(label_filtered)
-        
-        if tree_selected.find_all_next("span"):
-            try:
-                return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-            except:
+
+        if tree_selected:
+            if tree_selected.find_all_next("span"):
+                try:
+                    return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                except:
+                    return False
+            else:
                 return False
         else:
             return False
