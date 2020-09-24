@@ -207,7 +207,11 @@ class Base(unittest.TestCase):
         >>> self.compare_field_values("A1_NOME", "JOÃO", "JOOÃ", "Field A1_NOME has different values")
         """
         if str(user_value).strip() != str(captured_value).strip():
+            if self.config.screenshot and self.errors == []:
+                self.log.take_screenshot_log(self.driver)
+                
             self.errors.append(message)
+            
 
     def double_click(self, element, click_type = enum.ClickType.SELENIUM):
         """

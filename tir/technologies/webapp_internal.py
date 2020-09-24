@@ -4830,24 +4830,7 @@ class WebappInternal(Base):
             self.execution_flow()
 
         if self.config.screenshot:
-
-            log_file = f"{self.log.user}_{uuid.uuid4().hex}_{routine_name}-{test_number} error.png"
-            
-            try:
-                if self.config.log_folder:
-                    path = f"{self.log.folder}\\{self.log.station}\\{log_file}"
-                    os.makedirs(f"{self.log.folder}\\{self.log.station}")
-                else:
-                    path = f"Log\\{self.log.station}\\{log_file}"
-                    os.makedirs(f"Log\\{self.log.station}")
-            except OSError:
-                pass
-            
-            if self.log.get_testcase_stack() not in self.log.test_case_log:
-                try:
-                    self.driver.save_screenshot(path)
-                except Exception as e:
-                    print(f"Warning Log Error save_screenshot exception {str(e)}")
+            self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line:
             self.log.new_line(False, log_message)
