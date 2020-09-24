@@ -84,6 +84,7 @@ class WebappInternal(Base):
 
         self.parameters = []
         self.backup_parameters = []
+        self.tree_base_element = ()
 
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
@@ -183,8 +184,9 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
-        print(f"***System Info*** in Setup():") # todo add log control
-        system_info()
+        if self.config.smart_test:
+            print(f"***System Info*** in Setup():")
+            system_info()
 
         try:
             self.service_process_bat_file()
@@ -2438,8 +2440,11 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
-            print(f"***System Info*** Before Clicking on button:") # todo add log control
-            system_info()
+
+            if self.config.smart_test
+                print(f"***System Info*** Before Clicking on button:")
+                system_info()
+
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -2451,7 +2456,9 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-            print(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+            if self.config.smart_test:
+                print(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
@@ -2543,9 +2550,10 @@ class WebappInternal(Base):
         except Exception as error:
             print(str(error))
             self.log_error(str(error))
-
-        print(f"***System Info*** After Clicking on button:") # todo add log control
-        system_info()
+        
+        if self.config.smart_test:
+            print(f"***System Info*** After Clicking on button:")
+            system_info()
 
     def set_button_x(self, position=1, check_error=True):
         position -= 1
@@ -4828,8 +4836,10 @@ class WebappInternal(Base):
         """
         self.clear_grid()
         print(f"Warning log_error {message}")
-        print(f"***System Info*** in log_error():") # todo add log control
-        system_info()
+
+        if self.config.smart_test:
+            print(f"***System Info*** in log_error():")
+            system_info()
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
         routine_name = routine_name if routine_name else "error"
@@ -5414,7 +5424,10 @@ class WebappInternal(Base):
 
             try_counter = 0
 
-            label_filtered = label.lower().strip()        
+            label_filtered = label.lower().strip()
+
+            if self.tree_base_element and label_filtered == self.tree_base_element[0]:
+                self.scroll_to_element(self.tree_base_element[1])
 
             endtime = time.time() + self.config.time_out
 
@@ -5453,7 +5466,6 @@ class WebappInternal(Base):
                                         if last_item:
                                             start_time = time.time()
                                             self.wait_blocker()
-                                            print(f"wait blocker time in clicktree last item: {time.time() - start_time}") #todo add log_control
                                             self.scroll_to_element(element_click())
                                             element_click().click()
                                             if self.check_toggler(label_filtered):
@@ -5465,6 +5477,8 @@ class WebappInternal(Base):
                                                     self.click(element_click(), right_click=right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
+                                            self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
+                                            self.scroll_to_element(element_click())
                                             element_click().click()
                                             success = self.check_hierarchy(label_filtered)
 
@@ -5474,7 +5488,9 @@ class WebappInternal(Base):
 
                             if not success:
                                 try:
+                                    self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item.parent)
                                     element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                                    self.scroll_to_element(element_click())
                                     element_click().click()
                                     success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
                                 except:
