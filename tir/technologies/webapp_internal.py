@@ -2441,7 +2441,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             starttime = time.time()
 
-            if self.config.smart_test
+            if self.config.smart_test:
                 print(f"***System Info*** Before Clicking on button:")
                 system_info()
 
