@@ -5426,8 +5426,11 @@ class WebappInternal(Base):
 
             label_filtered = label.lower().strip()
 
-            if self.tree_base_element and label_filtered == self.tree_base_element[0]:
-                self.scroll_to_element(self.tree_base_element[1])
+            try:
+                if self.tree_base_element and label_filtered == self.tree_base_element[0]:
+                    self.scroll_to_element(self.tree_base_element[1])
+            except:
+                pass
 
             endtime = time.time() + self.config.time_out
 
@@ -5488,7 +5491,6 @@ class WebappInternal(Base):
 
                             if not success:
                                 try:
-                                    self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item.parent)
                                     element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                     self.scroll_to_element(element_click())
                                     element_click().click()
