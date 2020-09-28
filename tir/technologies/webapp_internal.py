@@ -468,7 +468,7 @@ class WebappInternal(Base):
         Refresh the page - retry load user_screen
         """
 
-        self.driver.refresh()
+        self.driver_refresh()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
@@ -1839,7 +1839,7 @@ class WebappInternal(Base):
         webdriver_exception = None
 
         try:
-            self.driver.refresh()
+            self.driver_refresh()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -1872,6 +1872,27 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     self.set_program(self.config.routine)
+
+    def driver_refresh(self):
+        """
+        [Internal]
+
+        Refresh the driver.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.driver_refresh()
+        """
+        result = self.send_action(ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform)
+        if not result:
+            if self.config.smart_test or self.config.debug_log:
+                print("driver_refresh - selenium")
+            self.driver.refresh()
+        else:
+            if self.config.smart_test or self.config.debug_log:
+                print("driver_refresh - CTRL+F5")
+
 
     def Finish(self):
         """
@@ -1925,7 +1946,7 @@ class WebappInternal(Base):
             if not element:
                 print("Warning method finish use driver.refresh. element not found")
 
-            self.driver.refresh() if not element else self.SetButton(self.language.finish)
+            self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
     def click_button_finish(self, click_counter=None):
         """
@@ -2479,7 +2500,7 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.click(soup_element())
+                self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
@@ -2510,7 +2531,7 @@ class WebappInternal(Base):
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                    self.click(soup_element())
+                    self.send_action(self.click, soup_element)
 
                     result  = self.click_sub_menu(sub_item)
  
@@ -5007,7 +5028,7 @@ class WebappInternal(Base):
         stack = None
 
         try:
-            self.driver.refresh()
+            self.driver_refresh()
         except Exception as error:
             exception = error
 
@@ -5056,7 +5077,7 @@ class WebappInternal(Base):
             time.sleep(1)
 
             if self.config.coverage:
-                self.driver.refresh()
+                self.driver_refresh()
             else:
                 self.Finish()
 
@@ -5457,10 +5478,10 @@ class WebappInternal(Base):
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                             else:
                                                 if right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
@@ -5750,7 +5771,7 @@ class WebappInternal(Base):
 
         if self.config.coverage:
             try:
-                self.driver.refresh()
+                self.driver_refresh()
             except WebDriverException as e:
                 webdriver_exception = e
 
@@ -6406,3 +6427,40 @@ class WebappInternal(Base):
             return config_dict[json_key]
         else:
             self.log_error("Doesn't contain that key in json object")
+
+    def send_action(self, action = None, element = None, right_click=False):
+        """
+
+        Sends an action to element and compare it object state change.
+    
+        :param action: selenium action like click or send_keys
+        :param element: selenium element
+        :param right_click: True if you want a right click
+        :return: True if there was a change in the object
+        """
+
+        soup = lambda: self.get_current_DOM()
+
+        soup_before_event = soup()
+        soup_after_event = soup()
+
+        endtime = time.time() + self.config.time_out
+        try:
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
+
+                if right_click:
+                    action(element(), right_click=right_click)
+                elif element:
+                    action(element())
+                elif action:
+                    action()
+
+                soup_after_event = soup()
+
+                time.sleep(1)
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                print(f"Warning Exception send_action {str(e)}")
+            return False
+
+        return soup_before_event != soup_after_event
