@@ -430,7 +430,7 @@ class Log:
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
 
-        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item}-{test_number} error.png"
+        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item} error.png"
 
         if self.config.debug_log:
             print(f"take_screenshot_log in:{datetime.now()}\n")
