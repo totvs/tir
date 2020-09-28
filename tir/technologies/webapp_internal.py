@@ -2479,7 +2479,7 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.click(soup_element())
+                self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
@@ -5457,10 +5457,10 @@ class WebappInternal(Base):
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                             else:
                                                 if right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
@@ -6406,3 +6406,30 @@ class WebappInternal(Base):
             return config_dict[json_key]
         else:
             self.log_error("Doesn't contain that key in json object")
+
+    def send_action(self, action, element, righ_click=False):
+        """
+
+        Sends an action to element and compare it object state change.
+    
+        :param action: selenium action like click or send_keys
+        :param element: selenium element
+        :param righ_click: True if you want a right click
+        :return: True if there was a change in the object
+        """
+
+        soup = lambda: self.get_current_DOM()
+
+        soup_before_event = soup()
+        soup_after_event = soup()
+
+        endtime = time.time() + self.config.time_out
+        while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
+            action(element(), right_click=righ_click)
+            self.wait_blocker()
+
+            soup_after_event = soup()
+
+            time.sleep(1)
+
+        return soup_before_event != soup_after_event
