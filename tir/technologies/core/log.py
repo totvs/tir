@@ -187,7 +187,7 @@ class Log:
             self.table_rows[1][3] = 'NO PROGRAM'
 
         if self.table_rows[1][10] == '':
-            self.table_rows[1][10] = '12.1.25'
+            self.table_rows[1][10] = '12.1.27'
 
         if self.table_rows[1][15] == '':
             self.table_rows[1][15] = 'BRA'
