@@ -3283,19 +3283,19 @@ class WebappInternal(Base):
             if key not in hotkey and self.supported_keys(key):
 
                 Id = self.driver.execute_script(script)
-                element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
-                self.set_element_focus(element)
+                element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
+                self.set_element_focus(element())
 
                 if key == "DOWN" and grid:
                     grid_number = 0 if grid_number is None else grid_number
                     self.grid_input.append(["", "", grid_number, True])
                 elif grid:
-                    ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+                    self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                 else:
-                    self.send_keys(element, self.supported_keys(key))
+                    self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
 
             elif additional_key:
-                ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
+                self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
             else:
                 self.log_error("Additional key is empty")  
 
@@ -6425,13 +6425,14 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, right_click=False):
+    def send_action(self, action = None, element = None, value = None, right_click=False):
         """
 
         Sends an action to element and compare it object state change.
     
-        :param action: selenium action like click or send_keys
-        :param element: selenium element
+        :param action: selenium function as a reference like click, actionchains or send_keys.
+        :param element: selenium element as a reference
+        :param value: send keys value
         :param right_click: True if you want a right click
         :return: True if there was a change in the object
         """
@@ -6447,6 +6448,8 @@ class WebappInternal(Base):
 
                 if right_click:
                     action(element(), right_click=right_click)
+                elif value:
+                    action(element(), value)
                 elif element:
                     action(element())
                 elif action:
