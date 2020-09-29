@@ -1884,15 +1884,12 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.driver_refresh()
         """
-        result = self.send_action(ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform)
-        if not result:
-            if self.config.smart_test or self.config.debug_log:
-                print("driver_refresh - selenium")
-            self.driver.refresh()
-        else:
-            if self.config.smart_test or self.config.debug_log:
-                print("driver_refresh - CTRL+F5")
+        if self.config.smart_test or self.config.debug_log:
+            print("Driver Refresh")
 
+        self.driver.refresh()
+        self.wait_blocker()
+        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform()
 
     def Finish(self):
         """
@@ -6463,4 +6460,6 @@ class WebappInternal(Base):
                 print(f"Warning Exception send_action {str(e)}")
             return False
 
+        if self.config.smart_test or self.config.debug_log:
+            print(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
