@@ -187,7 +187,7 @@ class Log:
             self.table_rows[1][3] = 'NO PROGRAM'
 
         if self.table_rows[1][10] == '':
-            self.table_rows[1][10] = '12.1.25'
+            self.table_rows[1][10] = '12.1.27'
 
         if self.table_rows[1][15] == '':
             self.table_rows[1][15] = 'BRA'
@@ -430,7 +430,7 @@ class Log:
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
 
-        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item}-{test_number} error.png"
+        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item} error.png"
 
         if self.config.debug_log:
             print(f"take_screenshot_log in:{datetime.now()}\n")
