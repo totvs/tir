@@ -6143,7 +6143,8 @@ class WebappInternal(Base):
             if text_extracted:
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False, presence=False)
+                self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
 
         if not text_extracted:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
