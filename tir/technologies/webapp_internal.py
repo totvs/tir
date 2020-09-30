@@ -1118,7 +1118,13 @@ class WebappInternal(Base):
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
 
-        soup = self.get_current_DOM()
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.driver.switch_to.default_content()
+            content = self.driver.page_source
+            soup = BeautifulSoup(content,"html.parser")
+        else:
+            soup = self.get_current_DOM()
+
         if not index:
 
             search_key = re.sub(r"\.+$", '', search_key).lower()
@@ -1186,11 +1192,16 @@ class WebappInternal(Base):
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_column())
         self.click(sel_browse_column())
+
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.tmenu_out_iframe = True
         
         self.wait_element_timeout(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
         tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
+            if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                self.tmenu_out_iframe = False
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
         self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
@@ -1201,10 +1212,18 @@ class WebappInternal(Base):
             filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
             for  item in filtered_column_itens:
                 span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+                if not span:
+                    span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
                 self.click(self.soup_to_selenium(span))
         else:
             span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
+            if not span:
+                span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+
             self.click(self.soup_to_selenium(span))
+
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.tmenu_out_iframe = False
 
     def fill_search_browse(self, term, search_elements):
         """
