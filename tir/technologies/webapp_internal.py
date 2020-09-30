@@ -5494,10 +5494,10 @@ class WebappInternal(Base):
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.send_action(self.click, element_click, right_click)
+                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if right_click:
-                                                    self.send_action(self.click, element_click, right_click)
+                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
