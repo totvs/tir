@@ -5730,6 +5730,7 @@ class WebappInternal(Base):
         div = self.search_grid_by_text(grid, last_item, column_index)
         self.wait_until_to(expected_condition="element_to_be_clickable", element = div, locator = By.XPATH )
         div_s = self.soup_to_selenium(div)
+        time.sleep(2)#TODO alterar antes de subir na master
         self.click((div_s), enum.ClickType.SELENIUM , right_click)
 
     def expand_treeGrid(self, column, item):
@@ -6487,10 +6488,9 @@ class WebappInternal(Base):
         :return: True if there was a change in the object
         """
 
-        soup = lambda: self.get_current_DOM()
+        soup_before_event = self.get_current_DOM()
 
-        soup_before_event = soup()
-        soup_after_event = soup()
+        soup_after_event = soup_before_event
 
         endtime = time.time() + self.config.time_out
         try:
@@ -6505,7 +6505,7 @@ class WebappInternal(Base):
                 elif action:
                     action()
 
-                soup_after_event = soup()
+                soup_after_event = self.get_current_DOM()
 
                 time.sleep(1)
         except Exception as e:
