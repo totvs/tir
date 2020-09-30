@@ -3467,6 +3467,8 @@ class WebappInternal(Base):
                     
                 element = self.soup_to_selenium(element)
                 self.set_element_focus(element)
+                if self.driver.switch_to_active_element() != element:
+                    self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
