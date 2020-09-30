@@ -3341,7 +3341,7 @@ class WebappInternal(Base):
                     self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
 
                 if wait_show:
-                    success = self.WaitShow(wait_show, timeout=step, throw_error = True)
+                    success = self.WaitShow(wait_show, timeout=step, throw_error = False)
                 else:
                     success = True
 
