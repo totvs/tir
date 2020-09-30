@@ -85,7 +85,7 @@ class Base(unittest.TestCase):
 
         try:
             self.log.user = os.getlogin()
-        except FileNotFoundError:
+        except Exception:
             import getpass
             self.log.user = getpass.getuser()
 
@@ -207,7 +207,11 @@ class Base(unittest.TestCase):
         >>> self.compare_field_values("A1_NOME", "JOÃO", "JOOÃ", "Field A1_NOME has different values")
         """
         if str(user_value).strip() != str(captured_value).strip():
+            if self.config.screenshot and self.errors == []:
+                self.log.take_screenshot_log(self.driver)
+                
             self.errors.append(message)
+            
 
     def double_click(self, element, click_type = enum.ClickType.SELENIUM):
         """
@@ -1040,7 +1044,7 @@ class Base(unittest.TestCase):
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
-        print("Starting TestCase")
+        print(f"Starting TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
 
     def finish_testcase(self):
         """
@@ -1050,7 +1054,7 @@ class Base(unittest.TestCase):
         :return:
         """
         if self.last_test_case not in self.log.finish_testcase:
-            print("Finishing TestCase")
+            print(f"Finishing TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
             self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
             self.log.generate_result(self.expected, self.message)
             self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())

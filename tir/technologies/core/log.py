@@ -187,7 +187,7 @@ class Log:
             self.table_rows[1][3] = 'NO PROGRAM'
 
         if self.table_rows[1][10] == '':
-            self.table_rows[1][10] = '12.1.25'
+            self.table_rows[1][10] = '12.1.27'
 
         if self.table_rows[1][15] == '':
             self.table_rows[1][15] = 'BRA'
@@ -406,3 +406,47 @@ class Log:
         ct_number = ''.join(list(filter(str.isdigit, f"{ct_method.split('_')[-1]}"))) if ct_method else ""
 
         return (ct_method, ct_number)
+
+    def take_screenshot_log(self, driver, stack_item="", test_number=""):
+        """
+        [Internal]
+
+        Takes a screenshot and saves on the log screenshot folder defined in config.
+
+        :param driver: The selenium driver.
+        :type: Selenium Driver
+        :param stack_item: test case stack
+        :type: str
+        :param test_number: test case number
+        :type: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.log.take_screenshot_log()
+        """
+        if not stack_item:
+            stack_item = self.get_testcase_stack()
+        if not test_number:
+            test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+
+        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item} error.png"
+
+        if self.config.debug_log:
+            print(f"take_screenshot_log in:{datetime.now()}\n")
+            
+        try:
+            if self.config.log_folder:
+                path = f"{self.folder}\\{self.station}\\{log_file}"
+                os.makedirs(f"{self.folder}\\{self.station}")
+            else:
+                path = f"Log\\{self.station}\\{log_file}"
+                os.makedirs(f"Log\\{self.station}")
+        except OSError:
+            pass
+        
+        if self.get_testcase_stack() not in self.test_case_log:
+            try:
+                driver.save_screenshot(path)
+            except Exception as e:
+                print(f"Warning Log Error save_screenshot exception {str(e)}")

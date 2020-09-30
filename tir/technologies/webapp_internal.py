@@ -17,6 +17,7 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from tir.technologies.core.psutil import system_info
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
@@ -83,6 +84,7 @@ class WebappInternal(Base):
 
         self.parameters = []
         self.backup_parameters = []
+        self.tree_base_element = ()
 
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
@@ -181,6 +183,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
+
+        if self.config.smart_test:
+            print(f"***System Info*** in Setup():")
+            system_info()
+
         try:
             self.service_process_bat_file()
             
@@ -461,7 +468,7 @@ class WebappInternal(Base):
         Refresh the page - retry load user_screen
         """
 
-        self.driver.refresh()
+        self.driver_refresh()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
@@ -1111,7 +1118,13 @@ class WebappInternal(Base):
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
 
-        soup = self.get_current_DOM()
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.driver.switch_to.default_content()
+            content = self.driver.page_source
+            soup = BeautifulSoup(content,"html.parser")
+        else:
+            soup = self.get_current_DOM()
+
         if not index:
 
             search_key = re.sub(r"\.+$", '', search_key).lower()
@@ -1179,11 +1192,16 @@ class WebappInternal(Base):
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_column())
         self.click(sel_browse_column())
+
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.tmenu_out_iframe = True
         
         self.wait_element_timeout(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
         tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
+            if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                self.tmenu_out_iframe = False
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
         self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
@@ -1194,10 +1212,18 @@ class WebappInternal(Base):
             filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
             for  item in filtered_column_itens:
                 span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+                if not span:
+                    span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
                 self.click(self.soup_to_selenium(span))
         else:
             span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
+            if not span:
+                span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+
             self.click(self.soup_to_selenium(span))
+
+        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+            self.tmenu_out_iframe = False
 
     def fill_search_browse(self, term, search_elements):
         """
@@ -1530,9 +1556,6 @@ class WebappInternal(Base):
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
-                if "disabled" in element.attrs:
-                    self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
-
                 if self.element_name(element) == "input":
                     valtype = element.attrs["valuetype"]
 
@@ -1607,6 +1630,9 @@ class WebappInternal(Base):
                         success = current_value == main_value
                 except:
                     continue
+
+        if "disabled" in element.attrs:
+            self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
 
         if not success:
             self.log_error(f"Could not input value {value} in field {field}")
@@ -1735,8 +1761,9 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find element: {field}")
 
             field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-
-            endtime = time.time() + 10
+            self.set_element_focus(field_element())
+            self.scroll_to_element(field_element())
+            endtime = time.time() + self.config.time_out
             current_value =  ''
             while(time.time() < endtime and not current_value):
                 current_value = self.get_web_value(field_element()).strip()
@@ -1831,7 +1858,7 @@ class WebappInternal(Base):
         webdriver_exception = None
 
         try:
-            self.driver.refresh()
+            self.driver_refresh()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -1864,6 +1891,24 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     self.set_program(self.config.routine)
+
+    def driver_refresh(self):
+        """
+        [Internal]
+
+        Refresh the driver.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.driver_refresh()
+        """
+        if self.config.smart_test or self.config.debug_log:
+            print("Driver Refresh")
+
+        self.driver.refresh()
+        self.wait_blocker()
+        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform()
 
     def Finish(self):
         """
@@ -1917,7 +1962,7 @@ class WebappInternal(Base):
             if not element:
                 print("Warning method finish use driver.refresh. element not found")
 
-            self.driver.refresh() if not element else self.SetButton(self.language.finish)
+            self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
     def click_button_finish(self, click_counter=None):
         """
@@ -2431,6 +2476,12 @@ class WebappInternal(Base):
 
             success = False
             endtime = time.time() + self.config.time_out
+            starttime = time.time()
+
+            if self.config.smart_test:
+                print(f"***System Info*** Before Clicking on button:")
+                system_info()
+
             while(time.time() < endtime and not soup_element):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -2442,7 +2493,9 @@ class WebappInternal(Base):
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
 
-
+            if self.config.smart_test:
+                print(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
@@ -2463,7 +2516,7 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.click(soup_element())
+                self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
@@ -2494,7 +2547,7 @@ class WebappInternal(Base):
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                    self.click(soup_element())
+                    self.send_action(self.click, soup_element)
 
                     result  = self.click_sub_menu(sub_item)
  
@@ -2534,6 +2587,10 @@ class WebappInternal(Base):
         except Exception as error:
             print(str(error))
             self.log_error(str(error))
+        
+        if self.config.smart_test:
+            print(f"***System Info*** After Clicking on button:")
+            system_info()
 
     def set_button_x(self, position=1, check_error=True):
         position -= 1
@@ -3269,7 +3326,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not success):
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
-                        ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
+                        self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -3277,11 +3334,11 @@ class WebappInternal(Base):
                         Id = self.driver.execute_script(script)
                         element = self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element)
-                        self.send_keys(element, self.supported_keys(key))
+                        self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
                         tries +=1
 
                 elif additional_key:
-                    ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform()
+                    self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = True)
@@ -3855,7 +3912,10 @@ class WebappInternal(Base):
                                     break
                                 else:
                                     try_endtime = try_endtime - 10
-                                    container_current = self.get_current_container()
+                                    containers = self.get_current_DOM().select(self.containers_selectors["GetCurrentContainer"])
+                                    if child[0].parent.parent in containers:
+                                        containers.remove(child[0].parent.parent)
+                                    container_current = next(iter(self.zindex_sort(containers, True)))
                                     if container_current.attrs['id'] != container_id:
                                         print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                         return
@@ -4842,6 +4902,10 @@ class WebappInternal(Base):
         self.clear_grid()
         print(f"Warning log_error {message}")
 
+        if self.config.smart_test:
+            print(f"***System Info*** in log_error():")
+            system_info()
+
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
         routine_name = routine_name if routine_name else "error"
 
@@ -4858,24 +4922,7 @@ class WebappInternal(Base):
             self.execution_flow()
 
         if self.config.screenshot:
-
-            log_file = f"{self.log.user}_{uuid.uuid4().hex}_{routine_name}-{test_number} error.png"
-            
-            try:
-                if self.config.log_folder:
-                    path = f"{self.log.folder}\\{self.log.station}\\{log_file}"
-                    os.makedirs(f"{self.log.folder}\\{self.log.station}")
-                else:
-                    path = f"Log\\{self.log.station}\\{log_file}"
-                    os.makedirs(f"Log\\{self.log.station}")
-            except OSError:
-                pass
-            
-            if self.log.get_testcase_stack() not in self.log.test_case_log:
-                try:
-                    self.driver.save_screenshot(path)
-                except Exception as e:
-                    print(f"Warning Log Error save_screenshot exception {str(e)}")
+            self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line:
             self.log.new_line(False, log_message)
@@ -5025,7 +5072,7 @@ class WebappInternal(Base):
         stack = None
 
         try:
-            self.driver.refresh()
+            self.driver_refresh()
         except Exception as error:
             exception = error
 
@@ -5074,7 +5121,7 @@ class WebappInternal(Base):
             time.sleep(1)
 
             if self.config.coverage:
-                self.driver.refresh()
+                self.driver_refresh()
             else:
                 self.Finish()
 
@@ -5425,7 +5472,13 @@ class WebappInternal(Base):
 
             try_counter = 0
 
-            label_filtered = label.lower().strip()        
+            label_filtered = label.lower().strip()
+
+            try:
+                if self.tree_base_element and label_filtered == self.tree_base_element[0]:
+                    self.scroll_to_element(self.tree_base_element[1])
+            except:
+                pass
 
             endtime = time.time() + self.config.time_out
 
@@ -5462,16 +5515,21 @@ class WebappInternal(Base):
                                     element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
                                         if last_item:
+                                            start_time = time.time()
+                                            self.wait_blocker()
+                                            self.scroll_to_element(element_click())
                                             element_click().click()
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                             else:
                                                 if right_click:
-                                                    self.click(element_click(), right_click=right_click)
+                                                    self.send_action(self.click, element_click, right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
+                                            self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
+                                            self.scroll_to_element(element_click())
                                             element_click().click()
                                             success = self.check_hierarchy(label_filtered)
 
@@ -5482,6 +5540,7 @@ class WebappInternal(Base):
                             if not success:
                                 try:
                                     element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                                    self.scroll_to_element(element_click())
                                     element_click().click()
                                     success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
                                 except:
@@ -5522,15 +5581,28 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        container = self.get_current_container()
 
-        tr = container.select("tr")
+        treenode_selected = None
 
-        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+        success = True
 
-        ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+        container_function = lambda: self.get_current_container() if success else self.get_current_DOM()
 
-        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode)) 
+        endtime = time.time() + self.config.time_out
+        while ((time.time() < endtime) and not treenode_selected):
+
+            container = container_function()
+
+            tr = container.select("tr")
+
+            tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+
+            ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+
+            treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
+
+            if not treenode_selected:
+                success = not success
 
         if not check_expanded:
             if list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected)):
@@ -5550,11 +5622,14 @@ class WebappInternal(Base):
         [Internal]
         """
         tree_selected = self.treenode_selected(label_filtered)
-        
-        if tree_selected.find_all_next("span"):
-            try:
-                return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-            except:
+
+        if tree_selected:
+            if tree_selected.find_all_next("span"):
+                try:
+                    return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                except:
+                    return False
+            else:
                 return False
         else:
             return False
@@ -5740,7 +5815,7 @@ class WebappInternal(Base):
 
         if self.config.coverage:
             try:
-                self.driver.refresh()
+                self.driver_refresh()
             except WebDriverException as e:
                 webdriver_exception = e
 
@@ -6396,3 +6471,45 @@ class WebappInternal(Base):
             return config_dict[json_key]
         else:
             self.log_error("Doesn't contain that key in json object")
+
+    def send_action(self, action = None, element = None, value = None, right_click=False):
+        """
+
+        Sends an action to element and compare it object state change.
+    
+        :param action: selenium function as a reference like click, actionchains or send_keys.
+        :param element: selenium element as a reference
+        :param value: send keys value
+        :param right_click: True if you want a right click
+        :return: True if there was a change in the object
+        """
+
+        soup = lambda: self.get_current_DOM()
+
+        soup_before_event = soup()
+        soup_after_event = soup()
+
+        endtime = time.time() + self.config.time_out
+        try:
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
+
+                if right_click:
+                    action(element(), right_click=right_click)
+                elif value:
+                    action(element(), value)
+                elif element:
+                    action(element())
+                elif action:
+                    action()
+
+                soup_after_event = soup()
+
+                time.sleep(1)
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                print(f"Warning Exception send_action {str(e)}")
+            return False
+
+        if self.config.smart_test or self.config.debug_log:
+            print(f"send_action method result = {soup_before_event != soup_after_event}")
+        return soup_before_event != soup_after_event
