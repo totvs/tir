@@ -6213,18 +6213,16 @@ class WebappInternal(Base):
 
         while(time.time() < endtime and not tmenupopupitem_filtered):
 
-            soup = self.get_current_DOM()
+            tmenupopupitem = self.tmenupopupitem()
 
-            body = next(iter(soup.select("body")))
+            if tmenupopupitem:
 
-            tmenupopupitem = body.select(".tmenupopupitem")
+                tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-            tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
+                tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
 
-            tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
-
-            if tmenupopupitem_filtered and len(tmenupopupitem_filtered) -1 >= position:
-                tmenupopupitem_filtered = tmenupopupitem_filtered[position]
+                if tmenupopupitem_filtered and len(tmenupopupitem_filtered) -1 >= position:
+                    tmenupopupitem_filtered = tmenupopupitem_filtered[position]
 
         if not tmenupopupitem_filtered:
             self.log_error(f"Couldn't find tmenupopupitem: {label}")
@@ -6235,6 +6233,18 @@ class WebappInternal(Base):
             self.click(tmenupopupitem_element(), right_click=right_click)
         else:
             self.click(tmenupopupitem_element())
+
+    def tmenupopupitem(self):
+        """
+
+        :return:
+        """
+
+        soup = self.get_current_DOM()
+
+        body = next(iter(soup.select("body")))
+
+        return body.select(".tmenupopupitem")
     
     def get_release(self):
         """
@@ -6498,12 +6508,17 @@ class WebappInternal(Base):
 
         soup_after_event = soup_before_event
 
+        soup_select = None
+
         endtime = time.time() + self.config.time_out
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
                 if right_click:
-                    action(element(), right_click=right_click)
+                    soup_select = self.get_soup_select(".tmenupopupitem")
+                    if not soup_select:
+                        action(element(), right_click=right_click)
+                        self.wait_blocker()
                 elif value:
                     action(element(), value)
                 elif element:
@@ -6511,9 +6526,15 @@ class WebappInternal(Base):
                 elif action:
                     action()
 
-                soup_after_event = self.get_current_DOM()
+                if soup_select:
+                    soup_after_event = soup_select
+                elif soup_select == []:
+                    soup_after_event = soup_before_event
+                else:
+                    soup_after_event = self.get_current_DOM()
 
                 time.sleep(1)
+
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
                 print(f"Warning Exception send_action {str(e)}")
@@ -6522,3 +6543,14 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             print(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
+
+    def get_soup_select(self, selector):
+        """
+        Get a soup select object.
+    
+        :param selector: Css selector
+        :return: Return a soup select object
+        """
+        soup =  self.get_current_DOM()
+
+        return soup.select(selector)
