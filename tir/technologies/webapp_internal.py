@@ -5524,17 +5524,9 @@ class WebappInternal(Base):
                                             if self.check_toggler(label_filtered):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    startime = time.time()
-                                                    self.wait_until_to(expected_condition="element_to_be_clickable",
-                                                                       element=element_click(), locator=By.ID)
-                                                    print(f"TEMPO GASTO NO wait until COM O BTN DIREITO {time.time() - startime}")
                                                     self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if right_click:
-                                                    startime = time.time()
-                                                    self.wait_until_to(expected_condition="element_to_be_clickable",
-                                                                       element=element_click(), locator=By.ID)
-                                                    print(f"TEMPO GASTO NO wait until COM O BTN DIREITO {time.time() - startime}")
                                                     self.send_action(action=self.click, element=element_click, right_click=right_click)
                                                 success = self.clicktree_status_selected(label_filtered)
                                         else:
@@ -6516,11 +6508,11 @@ class WebappInternal(Base):
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
-                print("Send Action -  CLicando no elemento")
-
                 if right_click:
-                    action(element(), right_click=right_click)
-                    soup_select = self.tmenupopupitem()
+                    soup_select = self.get_soup_select(".tmenupopupitem")
+                    if not soup_select:
+                        action(element(), right_click=right_click)
+                        self.wait_blocker()
                 elif value:
                     action(element(), value)
                 elif element:
@@ -6536,6 +6528,7 @@ class WebappInternal(Base):
                     soup_after_event = self.get_current_DOM()
 
                 time.sleep(1)
+
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
                 print(f"Warning Exception send_action {str(e)}")
@@ -6544,3 +6537,10 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             print(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
+
+    def get_soup_select(self, selector):
+        """
+        """
+        soup =  self.get_current_DOM()
+
+        return soup.select(selector)
