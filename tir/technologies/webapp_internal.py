@@ -2752,7 +2752,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, string, timeout=None):
+    def WaitHide(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait hide the element.
 
@@ -2781,7 +2781,10 @@ class WebappInternal(Base):
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
 
-        self.log_error(f"Element {string} not found")
+        if not throw_error:
+            return False
+        else:
+            self.log_error(f"Element {string} not found")
 
     def WaitShow(self, string, timeout=None, throw_error = True):
         """
@@ -2833,9 +2836,9 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
-        self.WaitShow(itens, timeout)
+        self.WaitShow(itens, timeout, throw_error = False)
 
-        self.WaitHide(itens, timeout)
+        self.WaitHide(itens, timeout, throw_error = False)
 
 
     def SetTabEDAPP(self, table):
