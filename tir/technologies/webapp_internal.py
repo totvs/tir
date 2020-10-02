@@ -2375,7 +2375,8 @@ class WebappInternal(Base):
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
 
-            self.slm_click_last_item(f"#{child.attrs['id']} > label")
+            if not re.search("\([0-9]\)$", child.text): 
+                self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
             if wait_coin_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_coin_screen_after_routine()
@@ -2426,7 +2427,8 @@ class WebappInternal(Base):
             child_label_s = self.soup_to_selenium(child_label)
             child_label_s.click()
         except Exception as e:
-            print(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
+            if self.config.smart_test or self.config.debug_log:
+                print(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
 
         
 
