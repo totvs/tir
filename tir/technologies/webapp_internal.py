@@ -2538,6 +2538,7 @@ class WebappInternal(Base):
                 else:
 
                     result = False
+                    self.tmenu_out_iframe = False
 
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
