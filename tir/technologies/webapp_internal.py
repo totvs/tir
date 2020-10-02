@@ -6540,6 +6540,10 @@ class WebappInternal(Base):
 
     def get_soup_select(self, selector):
         """
+        Get a soup select object.
+    
+        :param selector: Css selector
+        :return: Return a soup select object
         """
         soup =  self.get_current_DOM()
 
