@@ -3469,17 +3469,15 @@ class WebappInternal(Base):
         else:
             print(f"Setting focus on element {field}.")
 
-            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
+            label = False if re.match(r"\w+(_)", field) else True
+
+            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label)), None)
             if not element:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
+                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label)), None)
             if element and not self.element_is_displayed(element):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
             try:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"])), None)
-                if not element:
-                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"])), None)
-                    
                 element = self.soup_to_selenium(element)
                 self.set_element_focus(element)
                 if self.driver.switch_to_active_element() != element:
