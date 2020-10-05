@@ -1108,6 +1108,7 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
+        success = False
 
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
@@ -1131,6 +1132,9 @@ class WebappInternal(Base):
 
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
 
+            self.click(self.soup_to_selenium(tradiobuttonitens[1]))
+            time.sleep(1)
+
             for element in tradiobuttonitens:
 
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
@@ -1139,14 +1143,19 @@ class WebappInternal(Base):
                 time.sleep(1)
 
                 try_get_tooltip = 0
-                success = False
+                self.get_current_DOM()
+                input_value = lambda : self.soup_to_selenium(search_elements[1]).get_attribute('value')
 
                 while (not success and try_get_tooltip < 3):
-                    success = self.check_element_tooltip(element, search_key, contains=True)
+                    success = input_value().lower().strip() == search_key
                     try_get_tooltip += 1
                     
                 if success:
                     break
+                elif self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                    self.driver.switch_to.default_content()
+                    content = self.driver.page_source
+                    soup = BeautifulSoup(content,"html.parser")
                 else:
                     pass
 
