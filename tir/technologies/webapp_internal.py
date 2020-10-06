@@ -3383,6 +3383,8 @@ class WebappInternal(Base):
             while(time.time() < endtime and not success):
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
+                        if key != "DOWN":
+                            self.LoadGrid()
                         self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
