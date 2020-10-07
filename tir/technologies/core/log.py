@@ -287,8 +287,7 @@ class Log:
             "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
             "TOOL": self.test_type,
             "USRNAME": self.user,
-            "VERSION": self.version,
-            "D_E_L_E_T_": " "
+            "VERSION": self.version
         }
 
         return dict_key
