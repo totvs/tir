@@ -1135,7 +1135,7 @@ class WebappInternal(Base):
             tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
-                radio = next(iter(list(filter(lambda x: re.sub(r"\.+$", '', x.next.text.strip()).lower() in search_key, tradiobuttonitens_not_ends_dots))), None)
+                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
                 if radio:
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
                     self.click(self.soup_to_selenium(radio))
