@@ -1128,14 +1128,14 @@ class WebappInternal(Base):
 
         if not index:
 
-            search_key = re.sub(r"\.+$", '', search_key).lower()
+            search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
             tradiobuttonitens = soup.select(".tradiobuttonitem input")
             tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
             tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
-                radio = next(iter(list(filter(lambda x: x.next.text.lower().strip() == search_key, tradiobuttonitens_not_ends_dots))), None)
+                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
                 if radio:
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
                     self.click(self.soup_to_selenium(radio))
@@ -1166,20 +1166,15 @@ class WebappInternal(Base):
             if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() == "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
 
-                    self.get_current_DOM()
-                    input_value = lambda : self.soup_to_selenium(search_elements[1]).get_attribute('value')
-                    old_value = input_value()
-                    self.driver.switch_to.default_content()
+                    old_value = self.search_browse_key_input_value(search_elements[1])
 
                     if tradiobuttonitens.index(element) == 0:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = tradiobuttonitens_ends_dots[1], locator = By.XPATH )
                         self.click(self.soup_to_selenium(tradiobuttonitens_ends_dots[1]))
                         
-                        self.get_current_DOM()
-                        while(old_value == input_value()):
+                        while(old_value == self.search_browse_key_input_value(search_elements[1])):
                             time.sleep(0.1)
-                        old_value = input_value()
-                        self.driver.switch_to.default_content()
+                        old_value = self.search_browse_key_input_value(search_elements[1])
 
                         if not self.driver.find_elements_by_css_selector(".tradiobuttonitem input"):
                             self.get_current_DOM()
@@ -1188,18 +1183,17 @@ class WebappInternal(Base):
                             self.driver.switch_to.default_content()
 
                     
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                        self.click(self.soup_to_selenium(element))
-                        
-                        self.get_current_DOM()
-                        while(old_value == input_value()):
-                            time.sleep(0.1)
-                        success = input_value().lower().strip() == search_key
-                        self.driver.switch_to.default_content()
-                        if success:
-                            break
-                        else:
-                            pass
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                    self.click(self.soup_to_selenium(element))
+                    
+                    while(old_value == self.search_browse_key_input_value(search_elements[1])):
+                        time.sleep(0.1)
+                    success = search_key.lower().strip() in self.search_browse_key_input_value(search_elements[1]).strip().lower()
+
+                    if success:
+                        break
+                    else:
+                        pass
                         
             if not success:
                 self.log_error(f"Couldn't search the key: {search_key} on screen.")
@@ -1323,6 +1317,19 @@ class WebappInternal(Base):
         self.wait_blocker()
         self.double_click(sel_browse_icon())
         return True
+
+    def search_browse_key_input_value(self, browse_input ):
+        """
+        [Internal]
+
+        Get the search browse input value
+        """
+        self.get_current_DOM()
+        input_value = self.soup_to_selenium(browse_input).get_attribute('value')
+        self.driver.switch_to.default_content()
+        return input_value
+        
+
     
     def wait_blocker(self):
         """
@@ -3099,7 +3106,7 @@ class WebappInternal(Base):
 
         frozen_table = next(iter(grid.select('table.frozen-table')),None)
         if (not self.click_grid_td(td()) and not frozen_table):
-            self.log_error(" Couldn't click on column, td class or tr is noit selected ")
+            self.log_error(" Couldn't click on column, td class or tr is not selected ")
 
         while( time.time() < endtime and  not td_element ):
             
