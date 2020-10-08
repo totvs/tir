@@ -3386,12 +3386,13 @@ class WebappInternal(Base):
             if key == "DOWN" and grid:
                 grid_number = 0 if grid_number is None else grid_number
                 self.grid_input.append(["", "", grid_number, True])
+                return
 
             while(time.time() < endtime and not success):
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
                         if key != "DOWN":
-                            self.LoadGrid()
+                            self.LoadGrid( wait_enable = False )
                         self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
@@ -3689,7 +3690,7 @@ class WebappInternal(Base):
         """
         self.grid_check.append([line, column, value, grid_number])
 
-    def LoadGrid(self):
+    def LoadGrid(self, wait_enable = True):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -3706,8 +3707,8 @@ class WebappInternal(Base):
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
         """
-
-        self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        if wait_enable:
+            self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         x3_dictionaries = self.create_x3_tuple()
 
