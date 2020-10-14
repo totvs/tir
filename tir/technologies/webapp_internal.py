@@ -4281,6 +4281,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         
+        self.wait_blocker()
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
         
