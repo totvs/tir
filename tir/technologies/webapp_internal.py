@@ -5022,6 +5022,8 @@ class WebappInternal(Base):
                     print(f"Warning Log Error Close {str(e)}")
 
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+            if self.restart_counter >= 3:
+                self.restart_counter = 0
             self.assertTrue(False, log_message)
         
     def ClickIcon(self, icon_text):
