@@ -1418,6 +1418,7 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         position -= 1
+        elem = []
 
         try:
             while( time.time() < endtime and not label ):
@@ -1448,9 +1449,9 @@ class WebappInternal(Base):
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
-            if not elem:
-                self.log_error("Element wasn't found.")
 
+            if not elem:
+                self.log_error(f"Label '{field}' wasn't found")
             return elem
             
         except AssertionError as error:
@@ -3522,6 +3523,18 @@ class WebappInternal(Base):
             print(f"Setting focus on element {field}.")
 
             label = False if re.match(r"\w+(_)", field) else True
+
+            if label:
+                container = self.get_current_container()
+                labels = container.select('label')
+
+                label_text_filtered = re.sub(r"[:;*?]", "", field)
+                label_filtered = next(iter(list(filter(
+                    lambda x: re.sub(r"[:;*?]", "",  x.text) == label_text_filtered, labels))), None)
+
+                if label_filtered and not self.element_is_displayed(label_filtered):
+                    self.scroll_to_element( self.soup_to_selenium(label_filtered) )
+                
 
             element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label)), None)
             if not element:
