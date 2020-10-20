@@ -1338,8 +1338,6 @@ class WebappInternal(Base):
         Wait blocker disappear
 
         """
-        blocker_container = None
-        blocker = None
 
         print("Waiting blocker to continue...")
         soup = None
@@ -1347,6 +1345,8 @@ class WebappInternal(Base):
         endtime = time.time() + 300
 
         while(time.time() < endtime and result):
+            blocker_container = None
+            blocker = None
             soup = self.get_current_DOM()
             blocker_container = self.blocker_containers(soup)
             if blocker_container:
@@ -2407,6 +2407,7 @@ class WebappInternal(Base):
         count = 0
         try:
             for menuitem in menu_itens:
+                self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = ".tmenu", locator=By.CSS_SELECTOR )
                 self.wait_until_to(expected_condition="presence_of_all_elements_located", element = ".tmenu .tmenuitem", locator = By.CSS_SELECTOR )
                 menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
