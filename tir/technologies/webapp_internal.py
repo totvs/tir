@@ -1338,8 +1338,6 @@ class WebappInternal(Base):
         Wait blocker disappear
 
         """
-        blocker_container = None
-        blocker = None
 
         print("Waiting blocker to continue...")
         soup = None
@@ -1347,6 +1345,8 @@ class WebappInternal(Base):
         endtime = time.time() + 300
 
         while(time.time() < endtime and result):
+            blocker_container = None
+            blocker = None
             soup = self.get_current_DOM()
             blocker_container = self.blocker_containers(soup)
             if blocker_container:
@@ -1418,6 +1418,7 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         position -= 1
+        elem = []
 
         try:
             while( time.time() < endtime and not label ):
@@ -1448,9 +1449,9 @@ class WebappInternal(Base):
             distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
-            if not elem:
-                self.log_error("Element wasn't found.")
 
+            if not elem:
+                self.log_error(f"Label '{field}' wasn't found")
             return elem
             
         except AssertionError as error:
@@ -2406,6 +2407,7 @@ class WebappInternal(Base):
         count = 0
         try:
             for menuitem in menu_itens:
+                self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = ".tmenu", locator=By.CSS_SELECTOR )
                 self.wait_until_to(expected_condition="presence_of_all_elements_located", element = ".tmenu .tmenuitem", locator = By.CSS_SELECTOR )
                 menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
@@ -3392,7 +3394,7 @@ class WebappInternal(Base):
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
                         if key != "DOWN":
-                            self.LoadGrid( wait_enable = False )
+                            self.LoadGrid()
                         self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
@@ -3522,6 +3524,18 @@ class WebappInternal(Base):
             print(f"Setting focus on element {field}.")
 
             label = False if re.match(r"\w+(_)", field) else True
+
+            if label:
+                container = self.get_current_container()
+                labels = container.select('label')
+
+                label_text_filtered = re.sub(r"[:;*?]", "", field)
+                label_filtered = next(iter(list(filter(
+                    lambda x: re.sub(r"[:;*?]", "",  x.text) == label_text_filtered, labels))), None)
+
+                if label_filtered and not self.element_is_displayed(label_filtered):
+                    self.scroll_to_element( self.soup_to_selenium(label_filtered) )
+                
 
             element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label)), None)
             if not element:
@@ -3690,7 +3704,7 @@ class WebappInternal(Base):
         """
         self.grid_check.append([line, column, value, grid_number])
 
-    def LoadGrid(self, wait_enable = True):
+    def LoadGrid(self):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -3707,13 +3721,13 @@ class WebappInternal(Base):
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
         """
-        if wait_enable:
-            self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         x3_dictionaries = self.create_x3_tuple()
 
         initial_layer = 0
         if self.grid_input:
+            self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
             if "tget" in self.get_current_container().next.attrs['class']:
                 self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
