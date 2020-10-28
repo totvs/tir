@@ -581,7 +581,7 @@ class Webapp():
         """
         self.__webapp.SetFocus(field,grid_cell,row_number)
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key=""): 
+    def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3): 
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -601,6 +601,10 @@ class Webapp():
         :type grid_number: int
 		:param additional_key: Key additional that would be pressed.
         :type additional_key: str
+        :param wait_show: String that will hold the wait after press a key.
+        :type wait_show: str
+        :param step: The amount of time each step should wait. - **Default:** 3
+        :type step: float
 
         Usage:
 
@@ -612,8 +616,14 @@ class Webapp():
         >>> #--------------------------------------
         >>> # Calling the method on the second grid on the screen:
         >>> oHelper.SetKey("DOWN", grid=True, grid_number=2)
+        >>> #--------------------------------------
+        >>> # Calling the method when you expected new window or text appears on the screen:
+        >>> oHelper.SetKey( key = "F12", wait_show="Parametros", step = 3 )
+        >>> #--------------------------------------
+        >>> # Calling the method with special keys (using parameter additional_key):
+        >>> oHelper.SetKey(key="CTRL", additional_key="A")
         """
-        self.__webapp.SetKey(key, grid, grid_number,additional_key)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
 
     def SetLateralMenu(self, menuitens):
         """
