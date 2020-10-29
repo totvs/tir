@@ -970,28 +970,28 @@ class Base(unittest.TestCase):
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
             log_path = os.devnull
 
-            options = FirefoxOpt()
-            options.set_headless(self.config.headless)
-            self.driver = webdriver.Firefox(firefox_options=options, executable_path=driver_path, log_path=log_path)
+            firefox_options = FirefoxOpt()
+            firefox_options.set_headless(self.config.headless)
+            self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
-            options = ChromeOpt()
-            options.set_headless(self.config.headless)
-            options.add_argument('--log-level=3')
+            chrome_options = ChromeOpt()
+            chrome_options.set_headless(self.config.headless)
+            chrome_options.add_argument('--log-level=3')
             if self.config.headless:
-                options.add_argument('force-device-scale-factor=0.77')
+                chrome_options.add_argument('force-device-scale-factor=0.77')
                 
-            self.driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
+            self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
         elif self.config.browser.lower() == "electron":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')# TODO chromedriver electron version
-            options = ChromeOpt()
-            options.add_argument('--log-level=3')
-            options.add_argument(f'--environment="{self.config.environment}"')
-            options.add_argument(f'--url="{self.config.url}"')
-            options.add_argument(f'--program="{self.config.start_program}"')
-            options.add_argument('--quiet')
-            options.binary_location = self.config.electron_binary_path
-            self.driver = webdriver.Chrome(options=options, executable_path=driver_path)
+            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
+            chrome_options = ChromeOpt()
+            chrome_options.add_argument('--log-level=3')
+            chrome_options.add_argument(f'--environment="{self.config.environment}"')
+            chrome_options.add_argument(f'--url="{self.config.url}"')
+            chrome_options.add_argument(f'--program="{self.config.start_program}"')
+            chrome_options.add_argument('--quiet')
+            chrome_options.binary_location = self.config.electron_binary_path
+            self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
 
         if not self.config.browser.lower() == "electron":
             if self.config.headless:
