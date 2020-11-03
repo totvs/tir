@@ -926,7 +926,7 @@ class WebappInternal(Base):
         :param name_attr: If true searchs element by name.
         :type name_attr: bool
         :param send_key: Try open standard search field send key F3 (no click).
-        :type bool
+        :type send_key: bool
 
         Usage:
 
@@ -4732,7 +4732,7 @@ class WebappInternal(Base):
         Fills the path screen with the desired path 
         
         .. warning::
-        Necessary informed the button name or the program will select the current button name.
+            Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
