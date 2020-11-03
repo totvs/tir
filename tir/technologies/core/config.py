@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 class ConfigLoader:
     """
@@ -14,6 +15,8 @@ class ConfigLoader:
         else:
             data = {}
 
+        today = datetime.today()
+
         self.json_data = data
         self.autostart = True
         self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
@@ -21,7 +24,7 @@ class ConfigLoader:
         self.url_set_end_exec = str(data["UrlSetEndExec"]) if "UrlSetEndExec" in data else ""
         self.screenshot = bool(data["ScreenShot"]) if "ScreenShot" in data else True
         self.country = str(data["Country"]) if "Country" in data else "BRA"
-        self.execution_id = str(data["ExecId"]) if "ExecId" in data else ""
+        self.execution_id = str(data["ExecId"]) if "ExecId" in data else today.strftime('%Y%m%d')
         self.num_exec = str(data["NumExec"]) if "NumExec" in data else ""
         self.issue = str(data["MotExec"]) if "MotExec" in data else ""
         self.url = str(data["Url"]) if "Url" in data else ""

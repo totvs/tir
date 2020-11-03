@@ -313,8 +313,9 @@ class Webapp():
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
+        
         .. note::
-            .Do not use this method in any routine. Use on home screen
+            Do not use this method in any routine. Use on home screen.
 
         Usage:
 
@@ -416,17 +417,19 @@ class Webapp():
     def F3(self, field, name_attr=False,send_key=False):
         """
         Do the standard query(F3)
-        this method
-        1.Search the field
-        2.Search icon "lookup"
-        3.Click()
+        
+        this method:
+
+            1.Search the field
+            2.Search icon "lookup"
+            3.Click()
 
         :param term: The term that must be searched.
         :type  term: str
-        :param name_attr: True: searchs element by name
+        :param name_attr: True: searchs element by name.
         :type  name_attr: bool
-        :param send_key: True: try open standard search field send key F3
-        :type bool
+        :param send_key: True: try open standard search field send key F3.
+        :type send_key: bool
 
         Usage:
 
@@ -444,6 +447,7 @@ class Webapp():
     def SetupTSS(self, initial_program="", environment=""):
         """
         Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+
         .. note::
             This method use the user and password from config.json.
 
@@ -548,7 +552,7 @@ class Webapp():
         Fills the path screen with the desired path 
         
         .. warning::
-        Necessary informed the button name or the program will select the current button name.
+            Necessary informed the button name or the program will select the current button name.
 
         :param value: Path to be inputted.
         :type value: str
