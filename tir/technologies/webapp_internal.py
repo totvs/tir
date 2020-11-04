@@ -86,6 +86,9 @@ class WebappInternal(Base):
         self.backup_parameters = []
         self.tree_base_element = ()
 
+        if not self.config.smart_test and self.config.issue:
+            self.check_mot_exec()
+
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
             self.restart_counter = 3
@@ -6634,3 +6637,14 @@ class WebappInternal(Base):
         soup =  self.get_current_DOM()
 
         return soup.select(selector)
+
+    def check_mot_exec(self):
+        """
+        Check MotExec key content
+        
+        :return:
+        """
+        m = re.match(pattern='((^TIR$)|(^TIR_))', string=self.config.issue)
+        if m:
+            self.driver.close()
+            self.assertTrue(False, f'Current "MotExec" are using a reserved word: "{m.group(0)}", please check "config.json" key and execute again.')
