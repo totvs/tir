@@ -20,7 +20,9 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 ## Documentation
 Our documentation can be found here:
 
-- [TIR Documentation](https://totvs.github.io/tir/)
+- [TIR Documentation](https://totvs.github.io/tir-docs/)
+
+- [TIR Technical Documentation](https://totvs.github.io/tir/)
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
