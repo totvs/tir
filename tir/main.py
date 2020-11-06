@@ -1153,6 +1153,19 @@ class Webapp():
         """
         return self.__webapp.get_config_value(json_key)
 
+    def DoubleClick(self, img_name):
+        """
+        Clicks in an image label button. 
+        :param img_name: Image label to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.DoubleClick("double_click")
+        """
+        self.__webapp.DoubleClick(img_name)
+
 class Apw():
 
     def __init__(self, config_path=""):

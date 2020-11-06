@@ -68,6 +68,7 @@ class WebappInternal(Base):
             "GetCurrentContainer": ".tmodaldialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
+            "DoubleClick":".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
         }
@@ -6430,6 +6431,36 @@ class WebappInternal(Base):
                     self.set_element_focus(element_selenium())
                     self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH )
                     success = self.click(element_selenium())
+
+        return success
+
+    def DoubleClick(self, img_name):
+        """
+        Clicks in an image label button. 
+        :param img_name: Image label to be clicked.
+        :type img_name: src
+
+        Usage:
+
+        >>> # Call the method:  
+        >>> oHelper.DoubleClick("double_click")
+        """
+        self.wait_element(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["DoubleClick"])
+
+        success = None
+        endtime = time.time() + self.config.time_out
+
+        while(time.time() < endtime and not success):
+
+            img_list = self.web_scrap(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["DoubleClick"])
+            img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
+            img_soup = next(iter(img_list_filtered), None)
+
+            if img_soup:
+                    element_selenium = lambda: self.soup_to_selenium(img_soup)
+                    self.set_element_focus(element_selenium())
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH )
+                    success = self.double_click(element_selenium())
 
         return success
 
