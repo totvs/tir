@@ -402,7 +402,7 @@ class WebappInternal(Base):
                 user = lambda: self.soup_to_selenium(user_element.parent)
 
             self.set_element_focus(user())
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH )
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH, timeout=True)
             self.double_click(user())
             # self.send_keys(user(), Keys.HOME)
             self.send_keys(user(), user_text)
@@ -439,7 +439,7 @@ class WebappInternal(Base):
                 password = lambda: self.soup_to_selenium(password_element.parent)
 
             self.set_element_focus(password())
-            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH )
+            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH, timeout=True)
             self.click(password())
             self.send_keys(password(), Keys.HOME)
             self.send_keys(password(), password_text)
@@ -893,7 +893,7 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
                 
@@ -1300,14 +1300,14 @@ class WebappInternal(Base):
 
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
                 self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().clear()
                 self.set_element_focus(sel_browse_input())
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
             except StaleElementReferenceException:
@@ -1657,7 +1657,7 @@ class WebappInternal(Base):
                             try_counter = 1
                             while(tries < 3):
                                 self.set_element_focus(input_field())
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
@@ -2553,7 +2553,7 @@ class WebappInternal(Base):
 
 
                 if soup_objects and len(soup_objects) - 1 >= position:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
@@ -3156,8 +3156,8 @@ class WebappInternal(Base):
                 self.set_element_focus(td_selenium())
                 td_selenium().click()
                 if not td_is_selected():
-                    self.wait_until_to( expected_condition = "visibility_of", element = td_selenium )
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "visibility_of", element = td_selenium, timeout=True)
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH, timeout=True)
                     
                     success = td_is_selected()
                 else:
@@ -3954,12 +3954,12 @@ class WebappInternal(Base):
                                     user_value = '00000000'
                                 user_value = self.remove_mask(user_value)
 
-                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input )
+                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
                             if "tget" in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
 
                                 if try_counter < 2:
@@ -3976,7 +3976,7 @@ class WebappInternal(Base):
                                         else:
                                             self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
                                             if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
-                                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
+                                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                                 self.send_keys(selenium_input(), Keys.ENTER)
                                 
                                 elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
@@ -4331,12 +4331,12 @@ class WebappInternal(Base):
                             if column_element_old_class == None:
                                 column_element_old_class = column_element().get_attribute("class")
 
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
                             self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
                                 self.wait_blocker()
                                 success = True
                             elif grids[grid_number] and "tcbrowse" in grids[grid_number].attrs['class']:
@@ -6128,7 +6128,7 @@ class WebappInternal(Base):
             except AttributeError:
                 pass
 
-    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None ):
+    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None , timeout=None):
         """
         [Internal]
         
@@ -6147,6 +6147,10 @@ class WebappInternal(Base):
         if not element and expected_condition != "alert_is_present" : self.log_error("Error method wait_until_to() - element is None")
 
         element = xpath_soup(element) if locator == By.XPATH else element
+
+        if timeout:
+            setattr(self.wait, '_timeout', self.config.time_out / 10)
+
         try:
 
             if locator:
@@ -6159,6 +6163,9 @@ class WebappInternal(Base):
         except TimeoutException as e:
             print(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
             pass
+
+        if timeout:
+            setattr(self.wait, '_timeout', self.config.time_out)
 
 
     def CheckHelp(self, text, button, text_help, text_problem, text_solution, verbosity):
@@ -6431,7 +6438,7 @@ class WebappInternal(Base):
             if img_soup:
                     element_selenium = lambda: self.soup_to_selenium(img_soup)
                     self.set_element_focus(element_selenium())
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH )
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH , timeout=True)
                     success = self.click(element_selenium())
 
         return success

@@ -1002,7 +1002,7 @@ class Base(unittest.TestCase):
                    
             self.driver.get(self.config.url)
 
-        self.wait = WebDriverWait(self.driver, 90)
+        self.wait = WebDriverWait(self.driver, self.config.time_out)
 
     def TearDown(self):
         """
