@@ -6128,7 +6128,7 @@ class WebappInternal(Base):
             except AttributeError:
                 pass
 
-    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None , timeout=None):
+    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None , timeout=False):
         """
         [Internal]
         
