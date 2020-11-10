@@ -1009,7 +1009,7 @@ class Webapp():
         
         return self.__webapp.ClickListBox(text)
 
-    def ClickImage(self, img_name):
+    def ClickImage(self, img_name, double_click=False):
         """
         Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
         :param img_name: Image to be clicked.
@@ -1017,10 +1017,11 @@ class Webapp():
 
         Usage:
 
-        >>> # Call the method:  
-        >>> oHelper.ClickImage("img_name")
+        >>> # Call the method:
+        >>> oHelper.ClickImage("img_name")  
+        >>> oHelper.ClickImage("img_name",double_click=True)
         """
-        self.__webapp.ClickImage(img_name)
+        self.__webapp.ClickImage(img_name,double_click)
 
     def ProgramScreen(self, initial_program=""):
         """

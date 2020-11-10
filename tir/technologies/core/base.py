@@ -244,12 +244,22 @@ class Base(unittest.TestCase):
                 self.driver.execute_script("arguments[0].click()", element)
                 self.driver.execute_script("arguments[0].click()", element)
 
-        except Exception:
-            self.scroll_to_element(element)
-            actions = ActionChains(self.driver)
-            actions.move_to_element(element)
-            actions.double_click()
-            actions.perform()
+            return True        
+
+        except Exception as e:
+            try:
+                print(f"Warning double_click method Exception: {str(e)}")
+                self.scroll_to_element(element)
+                actions = ActionChains(self.driver)
+                actions.move_to_element(element)
+                actions.double_click()
+                actions.perform()
+
+                return True
+            except Exception as x:
+                print(f"Error double_click method Exception: {str(x)}")
+                return False
+
 
     def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog"):
         """

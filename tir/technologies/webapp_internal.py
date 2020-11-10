@@ -6413,7 +6413,7 @@ class WebappInternal(Base):
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
         element_selenium.click()
 
-    def ClickImage(self, img_name):
+    def ClickImage(self, img_name, double_click=False):
         """
         Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
         :param img_name: Image to be clicked.
@@ -6422,7 +6422,8 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Call the method:  
-        >>> oHelper.ClickImage("img_name")
+        >>> oHelper.ClickImage("img_name")  
+        >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.wait_element(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
 
@@ -6438,9 +6439,11 @@ class WebappInternal(Base):
             if img_soup:
                     element_selenium = lambda: self.soup_to_selenium(img_soup)
                     self.set_element_focus(element_selenium())
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH , timeout=True)
-                    success = self.click(element_selenium())
-
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH, timeout=True)
+                    if double_click:
+                        success = self.double_click(element_selenium())
+                    else:
+                        success = self.click(element_selenium())
         return success
 
     def img_src_filtered(self, img_soup):
