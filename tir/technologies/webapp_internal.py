@@ -882,7 +882,8 @@ class WebappInternal(Base):
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.double_click(s_tget())
                 self.set_element_focus(s_tget())
-                self.send_keys(s_tget(), Keys.BACK_SPACE)
+                self.send_keys(s_tget(), Keys.HOME)
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.send_keys(s_tget(), program)
                 current_value = self.get_web_value(s_tget()).strip()
@@ -898,8 +899,8 @@ class WebappInternal(Base):
                     self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
                 self.set_element_focus(s_tget_img())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
-                self.click(s_tget_img())
-                
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
+                self.send_action(self.click, s_tget_img)
                 self.wait_element_is_not_displayed(tget_img)
 
             if self.config.initial_program.lower() == 'sigaadv':
@@ -6602,6 +6603,7 @@ class WebappInternal(Base):
                 elif value:
                     action(element(), value)
                 elif element:
+                    self.set_element_focus(element())
                     action(element())
                 elif action:
                     action()
