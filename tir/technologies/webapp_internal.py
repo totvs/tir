@@ -1411,7 +1411,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self, field, position=1):
+    def search_element_position(self, field, position=1, input_field=True, direction=None):
         """
         [Internal]
         Usage:
@@ -1422,6 +1422,10 @@ class WebappInternal(Base):
         label = None
         position -= 1
         elem = []
+        term=".tget, .tcombobox, .tmultiget"
+
+        if not input_field:
+            term=".tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -1445,11 +1449,15 @@ class WebappInternal(Base):
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+
+            if not input_field:
+                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
-            distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
+            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
+            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
 
@@ -1492,6 +1500,56 @@ class WebappInternal(Base):
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
 
+    def get_distance_x(self, x_label, x_element):
+        """
+        [Internal]
+
+        """
+
+        return (x_element['x'] - x_label['x'])
+
+    def get_distance_y(self, y_label, y_element):
+        """
+        [Internal]
+
+        """
+
+        return (y_element['y'] - y_label['y'])
+
+    def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction):
+        """
+        [Internal]
+        
+        """
+
+        if not direction:
+
+            return list(filter(lambda xy_elem: (
+                        xy_elem[1]['y'] + width_safe >= xy_label['y'] and xy_elem[1]['x'] + height_safe >= xy_label['x']),
+                        position_list))
+
+        elif direction.lower() == 'right':
+            return list(filter(
+                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and (xy_elem[1]['y'] >= xy_label['y'] - height_safe and xy_elem[1]['y'] <= xy_label[
+                    'y'] + height_safe), position_list))
+        
+        elif direction.lower() == 'down':
+            return list(filter(
+                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
+                               xy_elem[1]['x'] - width_safe <= xy_label['x']), position_list))
+
+    def get_distance_by_direction(self, xy_label, position_list, direction):
+        
+        if not direction:
+            get_distance = self.get_distance
+        
+        elif direction.lower() == 'right':
+            get_distance = self.get_distance_x
+
+        elif direction.lower() == 'down':
+            get_distance = self.get_distance_y
+        
+        return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
         """
@@ -1701,7 +1759,7 @@ class WebappInternal(Base):
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
 
-    def get_field(self, field, name_attr=False, position=1):
+    def get_field(self, field, name_attr=False, position=1, input_field=True, direction=None):
         """
         [Internal]
 
@@ -1732,7 +1790,7 @@ class WebappInternal(Base):
                     element = element_list[position]
                 
             elif position == 0:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction)), None)
             else:
                 element = self.find_label_element(label_text = field, position = position)
 
@@ -1766,6 +1824,8 @@ class WebappInternal(Base):
 
         if element.tag_name == "label":
             web_value = element.get_attribute("text")
+            if not web_value:
+                web_value = element.text.strip()
         elif element.tag_name == "select":
             current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value')) 
             selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
@@ -1775,7 +1835,7 @@ class WebappInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
         """
         Checks if a field has the value the user expects.
 
@@ -1791,6 +1851,10 @@ class WebappInternal(Base):
         :type grid_number: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param input_field: False if the desired field is not an input type 
+        :type bool
+        :param direction: Desired direction to search for the element, currently accepts right and down
+        :type str
 
         Usage:
 
@@ -1804,6 +1868,11 @@ class WebappInternal(Base):
         >>> # Calling method to check a field that is on the second grid of the screen:
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Call method to check a field value that is not an input field and is on the right:
+        >>> oHelper.CheckResult("Saldo Titulo", "100.000,00", input_field=False, direction='right')
+        >>> oHelper.LoadGrid()
+        
         """
         self.wait_blocker()
         if grid:
@@ -1818,7 +1887,7 @@ class WebappInternal(Base):
             else:
                 self.wait_element(field)
                 
-            element = self.get_field(field, name_attr=name_attr)
+            element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
@@ -2082,7 +2151,7 @@ class WebappInternal(Base):
             self.SetButton(self.language.logOff)
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None):
         """
         [Internal]
 
@@ -2145,7 +2214,7 @@ class WebappInternal(Base):
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
-                    return self.find_label_element(term, container) if self.find_label_element(term, container) else []
+                    return self.find_label_element(term, container, input_field=input_field, direction=direction)
                 elif not re.match(r"\w+(_)", term):
                     return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
                 else:
@@ -4875,7 +4944,7 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
-    def find_label_element(self, label_text, container= None, position = 1):
+    def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
         [Internal]
 
@@ -4898,7 +4967,7 @@ class WebappInternal(Base):
                 elements = self.filter_label_element(label_text, container)
             if elements:
                 for element in elements:
-                    elem = self.search_element_position(label_text, position)
+                    elem = self.search_element_position(label_text, position, input_field, direction)
                     if elem:
                         return elem
 
