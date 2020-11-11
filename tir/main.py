@@ -92,7 +92,7 @@ class Webapp():
         """
         self.__webapp.ChangeEnvironment(date, group, branch, module)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
         """
         Checks if a field has the value the user expects.
 
@@ -108,6 +108,10 @@ class Webapp():
         :type grid_number: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param input_field: False if the desired field is not an input type .
+        :type bool
+        :param direction: Desired direction to search for the element, currently accepts right and down.
+        :type str
 
         Usage:
 
@@ -121,8 +125,13 @@ class Webapp():
         >>> # Calling method to check a field that is on the second grid of the screen:
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Call method to check a field value that is not an input field and is on the right:
+        >>> oHelper.CheckResult("Saldo Titulo", "100.000,00", input_field=False, direction='right')
+        >>> oHelper.LoadGrid()
+
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction)
 
     def CheckView(self, text, element_type="help"):
         """
