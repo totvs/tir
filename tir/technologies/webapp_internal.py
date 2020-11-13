@@ -86,6 +86,9 @@ class WebappInternal(Base):
         self.backup_parameters = []
         self.tree_base_element = ()
 
+        if not self.config.smart_test and self.config.issue:
+            self.check_mot_exec()
+
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
             self.restart_counter = 3
@@ -399,7 +402,7 @@ class WebappInternal(Base):
                 user = lambda: self.soup_to_selenium(user_element.parent)
 
             self.set_element_focus(user())
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH )
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH, timeout=True)
             self.double_click(user())
             # self.send_keys(user(), Keys.HOME)
             self.send_keys(user(), user_text)
@@ -436,7 +439,7 @@ class WebappInternal(Base):
                 password = lambda: self.soup_to_selenium(password_element.parent)
 
             self.set_element_focus(password())
-            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH )
+            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH, timeout=True)
             self.click(password())
             self.send_keys(password(), Keys.HOME)
             self.send_keys(password(), password_text)
@@ -890,7 +893,7 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
                 
@@ -1297,14 +1300,14 @@ class WebappInternal(Base):
 
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
                 self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().clear()
                 self.set_element_focus(sel_browse_input())
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH )
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
             except StaleElementReferenceException:
@@ -1408,7 +1411,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self, field, position=1):
+    def search_element_position(self, field, position=1, input_field=True, direction=None):
         """
         [Internal]
         Usage:
@@ -1418,6 +1421,10 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
+        term=".tget, .tcombobox, .tmultiget"
+
+        if not input_field:
+            term=".tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -1441,11 +1448,15 @@ class WebappInternal(Base):
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=".tget, .tcombobox, .tmultiget", scrap_type=enum.ScrapType.CSS_SELECTOR) 
+            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) 
             list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+
+            if not input_field:
+                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = list(filter(lambda xy_elem: (xy_elem[1]['y']+width_safe >= xy_label['y'] and xy_elem[1]['x']+height_safe >= xy_label['x']),position_list ))
-            distance      = list(map(lambda x:(x[0], self.get_distance(xy_label,x[1])), position_list))
+            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
+            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
             elem          = min(distance, key = lambda x: x[1])
             elem          = list_in_range[elem[0]]
 
@@ -1488,6 +1499,56 @@ class WebappInternal(Base):
         width  = self.driver.execute_script(script)
         return {'height': height, 'width':width}
 
+    def get_distance_x(self, x_label, x_element):
+        """
+        [Internal]
+
+        """
+
+        return (x_element['x'] - x_label['x'])
+
+    def get_distance_y(self, y_label, y_element):
+        """
+        [Internal]
+
+        """
+
+        return (y_element['y'] - y_label['y'])
+
+    def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction):
+        """
+        [Internal]
+        
+        """
+
+        if not direction:
+
+            return list(filter(lambda xy_elem: (
+                        xy_elem[1]['y'] + width_safe >= xy_label['y'] and xy_elem[1]['x'] + height_safe >= xy_label['x']),
+                        position_list))
+
+        elif direction.lower() == 'right':
+            return list(filter(
+                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and (xy_elem[1]['y'] >= xy_label['y'] - height_safe and xy_elem[1]['y'] <= xy_label[
+                    'y'] + height_safe), position_list))
+        
+        elif direction.lower() == 'down':
+            return list(filter(
+                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
+                               xy_elem[1]['x'] - width_safe <= xy_label['x']), position_list))
+
+    def get_distance_by_direction(self, xy_label, position_list, direction):
+        
+        if not direction:
+            get_distance = self.get_distance
+        
+        elif direction.lower() == 'right':
+            get_distance = self.get_distance_x
+
+        elif direction.lower() == 'down':
+            get_distance = self.get_distance_y
+        
+        return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
     def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
         """
@@ -1653,7 +1714,7 @@ class WebappInternal(Base):
                             try_counter = 1
                             while(tries < 3):
                                 self.set_element_focus(input_field())
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
@@ -1697,7 +1758,7 @@ class WebappInternal(Base):
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
 
-    def get_field(self, field, name_attr=False, position=1):
+    def get_field(self, field, name_attr=False, position=1, input_field=True, direction=None):
         """
         [Internal]
 
@@ -1727,7 +1788,7 @@ class WebappInternal(Base):
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
             else:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, position=position)), None)
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
         if element:
             element_children = next((x for x in element.contents if self.element_name(x) in ["input", "select"]), None)
@@ -1759,6 +1820,8 @@ class WebappInternal(Base):
 
         if element.tag_name == "label":
             web_value = element.get_attribute("text")
+            if not web_value:
+                web_value = element.text.strip()
         elif element.tag_name == "select":
             current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value')) 
             selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
@@ -1768,7 +1831,7 @@ class WebappInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
         """
         Checks if a field has the value the user expects.
 
@@ -1784,6 +1847,10 @@ class WebappInternal(Base):
         :type grid_number: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param input_field: False if the desired field is not an input type 
+        :type bool
+        :param direction: Desired direction to search for the element, currently accepts right and down
+        :type str
 
         Usage:
 
@@ -1797,6 +1864,11 @@ class WebappInternal(Base):
         >>> # Calling method to check a field that is on the second grid of the screen:
         >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
         >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Call method to check a field value that is not an input field and is on the right:
+        >>> oHelper.CheckResult("Saldo Titulo", "100.000,00", input_field=False, direction='right')
+        >>> oHelper.LoadGrid()
+        
         """
         self.wait_blocker()
         if grid:
@@ -1811,7 +1883,7 @@ class WebappInternal(Base):
             else:
                 self.wait_element(field)
                 
-            element = self.get_field(field, name_attr=name_attr)
+            element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
@@ -2075,7 +2147,7 @@ class WebappInternal(Base):
             self.SetButton(self.language.logOff)
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, position=1):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1):
         """
         [Internal]
 
@@ -2140,7 +2212,7 @@ class WebappInternal(Base):
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
-                    return self.find_label_element(term, container, position)
+                    return self.find_label_element(term, container, input_field=input_field, direction=direction, position)
                 elif not re.match(r"\w+(_)", term):
                     return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
                 else:
@@ -2548,7 +2620,7 @@ class WebappInternal(Base):
 
 
                 if soup_objects and len(soup_objects) - 1 >= position:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     parent_element = self.soup_to_selenium(soup_objects[0].parent)
                     id_parent_element = parent_element.get_attribute('id')
@@ -3151,8 +3223,8 @@ class WebappInternal(Base):
                 self.set_element_focus(td_selenium())
                 td_selenium().click()
                 if not td_is_selected():
-                    self.wait_until_to( expected_condition = "visibility_of", element = td_selenium )
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH )
+                    self.wait_until_to( expected_condition = "visibility_of", element = td_selenium, timeout=True)
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH, timeout=True)
                     
                     success = td_is_selected()
                 else:
@@ -3949,12 +4021,12 @@ class WebappInternal(Base):
                                     user_value = '00000000'
                                 user_value = self.remove_mask(user_value)
 
-                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input )
+                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
                             if "tget" in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
 
                                 if try_counter < 2:
@@ -3971,7 +4043,7 @@ class WebappInternal(Base):
                                         else:
                                             self.wait_element_timeout(term= ".tmodaldialog.twidget", scrap_type= enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, presence=False, main_container="body")
                                             if self.element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body"):
-                                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH )
+                                                self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                                 self.send_keys(selenium_input(), Keys.ENTER)
                                 
                                 elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
@@ -4326,12 +4398,12 @@ class WebappInternal(Base):
                             if column_element_old_class == None:
                                 column_element_old_class = column_element().get_attribute("class")
 
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
                             self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH )
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
                                 self.wait_blocker()
                                 success = True
                             elif grids[grid_number] and "tcbrowse" in grids[grid_number].attrs['class']:
@@ -4870,7 +4942,7 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
-    def find_label_element(self, label_text, container= None, position = 1):
+    def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
         [Internal]
 
@@ -4893,7 +4965,7 @@ class WebappInternal(Base):
                 elements = self.filter_label_element(label_text, container)
             if elements:
                 for element in elements:
-                    elem = self.search_element_position(label_text, position)
+                    elem = self.search_element_position(label_text, position, input_field, direction)
                     if elem:
                         return elem
 
@@ -6123,7 +6195,7 @@ class WebappInternal(Base):
             except AttributeError:
                 pass
 
-    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None ):
+    def wait_until_to(self, expected_condition = "element_to_be_clickable", element = None, locator = None , timeout=False):
         """
         [Internal]
         
@@ -6142,6 +6214,10 @@ class WebappInternal(Base):
         if not element and expected_condition != "alert_is_present" : self.log_error("Error method wait_until_to() - element is None")
 
         element = xpath_soup(element) if locator == By.XPATH else element
+
+        if timeout:
+            setattr(self.wait, '_timeout', self.config.time_out / 10)
+
         try:
 
             if locator:
@@ -6154,6 +6230,9 @@ class WebappInternal(Base):
         except TimeoutException as e:
             print(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
             pass
+
+        if timeout:
+            setattr(self.wait, '_timeout', self.config.time_out)
 
 
     def CheckHelp(self, text, button, text_help, text_problem, text_solution, verbosity):
@@ -6401,7 +6480,7 @@ class WebappInternal(Base):
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
         element_selenium.click()
 
-    def ClickImage(self, img_name):
+    def ClickImage(self, img_name, double_click=False):
         """
         Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
         :param img_name: Image to be clicked.
@@ -6410,7 +6489,8 @@ class WebappInternal(Base):
         Usage:
 
         >>> # Call the method:  
-        >>> oHelper.ClickImage("img_name")
+        >>> oHelper.ClickImage("img_name")  
+        >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.wait_element(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
 
@@ -6426,9 +6506,11 @@ class WebappInternal(Base):
             if img_soup:
                     element_selenium = lambda: self.soup_to_selenium(img_soup)
                     self.set_element_focus(element_selenium())
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH )
-                    success = self.click(element_selenium())
-
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = img_soup, locator = By.XPATH, timeout=True)
+                    if double_click:
+                        success = self.double_click(element_selenium())
+                    else:
+                        success = self.click(element_selenium())
         return success
 
     def img_src_filtered(self, img_soup):
@@ -6632,3 +6714,14 @@ class WebappInternal(Base):
         soup =  self.get_current_DOM()
 
         return soup.select(selector)
+
+    def check_mot_exec(self):
+        """
+        Check MotExec key content
+        
+        :return:
+        """
+        m = re.match(pattern='((^TIR$)|(^TIR_))', string=self.config.issue)
+        if m:
+            self.driver.close()
+            self.assertTrue(False, f'Current "MotExec" are using a reserved word: "{m.group(0)}", please check "config.json" key and execute again.')
