@@ -1430,7 +1430,7 @@ class WebappInternal(Base):
                     label = labels_list_filtered[position]
 
             if not label:
-                self.log_error("Label wasn't found.")
+                self.log_error(f"Label: '{field}'' wasn't found.")
 
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
             
