@@ -899,7 +899,7 @@ class WebappInternal(Base):
                 self.set_element_focus(s_tget_img())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.click(s_tget_img())
-                
+
                 self.wait_element_is_not_displayed(tget_img)
 
             if self.config.initial_program.lower() == 'sigaadv':
@@ -1417,7 +1417,6 @@ class WebappInternal(Base):
         """
         endtime = (time.time() + self.config.time_out)
         label = None
-        position -= 1
         elem = []
 
         try:
@@ -1727,11 +1726,8 @@ class WebappInternal(Base):
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
-                
-            elif position == 0:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True)), None)
             else:
-                element = self.find_label_element(label_text = field, position = position)
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, position=position)), None)
 
         if element:
             element_children = next((x for x in element.contents if self.element_name(x) in ["input", "select"]), None)
@@ -2079,7 +2075,7 @@ class WebappInternal(Base):
             self.SetButton(self.language.logOff)
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, position=1):
         """
         [Internal]
 
@@ -2097,6 +2093,8 @@ class WebappInternal(Base):
         :type label: bool
         :param main_container: The selector of a container element that has all other elements. - **Default:** None
         :type main_container: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         :return: List of BeautifulSoup4 elements based on search parameters.
         :rtype: List of BeautifulSoup4 objects
@@ -2142,7 +2140,7 @@ class WebappInternal(Base):
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
-                    return self.find_label_element(term, container) if self.find_label_element(term, container) else []
+                    return self.find_label_element(term, container, position)
                 elif not re.match(r"\w+(_)", term):
                     return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
                 else:
