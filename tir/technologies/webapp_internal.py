@@ -2213,7 +2213,7 @@ class WebappInternal(Base):
 
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
-                    return self.find_label_element(term, container, input_field=input_field, direction=direction, position)
+                    return self.find_label_element(term, container, input_field=input_field, direction=direction, position=position)
                 elif not re.match(r"\w+(_)", term):
                     return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
                 else:
