@@ -1423,6 +1423,7 @@ class WebappInternal(Base):
         label = None
         elem = []
         term=".tget, .tcombobox, .tmultiget"
+        position-=1
 
         if not input_field:
             term=".tsay"
@@ -1782,9 +1783,9 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element =  None
-        position -= 1
         while(time.time() < endtime and element is None):
             if re.match(r"\w+(_)", field) or name_attr:
+                position -= 1
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
@@ -3570,13 +3571,18 @@ class WebappInternal(Base):
         except KeyError:
             self.log_error("Key is not supported")
 
-    def SetFocus(self, field, grid_cell, row_number):
+    def SetFocus(self, field, grid_cell, row_number, position):
         """
         Sets the current focus on the desired field.
 
         :param field: The field that must receive the focus.
         :type field: str
+        :param grid_cell: Indicates if the element that deserve focus is on a grid.
         :type grid_cell: bool
+        :param row_number: Number of row in case of multiples rows.
+        :type row_number: int
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -3608,9 +3614,9 @@ class WebappInternal(Base):
                     self.scroll_to_element( self.soup_to_selenium(label_filtered) )
                 
 
-            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label)), None)
+            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
             if not element:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label)), None)
+                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
             if element and not self.element_is_displayed(element):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
@@ -3641,6 +3647,8 @@ class WebappInternal(Base):
         >>> element = self.check_checkbox("CheckBox1", True)
         """
         print(f'Clicking in "{self.returns_printable_string(field)}"')
+
+        position -= 1
         
         element_list = []
 
@@ -3648,21 +3656,18 @@ class WebappInternal(Base):
         while(time.time() < endtime and not element_list):
             if re.match(r"\w+(_)", field):
                 self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
                 #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
+                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span", position=position)
 
         if not element_list:
             self.log_error("Couldn't find span element")
 
-        position -= 1
-
         if not element_list:
             self.log_error("Couldn't find span element")
 
-        #if soup_objects and len(soup_objects) - 1 >= position:
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
 
