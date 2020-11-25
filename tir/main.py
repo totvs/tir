@@ -576,19 +576,25 @@ class Webapp():
         """
         self.__webapp.SetFilePath(value, button)
 
-    def SetFocus(self, field, grid_cell=False, row_number=1):
+    def SetFocus(self, field, grid_cell=False, row_number=1, position=1):
         """
         Sets the current focus on the desired field.
 
         :param field: The field that must receive the focus.
         :type field: str
+        :param grid_cell: Indicates if the element that deserve focus is on a grid.
+        :type grid_cell: bool
+        :param row_number: Number of row in case of multiples rows.
+        :type row_number: int
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetFocus("A1_COD")
         """
-        self.__webapp.SetFocus(field,grid_cell,row_number)
+        self.__webapp.SetFocus(field, grid_cell, row_number, position)
 
     def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3): 
         """
