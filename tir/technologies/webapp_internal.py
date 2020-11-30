@@ -5211,7 +5211,7 @@ class WebappInternal(Base):
         if(self.config.smart_test):
             self.driver.get(f"""{self.config.url}/?StartProg=u_SetParam&a={
                 self.config.group}&a={self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
-            time.sleep(5)
+            time.sleep(10)
             self.driver.get(self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
             if ">" in self.config.routine:
@@ -5235,7 +5235,7 @@ class WebappInternal(Base):
         if(self.config.smart_test):
             self.driver.get(f"""{self.config.url}/?StartProg=u_RestorePar&a={
                 self.config.group}&a={self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
-            time.sleep(5)
+            time.sleep(10)
 
             self.driver.get(self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
