@@ -81,6 +81,7 @@ class WebappInternal(Base):
         self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
+        self.restart_coverage = True
 
         self.parameters = []
         self.backup_parameters = []
@@ -250,6 +251,10 @@ class WebappInternal(Base):
             if not self.num_exec.post_exec(self.config.url_set_start_exec):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
+
+        if self.config.smart_test and self.config.coverage and self.search_stack("setUpClass") and self.restart_coverage:
+            self.restart()
+            self.restart_coverage = False
 
     def service_process_bat_file(self):
         """
