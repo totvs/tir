@@ -81,6 +81,7 @@ class WebappInternal(Base):
         self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
+        self.restart_coverage = True
 
         self.parameters = []
         self.backup_parameters = []
@@ -250,6 +251,10 @@ class WebappInternal(Base):
             if not self.num_exec.post_exec(self.config.url_set_start_exec):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
+
+        if self.config.smart_test and self.config.coverage and self.search_stack("setUpClass") and self.restart_coverage:
+            self.restart()
+            self.restart_coverage = False
 
     def service_process_bat_file(self):
         """
@@ -1693,14 +1698,14 @@ class WebappInternal(Base):
                         current_value = self.get_web_value(input_field()).strip()
                     #Action for Input elements
                     else:
-                        self.wait_until_to( expected_condition = "visibility_of", element = input_field )
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                        self.wait_until_to( expected_condition = "visibility_of", element = input_field, timeout=True)
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                         self.double_click(input_field())
 
                         #if Character input
                         if valtype != 'N':
                             self.set_element_focus(input_field())
-                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                             self.send_keys(input_field(), Keys.HOME)
                             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
@@ -1708,7 +1713,7 @@ class WebappInternal(Base):
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
                             else:
                                 self.wait_blocker()
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
                         #if Number input
                         else:
@@ -5195,7 +5200,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
-        self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
+        if(self.config.smart_test):
+            portuguese_value = portuguese_value.replace("=","/\\")
+            portuguese_value = portuguese_value.replace("|","\\/")
+
+            self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                branch}&a={portuguese_value}&Env={self.config.environment}""")
+
+            self.wait_element_timeout(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                timeout = self.config.time_out * 3, main_container='body')
+
+        else:
+            self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
+
 
     def SetParameters(self):
         """
@@ -5208,7 +5225,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetParameters()
         """
-        self.parameter_screen(restore_backup=False)
+
+        if(self.config.smart_test):
+            self.parameter_url(restore_backup=False)
+        else:
+            self.parameter_screen(restore_backup=False)
 
     def RestoreParameters(self):
         """
@@ -5221,7 +5242,42 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetParameters()
         """
-        self.parameter_screen(restore_backup=True)
+        if(self.config.smart_test):
+            self.parameter_url(restore_backup=True)
+        else:
+            self.parameter_screen(restore_backup=True)
+    
+    def parameter_url(self, restore_backup=False):
+        """
+        [Internal]
+
+        Internal method of set and restore parameters.
+
+        :param restore_backup: Boolean if method should restore the parameters.
+        :type restore_backup: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.parameter_url(restore_backup=False)
+        """
+        function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
+
+        self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
+
+        self.wait_element_timeout(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out * 3, main_container='body')
+        
+        self.driver.get(self.config.url)
+        self.Setup(self.config.initial_program, self.config.date, self.config.group,
+            self.config.branch, save_input=not self.config.autostart)
+
+        if ">" in self.config.routine:
+            self.SetLateralMenu(self.config.routine, save_input=False)
+        else:
+            self.Program(self.config.routine)
+
 
     def parameter_screen(self, restore_backup):
         """
