@@ -5238,7 +5238,7 @@ class WebappInternal(Base):
         >>> oHelper.SetParameters()
         """
         if(self.config.smart_test):
-            self.parameter_url(restore_backup=False)
+            self.parameter_url(restore_backup=True)
         else:
             self.parameter_screen(restore_backup=True)
     
