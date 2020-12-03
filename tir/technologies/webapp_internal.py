@@ -5195,15 +5195,23 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
-        if(self.config.smart_test):
+        endtime = time.time() + self.config.time_out
+
+        if(self.config.smart_test or self.config.parameter_url):
             portuguese_value = portuguese_value.replace("=","/\\")
             portuguese_value = portuguese_value.replace("|","\\/")
 
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={portuguese_value}&Env={self.config.environment}""")
 
-            self.wait_element_timeout(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                timeout = self.config.time_out * 3, main_container='body')
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input",
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+
+                tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                    optional_term=None, label=False, main_container="body")
+                if( tmessagebox ):
+                    self.restart_counter = 3
+                    self.log_error(f" AddParameter error: {tmessagebox[0].text}")
 
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
@@ -5221,7 +5229,7 @@ class WebappInternal(Base):
         >>> oHelper.SetParameters()
         """
 
-        if(self.config.smart_test):
+        if(self.config.smart_test or self.config.parameter_url):
             self.parameter_url(restore_backup=False)
         else:
             self.parameter_screen(restore_backup=False)
@@ -5237,7 +5245,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetParameters()
         """
-        if(self.config.smart_test):
+        if(self.config.smart_test or self.config.parameter_url):
             self.parameter_url(restore_backup=True)
         else:
             self.parameter_screen(restore_backup=True)
@@ -5256,13 +5264,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_url(restore_backup=False)
         """
+        endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
 
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        self.wait_element_timeout(term="[name='cGetUser'] > input", scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out * 3, main_container='body')
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input", timeout = 1,
+            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+
+            if (self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR, optional_term=None, label=False, main_container="body")):
+                method = "SetParameters unknown error " if restore_backup is False else "RestoreParameters unknown error"
+                self.restart_counter = 3
+                self.log_error(method)
         
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
