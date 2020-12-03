@@ -2001,6 +2001,7 @@ class WebappInternal(Base):
                 print("Starting the Browser")
                 self.Start()
             else:
+                print("Refreshing the Browser")
                 self.driver_refresh()
         except WebDriverException as e:
             webdriver_exception = e
