@@ -1996,7 +1996,9 @@ class WebappInternal(Base):
 
         try:
             if self.restart_counter == 2:
+                print("Closing the Browser")
                 self.driver.close()
+                print("Starting the Browser")
                 self.Start()
             else:
                 self.driver_refresh()
