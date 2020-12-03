@@ -1995,7 +1995,14 @@ class WebappInternal(Base):
         webdriver_exception = None
 
         try:
-            self.driver_refresh()
+            if self.restart_counter == 2:
+                print("Closing the Browser")
+                self.driver.close()
+                print("Starting the Browser")
+                self.Start()
+            else:
+                print("Refreshing the Browser")
+                self.driver_refresh()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -2468,6 +2475,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
+
         submenu = ""
         endtime = time.time() + self.config.time_out
         wait_coin_screen = True if menu_itens != self.language.menu_about else False
