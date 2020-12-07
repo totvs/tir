@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.expected_conditions import element_to_be_clickable
 from selenium.webdriver.support.ui import Select
 import tir.technologies.core.enumerations as enum
 from tir.technologies.core.log import Log
@@ -4406,6 +4407,7 @@ class WebappInternal(Base):
                 grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
 
                 if grids:
+                    grids = self.filter_non_obscured(grids, grid_number)
                     grids = list(filter(lambda x:x.select("tbody tr"), grids))      
                     headers = self.get_headers_from_grids(grids)
                     if grid_number < len(grids):
@@ -4434,6 +4436,35 @@ class WebappInternal(Base):
 
         if not success:
             self.log_error(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+
+    def filter_non_obscured(self, elements, grid_number):
+
+        main_element = self.soup_to_selenium(elements[grid_number])
+
+        x, y = main_element.location['x'], main_element.location['y']
+
+        element_data = []
+
+        for row, element in enumerate(elements):
+            selenium_element = self.soup_to_selenium(element)
+            element_data.append([element])
+            element_data[row].append(selenium_element)
+            element_data[row].append(selenium_element.location)
+            element_data[row].append(True)
+
+            if x == selenium_element.location['x'] and y == selenium_element.location['y']:
+
+                if not self.check_obscured_element(element_data[row][1], element_data[row][2]['x'],
+                                                element_data[row][2]['y']):
+                    print(f"Removing obscured ID: {element_data[row][0].attrs['id']} ")
+                    element_data[row][3] = False
+
+        return list(map(lambda x: x[0], list(filter( lambda x: x[3] == True, element_data))))
+
+    def check_obscured_element(self, element, x, y):
+
+        element_front = self.driver.execute_script("return document.elementFromPoint(arguments[0], arguments[1])", x, y)
+        return element == element_front
 
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
