@@ -5204,6 +5204,7 @@ class WebappInternal(Base):
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
         endtime = time.time() + self.config.time_out
+        halftime = ((endtime - time.time()) / 2)
 
         if(self.config.smart_test or self.config.parameter_url):
             portuguese_value = portuguese_value.replace("=","/\\")
@@ -5221,6 +5222,9 @@ class WebappInternal(Base):
                     self.restart_counter = 3
                     self.log_error(f" AddParameter error: {tmessagebox[0].text}")
 
+                if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+                    self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                        branch}&a={portuguese_value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
@@ -5281,10 +5285,12 @@ class WebappInternal(Base):
         while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input", timeout = 1,
             scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
 
-            if (self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR, optional_term=None, label=False, main_container="body")):
-                method = "SetParameters unknown error " if restore_backup is False else "RestoreParameters unknown error"
+            tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                optional_term=None, label=False, main_container="body")
+            if( tmessagebox ):
+                method = "SetParameters" if restore_backup is False else "RestoreParameters"
                 self.restart_counter = 3
-                self.log_error(method)
+                self.log_error(f" {method} error: {tmessagebox[0].text}")
         
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
@@ -5294,7 +5300,6 @@ class WebappInternal(Base):
             self.SetLateralMenu(self.config.routine, save_input=False)
         else:
             self.Program(self.config.routine)
-
 
     def parameter_screen(self, restore_backup):
         """
