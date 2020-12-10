@@ -4361,7 +4361,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find grids.")
 
-    def ClickGridCell(self, column, row_number=1, grid_number=1):
+        def ClickGridCell(self, column, row_number=1, grid_number=1):
         """
         Clicks on a Cell of a Grid.
 
@@ -4386,6 +4386,7 @@ class WebappInternal(Base):
         column_element_old_class = None
         columns =  None
         rows = None
+        same_location = False
         
         self.wait_blocker()
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4407,7 +4408,9 @@ class WebappInternal(Base):
 
                 if grids:
                     if len(grids) > 1:
-                        grids = self.filter_non_obscured(grids, grid_number)
+                        grids, same_location = self.filter_non_obscured(grids, grid_number)
+                        if same_location:
+                            grid_number = 0
                     grids = list(filter(lambda x:x.select("tbody tr"), grids))      
                     headers = self.get_headers_from_grids(grids)
                     if grid_number < len(grids):
@@ -4439,33 +4442,24 @@ class WebappInternal(Base):
 
     def filter_non_obscured(self, elements, grid_number):
 
+        same_position = []
+
         main_element = self.soup_to_selenium(elements[grid_number])
 
         x, y = main_element.location['x'], main_element.location['y']
 
-        element_data = []
-
-        for row, element in enumerate(elements):
+        for element in elements:
             selenium_element = self.soup_to_selenium(element)
-            element_data.append([element])
-            element_data[row].append(selenium_element)
-            element_data[row].append(selenium_element.location)
-            element_data[row].append(True)
 
-            if x == selenium_element.location['x'] and y == selenium_element.location['y']:
+            if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
+                    not main_element == selenium_element:
+                same_position.append(element)
 
-                if not self.check_obscured_element(element_data[row][1], element_data[row][2]['x'],
-                                                element_data[row][2]['y']):
-                    print(f"Removing obscured ID: {element_data[row][0].attrs['id']} ")
-                    element_data[row][3] = False
+        if same_position:
+            same_position.append(elements[grid_number])
+            return [next(iter(list(self.zindex_sort(same_position, reverse=True))))], True
 
-        return list(map(lambda x: x[0], list(filter( lambda x: x[3] == True, element_data))))
-
-    def check_obscured_element(self, element, x, y):
-
-        element_front = self.driver.execute_script("return document.elementFromPoint(arguments[0], arguments[1])", x, y)
-        return element.text == element_front.text
-
+        return elements, False
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
         """
@@ -4509,9 +4503,6 @@ class WebappInternal(Base):
             self.set_element_focus(column_element_selenium)
             self.wait_until_to(expected_condition="element_to_be_clickable", element = column_element, locator = By.XPATH )
             column_element_selenium.click()
-            
-                
-        
 
     def search_column_index(self, grid, column):
         column_enumeration = list(enumerate(grid.select("thead label")))
