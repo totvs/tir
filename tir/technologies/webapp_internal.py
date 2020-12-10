@@ -5238,11 +5238,12 @@ class WebappInternal(Base):
         halftime = ((endtime - time.time()) / 2)
 
         if(self.config.smart_test or self.config.parameter_url):
-            portuguese_value = portuguese_value.replace("=","/\\")
-            portuguese_value = portuguese_value.replace("|","\\/")
+
+            value = self.parameter_url_value( self.config.language.lower(), 
+                {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
 
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
-                branch}&a={portuguese_value}&Env={self.config.environment}""")
+                branch}&a={value}&Env={self.config.environment}""")
 
             while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input",
                 scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
@@ -5255,7 +5256,7 @@ class WebappInternal(Base):
 
                 if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
                     self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
-                        branch}&a={portuguese_value}&Env={self.config.environment}""")
+                        branch}&a={value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
@@ -5416,6 +5417,33 @@ class WebappInternal(Base):
                 self.restart_counter += 1
                 self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
 
+    def parameter_url_value(self, language, values = {'pt-br': '', 'en-us': '','es-es': '' }):
+        """
+        [Internal]
+
+        Internal method of AddParameters to filter the values.
+
+        :param language: The language of config file.
+        :type language: str
+        :param values: The values organized by language.
+        :type values: dict[str, str]
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.parameter_url_value(language = self.config.language.lower(), values = {'pt-br': portuguese_value })
+        """
+        value = values[language]
+
+        if not value:
+            for vl in values.values():
+                if vl:
+                    value = vl
+
+        value = value.replace("=","/\\")
+        value = value.replace("|","\\/")
+
+        return value
 
     def fill_parameters(self, restore_backup):
         """
