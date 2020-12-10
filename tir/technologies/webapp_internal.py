@@ -4361,7 +4361,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Couldn't find grids.")
 
-        def ClickGridCell(self, column, row_number=1, grid_number=1):
+    def ClickGridCell(self, column, row_number=1, grid_number=1):
         """
         Clicks on a Cell of a Grid.
 
