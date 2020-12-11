@@ -22,6 +22,7 @@ from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
 from selenium.common.exceptions import *
+from datetime import datetime
 
 class WebappInternal(Base):
     """
@@ -502,6 +503,8 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.environment_screen()
         """
+        if not self.config.date:
+            self.config.date = datetime.today().strftime('%d/%m/%Y')
 
         if change_env:
             label = self.language.confirm
