@@ -95,7 +95,7 @@ class Log:
         total_cts = 1
         passed = 1 if result else 0
         failed = 0 if result else 1
-        printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
+        printable_message = self.printable_message(message)
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
@@ -223,7 +223,7 @@ class Log:
         >>> # Calling the method:
         >>> self.log.generate_result(True, "Success")
         """
-        printable_message = ''.join(filter(lambda x: x.isprintable(), message))[:650]
+        printable_message = self.printable_message(message)
 
         if not self.suite_datetime:
             self.suite_datetime = time.strftime("%d/%m/%Y %X")
@@ -449,3 +449,13 @@ class Log:
                 driver.save_screenshot(path)
             except Exception as e:
                 print(f"Warning Log Error save_screenshot exception {str(e)}")
+
+    def printable_message(self, string):
+        """
+
+        :param string:
+        :return:
+        """
+
+        return re.sub(';', ',', ''.join(filter(lambda x: x.isprintable(), string))[:600])
+    
