@@ -132,14 +132,14 @@ class Log:
                 open("log_exec_file.txt", "w")
 
             if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
-                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
+                with open( os.path.join(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
                     for line in self.table_rows[1:]:
                         csv_writer.writerow(line)
 
-                print(f"Log file created successfully: {path}\\{log_file}")
+                print(f"Log file created successfully: {os.path.join(path, log_file)}")
                             
                 self.csv_log.append(self.get_testcase_stack())
 
@@ -393,10 +393,10 @@ class Log:
         if self.config.smart_test:
             open("log_exec_file.txt", "w")
 
-        with open(f"{path}\\{log_file}", mode="w", encoding="utf-8") as json_file:
+        with open( os.path.join(path, log_file), mode="w", encoding="utf-8") as json_file:
             json_file.write(json_data)
 
-        print(f"Log file created successfully: {path}\\{log_file}")
+        print(f"Log file created successfully: {os.path.join(path, log_file)}")
 
     def ident_test(self):
         """
