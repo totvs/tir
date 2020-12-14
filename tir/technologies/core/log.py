@@ -120,9 +120,10 @@ class Log:
             try:
                 if self.folder:
                     path = f"{self.folder}\\{self.station}_v6"
+                    path = os.path.join(*path.split('\\'))
                     os.makedirs(path)
                 else:
-                    path = f"Log\\{self.station}"
+                    path = os.path.join("Log", self.station)
                     os.makedirs(path)
             except OSError:
                 pass
@@ -131,14 +132,14 @@ class Log:
                 open("log_exec_file.txt", "w")
 
             if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
-                with open(f"{path}\\{log_file}", mode="w", newline="", encoding="windows-1252") as csv_file:
+                with open( os.path.join(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
                     csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                     csv_writer_header.writerow(self.table_rows[0])
                     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
                     for line in self.table_rows[1:]:
                         csv_writer.writerow(line)
 
-                print(f"Log file created successfully: {path}\\{log_file}")
+                print(f"Log file created successfully: {os.path.join(path, log_file)}")
                             
                 self.csv_log.append(self.get_testcase_stack())
 
@@ -354,12 +355,12 @@ class Log:
         
         try:
             path = f"{self.folder}\\new_log\\{self.station}"
+            path = os.path.join(*path.split('\\'))
             os.makedirs(path)
         except OSError:
             pass
-
         try:
-            with open(f"{path}\\response_log.csv", mode="a", encoding="utf-8", newline='') as response_log:
+            with open( os.path.join(path, "response_log.csv"), mode="a", encoding="utf-8", newline='') as response_log:
                 csv_write = csv.writer(response_log, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_write.writerow([f"Time: {today.strftime('%Y%m%d%H%M%S%f')[:-3]}", f"URL: {server_address}", f"CT: {json.loads(json_data)['CTMETHOD']}",
                                     {f"Status Code: {response.status_code}"}, f"Message: {response.text}"])
@@ -379,9 +380,10 @@ class Log:
         try:
             if self.folder:
                 path = f"{self.folder}\\new_log\\{self.station}"
+                path = os.path.join(*path.split('\\'))
                 os.makedirs(path)
             else:
-                path = f"Log\\{self.station}"
+                path = os.path.join("Log", self.station)
                 os.makedirs(path)
         except OSError:
             pass
@@ -391,10 +393,10 @@ class Log:
         if self.config.smart_test:
             open("log_exec_file.txt", "w")
 
-        with open(f"{path}\\{log_file}", mode="w", encoding="utf-8") as json_file:
+        with open( os.path.join(path, log_file), mode="w", encoding="utf-8") as json_file:
             json_file.write(json_data)
 
-        print(f"Log file created successfully: {path}\\{log_file}")
+        print(f"Log file created successfully: {os.path.join(path, log_file)}")
 
     def ident_test(self):
         """
@@ -436,11 +438,11 @@ class Log:
             
         try:
             if self.config.log_folder:
-                path = f"{self.folder}\\{self.station}\\{log_file}"
-                os.makedirs(f"{self.folder}\\{self.station}")
+                path = os.path.join(self.folder, self.station, log_file)
+                os.makedirs(os.path.join(self.folder, self.station))
             else:
-                path = f"Log\\{self.station}\\{log_file}"
-                os.makedirs(f"Log\\{self.station}")
+                path = os.path.join("Log", self.station, log_file)
+                os.makedirs(os.path.join("Log", self.station))
         except OSError:
             pass
         
