@@ -667,6 +667,44 @@ class WebappInternal(Base):
 
         return False
 
+    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch=''):
+        """
+        Change the user then init protheus on home page.
+
+        :param initial_program: The initial program to load. - **Default:** "" (previous initial_program)
+        :type initial_program: str
+        :param date: The date to fill on the environment screen. - **Default:** "" (previous date)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "previous date group"
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "previous branch"
+        :type branch: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser("userTest", "a", "SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
+        >>> #------------------------------------------------------------------------
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser(user="user08", password="8" )
+        >>> #------------------------------------------------------------------------
+        """
+        if not user or password:
+            self.log_error("You must enter a user and a password to use ChangeUser!")
+            return
+
+        initial_program = self.config.initial_program if not self.config.initial_program else initial_program
+        date = self.config.date if not self.config.date else date
+        group = self.config.group if not self.config.group else group
+        branch = self.config.branch if not self.config.branch else branch
+
+        self.config.user = user
+        self.config.password = password
+
+        self.driver.refresh()
+        print(f"Change to the user: {user}")
+        self.Setup(initial_program, date, group, branch)
+
     def close_modal(self):
         """
         [Internal]
@@ -2145,26 +2183,75 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.LogOff()
         """
-        element = ""
+        element = None
+        text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
-
+        click_counter = 1
+        
         if self.config.coverage:
             endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.logOff)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+            while((time.time() < endtime) and (not element or not text_cover)):
 
-                element = self.search_text(selector=".tsay", text=string)
+                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down('q').perform()
+                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
+
+                element = self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
+
                 if element:
-                    print(string)
-
+                    if self.click_button_logoff(click_counter):                        
+                        text_cover = self.search_text(selector=".tsay", text=string)
+                        if text_cover:
+                            print(string)
+                            timeout = endtime - time.time()
+                            if timeout > 0:
+                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
+                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
+                    click_counter += 1
+                    if click_counter > 3:
+                        click_counter = 1
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.logOff)
+            endtime = time.time() + self.config.time_out
+            while( time.time() < endtime and not element ):
+
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                soup = self.get_current_DOM()
+                element = soup.find_all(text=self.language.logOff)
+
+                self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            if not element:
+                print("Warning method finish use driver.refresh. element not found")
+
+            self.driver_refresh() if not element else self.SetButton(self.language.logOff)
+
+    def click_button_logoff(self, click_counter=None):
+        """
+        [internal]
+
+        This method is reponsible to click on button finish
+
+        """
+        button = None
+        listButtons = []
+        try:
+            soup = self.get_current_DOM()
+            listButtons = soup.select('button')
+            button = next(iter(list(filter(lambda x: x.text == self.language.logOff ,listButtons ))), None)
+            if button:
+                button_element = lambda : self.soup_to_selenium(button)            
+                self.scroll_to_element(button_element())
+                self.set_element_focus(button_element())
+                if self.click(button_element(), click_type=enum.ClickType(click_counter)):
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print(f"Warning Finish method exception - {str(e)}")
+            return False
 
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1):
