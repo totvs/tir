@@ -1709,8 +1709,9 @@ class WebappInternal(Base):
                         if valtype != 'N':
                             self.set_element_focus(input_field())
                             self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                            self.send_keys(input_field(), Keys.HOME)
-                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
