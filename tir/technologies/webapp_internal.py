@@ -3423,7 +3423,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
         """
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
         grids = None
         while(time.time() < endtime and not grids):
             if not grid_element:
@@ -3431,15 +3431,15 @@ class WebappInternal(Base):
             else:
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        if grids:
-            grids = list(filter(lambda x: self.element_is_displayed(x), grids))
-        else:
-            self.log_error("Couldn't find grid.")
+            if grids:
+                grids = list(filter(lambda x: self.element_is_displayed(x), grids))
 
-        if len(grids) - 1  >= grid_number:
-            return grids[grid_number]
-        else:
-            self.log_error("Grid number out of bounds.")
+                if grids:
+                    if len(grids) - 1 >= grid_number:
+                        return grids[grid_number]
+
+        if not grids:
+            self.log_error("Couldn't find grid.")
 
     def check_mask(self, element):
         """
