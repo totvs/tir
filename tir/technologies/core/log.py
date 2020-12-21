@@ -446,7 +446,8 @@ class Log:
         
         if self.get_testcase_stack() not in self.test_case_log:
             try:
-                driver.save_screenshot(path)
+                driver.save_screenshot(str(path))
+                print(f"Screenshot file created successfully: {path}")
             except Exception as e:
                 print(f"Warning Log Error save_screenshot exception {str(e)}")
 
