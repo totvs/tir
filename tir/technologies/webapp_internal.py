@@ -5560,6 +5560,7 @@ class WebappInternal(Base):
 
         value = value.replace("=","/\\")
         value = value.replace("|","\\/")
+        value = value.replace("+","[2B]")
 
         return value
 
