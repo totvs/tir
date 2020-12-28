@@ -3229,16 +3229,19 @@ class WebappInternal(Base):
                 while( time.time() < endtime and not success):
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
                     click_box_item = td.parent.select_one("td")
-                    click_box_item_s = self.soup_to_selenium(click_box_item)
-                    self.scroll_to_element(click_box_item_s)
+                    click_box_item_s = lambda: self.soup_to_selenium(click_box_item)
+                    self.scroll_to_element(click_box_item_s())
 
                     if class_grid == 'tmsselbr':
-                        ActionChains(self.driver).move_to_element(click_box_item_s).click(click_box_item_s).perform()
-                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).click(click_box_item_s()).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
+                            click_box_item_s(), Keys.ENTER).perform()
                     elif class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
+                            click_box_item_s(), Keys.ENTER).perform()
                     else:
-                        self.double_click(click_box_item_s, click_type = enum.ClickType.ACTIONCHAINS)
+                        self.double_click(click_box_item_s(), click_type=enum.ClickType.ACTIONCHAINS)
+
                     self.wait_element_is_not_displayed(click_box_item)
 
                     end_containers = self.get_all_containers()
@@ -3250,6 +3253,37 @@ class WebappInternal(Base):
                     new_click_box_item = new_td.parent.select_one("td")
                     if new_click_box_item != click_box_item:
                         success = True
+                    else:
+                        parent_id = click_box_item.find_parent("div", class_="tpanel").attrs["id"]
+                        success = self.wait_element_is_blocked(parent_id)
+
+    def wait_element_is_blocked(self, parent_id):
+        """
+
+        :param parent_id:
+        :return:
+        """
+
+        print("Wait for element to be blocked...")
+
+        element = False
+
+        endtime = time.time() + 10
+
+        while(time.time() < endtime and not element):
+
+            tpanels = self.get_current_container().select(".tpanel")
+
+            if tpanels:
+
+                tpanels_filtered = list(filter(lambda x: self.element_is_displayed(x), tpanels))
+
+                element = next(iter(list(filter(lambda x: x.attrs["id"] == parent_id, tpanels_filtered))), None)
+
+        if element:
+            return  "readonly" in element.get_attribute_list("class") or "hidden"  in element.get_attribute_list("class")
+        else:
+            return False
 
     def ScrollGrid(self, column, match_value, grid_number=1):
         """
