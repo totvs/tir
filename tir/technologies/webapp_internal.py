@@ -1676,6 +1676,8 @@ class WebappInternal(Base):
         >>> self.input_value("A1_COD", "000001")
         """
 
+        self.wait_blocker()
+
         field = re.sub(r"([\s\?:\*\.]+)?$", "", field).strip()
 
         main_element = None
