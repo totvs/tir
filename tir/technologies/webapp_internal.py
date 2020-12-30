@@ -5428,6 +5428,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_url(restore_backup=False)
         """
+
+        tmenu_screen = self.check_tmenu_screen()
+
         endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
 
@@ -5448,10 +5451,12 @@ class WebappInternal(Base):
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, save_input=not self.config.autostart)
 
-        if ">" in self.config.routine:
-            self.SetLateralMenu(self.config.routine, save_input=False)
-        else:
-            self.Program(self.config.routine)
+
+        if not tmenu_screen:
+            if ">" in self.config.routine:
+                self.SetLateralMenu(self.config.routine, save_input=False)
+            else:
+                self.Program(self.config.routine)
 
     def parameter_screen(self, restore_backup):
         """
@@ -5470,6 +5475,8 @@ class WebappInternal(Base):
         label_param = None
         exception = None
         stack = None
+
+        tmenu_screen = self.check_tmenu_screen()
 
         try:
             self.driver_refresh()
@@ -5527,15 +5534,25 @@ class WebappInternal(Base):
 
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
-            if ">" in self.config.routine:
-                self.SetLateralMenu(self.config.routine, save_input=False)
-            else:
-                self.Program(self.config.routine)
+            if not tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
                 self.restart_counter += 1
                 self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
+    def check_tmenu_screen(self):
+        """
+        [Internal]
+        """
+        
+        return self.element_is_displayed(
+            next(iter(self.web_scrap(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                 None))
 
     def parameter_url_value(self, language, values = {'pt-br': '', 'en-us': '','es-es': '' }):
         """
