@@ -5283,7 +5283,7 @@ class WebappInternal(Base):
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
         
-    def ClickIcon(self, icon_text):
+    def ClickIcon(self, icon_text, position):
         """
         Clicks on an Icon button based on its tooltip text or Alt attribute title.
 
@@ -5299,6 +5299,7 @@ class WebappInternal(Base):
         icon = ""
         success = False
         filtered_buttons = None
+        position -= 1
         
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
@@ -5313,15 +5314,15 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             
-            if tbtnbmp_img:
-                icon = next(iter(list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))), None)
+            if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
+                icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
 
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    if filtered_buttons:
+                    if filtered_buttons and len(filtered_buttons) -1 >= position:
                         icon = next(iter(filtered_buttons), None)
 
             if icon:

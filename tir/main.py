@@ -259,7 +259,7 @@ class Webapp():
         """
         self.__webapp.ClickGridHeader(column, column_name, grid_number)
 
-    def ClickIcon(self, icon_text):
+    def ClickIcon(self, icon_text, position=1):
         """
         Clicks on an Icon button based on its tooltip text.
 
@@ -272,7 +272,7 @@ class Webapp():
         >>> oHelper.ClickIcon("Add")
         >>> oHelper.ClickIcon("Edit")
         """
-        self.__webapp.ClickIcon(icon_text)
+        self.__webapp.ClickIcon(icon_text, position)
 
     def ClickCheckBox(self, label_box_name, position=1):
         """
