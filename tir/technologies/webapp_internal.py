@@ -22,6 +22,7 @@ from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
 from selenium.common.exceptions import *
+from datetime import datetime
 
 class WebappInternal(Base):
     """
@@ -502,6 +503,8 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.environment_screen()
         """
+        if not self.config.date:
+            self.config.date = datetime.today().strftime('%d/%m/%Y')
 
         if change_env:
             label = self.language.confirm
@@ -663,6 +666,44 @@ class WebappInternal(Base):
                     return element
 
         return False
+
+    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch=''):
+        """
+        Change the user then init protheus on home page.
+
+        :param initial_program: The initial program to load. - **Default:** "" (previous initial_program)
+        :type initial_program: str
+        :param date: The date to fill on the environment screen. - **Default:** "" (previous date)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "previous date group"
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "previous branch"
+        :type branch: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser("userTest", "a", "SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
+        >>> #------------------------------------------------------------------------
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser(user="user08", password="8" )
+        >>> #------------------------------------------------------------------------
+        """
+        if not user or password:
+            self.log_error("You must enter a user and a password to use ChangeUser!")
+            return
+
+        initial_program = self.config.initial_program if not self.config.initial_program else initial_program
+        date = self.config.date if not self.config.date else date
+        group = self.config.group if not self.config.group else group
+        branch = self.config.branch if not self.config.branch else branch
+
+        self.config.user = user
+        self.config.password = password
+
+        self.driver.refresh()
+        print(f"Change to the user: {user}")
+        self.Setup(initial_program, date, group, branch)
 
     def close_modal(self):
         """
@@ -1635,6 +1676,8 @@ class WebappInternal(Base):
         >>> self.input_value("A1_COD", "000001")
         """
 
+        self.wait_blocker()
+
         field = re.sub(r"([\s\?:\*\.]+)?$", "", field).strip()
 
         main_element = None
@@ -1706,8 +1749,9 @@ class WebappInternal(Base):
                         if valtype != 'N':
                             self.set_element_focus(input_field())
                             self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                            self.send_keys(input_field(), Keys.HOME)
-                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
@@ -2142,26 +2186,75 @@ class WebappInternal(Base):
         >>> # Calling the method.
         >>> oHelper.LogOff()
         """
-        element = ""
+        element = None
+        text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
-
+        click_counter = 1
+        
         if self.config.coverage:
             endtime = time.time() + timeout
-            while(time.time() < endtime and not element):
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                self.SetButton(self.language.logOff)
 
-                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=10, step=0.1)
+            while((time.time() < endtime) and (not element or not text_cover)):
 
-                element = self.search_text(selector=".tsay", text=string)
+                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down('q').perform()
+                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
+
+                element = self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
+
                 if element:
-                    print(string)
-
+                    if self.click_button_logoff(click_counter):                        
+                        text_cover = self.search_text(selector=".tsay", text=string)
+                        if text_cover:
+                            print(string)
+                            timeout = endtime - time.time()
+                            if timeout > 0:
+                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
+                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
+                    click_counter += 1
+                    if click_counter > 3:
+                        click_counter = 1
         else:
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-            self.SetButton(self.language.logOff)
+            endtime = time.time() + self.config.time_out
+            while( time.time() < endtime and not element ):
+
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                soup = self.get_current_DOM()
+                element = soup.find_all(text=self.language.logOff)
+
+                self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+
+            if not element:
+                print("Warning method finish use driver.refresh. element not found")
+
+            self.driver_refresh() if not element else self.SetButton(self.language.logOff)
+
+    def click_button_logoff(self, click_counter=None):
+        """
+        [internal]
+
+        This method is reponsible to click on button finish
+
+        """
+        button = None
+        listButtons = []
+        try:
+            soup = self.get_current_DOM()
+            listButtons = soup.select('button')
+            button = next(iter(list(filter(lambda x: x.text == self.language.logOff ,listButtons ))), None)
+            if button:
+                button_element = lambda : self.soup_to_selenium(button)            
+                self.scroll_to_element(button_element())
+                self.set_element_focus(button_element())
+                if self.click(button_element(), click_type=enum.ClickType(click_counter)):
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print(f"Warning Finish method exception - {str(e)}")
+            return False
 
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1):
@@ -2452,9 +2545,11 @@ class WebappInternal(Base):
             else:
                 selector = "div"
 
+        if not element_list:
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
             if not element_list:
                 return None
+
         if position == 0:
             return len(element_list) > 0
         else:
@@ -3136,16 +3231,19 @@ class WebappInternal(Base):
                 while( time.time() < endtime and not success):
                     td = next(iter(current.select(f"td[id='{column_index}']")), None)
                     click_box_item = td.parent.select_one("td")
-                    click_box_item_s = self.soup_to_selenium(click_box_item)
-                    self.scroll_to_element(click_box_item_s)
+                    click_box_item_s = lambda: self.soup_to_selenium(click_box_item)
+                    self.scroll_to_element(click_box_item_s())
 
                     if class_grid == 'tmsselbr':
-                        ActionChains(self.driver).move_to_element(click_box_item_s).click(click_box_item_s).perform()
-                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).click(click_box_item_s()).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
+                            click_box_item_s(), Keys.ENTER).perform()
                     elif class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(click_box_item_s).send_keys_to_element(click_box_item_s, Keys.ENTER).perform()
+                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
+                            click_box_item_s(), Keys.ENTER).perform()
                     else:
-                        self.double_click(click_box_item_s, click_type = enum.ClickType.ACTIONCHAINS)
+                        self.double_click(click_box_item_s(), click_type=enum.ClickType.ACTIONCHAINS)
+
                     self.wait_element_is_not_displayed(click_box_item)
 
                     end_containers = self.get_all_containers()
@@ -3157,6 +3255,37 @@ class WebappInternal(Base):
                     new_click_box_item = new_td.parent.select_one("td")
                     if new_click_box_item != click_box_item:
                         success = True
+                    else:
+                        parent_id = click_box_item.find_parent("div", class_="tpanel").attrs["id"]
+                        success = self.wait_element_is_blocked(parent_id)
+
+    def wait_element_is_blocked(self, parent_id):
+        """
+
+        :param parent_id:
+        :return:
+        """
+
+        print("Wait for element to be blocked...")
+
+        element = False
+
+        endtime = time.time() + 10
+
+        while(time.time() < endtime and not element):
+
+            tpanels = self.get_current_container().select(".tpanel")
+
+            if tpanels:
+
+                tpanels_filtered = list(filter(lambda x: self.element_is_displayed(x), tpanels))
+
+                element = next(iter(list(filter(lambda x: x.attrs["id"] == parent_id, tpanels_filtered))), None)
+
+        if element:
+            return  "readonly" in element.get_attribute_list("class") or "hidden"  in element.get_attribute_list("class")
+        else:
+            return False
 
     def ScrollGrid(self, column, match_value, grid_number=1):
         """
@@ -3330,7 +3459,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
         """
-        endtime = time.time() + 60
+        endtime = time.time() + self.config.time_out
         grids = None
         while(time.time() < endtime and not grids):
             if not grid_element:
@@ -3338,15 +3467,15 @@ class WebappInternal(Base):
             else:
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        if grids:
-            grids = list(filter(lambda x: self.element_is_displayed(x), grids))
-        else:
-            self.log_error("Couldn't find grid.")
+            if grids:
+                grids = list(filter(lambda x: self.element_is_displayed(x), grids))
 
-        if len(grids) - 1  >= grid_number:
-            return grids[grid_number]
-        else:
-            self.log_error("Grid number out of bounds.")
+                if grids:
+                    if len(grids) - 1 >= grid_number:
+                        return grids[grid_number]
+
+        if not grids:
+            self.log_error("Couldn't find grid.")
 
     def check_mask(self, element):
         """
@@ -5433,6 +5562,7 @@ class WebappInternal(Base):
 
         value = value.replace("=","/\\")
         value = value.replace("|","\\/")
+        value = value.replace("+","[2B]")
 
         return value
 

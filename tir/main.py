@@ -92,6 +92,30 @@ class Webapp():
         """
         self.__webapp.ChangeEnvironment(date, group, branch, module)
 
+    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01'):
+        """
+        Change the user.
+
+        :param initial_program: The initial program to load. - **Default:** "" (previous initial_program)
+        :type initial_program: str
+        :param date: The date to fill on the environment screen. - **Default:** "" (previous date)
+        :type date: str
+        :param group: The group to fill on the environment screen. - **Default:** "previous date group"
+        :type group: str
+        :param branch: The branch to fill on the environment screen. - **Default:** "previous branch"
+        :type branch: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser("userTest", "a", "SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
+        >>> #------------------------------------------------------------------------
+        >>> # Calling the method:
+        >>> oHelper.ChangeUser(user="user08", password="8" )
+        >>> #------------------------------------------------------------------------
+        """
+        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
+
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
         """
         Checks if a field has the value the user expects.
