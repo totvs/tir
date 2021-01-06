@@ -265,6 +265,8 @@ class Webapp():
 
         :param icon_text: The tooltip text.
         :type icon_text: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
