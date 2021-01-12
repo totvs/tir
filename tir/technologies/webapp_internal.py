@@ -87,6 +87,7 @@ class WebappInternal(Base):
         self.parameters = []
         self.backup_parameters = []
         self.tree_base_element = ()
+        self.tmenu_screen = None
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -2761,7 +2762,10 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.send_action(self.click, soup_element)
+                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
+                    self.click(soup_element())
+                else:
+                    self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
@@ -5283,7 +5287,7 @@ class WebappInternal(Base):
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
         
-    def ClickIcon(self, icon_text, position):
+    def ClickIcon(self, icon_text, position=1):
         """
         Clicks on an Icon button based on its tooltip text or Alt attribute title.
 
@@ -5362,6 +5366,9 @@ class WebappInternal(Base):
 
         if(self.config.smart_test or self.config.parameter_url):
 
+            if self.tmenu_screen is None:
+                self.tmenu_screen = self.check_tmenu_screen()
+
             value = self.parameter_url_value( self.config.language.lower(), 
                 {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
 
@@ -5413,6 +5420,7 @@ class WebappInternal(Base):
         >>> oHelper.SetParameters()
         """
         if(self.config.smart_test or self.config.parameter_url):
+            self.tmenu_screen = self.check_tmenu_screen()
             self.parameter_url(restore_backup=True)
         else:
             self.parameter_screen(restore_backup=True)
@@ -5431,8 +5439,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_url(restore_backup=False)
         """
-
-        tmenu_screen = self.check_tmenu_screen()
 
         endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -5455,11 +5461,13 @@ class WebappInternal(Base):
             self.config.branch, save_input=not self.config.autostart)
 
 
-        if not tmenu_screen:
+        if not self.tmenu_screen:
             if ">" in self.config.routine:
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
                 self.Program(self.config.routine)
+
+        self.tmenu_screen = None
 
     def parameter_screen(self, restore_backup):
         """
@@ -5479,7 +5487,7 @@ class WebappInternal(Base):
         exception = None
         stack = None
 
-        tmenu_screen = self.check_tmenu_screen()
+        self.tmenu_screen = self.check_tmenu_screen()
 
         try:
             self.driver_refresh()
@@ -5537,7 +5545,7 @@ class WebappInternal(Base):
 
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
-            if not tmenu_screen:
+            if not self.tmenu_screen:
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
