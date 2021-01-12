@@ -2761,7 +2761,10 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.send_action(self.click, soup_element)
+                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
+                    self.click(soup_element())
+                else:
+                    self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
