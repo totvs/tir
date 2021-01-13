@@ -5561,9 +5561,12 @@ class WebappInternal(Base):
         [Internal]
         """
         
-        return self.element_is_displayed(
-            next(iter(self.web_scrap(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
-                 None))
+        try:
+            return self.element_is_displayed(
+                next(iter(self.web_scrap(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                     None))
+        except:
+            return False
 
     def parameter_url_value(self, language, values = {'pt-br': '', 'en-us': '','es-es': '' }):
         """
