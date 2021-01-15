@@ -434,7 +434,7 @@ class Log:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
 
         if not self.release:
-            self.release = "12.1.027"
+            self.release = self.config.release
 
         testsuite = self.get_file_name("testsuite")
 
