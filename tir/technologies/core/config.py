@@ -69,3 +69,4 @@ class ConfigLoader:
         self.logurl1 = str(data["LogUrl1"]) if "LogUrl1" in data else ""
         self.logurl2 = str(data["LogUrl2"]) if "LogUrl2" in data else ""
         self.parameter_url = bool(data["ParameterUrl"]) if "ParameterUrl" in data else False
+        self.release = str(data["Release"]) if "Release" in data else ""

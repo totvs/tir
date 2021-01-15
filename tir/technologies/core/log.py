@@ -426,18 +426,28 @@ class Log:
         """
         if not stack_item:
             stack_item = self.get_testcase_stack()
+
+        if stack_item == "setUpClass":
+            stack_item = self.get_file_name("testsuite")
+
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
 
-        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item} error.png"
+        if not self.release:
+            self.release = self.config.release
+
+        testsuite = self.get_file_name("testsuite")
+
+        log_file = f"{self.user}_{uuid.uuid4().hex}_{stack_item}_error.png"
 
         if self.config.debug_log:
             print(f"take_screenshot_log in:{datetime.now()}\n")
             
         try:
             if self.config.log_folder:
-                path = Path(self.folder, self.station, log_file)
-                os.makedirs(Path(self.folder, self.station))
+                folder_path = Path(self.folder, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)
+                path = Path(folder_path, log_file)
+                os.makedirs(Path(folder_path))
             else:
                 path = Path("Log", self.station, log_file)
                 os.makedirs(Path("Log", self.station))
