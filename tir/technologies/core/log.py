@@ -444,8 +444,8 @@ class Log:
             print(f"take_screenshot_log in:{datetime.now()}\n")
             
         try:
-            if self.config.log_folder:
-                folder_path = Path(self.folder, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)
+            if self.config.log_http:
+                folder_path = Path(self.config.log_http, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)
                 path = Path(folder_path, log_file)
                 os.makedirs(Path(folder_path))
             else:
