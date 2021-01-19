@@ -442,9 +442,11 @@ class Log:
         today = datetime.today()
 
         if self.search_stack("log_error"):
-            log_file = f"{self.user}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}_{stack_item}_error.png"
+            screenshot_file = self.screenshot_file_name("error", stack_item)
+        elif self.search_stack("CheckResult"):
+            screenshot_file = self.screenshot_file_name("CheckResult_result_divergence", stack_item)
         else:
-            log_file = f"{self.user}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}_{stack_item}.png"
+            screenshot_file = self.screenshot_file_name(stack_item)
 
         if self.config.debug_log:
             print(f"take_screenshot_log in:{datetime.now()}\n")
@@ -452,10 +454,10 @@ class Log:
         try:
             if self.config.log_http:
                 folder_path = Path(self.config.log_http, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)
-                path = Path(folder_path, log_file)
+                path = Path(folder_path, screenshot_file)
                 os.makedirs(Path(folder_path))
             else:
-                path = Path("Log", self.station, log_file)
+                path = Path("Log", self.station, screenshot_file)
                 os.makedirs(Path("Log", self.station))
         except OSError:
             pass
@@ -465,6 +467,20 @@ class Log:
             print(f"Screenshot file created successfully: {path}")
         except Exception as e:
             print(f"Warning Log Error save_screenshot exception {str(e)}")
+
+    def screenshot_file_name(self, description="", stack_item=""):
+        """
+
+        :param name:
+        :return:
+        """
+
+        today = datetime.today()
+
+        if description:
+            return f"{self.user}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}_{stack_item}_{description}.png"
+        else:
+            return f"{self.user}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}_{stack_item}.png"
 
     def printable_message(self, string):
         """
