@@ -87,6 +87,7 @@ class WebappInternal(Base):
         self.parameters = []
         self.backup_parameters = []
         self.tree_base_element = ()
+        self.tmenu_screen = None
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -2761,7 +2762,10 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                self.send_action(self.click, soup_element)
+                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
+                    self.click(soup_element())
+                else:
+                    self.send_action(self.click, soup_element)
                 self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
@@ -5283,12 +5287,14 @@ class WebappInternal(Base):
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
         
-    def ClickIcon(self, icon_text):
+    def ClickIcon(self, icon_text, position=1):
         """
         Clicks on an Icon button based on its tooltip text or Alt attribute title.
 
         :param icon_text: The tooltip/title text.
         :type icon_text: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -5299,6 +5305,7 @@ class WebappInternal(Base):
         icon = ""
         success = False
         filtered_buttons = None
+        position -= 1
         
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
@@ -5313,15 +5320,15 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             
-            if tbtnbmp_img:
-                icon = next(iter(list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))), None)
+            if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
+                icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
 
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
                 print("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
-                    if filtered_buttons:
+                    if filtered_buttons and len(filtered_buttons) -1 >= position:
                         icon = next(iter(filtered_buttons), None)
 
             if icon:
@@ -5358,6 +5365,9 @@ class WebappInternal(Base):
         halftime = ((endtime - time.time()) / 2)
 
         if(self.config.smart_test or self.config.parameter_url):
+
+            if self.tmenu_screen is None:
+                self.tmenu_screen = self.check_tmenu_screen()
 
             value = self.parameter_url_value( self.config.language.lower(), 
                 {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
@@ -5410,6 +5420,7 @@ class WebappInternal(Base):
         >>> oHelper.SetParameters()
         """
         if(self.config.smart_test or self.config.parameter_url):
+            self.tmenu_screen = self.check_tmenu_screen()
             self.parameter_url(restore_backup=True)
         else:
             self.parameter_screen(restore_backup=True)
@@ -5428,6 +5439,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_url(restore_backup=False)
         """
+
         endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
 
@@ -5448,10 +5460,14 @@ class WebappInternal(Base):
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, save_input=not self.config.autostart)
 
-        if ">" in self.config.routine:
-            self.SetLateralMenu(self.config.routine, save_input=False)
-        else:
-            self.Program(self.config.routine)
+
+        if not self.tmenu_screen:
+            if ">" in self.config.routine:
+                self.SetLateralMenu(self.config.routine, save_input=False)
+            else:
+                self.Program(self.config.routine)
+
+        self.tmenu_screen = None
 
     def parameter_screen(self, restore_backup):
         """
@@ -5470,6 +5486,8 @@ class WebappInternal(Base):
         label_param = None
         exception = None
         stack = None
+
+        self.tmenu_screen = self.check_tmenu_screen()
 
         try:
             self.driver_refresh()
@@ -5527,15 +5545,28 @@ class WebappInternal(Base):
 
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
 
-            if ">" in self.config.routine:
-                self.SetLateralMenu(self.config.routine, save_input=False)
-            else:
-                self.Program(self.config.routine)
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
                 self.restart_counter += 1
                 self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
+    def check_tmenu_screen(self):
+        """
+        [Internal]
+        """
+        
+        try:
+            return self.element_is_displayed(
+                next(iter(self.web_scrap(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                     None))
+        except:
+            return False
 
     def parameter_url_value(self, language, values = {'pt-br': '', 'en-us': '','es-es': '' }):
         """
