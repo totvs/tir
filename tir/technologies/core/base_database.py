@@ -3,6 +3,7 @@ from tir.technologies.webapp_internal import WebappInternal
 import pandas as pd
 import pyodbc
 import re
+from tir.technologies.core.logging_config import logger
 
 
 class BaseDatabase(Base):
@@ -54,9 +55,9 @@ class BaseDatabase(Base):
         connection = self.odbc_connect(database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
 
         if self.test_odbc_connection(connection):
-            print('DataBase connection started')
+            logger().info('DataBase connection started')
         else:
-            print('DataBase connection is stopped')
+            logger().info('DataBase connection is stopped')
 
         return connection
 
@@ -70,9 +71,9 @@ class BaseDatabase(Base):
             cursor.close()
             connection.close()
             if not self.test_odbc_connection(connection):
-                print('DataBase connection stopped')
+                logger().info('DataBase connection stopped')
         else:
-            print('DataBase connection already stopped')
+            logger().info('DataBase connection already stopped')
 
     def check_pyodbc_drivers(self, driver_database):
         if not next(iter(list(filter(lambda x: x == driver_database, pyodbc.drivers()))), None):
@@ -141,5 +142,5 @@ class BaseDatabase(Base):
             rowcount = cursor.execute(query).rowcount
         except Exception as error:
             self.webapp_internal.log_error(str(error))
-        print(f'{rowcount} row(s) affected')
+        logger().info(f'{rowcount} row(s) affected')
         connection.commit()
