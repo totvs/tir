@@ -1,13 +1,17 @@
 import logging
-import sys
 from logging.config import dictConfig
 from tir.technologies.core.config import ConfigLoader
 from datetime import datetime
+from pathlib import Path
+import os
+import socket
 import inspect
+
 
 config = ConfigLoader()
 
 filename = None
+folder = None
 
 def logger(logger='root'):
     """
@@ -15,11 +19,14 @@ def logger(logger='root'):
     """
 
     global filename
+    global folder
 
     today = datetime.today()
 
     if not filename:
         filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
+
+        folder = create_folder()
 
     if config.smart_test or config.debug_log:
         logging_config = {
@@ -40,7 +47,7 @@ def logger(logger='root'):
                 'debug_file_handler': {
                     'level': 'DEBUG',
                     'formatter': 'info',
-                    'filename': filename,
+                    'filename': Path(folder, filename),
                     'class': 'logging.FileHandler',
                     'mode': 'a'
                 },
@@ -96,3 +103,25 @@ def get_file_name(file_name):
         return testsuite_stack.filename.split(split_character)[-1].split(".")[0]
     else:
         return ""
+
+def create_folder():
+    """
+
+    :return:
+    """
+
+    path = None
+
+    try:
+        if config.log_http:
+            folder_path = Path(config.log_http, config.country, config.release, config.issue,
+                               config.execution_id, get_file_name('testsuite'))
+            path = Path(folder_path)
+            os.makedirs(Path(folder_path))
+        else:
+            path = Path("Log", socket.gethostname())
+            os.makedirs(Path("Log", socket.gethostname()))
+    except OSError:
+        pass
+
+    return path
