@@ -25,7 +25,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
-import pkg_resources
+from tir.version import __version__
 
 class Base(unittest.TestCase):
     """
@@ -973,7 +973,7 @@ class Base(unittest.TestCase):
         >>> oHelper.Start()
         """
 
-        logger().info(f'TIR Version: {pkg_resources.get_distribution("tir_framework")}')
+        logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
             if sys.platform == 'linux':
