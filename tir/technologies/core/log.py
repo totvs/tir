@@ -13,6 +13,7 @@ import requests
 import json
 from datetime import datetime
 from tir.technologies.core.config import ConfigLoader
+from tir.technologies.core.logging_config import logger
 
 class Log:
     """
@@ -141,7 +142,8 @@ class Log:
                     for line in self.table_rows[1:]:
                         csv_writer.writerow(line)
 
-                print(f"Log file created successfully: {os.path.join(path, log_file)}")
+                logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
+
                             
                 self.csv_log.append(self.get_testcase_stack())
 
@@ -336,10 +338,10 @@ class Log:
 
         if response is not None:
             if response.status_code == 200:
-                print("Log de execucao enviado com sucesso!")
+                logger().debug("Log de execucao enviado com sucesso!")
                 success = True
             elif response.status_code == 201 or response.status_code == 204:
-                print("Log de execucao enviado com sucesso!")
+                logger().debug("Log de execucao enviado com sucesso!")
                 success = True
             else:
                 self.save_response_log(response, server_address, json_data)
@@ -396,7 +398,7 @@ class Log:
         with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
             json_file.write(json_data)
 
-        print(f"Log file created successfully: {Path(path, log_file)}")
+        logger().debug(f"Log file created successfully: {Path(path, log_file)}")
 
     def ident_test(self):
         """
@@ -451,7 +453,7 @@ class Log:
             screenshot_file = self.screenshot_file_name(stack_item)
 
         if self.config.debug_log:
-            print(f"take_screenshot_log in:{datetime.now()}\n")
+            logger().debug(f"take_screenshot_log in:{datetime.now()}\n")
             
         try:
             if self.config.log_http:
@@ -466,9 +468,9 @@ class Log:
 
         try:
             driver.save_screenshot(str(path))
-            print(f"Screenshot file created successfully: {path}")
+            logger().debug(f"Screenshot file created successfully: {path}")
         except Exception as e:
-            print(f"Warning Log Error save_screenshot exception {str(e)}")
+            logger().exception(f"Warning Log Error save_screenshot exception {str(e)}")
 
     def screenshot_file_name(self, description="", stack_item=""):
         """

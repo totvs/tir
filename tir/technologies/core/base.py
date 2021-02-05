@@ -11,7 +11,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
@@ -24,8 +23,9 @@ from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
-from tir.technologies.core.third_party.screen_size import size
 from datetime import datetime
+from tir.technologies.core.logging_config import logger
+from tir.version import __version__
 
 class Base(unittest.TestCase):
     """
@@ -135,7 +135,7 @@ class Base(unittest.TestCase):
         self.log.save_file()
 
         self.errors = []
-        print(msg)
+        logger().info(msg)
         if expected_assert:
             self.assertTrue(expected, msg)
         else:
@@ -180,10 +180,10 @@ class Base(unittest.TestCase):
             return True
 
         except StaleElementReferenceException:
-            print("********Element Stale click*********")
+            logger().exception("********Element Stale click*********")
             return False
         except Exception as e:
-            print(f"Warning click method Exception: {str(e)}")
+            logger().exception(f"Warning click method Exception: {str(e)}")
             return False
 
     def compare_field_values(self, field, user_value, captured_value, message):
@@ -248,7 +248,7 @@ class Base(unittest.TestCase):
 
         except Exception as e:
             try:
-                print(f"Warning double_click method Exception: {str(e)}")
+                logger().warning(f"Warning double_click method Exception: {str(e)}")
                 self.scroll_to_element(element)
                 actions = ActionChains(self.driver)
                 actions.move_to_element(element)
@@ -257,7 +257,7 @@ class Base(unittest.TestCase):
 
                 return True
             except Exception as x:
-                print(f"Error double_click method Exception: {str(x)}")
+                logger().exception(f"Error double_click method Exception: {str(x)}")
                 return False
 
 
@@ -286,7 +286,7 @@ class Base(unittest.TestCase):
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
         if self.config.debug_log:
-            print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
+            logger().info(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -500,7 +500,7 @@ class Base(unittest.TestCase):
         try:
             return self.driver.execute_script("return arguments[0].innerText", element)
         except StaleElementReferenceException:
-            print("********Element Stale get_element_text*********")
+            logger().exception("********Element Stale get_element_text*********")
             pass
 
     def get_element_value(self, element):
@@ -525,7 +525,7 @@ class Base(unittest.TestCase):
         try:
             return self.driver.execute_script("return arguments[0].value", element)
         except StaleElementReferenceException:
-            print("********Element Stale get_element_value*********")
+            logger().exception("********Element Stale get_element_value*********")
             pass
 
     def log_error(self, message, new_log_line=True):
@@ -651,7 +651,7 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except StaleElementReferenceException:
-            print("********Element Stale scroll_to_element*********")
+            logger().exception("********Element Stale scroll_to_element*********")
             pass
 
     def search_zindex(self,element):
@@ -703,7 +703,7 @@ class Base(unittest.TestCase):
             time.sleep(1)
             text_value = value.text
             combo.select_by_visible_text(text_value)
-            print(f"Selected value for combo is: {text_value}")
+            logger().info(f"Selected value for combo is: {text_value}")
 
     def send_keys(self, element, arg):
         """
@@ -776,7 +776,7 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
-            print("********Element Stale set_element_focus*********")
+            logger().exception("********Element Stale set_element_focus*********")
             pass
     
 
@@ -957,9 +957,9 @@ class Base(unittest.TestCase):
         >>> oHelper.SetTIRConfig(config_name="date", value="30/10/2018")
         """
         if 'TimeOut' in config_name:
-            print('TimeOut setting has been disabled in SetTirConfig')
+            logger().info('TimeOut setting has been disabled in SetTirConfig')
         else:
-            print(f"Setting config: {config_name} = {value}")
+            logger().info(f"Setting config: {config_name} = {value}")
             normalized_config = self.normalize_config_name(config_name)
             setattr(self.config, normalized_config, value)
 
@@ -972,7 +972,9 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> oHelper.Start()
         """
-        print("Starting the browser")
+
+        logger().info(f'TIR Version: {__version__}')
+        logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
             if sys.platform == 'linux':
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers/linux64/geckodriver')
@@ -1054,7 +1056,7 @@ class Base(unittest.TestCase):
         self.test_case.append(self.log.get_testcase_stack())
         self.last_test_case = self.log.get_testcase_stack()
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
-        print(f"Starting TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
+        logger().info(f"Starting TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
 
     def finish_testcase(self):
         """
@@ -1064,8 +1066,8 @@ class Base(unittest.TestCase):
         :return:
         """
         if self.last_test_case not in self.log.finish_testcase:
-            print(f"Finishing TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
+            logger().info(f"Finishing TestCase: {self.log.ct_method} CT: {self.log.ct_number}")
             self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
             self.log.generate_result(self.expected, self.message)
             self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())
-            print(self.log.testcase_seconds)
+            logger().info(self.log.testcase_seconds)
