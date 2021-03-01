@@ -23,6 +23,7 @@ from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
 from selenium.common.exceptions import *
 from datetime import datetime
+from tir.technologies.core.logging_config import logger
 
 class WebappInternal(Base):
     """
@@ -116,7 +117,7 @@ class WebappInternal(Base):
         """
         try:
 
-            print("Starting Setup TSS")
+            logger().info("Starting Setup TSS")
             self.tss = True
             self.service_process_bat_file()
 
@@ -159,7 +160,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
-        print("Fill user Screen")
+        logger().info("Fill user Screen")
         self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
         self.SetValue('cUser', self.config.user, name_attr = True)
@@ -191,7 +192,7 @@ class WebappInternal(Base):
         """
 
         if self.config.smart_test:
-            print(f"***System Info*** in Setup():")
+            logger().info(f"***System Info*** in Setup():")
             system_info()
 
         try:
@@ -294,7 +295,7 @@ class WebappInternal(Base):
             self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
 
-            print("Filling Initial Program")
+            logger().info("Filling Initial Program")
             start_prog_element = next(iter(soup.select("#inputStartProg")), None)
             if start_prog_element is None:
                 self.restart_counter += 1
@@ -324,7 +325,7 @@ class WebappInternal(Base):
                 self.log_error(message)
                 raise ValueError(message)
 
-            print("Filling Environment")
+            logger().info("Filling Environment")
             env_element = next(iter(soup.select("#inputEnv")), None)
             if env_element is None:
                 self.restart_counter += 1
@@ -383,7 +384,7 @@ class WebappInternal(Base):
         try_counter = 0
         soup = self.get_current_DOM()
 
-        print("Filling User")
+        logger().info("Filling User")
 
         try:
             user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
@@ -426,7 +427,7 @@ class WebappInternal(Base):
         # loop_control = True
 
         # while(loop_control):
-        print("Filling Password")
+        logger().info("Filling Password")
         password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
         if password_element is None:
             self.restart_counter += 1
@@ -516,7 +517,7 @@ class WebappInternal(Base):
 
         self.wait_element(self.language.database, main_container=container)
 
-        print("Filling Date")
+        logger().info("Filling Date")
         base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
         if len(base_dates) > 1:
             base_date = base_dates.pop()
@@ -534,7 +535,7 @@ class WebappInternal(Base):
         self.send_keys(date(), Keys.HOME)
         self.send_keys(date(), self.config.date)
 
-        print("Filling Group")
+        logger().info("Filling Group")
         group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
         if len(group_elements) > 1:
             group_element = group_elements.pop()
@@ -552,7 +553,7 @@ class WebappInternal(Base):
         self.send_keys(group(), Keys.HOME)
         self.send_keys(group(), self.config.group)
 
-        print("Filling Branch")
+        logger().info("Filling Branch")
         branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
         if len(branch_elements) > 1:
             branch_element = branch_elements.pop()
@@ -569,7 +570,7 @@ class WebappInternal(Base):
         self.send_keys(branch(), Keys.HOME)
         self.send_keys(branch(), self.config.branch)
 
-        print("Filling Environment")
+        logger().info("Filling Environment")
         environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
         if len(environment_elements) > 1:
             environment_element = environment_elements.pop()
@@ -703,7 +704,7 @@ class WebappInternal(Base):
         self.config.password = password
 
         self.driver.refresh()
-        print(f"Change to the user: {user}")
+        logger().info(f"Change to the user: {user}")
         self.Setup(initial_program, date, group, branch)
 
     def close_modal(self):
@@ -778,7 +779,7 @@ class WebappInternal(Base):
                 self.close_coin_screen()
                 
             except Exception as e:
-                print(str(e))
+                logger().exception(str(e))
         
         
     def close_resolution_screen(self):
@@ -915,7 +916,7 @@ class WebappInternal(Base):
         >>> self.set_program("MATA020")
         """
         try:
-            print(f"Setting program: {program}")
+            logger().info(f"Setting program: {program}")
             self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
             tget = next(iter(soup.select("[name=cGet]")), None)
@@ -957,7 +958,7 @@ class WebappInternal(Base):
                 self.close_coin_screen_after_routine()
 
         except AssertionError as error:
-            print(f"Warning set program raise AssertionError: {str(error)}")
+            logger().exception(f"Warning set program raise AssertionError: {str(error)}")
             raise error
         except Exception as e:
             self.log_error(str(e))
@@ -1003,7 +1004,7 @@ class WebappInternal(Base):
             if not(element):
                 raise Exception("Couldn't find element")
 
-            print("Field successfully found")
+            logger().debug("Field successfully found")
             if(send_key):
                 input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.set_element_focus(input_field())
@@ -1026,9 +1027,9 @@ class WebappInternal(Base):
                 time.sleep(0.01)
 
             if time.time() > endtime:
-                print("Timeout: new container not found.")
+                logger().debug("Timeout: new container not found.")
             else:
-                print("Success")
+                logger().debug("Success")
                 
         except Exception as e:
             self.log_error(str(e))
@@ -1073,7 +1074,7 @@ class WebappInternal(Base):
 
         self.wait_blocker()
 
-        print(f"Searching: {term}")
+        logger().info(f"Searching: {term}")
         if index and isinstance(key, int):
             key -= 1
         browse_elements = self.get_search_browse_elements(identifier)
@@ -1390,7 +1391,7 @@ class WebappInternal(Base):
 
         """
 
-        print("Waiting blocker to continue...")
+        logger().debug("Waiting blocker to continue...")
         soup = None
         result = True
         endtime = time.time() + 300
@@ -1431,9 +1432,9 @@ class WebappInternal(Base):
                 return None
                        
         except AttributeError as e:
-            print(f"Warning: wait_blocker > blocker_containers Exeception (AttributeError)\n {str(e)}")
+            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception (AttributeError)\n {str(e)}")
         except Exception as e:
-            print(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
+            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
 
             
     def get_panel_name_index(self, panel_name):
@@ -1516,7 +1517,7 @@ class WebappInternal(Base):
         except AssertionError as error:
             raise error
         except Exception as error:
-            print(error)
+            logger().exception(str(error))
             self.log_error(str(error))
 
 
@@ -1694,7 +1695,7 @@ class WebappInternal(Base):
         while(time.time() < endtime and not success):
             unmasked_value = self.remove_mask(value)
 
-            print(f"Looking for element: {field}")
+            logger().info(f"Looking for element: {field}")
 
             if field.lower() == self.language.From.lower():
                 element = self.get_field("cDeCond", name_attr=True)
@@ -1787,7 +1788,7 @@ class WebappInternal(Base):
                             current_value = self.get_web_value(input_field()).strip()
 
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
-                            print(f"Current field value: {current_value}")
+                            logger().info(f"Current field value: {current_value}")
 
                     if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
                     (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
@@ -1950,7 +1951,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not current_value):
                 current_value = self.get_web_value(field_element()).strip()
 
-            print(f"Value for Field {field} is: {current_value}")
+            logger().info(f"Value for Field {field} is: {current_value}")
 
             #Remove mask if present.
             if self.check_mask(field_element()):
@@ -2041,12 +2042,12 @@ class WebappInternal(Base):
 
         try:
             if self.restart_counter == 2:
-                print("Closing the Browser")
+                logger().info("Closing the Browser")
                 self.driver.close()
-                print("Starting the Browser")
+                logger().info("Starting the Browser")
                 self.Start()
             else:
-                print("Refreshing the Browser")
+                logger().info("Refreshing the Browser")
                 self.driver_refresh()
         except WebDriverException as e:
             webdriver_exception = e
@@ -2093,7 +2094,7 @@ class WebappInternal(Base):
         >>> self.driver_refresh()
         """
         if self.config.smart_test or self.config.debug_log:
-            print("Driver Refresh")
+            logger().info("Driver Refresh")
 
         self.driver.refresh()
         self.wait_blocker()
@@ -2130,7 +2131,7 @@ class WebappInternal(Base):
                     if self.click_button_finish(click_counter):                        
                         text_cover = self.search_text(selector=".tsay", text=string)
                         if text_cover:
-                            print(string)
+                            logger().info(string)
                             timeout = endtime - time.time()
                             if timeout > 0:
                                 self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
@@ -2149,7 +2150,7 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
 
             if not element:
-                print("Warning method finish use driver.refresh. element not found")
+                logger().warning("Warning method finish use driver.refresh. element not found")
 
             self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
@@ -2175,7 +2176,7 @@ class WebappInternal(Base):
                 else:
                     return False
         except Exception as e:
-            print(f"Warning Finish method exception - {str(e)}")
+            logger().exception(f"Warning Finish method exception - {str(e)}")
             return False
 
     def LogOff(self):
@@ -2209,7 +2210,7 @@ class WebappInternal(Base):
                     if self.click_button_logoff(click_counter):                        
                         text_cover = self.search_text(selector=".tsay", text=string)
                         if text_cover:
-                            print(string)
+                            logger().info(string)
                             timeout = endtime - time.time()
                             if timeout > 0:
                                 self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
@@ -2228,7 +2229,7 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
 
             if not element:
-                print("Warning method finish use driver.refresh. element not found")
+                logger().warning("Warning method finish use driver.refresh. element not found")
 
             self.driver_refresh() if not element else self.SetButton(self.language.logOff)
 
@@ -2254,7 +2255,7 @@ class WebappInternal(Base):
                 else:
                     return False
         except Exception as e:
-            print(f"Warning Finish method exception - {str(e)}")
+            logger().exception(f"Warning Finish method exception - {str(e)}")
             return False
 
 
@@ -2480,11 +2481,6 @@ class WebappInternal(Base):
         element_list = []
         containers = None
 
-        if self.config.debug_log:
-            with open("debug_log.txt", "a", ) as debug_log:
-                debug_log.write(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}\n")
-                print(f"term={term}, scrap_type={scrap_type}, position={position}, optional_term={optional_term}")
-
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
         elif (scrap_type != enum.ScrapType.MIXED and not (scrap_type == enum.ScrapType.TEXT and not re.match(r"\w+(_)", term))):
@@ -2519,7 +2515,7 @@ class WebappInternal(Base):
                     containers = self.zindex_sort(containers_soup, reverse=True)
 
                 except Exception as e:
-                    print(f"Warning element_exists containers exception:\n {str(e)}")
+                    logger().exception(f"Warning element_exists containers exception:\n {str(e)}")
                     pass
 
                 if self.base_container in container_selector:
@@ -2578,7 +2574,7 @@ class WebappInternal(Base):
         if save_input:
             self.config.routine = menu_itens
 
-        print(f"Navigating lateral menu: {menu_itens}")
+        logger().info(f"Navigating lateral menu: {menu_itens}")
         self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
@@ -2628,7 +2624,7 @@ class WebappInternal(Base):
         except AssertionError as error:
             raise error
         except Exception as error:
-            print(error)
+            logger().exception(str(error))
             self.restart_counter += 1
             self.log_error(str(error))
     
@@ -2672,7 +2668,7 @@ class WebappInternal(Base):
             child_label_s.click()
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
-                print(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
+                logger().exception(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
 
         
 
@@ -2705,7 +2701,7 @@ class WebappInternal(Base):
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
-        print(f"Clicking on {button}")
+        logger().info(f"Clicking on {button}")
 
         try:
             soup_element  = ""
@@ -2725,7 +2721,7 @@ class WebappInternal(Base):
             starttime = time.time()
 
             if self.config.smart_test:
-                print(f"***System Info*** Before Clicking on button:")
+                logger().debug(f"***System Info*** Before Clicking on button:")
                 system_info()
 
             while(time.time() < endtime and not soup_element):
@@ -2740,7 +2736,7 @@ class WebappInternal(Base):
                     id_parent_element = parent_element.get_attribute('id')
 
             if self.config.smart_test:
-                print(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
                 
             if not soup_element:
                 other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
@@ -2830,16 +2826,16 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
-            print(str(error))
-            self.log_error(f"Button {button} could not be located.")
+            logger().exception(str(error))
+            logger().exception(f"Button {button} could not be located.")
         except AssertionError:
             raise
         except Exception as error:
-            print(str(error))
+            logger().exception(str(error))
             self.log_error(str(error))
         
         if self.config.smart_test:
-            print(f"***System Info*** After Clicking on button:")
+            logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
     def set_button_x(self, position=1, check_error=True):
@@ -2996,7 +2992,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetBranch("D MG 01 ")
         """
-        print(f"Setting branch: {branch}.")
+        logger().info(f"Setting branch: {branch}.")
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
         Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
@@ -3014,7 +3010,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        print("Waiting processing...")
+        logger().info("Waiting processing...")
 
         if not timeout:
             timeout = 1200
@@ -3048,7 +3044,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        print(f"Waiting show text '{string}'...")
+        logger().info(f"Waiting show text '{string}'...")
 
         if not timeout:
             timeout = 1200
@@ -3113,7 +3109,7 @@ class WebappInternal(Base):
             self.send_keys(element(), Keys.ENTER)
             self.SetButton("Ok")
         except:
-            print("Search field could not be located.")
+            logger().exception("Search field could not be located.")
 
     def ClickFolder(self, folder_name, position):
         """
@@ -3185,7 +3181,7 @@ class WebappInternal(Base):
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
         self.wait_blocker()
-        print(f"ClickBox - Clicking on {content_list}")
+        logger().info(f"ClickBox - Clicking on {content_list}")
         endtime = time.time() + self.config.time_out
         grid_number -= 1
         if content_list:
@@ -3252,7 +3248,7 @@ class WebappInternal(Base):
 
                     end_containers = self.get_all_containers()
                     if end_containers and len(end_containers) > len(initial_containers):
-                        print("ClickBox: New container found stopping attempts to click on the checkbox")
+                        logger().debug("ClickBox: New container found stopping attempts to click on the checkbox")
                         break
 
                     new_td = next(iter(get_current().select(f"td[id='{column_index}']")), None)
@@ -3270,7 +3266,7 @@ class WebappInternal(Base):
         :return:
         """
 
-        print("Wait for element to be blocked...")
+        logger().debug("Wait for element to be blocked...")
 
         element = False
 
@@ -3577,7 +3573,7 @@ class WebappInternal(Base):
         >>> oHelper.SetKey(key="CTRL", additional_key="A")
         """
         self.wait_blocker()
-        print(f"Key pressed: {key + '+' + additional_key if additional_key != '' else key }") 
+        logger().info(f"Key pressed: {key + '+' + additional_key if additional_key != '' else key }")
 
         #JavaScript function to return focused element if DIV/Input OR empty if other element is focused
 
@@ -3747,7 +3743,7 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)
         else:
-            print(f"Setting focus on element {field}.")
+            logger().debug(f"Setting focus on element {field}.")
 
             label = False if re.match(r"\w+(_)", field) else True
 
@@ -3775,7 +3771,7 @@ class WebappInternal(Base):
                 if self.driver.switch_to_active_element() != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
-                print(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
+                logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
     def click_check_radio_button(self, field, value, name_attr = False, position = 1):
         """
@@ -3795,7 +3791,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> element = self.check_checkbox("CheckBox1", True)
         """
-        print(f'Clicking in "{self.returns_printable_string(field)}"')
+        logger().info(f'Clicking in "{self.returns_printable_string(field)}"')
 
         position -= 1
         
@@ -3963,11 +3959,11 @@ class WebappInternal(Base):
                 self.new_grid_line(field)
             else:
                 self.wait_blocker()
-                print(f"Filling grid field: {field[0]}")
+                logger().info(f"Filling grid field: {field[0]}")
                 self.fill_grid(field, x3_dictionaries, initial_layer)
 
         for field in self.grid_check:
-            print(f"Checking grid field value: {field[1]}")
+            logger().info(f"Checking grid field value: {field[1]}")
             self.check_grid(field, x3_dictionaries)
 
         self.clear_grid()
@@ -4053,7 +4049,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
-            print("Waiting for container to be active")
+            logger().debug("Waiting for container to be active")
             time.sleep(1)
             
         if "tget" in self.get_current_container().next.attrs['class']:
@@ -4075,7 +4071,7 @@ class WebappInternal(Base):
                         container_id = self.soup_to_selenium(container).get_attribute("id") if self.soup_to_selenium(container) else None
                     except Exception as err:
                         container_id = None
-                        print(err)
+                        logger().exception(str(err))
                         pass
                     grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                     grids = self.filter_displayed_elements(grids)
@@ -4223,7 +4219,7 @@ class WebappInternal(Base):
                                         containers.remove(child[0].parent.parent)
                                     container_current = next(iter(self.zindex_sort(containers, True)))
                                     if container_current.attrs['id'] != container_id:
-                                        print("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
+                                        logger().debug("Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                         return
                         else:
                             option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text ,child[0].select('option'))))
@@ -4296,7 +4292,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not ret):
             if self.config.debug_log:
-                print("Recovering lost line")
+                logger().debug("Recovering lost line")
             while ( time.time() < endtime and int(row.attrs["id"]) < self.grid_counters[grid_id]):
                 self.new_grid_line(field, False)
                 row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
@@ -4358,7 +4354,7 @@ class WebappInternal(Base):
 
         while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body") and time.time() < endtime):
             if self.config.debug_log:
-                print("Waiting for container to be active")
+                logger().debug("Waiting for container to be active")
             time.sleep(1)
 
         while(time.time() < endtime and not success):
@@ -4405,7 +4401,7 @@ class WebappInternal(Base):
 
         field_name = f"({field[0]}, {column_name})"
         self.log_result(field_name, field[2], text)
-        print(f"Collected value: {text}")
+        logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error( grids, headers, column_name, rows, columns, field )
 
@@ -4482,7 +4478,7 @@ class WebappInternal(Base):
                     endtime = time.time() + self.config.time_out
                     while (time.time() < endtime and not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1))):
                         if self.config.debug_log:
-                            print("Waiting for the new line to show")
+                            logger().debug("Waiting for the new line to show")
                         time.sleep(1)
 
                     if (add_grid_line_counter):
@@ -4781,7 +4777,7 @@ class WebappInternal(Base):
         """
         endtime = time.time() + timeout
         try:
-            print('Waiting for element to disappear')
+            logger().debug('Waiting for element to disappear')
             while(self.element_is_displayed(element_soup) and time.time() <= endtime):
                 time.sleep(step)
         except Exception:
@@ -4815,7 +4811,7 @@ class WebappInternal(Base):
         except NoSuchElementException:
             return None
         except Exception as e:
-            print(f"Warning switch_to_active_element() exception : {str(e)}")
+            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
@@ -4844,7 +4840,7 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         if self.config.debug_log:
-            print("Waiting for element")
+            logger().debug("Waiting for element")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
@@ -4866,7 +4862,7 @@ class WebappInternal(Base):
         if presence:
 
             if self.config.debug_log:
-                print("Element found! Waiting for element to be displayed.")
+                logger().debug("Element found! Waiting for element to be displayed.")
 
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             
@@ -4934,7 +4930,7 @@ class WebappInternal(Base):
 
         if presence and success:
             if self.config.debug_log:
-                print("Element found! Waiting for element to be displayed.")
+                logger().debug("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
@@ -5060,7 +5056,7 @@ class WebappInternal(Base):
             buttons = list(filter(lambda x: x.text.strip() != "", current_layer.select(".tpanel button")))
             return list(map(lambda x: x.parent.attrs["id"], buttons))
         except Exception as error:
-            print(error)
+            logger().exception(error)
             return []
 
     def CheckView(self, text, element_type="help"):
@@ -5080,7 +5076,7 @@ class WebappInternal(Base):
         >>> oHelper.CheckView("Processing")
         """
         if element_type == "help":
-            print(f"Checking text on screen: {text}")
+            logger().info(f"Checking text on screen: {text}")
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
@@ -5231,10 +5227,10 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
         self.clear_grid()
-        print(f"Warning log_error {message}")
+        logger().warning(f"Warning log_error {message}")
 
         if self.config.smart_test:
-            print(f"***System Info*** in log_error():")
+            logger().debug(f"***System Info*** in log_error():")
             system_info()
 
         routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
@@ -5267,7 +5263,7 @@ class WebappInternal(Base):
             try:
                 self.driver.close()
             except Exception as e:
-                print(f"Warning Log Error Close {str(e)}")
+                logger().exception(f"Warning Log Error Close {str(e)}")
 
         if self.restart_counter > 2:
 
@@ -5280,7 +5276,7 @@ class WebappInternal(Base):
                 try:
                     self.driver.close()
                 except Exception as e:
-                    print(f"Warning Log Error Close {str(e)}")
+                    logger().exception(f"Warning Log Error Close {str(e)}")
 
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
             if self.restart_counter >= 3:
@@ -5325,7 +5321,7 @@ class WebappInternal(Base):
 
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
-                print("Searching for Icon")
+                logger().info("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
                     if filtered_buttons and len(filtered_buttons) -1 >= position:
@@ -5706,7 +5702,7 @@ class WebappInternal(Base):
         >>> # Calling method:
         >>> self.WaitFieldValue("CN0_DESCRI", "MY DESCRIPTION")
         """
-        print(f"Waiting for field {field} value to be: {expected_value}")
+        logger().info(f"Waiting for field {field} value to be: {expected_value}")
         field = re.sub(r"(\:*)(\?*)", "", field).strip()
         self.wait_element(field)
 
@@ -5768,7 +5764,7 @@ class WebappInternal(Base):
 
         self.errors = []
 
-        print(self.message) if self.message else None
+        logger().info(self.message) if self.message else None
         
         if self.expected:
             self.assertTrue(True, "Passed")
@@ -5915,7 +5911,7 @@ class WebappInternal(Base):
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
         """
 
-        print(f"Clicking on Tree: {treepath}")
+        logger().info(f"Clicking on Tree: {treepath}")
 
         hierarchy=None
 
@@ -6279,11 +6275,12 @@ class WebappInternal(Base):
             try:
                 self.driver_refresh()
             except WebDriverException as e:
+                logger().exception(str(e))
                 webdriver_exception = e
 
             if webdriver_exception:
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                print(message)
+                logger().debug(message)
 
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
@@ -6306,7 +6303,7 @@ class WebappInternal(Base):
         try:
             self.driver.close()
         except Exception as e:
-            print(f"Warning tearDown Close {str(e)}")
+            logger().exception(f"Warning tearDown Close {str(e)}")
             
     def containers_filter(self, containers):
         """
@@ -6488,7 +6485,7 @@ class WebappInternal(Base):
         content = False
         endtime = time.time() + self.config.time_out
 
-        print("Waiting for SmartERP environment assembly")
+        logger().debug("Waiting for SmartERP environment assembly")
 
         while not content and (time.time() < endtime):
             try:
@@ -6531,7 +6528,7 @@ class WebappInternal(Base):
                 self.wait.until(expected_conditions_dictionary[expected_condition]())
 
         except TimeoutException as e:
-            print(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
+            logger().exception(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
             pass
 
         if timeout:
@@ -6579,8 +6576,8 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not text_extracted):
-            
-            print(f"Checking Help on screen: {text}")
+
+            logger().info(f"Checking Help on screen: {text}")
             # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
             self.wait_element_timeout(term=text_help, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5,
                                       optional_term=".tsay", check_error=False)
@@ -6621,16 +6618,16 @@ class WebappInternal(Base):
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
             if text_user.replace(" ","") in text_extracted.replace(" ",""):
-                print(f"Help on screen Checked: {text_user}")
+                logger().info(f"Help on screen Checked: {text_user}")
                 return
             else:
-                print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
+                logger().info(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
         else:
             if text_user in text_extracted:
-                print(f"Help on screen Checked: {text_user}")
+                logger().info(f"Help on screen Checked: {text_user}")
                 return
             else:
-                print(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
+                logger().info(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
 
     def get_single_button(self):
         """
@@ -6893,7 +6890,7 @@ class WebappInternal(Base):
                     filter_column_user = filter_column - 1
                 df = self.filter_dataframe(df, filter_column_user, filter_value)
             elif (filter_column and not filter_value) or (filter_value and not filter_column):
-                print('WARNING: filter_column and filter_value is necessary to filter rows by column content. Data wasn\'t filtered') 
+                logger().warning('WARNING: filter_column and filter_value is necessary to filter rows by column content. Data wasn\'t filtered')
                 
             return self.return_data(df, has_header, column)
         else:
@@ -7001,11 +6998,11 @@ class WebappInternal(Base):
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
-                print(f"Warning Exception send_action {str(e)}")
+                logger().exception(f"Warning Exception send_action {str(e)}")
             return False
 
         if self.config.smart_test or self.config.debug_log:
-            print(f"send_action method result = {soup_before_event != soup_after_event}")
+            logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
 
     def get_soup_select(self, selector):

@@ -4,6 +4,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from tir.version import __version__
+
 setup(
     description='TOTVS Interface Robot',
     long_description=open('README.md').read(),
@@ -14,7 +16,7 @@ setup(
     project_urls={
     'Script Samples': 'https://github.com/totvs/tir-script-samples'
     },
-    version='1.17.40',
+    version=__version__,
     license='MIT',
     keywords='test automation selenium tir totvs protheus framework',
     classifiers=[

@@ -2,6 +2,8 @@ from tir.technologies.core.config import ConfigLoader
 import requests
 import json
 import time
+from tir.technologies.core.logging_config import logger
+
 
 class NumExec(ConfigLoader):
 
@@ -30,7 +32,7 @@ class NumExec(ConfigLoader):
             time.sleep(12)
 
         response = str(f"STATUS: {status} Url: {url} ID: {id_error} Error: {error}")
-        print(response)
+        logger().debug(response)
         if status not in success_response:
             with open(f"{self.log_folder}\{id_error}_json_data_response.txt", "w") as json_log:
                 json_log.write(response)
