@@ -6,6 +6,8 @@ except ImportError:
 
 from tir.version import __version__
 
+version = __version__
+
 setup(
     description='TOTVS Interface Robot',
     long_description=open('README.md').read(),
@@ -16,7 +18,7 @@ setup(
     project_urls={
     'Script Samples': 'https://github.com/totvs/tir-script-samples'
     },
-    version=__version__,
+    version=version,
     license='MIT',
     keywords='test automation selenium tir totvs protheus framework',
     classifiers=[
