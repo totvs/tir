@@ -235,6 +235,7 @@ class WebappInternal(Base):
             self.environment_screen()
 
             while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                self.close_warning_screen()
                 self.close_coin_screen()
                 self.close_modal()
 
@@ -643,6 +644,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
 
+        self.close_warning_screen()
         self.close_coin_screen()
         
     def change_environment_element_home_screen(self):
@@ -780,6 +782,21 @@ class WebappInternal(Base):
                 
             except Exception as e:
                 logger().exception(str(e))
+
+    def close_warning_screen(self):
+        """
+        [Internal]
+        Closes the warning screen.
+
+        Usage:
+        >>> # Calling the method:
+        >>> self.close_warning_screen()
+        """
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".ui-dialog"), True)
+        if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+         optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False):
+            self.set_button_x()
         
         
     def close_resolution_screen(self):
