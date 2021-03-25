@@ -2090,6 +2090,7 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+                self.close_warning_screen()
                 self.close_modal()
 
             
