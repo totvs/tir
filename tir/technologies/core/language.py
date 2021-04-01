@@ -294,7 +294,7 @@ class LanguagePack:
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
             "File Name": "Nombre del archivo:",
 			"Open": "Abierto",
-            "Warning": "Atencion"
+            "Warning": "Aviso"
         }
         russian = {
             "User": "Пользователь",
