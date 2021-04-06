@@ -68,6 +68,7 @@ class LanguagePack:
         self.assert_false_message = languagepack["AssertFalseMessage"]
         self.file_name = languagepack["File Name"]
         self.open = languagepack["Open"]
+        self.warning = languagepack["Warning"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -143,8 +144,8 @@ class LanguagePack:
             "Yes": "Sim",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "File Name": "File Name",
-			"Open": "Open"
-            
+			"Open": "Open",
+            "Warning": "Warning" 
         }
 
         brazilian_portuguese = {
@@ -218,9 +219,8 @@ class LanguagePack:
             "Yes": "Sim",
             "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
             "File Name": "Nome do Arquivo:",
-			"Open": "Abrir"
-        
-            
+			"Open": "Abrir",
+            "Warning": "Atenção"
         }
         spanish = {
             "User": "Usuário",
@@ -293,7 +293,8 @@ class LanguagePack:
             "Yes":"Reserved",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
             "File Name": "Nombre del archivo:",
-			"Open": "Abierto"
+			"Open": "Abierto",
+            "Warning": "Aviso"
         }
         russian = {
             "User": "Пользователь",
@@ -369,7 +370,8 @@ class LanguagePack:
             "NewPassword": "Нов. пароль*",
             "ConfirmNewPassword": "Подтв. новый пароль*",
             "File Name": "имя файла",
-			"Open": "открыто"
+			"Open": "открыто",
+            "Warning": "Берегись"
         }
 
         if language.lower() == "en-us":

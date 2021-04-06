@@ -235,6 +235,7 @@ class WebappInternal(Base):
             self.environment_screen()
 
             while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                self.close_warning_screen()
                 self.close_coin_screen()
                 self.close_modal()
 
@@ -643,6 +644,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
 
+        self.close_warning_screen()
         self.close_coin_screen()
         
     def change_environment_element_home_screen(self):
@@ -780,8 +782,53 @@ class WebappInternal(Base):
                 
             except Exception as e:
                 logger().exception(str(e))
+
+    def close_warning_screen(self):
+        """
+        [Internal]
+        Closes the warning screen.
+
+        Usage:
+        >>> # Calling the method:
+        >>> self.close_warning_screen()
+        """
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".ui-dialog"), True)
+        if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+         optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False):
+            self.set_button_x()
         
-        
+    def close_warning_screen_after_routine(self):
+        """
+        [internal]
+        This method is responsible for closing the "warning screen" that opens after searching for the routine
+        """
+        endtime = time.time() + self.config.time_out
+
+        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out, main_container="body", check_error = False)
+
+        uidialog_list = []
+
+        while(time.time() < endtime and not uidialog_list):
+            try:
+                soup = self.get_current_DOM()
+                uidialog_list = soup.select('.ui-dialog')
+
+                self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".ui-dialog-titlebar", timeout=10, main_container = "body", check_error = False)
+                 
+                tmodal_warning_screen = next(iter(self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False, check_help = False)), None)
+
+                if tmodal_warning_screen and tmodal_warning_screen in uidialog_list:
+                    uidialog_list.remove(tmodal_warning_screen.parent.parent)
+                    
+                self.close_warning_screen()
+                
+            except Exception as e:
+                logger().exception(str(e))
+
     def close_resolution_screen(self):
         """
         [Internal]
@@ -955,6 +1002,7 @@ class WebappInternal(Base):
                 self.wait_element_is_not_displayed(tget_img)
 
             if self.config.initial_program.lower() == 'sigaadv':
+                self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
 
         except AssertionError as error:
@@ -2073,6 +2121,7 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+                self.close_warning_screen()
                 self.close_modal()
 
             
