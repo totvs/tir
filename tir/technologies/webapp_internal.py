@@ -3025,7 +3025,9 @@ class WebappInternal(Base):
                 containers.append(child)
             elif child.text.startswith(menu_item):
                 submenu = child
-                break
+        
+        if len(containers) > 0:
+            submenu = ""
 
         return (submenu, containers)
 
