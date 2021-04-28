@@ -1195,6 +1195,22 @@ class Webapp():
         """
         return self.__webapp.get_config_value(json_key)
 
+    def ReportComparison(self, base_file="", current_file=""):
+        """
+
+        Compare two reports files and return success or the difference between then.
+
+        .. warning::
+            Important to use BaseLine_Spool key in config.json to work appropriately.
+
+
+        :param base_file: Base file that reflects the expected 
+        :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        :return:
+        """
+
+        return self.__webapp.report_comparison(base_file, current_file)
+
 class Apw():
 
     def __init__(self, config_path=""):

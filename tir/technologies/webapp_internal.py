@@ -3422,7 +3422,7 @@ class WebappInternal(Base):
                 td_selenium().click()
                 if not td_is_selected():
                     self.wait_until_to( expected_condition = "visibility_of", element = td_selenium, timeout=True)
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td, locator = By.XPATH, timeout=True)
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element = td_selenium, locator = By.XPATH, timeout=True)
                     
                     success = td_is_selected()
                 else:
@@ -7077,3 +7077,133 @@ class WebappInternal(Base):
         if m:
             self.driver.close()
             self.assertTrue(False, f'Current "MotExec" are using a reserved word: "{m.group(0)}", please check "config.json" key and execute again.')
+
+    def report_comparison(self, base_file="aaaa", current_file="aaa"):
+        """
+
+        Compare two reports files and return success or the difference between then.
+
+        .. warning::
+            Important to use BaseLine_Spool key in config.json to work appropriately.
+
+
+        :param base_file: Base file that reflects the expected 
+        :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        :return:
+        """
+
+        message = ""
+
+        if not self.config.baseline_spool:
+            self.log_error("No path in BaseLine_Spool in config.json! Please make sure to put a valid path in this key")
+
+        if not current_file:
+            self.log_error("Report current file not found! Please inform a valid file")
+        else:
+            self.check_file(base_file, current_file)
+            auto_file = self.create_auto_file(current_file)
+            logger().warning(
+                f'We created a "auto" based in current file in "{self.config.baseline_spool}". please, make a copy of auto and rename to base then run again.')
+
+            with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
+                with open(auto_file) as auto_file:
+                    for line_base_file, line_auto_file in zip(base_file, auto_file):
+                        if line_base_file != line_auto_file:
+                            logger().warning("Make sure you are comparing 2 treated files")
+                            message = f'Base line content: "{line_base_file}" is different of Auto line content: "{line_auto_file}"'
+                            self.errors.append(message)
+                            break
+
+    def create_auto_file(self, file=""):
+        """
+
+        :param file:
+        :return:
+        """
+
+        file_extension = file[-4:].lower()
+
+        full_path = f'{self.config.baseline_spool}\\{file}'
+
+        with open(full_path) as file_obj:
+            readlines = file_obj.readlines()
+
+            for line in readlines:
+                content = self.sub_string(line, file_extension)
+
+                with open(
+                            rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}',
+                            "a") as write_file:
+                        write_file.write(content)
+
+        return f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+
+    def sub_string(self, line, file_extension):
+        """
+
+        :param line:
+        :param file_extension:
+        :return:
+        """
+
+        if not file_extension == '.xml':
+
+            emissao = re.search(r'(Emissão: )(?:(\d{2}-\d{2}-\d{4}))', line)
+
+            emision = re.search(r'(Emision: )(?:(\d{2}-\d{2}-\d{4}))', line)
+
+            dtref = re.search(r'(DT\.Ref\.: )(?:(\d{2}-\d{2}-\d{4}))', line)
+
+            fcref = re.search(r'(Fc\.Ref\.: )(?:(\d{2}-\d{2}-\d{4}))', line)
+
+            hora = re.search(r'(Hora\.\.\.: )(?:(\d{2}:\d{2}:\d{2}))', line)
+
+            hora_termino = re.search(r'(Hora Término: )(?:(\d{2}:\d{2}:\d{2}))', line)
+
+            slash = re.search(r'(/)', line)
+
+            if emissao:
+                line = re.sub(emissao.group(0), 'Emissão: 01-01-2015', line)
+            if emision:
+                line = re.sub(emision.group(0), 'Emision: 01-01-2015', line)
+            if dtref:
+                line = re.sub(dtref.group(0), 'DT.Ref.: 01-01-2015', line)
+            if fcref:
+                line = re.sub(fcref.group(0), 'Fc.Ref.: 01-01-2015', line)
+            if hora:
+                line = re.sub(hora.group(0), 'Hora...: 00:00:00', line)
+            if hora_termino:
+                line = re.sub(hora_termino.group(0), 'Hora Término: 00:00:00', line)
+            if slash:
+                line = re.sub(slash.group(0), '@', line)
+
+        else:
+
+            encoding = re.search(r'(encoding=)(?:("UTF-8")|(""))', line)
+
+            datetime = re.search(r'("DateTime">)(?:(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))', line)
+
+            width = re.search(r'(ss:Width=)"(?:(\d+))"', line)
+
+            if encoding:
+                line = re.sub(encoding.group(0), 'encoding=""', line)
+            if datetime:
+                line = re.sub(datetime.group(0), '"DateTime">2015-01-01T00:00:00', line)
+            if width:
+                line = re.sub(datetime.group(0), 'ss:Width="100"', line)
+
+        return line
+
+    def check_file(self, base_file="", current_file=""):
+        """
+
+        :param base_file:
+        :param current_file:
+        :return:
+        """
+
+        if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
+            self.log_error("Base file doesn't exist! Please confirm the file name and path.")
+
+        if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
+            self.log_error("Current file doesn't exist! Please confirm the file name and path.")

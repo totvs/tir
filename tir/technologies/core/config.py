@@ -71,3 +71,4 @@ class ConfigLoader:
         self.parameter_url = bool(data["ParameterUrl"]) if "ParameterUrl" in data else False
         self.release = str(data["Release"]) if "Release" in data else ""
         self.log_http = str(data["LogHttp"]) if "LogHttp" in data else ""
+        self.baseline_spool = str(data["BaseLine_Spool"]) if "BaseLine_Spool" in data else ""
