@@ -7125,6 +7125,11 @@ class WebappInternal(Base):
 
         full_path = f'{self.config.baseline_spool}\\{file}'
 
+        auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+
+        if pathlib.Path(f'{auto_file_path}').exists():
+            pathlib.Path(f'{auto_file_path}').unlink()
+
         with open(full_path) as file_obj:
             readlines = file_obj.readlines()
 
@@ -7136,7 +7141,7 @@ class WebappInternal(Base):
                             "a") as write_file:
                         write_file.write(content)
 
-        return f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+        return auto_file_path
 
     def sub_string(self, line, file_extension):
         """
