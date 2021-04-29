@@ -17,7 +17,7 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
-from tir.technologies.core.psutil import system_info
+from tir.technologies.core.psutil_info import system_info
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
 from math import sqrt, pow
@@ -7080,13 +7080,13 @@ class WebappInternal(Base):
             self.driver.close()
             self.assertTrue(False, f'Current "MotExec" are using a reserved word: "{m.group(0)}", please check "config.json" key and execute again.')
 
-    def report_comparison(self, base_file="aaaa", current_file="aaa"):
+    def report_comparison(self, base_file="", current_file=""):
         """
 
-        Compare two reports files and return success or the difference between then.
+        Compare two reports files and if exists show the difference between then if exists.
 
         .. warning::
-            Important to use BaseLine_Spool key in config.json to work appropriately.
+            Important to use BaseLine_Spool key in config.json to work appropriately. Baseline_Spool is the path of report spool in yout environment
 
         .. warning::
             Some words are changed to this pattern below:
@@ -7105,10 +7105,13 @@ class WebappInternal(Base):
             '"DateTime">2015-01-01T00:00:00'
             'ss:Width="100"'
 
-
-
-        :param base_file: Base file that reflects the expected 
+        :param base_file: Base file that reflects the expected. If doesn't exist make a copy of auto and then rename to base
         :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        >>> # File example:
+        >>> # acda080rbase.##r
+        >>> # acda080rauto.##r
+        >>> # Calling the method:
+        >>> self.oHelper.ReportComparison(base_file="acda080rbase.##r", current_file="acda080rauto.##r")
         :return:
         """
 
@@ -7120,16 +7123,16 @@ class WebappInternal(Base):
         if not current_file:
             self.log_error("Report current file not found! Please inform a valid file")
         else:
-            self.check_file(base_file, current_file)
             auto_file = self.create_auto_file(current_file)
             logger().warning(
-                f'We created a "auto" based in current file in "{self.config.baseline_spool}". please, make a copy of auto and rename to base then run again.')
+                f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.')
+            self.check_file(base_file, current_file)
 
             with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
                 with open(auto_file) as auto_file:
                     for line_base_file, line_auto_file in zip(base_file, auto_file):
                         if line_base_file != line_auto_file:
-                            logger().warning("Make sure you are comparing 2 treated files")
+                            logger().warning("Make sure you are comparing two treated files")
                             message = f'Base line content: "{line_base_file}" is different of Auto line content: "{line_auto_file}"'
                             self.errors.append(message)
                             break
@@ -7227,8 +7230,11 @@ class WebappInternal(Base):
         :return:
         """
 
+        if not base_file:
+            base_file = None
+
         if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
-            self.log_error("Base file doesn't exist! Please confirm the file name and path.")
+            self.log_error("Base file doesn't exist! Please confirm the file name and path. Now you can use auto file to rename to base.")
 
         if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
