@@ -7164,6 +7164,9 @@ class WebappInternal(Base):
                             "a") as write_file:
                         write_file.write(content)
 
+        logger().warning(
+                f'Auto file created in: "{auto_file_path}"')
+
         return auto_file_path
 
     def sub_string(self, line, file_extension):
