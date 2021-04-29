@@ -24,6 +24,7 @@ from math import sqrt, pow
 from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
+import pathlib
 
 class WebappInternal(Base):
     """
