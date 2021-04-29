@@ -1212,7 +1212,7 @@ class Webapp():
             'Fc.Ref.: 01-01-2015'
             'Hora...: 00:00:00'
             'Hora Término: 00:00:00'
-            '@'
+            '/' to '@'
 
             Only .xml
 

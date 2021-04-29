@@ -7086,6 +7086,24 @@ class WebappInternal(Base):
         .. warning::
             Important to use BaseLine_Spool key in config.json to work appropriately.
 
+        .. warning::
+            Some words are changed to this pattern below:
+
+            'Emissão: 01-01-2015'
+            'Emision: 01-01-2015'
+            'DT.Ref.: 01-01-2015'
+            'Fc.Ref.: 01-01-2015'
+            'Hora...: 00:00:00'
+            'Hora Término: 00:00:00'
+            '/' to '@'
+
+            Only .xml
+
+            'encoding=""'
+            '"DateTime">2015-01-01T00:00:00'
+            'ss:Width="100"'
+
+
 
         :param base_file: Base file that reflects the expected 
         :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
