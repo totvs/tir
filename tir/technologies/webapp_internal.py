@@ -3188,10 +3188,15 @@ class WebappInternal(Base):
         self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
 
         endtime  = time.time() + self.config.time_out
+        half_config_timeout = time.time() + self.config.time_out / 2
 
         while(time.time() < endtime and not element):
             panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
             panels_filtered = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
+
+            if time.time() >= half_config_timeout:
+                panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
+
             if panels_filtered:
                 if position > 0:
                     panel = panels_filtered[position] if position < len(panels_filtered) else None
