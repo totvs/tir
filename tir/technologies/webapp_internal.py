@@ -383,6 +383,8 @@ class WebappInternal(Base):
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out * 3 , main_container='body'):
             self.reload_user_screen()
 
+        self.set_multilanguage()
+
         try_counter = 0
         soup = self.get_current_DOM()
 
@@ -7246,3 +7248,19 @@ class WebappInternal(Base):
 
         if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
+
+    def set_multilanguage(self):
+
+        if self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
+
+            tcombobox = next(iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
+            selects = next(iter(tcombobox.select('select')))
+
+            if self.config.language == 'pt-br':
+                language = ['português', 'portugués', 'portuguese']
+            elif self.config.language == 'es-es':
+                language = ['espanhol', 'español', 'spanish']
+            elif self.config.language == 'en-us':
+                language = ['inglês', 'inglés', 'english']
+
+            self.select_combo(selects, language, index=True)
