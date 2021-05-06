@@ -682,7 +682,7 @@ class Base(unittest.TestCase):
 
         return zindex
 
-    def select_combo(self, element, option):
+    def select_combo(self, element, option, index=False):
         """
         Selects the option on the combobox.
 
@@ -697,13 +697,18 @@ class Base(unittest.TestCase):
         >>> self.select_combo(element, "Chosen option")
         """
         combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
-        value = next(iter(filter(lambda x: x.text[0:len(option)] == option, combo.options)), None)
 
-        if value:
+        if index:
+            index_number = self.return_combo_index(combo, option)
             time.sleep(1)
-            text_value = value.text
-            combo.select_by_visible_text(text_value)
-            logger().info(f"Selected value for combo is: {text_value}")
+            combo.select_by_index(str(index_number))
+        else:
+            value = next(iter(filter(lambda x: x.text[0:len(option)].lower() == option.lower(), combo.options)), None)
+            if value:
+                time.sleep(1)
+                text_value = value.text
+                combo.select_by_visible_text(text_value)
+                logger().info(f"Selected value for combo is: {text_value}")
 
     def send_keys(self, element, arg):
         """
@@ -1071,3 +1076,15 @@ class Base(unittest.TestCase):
             self.log.generate_result(self.expected, self.message)
             self.log.finish_testcase.append(self.last_test_case if not self.log.get_testcase_stack() == "setUpClass" else self.log.get_testcase_stack())
             logger().info(self.log.testcase_seconds)
+
+    def return_combo_index(self, combo, option):
+        """
+
+        :param combo:
+        :param option:
+        :return:
+        """
+
+        for i, j in enumerate(combo.options):
+            if j.text.lower() in option:
+                return i
