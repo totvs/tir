@@ -1021,6 +1021,8 @@ class Base(unittest.TestCase):
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
+        self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+
     def TearDown(self):
         """
         Closes the webdriver and ends the test case.
