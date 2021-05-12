@@ -133,9 +133,9 @@ class Webapp():
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
         :param input_field: False if the desired field is not an input type .
-        :type bool
+        :type input_field: bool
         :param direction: Desired direction to search for the element, currently accepts right and down.
-        :type str
+        :type direction: str
 
         Usage:
 
@@ -1221,13 +1221,17 @@ class Webapp():
             'ss:Width="100"'
 
         :param base_file: Base file that reflects the expected. If doesn't exist make a copy of auto and then rename to base
+        :type base_file: str
         :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        :type current_file: str
+
+        Usage:
+
         >>> # File example:
         >>> # acda080rbase.##r
         >>> # acda080rauto.##r
         >>> # Calling the method:
         >>> self.oHelper.ReportComparison(base_file="acda080rbase.##r", current_file="acda080rauto.##r")
-        :return:
         """
 
         return self.__webapp.report_comparison(base_file, current_file)
