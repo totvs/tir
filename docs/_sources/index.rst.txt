@@ -5,32 +5,22 @@
 
 TOTVS Interface Robot
 =====================
+.. image:: img/completoCor.png
+   :width: 800
 
 .. toctree::
    :maxdepth: 5
+   :caption: User Documentation:
 
+   webapp
    configjson
 
 .. toctree::
    :maxdepth: 5
-   :caption: User Classes:
+   :caption: TIR internal classes:
 
-   apw
-   webapp
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Internal Classes:
-
-   apw_internal
    webapp_internal
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Core Classes:
-
    base
-   config
    enumerations
    log
 

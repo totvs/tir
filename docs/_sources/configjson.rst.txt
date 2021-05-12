@@ -16,3 +16,7 @@ These are the accepted config keys, and whether they are required or not:
 - **SkipEnvironment** Skips the module selection screen, if your Protheus configuration does not have it.
 - **Headless:** Defines whether the test will run with or without interface.
 - **ScreenshotFolder**: A folder to contain all screenshots taken by the user with the Screenshot method.
+- **NewLog**: (boolean) true to activate the new log.
+- **MotExec**: Execution tag. Example: "MotExec":"HOMOLOG_TIR"
+- **ExecId**: Execution id. Example: "ExecId":"20201119"
+- **LogUrl1**: service url. Example: "LogUrl1":"http://127.0.0.1:3333/log/"
