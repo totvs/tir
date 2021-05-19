@@ -58,7 +58,7 @@ class Webapp():
         """
         self.__webapp.AssertFalse()
 
-    def AssertTrue(self):
+    def AssertTrue(self, expected=True, message=''):
         """
         Defines that the test case expects a True response to pass
 
@@ -69,7 +69,7 @@ class Webapp():
         >>> #Calling the method
         >>> inst.oHelper.AssertTrue()
         """
-        self.__webapp.AssertTrue()
+        self.__webapp.AssertTrue(expected, message)
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """

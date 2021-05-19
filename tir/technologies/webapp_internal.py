@@ -5782,7 +5782,7 @@ class WebappInternal(Base):
                 success = True
             time.sleep(0.5)
 
-    def assert_result(self, expected=True):
+    def assert_result(self, expected, message):
         """
         [Internal]
 
@@ -5797,7 +5797,7 @@ class WebappInternal(Base):
         >>> self.assert_result(True)
         """
         self.expected = expected
-        log_message = f"{self.log.ident_test()[1]} - "
+        log_message = f"{self.log.ident_test()[1]} - {message}"
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
 
         if self.grid_input or self.grid_check:
