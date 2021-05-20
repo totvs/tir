@@ -45,7 +45,7 @@ class Webapp():
         """
         self.__webapp.AddParameter(parameter, branch, portuguese_value, english_value, spanish_value)
 
-    def AssertFalse(self):
+    def AssertFalse(self, expected=False, scritp_message=''):
         """
         Defines that the test case expects a False response to pass
 
@@ -56,9 +56,9 @@ class Webapp():
         >>> #Calling the method
         >>> inst.oHelper.AssertFalse()
         """
-        self.__webapp.AssertFalse()
+        self.__webapp.AssertFalse(expected, scritp_message)
 
-    def AssertTrue(self):
+    def AssertTrue(self, expected=True, scritp_message=''):
         """
         Defines that the test case expects a True response to pass
 
@@ -69,7 +69,7 @@ class Webapp():
         >>> #Calling the method
         >>> inst.oHelper.AssertTrue()
         """
-        self.__webapp.AssertTrue()
+        self.__webapp.AssertTrue(expected, scritp_message)
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """

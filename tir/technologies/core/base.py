@@ -99,7 +99,7 @@ class Base(unittest.TestCase):
 
 # Internal Methods
 
-    def assert_result(self, expected):
+    def assert_result(self, expected, script_message=""):
         """
         [Internal]
 
@@ -906,7 +906,7 @@ class Base(unittest.TestCase):
 
 # User Methods
 
-    def AssertFalse(self):
+    def AssertFalse(self, expected, message):
         """
         Defines that the test case expects a False response to pass
 
@@ -915,9 +915,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> oHelper.AssertFalse()
         """
-        self.assert_result(False)
+        self.assert_result(expected, message)
 
-    def AssertTrue(self):
+    def AssertTrue(self, expected, message):
         """
         Defines that the test case expects a True response to pass
 
@@ -926,7 +926,7 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> oHelper.AssertTrue()
         """
-        self.assert_result(True)
+        self.assert_result(expected, message)
 
     def SetTIRConfig(self, config_name, value):
         """
