@@ -30,7 +30,7 @@ Our **create_docs.cmd** script handles the installation of dependencies and crea
 
 ## Installation
 
-The installation is pretty simple. All you need as a requirement is Python 3.6 or greater and a browser (Mozilla Firefox/Google Chrome) installed in your system.
+The installation is pretty simple. All you need as a requirement is Python 3.7.9 (Mozilla Firefox) installed in your system.
 
 There are three ways of installing TIR:
 
