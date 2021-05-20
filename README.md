@@ -42,7 +42,7 @@ TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework
 pip install tir_framework --upgrade
 ```
 
-### 2. via Terminal
+### 2. via Terminal(Deprecated For The Branch Master)
 
 You can install TIR via terminal. Make sure your Python and Git is installed and run this command:
 
