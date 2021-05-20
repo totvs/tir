@@ -5782,7 +5782,7 @@ class WebappInternal(Base):
                 success = True
             time.sleep(0.5)
 
-    def assert_result(self, expected, message):
+    def assert_result(self, expected, script_message):
         """
         [Internal]
 
@@ -5796,8 +5796,9 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.assert_result(True)
         """
+        assert_false = self.search_stack('AssertFalse')
         self.expected = expected
-        log_message = f"{self.log.ident_test()[1]} - {message}"
+        log_message = f"{self.log.ident_test()[1]} - "
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
 
         if self.grid_input or self.grid_check:
@@ -5816,8 +5817,11 @@ class WebappInternal(Base):
         if self.expected:
             self.message = "" if not self.errors else log_message
             self.log.new_line(True, self.message)
+        elif script_message:
+            self.message = f"{log_message}{script_message}"
+            self.log.new_line(False, self.message)
         else:
-            self.message = self.language.assert_false_message if not self.errors else log_message
+            self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
         self.log.save_file()
