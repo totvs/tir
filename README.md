@@ -34,12 +34,12 @@ The installation is pretty simple. All you need as a requirement is Python 3.6 o
 
 There are three ways of installing TIR:
 
-### 1. Installing from PyPI
+### 1. Installing and Upgrade from PyPI
 
 TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
 
 ```shell
-pip install tir_framework
+pip install tir_framework --upgrade
 ```
 
 ### 2. via Terminal
