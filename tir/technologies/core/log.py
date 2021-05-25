@@ -24,7 +24,7 @@ class Log:
     >>> # Instanted inside base.py:
     >>> self.log = Log()
     """
-    def __init__(self, suite_datetime="", user="", station="", program="", program_date=time.strftime("01/01/1980 12:00:00"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
+    def __init__(self, suite_datetime="", user="", station="", program="", program_date=("19800101"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         today = datetime.today()
