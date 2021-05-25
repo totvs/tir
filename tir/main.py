@@ -1147,11 +1147,11 @@ class Webapp():
         .. note::  
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
-            "DriverDB": "",
-            "ServerDB": "",
-            "NameDB": "",
-            "UserDB": "",
-            "PasswordDB": ""
+            "DBDriver": "",
+            "DBServer": "",
+            "DBName": "",
+            "DBUser": "",
+            "DBPassword": ""
 
         .. note::        
             Must be used an ANSI default SQL statement.
