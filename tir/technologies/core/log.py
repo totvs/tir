@@ -24,12 +24,11 @@ class Log:
     >>> # Instanted inside base.py:
     >>> self.log = Log()
     """
-    def __init__(self, suite_datetime="", user="", station="", program="", program_date=("19800101"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR"):
+    def __init__(self, suite_datetime="", user="", station="", program="", program_date=("19800101"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR", config_path=""):
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         today = datetime.today()
 
-        config_path = os.path.join(sys.path[0], r"config.json")
         self.config = ConfigLoader(config_path)
         self.user = user
         self.station = station
