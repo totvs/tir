@@ -70,13 +70,16 @@ class Base(unittest.TestCase):
         """
         #Global Variables:
 
-        if config_path == "":
-            config_path = os.path.join(sys.path[0], r"config.json")
-        self.config = ConfigLoader(config_path)
+        self.config_path = config_path
+
+        if self.config_path == "":
+            self.config_path = os.path.join(sys.path[0], r"config.json")
+
+        self.config = ConfigLoader(self.config_path)
         self.config.autostart = autostart
 
         self.language = LanguagePack(self.config.language) if self.config.language else ""
-        self.log = Log(folder=self.config.log_folder)
+        self.log = Log(folder=self.config.log_folder, config_path=self.config_path)
         self.log.station = socket.gethostname()
         self.test_case = []
         self.last_test_case = None
