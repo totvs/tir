@@ -696,7 +696,7 @@ class WebappInternal(Base):
         >>> oHelper.ChangeUser(user="user08", password="8" )
         >>> #------------------------------------------------------------------------
         """
-        if not user or password:
+        if not user and not password:
             self.log_error("You must enter a user and a password to use ChangeUser!")
             return
 
