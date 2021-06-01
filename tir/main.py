@@ -1080,6 +1080,12 @@ class Webapp():
         Returns a dictionary when the file has a header in another way returns a list
         The folder must be entered in the CSVPath parameter in the config.json.
 
+        .. note::
+            This method return data as a string if necessary use some method to convert data like int().
+
+        >>> config.json
+        >>> "CSVPath" : "C:\\temp"
+
         :param csv_file: .csv file name
         :type csv_file: str
         :param delimiter: Delimiter option such like ';' or ',' or '|'

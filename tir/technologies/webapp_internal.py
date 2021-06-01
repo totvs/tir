@@ -6904,8 +6904,11 @@ class WebappInternal(Base):
         Returns a dictionary when the file has a header in another way returns a list
         The folder must be entered in the CSVPath parameter in the config.json. Ex:
 
+        .. note::
+            This method return data as a string if necessary use some method to convert data like int().
+
         >>> config.json
-        >>> "CsvPath" : "C:\\temp"
+        >>> "CSVPath" : "C:\\temp"
 
         :param csv_file: .csv file name
         :type csv_file: str
@@ -6943,7 +6946,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
         
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False)
+            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
