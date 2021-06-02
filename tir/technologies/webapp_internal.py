@@ -2622,7 +2622,7 @@ class WebappInternal(Base):
 
         submenu = ""
         endtime = time.time() + self.config.time_out
-        wait_coin_screen = True if menu_itens != self.language.menu_about else False
+        wait_screen = True if menu_itens != self.language.menu_about else False
         if save_input:
             self.config.routine = menu_itens
 
@@ -2671,7 +2671,8 @@ class WebappInternal(Base):
             if not re.search("\([0-9]\)$", child.text): 
                 self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
-            if wait_coin_screen and self.config.initial_program.lower() == 'sigaadv':
+            if wait_screen and self.config.initial_program.lower() == 'sigaadv':
+                self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
 
         except AssertionError as error:
