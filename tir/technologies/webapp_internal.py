@@ -1651,7 +1651,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
         """
         Sets value of an input element.
         
@@ -1696,12 +1696,26 @@ class WebappInternal(Base):
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
         """
+
+        check_value = self.check_value(check_value)
+
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value)
+
+    def check_value(self, check_value):
+
+        if check_value != None:
+            check_value = check_value
+        elif self.config.check_value != None:
+            check_value = self.config.check_value
+        else:
+            check_value = True
+
+        return check_value
 
     def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True):
         """
