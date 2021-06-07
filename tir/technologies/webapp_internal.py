@@ -2751,7 +2751,7 @@ class WebappInternal(Base):
             child_label_s.click()
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
-                logger().exception(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
+                logger().warning(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
 
         
 
