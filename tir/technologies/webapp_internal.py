@@ -2653,6 +2653,7 @@ class WebappInternal(Base):
         count = 0
         try:
             for menuitem in menu_itens:
+                logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = ".tmenu", locator=By.CSS_SELECTOR )
                 self.wait_until_to(expected_condition="presence_of_all_elements_located", element = ".tmenu .tmenuitem", locator = By.CSS_SELECTOR )
@@ -2684,6 +2685,20 @@ class WebappInternal(Base):
 
             if not re.search("\([0-9]\)$", child.text): 
                 self.slm_click_last_item(f"#{child.attrs['id']} > label")
+            
+            menuitem_exists = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem",
+                                    main_container="body")
+            start_time = time.time()
+            while (time.time() < endtime) and (menuitem_exists() and menuitem != self.language.menu_about.split('>')[1].strip()):
+                elapsed_time = time.time() - start_time
+                self.wait_blocker()
+                time.sleep(1)
+
+                if elapsed_time >= 20:
+                    start_time = time.time()
+                    logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
+                    if not re.search("\([0-9]\)$", child.text):
+                        self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
