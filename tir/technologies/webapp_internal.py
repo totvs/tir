@@ -3534,13 +3534,15 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None):
+    def get_grid(self, grid_number=1, grid_element = None):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
 
         :param grid_number: The number of the grid on the screen.
         :type: int
+        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
 
@@ -3549,6 +3551,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
         """
+
+        grid_number -= 1
+
         endtime = time.time() + self.config.time_out
         grids = None
         while(time.time() < endtime and not grids):
@@ -7301,3 +7306,24 @@ class WebappInternal(Base):
                 language = ['inglês', 'inglés', 'english']
 
             self.select_combo(selects, language, index=True)
+
+    def get_grid_content(self, grid_number, grid_element):
+        """
+
+        :param grid_number:
+        :param grid_element:
+        :return:
+        """
+        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
+                          scrap_type=enum.ScrapType.CSS_SELECTOR)
+        grid = self.get_grid(grid_number, grid_element)
+
+        return grid.select('tbody tr')
+
+    def LengthGridLines(self, grid):
+        """
+        Returns the length of the grid.
+        :return:
+        """
+        
+        return len(grid)
