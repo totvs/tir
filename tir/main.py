@@ -19,7 +19,7 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
-        self.__database = BaseDatabase()
+        self.__database = BaseDatabase(config_path, autostart=False)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
