@@ -1242,6 +1242,33 @@ class Webapp():
 
         return self.__webapp.report_comparison(base_file, current_file)
 
+    def GetGrid(self, grid_number=1, grid_element = None):
+        """
+        Gets a grid BeautifulSoup object from the screen.
+
+        :param grid_number: The number of the grid on the screen.
+        :type: int
+        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :type: str
+        :return: Grid BeautifulSoup object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> my_grid = self.get_grid()
+        """
+        
+        return self.__webapp.get_grid_content(grid_number, grid_element)
+
+    def LengthGridLines(self, grid):
+        """
+        Returns the length of the grid.
+        :return:
+        """
+
+        return self.__webapp.LengthGridLines(grid)
+
 class Apw():
 
     def __init__(self, config_path=""):
