@@ -1842,8 +1842,9 @@ class WebappInternal(Base):
 
                         if user_value_size < interface_value_size:
                             self.send_keys(input_field(), Keys.ENTER)
-                            if not check_value:
-                                return
+                        
+                        if not check_value:
+                            return
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip())
