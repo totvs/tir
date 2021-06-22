@@ -1688,6 +1688,9 @@ class WebappInternal(Base):
         >>> oHelper.SetValue('Confirmado?', True, grid=True)
         >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
+        >>> # Calling method to checkbox value on a field that isn't a grid:
+        >>> oHelper.SetValue('', True, name_attr=True, position=1)
+        >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
@@ -3901,13 +3904,10 @@ class WebappInternal(Base):
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
                 #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span", position=position)
+                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
 
         if not element_list:
-            self.log_error("Couldn't find span element")
-
-        if not element_list:
-            self.log_error("Couldn't find span element")
+            self.log_error("Couldn't find input element")
 
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
@@ -3919,9 +3919,6 @@ class WebappInternal(Base):
             self.log_error("Couldn't find input element")
 
         xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
-
-        if input_element.attrs['type'] == "checkbox" and "checked" in input_element.parent.attrs['class']:
-            return None
 
         self.scroll_to_element(xpath_input())
 
