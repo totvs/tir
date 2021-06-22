@@ -2978,10 +2978,11 @@ class WebappInternal(Base):
         result = self.find_sub_menu_text(sub_item, menu_itens)
 
         item = ""
-        if result[0]:
-            item = result[0]
-        elif result[1]:
+        if result[1]:
             item = self.find_sub_menu_child(sub_item, result[1])
+        elif result[0]:
+            item = result[0]
+        
         else:
             return False
 
@@ -3064,9 +3065,6 @@ class WebappInternal(Base):
             elif child.text.startswith(menu_item):
                 submenu = child
         
-        if len(containers) > 0:
-            submenu = ""
-
         return (submenu, containers)
 
     def SetBranch(self, branch):
