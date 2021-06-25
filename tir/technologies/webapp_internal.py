@@ -3251,7 +3251,7 @@ class WebappInternal(Base):
         if not element:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
+    def ClickBox(self, fields, content_list="", select_all=False, grid_number=1, itens=False):
         """
         Clicks on Checkbox elements of a grid.
 
@@ -3275,84 +3275,91 @@ class WebappInternal(Base):
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
+
         self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
-        endtime = time.time() + self.config.time_out
         grid_number -= 1
-        if content_list:
-            self.wait_element_timeout(field)
-        elif select_all:
+        if not select_all:
+            field = list(map(lambda x: x.strip(), field.split(',')))
+            content_list = list(map(lambda x: x.strip(), content_list.split(',')))
+
+            if len(field) == 2 and len(content_list) == 2:
+                self.click_box_dataframe(*field, *content_list, grid_number=grid_number)
+            elif len(field) == 1 and len(content_list) == 1:
+                self.click_box_dataframe(first_column=field[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
+
+        if select_all:
             self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
 
-        grid = self.get_grid(grid_number)
-        column_enumeration = list(enumerate(grid.select("thead label")))
-        chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
-        if chosen_column:
-            column_index = chosen_column[0]
+            grid = self.get_grid(grid_number)
+
+            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+
+            if select_all and is_select_all_button:
+                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+                element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                if element:
+                    box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    self.click(box())
+
+            elif select_all and not is_select_all_button:
+                th = next(iter(grid.select('th')))
+                th_element = self.soup_to_selenium(th)
+                th_element.click()
+
+    def performing_click(self, element, class_grid):
+
+        if class_grid == 'tmsselbr':
+            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
+            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                element(), Keys.ENTER).perform()
+        elif class_grid != "tgrid":
+            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                element(), Keys.ENTER).perform()
         else:
-            self.log_error("Couldn't find chosen column.")
+            self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
 
-        content_list = content_list.split(",")
+    def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
 
-        is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+        index_number = None
 
-        if select_all and is_select_all_button:
-            self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
-            element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            if element:
-                box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                self.click(box())
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not index_number:
 
-        elif select_all and not is_select_all_button:
-            th = next(iter(grid.select('th')))
-            th_element = self.soup_to_selenium(th)
-            th_element.click()
+            df, grid = self.grid_dataframe(grid_number=grid_number)
 
-        elif content_list or (select_all and not is_select_all_button):
-            class_grid = grid.attrs['class'][0]
-            initial_containers = self.get_all_containers()
+            class_grid = next(iter(grid.attrs['class']))
 
-            for item in content_list:
-                grid = self.get_grid(grid_number)
-                self.ScrollGrid(column=field, match_value=item, grid_number=grid_number+1)
-                get_current = lambda: self.selected_row(grid_number)
-                column_enumeration = list(enumerate(grid.select("thead label")))
-                chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
-                column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
-                self.wait_selected_row( grid_number, column_index, field)
-                current = get_current()
+            if first_column and second_column:
+                index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == int(second_content))].index[0]
+            elif itens:
+                index_number = df.loc[(df[first_column] == first_content)].index.array
+            else:
+                index_number = df.loc[(df[first_column] == first_content)].index[0]
 
-                success = False
-                while( time.time() < endtime and not success):
-                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                    click_box_item = td.parent.select_one("td")
-                    click_box_item_s = lambda: self.soup_to_selenium(click_box_item)
-                    self.scroll_to_element(click_box_item_s())
+            if not index_number:
+                ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                self.wait_blocker()
 
-                    if class_grid == 'tmsselbr':
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).click(click_box_item_s()).perform()
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
-                            click_box_item_s(), Keys.ENTER).perform()
-                    elif class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
-                            click_box_item_s(), Keys.ENTER).perform()
-                    else:
-                        self.double_click(click_box_item_s(), click_type=enum.ClickType.ACTIONCHAINS)
+        if not index_number:
+            self.log_error("Couldn't possible performing click in box")
 
-                    self.wait_element_is_not_displayed(click_box_item)
+        tr = grid.select('tbody > tr')
 
-                    end_containers = self.get_all_containers()
-                    if end_containers and len(end_containers) > len(initial_containers):
-                        logger().debug("ClickBox: New container found stopping attempts to click on the checkbox")
-                        break
+        if hasattr(index_number, '__iter__'):
+            for index in index_number:
+                element = lambda: self.soup_to_selenium(next(iter(tr[index].select('td'))))
+                self.performing_click(element, class_grid)
+                self.wait_blocker()
+        else:
+            element = lambda: self.soup_to_selenium(next(iter(tr[index_number].select('td'))))
+            self.performing_click(element, class_grid)
 
-                    new_td = next(iter(get_current().select(f"td[id='{column_index}']")), None)
-                    new_click_box_item = new_td.parent.select_one("td")
-                    if new_click_box_item != click_box_item:
-                        success = True
-                    else:
-                        parent_id = click_box_item.find_parent("div", class_="tpanel").attrs["id"]
-                        success = self.wait_element_is_blocked(parent_id)
+    def grid_dataframe(self, grid_number=0):
+
+        grid = self.get_grid()
+
+        return (next(iter(pd.read_html(str(grid)))), grid)
 
     def wait_element_is_blocked(self, parent_id):
         """

@@ -175,7 +175,7 @@ class Webapp():
         """
         self.__webapp.CheckView(text, element_type)
 
-    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1):
+    def ClickBox(self, fields, contents_list="", select_all=False, grid_number=1, itens=False):
         """
         Clicks on Checkbox elements of a grid.
 
@@ -201,7 +201,7 @@ class Webapp():
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
         """
-        self.__webapp.ClickBox(fields, contents_list, select_all, grid_number)
+        self.__webapp.ClickBox(fields, contents_list, select_all, grid_number, itens)
 
     def ClickFolder(self, item, position=1):
         """
