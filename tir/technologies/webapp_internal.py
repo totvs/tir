@@ -3251,11 +3251,11 @@ class WebappInternal(Base):
         if not element:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, fields, content_list="", select_all=False, grid_number=1, itens=False):
+    def ClickBox(self, fields="", content_list="", select_all=False, grid_number=1, itens=False):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: The column to identify grid rows.
+        :param field: Comma divided string with values that must be checked, combine with content_list.
         :type field: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
@@ -3263,6 +3263,8 @@ class WebappInternal(Base):
         :type select_all: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
 
         Usage:
 
@@ -3274,6 +3276,12 @@ class WebappInternal(Base):
         >>> #--------------------------------------------------
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
+        >>> #--------------------------------------------------
+        >>> # Calling the method to performe click based in 2 fields and contens:
+        >>> test_helper.ClickBox('Numero da SC, Item da SC', 'COM068, 0001')
+        >>> #--------------------------------------------------
+        >>> # Calling the method to click in all itens with this reference:
+        >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
 
         self.wait_blocker()
@@ -3283,10 +3291,13 @@ class WebappInternal(Base):
             field = list(map(lambda x: x.strip(), field.split(',')))
             content_list = list(map(lambda x: x.strip(), content_list.split(',')))
 
-            if len(field) == 2 and len(content_list) == 2:
+            if len(field) == 2 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(*field, *content_list, grid_number=grid_number)
-            elif len(field) == 1 and len(content_list) == 1:
+            elif len(field) == 1 and len(content_list) == 2 and not select_all:
+                self.click_box_dataframe(first_column=field, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
+            elif len(field) == 1 and not select_all:
                 self.click_box_dataframe(first_column=field[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
+
 
         if select_all:
             self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
@@ -3322,27 +3333,35 @@ class WebappInternal(Base):
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
 
         index_number = None
+        count = 0
 
         endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not index_number:
+        while time.time() < endtime and not index_number and count <= 3:
 
             df, grid = self.grid_dataframe(grid_number=grid_number)
+
+            last_df = df
 
             class_grid = next(iter(grid.attrs['class']))
 
             if first_column and second_column:
                 index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == int(second_content))].index[0]
+            elif first_column and (first_content and second_content):
+                index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
             elif itens:
                 index_number = df.loc[(df[first_column] == first_content)].index.array
             else:
                 index_number = df.loc[(df[first_column] == first_content)].index[0]
 
-            if not index_number:
+            if not index_number and count <= 3:
                 ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                 self.wait_blocker()
+                df, grid = self.grid_dataframe(grid_number=grid_number)
+                if df.equals(last_df):
+                    count +=1
 
         if not index_number:
-            self.log_error("Couldn't possible performing click in box")
+            self.log_error(f"Content doesn't found on the screen!")
 
         tr = grid.select('tbody > tr')
 
