@@ -3288,15 +3288,15 @@ class WebappInternal(Base):
         logger().info(f"ClickBox - Clicking on {content_list}")
         grid_number -= 1
         if not select_all:
-            field = list(map(lambda x: x.strip(), field.split(',')))
+            fields = list(map(lambda x: x.strip(), fields.split(',')))
             content_list = list(map(lambda x: x.strip(), content_list.split(',')))
 
-            if len(field) == 2 and len(content_list) == 2 and not select_all:
-                self.click_box_dataframe(*field, *content_list, grid_number=grid_number)
-            elif len(field) == 1 and len(content_list) == 2 and not select_all:
-                self.click_box_dataframe(first_column=field, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
-            elif len(field) == 1 and not select_all:
-                self.click_box_dataframe(first_column=field[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
+            if len(fields) == 2 and len(content_list) == 2 and not select_all:
+                self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
+            elif len(fields) == 1 and len(content_list) == 2 and not select_all:
+                self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
+            elif len(fields) == 1 and not select_all:
+                self.click_box_dataframe(first_column=fields[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
 
 
         if select_all:
@@ -3338,27 +3338,31 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not index_number and count <= 3:
 
-            df, grid = self.grid_dataframe(grid_number=grid_number)
-
-            last_df = df
-
-            class_grid = next(iter(grid.attrs['class']))
-
-            if first_column and second_column:
-                index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == int(second_content))].index[0]
-            elif first_column and (first_content and second_content):
-                index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
-            elif itens:
-                index_number = df.loc[(df[first_column] == first_content)].index.array
-            else:
-                index_number = df.loc[(df[first_column] == first_content)].index[0]
-
-            if not index_number and count <= 3:
-                ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                self.wait_blocker()
+            try:
                 df, grid = self.grid_dataframe(grid_number=grid_number)
-                if df.equals(last_df):
-                    count +=1
+
+                last_df = df
+
+                class_grid = next(iter(grid.attrs['class']))
+
+                if df:
+                    if first_column and second_column:
+                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == int(second_content))].index[0]
+                    elif first_column and (first_content and second_content):
+                        index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
+                    elif itens:
+                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                    else:
+                        index_number = df.loc[(df[first_column] == first_content)].index[0]
+
+                    if not index_number and count <= 3:
+                        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                        self.wait_blocker()
+                        df, grid = self.grid_dataframe(grid_number=grid_number)
+                        if df.equals(last_df):
+                            count +=1
+            except:
+                self.log_error(f"Content doesn't found on the screen!")    
 
         if not index_number:
             self.log_error(f"Content doesn't found on the screen!")
