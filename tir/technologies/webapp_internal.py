@@ -6074,7 +6074,7 @@ class WebappInternal(Base):
                                             self.wait_blocker()
                                             self.scroll_to_element(element_click())
                                             element_click().click()
-                                            if self.check_toggler(label_filtered):
+                                            if self.check_toggler(label_filtered, element):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
                                                     self.send_action(action=self.click, element=element_click, right_click=right_click)
@@ -6172,17 +6172,23 @@ class WebappInternal(Base):
             else:
                 return False
     
-    def check_toggler(self, label_filtered):
+    def check_toggler(self, label_filtered, element):
         """
         [Internal]
         """
+
+        element_id = element.get_attribute_list('id')
         tree_selected = self.treenode_selected(label_filtered)
 
         if tree_selected:
             if tree_selected.find_all_next("span"):
-                try:
-                    return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-                except:
+                first_span = next(iter(tree_selected.find_all_next("span"))).find_parent('tr')
+                if next(iter(element_id)) == next(iter(first_span.get_attribute_list('id'))):
+                    try:
+                        return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                    except:
+                        return False
+                else:
                     return False
             else:
                 return False
