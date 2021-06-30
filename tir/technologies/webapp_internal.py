@@ -3535,7 +3535,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=1, grid_element = None):
+    def get_grid(self, grid_number=0, grid_element = None):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -3552,8 +3552,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
         """
-
-        grid_number -= 1
 
         endtime = time.time() + self.config.time_out
         grids = None
@@ -7315,6 +7313,9 @@ class WebappInternal(Base):
         :param grid_element:
         :return:
         """
+
+        grid_number -= 1
+        
         self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
                           scrap_type=enum.ScrapType.CSS_SELECTOR)
         grid = self.get_grid(grid_number, grid_element)
