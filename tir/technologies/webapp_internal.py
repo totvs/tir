@@ -3293,6 +3293,7 @@ class WebappInternal(Base):
 
             if len(fields) == 2 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
+                # self.click_box_dataframe(first_column=fields[0], second_column=fields[1], first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and not select_all:
@@ -3318,7 +3319,17 @@ class WebappInternal(Base):
                 th_element = self.soup_to_selenium(th)
                 th_element.click()
 
-    def performing_click(self, element, class_grid):
+    def performing_click(self, element_bs4, class_grid):
+
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4,
+                           locator=By.XPATH)
+
+        element = lambda: self.soup_to_selenium(element_bs4)
+
+        self.set_element_focus(element())
+        self.scroll_to_element(element())
+        element().click()
+        time.sleep(1)
 
         if class_grid == 'tmsselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
@@ -3332,11 +3343,11 @@ class WebappInternal(Base):
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
 
-        index_number = None
+        index_number = []
         count = 0
 
         endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not index_number and count <= 3:
+        while time.time() < endtime and len(index_number) < 1 and count <= 3:
 
             try:
                 df, grid = self.grid_dataframe(grid_number=grid_number)
@@ -3345,17 +3356,19 @@ class WebappInternal(Base):
 
                 class_grid = next(iter(grid.attrs['class']))
 
-                if df:
+                if not df.empty:
                     if first_column and second_column:
-                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == int(second_content))].index[0]
+                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
                     elif itens:
                         index_number = df.loc[(df[first_column] == first_content)].index.array
                     else:
-                        index_number = df.loc[(df[first_column] == first_content)].index[0]
+                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                        if len(index_number) > 0:
+                            index_number = [index_number[0]]
 
-                    if not index_number and count <= 3:
+                    if len(index_number) < 1 and count <= 3:
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                         self.wait_blocker()
                         df, grid = self.grid_dataframe(grid_number=grid_number)
@@ -3364,16 +3377,16 @@ class WebappInternal(Base):
             except:
                 self.log_error(f"Content doesn't found on the screen!")    
 
-        if not index_number:
+        if len(index_number) < 1:
             self.log_error(f"Content doesn't found on the screen!")
 
         tr = grid.select('tbody > tr')
 
         if hasattr(index_number, '__iter__'):
             for index in index_number:
-                element = lambda: self.soup_to_selenium(next(iter(tr[index].select('td'))))
-                self.performing_click(element, class_grid)
+                element_bs4 = next(iter(tr[index].select('td')))
                 self.wait_blocker()
+                self.performing_click(element_bs4, class_grid)
         else:
             element = lambda: self.soup_to_selenium(next(iter(tr[index_number].select('td'))))
             self.performing_click(element, class_grid)
@@ -3382,7 +3395,11 @@ class WebappInternal(Base):
 
         grid = self.get_grid()
 
-        return (next(iter(pd.read_html(str(grid)))), grid)
+        df = (next(iter(pd.read_html(str(grid)))))
+
+        converters = {c: lambda x: str(x) for c in df.columns}
+
+        return (next(iter(pd.read_html(str(grid), converters=converters))), grid)
 
     def wait_element_is_blocked(self, parent_id):
         """
