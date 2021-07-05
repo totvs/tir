@@ -597,6 +597,7 @@ class WebappInternal(Base):
                 self.send_keys(env(), self.config.module)
                 env_value = self.get_web_value(env())
                 time.sleep(1)
+                self.close_warning_screen()
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
         button_element = next(iter(buttons), None) if buttons else None
