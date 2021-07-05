@@ -597,6 +597,7 @@ class WebappInternal(Base):
                 self.send_keys(env(), self.config.module)
                 env_value = self.get_web_value(env())
                 time.sleep(1)
+                self.close_warning_screen()
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
         button_element = next(iter(buttons), None) if buttons else None
@@ -1651,7 +1652,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, type_item="input"):
         """
         Sets value of an input element.
         
@@ -3871,7 +3872,7 @@ class WebappInternal(Base):
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
-    def click_check_radio_button(self, field, value, name_attr = False, position = 1):
+    def click_check_radio_button(self, field, value, name_attr = False, position = 1, type_item="input"):
         """
         [Internal]
         Identify and click on check or radio button.
@@ -3902,9 +3903,11 @@ class WebappInternal(Base):
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-                #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
-
+                if type_item == "input":
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
+                else:
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")
+        
         if not element_list:
             self.log_error("Couldn't find input element")
 
