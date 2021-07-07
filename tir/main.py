@@ -708,7 +708,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, type_item="input"):
         """
         Sets value of an input element.
 
