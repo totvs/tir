@@ -3725,10 +3725,11 @@ class WebappInternal(Base):
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
                     else:
+                        time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
+                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
