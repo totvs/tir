@@ -5933,6 +5933,7 @@ class WebappInternal(Base):
         """
         label = ''
         self.wait_element(label_name)
+        logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
         while(not label and time.time() < endtime):
             container = self.get_current_container()
@@ -5949,6 +5950,7 @@ class WebappInternal(Base):
 
         label_element = lambda: self.soup_to_selenium(label)
         
+        time.sleep(2)
         self.scroll_to_element(label_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
         self.set_element_focus(label_element())
