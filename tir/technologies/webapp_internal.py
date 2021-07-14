@@ -2693,26 +2693,31 @@ class WebappInternal(Base):
             
             start_time = time.time()
             child_is_displayed = True
+
+            child_attrs = f"#{child.attrs['id']} > label"
+
+            child_object = next(iter(
+                self.web_scrap(term=child_attrs, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container="body")), None)
+
             if menuitem != self.language.menu_about.split('>')[1].strip():
                 while (time.time() < endtime) and (child_is_displayed):
-                    child_attrs = f"#{child.attrs['id']} > label"
-
-                    child_object = next(iter(
-                        self.web_scrap(term=child_attrs, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       main_container="body")), None)
-                    child_element = lambda: self.soup_to_selenium(child_object)
-
-                    child_is_displayed = child_element().is_displayed()
-
-                    elapsed_time = time.time() - start_time
-                    self.wait_blocker()
                     time.sleep(1)
-                
-                    if elapsed_time >= 20:
-                        start_time = time.time()
-                        logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
-                        if not re.search("\([0-9]\)$", child.text):
-                            self.slm_click_last_item(f"#{child.attrs['id']} > label")
+
+                    if child_object:
+                        child_element = lambda: self.soup_to_selenium(child_object)
+
+                        child_is_displayed = child_element().is_displayed()
+
+                        elapsed_time = time.time() - start_time
+                        self.wait_blocker()
+                        time.sleep(1)
+
+                        if elapsed_time >= 20:
+                            start_time = time.time()
+                            logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
+                            if not re.search("\([0-9]\)$", child.text):
+                                self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
@@ -3725,10 +3730,11 @@ class WebappInternal(Base):
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
                     else:
+                        time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
+                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
