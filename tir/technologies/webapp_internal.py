@@ -2200,6 +2200,7 @@ class WebappInternal(Base):
 
                 if element:
                     if self.click_button_finish(click_counter):                        
+                        self.WaitShow(string)
                         text_cover = self.search_text(selector=".tsay", text=string)
                         if text_cover:
                             logger().info(string)
@@ -6415,7 +6416,7 @@ class WebappInternal(Base):
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                 self.user_screen()
-                self.environment_screen()
+                self.wait_element(self.language.database, main_container=".twindow")
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
