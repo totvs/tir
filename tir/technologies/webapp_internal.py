@@ -597,6 +597,7 @@ class WebappInternal(Base):
                 self.send_keys(env(), self.config.module)
                 env_value = self.get_web_value(env())
                 time.sleep(1)
+                self.close_warning_screen()
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
         button_element = next(iter(buttons), None) if buttons else None
@@ -2199,6 +2200,7 @@ class WebappInternal(Base):
 
                 if element:
                     if self.click_button_finish(click_counter):                        
+                        self.WaitShow(string)
                         text_cover = self.search_text(selector=".tsay", text=string)
                         if text_cover:
                             logger().info(string)
@@ -2690,19 +2692,40 @@ class WebappInternal(Base):
             if not re.search("\([0-9]\)$", child.text): 
                 self.slm_click_last_item(f"#{child.attrs['id']} > label")
             
-            menuitem_exists = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem",
-                                    main_container="body")
             start_time = time.time()
-            while (time.time() < endtime) and (menuitem_exists() and menuitem != self.language.menu_about.split('>')[1].strip()):
-                elapsed_time = time.time() - start_time
-                self.wait_blocker()
-                time.sleep(1)
+            child_is_displayed = True
 
-                if elapsed_time >= 20:
-                    start_time = time.time()
-                    logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
-                    if not re.search("\([0-9]\)$", child.text):
-                        self.slm_click_last_item(f"#{child.attrs['id']} > label")
+            child_attrs = f"#{child.attrs['id']} > label"
+
+            child_object = next(iter(
+                self.web_scrap(term=child_attrs, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container="body")), None)
+
+            counter_child = 1
+            if menuitem != self.language.menu_about.split('>')[1].strip():
+                while (time.time() < endtime) and (child_is_displayed and counter_child <=3):
+                    time.sleep(1)
+
+                    try:
+                        if child_object:
+                            child_element = lambda: self.soup_to_selenium(child_object)
+
+                            if hasattr(child_element(), 'is_displayed'):
+                                child_is_displayed = child_element().is_displayed()
+
+                                elapsed_time = time.time() - start_time
+                                self.wait_blocker()
+                                time.sleep(1)
+
+                                if elapsed_time >= 20:
+                                    start_time = time.time()
+                                    logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
+                                    if not re.search("\([0-9]\)$", child.text):
+                                        self.slm_click_last_item(f"#{child.attrs['id']} > label")
+                        else:
+                            counter_child +=1
+                    except:
+                        counter_child +=1
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
@@ -2861,7 +2884,7 @@ class WebappInternal(Base):
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text == sub_item, contents))))
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text == sub_item, contents))), None)
 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
@@ -3762,10 +3785,11 @@ class WebappInternal(Base):
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
                     else:
+                        time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
+                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
@@ -5970,6 +5994,7 @@ class WebappInternal(Base):
         """
         label = ''
         self.wait_element(label_name)
+        logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
         while(not label and time.time() < endtime):
             container = self.get_current_container()
@@ -5986,6 +6011,7 @@ class WebappInternal(Base):
 
         label_element = lambda: self.soup_to_selenium(label)
         
+        time.sleep(2)
         self.scroll_to_element(label_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
         self.set_element_focus(label_element())
@@ -6228,10 +6254,13 @@ class WebappInternal(Base):
         if tree_selected:
             if tree_selected.find_all_next("span"):
                 first_span = next(iter(tree_selected.find_all_next("span"))).find_parent('tr')
-                if next(iter(element_id)) == next(iter(first_span.get_attribute_list('id'))):
-                    try:
-                        return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-                    except:
+                if first_span:
+                    if next(iter(element_id)) == next(iter(first_span.get_attribute_list('id'))):
+                        try:
+                            return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                        except:
+                            return False
+                    else:
                         return False
                 else:
                     return False
@@ -6434,7 +6463,7 @@ class WebappInternal(Base):
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                 self.user_screen()
-                self.environment_screen()
+                self.wait_element(self.language.database, main_container=".twindow")
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
