@@ -379,7 +379,14 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        if not self.wait_element_timeout(term="[name='cGetUser'] > input",
+        if self.config.poui:
+            self.twebview_context = True
+            # if not self.driver.find_element(By.CSS_SELECTOR, ".po-page-login-info-field .po-input"):
+            if not self.wait_element_timeout(term=".po-page-login-info-field .po-input",
+            scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out * 3,main_container='body'):
+                self.reload_user_screen()
+
+        elif not self.wait_element_timeout(term="[name='cGetUser'] > input",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out * 3 , main_container='body'):
             self.reload_user_screen()
 
@@ -391,7 +398,10 @@ class WebappInternal(Base):
         logger().info("Filling User")
 
         try:
-            user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
+            if self.config.poui:
+                user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
+            else:
+                user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
             if user_element is None:
                 self.restart_counter += 1
@@ -432,7 +442,11 @@ class WebappInternal(Base):
 
         # while(loop_control):
         logger().info("Filling Password")
-        password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
+        if self.config.poui:
+            password_element = next(iter(soup.select(".po-input-icon-right")), None)
+        else:
+            password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
+
         if password_element is None:
             self.restart_counter += 1
             message = "Couldn't find User input element."
@@ -519,10 +533,17 @@ class WebappInternal(Base):
             label = self.language.enter
             container = ".twindow"
 
-        self.wait_element(self.language.database, main_container=container)
+        if self.config.poui:
+            self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            self.wait_element(self.language.database, main_container=container)
 
         logger().info("Filling Date")
-        base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if self.config.poui:
+            base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+
         if len(base_dates) > 1:
             base_date = base_dates.pop()
         else:
@@ -540,11 +561,17 @@ class WebappInternal(Base):
         self.send_keys(date(), self.config.date)
 
         logger().info("Filling Group")
-        group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(group_elements) > 1:
-            group_element = group_elements.pop()
+        if self.config.poui:
+            group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            group_element = next(iter(group_elements))
+            group_element = group_element.find_parent('pro-company-lookup')
+            group_element = next(iter(group_element.select('input')), None)
         else:
-            group_element = next(iter(group_elements), None)
+            group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(group_elements) > 1:
+                group_element = group_elements.pop()
+            else:
+                group_element = next(iter(group_elements), None)
 
         if group_element is None:
             self.restart_counter += 1
@@ -558,11 +585,18 @@ class WebappInternal(Base):
         self.send_keys(group(), self.config.group)
 
         logger().info("Filling Branch")
-        branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(branch_elements) > 1:
-            branch_element = branch_elements.pop()
+        if self.config.poui:
+            branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            branch_element = next(iter(branch_elements))
+            branch_element = branch_element.find_parent('pro-branch-lookup')
+            branch_element = next(iter(branch_element.select('input')), None)
         else:
-            branch_element = next(iter(branch_elements), None)
+            branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(branch_elements) > 1:
+                branch_element = branch_elements.pop()
+            else:
+                branch_element = next(iter(branch_elements), None)
+
         if branch_element is None:
             self.restart_counter += 1
             message = "Couldn't find Branch input element."
@@ -575,11 +609,18 @@ class WebappInternal(Base):
         self.send_keys(branch(), self.config.branch)
 
         logger().info("Filling Environment")
-        environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(environment_elements) > 1:
-            environment_element = environment_elements.pop()
+        if self.config.poui:
+            environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            environment_element = next(iter(environment_elements))
+            environment_element = environment_element.find_parent('pro-system-module-lookup')
+            environment_element = next(iter(environment_element.select('input')), None)
         else:
-            environment_element = next(iter(environment_elements), None)
+            environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(environment_elements) > 1:
+                environment_element = environment_elements.pop()
+            else:
+                environment_element = next(iter(environment_elements), None)
+
         if environment_element is None:
             self.restart_counter += 1
             message = "Couldn't find Module input element."
@@ -611,7 +652,7 @@ class WebappInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)             
+        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)            
             
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
@@ -2605,6 +2646,9 @@ class WebappInternal(Base):
             else:
                 container_element = self.driver
             try:
+                if self.config.poui:
+                    self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+                    element_list = self.driver.find_element(By.CSS_SELECTOR, selector)
                 element_list = container_element.find_elements(by, selector)
             except StaleElementReferenceException:
                 pass
@@ -7325,6 +7369,8 @@ class WebappInternal(Base):
 
     def set_multilanguage(self):
 
+        if self.config.poui:
+            return
         if self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
 
             tcombobox = next(iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
