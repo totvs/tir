@@ -230,8 +230,9 @@ class WebappInternal(Base):
             self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
-                self.update_password()
+            if not self.config.poui_login:
+                while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
+                    self.update_password()
 
             self.environment_screen()
 
@@ -379,7 +380,7 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        if self.config.poui:
+        if self.config.poui_login:
             self.twebview_context = True
             # if not self.driver.find_element(By.CSS_SELECTOR, ".po-page-login-info-field .po-input"):
             if not self.wait_element_timeout(term=".po-page-login-info-field .po-input",
@@ -398,7 +399,7 @@ class WebappInternal(Base):
         logger().info("Filling User")
 
         try:
-            if self.config.poui:
+            if self.config.poui_login:
                 user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
             else:
                 user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
@@ -442,7 +443,7 @@ class WebappInternal(Base):
 
         # while(loop_control):
         logger().info("Filling Password")
-        if self.config.poui:
+        if self.config.poui_login:
             password_element = next(iter(soup.select(".po-input-icon-right")), None)
         else:
             password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
@@ -533,13 +534,13 @@ class WebappInternal(Base):
             label = self.language.enter
             container = ".twindow"
 
-        if self.config.poui:
+        if self.config.poui_login:
             self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
             self.wait_element(self.language.database, main_container=container)
 
         logger().info("Filling Date")
-        if self.config.poui:
+        if self.config.poui_login:
             base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
         else:
             base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
@@ -559,9 +560,11 @@ class WebappInternal(Base):
         self.double_click(date())
         self.send_keys(date(), Keys.HOME)
         self.send_keys(date(), self.config.date)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Group")
-        if self.config.poui:
+        if self.config.poui_login:
             group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
             group_element = next(iter(group_elements))
             group_element = group_element.find_parent('pro-company-lookup')
@@ -583,9 +586,11 @@ class WebappInternal(Base):
         self.double_click(group())
         self.send_keys(group(), Keys.HOME)
         self.send_keys(group(), self.config.group)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Branch")
-        if self.config.poui:
+        if self.config.poui_login:
             branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
             branch_element = next(iter(branch_elements))
             branch_element = branch_element.find_parent('pro-branch-lookup')
@@ -607,9 +612,11 @@ class WebappInternal(Base):
         self.double_click(branch())
         self.send_keys(branch(), Keys.HOME)
         self.send_keys(branch(), self.config.branch)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Environment")
-        if self.config.poui:
+        if self.config.poui_login:
             environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
             environment_element = next(iter(environment_elements))
             environment_element = environment_element.find_parent('pro-system-module-lookup')
@@ -629,7 +636,12 @@ class WebappInternal(Base):
 
 
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
-        if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
+        if self.config.poui_login:
+            enable = env().is_enabled()
+        else:
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled())
+
+        if enable:
             env_value = self.get_web_value(env())
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and env_value != self.config.module):
@@ -652,7 +664,11 @@ class WebappInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)            
+        if not self.config.poui_login:
+            self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
+        else:
+            self.driver.switch_to.default_content()
+            self.config.poui_login = False
             
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
@@ -2646,9 +2662,9 @@ class WebappInternal(Base):
             else:
                 container_element = self.driver
             try:
-                if self.config.poui:
+                if self.config.poui_login:
                     self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
-                    element_list = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    return self.driver.find_element(By.CSS_SELECTOR, selector)
                 element_list = container_element.find_elements(by, selector)
             except StaleElementReferenceException:
                 pass
@@ -7369,7 +7385,7 @@ class WebappInternal(Base):
 
     def set_multilanguage(self):
 
-        if self.config.poui:
+        if self.config.poui_login:
             return
         if self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
 

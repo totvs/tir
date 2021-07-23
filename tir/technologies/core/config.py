@@ -73,4 +73,4 @@ class ConfigLoader:
         self.log_http = str(data["LogHttp"]) if "LogHttp" in data else ""
         self.baseline_spool = str(data["BaseLine_Spool"]) if "BaseLine_Spool" in data else ""
         self.check_value = (bool(data["CheckValue"]) if "CheckValue" in data else None)
-        self.poui = bool(data["POUI"]) if "POUI" in data else False
+        self.poui_login = bool(data["POUILogin"]) if "POUILogin" in data else False
