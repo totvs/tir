@@ -7387,10 +7387,13 @@ class WebappInternal(Base):
 
         if self.config.poui_login:
             soup = self.get_current_DOM()
-            po_select = next(iter(soup.select('.po-select')), None)
+            po_select = next(iter(soup.select(".po-select-container")), None)
             if po_select:
-                language = self.return_select_language()
-                self.select_combo(po_select, language, index=True)
+                span_label = next(iter(po_select.select('span')), None)
+                if span_label:
+                    language = self.return_select_language()
+                    if not span_label.text.lower() in language:
+                        self.set_language_poui(language, po_select)
 
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
 
@@ -7400,6 +7403,19 @@ class WebappInternal(Base):
             language = self.return_select_language()
 
             self.select_combo(selects, language, index=True)
+
+    def set_language_poui(self, language, container):
+
+        icon = next(iter(list(filter(lambda x: "class" in x.attrs, container.select('span')))), None)
+        if icon:
+            icon_element = self.soup_to_selenium(icon)
+            icon_element.click()
+
+            container_ul = next(iter(container.select('ul')), None)
+            if container_ul:
+                item = next(iter(list(filter(lambda x: x.text.lower() in language ,container_ul.select('li')))), None)
+                element = self.soup_to_selenium(item)
+                element.click()
 
     def return_select_language(self):
 
