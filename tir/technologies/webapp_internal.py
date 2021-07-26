@@ -7386,20 +7386,31 @@ class WebappInternal(Base):
     def set_multilanguage(self):
 
         if self.config.poui_login:
-            return
-        if self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
+            soup = self.get_current_DOM()
+            po_select = next(iter(soup.select('.po-select')), None)
+            if po_select:
+                language = self.return_select_language()
+                self.select_combo(po_select, language, index=True)
+
+        elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
 
             tcombobox = next(iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
             selects = next(iter(tcombobox.select('select')))
 
-            if self.config.language == 'pt-br':
-                language = ['português', 'portugués', 'portuguese']
-            elif self.config.language == 'es-es':
-                language = ['espanhol', 'español', 'spanish']
-            elif self.config.language == 'en-us':
-                language = ['inglês', 'inglés', 'english']
+            language = self.return_select_language()
 
             self.select_combo(selects, language, index=True)
+
+    def return_select_language(self):
+
+        if self.config.language == 'pt-br':
+            language = ['português', 'portugués', 'portuguese']
+        elif self.config.language == 'es-es':
+            language = ['espanhol', 'español', 'spanish']
+        elif self.config.language == 'en-us':
+            language = ['inglês', 'inglés', 'english']
+
+        return language
 
     def get_grid_content(self, grid_number, grid_element):
         """
