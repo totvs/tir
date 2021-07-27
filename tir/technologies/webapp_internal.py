@@ -3397,8 +3397,8 @@ class WebappInternal(Base):
                         df, grid = self.grid_dataframe(grid_number=grid_number)
                         if df.equals(last_df):
                             count +=1
-            except:
-                self.log_error(f"Content doesn't found on the screen!")    
+            except Exception as e:
+                self.log_error(f"Content doesn't found on the screen! {str(e)}")
 
         if len(index_number) < 1:
             self.log_error(f"Content doesn't found on the screen!")
