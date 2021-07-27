@@ -3416,6 +3416,8 @@ class WebappInternal(Base):
 
     def grid_dataframe(self, grid_number=0):
 
+        self.wait_element(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
         grid = self.get_grid()
 
         df = (next(iter(pd.read_html(str(grid)))))
