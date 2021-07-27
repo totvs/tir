@@ -4243,7 +4243,7 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
                         tmodal_list = soup.select('.tmodaldialog.twidget.borderless')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
-                        while(time.time() < endtime and not self.element_exists(term=".tmodaldialog.twidget.borderless", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer+1, main_container="body")):
+                        while (time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
@@ -4267,7 +4267,7 @@ class WebappInternal(Base):
                         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                         soup = self.get_current_DOM()
                         new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
-                        child = new_container.select("input")
+                        child = new_container.select("input, textarea")
                         child_type = "input"
                         option_text = ""
                         if not child:
@@ -4291,7 +4291,7 @@ class WebappInternal(Base):
                             self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
-                            if "tget" in self.get_current_container().next.attrs['class']:
+                            if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
