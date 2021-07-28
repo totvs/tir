@@ -2677,6 +2677,7 @@ class WebappInternal(Base):
                 child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
+                    self.expanded_menu(child)
                     self.scroll_to_element(submenu())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = child, locator = By.XPATH )
                     self.wait_blocker()
@@ -2738,6 +2739,13 @@ class WebappInternal(Base):
             self.restart_counter += 1
             self.log_error(str(error))
     
+    def expanded_menu(self, element):
+        expanded = lambda: True if "expanded" in element.attrs['class'] else False
+        if expanded():
+            parent_menu = self.driver.find_element_by_xpath(xpath_soup(element.select('label')[0]))
+            self.wait_blocker()
+            ActionChains(self.driver).move_to_element(parent_menu).click().perform()
+
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
         subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
