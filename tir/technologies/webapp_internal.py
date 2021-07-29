@@ -3426,7 +3426,7 @@ class WebappInternal(Base):
 
         self.wait_element(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        grid = self.get_grid()
+        grid = self.get_grid(grid_number=grid_number)
 
         df = (next(iter(pd.read_html(str(grid)))))
 
