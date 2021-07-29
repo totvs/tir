@@ -4295,6 +4295,8 @@ class WebappInternal(Base):
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
+                                if self.element_exists(term=".ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body'):
+                                    self.SetButton('Ok')
 
                                 if try_counter < 2:
                                     try_counter += 1
