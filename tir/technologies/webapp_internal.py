@@ -3394,10 +3394,17 @@ class WebappInternal(Base):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
                     elif itens:
                         index_number = df.loc[(df[first_column] == first_content)].index.array
+                    elif first_column and first_content:
+                        first_column_values = df[first_column].values
+                        first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
+                        first_content = first_content.replace(' ', '')
+                        content = next(iter(list(filter(lambda x: x == first_content, first_column_formatted_values))), None)
+                        if content:
+                            index_number.append(first_column_formatted_values.index(content))
+                            if len(index_number) > 0:
+                                index_number = [index_number[0]]
                     else:
-                        index_number = df.loc[(df[first_column] == first_content)].index.array
-                        if len(index_number) > 0:
-                            index_number = [index_number[0]]
+                        index_number.append(0)
 
                     if len(index_number) < 1 and count <= 3:
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
