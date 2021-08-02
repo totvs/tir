@@ -3397,7 +3397,6 @@ class WebappInternal(Base):
                     elif first_column and first_content:
                         first_column_values = df[first_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
-                        first_content = first_content.replace(' ', '')
                         content = next(iter(list(filter(lambda x: x == first_content, first_column_formatted_values))), None)
                         if content:
                             index_number.append(first_column_formatted_values.index(content))
@@ -3407,16 +3406,21 @@ class WebappInternal(Base):
                         index_number.append(0)
 
                     if len(index_number) < 1 and count <= 3:
+                        first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        if first_element_focus:
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                            self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                         self.wait_blocker()
                         df, grid = self.grid_dataframe(grid_number=grid_number)
                         if df.equals(last_df):
                             count +=1
+
             except Exception as e:
                 self.log_error(f"Content doesn't found on the screen! {str(e)}")
 
         if len(index_number) < 1:
-            self.log_error(f"Content doesn't found on the screen!")
+            self.log_error(f"Content doesn't found on the screen! {first_content}")
 
         tr = grid.select('tbody > tr')
 
@@ -3439,7 +3443,11 @@ class WebappInternal(Base):
 
         converters = {c: lambda x: str(x) for c in df.columns}
 
-        return (next(iter(pd.read_html(str(grid), converters=converters))), grid)
+        df, grid = (next(iter(pd.read_html(str(grid), converters=converters)), None), grid)
+
+        if not df.empty:
+            df = df.fillna('Not Value')
+            return (df, grid)
 
     def wait_element_is_blocked(self, parent_id):
         """
