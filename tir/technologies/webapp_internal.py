@@ -3450,6 +3450,9 @@ class WebappInternal(Base):
                     self.performing_click(element_bs4, class_grid)
                     self.wait_blocker()
                     time.sleep(2)
+                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                    if tmodal:
+                        return
                     grid = self.get_grid(grid_number=grid_number)
                     tr = grid.select('tbody > tr')
                     td = next(iter(tr[index].select('td')))
