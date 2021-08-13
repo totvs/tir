@@ -2892,7 +2892,7 @@ class WebappInternal(Base):
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text == sub_item, contents))), None)
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip() == sub_item, contents))), None)
 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
