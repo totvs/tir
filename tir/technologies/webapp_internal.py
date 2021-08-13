@@ -5272,7 +5272,6 @@ class WebappInternal(Base):
             buttons = list(filter(lambda x: x.text.strip() != "", current_layer.select(".tpanel button")))
             return list(map(lambda x: x.parent.attrs["id"], buttons))
         except Exception as error:
-            logger().exception(error)
             return []
 
     def CheckView(self, text, element_type="help"):
