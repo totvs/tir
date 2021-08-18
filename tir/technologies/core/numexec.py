@@ -3,6 +3,8 @@ import requests
 import json
 import time
 from tir.technologies.core.logging_config import logger
+from pathlib import Path
+import os
 
 
 class NumExec(ConfigLoader):
@@ -10,7 +12,7 @@ class NumExec(ConfigLoader):
     def __init__(self):
         super().__init__()
 
-    def post_exec(self, url):
+    def post_exec(self, url, numexec_folder):
 
         success_response = [200, 201]
 
@@ -20,7 +22,7 @@ class NumExec(ConfigLoader):
 
         error = None
 
-        id_error = time.strftime("%Y%m%d%H%M%S")
+        strftime = time.strftime("%Y%m%d%H%M%S")
 
         while(time.time() < endtime and status not in success_response):
 
@@ -31,10 +33,21 @@ class NumExec(ConfigLoader):
 
             time.sleep(12)
 
-        response = str(f"STATUS: {status} Url: {url} ID: {id_error} Error: {error}")
+        if error:
+            response = str(f"STATUS: {status} Url: {url} ID: {self.num_exec} Error: {error}")
+        else:
+            response = str(f"STATUS: {status} Url: {url} ID: {self.num_exec}")
+
         logger().debug(response)
         if status not in success_response:
-            with open(f"{self.log_folder}\{id_error}_json_data_response.txt", "w") as json_log:
+
+            try:
+                path = Path(self.log_folder, numexec_folder)
+                os.makedirs(path)
+            except OSError:
+                pass
+
+            with open(Path(path, f"{self.num_exec}_TIR_{strftime}.txt"), "w") as json_log:
                 json_log.write(response)
 
         return status in success_response

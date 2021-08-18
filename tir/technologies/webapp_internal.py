@@ -141,7 +141,7 @@ class WebappInternal(Base):
             self.set_log_info_tss()
 
             if self.config.num_exec:
-                if not self.num_exec.post_exec(self.config.url_set_start_exec):
+                if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -253,7 +253,7 @@ class WebappInternal(Base):
             self.log_error(str(e))
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_start_exec):
+            if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -5483,7 +5483,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
 
             if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-                if not self.num_exec.post_exec(self.config.url_set_end_exec):
+                if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
                 
@@ -6530,7 +6530,7 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_end_exec):
+            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
