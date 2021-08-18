@@ -4592,8 +4592,11 @@ class WebappInternal(Base):
                 rows = grids[field[3]].select("tbody tr")
                 
                 if rows:
-                    if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error) 
+                    if field[0] > len(rows)-1:
+                        if get_value:
+                            return ''
+                        else:
+                            self.log_error(self.language.messages.grid_line_error) 
 
                     field_element = next(iter(field), None)
                    
