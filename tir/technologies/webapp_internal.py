@@ -2908,7 +2908,7 @@ class WebappInternal(Base):
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text == sub_item, contents))), None)
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip() == sub_item.strip(), contents))), None)
 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
@@ -3413,7 +3413,7 @@ class WebappInternal(Base):
                     elif first_column and first_content:
                         first_column_values = df[first_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
-                        content = next(iter(list(filter(lambda x: x == first_content, first_column_formatted_values))), None)
+                        content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
                         if content:
                             index_number.append(first_column_formatted_values.index(content))
                             if len(index_number) > 0:
@@ -3444,10 +3444,38 @@ class WebappInternal(Base):
             for index in index_number:
                 element_bs4 = next(iter(tr[index].select('td')))
                 self.wait_blocker()
-                self.performing_click(element_bs4, class_grid)
+                self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
         else:
-            element = lambda: self.soup_to_selenium(next(iter(tr[index_number].select('td'))))
-            self.performing_click(element, class_grid)
+            index = index_number
+            element_bs4 = next(iter(tr[index].select('td')))
+            self.wait_blocker()
+            self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
+
+    def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
+
+        if element_bs4:
+            success = False
+            td = next(iter(tr[index].select('td')))
+
+            if hasattr(td, 'style'):
+
+                last_box_state = td.attrs['style']
+
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+                    self.performing_click(element_bs4, class_grid)
+                    self.wait_blocker()
+                    time.sleep(2)
+                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                    if tmodal:
+                        return
+                    grid = self.get_grid(grid_number=grid_number)
+                    tr = grid.select('tbody > tr')
+                    td = next(iter(tr[index].select('td')))
+                    new_box_state = td.attrs['style']
+                    success = last_box_state != new_box_state
+            else:
+                logger().debug(f"Couldn't check box element td: {str(td)}")
 
     def grid_dataframe(self, grid_number=0):
 
@@ -5284,7 +5312,6 @@ class WebappInternal(Base):
             buttons = list(filter(lambda x: x.text.strip() != "", current_layer.select(".tpanel button")))
             return list(map(lambda x: x.parent.attrs["id"], buttons))
         except Exception as error:
-            logger().exception(error)
             return []
 
     def CheckView(self, text, element_type="help"):
@@ -6528,7 +6555,11 @@ class WebappInternal(Base):
             if not webdriver_exception and not self.tss:
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                 self.user_screen()
-                self.wait_element(self.language.database, main_container=".twindow")
+                self.environment_screen()
+                endtime = time.time() + self.config.time_out
+                while (time.time() < endtime and (
+                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                    self.close_warning_screen()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
