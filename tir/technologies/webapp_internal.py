@@ -597,6 +597,7 @@ class WebappInternal(Base):
                 self.send_keys(env(), self.config.module)
                 env_value = self.get_web_value(env())
                 time.sleep(1)
+                self.close_warning_screen()
 
         buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
         button_element = next(iter(buttons), None) if buttons else None
@@ -1688,6 +1689,9 @@ class WebappInternal(Base):
         >>> oHelper.SetValue('Confirmado?', True, grid=True)
         >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
+        >>> # Calling method to checkbox value on a field that isn't a grid:
+        >>> oHelper.SetValue('', True, name_attr=True, position=1)
+        >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is on the second grid of the screen:
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
         >>> oHelper.LoadGrid()
@@ -2196,6 +2200,7 @@ class WebappInternal(Base):
 
                 if element:
                     if self.click_button_finish(click_counter):                        
+                        self.WaitShow(string)
                         text_cover = self.search_text(selector=".tsay", text=string)
                         if text_cover:
                             logger().info(string)
@@ -2672,6 +2677,7 @@ class WebappInternal(Base):
                 child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 if subMenuElements and submenu():
+                    self.expanded_menu(child)
                     self.scroll_to_element(submenu())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = child, locator = By.XPATH )
                     self.wait_blocker()
@@ -2687,19 +2693,40 @@ class WebappInternal(Base):
             if not re.search("\([0-9]\)$", child.text): 
                 self.slm_click_last_item(f"#{child.attrs['id']} > label")
             
-            menuitem_exists = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem",
-                                    main_container="body")
             start_time = time.time()
-            while (time.time() < endtime) and (menuitem_exists() and menuitem != self.language.menu_about.split('>')[1].strip()):
-                elapsed_time = time.time() - start_time
-                self.wait_blocker()
-                time.sleep(1)
+            child_is_displayed = True
 
-                if elapsed_time >= 20:
-                    start_time = time.time()
-                    logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
-                    if not re.search("\([0-9]\)$", child.text):
-                        self.slm_click_last_item(f"#{child.attrs['id']} > label")
+            child_attrs = f"#{child.attrs['id']} > label"
+
+            child_object = next(iter(
+                self.web_scrap(term=child_attrs, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container="body")), None)
+
+            counter_child = 1
+            if menuitem != self.language.menu_about.split('>')[1].strip():
+                while (time.time() < endtime) and (child_is_displayed and counter_child <=3):
+                    time.sleep(1)
+
+                    try:
+                        if child_object:
+                            child_element = lambda: self.soup_to_selenium(child_object)
+
+                            if hasattr(child_element(), 'is_displayed'):
+                                child_is_displayed = child_element().is_displayed()
+
+                                elapsed_time = time.time() - start_time
+                                self.wait_blocker()
+                                time.sleep(1)
+
+                                if elapsed_time >= 20:
+                                    start_time = time.time()
+                                    logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
+                                    if not re.search("\([0-9]\)$", child.text):
+                                        self.slm_click_last_item(f"#{child.attrs['id']} > label")
+                        else:
+                            counter_child +=1
+                    except:
+                        counter_child +=1
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
@@ -2712,6 +2739,13 @@ class WebappInternal(Base):
             self.restart_counter += 1
             self.log_error(str(error))
     
+    def expanded_menu(self, element):
+        expanded = lambda: True if "expanded" in element.attrs['class'] else False
+        if expanded():
+            parent_menu = self.driver.find_element_by_xpath(xpath_soup(element.select('label')[0]))
+            self.wait_blocker()
+            ActionChains(self.driver).move_to_element(parent_menu).click().perform()
+
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
         subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
@@ -2857,6 +2891,9 @@ class WebappInternal(Base):
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
+                contents = list(map(lambda x: x.contents, soup_objects_filtered))
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip() == sub_item.strip(), contents))), None)
+
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects_filtered[0], locator = By.XPATH )
@@ -2975,10 +3012,11 @@ class WebappInternal(Base):
         result = self.find_sub_menu_text(sub_item, menu_itens)
 
         item = ""
-        if result[0]:
-            item = result[0]
-        elif result[1]:
+        if result[1]:
             item = self.find_sub_menu_child(sub_item, result[1])
+        elif result[0]:
+            item = result[0]
+        
         else:
             return False
 
@@ -3061,9 +3099,6 @@ class WebappInternal(Base):
             elif child.text.startswith(menu_item):
                 submenu = child
         
-        if len(containers) > 0:
-            submenu = ""
-
         return (submenu, containers)
 
     def SetBranch(self, branch):
@@ -3247,11 +3282,11 @@ class WebappInternal(Base):
         if not element:
             self.log_error("Couldn't find panel item.")
 
-    def ClickBox(self, field, content_list="", select_all=False, grid_number=1):
+    def ClickBox(self, fields="", content_list="", select_all=False, grid_number=1, itens=False):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: The column to identify grid rows.
+        :param field: Comma divided string with values that must be checked, combine with content_list.
         :type field: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
@@ -3259,6 +3294,8 @@ class WebappInternal(Base):
         :type select_all: bool
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
 
         Usage:
 
@@ -3270,85 +3307,175 @@ class WebappInternal(Base):
         >>> #--------------------------------------------------
         >>> # Calling the method to select all checkboxes:
         >>> oHelper.ClickBox("Branch", select_all=True)
+        >>> #--------------------------------------------------
+        >>> # Calling the method to performe click based in 2 fields and contens:
+        >>> test_helper.ClickBox('Numero da SC, Item da SC', 'COM068, 0001')
+        >>> #--------------------------------------------------
+        >>> # Calling the method to click in all itens with this reference:
+        >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
+
         self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
-        endtime = time.time() + self.config.time_out
         grid_number -= 1
-        if content_list:
-            self.wait_element_timeout(field)
-        elif select_all:
+        if not select_all:
+            fields = list(map(lambda x: x.strip(), fields.split(',')))
+            content_list = list(map(lambda x: x.strip(), content_list.split(',')))
+
+            if len(fields) == 2 and len(content_list) == 2 and not select_all:
+                self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
+                # self.click_box_dataframe(first_column=fields[0], second_column=fields[1], first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
+            elif len(fields) == 1 and len(content_list) == 2 and not select_all:
+                self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
+            elif len(fields) == 1 and not select_all:
+                self.click_box_dataframe(first_column=fields[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
+
+
+        if select_all:
             self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
 
-        grid = self.get_grid(grid_number)
-        column_enumeration = list(enumerate(grid.select("thead label")))
-        chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
-        if chosen_column:
-            column_index = chosen_column[0]
+            grid = self.get_grid(grid_number)
+
+            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+
+            if select_all and is_select_all_button:
+                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+                element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                if element:
+                    box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    self.click(box())
+
+            elif select_all and not is_select_all_button:
+                th = next(iter(grid.select('th')))
+                th_element = self.soup_to_selenium(th)
+                th_element.click()
+
+    def performing_click(self, element_bs4, class_grid):
+
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4,
+                           locator=By.XPATH)
+
+        element = lambda: self.soup_to_selenium(element_bs4)
+
+        self.set_element_focus(element())
+        self.scroll_to_element(element())
+        element().click()
+        time.sleep(1)
+
+        if class_grid == 'tmsselbr':
+            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
+            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                element(), Keys.ENTER).perform()
+        elif class_grid != "tgrid":
+            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                element(), Keys.ENTER).perform()
         else:
-            self.log_error("Couldn't find chosen column.")
+            self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
 
-        content_list = content_list.split(",")
+    def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
 
-        is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+        index_number = []
+        count = 0
 
-        if select_all and is_select_all_button:
-            self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
-            element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
-            if element:
-                box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-                self.click(box())
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and len(index_number) < 1 and count <= 3:
 
-        elif select_all and not is_select_all_button:
-            th = next(iter(grid.select('th')))
-            th_element = self.soup_to_selenium(th)
-            th_element.click()
+            try:
+                df, grid = self.grid_dataframe(grid_number=grid_number)
 
-        elif content_list or (select_all and not is_select_all_button):
-            class_grid = grid.attrs['class'][0]
-            initial_containers = self.get_all_containers()
+                last_df = df
 
-            for item in content_list:
-                grid = self.get_grid(grid_number)
-                self.ScrollGrid(column=field, match_value=item, grid_number=grid_number+1)
-                get_current = lambda: self.selected_row(grid_number)
-                column_enumeration = list(enumerate(grid.select("thead label")))
-                chosen_column = next(iter(list(filter(lambda x: field in x[1].text, column_enumeration))), None)
-                column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
-                self.wait_selected_row( grid_number, column_index, field)
-                current = get_current()
+                class_grid = next(iter(grid.attrs['class']))
 
-                success = False
-                while( time.time() < endtime and not success):
-                    td = next(iter(current.select(f"td[id='{column_index}']")), None)
-                    click_box_item = td.parent.select_one("td")
-                    click_box_item_s = lambda: self.soup_to_selenium(click_box_item)
-                    self.scroll_to_element(click_box_item_s())
-
-                    if class_grid == 'tmsselbr':
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).click(click_box_item_s()).perform()
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
-                            click_box_item_s(), Keys.ENTER).perform()
-                    elif class_grid != "tgrid":
-                        ActionChains(self.driver).move_to_element(click_box_item_s()).send_keys_to_element(
-                            click_box_item_s(), Keys.ENTER).perform()
+                if not df.empty:
+                    if first_column and second_column:
+                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
+                    elif first_column and (first_content and second_content):
+                        index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
+                    elif itens:
+                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                    elif first_column and first_content:
+                        first_column_values = df[first_column].values
+                        first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
+                        content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
+                        if content:
+                            index_number.append(first_column_formatted_values.index(content))
+                            if len(index_number) > 0:
+                                index_number = [index_number[0]]
                     else:
-                        self.double_click(click_box_item_s(), click_type=enum.ClickType.ACTIONCHAINS)
+                        index_number.append(0)
 
-                    self.wait_element_is_not_displayed(click_box_item)
+                    if len(index_number) < 1 and count <= 3:
+                        first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        if first_element_focus:
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                            self.soup_to_selenium(first_element_focus).click()
+                        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                        self.wait_blocker()
+                        df, grid = self.grid_dataframe(grid_number=grid_number)
+                        if df.equals(last_df):
+                            count +=1
 
-                    end_containers = self.get_all_containers()
-                    if end_containers and len(end_containers) > len(initial_containers):
-                        logger().debug("ClickBox: New container found stopping attempts to click on the checkbox")
-                        break
+            except Exception as e:
+                self.log_error(f"Content doesn't found on the screen! {str(e)}")
 
-                    new_td = next(iter(get_current().select(f"td[id='{column_index}']")), None)
-                    new_click_box_item = new_td.parent.select_one("td")
-                    if new_click_box_item != click_box_item:
-                        success = True
-                    else:
-                        parent_id = click_box_item.find_parent("div", class_="tpanel").attrs["id"]
-                        success = self.wait_element_is_blocked(parent_id)
+        if len(index_number) < 1:
+            self.log_error(f"Content doesn't found on the screen! {first_content}")
+
+        tr = grid.select('tbody > tr')
+
+        if hasattr(index_number, '__iter__'):
+            for index in index_number:
+                element_bs4 = next(iter(tr[index].select('td')))
+                self.wait_blocker()
+                self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
+        else:
+            index = index_number
+            element_bs4 = next(iter(tr[index].select('td')))
+            self.wait_blocker()
+            self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
+
+    def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
+
+        if element_bs4:
+            success = False
+            td = next(iter(tr[index].select('td')))
+
+            if hasattr(td, 'style'):
+
+                last_box_state = td.attrs['style']
+
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+                    self.performing_click(element_bs4, class_grid)
+                    self.wait_blocker()
+                    time.sleep(2)
+                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                    if tmodal:
+                        return
+                    grid = self.get_grid(grid_number=grid_number)
+                    tr = grid.select('tbody > tr')
+                    td = next(iter(tr[index].select('td')))
+                    new_box_state = td.attrs['style']
+                    success = last_box_state != new_box_state
+            else:
+                logger().debug(f"Couldn't check box element td: {str(td)}")
+
+    def grid_dataframe(self, grid_number=0):
+
+        self.wait_element(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        grid = self.get_grid(grid_number=grid_number)
+
+        df = (next(iter(pd.read_html(str(grid)))))
+
+        converters = {c: lambda x: str(x) for c in df.columns}
+
+        df, grid = (next(iter(pd.read_html(str(grid), converters=converters)), None), grid)
+
+        if not df.empty:
+            df = df.fillna('Not Value')
+            return (df, grid)
 
     def wait_element_is_blocked(self, parent_id):
         """
@@ -3711,10 +3838,11 @@ class WebappInternal(Base):
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
                     else:
+                        time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(action=self.send_keys, element=element, value=self.supported_keys(key))
+                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
@@ -3899,13 +4027,10 @@ class WebappInternal(Base):
             else:
                 self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
                 #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span", position=position)
+                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
 
         if not element_list:
-            self.log_error("Couldn't find span element")
-
-        if not element_list:
-            self.log_error("Couldn't find span element")
+            self.log_error("Couldn't find input element")
 
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
@@ -3917,9 +4042,6 @@ class WebappInternal(Base):
             self.log_error("Couldn't find input element")
 
         xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
-
-        if input_element.attrs['type'] == "checkbox" and "checked" in input_element.parent.attrs['class']:
-            return None
 
         self.scroll_to_element(xpath_input())
 
@@ -5150,7 +5272,6 @@ class WebappInternal(Base):
             buttons = list(filter(lambda x: x.text.strip() != "", current_layer.select(".tpanel button")))
             return list(map(lambda x: x.parent.attrs["id"], buttons))
         except Exception as error:
-            logger().exception(error)
             return []
 
     def CheckView(self, text, element_type="help"):
@@ -5925,6 +6046,7 @@ class WebappInternal(Base):
         """
         label = ''
         self.wait_element(label_name)
+        logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
         while(not label and time.time() < endtime):
             container = self.get_current_container()
@@ -5941,6 +6063,7 @@ class WebappInternal(Base):
 
         label_element = lambda: self.soup_to_selenium(label)
         
+        time.sleep(2)
         self.scroll_to_element(label_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
         self.set_element_focus(label_element())
@@ -6074,7 +6197,7 @@ class WebappInternal(Base):
                                             self.wait_blocker()
                                             self.scroll_to_element(element_click())
                                             element_click().click()
-                                            if self.check_toggler(label_filtered):
+                                            if self.check_toggler(label_filtered, element):
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
                                                     self.send_action(action=self.click, element=element_click, right_click=right_click)
@@ -6172,17 +6295,26 @@ class WebappInternal(Base):
             else:
                 return False
     
-    def check_toggler(self, label_filtered):
+    def check_toggler(self, label_filtered, element):
         """
         [Internal]
         """
+
+        element_id = element.get_attribute_list('id')
         tree_selected = self.treenode_selected(label_filtered)
 
         if tree_selected:
             if tree_selected.find_all_next("span"):
-                try:
-                    return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-                except:
+                first_span = next(iter(tree_selected.find_all_next("span"))).find_parent('tr')
+                if first_span:
+                    if next(iter(element_id)) == next(iter(first_span.get_attribute_list('id'))):
+                        try:
+                            return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                        except:
+                            return False
+                    else:
+                        return False
+                else:
                     return False
             else:
                 return False
@@ -6384,6 +6516,10 @@ class WebappInternal(Base):
                 self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                 self.user_screen()
                 self.environment_screen()
+                endtime = time.time() + self.config.time_out
+                while (time.time() < endtime and (
+                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                    self.close_warning_screen()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
