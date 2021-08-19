@@ -90,6 +90,7 @@ class WebappInternal(Base):
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
+        self.grid_memo_field = False
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -1709,7 +1710,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
         """
         Sets value of an input element.
         
@@ -1732,6 +1733,8 @@ class WebappInternal(Base):
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -1759,6 +1762,9 @@ class WebappInternal(Base):
         """
 
         check_value = self.check_value(check_value)
+
+        if grid_memo_field:
+            self.grid_memo_field = True
 
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
@@ -2014,7 +2020,7 @@ class WebappInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
         """
         Checks if a field has the value the user expects.
 
@@ -2034,6 +2040,8 @@ class WebappInternal(Base):
         :type bool
         :param direction: Desired direction to search for the element, currently accepts right and down
         :type str
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -2054,6 +2062,9 @@ class WebappInternal(Base):
         
         """
         self.wait_blocker()
+
+        if grid_memo_field:
+            self.grid_memo_field = True
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
@@ -2116,7 +2127,7 @@ class WebappInternal(Base):
 
         self.compare_field_values(field, user_value, captured_value, message)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
         """
         Gets the current value or text of element.
 
@@ -2128,6 +2139,8 @@ class WebappInternal(Base):
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -2136,6 +2149,9 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element = None
+
+        if grid_memo_field:
+            self.grid_memo_field = True
 
         if not grid:
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
@@ -4403,7 +4419,7 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
                         tmodal_list = soup.select('.tmodaldialog.twidget.borderless')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
-                        while(time.time() < endtime and not self.element_exists(term=".tmodaldialog.twidget.borderless", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer+1, main_container="body")):
+                        while (time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
@@ -4427,7 +4443,7 @@ class WebappInternal(Base):
                         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                         soup = self.get_current_DOM()
                         new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
-                        child = new_container.select("input")
+                        child = new_container.select("input, textarea")
                         child_type = "input"
                         option_text = ""
                         if not child:
@@ -4451,10 +4467,14 @@ class WebappInternal(Base):
                             self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
-                            if "tget" in self.get_current_container().next.attrs['class']:
+                            if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
+                                if self.grid_memo_field:
+                                    self.SetButton('Ok')
+                                    check_value = False
+                                    self.grid_memo_field = False
 
                                 if try_counter < 2:
                                     try_counter += 1
@@ -4669,7 +4689,11 @@ class WebappInternal(Base):
 
                     if column_name in headers[field[3]]:
                         column_number = headers[field[3]][column_name]
-                        text = columns[column_number].text.strip()
+                        if self.grid_memo_field:
+                            text = self.check_grid_memo(columns[column_number])
+                            self.grid_memo_field = False
+                        else:
+                            text = columns[column_number].text.strip()
                         success = True
 
                     if success and get_value and text:
@@ -4680,6 +4704,22 @@ class WebappInternal(Base):
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error( grids, headers, column_name, rows, columns, field )
+
+    def check_grid_memo(self, element):
+        """
+        [Internal]
+        :param element: 
+        :return: 
+        """
+        
+        self.soup_to_selenium(element).click()
+        ActionChains(self.driver).key_down(Keys.ENTER).perform()
+        container = self.get_current_container()
+        textarea = next(iter(container.select("textarea")), None)
+        content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+        self.SetButton('Ok')
+        
+        return content
 
     def check_grid_error(self, grid, headers, column_name, rows, columns, field):
         """
