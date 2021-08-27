@@ -116,7 +116,7 @@ class Webapp():
         """
         self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
         """
         Checks if a field has the value the user expects.
 
@@ -136,6 +136,8 @@ class Webapp():
         :type input_field: bool
         :param direction: Desired direction to search for the element, currently accepts right and down.
         :type direction: str
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -155,7 +157,7 @@ class Webapp():
         >>> oHelper.LoadGrid()
 
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field)
 
     def CheckView(self, text, element_type="help"):
         """
@@ -312,7 +314,7 @@ class Webapp():
         """
         self.__webapp.ClickLabel(label_name)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
         """
         Gets the current value or text of element.
 
@@ -324,13 +326,15 @@ class Webapp():
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> current_value = oHelper.GetValue("A1_COD")
         """
-        return self.__webapp.GetValue(field, grid, line, grid_number)
+        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
 
     def LoadGrid(self):
         """
@@ -714,7 +718,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
         """
         Sets value of an input element.
 
@@ -739,6 +743,8 @@ class Webapp():
         :type name_attr: bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -767,7 +773,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

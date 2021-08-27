@@ -26,6 +26,7 @@ from selenium.common.exceptions import WebDriverException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
+from selenium.webdriver.support import expected_conditions as EC
 
 class Base(unittest.TestCase):
     """
@@ -96,6 +97,7 @@ class Base(unittest.TestCase):
         self.errors = []
         self.config.log_file = False
         self.tmenu_out_iframe = False
+        self.twebview_context = False
 
         if autostart:
             self.Start()
@@ -449,6 +451,13 @@ class Base(unittest.TestCase):
             self.execution_flow()
 
         try:
+
+            if self.twebview_context:
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="COMP3010"]')))
+                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '//*[@id="COMP3010"]'))
+                self.twebview_context = False
+                return BeautifulSoup(self.driver.page_source, "html.parser")
+
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
