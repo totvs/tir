@@ -4241,10 +4241,10 @@ class WebappInternal(Base):
         if self.grid_input:
             self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-            if "tget" in self.get_current_container().next.attrs['class']:
-                self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
-            initial_layer = len(soup.select(".tmodaldialog"))
+            container_soup = next(iter(soup.select('body')))
+            container_element = self.driver.find_element_by_xpath(xpath_soup(container_soup))
+            initial_layer = len(container_element.find_elements(By.CSS_SELECTOR, '.tmodaldialog'))
 
         for field in self.grid_input:
             if field[3] and field[0] == "":
@@ -4343,9 +4343,6 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             logger().debug("Waiting for container to be active")
             time.sleep(1)
-            
-        if "tget" in self.get_current_container().next.attrs['class']:
-            self.wait_element(field[0])
 
         endtime = time.time() + self.config.time_out
         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
