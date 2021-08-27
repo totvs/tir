@@ -91,6 +91,7 @@ class WebappInternal(Base):
         self.tree_base_element = ()
         self.tmenu_screen = None
         self.grid_memo_field = False
+        self.range_multiplier = None
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -1603,8 +1604,7 @@ class WebappInternal(Base):
             
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
-            width_safe  = (container_size['width']  * 0.015)
-            height_safe = (container_size['height'] * 0.01)
+            width_safe, height_safe = self.width_height(container_size)
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
@@ -1617,8 +1617,9 @@ class WebappInternal(Base):
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
             distance      = self.get_distance_by_direction(xy_label, position_list, direction)
-            elem          = min(distance, key = lambda x: x[1])
-            elem          = list_in_range[elem[0]]
+            if distance:
+                elem          = min(distance, key = lambda x: x[1])
+                elem          = list_in_range[elem[0]]
 
             if not elem:
                 self.log_error(f"Label '{field}' wasn't found")
@@ -1629,6 +1630,20 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
+    def width_height(self, container_size):
+
+        if not self.range_multiplier:
+            width_safe  = (container_size['width']  * 0.015)
+            height_safe = (container_size['height'] * 0.01)
+        elif self.range_multiplier == 1:
+            width_safe  = (container_size['width']  * 0.03)
+            height_safe = (container_size['height'] * 0.02)
+        else:
+            width_safe  = (container_size['width']  * (0.015 * self.range_multiplier))
+            height_safe = (container_size['height'] * (0.01 * self.range_multiplier))
+
+        return (width_safe, height_safe)
 
 
     def get_position_from_bs_element(self,element):
@@ -1710,7 +1725,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None):
         """
         Sets value of an input element.
         
@@ -1735,6 +1750,8 @@ class WebappInternal(Base):
         :type name_attr: bool
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
+        :type range_multiplier: int
 
         Usage:
 
@@ -1766,6 +1783,9 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
 
+        if range_multiplier:
+            self.range_multiplier = range_multiplier
+            
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
