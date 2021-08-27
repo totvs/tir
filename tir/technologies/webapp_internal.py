@@ -90,6 +90,7 @@ class WebappInternal(Base):
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
+        self.grid_memo_field = False
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -230,8 +231,9 @@ class WebappInternal(Base):
             self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
-                self.update_password()
+            if not self.config.poui_login:
+                while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
+                    self.update_password()
 
             self.environment_screen()
 
@@ -379,7 +381,14 @@ class WebappInternal(Base):
             user_text = "admin"
             password_text = "1234"
 
-        if not self.wait_element_timeout(term="[name='cGetUser'] > input",
+        if self.config.poui_login:
+            self.twebview_context = True
+            # if not self.driver.find_element(By.CSS_SELECTOR, ".po-page-login-info-field .po-input"):
+            if not self.wait_element_timeout(term=".po-page-login-info-field .po-input",
+            scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out * 3,main_container='body'):
+                self.reload_user_screen()
+
+        elif not self.wait_element_timeout(term="[name='cGetUser'] > input",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out * 3 , main_container='body'):
             self.reload_user_screen()
 
@@ -391,7 +400,10 @@ class WebappInternal(Base):
         logger().info("Filling User")
 
         try:
-            user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
+            if self.config.poui_login:
+                user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
+            else:
+                user_element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
             if user_element is None:
                 self.restart_counter += 1
@@ -432,7 +444,11 @@ class WebappInternal(Base):
 
         # while(loop_control):
         logger().info("Filling Password")
-        password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
+        if self.config.poui_login:
+            password_element = next(iter(soup.select(".po-input-icon-right")), None)
+        else:
+            password_element = next(iter(soup.select("[name='cGetPsw'] > input")), None)
+
         if password_element is None:
             self.restart_counter += 1
             message = "Couldn't find User input element."
@@ -519,10 +535,17 @@ class WebappInternal(Base):
             label = self.language.enter
             container = ".twindow"
 
-        self.wait_element(self.language.database, main_container=container)
+        if self.config.poui_login:
+            self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            self.wait_element(self.language.database, main_container=container)
 
         logger().info("Filling Date")
-        base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+        if self.config.poui_login:
+            base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+
         if len(base_dates) > 1:
             base_date = base_dates.pop()
         else:
@@ -538,13 +561,21 @@ class WebappInternal(Base):
         self.double_click(date())
         self.send_keys(date(), Keys.HOME)
         self.send_keys(date(), self.config.date)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Group")
-        group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(group_elements) > 1:
-            group_element = group_elements.pop()
+        if self.config.poui_login:
+            group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            group_element = next(iter(group_elements))
+            group_element = group_element.find_parent('pro-company-lookup')
+            group_element = next(iter(group_element.select('input')), None)
         else:
-            group_element = next(iter(group_elements), None)
+            group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(group_elements) > 1:
+                group_element = group_elements.pop()
+            else:
+                group_element = next(iter(group_elements), None)
 
         if group_element is None:
             self.restart_counter += 1
@@ -556,13 +587,22 @@ class WebappInternal(Base):
         self.double_click(group())
         self.send_keys(group(), Keys.HOME)
         self.send_keys(group(), self.config.group)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Branch")
-        branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(branch_elements) > 1:
-            branch_element = branch_elements.pop()
+        if self.config.poui_login:
+            branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            branch_element = next(iter(branch_elements))
+            branch_element = branch_element.find_parent('pro-branch-lookup')
+            branch_element = next(iter(branch_element.select('input')), None)
         else:
-            branch_element = next(iter(branch_elements), None)
+            branch_elements = self.web_scrap(term="[name='cFil'] input, [name='__cFil'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(branch_elements) > 1:
+                branch_element = branch_elements.pop()
+            else:
+                branch_element = next(iter(branch_elements), None)
+
         if branch_element is None:
             self.restart_counter += 1
             message = "Couldn't find Branch input element."
@@ -573,13 +613,22 @@ class WebappInternal(Base):
         self.double_click(branch())
         self.send_keys(branch(), Keys.HOME)
         self.send_keys(branch(), self.config.branch)
+        if self.config.poui_login:
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Environment")
-        environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
-        if len(environment_elements) > 1:
-            environment_element = environment_elements.pop()
+        if self.config.poui_login:
+            environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            environment_element = next(iter(environment_elements))
+            environment_element = environment_element.find_parent('pro-system-module-lookup')
+            environment_element = next(iter(environment_element.select('input')), None)
         else:
-            environment_element = next(iter(environment_elements), None)
+            environment_elements = self.web_scrap(term="[name='cAmb'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
+            if len(environment_elements) > 1:
+                environment_element = environment_elements.pop()
+            else:
+                environment_element = next(iter(environment_elements), None)
+
         if environment_element is None:
             self.restart_counter += 1
             message = "Couldn't find Module input element."
@@ -588,7 +637,12 @@ class WebappInternal(Base):
 
 
         env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
-        if ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()):
+        if self.config.poui_login:
+            enable = env().is_enabled()
+        else:
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled())
+
+        if enable:
             env_value = self.get_web_value(env())
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and env_value != self.config.module):
@@ -611,7 +665,11 @@ class WebappInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)             
+        if not self.config.poui_login:
+            self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="input", main_container=container)
+        else:
+            self.driver.switch_to.default_content()
+            self.config.poui_login = False
             
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
@@ -1652,7 +1710,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
         """
         Sets value of an input element.
         
@@ -1675,6 +1733,8 @@ class WebappInternal(Base):
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -1702,6 +1762,9 @@ class WebappInternal(Base):
         """
 
         check_value = self.check_value(check_value)
+
+        if grid_memo_field:
+            self.grid_memo_field = True
 
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
@@ -1957,7 +2020,7 @@ class WebappInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
         """
         Checks if a field has the value the user expects.
 
@@ -1977,6 +2040,8 @@ class WebappInternal(Base):
         :type bool
         :param direction: Desired direction to search for the element, currently accepts right and down
         :type str
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -1997,6 +2062,9 @@ class WebappInternal(Base):
         
         """
         self.wait_blocker()
+
+        if grid_memo_field:
+            self.grid_memo_field = True
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
         elif isinstance(user_value, bool):
@@ -2059,7 +2127,7 @@ class WebappInternal(Base):
 
         self.compare_field_values(field, user_value, captured_value, message)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
         """
         Gets the current value or text of element.
 
@@ -2071,6 +2139,8 @@ class WebappInternal(Base):
         :type line: int
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
+        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
+        :type grid_memo_field: bool
 
         Usage:
 
@@ -2079,6 +2149,9 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element = None
+
+        if grid_memo_field:
+            self.grid_memo_field = True
 
         if not grid:
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
@@ -2605,6 +2678,9 @@ class WebappInternal(Base):
             else:
                 container_element = self.driver
             try:
+                if self.config.poui_login:
+                    self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+                    return self.driver.find_element(By.CSS_SELECTOR, selector)
                 element_list = container_element.find_elements(by, selector)
             except StaleElementReferenceException:
                 pass
@@ -4340,7 +4416,13 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
                         tmodal_list = soup.select('.tmodaldialog.twidget.borderless')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
-                        while(time.time() < endtime and not self.element_exists(term=".tmodaldialog.twidget.borderless", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer+1, main_container="body")):
+
+                        if self.grid_memo_field:
+                            term = ".tmodaldialog"
+                        else:
+                            term = ".tmodaldialog.twidget.borderless"
+                            
+                        while (time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
@@ -4364,7 +4446,7 @@ class WebappInternal(Base):
                         self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
                         soup = self.get_current_DOM()
                         new_container = self.zindex_sort(soup.select(".tmodaldialog.twidget"), True)[0]
-                        child = new_container.select("input")
+                        child = new_container.select("input, textarea")
                         child_type = "input"
                         option_text = ""
                         if not child:
@@ -4388,10 +4470,14 @@ class WebappInternal(Base):
                             self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
-                            if "tget" in self.get_current_container().next.attrs['class']:
+                            if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(selenium_input, user_value, try_counter)
+                                if self.grid_memo_field:
+                                    self.SetButton('Ok')
+                                    check_value = False
+                                    self.grid_memo_field = False
 
                                 if try_counter < 2:
                                     try_counter += 1
@@ -4606,7 +4692,11 @@ class WebappInternal(Base):
 
                     if column_name in headers[field[3]]:
                         column_number = headers[field[3]][column_name]
-                        text = columns[column_number].text.strip()
+                        if self.grid_memo_field:
+                            text = self.check_grid_memo(columns[column_number])
+                            self.grid_memo_field = False
+                        else:
+                            text = columns[column_number].text.strip()
                         success = True
 
                     if success and get_value and text:
@@ -4617,6 +4707,22 @@ class WebappInternal(Base):
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error( grids, headers, column_name, rows, columns, field )
+
+    def check_grid_memo(self, element):
+        """
+        [Internal]
+        :param element: 
+        :return: 
+        """
+        
+        self.soup_to_selenium(element).click()
+        ActionChains(self.driver).key_down(Keys.ENTER).perform()
+        container = self.get_current_container()
+        textarea = next(iter(container.select("textarea")), None)
+        content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+        self.SetButton('Ok')
+        
+        return content
 
     def check_grid_error(self, grid, headers, column_name, rows, columns, field):
         """
@@ -7425,19 +7531,48 @@ class WebappInternal(Base):
 
     def set_multilanguage(self):
 
-        if self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
+        if self.config.poui_login:
+            soup = self.get_current_DOM()
+            po_select = next(iter(soup.select(".po-select-container")), None)
+            if po_select:
+                span_label = next(iter(po_select.select('span')), None)
+                if span_label:
+                    language = self.return_select_language()
+                    if not span_label.text.lower() in language:
+                        self.set_language_poui(language, po_select)
+
+        elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
 
             tcombobox = next(iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
             selects = next(iter(tcombobox.select('select')))
 
-            if self.config.language == 'pt-br':
-                language = ['português', 'portugués', 'portuguese']
-            elif self.config.language == 'es-es':
-                language = ['espanhol', 'español', 'spanish']
-            elif self.config.language == 'en-us':
-                language = ['inglês', 'inglés', 'english']
+            language = self.return_select_language()
 
             self.select_combo(selects, language, index=True)
+
+    def set_language_poui(self, language, container):
+
+        icon = next(iter(list(filter(lambda x: "class" in x.attrs, container.select('span')))), None)
+        if icon:
+            icon_element = self.soup_to_selenium(icon)
+            icon_element.click()
+
+            container_ul = next(iter(container.select('ul')), None)
+            if container_ul:
+                item = next(iter(list(filter(lambda x: x.text.lower() in language ,container_ul.select('li')))), None)
+                element = self.soup_to_selenium(item)
+                element.click()
+
+    def return_select_language(self):
+
+        if self.config.language == 'pt-br':
+            language = ['português', 'portugués', 'portuguese']
+        elif self.config.language == 'es-es':
+            language = ['espanhol', 'español', 'spanish']
+        elif self.config.language == 'en-us':
+            language = ['inglês', 'inglés', 'english']
+
+        return language
 
     def get_grid_content(self, grid_number, grid_element):
         """
