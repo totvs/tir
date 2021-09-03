@@ -143,7 +143,7 @@ class WebappInternal(Base):
             self.set_log_info_tss()
 
             if self.config.num_exec:
-                if not self.num_exec.post_exec(self.config.url_set_start_exec):
+                if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -256,7 +256,7 @@ class WebappInternal(Base):
             self.log_error(str(e))
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_start_exec):
+            if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -2988,7 +2988,7 @@ class WebappInternal(Base):
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip() == sub_item.strip(), contents))), None)
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip().lower() == sub_item.strip().lower(), contents))), None)
 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
@@ -4261,10 +4261,10 @@ class WebappInternal(Base):
         if self.grid_input:
             self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-            if "tget" in self.get_current_container().next.attrs['class']:
-                self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
-            initial_layer = len(soup.select(".tmodaldialog"))
+            container_soup = next(iter(soup.select('body')))
+            container_element = self.driver.find_element_by_xpath(xpath_soup(container_soup))
+            initial_layer = len(container_element.find_elements(By.CSS_SELECTOR, '.tmodaldialog'))
 
         for field in self.grid_input:
             if field[3] and field[0] == "":
@@ -4363,9 +4363,6 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             logger().debug("Waiting for container to be active")
             time.sleep(1)
-            
-        if "tget" in self.get_current_container().next.attrs['class']:
-            self.wait_element(field[0])
 
         endtime = time.time() + self.config.time_out
         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
@@ -4698,8 +4695,11 @@ class WebappInternal(Base):
                 rows = grids[field[3]].select("tbody tr")
                 
                 if rows:
-                    if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error) 
+                    if field[0] > len(rows)-1:
+                        if get_value:
+                            return ''
+                        else:
+                            self.log_error(self.language.messages.grid_line_error) 
 
                     field_element = next(iter(field), None)
                    
@@ -5609,7 +5609,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
 
             if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-                if not self.num_exec.post_exec(self.config.url_set_end_exec):
+                if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
                 
@@ -6656,7 +6656,7 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_end_exec):
+            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
