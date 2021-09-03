@@ -1234,7 +1234,7 @@ class WebappInternal(Base):
                     success = True
             
         if not elements_soup:
-            self.log_error("Couldn't find element_soup.")
+            self.log_error("Couldn't find search browse.")
 
         if not container:
             self.log_error("Couldn't find container of element.")
