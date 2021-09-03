@@ -3471,6 +3471,7 @@ class WebappInternal(Base):
                     elif itens:
                         index_number = df.loc[(df[first_column] == first_content)].index.array
                     elif first_column and first_content:
+                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))))
                         first_column_values = df[first_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
