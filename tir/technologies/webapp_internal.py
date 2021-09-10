@@ -92,6 +92,7 @@ class WebappInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
+        self.routine = None
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -1005,6 +1006,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
+        self.routine = 'Program'
         self.config.routine = program_name
         
         if not self.log.program:
@@ -2241,9 +2243,9 @@ class WebappInternal(Base):
 
             
             if self.config.routine:
-                if ">" in self.config.routine:
+                if self.routine == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                else:
+                elif self.routine == 'Program':
                     self.set_program(self.config.routine)
 
     def driver_refresh(self):
@@ -2740,6 +2742,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         wait_screen = True if menu_itens != self.language.menu_about else False
         if save_input:
+            self.routine = 'SetLateralMenu'
             self.config.routine = menu_itens
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
