@@ -1036,7 +1036,7 @@ class WebappInternal(Base):
             if tget:
                 tget_img = next(iter(tget.select("img")), None)
 
-                if tget_img is None:
+                if tget_img is None or not self.element_is_displayed(tget_img):
                     self.log_error("Couldn't find Program field.")
 
                 s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
