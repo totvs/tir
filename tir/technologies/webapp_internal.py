@@ -1858,7 +1858,7 @@ class WebappInternal(Base):
             else:
                 element = self.get_field(field, name_attr, position)
 
-            if not element:
+            if not element or not self.element_is_displayed(element):
                 continue
 
             main_element = element
