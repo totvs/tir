@@ -1727,7 +1727,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
         """
         Sets value of an input element.
         
@@ -1754,6 +1754,8 @@ class WebappInternal(Base):
         :type grid_memo_field: bool
         :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
         :type range_multiplier: int
+        :param direction: Desired direction to search for the element, currently accepts right and down.
+        :type direction: str
 
         Usage:
 
@@ -1793,7 +1795,7 @@ class WebappInternal(Base):
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
-            self.input_value(field, value, ignore_case, name_attr, position, check_value)
+            self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
     def check_value(self, check_value):
 
@@ -1806,7 +1808,7 @@ class WebappInternal(Base):
 
         return check_value
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True):
+    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True, direction=None):
         """
         [Internal]
 
@@ -1852,11 +1854,11 @@ class WebappInternal(Base):
             logger().info(f"Looking for element: {field}")
 
             if field.lower() == self.language.From.lower():
-                element = self.get_field("cDeCond", name_attr=True)
+                element = self.get_field("cDeCond", name_attr=True, direction=direction)
             elif field.lower() == self.language.To.lower():
-                element = self.get_field("cAteCond", name_attr=True)
+                element = self.get_field("cAteCond", name_attr=True, direction=direction)
             else:
-                element = self.get_field(field, name_attr, position)
+                element = self.get_field(field, name_attr, position, direction=direction)
 
             if not element or not self.element_is_displayed(element):
                 continue
