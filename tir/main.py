@@ -718,7 +718,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
         """
         Sets value of an input element.
 
@@ -747,6 +747,8 @@ class Webapp():
         :type grid_memo_field: bool
         :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
         :type range_multiplier: int
+        :param direction: Desired direction to search for the element, currently accepts right and down.
+        :type direction: str
 
         Usage:
 
@@ -775,7 +777,7 @@ class Webapp():
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """
