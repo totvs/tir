@@ -2747,6 +2747,8 @@ class WebappInternal(Base):
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
         self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
         soup = self.get_current_DOM()
