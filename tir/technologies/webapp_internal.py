@@ -1754,13 +1754,16 @@ class WebappInternal(Base):
         :type grid_memo_field: bool
         :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
         :type range_multiplier: int
-        :param direction: Desired direction to search for the element, currently accepts right and down.
+        :param direction: Desired direction to search for the element from a label, currently accepts right and down.
         :type direction: str
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field from a label text and looking an input field for a specific direction:
+        >>> oHelper.SetValue("Codigo", "000001", direction='right')
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
