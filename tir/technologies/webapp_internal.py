@@ -1030,6 +1030,8 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
             self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
             tget = next(iter(soup.select("[name=cGet]")), None)
             tget_input = next(iter(tget.select("input")), None)
