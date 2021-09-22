@@ -3160,7 +3160,7 @@ class WebappInternal(Base):
 
             child_id = child.get_attribute("id")
             old_class = self.driver.execute_script("return document.querySelector('#{}').className".format(child_id))
-            new_class = old_class + " highlighted expanded"
+            new_class = old_class + " highlighted expanded, highlight expanded"
             self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, new_class))
 
             child_itens = child.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
