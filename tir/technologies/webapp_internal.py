@@ -5087,13 +5087,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> headers = self.get_headers_from_grids(grids)
         """
-        headers = []
+        
+        headers = []    
+
         for item in grids:
             labels = item.select("thead tr label")
             if labels:
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
+
+        for item_duplicated in duplicate_fields:
+            duplicated_key = item_duplicated[0].lower()
+            duplicated_value = item_duplicated[1]
+
+            for header in headers:
+                if duplicated_key in header:
+                    header[duplicated_key] = duplicated_value
+
         return headers
 
     def add_grid_row_counter(self, grid):
