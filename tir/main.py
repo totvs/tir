@@ -336,7 +336,7 @@ class Webapp():
         """
         return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
 
-    def LoadGrid(self):
+    def LoadGrid(selfduplicate_fields=[]):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -352,8 +352,14 @@ class Webapp():
         >>> # After CheckResult:
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
+        >>> #--------------------------------------
+        >>> # After Duplicate Fields:
+        >>> oHelper.SetValue('D1_TES' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> oHelper.LoadGrid(duplicate_fields=[['tipo entrada', 10]])
+
+        >>> oHelper.LoadGrid()
         """
-        self.__webapp.LoadGrid()
+        self.__webapp.LoadGrid(duplicate_fields)
 
     def LogOff(self):
         """

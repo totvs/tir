@@ -4250,7 +4250,7 @@ class WebappInternal(Base):
         """
         self.grid_check.append([line, column, value, grid_number])
 
-    def LoadGrid(self):
+    def LoadGrid(self,duplicate_fields=[]):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -4285,7 +4285,7 @@ class WebappInternal(Base):
             else:
                 self.wait_blocker()
                 logger().info(f"Filling grid field: {field[0]}")
-                self.fill_grid(field, x3_dictionaries, initial_layer)
+                self.fill_grid(field, x3_dictionaries, initial_layer,duplicate_fields)
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
@@ -4315,7 +4315,7 @@ class WebappInternal(Base):
             x3_dictionaries = self.get_x3_dictionaries(fields)
         return x3_dictionaries
 
-    def fill_grid(self, field, x3_dictionaries, initial_layer):
+    def fill_grid(self, field, x3_dictionaries, initial_layer, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4399,7 +4399,7 @@ class WebappInternal(Base):
                     grids = self.filter_displayed_elements(grids)
 
                 if grids:
-                    headers = self.get_headers_from_grids(grids)
+                    headers = self.get_headers_from_grids(grids, duplicate_fields=[])
                     if field[2] + 1 > len(grids):
                         grid_reload = True
                     else:
@@ -5066,7 +5066,7 @@ class WebappInternal(Base):
 
         return regex[:-1]
 
-    def get_headers_from_grids(self, grids):
+    def get_headers_from_grids(self, gridsduplicate_fields=[]):
         """
         [Internal]
 
