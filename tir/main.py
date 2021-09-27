@@ -336,7 +336,7 @@ class Webapp():
         """
         return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
 
-    def LoadGrid(selfduplicate_fields=[]):
+    def LoadGrid(self, duplicate_fields=[]):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
