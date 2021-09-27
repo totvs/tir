@@ -4266,6 +4266,10 @@ class WebappInternal(Base):
         >>> # After CheckResult:
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
+        >>> #--------------------------------------
+        >>> # After Duplicate Fields:
+        >>> oHelper.SetValue('D1_TES' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> oHelper.LoadGrid(duplicate_fields=[['tipo entrada', 10]])
         """
 
         x3_dictionaries = self.create_x3_tuple()
