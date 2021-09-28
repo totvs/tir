@@ -453,8 +453,8 @@ class Base(unittest.TestCase):
         try:
 
             if self.twebview_context:
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="COMP3010"]')))
-                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '//*[@id="COMP3010"]'))
+                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="twebview"]')))
+                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '[class="twebview"]'))
                 self.twebview_context = False
                 return BeautifulSoup(self.driver.page_source, "html.parser")
 
