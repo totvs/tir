@@ -4279,6 +4279,8 @@ class WebappInternal(Base):
 
         x3_dictionaries = self.create_x3_tuple()
 
+        duplicate_fields=[]
+
         initial_layer = 0
         if self.grid_input:
             self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
