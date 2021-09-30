@@ -3467,13 +3467,18 @@ class WebappInternal(Base):
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
-        element().click()
+        try:
+            element().click()
+        except:
+            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
         time.sleep(1)
 
         if class_grid == 'tmsselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
-            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                element(), Keys.ENTER).perform()
+            event = "var evt = document.createEvent('MouseEvents');\
+                evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
+                arguments[0].dispatchEvent(evt);"
+            self.driver.execute_script(event, element())
         elif class_grid != "tgrid":
             ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                 element(), Keys.ENTER).perform()
