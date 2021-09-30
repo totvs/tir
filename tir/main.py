@@ -336,7 +336,7 @@ class Webapp():
         """
         return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
 
-    def LoadGrid(self, duplicate_fields=[]):
+    def LoadGrid(self):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -352,14 +352,9 @@ class Webapp():
         >>> # After CheckResult:
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
-        >>> #--------------------------------------
-        >>> # After Duplicate Fields:
-        >>> oHelper.SetValue('D1_TES' , '073', grid=True, grid_number=2, name_attr=True)
-        >>> oHelper.LoadGrid(duplicate_fields=[['tipo entrada', 10]])
 
-        >>> oHelper.LoadGrid()
         """
-        self.__webapp.LoadGrid(duplicate_fields)
+        self.__webapp.LoadGrid()
 
     def LogOff(self):
         """
@@ -724,7 +719,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
 
@@ -785,8 +780,13 @@ class Webapp():
         >>> # Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
+        >>> #--------------------------------------
+        >>> # Calling method to input value in cases that have duplicate fields:
+        >>> oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> self.oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True, duplicate_fields=['tipo entrada', 10])
+        >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction, duplicate_fields)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

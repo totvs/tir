@@ -1729,7 +1729,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
         
@@ -1785,6 +1785,10 @@ class WebappInternal(Base):
         >>> # Calling method to input value on a field that is a grid *Will not attempt to verify the entered value. Run only once.* :
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
+        >>> # Calling method to input value in cases that have duplicate fields:
+        >>> oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> self.oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True, duplicate_fields=['tipo entrada', 10])
+        >>> oHelper.LoadGrid()
         """
 
         check_value = self.check_value(check_value)
@@ -1796,7 +1800,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
             
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -4198,7 +4202,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4226,7 +4230,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -4250,7 +4254,7 @@ class WebappInternal(Base):
         """
         self.grid_check.append([line, column, value, grid_number])
 
-    def LoadGrid(self, duplicate_fields=[]):
+    def LoadGrid(self):
         """
         This method is responsible for running all actions of the input and check queues
         of a grid. After running, the queues would be empty.
@@ -4266,10 +4270,6 @@ class WebappInternal(Base):
         >>> # After CheckResult:
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
-        >>> #--------------------------------------
-        >>> # After Duplicate Fields:
-        >>> oHelper.SetValue('D1_TES' , '073', grid=True, grid_number=2, name_attr=True)
-        >>> oHelper.LoadGrid(duplicate_fields=[['tipo entrada', 10]])
         """
 
         x3_dictionaries = self.create_x3_tuple()
@@ -4289,6 +4289,8 @@ class WebappInternal(Base):
             else:
                 self.wait_blocker()
                 logger().info(f"Filling grid field: {field[0]}")
+                if len(field[6]) > 0:
+                    duplicate_fields=field[6]
                 self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
 
         for field in self.grid_check:
@@ -4403,7 +4405,7 @@ class WebappInternal(Base):
                     grids = self.filter_displayed_elements(grids)
 
                 if grids:
-                    headers = self.get_headers_from_grids(grids, duplicate_fields=[])
+                    headers = self.get_headers_from_grids(grids, duplicate_fields)
                     if field[2] + 1 > len(grids):
                         grid_reload = True
                     else:
@@ -5097,9 +5099,9 @@ class WebappInternal(Base):
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
 
-        for item_duplicated in duplicate_fields:
-            duplicated_key = item_duplicated[0].lower()
-            duplicated_value = item_duplicated[1]
+        if len(duplicate_fields) > 0:
+            duplicated_key = duplicate_fields[0].lower()
+            duplicated_value = duplicate_fields[1]
 
             for header in headers:
                 if duplicated_key in header:
