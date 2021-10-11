@@ -352,6 +352,7 @@ class Webapp():
         >>> # After CheckResult:
         >>> oHelper.CheckResult("A1_COD", "000001", grid=True, line=1)
         >>> oHelper.LoadGrid()
+
         """
         self.__webapp.LoadGrid()
 
@@ -718,7 +719,7 @@ class Webapp():
         """
         self.__webapp.SetTabEDAPP(table_name)
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
 
@@ -745,11 +746,18 @@ class Webapp():
         :type position: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
+        :type range_multiplier: int
+        :param direction: Desired direction to search for the element from a label, currently accepts right and down.
+        :type direction: str
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field from a label text and looking an input field for a specific direction:
+        >>> oHelper.SetValue("Codigo", "000001", direction='right')
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field using by label name:
         >>> oHelper.SetValue("Codigo", "000001")
@@ -772,8 +780,13 @@ class Webapp():
         >>> # Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
+        >>> #--------------------------------------
+        >>> # Calling method to input value in cases that have duplicate fields:
+        >>> oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> self.oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True, duplicate_fields=['tipo entrada', 10])
+        >>> oHelper.LoadGrid()
         """
-        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field)
+        self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction, duplicate_fields)
 
     def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
         """

@@ -91,6 +91,8 @@ class WebappInternal(Base):
         self.tree_base_element = ()
         self.tmenu_screen = None
         self.grid_memo_field = False
+        self.range_multiplier = None
+        self.routine = None
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
@@ -142,7 +144,7 @@ class WebappInternal(Base):
             self.set_log_info_tss()
 
             if self.config.num_exec:
-                if not self.num_exec.post_exec(self.config.url_set_start_exec):
+                if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -255,7 +257,7 @@ class WebappInternal(Base):
             self.log_error(str(e))
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_start_exec):
+            if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
@@ -1004,6 +1006,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
+        self.routine = 'Program'
         self.config.routine = program_name
         
         if not self.log.program:
@@ -1027,13 +1030,15 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
             self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
             tget = next(iter(soup.select("[name=cGet]")), None)
             tget_input = next(iter(tget.select("input")), None)
             if tget:
                 tget_img = next(iter(tget.select("img")), None)
 
-                if tget_img is None:
+                if tget_img is None or not self.element_is_displayed(tget_img):
                     self.log_error("Couldn't find Program field.")
 
                 s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
@@ -1234,7 +1239,7 @@ class WebappInternal(Base):
                     success = True
             
         if not elements_soup:
-            self.log_error("Couldn't find element_soup.")
+            self.log_error("Couldn't find search browse.")
 
         if not container:
             self.log_error("Couldn't find container of element.")
@@ -1603,8 +1608,7 @@ class WebappInternal(Base):
             
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
-            width_safe  = (container_size['width']  * 0.015)
-            height_safe = (container_size['height'] * 0.01)
+            width_safe, height_safe = self.width_height(container_size)
 
             label_s  = lambda:self.soup_to_selenium(label)
             xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
@@ -1617,8 +1621,9 @@ class WebappInternal(Base):
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
             distance      = self.get_distance_by_direction(xy_label, position_list, direction)
-            elem          = min(distance, key = lambda x: x[1])
-            elem          = list_in_range[elem[0]]
+            if distance:
+                elem          = min(distance, key = lambda x: x[1])
+                elem          = list_in_range[elem[0]]
 
             if not elem:
                 self.log_error(f"Label '{field}' wasn't found")
@@ -1629,6 +1634,20 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
+    def width_height(self, container_size):
+
+        if not self.range_multiplier:
+            width_safe  = (container_size['width']  * 0.015)
+            height_safe = (container_size['height'] * 0.01)
+        elif self.range_multiplier == 1:
+            width_safe  = (container_size['width']  * 0.03)
+            height_safe = (container_size['height'] * 0.02)
+        else:
+            width_safe  = (container_size['width']  * (0.015 * self.range_multiplier))
+            height_safe = (container_size['height'] * (0.01 * self.range_multiplier))
+
+        return (width_safe, height_safe)
 
 
     def get_position_from_bs_element(self,element):
@@ -1710,7 +1729,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
         
@@ -1735,11 +1754,18 @@ class WebappInternal(Base):
         :type name_attr: bool
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
+        :type range_multiplier: int
+        :param direction: Desired direction to search for the element from a label, currently accepts right and down.
+        :type direction: str
 
         Usage:
 
         >>> # Calling method to input value on a field:
         >>> oHelper.SetValue("A1_COD", "000001")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field from a label text and looking an input field for a specific direction:
+        >>> oHelper.SetValue("Codigo", "000001", direction='right')
         >>> #-----------------------------------------
         >>> # Calling method to input value on a field that is a grid:
         >>> oHelper.SetValue("Client", "000001", grid=True)
@@ -1759,6 +1785,10 @@ class WebappInternal(Base):
         >>> # Calling method to input value on a field that is a grid *Will not attempt to verify the entered value. Run only once.* :
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
+        >>> # Calling method to input value in cases that have duplicate fields:
+        >>> oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> self.oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True, duplicate_fields=['tipo entrada', 10])
+        >>> oHelper.LoadGrid()
         """
 
         check_value = self.check_value(check_value)
@@ -1766,12 +1796,15 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
 
+        if range_multiplier:
+            self.range_multiplier = range_multiplier
+            
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
-            self.input_value(field, value, ignore_case, name_attr, position, check_value)
+            self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
     def check_value(self, check_value):
 
@@ -1784,7 +1817,7 @@ class WebappInternal(Base):
 
         return check_value
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True):
+    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True, direction=None):
         """
         [Internal]
 
@@ -1830,13 +1863,13 @@ class WebappInternal(Base):
             logger().info(f"Looking for element: {field}")
 
             if field.lower() == self.language.From.lower():
-                element = self.get_field("cDeCond", name_attr=True)
+                element = self.get_field("cDeCond", name_attr=True, direction=direction)
             elif field.lower() == self.language.To.lower():
-                element = self.get_field("cAteCond", name_attr=True)
+                element = self.get_field("cAteCond", name_attr=True, direction=direction)
             else:
-                element = self.get_field(field, name_attr, position)
+                element = self.get_field(field, name_attr, position, direction=direction)
 
-            if not element:
+            if not element or not self.element_is_displayed(element):
                 continue
 
             main_element = element
@@ -2221,9 +2254,9 @@ class WebappInternal(Base):
 
             
             if self.config.routine:
-                if ">" in self.config.routine:
+                if self.routine == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                else:
+                elif self.routine == 'Program':
                     self.set_program(self.config.routine)
 
     def driver_refresh(self):
@@ -2720,9 +2753,12 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         wait_screen = True if menu_itens != self.language.menu_about else False
         if save_input:
+            self.routine = 'SetLateralMenu'
             self.config.routine = menu_itens
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
+        self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
@@ -2968,7 +3004,7 @@ class WebappInternal(Base):
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
                 
                 contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip() == sub_item.strip(), contents))), None)
+                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip().lower() == sub_item.strip().lower(), contents))), None)
 
                 if soup_objects_filtered:
                     soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
@@ -3128,7 +3164,7 @@ class WebappInternal(Base):
 
             child_id = child.get_attribute("id")
             old_class = self.driver.execute_script("return document.querySelector('#{}').className".format(child_id))
-            new_class = old_class + " highlighted expanded"
+            new_class = old_class + " highlighted expanded, highlight expanded"
             self.driver.execute_script("document.querySelector('#{}').className = '{}'".format(child_id, new_class))
 
             child_itens = child.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
@@ -3435,13 +3471,18 @@ class WebappInternal(Base):
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
-        element().click()
+        try:
+            element().click()
+        except:
+            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
         time.sleep(1)
 
         if class_grid == 'tmsselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
-            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                element(), Keys.ENTER).perform()
+            event = "var evt = document.createEvent('MouseEvents');\
+                evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
+                arguments[0].dispatchEvent(evt);"
+            self.driver.execute_script(event, element())
         elif class_grid != "tgrid":
             ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                 element(), Keys.ENTER).perform()
@@ -3471,6 +3512,7 @@ class WebappInternal(Base):
                     elif itens:
                         index_number = df.loc[(df[first_column] == first_content)].index.array
                     elif first_column and first_content:
+                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))))
                         first_column_values = df[first_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
@@ -3526,7 +3568,7 @@ class WebappInternal(Base):
                     self.performing_click(element_bs4, class_grid)
                     self.wait_blocker()
                     time.sleep(2)
-                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                     if tmodal:
                         return
                     grid = self.get_grid(grid_number=grid_number)
@@ -4165,7 +4207,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4193,7 +4235,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -4237,14 +4279,16 @@ class WebappInternal(Base):
 
         x3_dictionaries = self.create_x3_tuple()
 
+        duplicate_fields=[]
+
         initial_layer = 0
         if self.grid_input:
             self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-            if "tget" in self.get_current_container().next.attrs['class']:
-                self.wait_element(self.grid_input[0][0])
             soup = self.get_current_DOM()
-            initial_layer = len(soup.select(".tmodaldialog"))
+            container_soup = next(iter(soup.select('body')))
+            container_element = self.driver.find_element_by_xpath(xpath_soup(container_soup))
+            initial_layer = len(container_element.find_elements(By.CSS_SELECTOR, '.tmodaldialog'))
 
         for field in self.grid_input:
             if field[3] and field[0] == "":
@@ -4252,7 +4296,9 @@ class WebappInternal(Base):
             else:
                 self.wait_blocker()
                 logger().info(f"Filling grid field: {field[0]}")
-                self.fill_grid(field, x3_dictionaries, initial_layer)
+                if len(field[6]) > 0:
+                    duplicate_fields=field[6]
+                self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
@@ -4282,7 +4328,7 @@ class WebappInternal(Base):
             x3_dictionaries = self.get_x3_dictionaries(fields)
         return x3_dictionaries
 
-    def fill_grid(self, field, x3_dictionaries, initial_layer):
+    def fill_grid(self, field, x3_dictionaries, initial_layer, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4343,9 +4389,6 @@ class WebappInternal(Base):
         while(self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
             logger().debug("Waiting for container to be active")
             time.sleep(1)
-            
-        if "tget" in self.get_current_container().next.attrs['class']:
-            self.wait_element(field[0])
 
         endtime = time.time() + self.config.time_out
         while(self.remove_mask(current_value).strip().replace(',','') != field_one.replace(',','') and time.time() < endtime):
@@ -4369,7 +4412,7 @@ class WebappInternal(Base):
                     grids = self.filter_displayed_elements(grids)
 
                 if grids:
-                    headers = self.get_headers_from_grids(grids)
+                    headers = self.get_headers_from_grids(grids, duplicate_fields)
                     if field[2] + 1 > len(grids):
                         grid_reload = True
                     else:
@@ -4678,8 +4721,11 @@ class WebappInternal(Base):
                 rows = grids[field[3]].select("tbody tr")
                 
                 if rows:
-                    if field[0] > len(rows):
-                        self.log_error(self.language.messages.grid_line_error) 
+                    if field[0] > len(rows)-1:
+                        if get_value:
+                            return ''
+                        else:
+                            self.log_error(self.language.messages.grid_line_error) 
 
                     field_element = next(iter(field), None)
                    
@@ -5033,7 +5079,7 @@ class WebappInternal(Base):
 
         return regex[:-1]
 
-    def get_headers_from_grids(self, grids):
+    def get_headers_from_grids(self, grids, duplicate_fields=[]):
         """
         [Internal]
 
@@ -5050,13 +5096,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> headers = self.get_headers_from_grids(grids)
         """
-        headers = []
+        
+        headers = []    
+
         for item in grids:
             labels = item.select("thead tr label")
             if labels:
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
+
+        if len(duplicate_fields) > 0:
+            duplicated_key = duplicate_fields[0].lower()
+            duplicated_value = duplicate_fields[1]
+
+            for header in headers:
+                if duplicated_key in header:
+                    header[duplicated_key] = duplicated_value
+
         return headers
 
     def add_grid_row_counter(self, grid):
@@ -5589,7 +5646,7 @@ class WebappInternal(Base):
         if self.restart_counter > 2:
 
             if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
-                if not self.num_exec.post_exec(self.config.url_set_end_exec):
+                if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
                 
@@ -6636,7 +6693,7 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_end_exec):
+            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
