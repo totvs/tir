@@ -2652,7 +2652,8 @@ class PouiInternal(Base):
             else:
                 container_element = self.driver
             try:
-                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+                # self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
+                self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, selector)))
                 return self.driver.find_element(By.CSS_SELECTOR, selector)
                 element_list = container_element.find_elements(by, selector)
             except StaleElementReferenceException:
@@ -5113,7 +5114,7 @@ class PouiInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container=".body", check_error=True):
+    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True):
         """
         [Internal]
 
@@ -7571,7 +7572,7 @@ class PouiInternal(Base):
 
     def ClickMenu(self, menu_item):
         """
-        Clicks on a menuitem POUI component.
+        Clicks on the menuitem of POUI component.
         https://po-ui.io/documentation/po-menu?view=doc
 
         :param menu_item: The Menu item name
@@ -7583,27 +7584,89 @@ class PouiInternal(Base):
         >>> oHelper.ClickMenu("Contracts")
         """
         menu = ''
-        self.wait_element(menu_item, optional_term="[class='po-menu']")
+        self.twebview_context = True
+        self.wait_element(term="[class='po-menu']")
         logger().info(f"Clicking on {menu_item}")
         endtime = time.time() + self.config.time_out
         while(not menu and time.time() < endtime):
-            container = self.get_current_container()
-            if not container:
-                self.log_error("Couldn't locate container.")
-                
-            labels = container.select("label")
-            filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
-            filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
-            label = next(iter(filtered_labels), None)
+            po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
+            if po_menu:
+                po_menu_item = po_menu.select('div[class="po-menu-item"]')
+                po_menu_item = list(filter(lambda x: menu_item.lower() in x.text.lower(), po_menu_item))
+                po_menu_item_filtered = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), po_menu_item))
+                menu = next(iter(po_menu_item_filtered), None)
             
-        if not label:
-            self.log_error("Couldn't find any labels.")
+            if not menu:
+                self.log_error("Couldn't find any labels.")
 
-        label_element = lambda: self.soup_to_selenium(label)
+        menu_item_element = lambda: self.soup_to_selenium(menu)
         
         time.sleep(2)
-        self.scroll_to_element(label_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-        self.set_element_focus(label_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-        self.click(label_element())
+        self.scroll_to_element(menu_item_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = menu, locator = By.XPATH )
+        self.set_element_focus(menu_item_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = menu, locator = By.XPATH )
+        self.click(menu_item_element())
+        self.driver.switch_to.default_content()
+
+    def InputValue(self, field, value, position):
+        """
+        """
+        position -= 1
+        input_field = ''
+        self.twebview_context = True
+        self.wait_element(term="[class='po-input']")
+        logger().info(f"Input Value in:'{field}'")
+        endtime = time.time() + self.config.time_out
+        while(not input_field and time.time() < endtime):
+            po_input = self.web_scrap(term="[class='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            if po_input:
+                po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
+                if len(po_input_span) >= position:
+                    po_input_span = po_input_span[position]
+                    input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
+            
+            if not input_field:
+                self.log_error("Couldn't find any labels.")
+
+        input_field_element = lambda: self.soup_to_selenium(input_field)
+
+        self.scroll_to_element(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+        self.set_element_focus(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+        self.click(input_field_element())
+        input_field_element().send_keys(value)
+        self.driver.switch_to.default_content()
+
+    def ClickCombo(self, field, value, position):
+        """
+        """
+        position -= 1
+        input_field = ''
+        self.twebview_context = True
+        self.wait_element(term="[class='po-input']")
+        logger().info(f"Input Value in:'{field}'")
+        endtime = time.time() + self.config.time_out
+        while (not input_field and time.time() < endtime):
+            po_input = self.web_scrap(term="[class='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      main_container='body')
+            if po_input:
+                po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
+                    map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
+                if len(po_input_span) >= position:
+                    po_input_span = po_input_span[position]
+                    input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
+
+            if not input_field:
+                self.log_error("Couldn't find any labels.")
+
+        input_field_element = lambda: self.soup_to_selenium(input_field)
+
+        self.scroll_to_element(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=input_field, locator=By.XPATH)
+        self.set_element_focus(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=input_field, locator=By.XPATH)
+        self.click(input_field_element())
+        input_field_element().send_keys(value)
+        self.driver.switch_to.default_content()

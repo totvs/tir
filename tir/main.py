@@ -1510,7 +1510,7 @@ class Poui():
 
     def ClickMenu(self, menu_item):
         """
-        Clicks on a menuitem POUI component.
+        Clicks on the menu-item of the POUI component.
         https://po-ui.io/documentation/po-menu?view=doc
 
         :param menu_item: The Menu item name
@@ -1523,3 +1523,12 @@ class Poui():
         """
         self.__poui.ClickMenu(menu_item)
         
+    def InputValue(self, field='', value='', position=1):
+        """
+        """
+        self.__poui.InputValue(field, value, position)
+
+    def ClickCombo(self, field='', value='', position=1):
+        """
+        """
+        self.__poui.ClickCombo(field, value, position)

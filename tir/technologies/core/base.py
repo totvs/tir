@@ -453,11 +453,16 @@ class Base(unittest.TestCase):
         try:
 
             if self.twebview_context:
-                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="twebview"]')))
-                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '[class="twebview"]'))
-                self.twebview_context = False
-                return BeautifulSoup(self.driver.page_source, "html.parser")
+                iframes = None
+                while not iframes:
+                    iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
 
+                    if iframes:
+                        iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+                        if iframe_displayed:
+                            self.driver.switch_to.frame(iframe_displayed)
+                            self.twebview_context = False
+                            return BeautifulSoup(self.driver.page_source, "html.parser")
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
