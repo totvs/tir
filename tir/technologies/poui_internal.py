@@ -7643,30 +7643,67 @@ class PouiInternal(Base):
         """
         """
         position -= 1
-        input_field = ''
+        element = None
         self.twebview_context = True
-        self.wait_element(term="[class='po-input']")
+        self.wait_element(term="div > po-combo")
         logger().info(f"Input Value in:'{field}'")
         endtime = time.time() + self.config.time_out
-        while (not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term="[class='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      main_container='body')
-            if po_input:
-                po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
-                    map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
-                if len(po_input_span) >= position:
-                    po_input_span = po_input_span[position]
-                    input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
+        while (not element and time.time() < endtime):
+            main_element = self.return_combo_element(field, position)
 
-            if not input_field:
+            if main_element:
+                span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
+                if span_icon:
+                    self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
+                    main_element = None
+                    self.po_loading("div > po-combo")
+
+            main_element = self.return_combo_element(field, position)
+
+            if main_element:
+                ul = next(iter(main_element.select('ul')), None)
+                if ul:
+                    li = ul.select('li')
+                    element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))), None)
+                else:
+                    self.log_error("Couldn't find Combo elements.")
+
+            if not element:
                 self.log_error("Couldn't find any labels.")
 
-        input_field_element = lambda: self.soup_to_selenium(input_field)
+        click_element = lambda: self.soup_to_selenium(element)
 
-        self.scroll_to_element(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element=input_field, locator=By.XPATH)
-        self.set_element_focus(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element=input_field, locator=By.XPATH)
-        self.click(input_field_element())
-        input_field_element().send_keys(value)
+        self.scroll_to_element(click_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
+        self.set_element_focus(click_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
+        self.click(click_element())
         self.driver.switch_to.default_content()
+
+    def return_combo_element(self, field, position):
+        """
+
+        :return:
+        """
+        po_combo = self.web_scrap(term="div > po-combo", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                  main_container='body')
+        if po_combo:
+            po_combo_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
+                map(lambda x: x.findChild('po-field-container').select('span')[0], po_combo))))
+            if len(po_combo_span) >= position:
+                po_combo_span = po_combo_span[position]
+                return next(iter(po_combo_span.find_parent('po-field-container')), None)
+
+    def po_loading(self, selector):
+        """
+
+        :return:
+        """
+        loading = True
+
+        endtime = time.time() + 300
+        while loading and time.time() < endtime:
+            container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       main_container='body')
+
+            loading = True if next(iter(container.select('po-loading')), None) else False
