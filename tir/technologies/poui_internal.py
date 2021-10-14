@@ -2652,12 +2652,13 @@ class PouiInternal(Base):
             else:
                 container_element = self.driver
             try:
-                # self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
-                self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, selector)))
-                return self.driver.find_element(By.CSS_SELECTOR, selector)
-                element_list = container_element.find_elements(by, selector)
-            except StaleElementReferenceException:
-                pass
+                element_list = container_element.find_element_by_css_selector(selector)
+                if element_list:
+                    return element_list
+                else:
+                    return None
+            except:
+                return None
         else:
             if scrap_type == enum.ScrapType.MIXED:
                 selector = optional_term
