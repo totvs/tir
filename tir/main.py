@@ -1531,4 +1531,9 @@ class Poui():
     def ClickCombo(self, field='', value='', position=1):
         """
         """
-        self.__poui.ClickCombo(field, value, position)
+        self.__poui.click_poui_component(field, value, position, selector="div > po-combo")
+
+    def ClickSelect(self, field='', value='', position=1):
+        """
+        """
+        self.__poui.click_poui_component(field, value, position, selector="div > po-select")

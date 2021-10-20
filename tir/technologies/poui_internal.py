@@ -7640,60 +7640,19 @@ class PouiInternal(Base):
         input_field_element().send_keys(value)
         self.driver.switch_to.default_content()
 
-    def ClickCombo(self, field, value, position):
-        """
-        """
-        position -= 1
-        element = None
-        self.twebview_context = True
-        self.wait_element(term="div > po-combo")
-        logger().info(f"Input Value in:'{field}'")
-        endtime = time.time() + self.config.time_out
-        while (not element and time.time() < endtime):
-            main_element = self.return_combo_element(field, position)
-
-            if main_element:
-                span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
-                if span_icon:
-                    self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
-                    main_element = None
-                    self.po_loading("div > po-combo")
-
-            main_element = self.return_combo_element(field, position)
-
-            if main_element:
-                ul = next(iter(main_element.select('ul')), None)
-                if ul:
-                    li = ul.select('li')
-                    element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))), None)
-                else:
-                    self.log_error("Couldn't find Combo elements.")
-
-            if not element:
-                self.log_error("Couldn't find any labels.")
-
-        click_element = lambda: self.soup_to_selenium(element)
-
-        self.scroll_to_element(click_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
-        self.set_element_focus(click_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
-        self.click(click_element())
-        self.driver.switch_to.default_content()
-
-    def return_combo_element(self, field, position):
+    def return_main_element(self, field, position, selector):
         """
 
         :return:
         """
-        po_combo = self.web_scrap(term="div > po-combo", scrap_type=enum.ScrapType.CSS_SELECTOR,
+        po_component = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                   main_container='body')
-        if po_combo:
-            po_combo_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
-                map(lambda x: x.findChild('po-field-container').select('span')[0], po_combo))))
-            if len(po_combo_span) >= position:
-                po_combo_span = po_combo_span[position]
-                return next(iter(po_combo_span.find_parent('po-field-container')), None)
+        if po_component:
+            po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
+                map(lambda x: x.findChild('po-field-container').select('span')[0], po_component))))
+            if len(po_component_span) >= position:
+                po_component_span = po_component_span[position]
+                return next(iter(po_component_span.find_parent('po-field-container')), None)
 
     def po_loading(self, selector):
         """
@@ -7707,4 +7666,46 @@ class PouiInternal(Base):
             container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        main_container='body')
 
-            loading = True if next(iter(container.select('po-loading')), None) else False
+            loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
+
+    def click_poui_component(self, field, value, position, selector):
+        """
+        """
+        position -= 1
+        element = None
+        self.twebview_context = True
+        self.wait_element(term=selector)
+        endtime = time.time() + self.config.time_out
+        while (not element and time.time() < endtime):
+            main_element = self.return_main_element(field, position, selector=selector)
+
+            if main_element:
+                span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
+                if span_icon:
+                    self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
+                    self.po_loading(selector)
+                    main_element = None
+
+            main_element = self.return_main_element(field, position, selector=selector)
+
+            if main_element:
+                ul = next(iter(main_element.select('ul')), None)
+                if ul:
+                    li = ul.select('li')
+                    element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))),
+                                   None)
+                else:
+                    self.log_error("Couldn't find table element.")
+
+            if not element:
+                self.log_error("Couldn't find element")
+
+        click_element = lambda: self.soup_to_selenium(element)
+
+        self.scroll_to_element(click_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
+        self.set_element_focus(click_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
+        logger().info(f"Clicking in:'{field}'")
+        self.click(click_element())
+        self.driver.switch_to.default_content()
