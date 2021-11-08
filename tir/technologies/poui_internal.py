@@ -601,6 +601,7 @@ class PouiInternal(Base):
                 self.send_keys(env(), Keys.HOME)
                 self.send_keys(env(), self.config.module)
                 env_value = self.get_web_value(env())
+                ActionChains(self.driver).send_keys(Keys.TAB).perform()
                 time.sleep(1)
                 self.close_warning_screen()
 
@@ -7593,22 +7594,17 @@ class PouiInternal(Base):
             po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
             if po_menu:
                 po_menu_item = po_menu.select('div[class="po-menu-item"]')
-                po_menu_item = list(filter(lambda x: menu_item.lower() in x.text.lower(), po_menu_item))
                 po_menu_item_filtered = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), po_menu_item))
+                po_menu_item_filtered = list(filter(lambda x: menu_item.lower() in x.text.lower(), po_menu_item_filtered))
                 menu = next(iter(po_menu_item_filtered), None)
             
             if not menu:
                 self.log_error("Couldn't find any labels.")
 
         menu_item_element = lambda: self.soup_to_selenium(menu)
-        
-        time.sleep(2)
-        self.scroll_to_element(menu_item_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = menu, locator = By.XPATH )
-        self.set_element_focus(menu_item_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = menu, locator = By.XPATH )
-        self.click(menu_item_element())
-        self.driver.switch_to.default_content()
+
+        self.poui_click(menu)
+        # self.click(element=menu, click_type=enum.ClickType.SELENIUM)
 
     def InputValue(self, field, value, position):
         """
@@ -7616,11 +7612,11 @@ class PouiInternal(Base):
         position -= 1
         input_field = ''
         self.twebview_context = True
-        self.wait_element(term="[class='po-input']")
+        self.wait_element(term="[class*='po-input']")
         logger().info(f"Input Value in:'{field}'")
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term="[class='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            po_input = self.web_scrap(term="[class*='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
                 po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
                 if len(po_input_span) >= position:
@@ -7637,10 +7633,11 @@ class PouiInternal(Base):
         self.set_element_focus(input_field_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
         self.click(input_field_element())
+        input_field_element().clear()
         input_field_element().send_keys(value)
         self.driver.switch_to.default_content()
 
-    def return_main_element(self, field, position, selector):
+    def return_main_element(self, field, position, selector, container):
         """
 
         :return:
@@ -7648,11 +7645,22 @@ class PouiInternal(Base):
         po_component = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                   main_container='body')
         if po_component:
-            po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
-                map(lambda x: x.findChild('po-field-container').select('span')[0], po_component))))
+            po_component = list(filter(lambda x: self.element_is_displayed(x), po_component))
+            if container:
+                po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
+                    map(lambda x: x.findChild('po-field-container').select('span')[0], po_component))))
+            else:
+                po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), po_component))
+                if len(po_component_span) > 1:
+                    po_component_span = list(filter(lambda x: self.return_index_element(x), po_component_span))
+
             if len(po_component_span) >= position:
                 po_component_span = po_component_span[position]
-                return next(iter(po_component_span.find_parent('po-field-container')), None)
+                return next(iter(po_component_span.find_parent('po-field-container')), None) if container else po_component_span
+
+    def return_index_element(self, element):
+        if hasattr(element.find_parent('div', class_='po-modal-content'), 'attrs'):
+            return element if element.find_parent('div', class_='po-modal-content').attrs['tabindex'] == '-1' else None
 
     def po_loading(self, selector):
         """
@@ -7668,7 +7676,7 @@ class PouiInternal(Base):
 
             loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
 
-    def click_poui_component(self, field, value, position, selector):
+    def click_poui_component(self, field, value, position, selector, container):
         """
         """
         position -= 1
@@ -7677,7 +7685,7 @@ class PouiInternal(Base):
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
-            main_element = self.return_main_element(field, position, selector=selector)
+            main_element = self.return_main_element(field, position, selector=selector, container=container)
 
             if main_element:
                 span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
@@ -7686,7 +7694,7 @@ class PouiInternal(Base):
                     self.po_loading(selector)
                     main_element = None
 
-            main_element = self.return_main_element(field, position, selector=selector)
+            main_element = self.return_main_element(field, position, selector=selector, container=container)
 
             if main_element:
                 ul = next(iter(main_element.select('ul')), None)
@@ -7700,12 +7708,94 @@ class PouiInternal(Base):
             if not element:
                 self.log_error("Couldn't find element")
 
+        logger().info(f"Clicking in:'{field}'")
+        self.poui_click(element)
+        # self.click(element=element, click_type=enum.ClickType.SELENIUM)
+
+    def poui_click(self, element):
+
         click_element = lambda: self.soup_to_selenium(element)
 
         self.scroll_to_element(click_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
         self.set_element_focus(click_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
-        logger().info(f"Clicking in:'{field}'")
+        time.sleep(1)
         self.click(click_element())
         self.driver.switch_to.default_content()
+
+    def click_button(self, field, value, position, selector, container):
+        """
+        """
+        position -= 1
+        element = None
+        self.twebview_context = True
+        self.wait_element(term=selector)
+        endtime = time.time() + self.config.time_out
+        while (not element and time.time() < endtime):
+            element = self.return_main_element(field, position, selector=selector, container=container)
+
+            if element:
+                button_element = next(iter(element.select('button')), None)
+
+        if not element:
+            self.log_error("Couldn't find element")
+
+        self.poui_click(button_element)
+        # self.click(element=button_element, click_type=enum.ClickType.SELENIUM)
+
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> self.TearDown()
+        """
+
+        if self.config.new_log:
+            self.execution_flow()
+
+        webdriver_exception = None
+        timeout = 1500
+        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+
+        if self.config.coverage:
+            try:
+                self.driver_refresh()
+            except WebDriverException as e:
+                logger().exception(str(e))
+                webdriver_exception = e
+
+            if webdriver_exception:
+                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
+                logger().debug(message)
+
+            if not webdriver_exception and not self.tss:
+                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+                self.user_screen()
+                self.environment_screen()
+                endtime = time.time() + self.config.time_out
+                while (time.time() < endtime and (
+                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                    self.close_warning_screen()
+                self.Finish()
+            elif not webdriver_exception:
+                self.SetupTSS(self.config.initial_program, self.config.environment )
+                self.SetButton(self.language.exit)
+                self.SetButton(self.language.yes)
+
+            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
+                self.WaitProcessing(string, timeout)
+
+        if self.config.num_exec:
+            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
+                self.restart_counter = 3
+                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
+
+        try:
+            self.driver.close()
+        except Exception as e:
+            logger().exception(f"Warning tearDown Close {str(e)}")
+            

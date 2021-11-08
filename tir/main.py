@@ -1365,6 +1365,7 @@ class Poui():
 
     def __init__(self, config_path="", autostart=True):
         self.__poui = PouiInternal(config_path, autostart)
+        self.__webapp = WebappInternal(config_path, autostart=False)
         self.__database = BaseDatabase(config_path, autostart=False)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
@@ -1390,91 +1391,6 @@ class Poui():
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
         self.__poui.Setup(initial_program, date, group, branch, module)
-
-    def SetButton(self, button, sub_item="", position=1, check_error=True):
-        """
-        Method that clicks on a button on the screen.
-
-        :param button: Button to be clicked.
-        :type button: str
-        :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
-        :type sub_item: str
-        :param position: Position which element is located. - **Default:** 1
-        :type position: int
-
-        Usage:
-
-        >>> # Calling the method to click on a regular button:
-        >>> oHelper.SetButton("Add")
-        >>> #-------------------------------------------------
-        >>> # Calling the method to click on a sub item inside a button.
-        >>> oHelper.SetButton("Other Actions", "Process")
-        """
-        self.__poui.SetButton(button, sub_item, position, check_error=check_error)
-
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
-        """
-        Sets value of an input element.
-
-        .. note::
-            Attention don't use  position parameter with  grid parameter True.
-
-        :param field: The field name or label to receive the value
-        :type field: str
-        :param value: The value to be inputted on the element.
-        :type value: str
-        :param grid: Boolean if this is a grid field or not. - **Default:** False
-        :type grid: bool
-        :param grid_number: Grid number of which grid should be inputted when there are multiple grids on the same screen. - **Default:** 1
-        :type grid_number: int
-        :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
-        :type ignore_case: bool
-        :param row: Row number that will be filled
-        :type row: int
-        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
-        :type name_attr: bool
-        :param check_value: Boolean ignore input check - **Default:** True
-        :type name_attr: bool
-        :param position: Position which element is located. - **Default:** 1
-        :type position: int
-        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
-        :type grid_memo_field: bool
-        :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
-        :type range_multiplier: int
-        :param direction: Desired direction to search for the element from a label, currently accepts right and down.
-        :type direction: str
-
-        Usage:
-
-        >>> # Calling method to input value on a field:
-        >>> oHelper.SetValue("A1_COD", "000001")
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field from a label text and looking an input field for a specific direction:
-        >>> oHelper.SetValue("Codigo", "000001", direction='right')
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field using by label name:
-        >>> oHelper.SetValue("Codigo", "000001")
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field using by an existing label name:
-        >>> oHelper.SetValue(field = "Codigo", value = "000002", position = 2)
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field that is a grid:
-        >>> oHelper.SetValue("Client", "000001", grid=True)
-        >>> oHelper.LoadGrid()
-        >>> #-----------------------------------------
-        >>> # Calling method to checkbox value on a field that is a grid:
-        >>> oHelper.SetValue('Confirmado?', True, grid=True)
-        >>> oHelper.LoadGrid()
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field that is on the second grid of the screen:
-        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2)
-        >>> oHelper.LoadGrid()
-        >>> #-----------------------------------------
-        >>> # Calling method to input value on a field that is a grid (2) *Will not attempt to verify the entered value. Run only once.* :
-        >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
-        >>> oHelper.LoadGrid()
-        """
-        self.__poui.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction)
 
     def Program(self, program_name):
         """
@@ -1531,9 +1447,52 @@ class Poui():
     def ClickCombo(self, field='', value='', position=1):
         """
         """
-        self.__poui.click_poui_component(field, value, position, selector="div > po-combo")
+        self.__poui.click_poui_component(field, value, position, selector="div > po-combo", container=True)
 
     def ClickSelect(self, field='', value='', position=1):
         """
         """
-        self.__poui.click_poui_component(field, value, position, selector="div > po-select")
+        self.__poui.click_poui_component(field, value, position, selector="div > po-select", container=True)
+
+    def ClickButton(self, field='', value='', position=1):
+        """
+        """
+        self.__poui.click_button(field, value, position, selector="div > po-button", container=False)
+
+    def AssertFalse(self, expected=False, scritp_message=''):
+        """
+        Defines that the test case expects a False response to pass
+
+        Usage:
+
+        >>> #Instantiating the class
+        >>> inst.oHelper = Webapp()
+        >>> #Calling the method
+        >>> inst.oHelper.AssertFalse()
+        """
+        self.__webapp.AssertFalse(expected, scritp_message)
+
+    def AssertTrue(self, expected=True, scritp_message=''):
+        """
+        Defines that the test case expects a True response to pass
+
+        Usage:
+
+        >>> #Instantiating the class
+        >>> inst.oHelper = Webapp()
+        >>> #Calling the method
+        >>> inst.oHelper.AssertTrue()
+        """
+        self.__webapp.AssertTrue(expected, scritp_message)
+
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> inst.oHelper.TearDown()
+        """
+        self.__poui.TearDown()
+        
