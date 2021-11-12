@@ -317,7 +317,9 @@ class PouiInternal(Base):
                     start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
 
                 self.set_element_focus(start_prog())
-                start_prog().clear()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                 self.send_keys(start_prog(), initial_program)
                 start_prog_value = self.get_web_value(start_prog())
                 try_counter += 1 if(try_counter < 1) else -1
@@ -348,7 +350,9 @@ class PouiInternal(Base):
                     env = lambda: self.soup_to_selenium(env_element.parent)
 
                 self.set_element_focus(env())
-                env().clear()
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                 self.send_keys(env(), self.config.environment)
                 env_value = self.get_web_value(env())
                 try_counter += 1 if(try_counter < 1) else -1
@@ -535,11 +539,17 @@ class PouiInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        date = lambda: self.driver.find_element_by_xpath(xpath_soup(base_date))
-        self.double_click(date())
-        self.send_keys(date(), Keys.HOME)
-        self.send_keys(date(), self.config.date)
-        ActionChains(self.driver).send_keys(Keys.TAB).perform()
+        date = lambda: self.soup_to_selenium(base_date)
+        base_date_value = ''
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
+            self.double_click(date())
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+            self.send_keys(date(), self.config.date)
+            base_date_value = self.get_web_value(date())
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Group")
         group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
@@ -553,11 +563,17 @@ class PouiInternal(Base):
             self.log_error(message)
             raise ValueError(message)
         
-        group = lambda: self.driver.find_element_by_xpath(xpath_soup(group_element))
-        self.double_click(group())
-        self.send_keys(group(), Keys.HOME)
-        self.send_keys(group(), self.config.group)
-        ActionChains(self.driver).send_keys(Keys.TAB).perform()
+        group = lambda: self.soup_to_selenium(group_element)
+        group_value = ''
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
+            self.double_click(group())
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+            self.send_keys(group(), self.config.group)
+            group_value = self.get_web_value(group())
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Branch")
         branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
@@ -571,11 +587,17 @@ class PouiInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        branch = lambda: self.driver.find_element_by_xpath(xpath_soup(branch_element))
-        self.double_click(branch())
-        self.send_keys(branch(), Keys.HOME)
-        self.send_keys(branch(), self.config.branch)
-        ActionChains(self.driver).send_keys(Keys.TAB).perform()
+        branch = lambda: self.soup_to_selenium(branch_element)
+        branch_value = ''
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
+            self.double_click(branch())
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+            self.send_keys(branch(), self.config.branch)
+            branch_value = self.get_web_value(branch())
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
         logger().info("Filling Environment")
         environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
@@ -590,7 +612,7 @@ class PouiInternal(Base):
             raise ValueError(message)
 
 
-        env = lambda: self.driver.find_element_by_xpath(xpath_soup(environment_element))
+        env = lambda: self.soup_to_selenium(environment_element)
         enable = env().is_enabled()
 
         if enable:
