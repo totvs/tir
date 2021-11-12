@@ -1729,7 +1729,7 @@ class WebappInternal(Base):
         
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
         
@@ -1785,6 +1785,10 @@ class WebappInternal(Base):
         >>> # Calling method to input value on a field that is a grid *Will not attempt to verify the entered value. Run only once.* :
         >>> oHelper.SetValue("Order", "000001", grid=True, grid_number=2, check_value = False)
         >>> oHelper.LoadGrid()
+        >>> # Calling method to input value in cases that have duplicate fields:
+        >>> oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True)
+        >>> self.oHelper.SetValue('Tipo Entrada' , '073', grid=True, grid_number=2, name_attr=True, duplicate_fields=['tipo entrada', 10])
+        >>> oHelper.LoadGrid()
         """
 
         check_value = self.check_value(check_value)
@@ -1796,7 +1800,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
             
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -3467,13 +3471,18 @@ class WebappInternal(Base):
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
-        element().click()
+        try:
+            element().click()
+        except:
+            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
         time.sleep(1)
 
         if class_grid == 'tmsselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
-            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                element(), Keys.ENTER).perform()
+            event = "var evt = document.createEvent('MouseEvents');\
+                evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
+                arguments[0].dispatchEvent(evt);"
+            self.driver.execute_script(event, element())
         elif class_grid != "tgrid":
             ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                 element(), Keys.ENTER).perform()
@@ -4198,7 +4207,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4226,7 +4235,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -4270,6 +4279,8 @@ class WebappInternal(Base):
 
         x3_dictionaries = self.create_x3_tuple()
 
+        duplicate_fields=[]
+
         initial_layer = 0
         if self.grid_input:
             self.wait_element(term=".tgetdados, .tgrid, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4285,7 +4296,9 @@ class WebappInternal(Base):
             else:
                 self.wait_blocker()
                 logger().info(f"Filling grid field: {field[0]}")
-                self.fill_grid(field, x3_dictionaries, initial_layer)
+                if len(field[6]) > 0:
+                    duplicate_fields=field[6]
+                self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
@@ -4315,7 +4328,7 @@ class WebappInternal(Base):
             x3_dictionaries = self.get_x3_dictionaries(fields)
         return x3_dictionaries
 
-    def fill_grid(self, field, x3_dictionaries, initial_layer):
+    def fill_grid(self, field, x3_dictionaries, initial_layer, duplicate_fields=[]):
         """
         [Internal]
 
@@ -4399,7 +4412,7 @@ class WebappInternal(Base):
                     grids = self.filter_displayed_elements(grids)
 
                 if grids:
-                    headers = self.get_headers_from_grids(grids)
+                    headers = self.get_headers_from_grids(grids, duplicate_fields)
                     if field[2] + 1 > len(grids):
                         grid_reload = True
                     else:
@@ -4447,7 +4460,7 @@ class WebappInternal(Base):
                         self.set_element_focus(selenium_column())
 
                         soup = self.get_current_DOM()
-                        tmodal_list = soup.select('.tmodaldialog.twidget.borderless')
+                        tmodal_list = soup.select('.tmodaldialog')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                         if self.grid_memo_field:
@@ -5066,7 +5079,7 @@ class WebappInternal(Base):
 
         return regex[:-1]
 
-    def get_headers_from_grids(self, grids):
+    def get_headers_from_grids(self, grids, duplicate_fields=[]):
         """
         [Internal]
 
@@ -5083,13 +5096,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> headers = self.get_headers_from_grids(grids)
         """
-        headers = []
+        
+        headers = []    
+
         for item in grids:
             labels = item.select("thead tr label")
             if labels:
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
+
+        if len(duplicate_fields) > 0:
+            duplicated_key = duplicate_fields[0].lower()
+            duplicated_value = duplicate_fields[1]
+
+            for header in headers:
+                if duplicated_key in header:
+                    header[duplicated_key] = duplicated_value
+
         return headers
 
     def add_grid_row_counter(self, grid):
