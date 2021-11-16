@@ -5846,6 +5846,8 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
+        if restore_backup == True and self.parameters:
+            return
 
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
