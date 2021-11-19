@@ -7615,18 +7615,19 @@ class PouiInternal(Base):
         while(not menu and time.time() < endtime):
             po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
             if po_menu:
-                po_menu_item = po_menu.select('div[class="po-menu-item"]')
+                po_menu_item = po_menu.select('div[class*="po-menu-item"]')
                 po_menu_item_filtered = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), po_menu_item))
                 po_menu_item_filtered = list(filter(lambda x: menu_item.lower() in x.text.lower(), po_menu_item_filtered))
-                menu = next(iter(po_menu_item_filtered), None)
-            
-            if not menu:
-                self.log_error("Couldn't find any labels.")
 
-        menu_item_element = lambda: self.soup_to_selenium(menu)
+                if len(po_menu_item_filtered) > 1:
+                    menu = next(iter(list(filter(lambda x: x.attrs['class'][0] == 'po-menu-item' , po_menu_item_filtered))))
+                else:
+                    menu = next(iter(po_menu_item_filtered), None)
+            
+        if not menu:
+            self.log_error("Couldn't find any labels.")
 
         self.poui_click(menu)
-        # self.click(element=menu, click_type=enum.ClickType.SELENIUM)
 
     def InputValue(self, field, value, position):
         """
@@ -7660,8 +7661,8 @@ class PouiInternal(Base):
                     po_input_span = po_input_span[position]
                     input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
             
-            if not input_field:
-                self.log_error("Couldn't find any labels.")
+        if not input_field:
+            self.log_error("Couldn't find any labels.")
 
         input_field_element = lambda: self.soup_to_selenium(input_field)
 
@@ -7747,8 +7748,8 @@ class PouiInternal(Base):
                 else:
                     self.log_error("Couldn't find table element.")
 
-            if not element:
-                self.log_error("Couldn't find element")
+        if not element:
+            self.log_error("Couldn't find element")
 
         logger().info(f"Clicking in:'{field}'")
         self.poui_click(element)
