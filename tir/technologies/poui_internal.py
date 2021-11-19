@@ -7630,6 +7630,21 @@ class PouiInternal(Base):
 
     def InputValue(self, field, value, position):
         """
+        Filling input component of POUI
+        https://po-ui.io/documentation/po-input
+
+        :param field: Input text title that you want to fill
+        :type field: str
+        :param value: Value that fill in input
+        :type value: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.InputValue('Name', 'Test')
+        :return: None
         """
         position -= 1
         input_field = ''
@@ -7700,7 +7715,12 @@ class PouiInternal(Base):
 
     def click_poui_component(self, field, value, position, selector, container):
         """
+        
+        :param field: Combo text title that you want to click.
+        :param value: Value that you want to select in Combo.
+        :param position: Position which element is located. - **Default:** 1
         """
+
         position -= 1
         element = None
         self.twebview_context = True
@@ -7746,8 +7766,12 @@ class PouiInternal(Base):
         self.click(click_element())
         self.driver.switch_to.default_content()
 
-    def click_button(self, field, value, position, selector, container):
+    def click_button(self, button, position, selector, container):
         """
+
+        :param field: Button to be clicked.
+        :param position: Position which element is located. - **Default:** 1
+
         """
         position -= 1
         element = None
@@ -7755,7 +7779,7 @@ class PouiInternal(Base):
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
-            element = self.return_main_element(field, position, selector=selector, container=container)
+            element = self.return_main_element(button, position, selector=selector, container=container)
 
             if element:
                 button_element = next(iter(element.select('button')), None)
@@ -7764,7 +7788,49 @@ class PouiInternal(Base):
             self.log_error("Couldn't find element")
 
         self.poui_click(button_element)
-        # self.click(element=button_element, click_type=enum.ClickType.SELENIUM)
+
+    def ClickWidget(self, title, action, position):
+        """
+        Clicks on the widget action.
+        https://po-ui.io/documentation/po-widget
+
+        :param tittle: Widget text title that you want to click.
+        :param action:
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickWidget(title=, action=, position=1)
+        :return:
+        """
+        position -= 1
+        element = None
+        self.twebview_context = True
+        self.wait_element(term="po-widget")
+        endtime = time.time() + self.config.time_out
+        while (not element and time.time() < endtime):
+            po_widget = self.web_scrap(term="po-widget", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                  main_container='body')
+
+            if title:
+                po_widget = next(iter(list(filter(lambda x: title.lower() in x.text.lower(), po_widget))))
+
+            if action:
+                po_widget = list(filter(lambda x: action.lower() in x.text.lower(), po_widget))
+
+            if len(po_widget) >= position:
+                element = po_widget[position]
+
+                if action:
+                    element = next(iter(element.select("[class*='po-widget-action']")), None)
+            else:
+                self.log_error("Couldn't find element")
+
+        if not element:
+            self.log_error("Couldn't find element")
+
+        self.poui_click(element)
 
     def TearDown(self):
         """

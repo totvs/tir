@@ -1433,10 +1433,10 @@ class Poui():
     def ClickMenu(self, menu_item):
         """
         Clicks on the menu-item of the POUI component.
-        https://po-ui.io/documentation/po-menu?view=doc
+        https://po-ui.io/documentation/po-menu
 
-        :param menu_item: The Menu item name
-        :type label_name: str
+        :param menu_item:Menu item name
+        :type menu_item: str
 
         Usage:
 
@@ -1447,25 +1447,75 @@ class Poui():
         
     def InputValue(self, field='', value='', position=1):
         """
+        Filling input component of POUI
+        https://po-ui.io/documentation/po-input
+
+        :param field: Input text title that you want to fill
+        :type field: str
+        :param value: Value that fill in input
+        :type value: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.InputValue('Name', 'Test')
+        :return: None
         """
         self.__poui.InputValue(field, value, position)
 
     def ClickCombo(self, field='', value='', position=1):
         """
+        Clicks on the Combo of POUI component.
+        https://po-ui.io/documentation/po-combo
+
+        :param field: Combo text title that you want to click.
+        :param value: Value that you want to select in Combo.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCombo('Visão', 'Compras')
+        :return:
         """
         self.__poui.click_poui_component(field, value, position, selector="div > po-combo", container=True)
 
     def ClickSelect(self, field='', value='', position=1):
         """
+        Clicks on the Select of POUI component.
+        https://po-ui.io/documentation/po-select
+
+        :param field: Select text title that you want to click.
+        :param value: Value that you want to select in Select.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickSelect('Espécie', 'Compra')
+        :return:
         """
         self.__poui.click_poui_component(field, value, position, selector="div > po-select", container=True)
 
-    def ClickButton(self, field='', value='', position=1):
+    def ClickButton(self, button='', position=1):
         """
-        """
-        self.__poui.click_button(field, value, position, selector="div > po-button", container=False)
+        Clicks on the Button of POUI component.
+        https://po-ui.io/documentation/po-button
 
-    def AssertFalse(self, expected=False, scritp_message=''):
+        :param field: Button to be clicked.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickButton('Cancelar')
+        :return:
+        """
+        self.__poui.click_button(button, position, selector="div > po-button", container=False)
+
+    def AssertFalse(self, expected=False, script_message=''):
         """
         Defines that the test case expects a False response to pass
 
@@ -1476,20 +1526,35 @@ class Poui():
         >>> #Calling the method
         >>> inst.oHelper.AssertFalse()
         """
-        self.__webapp.AssertFalse(expected, scritp_message)
+        self.__webapp.AssertFalse(expected, script_message)
 
-    def AssertTrue(self, expected=True, scritp_message=''):
+    def AssertTrue(self, expected=True, script_message=''):
         """
         Defines that the test case expects a True response to pass
 
         Usage:
 
-        >>> #Instantiating the class
-        >>> inst.oHelper = Webapp()
         >>> #Calling the method
         >>> inst.oHelper.AssertTrue()
         """
-        self.__webapp.AssertTrue(expected, scritp_message)
+        self.__webapp.AssertTrue(expected, script_message)
+
+    def ClickWidget(self, title='', action='', position=1):
+        """
+        Clicks on the Widget or Widget action of POUI component.
+        https://po-ui.io/documentation/po-widget
+
+        :param tittle: Widget text title that you want to click.
+        :param action: The name of action to be clicked
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        :return:
+        """
+        self.__poui.ClickWidget(title, action, position)
 
     def TearDown(self):
         """
