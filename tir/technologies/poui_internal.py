@@ -7791,17 +7791,17 @@ class PouiInternal(Base):
 
     def ClickWidget(self, title, action, position):
         """
-        Clicks on the widget action.
+        Clicks on the Widget or Widget action of POUI component.
         https://po-ui.io/documentation/po-widget
 
         :param tittle: Widget text title that you want to click.
-        :param action:
+        :param action: The name of action to be clicked
         :param position: Position which element is located. - **Default:** 1
 
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickWidget(title=, action=, position=1)
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
         :return:
         """
         position -= 1
