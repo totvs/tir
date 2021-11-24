@@ -738,6 +738,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
 
+        self.wait_blocker()
         self.close_warning_screen()
         self.close_coin_screen()
         
