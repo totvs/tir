@@ -213,7 +213,7 @@ class WebappInternal(Base):
 
             if save_input:
                 self.config.initial_program = initial_program
-                self.config.date = date
+                self.config.date = re.sub('[,.-]', '/', date)
                 self.config.group = group
                 self.config.branch = branch
                 self.config.module = module
@@ -239,6 +239,7 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
+            endtime = time.time() + self.config.time_out
             while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                 self.close_warning_screen()
                 self.close_coin_screen()
