@@ -1447,7 +1447,7 @@ class Poui():
         
     def InputValue(self, field='', value='', position=1):
         """
-        Filling input component of POUI
+        Fill the POUI input component.
         https://po-ui.io/documentation/po-input
 
         :param field: Input text title that you want to fill
