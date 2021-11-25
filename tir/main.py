@@ -1567,3 +1567,17 @@ class Poui():
         """
         self.__poui.TearDown()
         
+    def POSearch(self, content=''):
+        """
+        Fill the POUI Search component.
+        https://po-ui.io/documentation/po-page-dynamic-search
+
+        :param content: Content to be Search.
+        :type content: str
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.POSearch(content='Content to be Search')
+        :return: None
+        """
+        self.__poui.POSearch(content)

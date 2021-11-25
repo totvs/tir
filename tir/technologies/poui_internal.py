@@ -7888,3 +7888,42 @@ class PouiInternal(Base):
         except Exception as e:
             logger().exception(f"Warning tearDown Close {str(e)}")
             
+    def POSearch(self, content):
+        """
+        Fill the POUI Search component.
+        https://po-ui.io/documentation/po-page-dynamic-search
+
+        :param content: Content to be Search.
+        :type content: str
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.POSearch(content='Content to be Search')
+        :return: None
+        """
+        element = None
+        self.twebview_context = True
+        self.wait_element(term='po-page')
+        endtime = time.time() + self.config.time_out
+        while (not element and time.time() < endtime):
+            po_page = next(iter(
+                self.web_scrap(term="[class='po-page']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')),
+                None)
+
+            if po_page:
+                page_list = next(iter(po_page.find_all_next('div', 'po-page-list-filter-wrapper')), None)
+
+                input = next(iter(page_list.select('input')), None)
+
+                if input:
+                    element = lambda: self.soup_to_selenium(input)
+
+        if not element:
+            self.log_error("Couldn't find element")
+
+        element().clear()
+        element().send_keys(content)
+
+        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
+        ActionChains(self.driver).move_to_element(action()).click().perform()
