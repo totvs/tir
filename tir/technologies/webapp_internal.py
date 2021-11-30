@@ -213,7 +213,7 @@ class WebappInternal(Base):
 
             if save_input:
                 self.config.initial_program = initial_program
-                self.config.date = re.sub('[,.-]', '/', date)
+                self.config.date = re.sub('([\d]{2}).?([\d]{2}).?([\d]{4})', r'\1/\2/\3', date)
                 self.config.group = group
                 self.config.branch = branch
                 self.config.module = module
