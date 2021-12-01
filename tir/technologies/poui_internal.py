@@ -7927,3 +7927,115 @@ class PouiInternal(Base):
 
         action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
+
+    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell):
+        """
+        Clicks on the Table of POUI component.
+        https://po-ui.io/documentation/po-table
+
+        :param first_column: Column name to be used as reference.
+        :type first_column: str
+        :param second_column: Column name to be used as reference.
+        :type second_column: str
+        :param first_content: Content of the column to be searched.
+        :type first_content: str
+        :param second_content: Content of the column to be searched.
+        :type second_content: str
+        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type table_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
+        :param click_cell: Content to click based on a column position to close the axis
+        :type click_cell: str
+
+        >>> # Call the method:
+        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
+        :return: None
+        """
+        element = None
+        self.twebview_context = True
+        index_number = []
+        count = 0
+        column_index_number = None
+        self.wait_element(term="[class='po-table']")
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and len(index_number) < 1 and count <= 3:
+
+            try:
+                df, table = self.table_dataframe(table_number=table_number)
+
+                last_df = df
+
+                if not df.empty:
+                    if click_cell:
+                        column_index_number = df.columns.get_loc(click_cell)
+
+                    if first_column and second_column:
+                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
+                    elif first_column and (first_content and second_content):
+                        index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
+                    elif itens:
+                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                    elif first_column and first_content:
+                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))))
+                        first_column_values = df[first_column].values
+                        first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
+                        content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
+                        if content:
+                            index_number.append(first_column_formatted_values.index(content))
+                            if len(index_number) > 0:
+                                index_number = [index_number[0]]
+                    else:
+                        index_number.append(0)
+
+                    if len(index_number) < 1 and count <= 3:
+                        first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        if first_element_focus:
+                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                            self.soup_to_selenium(first_element_focus).click()
+                        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                        self.wait_blocker()
+                        df, grid = self.table_dataframe(table_number=table_number)
+                        if df.equals(last_df):
+                            count +=1
+
+            except Exception as e:
+                self.log_error(f"Content doesn't found on the screen! {str(e)}")
+
+        if len(index_number) < 1:
+            self.log_error(f"Content doesn't found on the screen! {first_content}")
+
+        tr = table.select('tbody > tr')
+
+        if hasattr(index_number, '__iter__'):
+            for index in index_number:
+                if column_index_number:
+                    element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+                else:
+                    element_bs4 = next(iter(tr[index].select('td')))
+                self.poui_click(element_bs4)
+        else:
+            index = index_number
+            element_bs4 = next(iter(tr[index].select('td')))
+            self.wait_blocker()
+            self.poui_click(element_bs4)
+
+    def table_dataframe(self, table_number=0):
+
+        self.wait_element(term="[class='po-table']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        po_table = next(iter(
+                self.web_scrap(term="[class='po-table']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')),
+                None)
+
+        df = (next(iter(pd.read_html(str(po_table)))))
+
+        converters = {c: lambda x: str(x) for c in df.columns}
+
+        df = (next(iter(pd.read_html(str(po_table), converters=converters)), None))
+
+        if not df.empty:
+            df = df.fillna('Not Value')
+            return (df, po_table)

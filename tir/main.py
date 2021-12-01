@@ -1581,3 +1581,31 @@ class Poui():
         :return: None
         """
         self.__poui.POSearch(content)
+
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
+        """
+        Clicks on the Table of POUI component.
+        https://po-ui.io/documentation/po-table
+
+        :param first_column: Column name to be used as reference.
+        :type first_column: str
+        :param second_column: Column name to be used as reference.
+        :type second_column: str
+        :param first_content: Content of the column to be searched.
+        :type first_content: str
+        :param second_content: Content of the column to be searched.
+        :type second_content: str
+        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type table_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
+        :param click_cell: Content to click based on a column position to close the axis
+        :type click_cell: str
+
+        >>> # Call the method:
+        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
+        :return: None
+        """
+
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
+        
