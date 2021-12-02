@@ -2017,7 +2017,7 @@ class PouiInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
+    def CheckResult(self, field, user_value, po_component):
         """
         Checks if a field has the value the user expects.
 
@@ -2025,78 +2025,22 @@ class PouiInternal(Base):
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
-        :param grid: Boolean if this is a grid field or not. - **Default:** False
-        :type grid: bool
-        :param line: Grid line that contains the column field to be checked.- **Default:** 1
-        :type line: int
-        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
-        :type grid_number: int
-        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
-        :type name_attr: bool
-        :param input_field: False if the desired field is not an input type 
-        :type bool
-        :param direction: Desired direction to search for the element, currently accepts right and down
-        :type str
-        :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
-        :type grid_memo_field: bool
+        :param po_component:  POUI component name that you want to check content on screen
+        :type po_component: str
 
         Usage:
 
         >>> # Calling method to check a value of a field:
-        >>> oHelper.CheckResult("A1_COD", "000001")
-        >>> #-----------------------------------------
-        >>> # Calling method to check a field that is on the second line of a grid:
-        >>> oHelper.CheckResult("Client", "000001", grid=True, line=2)
-        >>> oHelper.LoadGrid()
-        >>> #-----------------------------------------
-        >>> # Calling method to check a field that is on the second grid of the screen:
-        >>> oHelper.CheckResult("Order", "000001", grid=True, line=1, grid_number=2)
-        >>> oHelper.LoadGrid()
-        >>> #-----------------------------------------
-        >>> # Call method to check a field value that is not an input field and is on the right:
-        >>> oHelper.CheckResult("Saldo Titulo", "100.000,00", input_field=False, direction='right')
-        >>> oHelper.LoadGrid()
-        
+        >>> oHelper.CheckResult("Código", "000001", 'po-input')
+
         """
-        self.wait_blocker()
 
-        if grid_memo_field:
-            self.grid_memo_field = True
-        if grid:
-            self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
-        elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field, user_value)
-            self.log_result(field, user_value, current_value)
-        else:
-            field = re.sub(r"(\:*)(\?*)", "", field).strip()
-            if name_attr:
-                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                self.wait_element(field)
-                
-            element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
-            if not element:
-                self.log_error(f"Couldn't find element: {field}")
+        if po_component == 'po-input':
+            input_field = self.return_input_element(field)
+            input_field_element = lambda: self.soup_to_selenium(input_field)
+            current_value = self.get_web_value(input_field_element())
 
-            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            self.set_element_focus(field_element())
-            self.scroll_to_element(field_element())
-            endtime = time.time() + self.config.time_out
-            current_value =  ''
-            while(time.time() < endtime and not current_value):
-                current_value = self.get_web_value(field_element()).strip()
-
-            logger().info(f"Value for Field {field} is: {current_value}")
-
-            #Remove mask if present.
-            if self.check_mask(field_element()):
-                current_value = self.remove_mask(current_value)
-                user_value = self.remove_mask(user_value)
-            #If user value is string, Slice string to match user_value's length
-            if type(current_value) is str:
-                current_value = current_value[0:len(str(user_value))]
-
-            self.log_result(field, user_value, current_value)
+        self.log_result(field, user_value, current_value)
 
     def log_result(self, field, user_value, captured_value):
         """
@@ -7647,6 +7591,26 @@ class PouiInternal(Base):
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
+        
+        input_field = self.return_input_element(field, position)
+
+        input_field_element = lambda: self.soup_to_selenium(input_field)
+
+        self.scroll_to_element(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+        self.set_element_focus(input_field_element())
+        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+        self.click(input_field_element())
+        input_field_element().clear()
+        input_field_element().send_keys(value)
+        self.driver.switch_to.default_content()
+    
+    def return_input_element(self, field=None, position=1):
+        """
+        [Internal]
+        Returns input element based on field
+        """
+
         position -= 1
         input_field = ''
         self.twebview_context = True
@@ -7664,16 +7628,7 @@ class PouiInternal(Base):
         if not input_field:
             self.log_error("Couldn't find any labels.")
 
-        input_field_element = lambda: self.soup_to_selenium(input_field)
-
-        self.scroll_to_element(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-        self.set_element_focus(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-        self.click(input_field_element())
-        input_field_element().clear()
-        input_field_element().send_keys(value)
-        self.driver.switch_to.default_content()
+        return input_field
 
     def return_main_element(self, field, position, selector, container):
         """

@@ -1526,7 +1526,7 @@ class Poui():
         >>> #Calling the method
         >>> inst.oHelper.AssertFalse()
         """
-        self.__webapp.AssertFalse(expected, script_message)
+        self.__poui.AssertFalse(expected, script_message)
 
     def AssertTrue(self, expected=True, script_message=''):
         """
@@ -1537,7 +1537,7 @@ class Poui():
         >>> #Calling the method
         >>> inst.oHelper.AssertTrue()
         """
-        self.__webapp.AssertTrue(expected, script_message)
+        self.__poui.AssertTrue(expected, script_message)
 
     def ClickWidget(self, title='', action='', position=1):
         """
@@ -1608,4 +1608,23 @@ class Poui():
         """
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
+        
+    def CheckResult(self, field=None, user_value=None, po_component='po-input'):
+        """
+        Checks if a field has the value the user expects.
+
+        :param field: The field or label of a field that must be checked.
+        :type field: str
+        :param user_value: The value that the field is expected to contain.
+        :type user_value: str
+        :param po_component:  POUI component name that you want to check content on screen
+        :type po_component: str
+
+        Usage:
+
+        >>> # Calling method to check a value of a field:
+        >>> oHelper.CheckResult("Código", "000001", 'po-input')
+
+        """
+        self.__poui.CheckResult(field, user_value, po_component)
         
