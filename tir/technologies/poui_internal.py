@@ -2017,7 +2017,7 @@ class PouiInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, po_component):
+    def CheckResult(self, field, user_value, po_component, position):
         """
         Checks if a field has the value the user expects.
 
@@ -2036,7 +2036,7 @@ class PouiInternal(Base):
         """
 
         if po_component == 'po-input':
-            input_field = self.return_input_element(field)
+            input_field = self.return_input_element(field, position)
             input_field_element = lambda: self.soup_to_selenium(input_field)
             current_value = self.get_web_value(input_field_element())
 

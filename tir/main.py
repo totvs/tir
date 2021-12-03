@@ -1609,7 +1609,7 @@ class Poui():
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
         
-    def CheckResult(self, field=None, user_value=None, po_component='po-input'):
+    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
         Checks if a field has the value the user expects.
 
@@ -1619,6 +1619,8 @@ class Poui():
         :type user_value: str
         :param po_component:  POUI component name that you want to check content on screen
         :type po_component: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -1626,5 +1628,4 @@ class Poui():
         >>> oHelper.CheckResult("Código", "000001", 'po-input')
 
         """
-        self.__poui.CheckResult(field, user_value, po_component)
-        
+        self.__poui.CheckResult(field, user_value, po_component, position)
