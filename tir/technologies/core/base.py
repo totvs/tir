@@ -51,6 +51,10 @@ class Base(unittest.TestCase):
     >>> def WebappInternal(Base):
     >>> def APWInternal(Base):
     """
+
+    driver = None
+    wait = None
+    
     def __init__(self, config_path="", autostart=True):
         """
         Definition of each global variable:

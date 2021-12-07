@@ -94,6 +94,12 @@ class WebappInternal(Base):
         self.range_multiplier = None
         self.routine = None
 
+        if not Base.driver:
+            Base.driver = self.driver
+
+        if not Base.wait:
+            Base.wait = self.wait
+
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
 

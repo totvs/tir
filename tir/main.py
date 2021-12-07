@@ -1371,7 +1371,6 @@ class Poui():
 
     def __init__(self, config_path="", autostart=True):
         self.__poui = PouiInternal(config_path, autostart)
-        self.__webapp = WebappInternal(config_path, autostart=False)
         self.__database = BaseDatabase(config_path, autostart=False)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
@@ -1397,38 +1396,6 @@ class Poui():
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
         self.__poui.Setup(initial_program, date, group, branch, module)
-
-    def Program(self, program_name):
-        """
-        Method that sets the program in the initial menu search field.
-
-        .. note::
-            Only used when the Initial Program is the module Ex: SIGAFAT.
-
-        :param program_name: The program name
-        :type program_name: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> oHelper.Program("MATA020")
-        """
-        self.__poui.Program(program_name)
-
-    def SetLateralMenu(self, menuitens):
-        """
-        Navigates through the lateral menu using provided menu path.
-        e.g. "MenuItem1 > MenuItem2 > MenuItem3"
-
-        :param menu_itens: String with the path to the menu.
-        :type menu_itens: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
-        """
-        self.__poui.SetLateralMenu(menuitens)
 
     def ClickMenu(self, menu_item):
         """
