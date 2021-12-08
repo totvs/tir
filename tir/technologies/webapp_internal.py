@@ -100,6 +100,9 @@ class WebappInternal(Base):
         if not Base.wait:
             Base.wait = self.wait
 
+        if not Base.errors:
+            Base.errors = self.errors
+
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
 

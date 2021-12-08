@@ -1375,28 +1375,6 @@ class Poui():
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
-    def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
-        """
-        Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
-
-        :param initial_program: The initial program to load.
-        :type initial_program: str
-        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
-        :type date: str
-        :param group: The group to fill on the environment screen. - **Default:** "99"
-        :type group: str
-        :param branch: The branch to fill on the environment screen. - **Default:** "01"
-        :type branch: str
-        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
-        :type module: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
-        """
-        self.__poui.Setup(initial_program, date, group, branch, module)
-
     def ClickMenu(self, menu_item):
         """
         Clicks on the menu-item of the POUI component.

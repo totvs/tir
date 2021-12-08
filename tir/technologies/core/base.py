@@ -54,6 +54,7 @@ class Base(unittest.TestCase):
 
     driver = None
     wait = None
+    errors = []
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -98,7 +99,6 @@ class Base(unittest.TestCase):
             self.log.user = getpass.getuser()
 
         self.base_container = "body"
-        self.errors = []
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False

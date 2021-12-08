@@ -100,6 +100,9 @@ class PouiInternal(Base):
         if not Base.wait:
             Base.wait = self.wait
 
+        if not Base.errors:
+            Base.errors = self.errors
+
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
 
@@ -108,168 +111,6 @@ class PouiInternal(Base):
             self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)
-
-    def SetupTSS( self, initial_program = "", enviroment = ""):
-        """
-        Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
-        .. note::
-            This method use the user and password from config.json.
-
-        :param initial_program: The initial program to load.
-        :type initial_program: str
-        :param environment: The initial environment to load.
-        :type environment: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
-        """
-        try:
-
-            logger().info("Starting Setup TSS")
-            self.tss = True
-            self.service_process_bat_file()
-
-            self.config.initial_program = initial_program
-            enviroment = self.config.environment if self.config.environment else enviroment
-
-            self.containers_selectors["SetButton"] = "body"
-            self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
-
-            if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program, enviroment)
-
-            if not self.log.program:
-                self.log.program = self.get_program_name()
-
-            if self.config.coverage:
-                self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
-
-            self.user_screen_tss()
-            self.set_log_info_tss()
-
-            if self.config.num_exec:
-                if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
-                    self.restart_counter = 3
-                    self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
-
-        except ValueError as e:
-            self.log_error(str(e))
-        except Exception as e:
-            self.log_error(str(e))
-
-    def user_screen_tss(self):
-        """
-        [Internal]
-
-        Fills the user login screen of Protheus with the user and password located on config.json.
-
-        Usage:
-
-        >>> # Calling the method
-        >>> self.user_screen()
-        """
-        logger().info("Fill user Screen")
-        self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-
-        self.SetValue('cUser', self.config.user, name_attr = True)
-        self.SetValue('cPass', self.config.password, name_attr = True)
-        self.SetButton("Entrar")
-        
-
-    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
-        """
-        Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
-
-        :param initial_program: The initial program to load.
-        :type initial_program: str
-        :param date: The date to fill on the environment screen. - **Default:** "" (empty string)
-        :type date: str
-        :param group: The group to fill on the environment screen. - **Default:** "99"
-        :type group: str
-        :param branch: The branch to fill on the environment screen. - **Default:** "01"
-        :type branch: str
-        :param module: The module to fill on the environment screen. - **Default:** "" (empty string)
-        :type module: str
-        :param save_input: Boolean if all input info should be saved for later usage. Leave this flag 'True' if you are not sure. **Default:** True
-        :type save_input: bool
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
-        """
-
-        if self.config.smart_test:
-            logger().info(f"***System Info*** in Setup():")
-            system_info()
-
-        try:
-            self.service_process_bat_file()
-            
-            if not initial_program:
-                self.log_error("Couldn't find The initial program")
-
-            if self.config.smart_erp:
-                self.wait_smart_erp_environment()
-
-            if not self.log.program:
-                self.log.program = self.get_program_name()
-
-            if save_input:
-                self.config.initial_program = initial_program
-                self.config.date = date
-                self.config.group = group
-                self.config.branch = branch
-                self.config.module = module
-
-            if self.config.coverage:
-                self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
-
-            if not self.config.valid_language:
-                self.config.language = self.get_language()
-                self.language = LanguagePack(self.config.language)
-
-            if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, coverage=False)
-
-            self.log.webapp_version = self.driver.execute_script("return app.VERSION")
-
-            self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
-
-            endtime = time.time() + self.config.time_out
-            # if not self.config.poui_login:
-            #     while(time.time() < endtime and (not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED, main_container=".twindow", optional_term=".tsay"))):
-            #         self.update_password()
-
-            self.environment_screen()
-
-            while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_warning_screen()
-                self.close_coin_screen()
-                self.close_modal()
-
-            if save_input:
-                self.set_log_info()
-
-            self.log.country = self.config.country
-            self.log.execution_id = self.config.execution_id
-            self.log.issue = self.config.issue
-            
-        except ValueError as error:
-            self.log_error(error)
-        except Exception as e:
-            self.log_error(str(e))
-
-        if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
-                self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
-
-        if self.config.smart_test and self.config.coverage and self.search_stack("setUpClass") and self.restart_coverage:
-            self.restart()
-            self.restart_coverage = False
 
     def service_process_bat_file(self):
         """
@@ -467,7 +308,6 @@ class PouiInternal(Base):
             self.send_keys(password(), password_text)
             self.send_keys(password(), Keys.TAB)
             password_value = self.get_web_value(password())
-            self.wait_blocker()
             try_counter += 1 if(try_counter < 1) else -1
         
         if not password_value.strip() and self.config.password != '':
@@ -835,6 +675,27 @@ class PouiInternal(Base):
         if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
          optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False):
             self.set_button_x()
+
+    def set_button_x(self, position=1, check_error=True):
+        position -= 1
+        term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
+        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
+        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
+
+        close_list = soup.select(term_button)
+        if not close_list:
+            self.log_error(f"Element not found")
+        if len(close_list) < position+1:
+            self.log_error(f"Element x position: {position} not found")
+        if position == 0:
+            element_soup = close_list.pop()
+        else:
+            element_soup = close_list.pop(position)
+        element_selenium = self.soup_to_selenium(element_soup)
+        self.scroll_to_element(element_selenium)
+        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element_soup, locator = By.XPATH )
+        
+        self.click(element_selenium)
         
     def close_warning_screen_after_routine(self):
         """
@@ -1203,166 +1064,6 @@ class PouiInternal(Base):
 
         return check_value
 
-    def input_value(self, field, value, ignore_case=True, name_attr=False, position=1, check_value=True, direction=None):
-        """
-        [Internal]
-
-        Sets value of an input element.
-        Returns True if succeeded, False if it failed.
-
-        :param field: The field name or label to receive the value
-        :type field: str
-        :param value: The value to be set on the field
-        :type value: str
-        :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
-        :type ignore_case: bool
-        :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
-        :type name_attr: bool
-        :param check_value: Boolean ignore input check - **Default:** True
-        :type name_attr: bool
-        :returns: True if succeeded, False if it failed.
-        :rtype: bool
-
-        Usage:
-
-        >>> # Calling the method
-        >>> self.input_value("A1_COD", "000001")
-        """
-
-        self.wait_blocker()
-
-        field = re.sub(r"([\s\?:\*\.]+)?$", "", field).strip()
-
-        main_element = None
-
-        if name_attr:
-            self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        else:
-            self.wait_element(field)
-
-        success = False
-        endtime = time.time() + self.config.time_out
-
-        while(time.time() < endtime and not success):
-            unmasked_value = self.remove_mask(value)
-
-            logger().info(f"Looking for element: {field}")
-
-            if field.lower() == self.language.From.lower():
-                element = self.get_field("cDeCond", name_attr=True, direction=direction)
-            elif field.lower() == self.language.To.lower():
-                element = self.get_field("cAteCond", name_attr=True, direction=direction)
-            else:
-                element = self.get_field(field, name_attr, position, direction=direction)
-
-            if not element or not self.element_is_displayed(element):
-                continue
-
-            main_element = element
-
-            if "tmultiget" in element.attrs['class'] if self.element_name(element) == 'div' else None:
-                textarea = element.select("textarea")
-                if not textarea:
-                    input_field = lambda : self.soup_to_selenium(element)
-                else:
-                    input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
-            else:
-                input_field = lambda : self.soup_to_selenium(element)
-            
-            if input_field:
-                valtype = "C"
-                main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
-
-                interface_value = self.get_web_value(input_field())
-                current_value = interface_value.strip()
-                interface_value_size = len(interface_value)
-                user_value_size = len(value)
-
-                if self.element_name(element) == "input":
-                    valtype = element.attrs["valuetype"]
-
-                self.scroll_to_element(input_field())
-
-                try:
-                    #Action for Combobox elements
-                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                        self.set_element_focus(input_field())
-                        main_element = element.parent
-                        self.try_element_to_be_clickable(main_element)
-                        self.select_combo(element, main_value)
-                        current_value = self.get_web_value(input_field()).strip()
-                    #Action for Input elements
-                    else:
-                        self.wait_until_to( expected_condition = "visibility_of", element = input_field, timeout=True)
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                        self.double_click(input_field())
-
-                        #if Character input
-                        if valtype != 'N':
-                            self.set_element_focus(input_field())
-                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                            time.sleep(0.1)
-                            if main_value == '':
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
-                            else:
-                                self.wait_blocker()
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
-                        #if Number input
-                        else:
-                            tries = 0
-                            try_counter = 1
-                            while(tries < 3):
-                                self.set_element_focus(input_field())
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                self.try_send_keys(input_field, main_value, try_counter)
-                                current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value).strip() == main_value:
-                                    break
-                                tries+=1
-                                try_counter+=1
-
-                        if user_value_size < interface_value_size:
-                            self.send_keys(input_field(), Keys.ENTER)
-                        
-                        if not check_value:
-                            return
-
-                        if self.check_mask(input_field()):
-                            current_value = self.remove_mask(self.get_web_value(input_field()).strip())
-                            if re.findall(r"\s", current_value):
-                                current_value = re.sub(r"\s", "", current_value)
-                        else:
-                            current_value = self.get_web_value(input_field()).strip()
-
-                        if current_value != "" and current_value.encode('latin-1', 'ignore'):
-                            logger().info(f"Current field value: {current_value}")
-
-                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
-                        current_value = current_value[0:len(str(value))]
-
-                    if re.match(r"^●+$", current_value):
-                        success = len(current_value) == len(str(value).strip())
-                    elif ignore_case:
-                        success = current_value.lower().strip() == main_value.lower().strip()
-                    else:
-                        success = current_value == main_value
-                except:
-                    continue
-
-        if "disabled" in element.attrs:
-            self.log_error(self.create_message(['', field],enum.MessageType.DISABLED))
-
-        if not success:
-            self.log_error(f"Could not input value {value} in field {field}")
-        else:
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
-
     def get_field(self, field, name_attr=False, position=1, input_field=True, direction=None):
         """
         [Internal]
@@ -1604,7 +1305,6 @@ class PouiInternal(Base):
             logger().info("Driver Refresh")
 
         self.driver.refresh()
-        self.wait_blocker()
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform()
 
     def Finish(self):
@@ -2559,7 +2259,6 @@ class PouiInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
-        self.clear_grid()
         logger().warning(f"Warning log_error {message}")
 
         if self.config.smart_test:
@@ -3791,7 +3490,6 @@ class PouiInternal(Base):
                             self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
                             self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                        self.wait_blocker()
                         df, grid = self.table_dataframe(table_number=table_number)
                         if df.equals(last_df):
                             count +=1
@@ -3814,7 +3512,6 @@ class PouiInternal(Base):
         else:
             index = index_number
             element_bs4 = next(iter(tr[index].select('td')))
-            self.wait_blocker()
             self.poui_click(element_bs4)
             self.driver.switch_to.default_content()
 
