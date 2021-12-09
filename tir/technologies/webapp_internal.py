@@ -1901,6 +1901,10 @@ class WebappInternal(Base):
             else:
                 element = self.get_field(field, name_attr, position, direction=direction)
 
+            if element:
+                input_field = lambda : self.soup_to_selenium(element)
+                self.scroll_to_element(input_field())
+
             if not element or not self.element_is_displayed(element):
                 continue
 
