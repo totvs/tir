@@ -3159,9 +3159,10 @@ class PouiInternal(Base):
             po_input = self.web_scrap(term="[class*='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
                 po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
-                if len(po_input_span) >= position:
-                    po_input_span = po_input_span[position]
-                    input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
+                if po_input_span:
+                    if len(po_input_span) >= position:
+                        po_input_span = po_input_span[position]
+                        input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
             
         if not input_field:
             self.log_error("Couldn't find any labels.")
