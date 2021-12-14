@@ -453,20 +453,26 @@ class Base(unittest.TestCase):
 
         if self.config.new_log:
             self.execution_flow()
+            
 
         try:
-
+            
             if self.twebview_context:
                 iframes = None
+                iframe_displayed = None
+                
                 while not iframes:
                     iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
 
                     if iframes:
                         iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
-                        if iframe_displayed:
-                            self.driver.switch_to.frame(iframe_displayed)
-                            self.twebview_context = False
-                            return BeautifulSoup(self.driver.page_source, "html.parser")
+                    else:
+                        self.driver.switch_to.default_content()
+
+                    if iframe_displayed:
+                        self.driver.switch_to.frame(iframe_displayed)
+                        self.twebview_context = False
+                        return BeautifulSoup(self.driver.page_source, "html.parser")
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 

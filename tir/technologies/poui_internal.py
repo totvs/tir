@@ -3308,19 +3308,22 @@ class PouiInternal(Base):
             po_widget = self.web_scrap(term="po-widget", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                   main_container='body')
 
-            if title:
-                po_widget = next(iter(list(filter(lambda x: title.lower() in x.text.lower(), po_widget))))
-
-            if action:
-                po_widget = list(filter(lambda x: action.lower() in x.text.lower(), po_widget))
-
-            if len(po_widget) >= position:
-                element = po_widget[position]
+            if po_widget:
+            
+                if title:
+                    po_widget = list(filter(lambda x: title.lower() in x.text.lower(), po_widget))
 
                 if action:
-                    element = next(iter(element.select("[class*='po-widget-action']")), None)
-            else:
-                self.log_error("Couldn't find element")
+                    po_widget = list(filter(lambda x: action.lower() in x.text.lower(), po_widget))
+
+                if po_widget:
+                    if len(po_widget) >= position:
+                        element = po_widget[position]
+
+                        if action:
+                            element = next(iter(element.select("[class*='po-widget-action']")), None)
+                    else:
+                        self.log_error("Couldn't find element")
 
         if not element:
             self.log_error("Couldn't find element")
