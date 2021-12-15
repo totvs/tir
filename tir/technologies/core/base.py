@@ -436,7 +436,7 @@ class Base(unittest.TestCase):
         else:
             return []
 
-    def get_current_DOM(self):
+    def get_current_DOM(self, twebview=False):
         """
         [Internal]
 
@@ -451,6 +451,10 @@ class Base(unittest.TestCase):
         >>> soup = self.get_current_DOM()
         """
 
+        self.twebview_context = twebview
+
+        self.driver.switch_to.default_content()
+
         if self.config.new_log:
             self.execution_flow()
             
@@ -458,21 +462,9 @@ class Base(unittest.TestCase):
         try:
             
             if self.twebview_context:
-                iframes = None
-                iframe_displayed = None
-                
-                while not iframes:
-                    iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
-
-                    if iframes:
-                        iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
-                    else:
-                        self.driver.switch_to.default_content()
-
-                    if iframe_displayed:
-                        self.driver.switch_to.frame(iframe_displayed)
-                        self.twebview_context = False
-                        return BeautifulSoup(self.driver.page_source, "html.parser")
+                self.switch_to_iframe()
+                self.twebview_context = False
+                return BeautifulSoup(self.driver.page_source, "html.parser")
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
@@ -504,6 +496,25 @@ class Base(unittest.TestCase):
             self.driver.switch_to.default_content()
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
             return soup
+
+    def switch_to_iframe(self):
+        """
+        [Internal]
+        :return:
+        """
+        iframes = None
+        iframe_displayed = None
+
+        while not iframes:
+            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
+
+            if iframes:
+                iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+            else:
+                self.driver.switch_to.default_content()
+
+            if iframe_displayed:
+                self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """

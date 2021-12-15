@@ -398,9 +398,8 @@ class WebappInternal(Base):
 
         if self.config.poui_login:
             self.twebview_context = True
-            # if not self.driver.find_element(By.CSS_SELECTOR, ".po-page-login-info-field .po-input"):
             if not self.wait_element_timeout(term=".po-page-login-info-field .po-input",
-            scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out * 3,main_container='body'):
+            scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out * 3,main_container='body', twebview=True):
                 self.reload_user_screen()
 
         elif not self.wait_element_timeout(term="[name='cGetUser'] > input",
@@ -410,7 +409,10 @@ class WebappInternal(Base):
         self.set_multilanguage()
 
         try_counter = 0
-        soup = self.get_current_DOM()
+        if self.config.poui_login:
+            self.twebview_context = True
+
+        soup = self.get_current_DOM(twebview=self.twebview_context)
 
         logger().info("Filling User")
 
@@ -2476,7 +2478,7 @@ class WebappInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False):
         """
         [Internal]
 
@@ -2511,6 +2513,8 @@ class WebappInternal(Base):
         >>> #Elements with class "my_class" and text "my_text"
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
+
+        self.twebview_context = twebview
 
         try:
             endtime = time.time() + self.config.time_out
@@ -2670,7 +2674,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog", check_error=True):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -2697,6 +2701,7 @@ class WebappInternal(Base):
 
         element_list = []
         containers = None
+        self.twebview_context = twebview
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -2750,7 +2755,8 @@ class WebappInternal(Base):
             else:
                 container_element = self.driver
             try:
-                if self.config.poui_login:
+                if twebview:
+                    self.switch_to_iframe()
                     self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
                     return self.driver.find_element(By.CSS_SELECTOR, selector)
                 element_list = container_element.find_elements(by, selector)
@@ -5232,7 +5238,7 @@ class WebappInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True):
+    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -5256,6 +5262,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
+
+        self.twebview_context = twebview
+
         endtime = time.time() + self.config.time_out
         if self.config.debug_log:
             logger().debug("Waiting for element")
@@ -5302,7 +5311,7 @@ class WebappInternal(Base):
                         pass
 
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -5330,12 +5339,14 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
         """
+        self.twebview_context = twebview
+
         success = False
         if presence:
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error):
+                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview):
                     success = True
                     break
         else:
@@ -5349,7 +5360,7 @@ class WebappInternal(Base):
         if presence and success:
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
             if element is not None:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 endtime = time.time() + timeout
