@@ -409,10 +409,11 @@ class WebappInternal(Base):
         self.set_multilanguage()
 
         try_counter = 0
-        if self.config.poui_login:
-            self.twebview_context = True
 
-        soup = self.get_current_DOM(twebview=self.twebview_context)
+        if self.config.poui_login:
+            soup = self.get_current_DOM(twebview=True)
+        else:
+            soup = self.get_current_DOM()
 
         logger().info("Filling User")
 
@@ -512,6 +513,10 @@ class WebappInternal(Base):
             raise ValueError(message)
 
         button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+        
+        if self.config.poui_login:
+            self.switch_to_iframe()
+            
         self.click(button())
 
     def reload_user_screen(self):
@@ -547,6 +552,7 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.environment_screen()
         """
+
         if not self.config.date:
             self.config.date = datetime.today().strftime('%d/%m/%Y')
 
@@ -558,13 +564,13 @@ class WebappInternal(Base):
             container = ".twindow"
 
         if self.config.poui_login:
-            self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
         else:
             self.wait_element(self.language.database, main_container=container)
 
         logger().info("Filling Date")
         if self.config.poui_login:
-            base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
         else:
             base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input", scrap_type=enum.ScrapType.CSS_SELECTOR, label=True, main_container=container)
 
@@ -581,6 +587,10 @@ class WebappInternal(Base):
 
         date = lambda: self.soup_to_selenium(base_date)
         base_date_value = ''
+
+        if self.config.poui_login:
+            self.switch_to_iframe()
+
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
             self.double_click(date())
@@ -613,6 +623,10 @@ class WebappInternal(Base):
 
         group = lambda: self.soup_to_selenium(group_element)
         group_value = ''
+
+        if self.config.poui_login:
+            self.switch_to_iframe()
+
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
             self.double_click(group())
@@ -683,6 +697,10 @@ class WebappInternal(Base):
 
         if enable:
             env_value = ''
+
+            if self.config.poui_login:
+                self.switch_to_iframe()
+
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and env_value.strip() != self.config.module.strip()):
                 self.double_click(env())
@@ -701,6 +719,10 @@ class WebappInternal(Base):
 
         if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
             button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+
+            if self.config.poui_login:
+                self.switch_to_iframe()
+
             self.click(button())
         elif not change_env:
             self.restart_counter += 1
@@ -2520,7 +2542,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             container =  None
             while(time.time() < endtime and container is None):
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview=twebview)
 
                 if check_error:
                     self.search_for_errors(check_help)
@@ -2757,10 +2779,10 @@ class WebappInternal(Base):
             try:
                 if twebview:
                     self.switch_to_iframe()
-                    self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
-                    return self.driver.find_element(By.CSS_SELECTOR, selector)
-                element_list = container_element.find_elements(by, selector)
-            except StaleElementReferenceException:
+                    return  self.driver.find_element(By.CSS_SELECTOR, selector)
+                else:
+                    element_list = container_element.find_elements(by, selector)
+            except:
                 pass
         else:
             if scrap_type == enum.ScrapType.MIXED:
@@ -5270,10 +5292,10 @@ class WebappInternal(Base):
             logger().debug("Waiting for element")
 
         if presence:
-            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
+            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview) and time.time() < endtime):
                 time.sleep(0.1)
         else:
-            while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
+            while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview) and time.time() < endtime):
                 time.sleep(0.1)
 
         if time.time() > endtime:
@@ -5291,7 +5313,7 @@ class WebappInternal(Base):
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
 
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
             
             if element is not None:
 
@@ -5367,6 +5389,10 @@ class WebappInternal(Base):
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
                         time.sleep(0.1)
+
+                        if self.config.poui_login:
+                            self.switch_to_iframe()
+
                         self.scroll_to_element(sel_element())
                         if(sel_element().is_displayed()):
                             break
@@ -7642,7 +7668,7 @@ class WebappInternal(Base):
     def set_multilanguage(self):
 
         if self.config.poui_login:
-            soup = self.get_current_DOM()
+            soup = self.get_current_DOM(twebview=True)
             po_select = next(iter(soup.select(".po-select-container")), None)
             if po_select:
                 span_label = next(iter(po_select.select('span')), None)
