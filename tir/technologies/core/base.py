@@ -336,7 +336,7 @@ class Base(unittest.TestCase):
         else:
             return len(element_list) >= position
 
-    def filter_displayed_elements(self, elements, reverse=False):
+    def filter_displayed_elements(self, elements, reverse=False, twebview=False):
         """
         [Internal]
 
@@ -358,6 +358,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.filter_displayed_elements(elements, True)
         """
+
+        if twebview:
+            self.switch_to_iframe()
         #0 - elements filtered
         elements = list(filter(lambda x: self.soup_to_selenium(x) is not None ,elements ))
         if not elements:

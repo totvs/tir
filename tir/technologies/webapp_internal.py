@@ -604,7 +604,7 @@ class WebappInternal(Base):
 
         logger().info("Filling Group")
         if self.config.poui_login:
-            group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT, twebview=True)
             group_element = next(iter(group_elements))
             group_element = group_element.find_parent('pro-company-lookup')
             group_element = next(iter(group_element.select('input')), None)
@@ -640,7 +640,7 @@ class WebappInternal(Base):
 
         logger().info("Filling Branch")
         if self.config.poui_login:
-            branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT, twebview=True)
             branch_element = next(iter(branch_elements))
             branch_element = branch_element.find_parent('pro-branch-lookup')
             branch_element = next(iter(branch_element.select('input')), None)
@@ -659,6 +659,10 @@ class WebappInternal(Base):
 
         branch = lambda: self.soup_to_selenium(branch_element)
         branch_value = ''
+
+        if self.config.poui_login:
+            self.switch_to_iframe()
+
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
             self.double_click(branch())
@@ -672,7 +676,7 @@ class WebappInternal(Base):
 
         logger().info("Filling Environment")
         if self.config.poui_login:
-            environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
+            environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT, twebview=True)
             environment_element = next(iter(environment_elements))
             environment_element = environment_element.find_parent('pro-system-module-lookup')
             environment_element = next(iter(environment_element.select('input')), None)
@@ -691,6 +695,7 @@ class WebappInternal(Base):
 
         env = lambda: self.soup_to_selenium(environment_element)
         if self.config.poui_login:
+            self.switch_to_iframe()
             enable = env().is_enabled()
         else:
             enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled())
@@ -714,7 +719,13 @@ class WebappInternal(Base):
                 time.sleep(1)
                 self.close_warning_screen()
 
-        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
+        if self.config.poui_login:
+            buttons = self.filter_displayed_elements(
+                self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body", twebview=True),
+                True, twebview=True)
+        else:
+            buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
+
         button_element = next(iter(buttons), None) if buttons else None
 
         if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
@@ -724,6 +735,7 @@ class WebappInternal(Base):
                 self.switch_to_iframe()
 
             self.click(button())
+
         elif not change_env:
             self.restart_counter += 1
             message = f"Couldn't find {label} button."

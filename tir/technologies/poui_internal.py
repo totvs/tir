@@ -1467,7 +1467,7 @@ class PouiInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False):
         """
         [Internal]
 
@@ -1502,6 +1502,8 @@ class PouiInternal(Base):
         >>> #Elements with class "my_class" and text "my_text"
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
+
+        self.twebview_context = twebview
 
         try:
             endtime = time.time() + self.config.time_out
@@ -1661,7 +1663,7 @@ class PouiInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -1688,6 +1690,7 @@ class PouiInternal(Base):
 
         element_list = []
         containers = None
+        self.twebview_context = twebview
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -1741,11 +1744,11 @@ class PouiInternal(Base):
             else:
                 container_element = self.driver
             try:
-                element_list = container_element.find_element_by_css_selector(selector)
-                if element_list:
-                    return element_list
+                if twebview:
+                    self.switch_to_iframe()
+                    return self.driver.find_element(By.CSS_SELECTOR, selector)
                 else:
-                    return None
+                    element_list = container_element.find_elements(by, selector)
             except:
                 return None
         else:
@@ -1755,7 +1758,7 @@ class PouiInternal(Base):
                 selector = "div"
 
         if not element_list:
-            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
+            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)
             if not element_list:
                 return None
 
@@ -1958,7 +1961,7 @@ class PouiInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True):
+    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -1982,15 +1985,20 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
+
+        self.twebview_context = twebview
+
         endtime = time.time() + self.config.time_out
         if self.config.debug_log:
             logger().debug("Waiting for element")
 
         if presence:
-            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
+            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                           twebview) and time.time() < endtime):
                 time.sleep(0.1)
         else:
-            while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error) and time.time() < endtime):
+            while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                       twebview) and time.time() < endtime):
                 time.sleep(0.1)
 
         if time.time() > endtime:
@@ -2008,8 +2016,8 @@ class PouiInternal(Base):
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
 
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
-            
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
+
             if element is not None:
 
                 sel_element = lambda:self.soup_to_selenium(element)
@@ -3089,12 +3097,11 @@ class PouiInternal(Base):
         >>> oHelper.ClickMenu("Contracts")
         """
         menu = ''
-        self.twebview_context = True
-        self.wait_element(term="[class='po-menu']")
+        self.wait_element(term="[class='po-menu']", twebview=True)
         logger().info(f"Clicking on {menu_item}")
         endtime = time.time() + self.config.time_out
         while(not menu and time.time() < endtime):
-            po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
+            po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=True)), None)
             if po_menu:
                 po_menu_item = po_menu.select('div[class*="po-menu-item"]')
                 po_menu_item_filtered = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), po_menu_item))
