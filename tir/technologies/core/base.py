@@ -826,7 +826,7 @@ class Base(unittest.TestCase):
             pass
     
 
-    def soup_to_selenium(self, soup_object):
+    def soup_to_selenium(self, soup_object=None, twebview=False):
         """
         [Internal]
 
@@ -843,6 +843,9 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
+        if twebview:
+            self.switch_to_iframe()
+
         if soup_object is None:
             raise AttributeError
         return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)

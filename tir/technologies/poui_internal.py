@@ -1467,7 +1467,7 @@ class PouiInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=True):
         """
         [Internal]
 
@@ -1502,14 +1502,11 @@ class PouiInternal(Base):
         >>> #Elements with class "my_class" and text "my_text"
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
-
-        self.twebview_context = twebview
-
         try:
             endtime = time.time() + self.config.time_out
             container =  None
             while(time.time() < endtime and container is None):
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview)
 
                 if check_error:
                     self.search_for_errors(check_help)
@@ -1663,7 +1660,7 @@ class PouiInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True, twebview=False):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True, twebview=True):
         """
         [Internal]
 
@@ -1690,7 +1687,6 @@ class PouiInternal(Base):
 
         element_list = []
         containers = None
-        self.twebview_context = twebview
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
@@ -1705,7 +1701,7 @@ class PouiInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview)
 
                 if not soup:
                     return False
@@ -1961,7 +1957,7 @@ class PouiInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True, twebview=False):
+    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True, twebview=True):
         """
         [Internal]
 
@@ -1985,9 +1981,6 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
-
-        self.twebview_context = twebview
-
         endtime = time.time() + self.config.time_out
         if self.config.debug_log:
             logger().debug("Waiting for element")
@@ -2544,6 +2537,7 @@ class PouiInternal(Base):
         [Internal]
 
         """
+        self.switch_to_iframe()
         element_selenium = self.soup_to_selenium(element)
         if element_selenium:
             return element_selenium.is_displayed()
@@ -3097,11 +3091,11 @@ class PouiInternal(Base):
         >>> oHelper.ClickMenu("Contracts")
         """
         menu = ''
-        self.wait_element(term="[class='po-menu']", twebview=True)
+        self.wait_element(term="[class='po-menu']")
         logger().info(f"Clicking on {menu_item}")
         endtime = time.time() + self.config.time_out
         while(not menu and time.time() < endtime):
-            po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=True)), None)
+            po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
             if po_menu:
                 po_menu_item = po_menu.select('div[class*="po-menu-item"]')
                 po_menu_item_filtered = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), po_menu_item))
@@ -3116,7 +3110,6 @@ class PouiInternal(Base):
             self.log_error("Couldn't find any labels.")
 
         self.poui_click(menu)
-        self.driver.switch_to.default_content()
 
     def InputValue(self, field, value, position):
         """
@@ -3136,6 +3129,8 @@ class PouiInternal(Base):
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
+
+        self.switch_to_iframe()
         
         input_field = self.return_input_element(field, position)
 
@@ -3148,7 +3143,6 @@ class PouiInternal(Base):
         self.click(input_field_element())
         input_field_element().clear()
         input_field_element().send_keys(value)
-        self.driver.switch_to.default_content()
     
     def return_input_element(self, field=None, position=1):
         """
@@ -3234,6 +3228,7 @@ class PouiInternal(Base):
             if main_element:
                 span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
                 if span_icon:
+                    self.switch_to_iframe()
                     self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
                     self.po_loading(selector)
                     main_element = None
@@ -3257,6 +3252,7 @@ class PouiInternal(Base):
 
     def poui_click(self, element):
 
+        self.switch_to_iframe()
         click_element = lambda: self.soup_to_selenium(element)
 
         self.scroll_to_element(click_element())
@@ -3265,7 +3261,6 @@ class PouiInternal(Base):
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
         time.sleep(1)
         self.click(click_element())
-        self.driver.switch_to.default_content()
 
     def click_button(self, button, position, selector, container):
         """
@@ -3289,7 +3284,6 @@ class PouiInternal(Base):
             self.log_error("Couldn't find element")
 
         self.poui_click(button_element)
-        self.driver.switch_to.default_content()
 
     def ClickWidget(self, title, action, position):
         """
@@ -3336,7 +3330,6 @@ class PouiInternal(Base):
             self.log_error("Couldn't find element")
 
         self.poui_click(element)
-        self.driver.switch_to.default_content()
 
     def TearDown(self):
         """
@@ -3427,12 +3420,12 @@ class PouiInternal(Base):
         if not element:
             self.log_error("Couldn't find element")
 
+        self.switch_to_iframe()
         element().clear()
         element().send_keys(content)
 
         action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
-        self.driver.switch_to.default_content()
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell):
         """
@@ -3524,7 +3517,6 @@ class PouiInternal(Base):
             index = index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
-            self.driver.switch_to.default_content()
 
     def table_dataframe(self, table_number=0):
 
