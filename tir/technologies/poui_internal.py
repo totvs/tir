@@ -1122,6 +1122,7 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> current_value = self.get_web_value(selenium_field_element)
         """
+        self.switch_to_iframe()
         if element.tag_name == "div":
             element_children = element.find_element(By.CSS_SELECTOR, "div > * ")
             if element_children is not None:
@@ -1160,8 +1161,9 @@ class PouiInternal(Base):
 
         if po_component == 'po-input':
             input_field = self.return_input_element(field, position)
-            input_field_element = lambda: self.soup_to_selenium(input_field)
-            current_value = self.get_web_value(input_field_element())
+            input_field_element = lambda: self.soup_to_selenium(input_field, twebview=True)
+            if input_field_element():
+                current_value = self.get_web_value(input_field_element())
 
         self.log_result(field, user_value, current_value)
 
