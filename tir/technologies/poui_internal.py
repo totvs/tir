@@ -3222,6 +3222,7 @@ class PouiInternal(Base):
         position -= 1
         element = None
         self.twebview_context = True
+        logger().info(f"Clicking on {field}")
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
@@ -3249,7 +3250,6 @@ class PouiInternal(Base):
         if not element:
             self.log_error("Couldn't find element")
 
-        logger().info(f"Clicking in:'{field}'")
         self.poui_click(element)
 
     def poui_click(self, element):
@@ -3274,6 +3274,7 @@ class PouiInternal(Base):
         position -= 1
         element = None
         self.twebview_context = True
+        logger().info(f"Clicking on {button}")
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
@@ -3305,6 +3306,7 @@ class PouiInternal(Base):
         position -= 1
         element = None
         self.twebview_context = True
+        logger().info(f"Clicking on Widget")
         self.wait_element(term="po-widget")
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
@@ -3403,6 +3405,7 @@ class PouiInternal(Base):
         """
         element = None
         self.twebview_context = True
+        logger().info(f"Searching: {content}")
         self.wait_element(term='po-page')
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
@@ -3458,6 +3461,7 @@ class PouiInternal(Base):
         index_number = []
         count = 0
         column_index_number = None
+        logger().info(f"Clicking on Table")
         self.wait_element(term="[class='po-table']")
 
         endtime = time.time() + self.config.time_out
