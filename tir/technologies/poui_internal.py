@@ -3093,8 +3093,8 @@ class PouiInternal(Base):
         >>> oHelper.ClickMenu("Contracts")
         """
         menu = ''
-        self.wait_element(term="[class='po-menu']")
         logger().info(f"Clicking on {menu_item}")
+        self.wait_element(term="[class='po-menu']")
         endtime = time.time() + self.config.time_out
         while(not menu and time.time() < endtime):
             po_menu = next(iter(self.web_scrap(term="[class='po-menu']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
@@ -3131,10 +3131,10 @@ class PouiInternal(Base):
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
-
-        self.switch_to_iframe()
         
         input_field = self.return_input_element(field, position)
+
+        self.switch_to_iframe()
 
         input_field_element = lambda: self.soup_to_selenium(input_field)
 
@@ -3155,8 +3155,8 @@ class PouiInternal(Base):
         position -= 1
         input_field = ''
         self.twebview_context = True
-        self.wait_element(term="[class*='po-input']")
         logger().info(f"Input Value in:'{field}'")
+        self.wait_element(term="[class*='po-input']")
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
             po_input = self.web_scrap(term="[class*='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
