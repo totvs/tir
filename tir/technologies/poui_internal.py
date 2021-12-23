@@ -2015,6 +2015,8 @@ class PouiInternal(Base):
 
             if element is not None:
 
+                self.switch_to_iframe()
+
                 sel_element = lambda:self.soup_to_selenium(element)
                 sel_element_isdisplayed = False
 
