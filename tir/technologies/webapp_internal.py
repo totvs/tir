@@ -2893,12 +2893,16 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and expanded():
-            menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
-            label_expanded = menu.select('label')[0]
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label_expanded, locator = By.XPATH )
-            parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
-            ActionChains(self.driver).move_to_element(parent_menu).click().perform()
             self.wait_blocker()
+            self.wait_element(term=".tmenu .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            label_expanded = menu.select('label')[0]
+            parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
+            self.scroll_to_element(parent_menu)
+            self.wait_blocker()
+            ActionChains(self.driver).move_to_element(parent_menu).click().perform()
+            self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_blocker()
+            menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
 
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
