@@ -2888,11 +2888,17 @@ class WebappInternal(Base):
             self.log_error(str(error))
     
     def expanded_menu(self, element):
-        expanded = lambda: True if "expanded" in element.attrs['class'] else False
-        if expanded():
-            parent_menu = self.driver.find_element_by_xpath(xpath_soup(element.select('label')[0]))
-            self.wait_blocker()
+        menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
+        expanded = lambda: True if "expanded" in menu.attrs['class'] else False
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and expanded():
+            menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
+            label_expanded = menu.select('label')[0]
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label_expanded, locator = By.XPATH )
+            parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             ActionChains(self.driver).move_to_element(parent_menu).click().perform()
+            self.wait_blocker()
 
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
