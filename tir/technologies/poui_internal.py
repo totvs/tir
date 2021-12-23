@@ -3131,6 +3131,8 @@ class PouiInternal(Base):
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
+
+        logger().info(f"Input Value in:'{field}'")
         
         input_field = self.return_input_element(field, position)
 
@@ -3155,7 +3157,6 @@ class PouiInternal(Base):
         position -= 1
         input_field = ''
         self.twebview_context = True
-        logger().info(f"Input Value in:'{field}'")
         self.wait_element(term="[class*='po-input']")
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
