@@ -2887,6 +2887,7 @@ class WebappInternal(Base):
             self.restart_counter += 1
             self.log_error(str(error))
 
+
     def expanded_menu(self, element):
         expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
 
