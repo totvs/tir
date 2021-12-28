@@ -2894,7 +2894,7 @@ class WebappInternal(Base):
         while time.time() < endtime and expanded():
             self.wait_blocker()
             self.wait_element(term=".tmenu .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            label_expanded = menu.select('label')[0]
+            label_expanded = self.get_current_DOM().select(f"#{element.attrs['id']}")[0].select('label')[0]
             parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
