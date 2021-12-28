@@ -2888,8 +2888,7 @@ class WebappInternal(Base):
             self.log_error(str(error))
     
     def expanded_menu(self, element):
-        menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
-        expanded = lambda: True if "expanded" in menu.attrs['class'] else False
+        expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and expanded():
@@ -2901,8 +2900,6 @@ class WebappInternal(Base):
             self.wait_blocker()
             ActionChains(self.driver).move_to_element(parent_menu).click().perform()
             self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            self.wait_blocker()
-            menu = self.get_current_DOM().select(f"#{element.attrs['id']}")[0]
 
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
