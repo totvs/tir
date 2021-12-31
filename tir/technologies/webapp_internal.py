@@ -2319,6 +2319,11 @@ class WebappInternal(Base):
 
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(self.config.initial_program)
+
+                self.wait_user_screen()
+                if self.return_iframe('[class*="twebview"]'):
+                    self.config.poui_login = True
+
             self.user_screen()
             self.environment_screen()
 
@@ -2333,6 +2338,16 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.routine == 'Program':
                     self.set_program(self.config.routine)
+
+    def wait_user_screen(self):
+        
+        element = None
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+            
+            element = self.element_exists(term=".po-page-login-info-field .po-input", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
+            if not element:
+                element = self.element_exists(term="[name='cGetUser'] > input", main_container='body')
 
     def driver_refresh(self):
         """

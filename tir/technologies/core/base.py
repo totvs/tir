@@ -507,8 +507,8 @@ class Base(unittest.TestCase):
         """
         iframes = None
         iframe_displayed = None
-
-        while not iframes:
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not iframes:
             iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
 
             if iframes:
@@ -1134,3 +1134,9 @@ class Base(unittest.TestCase):
         for i, j in enumerate(combo.options):
             if j.text.lower() in option:
                 return i
+
+    def return_iframe(self, selector):
+        """
+        """
+        self.driver.switch_to_default_content()
+        return self.driver.find_elements_by_css_selector(selector)
