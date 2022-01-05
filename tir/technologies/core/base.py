@@ -20,7 +20,9 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOpt
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
 from datetime import datetime
@@ -1000,12 +1002,13 @@ class Base(unittest.TestCase):
             log_path = os.devnull
 
             firefox_options = FirefoxOpt()
-            firefox_options.set_headless(self.config.headless)
-            self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
+            firefox_options.headless = self.config.headless
+            service = FirefoxService(executable_path=driver_path, log_path=log_path)
+            self.driver = webdriver.Firefox(options=firefox_options, service=service)
         elif self.config.browser.lower() == "chrome":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             chrome_options = ChromeOpt()
-            chrome_options.set_headless(self.config.headless)
+            chrome_options.headless = self.config.headless
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')

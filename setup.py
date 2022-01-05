@@ -41,7 +41,7 @@ setup(
         'pandas==1.0.1',
         'python-dateutil',
         'pytz',
-        'selenium==3.8.0',
+        'selenium==4.1.0',
         'six',
         'enum34',
         'requests',
