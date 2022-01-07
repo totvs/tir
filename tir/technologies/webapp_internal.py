@@ -4194,7 +4194,7 @@ class WebappInternal(Base):
             try:
                 element = self.soup_to_selenium(element)
                 self.set_element_focus(element)
-                if self.driver.switch_to_active_element() != element:
+                if self.driver.switch_to.active_element != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
@@ -5272,7 +5272,7 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            return self.driver.switch_to.active_element
         except NoSuchElementException:
             return None
         except Exception as e:
