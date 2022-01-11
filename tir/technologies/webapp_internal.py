@@ -1425,7 +1425,7 @@ class WebappInternal(Base):
                             time.sleep(0.1)
                         old_value = self.search_browse_key_input_value(search_elements[1])
 
-                        if not self.driver.find_elements_by_css_selector(".tradiobuttonitem input"):
+                        if not self.driver.find_elements(by=By.CSS_SELECTOR, value=".tradiobuttonitem input"):
                             self.get_current_DOM()
                             self.set_element_focus(sel_browse_key())
                             self.click(sel_browse_key())
