@@ -2321,7 +2321,7 @@ class WebappInternal(Base):
                 self.program_screen(self.config.initial_program)
 
                 self.wait_user_screen()
-                if self.return_iframe('[class*="twebview"]'):
+                if self.config.json_data['POUILogin']:
                     self.config.poui_login = True
 
             self.user_screen()
@@ -2340,14 +2340,17 @@ class WebappInternal(Base):
                     self.set_program(self.config.routine)
 
     def wait_user_screen(self):
-        
+
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-            
-            element = self.element_exists(term=".po-page-login-info-field .po-input", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
-            if not element:
-                element = self.element_exists(term="[name='cGetUser'] > input", main_container='body')
+
+            if self.config.json_data['POUILogin']:
+                soup = self.get_current_DOM(twebview=True)
+                element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
+            else:
+                soup = self.get_current_DOM()
+                element = next(iter(soup.select("[name='cGetUser'] > input")), None)
 
     def driver_refresh(self):
         """
