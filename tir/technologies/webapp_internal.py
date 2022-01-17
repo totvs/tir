@@ -5731,7 +5731,7 @@ class WebappInternal(Base):
 
         if self.restart_counter > 2:
 
-            if self.config.num_exec and stack_item == "setUpClass" and self.log.checks_empty_line():
+            if self.config.num_exec and stack_item == "setUpClass" or stack_item == "tearDownClass" and self.log.checks_empty_line():
                 if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
