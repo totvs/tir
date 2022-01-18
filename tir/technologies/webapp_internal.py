@@ -222,7 +222,7 @@ class WebappInternal(Base):
 
             if save_input:
                 self.config.initial_program = initial_program
-                self.config.date = date
+                self.config.date = re.sub('([\d]{2}).?([\d]{2}).?([\d]{4})', r'\1/\2/\3', date)
                 self.config.group = group
                 self.config.branch = branch
                 self.config.module = module
@@ -248,6 +248,7 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
+            endtime = time.time() + self.config.time_out
             while(time.time() < endtime and (not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                 self.close_warning_screen()
                 self.close_coin_screen()
@@ -783,6 +784,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
 
+        self.wait_blocker()
         self.close_warning_screen()
         self.close_coin_screen()
         
@@ -968,6 +970,54 @@ class WebappInternal(Base):
             except Exception as e:
                 logger().exception(str(e))
 
+    def close_news_screen(self):
+        """
+        [Internal]
+
+        Closes the news do programa screen.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.close_news_screen()
+        """
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
+         optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False):
+            self.SetButton(self.language.close)
+
+    def close_news_screen_after_routine(self):
+        """
+        [internal]
+        This method is responsible for closing the "news screen" that opens after searching for the routine
+        """
+        endtime = time.time() + self.config.time_out
+
+        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout = self.config.time_out, main_container="body", check_error = False)
+
+        tmodaldialog_list = []
+
+        while(time.time() < endtime and not tmodaldialog_list):
+            try:
+                soup = self.get_current_DOM()
+                tmodaldialog_list = soup.select('.tmodaldialog')
+
+                self.wait_element_timeout(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
+                 optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
+                 
+                tmodal_news_screen = next(iter(self.web_scrap(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
+
+                if tmodal_news_screen and tmodal_news_screen in tmodaldialog_list:
+                    tmodaldialog_list.remove(tmodal_news_screen.parent.parent)
+                    
+                self.close_news_screen()
+                
+            except Exception as e:
+                logger().exception(str(e))
+
     def close_resolution_screen(self):
         """
         [Internal]
@@ -1142,10 +1192,12 @@ class WebappInternal(Base):
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
                 self.send_action(self.click, s_tget_img)
                 self.wait_element_is_not_displayed(tget_img)
+                self.close_news_screen()
 
             if self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
+                self.close_news_screen_after_routine()
 
         except AssertionError as error:
             logger().exception(f"Warning set program raise AssertionError: {str(error)}")
@@ -1943,6 +1995,10 @@ class WebappInternal(Base):
                 element = self.get_field("cAteCond", name_attr=True, direction=direction)
             else:
                 element = self.get_field(field, name_attr, position, direction=direction)
+
+            if element:
+                input_field = lambda : self.soup_to_selenium(element)
+                self.scroll_to_element(input_field())
 
             if not element or not self.element_is_displayed(element):
                 continue
@@ -5922,6 +5978,8 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
+        if restore_backup == True and self.parameters:
+            return
 
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
