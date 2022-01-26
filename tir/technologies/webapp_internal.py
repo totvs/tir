@@ -1955,7 +1955,9 @@ class WebappInternal(Base):
                 input_field = lambda : self.soup_to_selenium(element)
                 self.scroll_to_element(input_field())
 
-            if not element or not self.element_is_displayed(element):
+            element_displayed = element.parent if 'tcombobox' in element.parent.attrs['class'] else element
+
+            if not element or not self.element_is_displayed(element_displayed):
                 continue
 
             main_element = element
@@ -2011,12 +2013,22 @@ class WebappInternal(Base):
                             else:
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+
+                                try_counter = 1
+                                while (try_counter <= 3):
+                                    self.set_element_focus(input_field())
+                                    self.wait_until_to(expected_condition="element_to_be_clickable", element=element,
+                                                       locator=By.XPATH, timeout=True)
+                                    self.try_send_keys(input_field, main_value, try_counter)
+                                    current_number_value = self.get_web_value(input_field())
+                                    if self.remove_mask(current_number_value).strip() == main_value.strip():
+                                        break
+                                    try_counter += 1
+                                # ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
                         #if Number input
                         else:
-                            tries = 0
                             try_counter = 1
-                            while(tries < 3):
+                            while(try_counter <= 3):
                                 self.set_element_focus(input_field())
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
@@ -5566,11 +5578,11 @@ class WebappInternal(Base):
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
         
-        if try_counter == 0:
+        if try_counter == 1:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
-        elif try_counter == 1:
+        elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
