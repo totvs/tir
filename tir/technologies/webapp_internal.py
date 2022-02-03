@@ -2019,6 +2019,7 @@ class WebappInternal(Base):
                                     self.set_element_focus(input_field())
                                     self.wait_until_to(expected_condition="element_to_be_clickable", element=element,
                                                        locator=By.XPATH, timeout=True)
+                                    self.wait_blocker()
                                     self.try_send_keys(input_field, main_value, try_counter)
                                     current_number_value = self.get_web_value(input_field())
                                     if self.remove_mask(current_number_value).strip() == main_value.strip():
@@ -2031,6 +2032,7 @@ class WebappInternal(Base):
                             while(try_counter <= 3):
                                 self.set_element_focus(input_field())
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
+                                self.wait_blocker()
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if self.remove_mask(current_number_value).strip() == main_value:
