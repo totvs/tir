@@ -5581,7 +5581,7 @@ class WebappInternal(Base):
         if try_counter == 1:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            element_function().send_keys(key)
+            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
         elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
@@ -5589,7 +5589,7 @@ class WebappInternal(Base):
         else:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
+            element_function().send_keys(key)
 
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
