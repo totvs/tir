@@ -1,5 +1,6 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
+from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
 """
@@ -1365,3 +1366,211 @@ class Apw():
 
     def WaitModal(self, text, opcao="title"):
         self.__Apw.WaitModal(text, opcao)
+
+class Poui():
+
+    def __init__(self, config_path="", autostart=True):
+        self.__poui = PouiInternal(config_path, autostart)
+        self.__database = BaseDatabase(config_path, autostart=False)
+        self.config = ConfigLoader()
+        self.coverage = self.config.coverage
+
+    def ClickMenu(self, menu_item):
+        """
+        Clicks on the menu-item of the POUI component.
+        https://po-ui.io/documentation/po-menu
+
+        :param menu_item:Menu item name
+        :type menu_item: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickMenu("Contracts")
+        """
+        self.__poui.ClickMenu(menu_item)
+        
+    def InputValue(self, field='', value='', position=1):
+        """
+        Fill the POUI input component.
+        https://po-ui.io/documentation/po-input
+
+        :param field: Input text title that you want to fill
+        :type field: str
+        :param value: Value that fill in input
+        :type value: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.InputValue('Name', 'Test')
+        :return: None
+        """
+        self.__poui.InputValue(field, value, position)
+
+    def ClickCombo(self, field='', value='', position=1):
+        """
+        Clicks on the Combo of POUI component.
+        https://po-ui.io/documentation/po-combo
+
+        :param field: Combo text title that you want to click.
+        :param value: Value that you want to select in Combo.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCombo('Visão', 'Compras')
+        :return:
+        """
+        self.__poui.click_poui_component(field, value, position, selector="div > po-combo", container=True)
+
+    def ClickSelect(self, field='', value='', position=1):
+        """
+        Clicks on the Select of POUI component.
+        https://po-ui.io/documentation/po-select
+
+        :param field: Select text title that you want to click.
+        :param value: Value that you want to select in Select.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickSelect('Espécie', 'Compra')
+        :return:
+        """
+        self.__poui.click_poui_component(field, value, position, selector="div > po-select", container=True)
+
+    def ClickButton(self, button='', position=1):
+        """
+        Clicks on the Button of POUI component.
+        https://po-ui.io/documentation/po-button
+
+        :param field: Button to be clicked.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickButton('Cancelar')
+        :return:
+        """
+        self.__poui.click_button(button, position, selector="div > po-button", container=False)
+
+    def AssertFalse(self, expected=False, script_message=''):
+        """
+        Defines that the test case expects a False response to pass
+
+        Usage:
+
+        >>> #Instantiating the class
+        >>> inst.oHelper = Webapp()
+        >>> #Calling the method
+        >>> inst.oHelper.AssertFalse()
+        """
+        self.__poui.AssertFalse(expected, script_message)
+
+    def AssertTrue(self, expected=True, script_message=''):
+        """
+        Defines that the test case expects a True response to pass
+
+        Usage:
+
+        >>> #Calling the method
+        >>> inst.oHelper.AssertTrue()
+        """
+        self.__poui.AssertTrue(expected, script_message)
+
+    def ClickWidget(self, title='', action='', position=1):
+        """
+        Clicks on the Widget or Widget action of POUI component.
+        https://po-ui.io/documentation/po-widget
+
+        :param tittle: Widget text title that you want to click.
+        :param action: The name of action to be clicked
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        :return:
+        """
+        self.__poui.ClickWidget(title, action, position)
+
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> inst.oHelper.TearDown()
+        """
+        self.__poui.TearDown()
+        
+    def POSearch(self, content=''):
+        """
+        Fill the POUI Search component.
+        https://po-ui.io/documentation/po-page-dynamic-search
+
+        :param content: Content to be Search.
+        :type content: str
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.POSearch(content='Content to be Search')
+        :return: None
+        """
+        self.__poui.POSearch(content)
+
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
+        """
+        Clicks on the Table of POUI component.
+        https://po-ui.io/documentation/po-table
+
+        :param first_column: Column name to be used as reference.
+        :type first_column: str
+        :param second_column: Column name to be used as reference.
+        :type second_column: str
+        :param first_content: Content of the column to be searched.
+        :type first_content: str
+        :param second_content: Content of the column to be searched.
+        :type second_content: str
+        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type table_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
+        :param click_cell: Content to click based on a column position to close the axis
+        :type click_cell: str
+
+        >>> # Call the method:
+        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
+        :return: None
+        """
+
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
+        
+    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
+        """
+        Checks if a field has the value the user expects.
+
+        :param field: The field or label of a field that must be checked.
+        :type field: str
+        :param user_value: The value that the field is expected to contain.
+        :type user_value: str
+        :param po_component:  POUI component name that you want to check content on screen
+        :type po_component: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Calling method to check a value of a field:
+        >>> oHelper.CheckResult("Código", "000001", 'po-input')
+
+        """
+        self.__poui.CheckResult(field, user_value, po_component, position)

@@ -51,6 +51,11 @@ class Base(unittest.TestCase):
     >>> def WebappInternal(Base):
     >>> def APWInternal(Base):
     """
+
+    driver = None
+    wait = None
+    errors = []
+    
     def __init__(self, config_path="", autostart=True):
         """
         Definition of each global variable:
@@ -94,7 +99,6 @@ class Base(unittest.TestCase):
             self.log.user = getpass.getuser()
 
         self.base_container = "body"
-        self.errors = []
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False
@@ -332,7 +336,7 @@ class Base(unittest.TestCase):
         else:
             return len(element_list) >= position
 
-    def filter_displayed_elements(self, elements, reverse=False):
+    def filter_displayed_elements(self, elements, reverse=False, twebview=False):
         """
         [Internal]
 
@@ -354,6 +358,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.filter_displayed_elements(elements, True)
         """
+
+        if twebview:
+            self.switch_to_iframe()
         #0 - elements filtered
         elements = list(filter(lambda x: self.soup_to_selenium(x) is not None ,elements ))
         if not elements:
@@ -432,7 +439,7 @@ class Base(unittest.TestCase):
         else:
             return []
 
-    def get_current_DOM(self):
+    def get_current_DOM(self, twebview=False):
         """
         [Internal]
 
@@ -447,17 +454,20 @@ class Base(unittest.TestCase):
         >>> soup = self.get_current_DOM()
         """
 
+        self.twebview_context = twebview
+
+        self.driver.switch_to.default_content()
+
         if self.config.new_log:
             self.execution_flow()
+            
 
         try:
-
+            
             if self.twebview_context:
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="COMP3010"]')))
-                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '//*[@id="COMP3010"]'))
+                self.switch_to_iframe()
                 self.twebview_context = False
                 return BeautifulSoup(self.driver.page_source, "html.parser")
-
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
@@ -489,6 +499,25 @@ class Base(unittest.TestCase):
             self.driver.switch_to.default_content()
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
             return soup
+
+    def switch_to_iframe(self):
+        """
+        [Internal]
+        :return:
+        """
+        iframes = None
+        iframe_displayed = None
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not iframes:
+            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
+
+            if iframes:
+                iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+            else:
+                self.driver.switch_to.default_content()
+
+            if iframe_displayed:
+                self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """
@@ -797,7 +826,7 @@ class Base(unittest.TestCase):
             pass
     
 
-    def soup_to_selenium(self, soup_object):
+    def soup_to_selenium(self, soup_object=None, twebview=False):
         """
         [Internal]
 
@@ -814,6 +843,9 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
+        if twebview:
+            self.switch_to_iframe()
+
         if soup_object is None:
             raise AttributeError
         return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
@@ -1102,3 +1134,9 @@ class Base(unittest.TestCase):
         for i, j in enumerate(combo.options):
             if j.text.lower() in option:
                 return i
+
+    def return_iframe(self, selector):
+        """
+        """
+        self.driver.switch_to_default_content()
+        return self.driver.find_elements_by_css_selector(selector)
