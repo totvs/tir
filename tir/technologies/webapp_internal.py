@@ -256,9 +256,14 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
+            if self.webapp_shadowroot():
+                term = '.dict-tmenu'
+            else:
+                term = '.tmenu'
+
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and (
-            not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+            not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                 self.close_warning_screen()
                 self.close_coin_screen()
                 self.close_modal()
@@ -3358,22 +3363,32 @@ class WebappInternal(Base):
 
     def set_button_x(self, position=1, check_error=True):
         position -= 1
-        term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
-        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
-        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
+        if self.webapp_shadowroot():
+            term_button = "wa-dialog"
+            soup = self.get_current_DOM()
+        else:
+            term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
+
+            wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position,
+                                            check_error=check_error)
+            soup = self.get_current_DOM() if not wait_button else self.get_current_container()
 
         close_list = soup.select(term_button)
         if not close_list:
             self.log_error(f"Element not found")
-        if len(close_list) < position+1:
+        if len(close_list) < position + 1:
             self.log_error(f"Element x position: {position} not found")
         if position == 0:
             element_soup = close_list.pop()
         else:
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
+        if self.webapp_shadowroot():
+            element_selenium = self.driver.execute_script(
+                "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')",
+                element_selenium)
         self.scroll_to_element(element_selenium)
-        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element_soup, locator = By.XPATH )
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
 
         self.click(element_selenium)
 
