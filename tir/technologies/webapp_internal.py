@@ -4745,7 +4745,7 @@ class WebappInternal(Base):
                         self.set_element_focus(selenium_column())
 
                         soup = self.get_current_DOM()
-                        tmodal_list = soup.select('.tmodaldialog')
+                        tmodal_list = soup.select('.tmodaldialog') if  self.grid_memo_field else soup.select('.tmodaldialog.twidget.borderless')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                         if self.grid_memo_field:
@@ -7894,17 +7894,21 @@ class WebappInternal(Base):
                 span_label = next(iter(po_select.select('span')), None)
                 if span_label:
                     language = self.return_select_language()
-                    if not span_label.text.lower() in language:
-                        self.set_language_poui(language, po_select)
+                    if language:
+                        if not span_label.text.lower() in language:
+                            self.set_language_poui(language, po_select)
 
-        elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
+        elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
+                                 check_error=False):
 
-            tcombobox = next(iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
+            tcombobox = next(
+                iter(self.web_scrap(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
             selects = next(iter(tcombobox.select('select')))
 
             language = self.return_select_language()
 
-            self.select_combo(selects, language, index=True)
+            if language:
+                self.select_combo(selects, language, index=True)
 
     def set_language_poui(self, language, container):
 
@@ -7915,17 +7919,23 @@ class WebappInternal(Base):
 
             container_ul = next(iter(container.select('ul')), None)
             if container_ul:
-                item = next(iter(list(filter(lambda x: x.text.lower() in language ,container_ul.select('li')))), None)
+                item = next(iter(list(filter(lambda x: x.text.lower() in language, container_ul.select('li')))), None)
                 element = self.soup_to_selenium(item)
                 element.click()
 
     def return_select_language(self):
 
-        if self.config.language == 'pt-br':
+        language = None
+
+        config_language = None
+
+        config_language = self.config.language.lower().strip()
+
+        if config_language == 'pt-br':
             language = ['português', 'portugués', 'portuguese']
-        elif self.config.language == 'es-es':
+        elif config_language == 'es-es':
             language = ['espanhol', 'español', 'spanish']
-        elif self.config.language == 'en-us':
+        elif config_language == 'en-us':
             language = ['inglês', 'inglés', 'english']
 
         return language
