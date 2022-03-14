@@ -3207,6 +3207,7 @@ class WebappInternal(Base):
             script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
+
     def slm_click_last_item(self, sub_menu_child_label):
         """
         [Internal]
