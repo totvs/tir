@@ -3037,39 +3037,65 @@ class WebappInternal(Base):
         if save_input:
             self.routine = 'SetLateralMenu'
             self.config.routine = menu_itens
+        
+
+        if self.webapp_shadowroot():
+            menu_term = ".dict-tmenu"
+            menu_itens_term = ".dict-tmenuitem"
+        else:
+            menu_term = ".tmenu"
+            menu_itens_term = ".tmenuitem"
+
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
-        self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
         menu_itens = list(map(str.strip, menu_itens.split(">")))
+
+        self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        if not self.webapp_shadowroot():
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform() 
+        self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
         soup = self.get_current_DOM()
 
-        menu_xpath = soup.select(".tmenu")
-
+        menu_xpath = soup.select(menu_term)
         menu = menu_xpath[0]
         child = menu
         count = 0
+        selenium_menu_element= lambda: self.soup_to_selenium(menu)
+
         try:
             for menuitem in menu_itens:
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
-                self.wait_until_to(expected_condition="element_to_be_clickable", element = ".tmenu", locator=By.CSS_SELECTOR )
-                self.wait_until_to(expected_condition="presence_of_all_elements_located", element = ".tmenu .tmenuitem", locator = By.CSS_SELECTOR )
-                menuitem_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=".tmenuitem", main_container="body")
-                if not menuitem_presence and submenu:
+                self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
+
+                if self.webapp_shadowroot():
+                    menu_item_presence = self.find_child_element(menu_itens_term, selenium_menu_element())
+                    subMenuElements = list(filter(lambda x: x.is_displayed(), menu_item_presence))
+                else:
+                    self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
+                    menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body")
+                    subMenuElements = menu.select(menu_itens_term)
+                    subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+
+                if not menu_item_presence and submenu:
                     submenu().click()
-                subMenuElements = menu.select(".tmenuitem")
-                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
-                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
+
+                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", menu_itens_term):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
-                    subMenuElements = menu.select(".tmenuitem")
-                    if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(".tmenu", ".tmenuitem")):
+                    subMenuElements = menu.select(menu_itens_term)
+                    if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
-                child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
-                submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+
+                if self.webapp_shadowroot():
+                    child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                    submenu = lambda: list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))[0]
+                else:
+                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))[0]
+                    submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+
                 if subMenuElements and submenu():
                     self.expanded_menu(child)
                     self.scroll_to_element(submenu())
@@ -3077,7 +3103,7 @@ class WebappInternal(Base):
                     self.wait_blocker()
                     ActionChains(self.driver).move_to_element(submenu()).click().perform()
                     if count < len(menu_itens) - 1:
-                        self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=".tmenuitem", main_container="body")
+                        self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body")
                         menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                 else:
                     self.restart_counter += 1
@@ -3172,7 +3198,13 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.children_element_count(".tmenu", ".tmenuitem")
         """
-        script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
+        if self.webapp_shadowroot():
+            element = self.get_current_DOM().select(f'{element_selector}')
+            element_selenium = self.soup_to_selenium(element[0])
+            script = len(self.find_child_element(element_selector, element_selenium))
+            return int(script)
+        else:
+            script = f"return document.querySelector('{element_selector}').querySelectorAll('{children_selector}').length;"
         return int(self.driver.execute_script(script))
 
     def slm_click_last_item(self, sub_menu_child_label):
@@ -3189,8 +3221,6 @@ class WebappInternal(Base):
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
                 logger().warning(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
-
-
 
 
     def SetButton(self, button, sub_item="", position=1, check_error=True):
@@ -7982,3 +8012,28 @@ class WebappInternal(Base):
     def webapp_shadowroot(self):
 
         return self.driver.execute_script("return app.VERSION").split('-')[0] >= "8.0.0"
+
+
+    def find_child_element(self, term, selenium_element):
+        """
+        Waits and find for elements and returns a list of elements found
+
+        >>> # Calling the method:
+        >>> find_element(".dict-tmenuitem", selenium_element)
+        """
+        elements = []
+        term = term.split('.')[1].strip()
+
+        endtime = time.time() + self.config.time_out
+        while not elements and time.time() < endtime:
+            if self.webapp_shadowroot():
+                element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.{term}')", element_dom)
+            else:
+                elements = selenium_element.find_elements_by_class_name(term)
+        if elements:
+            return elements
+        else:
+            message = "Couldn't find child element."
+            self.log_error(message)
+            raise ValueError(message)
