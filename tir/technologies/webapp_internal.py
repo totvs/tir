@@ -1155,6 +1155,7 @@ class WebappInternal(Base):
             time.sleep(1)
         self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out, main_container='body')
 
+
     def set_log_info(self):
         """
         [Internal]
@@ -1165,33 +1166,47 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
+
+        if self.webapp_shadowroot():
+            term_dialog = 'wa-dialog'
+        else:
+            term_dialog = '.tmodaldialog'
+
         self.SetLateralMenu(self.language.menu_about, save_input=False)
-        self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = ".tmodaldialog", locator= By.CSS_SELECTOR)
+        self.wait_element(term=term_dialog, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = term_dialog, locator= By.CSS_SELECTOR)
 
         soup = self.get_current_DOM()
-        labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
+        if self.webapp_shadowroot():
+            labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
+            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
 
-        release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
-        database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
-        lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
-        build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
+        else:
+            labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
+            release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
+            build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
 
         if release_element:
-            release = release_element.text.split(":")[1].strip()
+            release = release_element.text.split(":")[1].strip() if release_element.text else release_element.attrs['caption'].split(":")[1].strip()
             self.log.release = release
             self.log.version = release.split(".")[0]
 
         if database_element:
-            self.log.database = database_element.text.split(":")[1].strip()
+            self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
 
         if build_element:
-            self.log.build_version = build_element.text.split(":")[1].strip()
+            self.log.build_version = build_element.text.split(":")[1].strip() if build_element.text else build_element.attrs['caption'].split(":")[1].strip()
 
         if lib_element:
-            self.log.lib_version = lib_element.text.split(":")[1].strip()
+            self.log.lib_version = lib_element.text.split(":")[1].strip() if lib_element.text else lib_element.attrs['caption'].split(":")[1].strip()
 
         self.SetButton(self.language.close)
+
 
     def set_log_info_tss(self):
 
