@@ -8036,13 +8036,12 @@ class WebappInternal(Base):
         >>> find_element(".dict-tmenuitem", selenium_element)
         """
         elements = []
-        term = term.split('.')[1].strip()
 
         endtime = time.time() + self.config.time_out
         while not elements and time.time() < endtime:
             if self.webapp_shadowroot():
                 element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.{term}')", element_dom)
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
             else:
                 elements = selenium_element.find_elements_by_class_name(term)
         if elements:
