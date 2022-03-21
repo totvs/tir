@@ -7,7 +7,7 @@ import random
 import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -1000,10 +1000,16 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_coin_screen()
         """
+
+        if self.webapp_shadowroot():
+            selector = "wa-dialog > wa-panel > wa-text-view"
+        else:
+            selector = "tmodaldialog > .tpanel > .tsay"
+
         soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-         optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False):
+        optional_term=selector, main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
 
     def close_coin_screen_after_routine(self):
@@ -1155,6 +1161,7 @@ class WebappInternal(Base):
             time.sleep(1)
         self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out, main_container='body')
 
+
     def set_log_info(self):
         """
         [Internal]
@@ -1165,33 +1172,47 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
+
+        if self.webapp_shadowroot():
+            term_dialog = 'wa-dialog'
+        else:
+            term_dialog = '.tmodaldialog'
+
         self.SetLateralMenu(self.language.menu_about, save_input=False)
-        self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = ".tmodaldialog", locator= By.CSS_SELECTOR)
+        self.wait_element(term=term_dialog, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = term_dialog, locator= By.CSS_SELECTOR)
 
         soup = self.get_current_DOM()
-        labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
+        if self.webapp_shadowroot():
+            labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
+            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
 
-        release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
-        database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
-        lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
-        build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
+        else:
+            labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
+            release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
+            build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
 
         if release_element:
-            release = release_element.text.split(":")[1].strip()
+            release = release_element.text.split(":")[1].strip() if release_element.text else release_element.attrs['caption'].split(":")[1].strip()
             self.log.release = release
             self.log.version = release.split(".")[0]
 
         if database_element:
-            self.log.database = database_element.text.split(":")[1].strip()
+            self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
 
         if build_element:
-            self.log.build_version = build_element.text.split(":")[1].strip()
+            self.log.build_version = build_element.text.split(":")[1].strip() if build_element.text else build_element.attrs['caption'].split(":")[1].strip()
 
         if lib_element:
-            self.log.lib_version = lib_element.text.split(":")[1].strip()
+            self.log.lib_version = lib_element.text.split(":")[1].strip() if lib_element.text else lib_element.attrs['caption'].split(":")[1].strip()
 
         self.SetButton(self.language.close)
+
 
     def set_log_info_tss(self):
 
@@ -3273,7 +3294,11 @@ class WebappInternal(Base):
                 self.set_button_x(position, check_error)
                 return
             else:
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", timeout=10, step=0.1, check_error=check_error)
+                if self.webapp_shadowroot():
+                    selector="wa-button
+                else:
+                    selector="button, .thbutton"
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=selector, timeout=10, step=0.1, check_error=check_error)
                 position -= 1
 
             layers = 0
@@ -3289,15 +3314,21 @@ class WebappInternal(Base):
                 system_info()
 
             while(time.time() < endtime and not soup_element):
-                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
-                soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+                if self.webapp_shadowroot():
+                    term_button = "wa-button"
+                    soup = self.get_current_DOM()
+                    soup_element = soup.find(term_button, attrs={"caption": button})
+                    soup_element = self.soup_to_selenium(soup_element)
+                else:
+                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
+                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
+                    if soup_objects and len(soup_objects) - 1 >= position:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
+                        soup_element = lambda : self.soup_to_selenium(soup_objects[position])
 
-                if soup_objects and len(soup_objects) - 1 >= position:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
-                    soup_element = lambda : self.soup_to_selenium(soup_objects[position])
-                    parent_element = self.soup_to_selenium(soup_objects[0].parent)
-                    id_parent_element = parent_element.get_attribute('id')
+                        parent_element = self.soup_to_selenium(soup_objects[0].parent)
+                        id_parent_element = parent_element.get_attribute('id')
 
             if self.config.smart_test:
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
@@ -3319,14 +3350,17 @@ class WebappInternal(Base):
                     self.log_error(f"Element {button} not found!")
 
             if soup_element:
-                self.scroll_to_element(soup_element())
-                self.set_element_focus(soup_element())
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
-                    self.click(soup_element())
+                if self.webapp_shadowroot():
+                    self.click(soup_element)
                 else:
-                    self.send_action(self.click, soup_element)
-                self.wait_element_is_not_focused(soup_element)
+                    self.scroll_to_element(soup_element())
+                    self.set_element_focus(soup_element())
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
+                    if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
+                        self.click(soup_element())
+                    else:
+                        self.send_action(self.click, soup_element)
+                    self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
                 if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
@@ -3357,6 +3391,11 @@ class WebappInternal(Base):
                     else:
                         self.log_error(f"Couldn't find element {button}")
 
+                    if self.webapp_shadowroot():
+                        element_selenium = self.driver.execute_script(
+                            "return arguments[0].shadowRoot.querySelector('wa-panel').shadowRoot.querySelector('button')",
+                            element_selenium)
+            
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
@@ -3389,7 +3428,7 @@ class WebappInternal(Base):
             if button == self.language.save and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
-            elif button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
+            elif not self.webapp_shadowroot() and button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
         except ValueError as error:
@@ -5610,7 +5649,7 @@ class WebappInternal(Base):
                         pass
 
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body", check_error=True, twebview=False):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -7111,7 +7150,11 @@ class WebappInternal(Base):
         [Internal]
 
         """
-        element_selenium = self.soup_to_selenium(element)
+        if type(element) == Tag:
+            element_selenium = self.soup_to_selenium(element)
+        else:
+            element_selenium = element
+
         if element_selenium:
             return element_selenium.is_displayed()
         else:
