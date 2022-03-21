@@ -1278,6 +1278,7 @@ class WebappInternal(Base):
             self.log.program = program_name
         self.set_program(program_name)
 
+
     def set_program(self, program):
         """
         [Internal]
@@ -1294,27 +1295,44 @@ class WebappInternal(Base):
         """
         try:
             logger().info(f"Setting program: {program}")
-            self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            self.wait_element(term="[name=cGet] > input", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
+            if self.webapp_shadowroot():
+                cGet_term = "[name=cGet][class=dict-tget]"
+            else:
+                cGet_term = "[name=cGet] > input"
+                self.wait_element(term=cGet_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+
+
+            self.wait_element(term=cGet_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
             tget = next(iter(soup.select("[name=cGet]")), None)
-            tget_input = next(iter(tget.select("input")), None)
             if tget:
-                tget_img = next(iter(tget.select("img")), None)
+                if self.webapp_shadowroot():
+                    tget_img = next(iter(tget.select(".button-image")), None)
+                    s_tget_img = lambda: self.soup_to_selenium(tget_img)
 
-                if tget_img is None or not self.element_is_displayed(tget_img):
-                    self.log_error("Couldn't find Program field.")
+                    s_tget = lambda: self.soup_to_selenium(tget)
+                    tget_input = self.find_child_element('input', s_tget())[0]
+                else:
+                    tget_input = next(iter(tget.select("input")), None)
+                    tget_img = next(iter(tget.select("img")), None)
+                    if tget_img is None or not self.element_is_displayed(tget_img):
+                        self.log_error("Couldn't find Program field.")
+                    s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
+                    s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
-                s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
-
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
                 self.double_click(s_tget())
                 self.set_element_focus(s_tget())
                 self.send_keys(s_tget(), Keys.HOME)
                 ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+
+                if self.webapp_shadowroot():
+                    self.find_child_element('input', s_tget())
+                else:
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+
                 self.send_keys(s_tget(), program)
                 current_value = self.get_web_value(s_tget()).strip()
 
@@ -1328,7 +1346,12 @@ class WebappInternal(Base):
                 if current_value.strip() != program.strip():
                     self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
                 self.set_element_focus(s_tget_img())
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+
+                if self.webapp_shadowroot():
+                    self.find_child_element('input', s_tget())
+                else:
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
                 self.send_action(self.click, s_tget_img)
                 self.wait_element_is_not_displayed(tget_img)
@@ -1344,6 +1367,7 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             self.log_error(str(e))
+
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -3092,6 +3116,7 @@ class WebappInternal(Base):
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
 
                 if self.webapp_shadowroot():
+                    #TODO ShadowRoot Desvio, nao compatibilidade do metodo self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
                     if menu_parent:
                         menu_item_presence = self.find_child_element(menu_itens_term, menu_parent)
                     else:
@@ -3124,6 +3149,7 @@ class WebappInternal(Base):
                     self.scroll_to_element(submenu())
 
                     if self.webapp_shadowroot():
+                        #TODO ShadowRoot Desvio, nao compatibilidade do metodo( expected_condition = "element_to_be_clickable", element = child, locator = By.XPATH )
                         self.wait_blocker()
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
@@ -3133,7 +3159,7 @@ class WebappInternal(Base):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():
+                        if not self.webapp_shadowroot(): #TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                 else:
@@ -3195,18 +3221,28 @@ class WebappInternal(Base):
 
 
     def expanded_menu(self, element):
-        expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
+        if self.webapp_shadowroot():
+            expanded = lambda: True if "expanded" in element.get_attribute('class') else False
+            tmenu_term = '.dict-tmenu'
+        else:
+            expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
+            tmenu_term = '.tmenu'
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and expanded():
             self.wait_blocker()
-            self.wait_element(term=".tmenu .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            label_expanded = self.get_current_DOM().select(f"#{element.attrs['id']}")[0].select('label')[0]
-            parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
+            if self.webapp_shadowroot():
+                self.find_child_element('.dict-tmenuitem', element)
+                parent_menu = element
+            else:
+                self.wait_element(term=f"{tmenu_term} .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                label_expanded = self.get_current_DOM().select(f"#{element.attrs['id']}")[0].select('label')[0]
+                parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
             ActionChains(self.driver).move_to_element(parent_menu).click().perform()
-            self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_element(term=tmenu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
 
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
@@ -8085,6 +8121,7 @@ class WebappInternal(Base):
             if self.webapp_shadowroot():
                 element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
             else:
                 elements = selenium_element.find_elements_by_class_name(term)
         if elements:
