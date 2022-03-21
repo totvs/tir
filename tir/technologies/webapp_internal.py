@@ -3295,7 +3295,7 @@ class WebappInternal(Base):
                 return
             else:
                 if self.webapp_shadowroot():
-                    selector="wa-button
+                    selector="wa-button"
                 else:
                     selector="button, .thbutton"
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=selector, timeout=10, step=0.1, check_error=check_error)
@@ -3326,7 +3326,6 @@ class WebappInternal(Base):
                     if soup_objects and len(soup_objects) - 1 >= position:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
                         soup_element = lambda : self.soup_to_selenium(soup_objects[position])
-
                         parent_element = self.soup_to_selenium(soup_objects[0].parent)
                         id_parent_element = parent_element.get_attribute('id')
 
@@ -3351,6 +3350,10 @@ class WebappInternal(Base):
 
             if soup_element:
                 if self.webapp_shadowroot():
+                    self.scroll_to_element(soup_element)
+                    self.set_element_focus(soup_element)
+                    wait_until_element = soup.find(term_button, attrs={"caption": button})
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = wait_until_element, locator = By.XPATH)
                     self.click(soup_element)
                 else:
                     self.scroll_to_element(soup_element())
