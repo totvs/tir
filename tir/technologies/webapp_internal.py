@@ -3195,18 +3195,28 @@ class WebappInternal(Base):
 
 
     def expanded_menu(self, element):
-        expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
+        if self.webapp_shadowroot():
+            expanded = lambda: True if "expanded" in element.get_attribute('class') else False
+            tmenu_term = '.dict-tmenu'
+        else:
+            expanded = lambda: True if "expanded" in self.get_current_DOM().select(f"#{element.attrs['id']}")[0].attrs['class'] else False
+            tmenu_term = '.tmenu'
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and expanded():
             self.wait_blocker()
-            self.wait_element(term=".tmenu .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            label_expanded = self.get_current_DOM().select(f"#{element.attrs['id']}")[0].select('label')[0]
-            parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
+            if self.webapp_shadowroot():
+                self.find_child_element('.dict-tmenuitem', element)
+                parent_menu = element
+            else:
+                self.wait_element(term=f"{tmenu_term} .tmenuitem", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                label_expanded = self.get_current_DOM().select(f"#{element.attrs['id']}")[0].select('label')[0]
+                parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
             ActionChains(self.driver).move_to_element(parent_menu).click().perform()
-            self.wait_element(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_element(term=tmenu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
 
     def tmenuitem_element(self, menu):
         subMenuElements = menu.select(".tmenuitem")
@@ -8085,6 +8095,7 @@ class WebappInternal(Base):
             if self.webapp_shadowroot():
                 element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
             else:
                 elements = selenium_element.find_elements_by_class_name(term)
         if elements:
