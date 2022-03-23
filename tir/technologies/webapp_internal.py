@@ -3354,6 +3354,8 @@ class WebappInternal(Base):
                     term_button = "wa-button"
                     soup = self.get_current_DOM()
                     soup_element = soup.find(term_button, attrs={"caption": button})
+                    if not soup_element:
+                        soup_element = soup.find(term_button, attrs={"caption": "<u>"+button[0:1]+"</u>"+button[1:len(button)]})
                     soup_element = self.soup_to_selenium(soup_element)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -3389,6 +3391,8 @@ class WebappInternal(Base):
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
                     wait_until_element = soup.find(term_button, attrs={"caption": button})
+                    if not wait_until_element:
+                        wait_until_element = soup.find(term_button, attrs={"caption": "<u>"+button[0:1]+"</u>"+button[1:len(button)]})
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = wait_until_element, locator = By.XPATH)
                     self.click(soup_element)
                 else:
