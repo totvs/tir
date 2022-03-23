@@ -1012,28 +1012,37 @@ class WebappInternal(Base):
         optional_term=selector, main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
 
+
     def close_coin_screen_after_routine(self):
         """
         [internal]
         This method is responsible for closing the "coin screen" that opens after searching for the routine
         """
-        endtime = time.time() + self.config.time_out
+        if self.webapp_shadowroot():
+            dialog_term = 'wa-tab-page > wa-dialog'
+            workspace_term = 'wa-tab-page > wa-dialog'
+            coin_term = f'wa-dialog > .dict-tpanel > [caption ={self.language.coins}]'
+        else:
+            dialog_term = '.tmodaldialog'
+            workspace_term = '.workspace-container'
+            coin_term = '.tmodaldialog > .tpanel > .tsay'
 
-        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+        self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
             timeout = self.config.time_out, main_container="body", check_error = False)
 
         tmodaldialog_list = []
 
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
-                tmodaldialog_list = soup.select('.tmodaldialog')
+                tmodaldialog_list = soup.select(dialog_term)
 
                 self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
+                 optional_term=coin_term, timeout=10, main_container = "body", check_error = False)
 
                 tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
+                    optional_term=coin_term, main_container="body", check_error = False, check_help = False)), None)
 
                 if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
@@ -1042,6 +1051,7 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(str(e))
+
 
     def close_warning_screen(self):
         """
