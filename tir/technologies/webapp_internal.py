@@ -3652,7 +3652,12 @@ class WebappInternal(Base):
         >>> oHelper.SetBranch("D MG 01 ")
         """
         logger().info(f"Setting branch: {branch}.")
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
+
+        if self.webapp_shadowroot():
+            term = '.dict-tpanel'
+        else:
+            term = "[style*='fwskin_seekbar_ico']"
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
         Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
             self.SetButton('OK')
