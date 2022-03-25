@@ -1749,6 +1749,7 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -1768,12 +1769,15 @@ class WebappInternal(Base):
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
         self.wait_blocker()
-        endtime = time.time() + self.config.time_out
+
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
+        if self.webapp_shadowroot():
+          sel_browse_input = lambda: self.find_child_element('input', sel_browse_input())[0]
 
         current_value = self.get_element_value(sel_browse_input())
 
+        endtime = time.time() + self.config.time_out
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
@@ -1796,6 +1800,7 @@ class WebappInternal(Base):
         self.wait_blocker()
         self.double_click(sel_browse_icon())
         return True
+
 
     def search_browse_key_input_value(self, browse_input ):
         """
