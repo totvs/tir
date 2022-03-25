@@ -1511,6 +1511,7 @@ class WebappInternal(Base):
             self.search_browse_column(column, browse_elements, index)
         self.fill_search_browse(term, browse_elements)
 
+
     def get_search_browse_elements(self, panel_name=None):
         """
         [Internal]
@@ -1529,6 +1530,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
+        if self.webapp_shadowroot():
+            dialog_term = 'wa-tab-page > wa-dialog'
+        else:
+            dialog_term = '.tmodaldialog'
+
         success = False
         container = None
         elements_soup = None
@@ -1539,7 +1545,7 @@ class WebappInternal(Base):
         while (time.time() < endtime and not success):
             soup = self.get_current_DOM()
             search_index = self.get_panel_name_index(panel_name) if panel_name else 0
-            containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True)
+            containers = self.zindex_sort(soup.select(dialog_term), reverse=True)
             container = next(iter(containers), None)
 
             if container:
@@ -1547,7 +1553,10 @@ class WebappInternal(Base):
 
             if elements_soup:
                 if elements_soup and len(elements_soup) -1 >= search_index:
-                    browse_div = elements_soup[search_index].find_parent().find_parent()
+                    if self.webapp_shadowroot():
+                        browse_div = elements_soup[search_index].find_parent()
+                    else:
+                        browse_div = elements_soup[search_index].find_parent().find_parent()
                     success = True
 
         if not elements_soup:
@@ -1559,12 +1568,19 @@ class WebappInternal(Base):
         if not success:
             self.log_error("Get search browse elements couldn't find browser div")
 
-        browse_tget = browse_div.select(".tget")[0]
-        browse_key = browse_div.select(".tbutton button")[0]
-        browse_input = browse_tget.select("input")[0]
-        browse_icon = browse_tget.select("img")[0]
+        if self.webapp_shadowroot():
+            browse_tget = browse_div.select(".dict-tget")[0]
+            browse_key = browse_div.select(".dict-tbutton")[0]
+            browse_input = browse_tget
+            browse_icon = browse_tget.select(".button-image")[0]
+        else:
+            browse_tget = browse_div.select(".tget")[0]
+            browse_key = browse_div.select(".tbutton button")[0]
+            browse_input = browse_tget.select("input")[0]
+            browse_icon = browse_tget.select("img")[0]
 
         return (browse_key, browse_input, browse_icon)
+
 
     def search_browse_key(self, search_key, search_elements, index=False):
         """
@@ -1749,6 +1765,7 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -1768,12 +1785,15 @@ class WebappInternal(Base):
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
         self.wait_blocker()
-        endtime = time.time() + self.config.time_out
+
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
+        if self.webapp_shadowroot():
+          sel_browse_input = lambda: self.find_child_element('input', sel_browse_input())[0]
 
         current_value = self.get_element_value(sel_browse_input())
 
+        endtime = time.time() + self.config.time_out
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
@@ -1796,6 +1816,7 @@ class WebappInternal(Base):
         self.wait_blocker()
         self.double_click(sel_browse_icon())
         return True
+
 
     def search_browse_key_input_value(self, browse_input ):
         """
