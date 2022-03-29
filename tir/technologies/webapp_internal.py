@@ -3117,6 +3117,7 @@ class WebappInternal(Base):
         else:
             return len(element_list) >= position
 
+
     def SetLateralMenu(self, menu_itens, save_input=True):
         """
         Navigates through the lateral menu using provided menu path.
