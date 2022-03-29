@@ -1805,8 +1805,6 @@ class WebappInternal(Base):
 
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
-        if self.webapp_shadowroot():
-          sel_browse_input = lambda: self.find_child_element('input', sel_browse_input())[0]
 
         current_value = self.get_element_value(sel_browse_input())
 
@@ -1818,7 +1816,7 @@ class WebappInternal(Base):
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
-                sel_browse_input().clear()
+                sel_browse_input().clear() if not self.webapp_shadowroot() else self.find_child_element('input', sel_browse_input())[0].clear
                 self.set_element_focus(sel_browse_input())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
