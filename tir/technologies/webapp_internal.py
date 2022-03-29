@@ -8172,23 +8172,27 @@ class WebappInternal(Base):
         return self.driver.execute_script("return app.VERSION").split('-')[0] >= "8.0.0"
 
 
-    def find_child_element(self, term, selenium_element):
+    def find_child_element(self, term, element):
         """
-        Waits and find for elements and returns a list of elements found
+        Waits and find for shadow elements in a beautiful soup object and returns a list of elements found
 
         >>> # Calling the method:
-        >>> find_element(".dict-tmenuitem", selenium_element)
+        >>> find_element(".dict-tmenuitem", bs4_element)
         """
         elements = []
 
         endtime = time.time() + self.config.time_out
         while not elements and time.time() < endtime:
             if self.webapp_shadowroot():
-                element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
-                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                try:
+                    element_dom = self.soup_to_selenium(self.get_current_DOM()) if not element else self.soup_to_selenium(element)
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                except:
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
             else:
-                elements = selenium_element.find_elements_by_class_name(term)
+                elements = element.find_elements_by_class_name(term)
         if elements:
             return elements
         else:
