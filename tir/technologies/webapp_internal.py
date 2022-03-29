@@ -1603,13 +1603,21 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
-        success = False
 
+        if self.webapp_shadowroot():
+            main_container = 'wa-dialog'
+            radio_term = '.dict-tradmenu'
+        else:
+            main_container = '.tmodaldialog,.ui-dialog'
+            radio_term = '.tradiobuttonitem input'
+
+        success = False
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
@@ -1625,18 +1633,27 @@ class WebappInternal(Base):
 
             search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = soup.select(".tradiobuttonitem input")
-            tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-            tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+            tradiobuttonitens = soup.select(radio_term)
+            if self.webapp_shadowroot():
+                tradiobuttonitens = self.find_child_element('.radioitem', tradiobuttonitens[0])
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
+            else:
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
-                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                if radio:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(radio))
-                    success = True
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
+                if self.webapp_shadowroot():
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    radio.find_element_by_tag_name('input').click()
+                else:
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    if radio:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(radio))
+                success = True
 
+            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
 
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
