@@ -1782,7 +1782,6 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
 
-
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
