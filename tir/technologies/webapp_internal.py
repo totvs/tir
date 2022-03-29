@@ -1603,13 +1603,21 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
-        success = False
 
+        if self.webapp_shadowroot():
+            main_container = 'wa-dialog'
+            radio_term = '.dict-tradmenu'
+        else:
+            main_container = '.tmodaldialog,.ui-dialog'
+            radio_term = '.tradiobuttonitem input'
+
+        success = False
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
@@ -1625,18 +1633,27 @@ class WebappInternal(Base):
 
             search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = soup.select(".tradiobuttonitem input")
-            tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-            tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+            tradiobuttonitens = soup.select(radio_term)
+            if self.webapp_shadowroot():
+                tradiobuttonitens = self.find_child_element('.radioitem', tradiobuttonitens[0])
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
+            else:
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
-                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                if radio:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(radio))
-                    success = True
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
+                if self.webapp_shadowroot():
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    radio.find_element_by_tag_name('input').click()
+                else:
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    if radio:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(radio))
+                success = True
 
+            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
 
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
@@ -1788,8 +1805,6 @@ class WebappInternal(Base):
 
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
-        if self.webapp_shadowroot():
-          sel_browse_input = lambda: self.find_child_element('input', sel_browse_input())[0]
 
         current_value = self.get_element_value(sel_browse_input())
 
@@ -1801,7 +1816,7 @@ class WebappInternal(Base):
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
-                sel_browse_input().clear()
+                sel_browse_input().clear() if not self.webapp_shadowroot() else self.find_child_element('input', sel_browse_input())[0].clear
                 self.set_element_focus(sel_browse_input())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
@@ -3101,6 +3116,7 @@ class WebappInternal(Base):
             return len(element_list) > 0
         else:
             return len(element_list) >= position
+
 
     def SetLateralMenu(self, menu_itens, save_input=True):
         """
@@ -8156,23 +8172,27 @@ class WebappInternal(Base):
         return self.driver.execute_script("return app.VERSION").split('-')[0] >= "8.0.0"
 
 
-    def find_child_element(self, term, selenium_element):
+    def find_child_element(self, term, element):
         """
-        Waits and find for elements and returns a list of elements found
+        Waits and find for shadow elements in a beautiful soup object and returns a list of elements found
 
         >>> # Calling the method:
-        >>> find_element(".dict-tmenuitem", selenium_element)
+        >>> find_element(".dict-tmenuitem", bs4_element)
         """
         elements = []
 
         endtime = time.time() + self.config.time_out
         while not elements and time.time() < endtime:
             if self.webapp_shadowroot():
-                element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
-                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                try:
+                    element_dom = self.soup_to_selenium(self.get_current_DOM()) if not element else self.soup_to_selenium(element)
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                except:
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
             else:
-                elements = selenium_element.find_elements_by_class_name(term)
+                elements = element.find_elements_by_class_name(term)
         if elements:
             return elements
         else:
