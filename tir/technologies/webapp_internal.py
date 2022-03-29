@@ -1012,28 +1012,37 @@ class WebappInternal(Base):
         optional_term=selector, main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
 
+
     def close_coin_screen_after_routine(self):
         """
         [internal]
         This method is responsible for closing the "coin screen" that opens after searching for the routine
         """
-        endtime = time.time() + self.config.time_out
+        if self.webapp_shadowroot():
+            dialog_term = 'wa-tab-page > wa-dialog'
+            workspace_term = 'wa-tab-page > wa-dialog'
+            coin_term = f'wa-dialog > .dict-tpanel > [caption ={self.language.coins}]'
+        else:
+            dialog_term = '.tmodaldialog'
+            workspace_term = '.workspace-container'
+            coin_term = '.tmodaldialog > .tpanel > .tsay'
 
-        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+        self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
             timeout = self.config.time_out, main_container="body", check_error = False)
 
         tmodaldialog_list = []
 
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
-                tmodaldialog_list = soup.select('.tmodaldialog')
+                tmodaldialog_list = soup.select(dialog_term)
 
                 self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
+                 optional_term=coin_term, timeout=10, main_container = "body", check_error = False)
 
                 tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
+                    optional_term=coin_term, main_container="body", check_error = False, check_help = False)), None)
 
                 if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
@@ -1042,6 +1051,7 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(str(e))
+
 
     def close_warning_screen(self):
         """
@@ -1064,28 +1074,38 @@ class WebappInternal(Base):
          optional_term=selector, main_container="body", check_error = False):
             self.set_button_x()
 
+
     def close_warning_screen_after_routine(self):
         """
         [internal]
         This method is responsible for closing the "warning screen" that opens after searching for the routine
         """
-        endtime = time.time() + self.config.time_out
+        if self.webapp_shadowroot():
+            dialog_term = f'wa-dialog [title={self.language.warning}]'
+            title_term = f'wa-dialog [title={self.language.warning}]'
+            workspace_term = "wa-dialog > wa-text-view"
 
-        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
+        else:
+            dialog_term = '.ui-dialog'
+            title_term = '.ui-dialog-titlebar'
+            workspace_term = ".workspace-container"
+
+        self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
             timeout = self.config.time_out, main_container="body", check_error = False)
 
         uidialog_list = []
 
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not uidialog_list):
             try:
                 soup = self.get_current_DOM()
-                uidialog_list = soup.select('.ui-dialog')
-
+                uidialog_list = soup.select(dialog_term)
+                
                 self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".ui-dialog-titlebar", timeout=10, main_container = "body", check_error = False)
+                    optional_term=title_term, timeout=10, main_container = "body", check_error = False)
 
                 tmodal_warning_screen = next(iter(self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False, check_help = False)), None)
+                    optional_term=title_term, main_container="body", check_error = False, check_help = False)), None)
 
                 if tmodal_warning_screen and tmodal_warning_screen in uidialog_list:
                     uidialog_list.remove(tmodal_warning_screen.parent.parent)
@@ -1094,6 +1114,7 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(str(e))
+
 
     def close_news_screen(self):
         """
@@ -1490,6 +1511,7 @@ class WebappInternal(Base):
             self.search_browse_column(column, browse_elements, index)
         self.fill_search_browse(term, browse_elements)
 
+
     def get_search_browse_elements(self, panel_name=None):
         """
         [Internal]
@@ -1508,6 +1530,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
+        if self.webapp_shadowroot():
+            dialog_term = 'wa-tab-page > wa-dialog'
+        else:
+            dialog_term = '.tmodaldialog'
+
         success = False
         container = None
         elements_soup = None
@@ -1518,7 +1545,7 @@ class WebappInternal(Base):
         while (time.time() < endtime and not success):
             soup = self.get_current_DOM()
             search_index = self.get_panel_name_index(panel_name) if panel_name else 0
-            containers = self.zindex_sort(soup.select(".tmodaldialog"), reverse=True)
+            containers = self.zindex_sort(soup.select(dialog_term), reverse=True)
             container = next(iter(containers), None)
 
             if container:
@@ -1526,7 +1553,10 @@ class WebappInternal(Base):
 
             if elements_soup:
                 if elements_soup and len(elements_soup) -1 >= search_index:
-                    browse_div = elements_soup[search_index].find_parent().find_parent()
+                    if self.webapp_shadowroot():
+                        browse_div = elements_soup[search_index].find_parent()
+                    else:
+                        browse_div = elements_soup[search_index].find_parent().find_parent()
                     success = True
 
         if not elements_soup:
@@ -1538,12 +1568,19 @@ class WebappInternal(Base):
         if not success:
             self.log_error("Get search browse elements couldn't find browser div")
 
-        browse_tget = browse_div.select(".tget")[0]
-        browse_key = browse_div.select(".tbutton button")[0]
-        browse_input = browse_tget.select("input")[0]
-        browse_icon = browse_tget.select("img")[0]
+        if self.webapp_shadowroot():
+            browse_tget = browse_div.select(".dict-tget")[0]
+            browse_key = browse_div.select(".dict-tbutton")[0]
+            browse_input = browse_tget
+            browse_icon = browse_tget.select(".button-image")[0]
+        else:
+            browse_tget = browse_div.select(".tget")[0]
+            browse_key = browse_div.select(".tbutton button")[0]
+            browse_input = browse_tget.select("input")[0]
+            browse_icon = browse_tget.select("img")[0]
 
         return (browse_key, browse_input, browse_icon)
+
 
     def search_browse_key(self, search_key, search_elements, index=False):
         """
@@ -1566,13 +1603,21 @@ class WebappInternal(Base):
         >>> self.search_browse_key("Branch+Id", search_elements)
 
         """
-        success = False
 
+        if self.webapp_shadowroot():
+            main_container = 'wa-dialog'
+            radio_term = '.dict-tradmenu'
+        else:
+            main_container = '.tmodaldialog,.ui-dialog'
+            radio_term = '.tradiobuttonitem input'
+
+        success = False
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
         sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
         self.click(sel_browse_key())
@@ -1588,18 +1633,27 @@ class WebappInternal(Base):
 
             search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = soup.select(".tradiobuttonitem input")
-            tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-            tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+            tradiobuttonitens = soup.select(radio_term)
+            if self.webapp_shadowroot():
+                tradiobuttonitens = self.find_child_element('.radioitem', tradiobuttonitens[0])
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
+            else:
+                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
-                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                if radio:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(radio))
-                    success = True
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
+                if self.webapp_shadowroot():
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    radio.find_element_by_tag_name('input').click()
+                else:
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    if radio:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(radio))
+                success = True
 
+            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
 
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
@@ -1728,6 +1782,7 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
 
+
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
@@ -1747,12 +1802,13 @@ class WebappInternal(Base):
         >>> self.fill_search_browse("D MG 01", search_elements)
         """
         self.wait_blocker()
-        endtime = time.time() + self.config.time_out
+
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
         current_value = self.get_element_value(sel_browse_input())
 
+        endtime = time.time() + self.config.time_out
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
@@ -1760,7 +1816,7 @@ class WebappInternal(Base):
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
-                sel_browse_input().clear()
+                sel_browse_input().clear() if not self.webapp_shadowroot() else self.find_child_element('input', sel_browse_input())[0].clear
                 self.set_element_focus(sel_browse_input())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
@@ -1775,6 +1831,7 @@ class WebappInternal(Base):
         self.wait_blocker()
         self.double_click(sel_browse_icon())
         return True
+
 
     def search_browse_key_input_value(self, browse_input ):
         """
@@ -3059,6 +3116,7 @@ class WebappInternal(Base):
             return len(element_list) > 0
         else:
             return len(element_list) >= position
+
 
     def SetLateralMenu(self, menu_itens, save_input=True):
         """
@@ -8119,23 +8177,27 @@ class WebappInternal(Base):
         return self.driver.execute_script("return app.VERSION").split('-')[0] >= "8.0.0"
 
 
-    def find_child_element(self, term, selenium_element):
+    def find_child_element(self, term, element):
         """
-        Waits and find for elements and returns a list of elements found
+        Waits and find for shadow elements in a beautiful soup object and returns a list of elements found
 
         >>> # Calling the method:
-        >>> find_element(".dict-tmenuitem", selenium_element)
+        >>> find_element(".dict-tmenuitem", bs4_element)
         """
         elements = []
 
         endtime = time.time() + self.config.time_out
         while not elements and time.time() < endtime:
             if self.webapp_shadowroot():
-                element_dom = self.soup_to_selenium(self.get_current_DOM()) if not selenium_element else selenium_element
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
-                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                try:
+                    element_dom = self.soup_to_selenium(self.get_current_DOM()) if not element else self.soup_to_selenium(element)
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+                except:
+                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element)
+                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
             else:
-                elements = selenium_element.find_elements_by_class_name(term)
+                elements = element.find_elements_by_class_name(term)
         if elements:
             return elements
         else:
