@@ -1645,13 +1645,15 @@ class WebappInternal(Base):
             if tradiobuttonitens_not_ends_dots:
                 if self.webapp_shadowroot():
                     radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                    radio.find_element_by_tag_name('input').click()
+                    if radio:
+                        radio.find_element_by_tag_name('input').click()
+                        success = True
                 else:
                     radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
                     if radio:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
                         self.click(self.soup_to_selenium(radio))
-                success = True
+                        success = True
 
             if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
