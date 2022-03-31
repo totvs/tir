@@ -1655,12 +1655,16 @@ class WebappInternal(Base):
                         self.click(self.soup_to_selenium(radio))
                         success = True
 
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
+            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv": #TODO entender o motivo da condição
                 for element in tradiobuttonitens_ends_dots:
-
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                    selenium_input = lambda : self.soup_to_selenium(element)
-                    self.click(selenium_input())
+                    
+                    if self.webapp_shadowroot():
+                        selenium_input = element.find_element_by_tag_name('input')
+                        self.click(selenium_input)
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                        selenium_input = lambda : self.soup_to_selenium(element)
+                        self.click(selenium_input())
                     time.sleep(1)
 
                     try_get_tooltip = 0
@@ -6550,15 +6554,23 @@ class WebappInternal(Base):
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
         has_text = False
+        expected_text = re.sub(' ', '', expected_text.lower())
 
-        element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-        self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
-        time.sleep(1)
-        tooltips = self.driver.find_elements(By.CSS_SELECTOR, ".ttooltip")
+        if self.webapp_shadowroot():
+            tooltip_term = 'wa-tooltip'
+            element_function = lambda: element
+            ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform() 
+        else:
+            tooltip_term = '.ttooltip'
+            element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())   
+
+        time.sleep(2)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, tooltip_term)
         if not tooltips:
-            tooltips = self.get_current_DOM().select('.ttooltip')
+            tooltips = self.get_current_DOM().select(tooltip_term)
         if tooltips:
-            has_text = (len(list(filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
+            has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
