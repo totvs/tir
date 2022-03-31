@@ -6327,21 +6327,25 @@ class WebappInternal(Base):
 
         self.message = ""
 
-        
-    def ClickCheckBox(self, label_box_name, position=1):
+    def ClickCheckBox(self, label_box_name, position=1, double_click=False):
         """
         Clicks on a Label in box on the screen.
 
         :param label_box_name: The label box name
         :type label_box_name: str
-        :param position: position label box on interface
+        :param position: index label box on interface
         :type position: int
+        :param double_click: True if a double click in element is necessary.
+        :type double_click: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickCheckBox("Search",1)
         """
+
+        img = None
+
         if position > 0:
 
             self.wait_element(label_box_name)
@@ -6351,21 +6355,33 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             labels_boxs = container.select("span")
-            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))                
-        
+            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
+
+            if not filtered_labels_boxs:
+                filtered_labels_boxs = list(
+                    filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+
             if position <= len(filtered_labels_boxs):
                 position -= 1
                 label_box = filtered_labels_boxs[position].parent
-                if 'tcheckbox' in label_box.get_attribute_list('class'):
-                    label_box_element = lambda: self.soup_to_selenium(label_box)                
-                    self.click(label_box_element())
+                if label_box.find_next('img'):
+                    if hasattr(label_box.find_next('img'), 'src'):
+                        img = label_box.find_next('img').attrs['src'].split('/')[-1] if \
+                        label_box.find_next('img').attrs['src'] else None
+                if 'tcheckbox' in label_box.get_attribute_list('class') or img == 'lbno_mdi.png':
+                    label_box_element = lambda: self.soup_to_selenium(label_box)
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=label_box,
+                                       locator=By.XPATH)
+                    if double_click:
+                        self.double_click(label_box_element())
+                    else:
+                        self.click(label_box_element())
                 else:
-                    self.log_error("Index the Ckeckbox invalid.")                
+                    self.log_error("Index the Ckeckbox invalid.")
             else:
                 self.log_error("Index the Ckeckbox invalid.")
         else:
             self.log_error("Index the Ckeckbox invalid.")
-
 
     def ClickLabel(self, label_name):
         """

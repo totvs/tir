@@ -285,7 +285,7 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text, position)
 
-    def ClickCheckBox(self, label_box_name, position=1):
+    def ClickCheckBox(self, label_box_name, position=1, double_click=False):
         """
         Clicks on a Label in box on the screen.
 
@@ -293,13 +293,15 @@ class Webapp():
         :type label_box_name: str
         :param position: index label box on interface
         :type position: int
+        :param double_click: True if a double click in element is necessary.
+        :type double_click: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickCheckBox("Search",1)
         """
-        self.__webapp.ClickCheckBox(label_box_name,position)
+        self.__webapp.ClickCheckBox(label_box_name,position, double_click)
 
     def ClickLabel(self, label_name):
         """
@@ -1110,7 +1112,7 @@ class Webapp():
             This method return data as a string if necessary use some method to convert data like int().
 
         >>> config.json
-        >>> "CSVPath" : "C:\\temp"
+        >>> '"CSVPath": "C:\\temp"'
 
         :param csv_file: .csv file name
         :type csv_file: str
