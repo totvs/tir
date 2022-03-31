@@ -6370,6 +6370,8 @@ class WebappInternal(Base):
                         label_box.find_next('img').attrs['src'] else None
                 if 'tcheckbox' in label_box.get_attribute_list('class') or img == 'lbno_mdi.png':
                     label_box_element = lambda: self.soup_to_selenium(label_box)
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=label_box,
+                                       locator=By.XPATH)
                     if double_click:
                         self.double_click(label_box_element())
                     else:
