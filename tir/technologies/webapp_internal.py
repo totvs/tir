@@ -1655,7 +1655,7 @@ class WebappInternal(Base):
                         self.click(self.soup_to_selenium(radio))
                         success = True
 
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv": #TODO entender o motivo da condição
+            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                 for element in tradiobuttonitens_ends_dots:
                     
                     if self.webapp_shadowroot():
