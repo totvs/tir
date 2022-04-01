@@ -6225,6 +6225,7 @@ class WebappInternal(Base):
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
         has_text = False
+        expected_text = re.sub(' ', '', expected_text.lower())
 
         element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
         self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
@@ -6233,7 +6234,7 @@ class WebappInternal(Base):
         if not tooltips:
             tooltips = self.get_current_DOM().select('.ttooltip')
         if tooltips:
-            has_text = (len(list(filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
+            has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
         self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
