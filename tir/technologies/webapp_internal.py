@@ -1701,13 +1701,23 @@ class WebappInternal(Base):
                             self.driver.switch_to.default_content()
 
 
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(element))
+                    if self.webapp_shadowroot():
+                        selenium_input = element.find_element_by_tag_name('input')
+                        self.click(selenium_input)
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(element))
 
                     while(old_value == self.search_browse_key_input_value(search_elements[1])):
                         time.sleep(0.1)
-                    search_key = re.sub(' ', '', search_key.lower().strip())
+                    
                     input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
+                    search_key = re.sub(' ', '', search_key.lower().strip())
+
+                    if self.webapp_shadowroot() and not input_value:
+                        selenium_element = self.soup_to_selenium(search_elements[1])
+                        input_value =  re.sub(' ', '', selenium_element.get_attribute('placeholder').strip().lower())
+
                     success = search_key in input_value
 
                     if success:
