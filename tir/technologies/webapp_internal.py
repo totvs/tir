@@ -2896,14 +2896,18 @@ class WebappInternal(Base):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot():
-                    labels = list(map(
-                        lambda x: self.driver.execute_script("return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
-                                                             self.soup_to_selenium(x)),
-                        container.select(optional_term)))
-                    labels_not_none = list(filter(lambda x: x is not None, labels))
-                    if len(labels_not_none) > 0:
-                        labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
-                        return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    try:
+                        labels = list(map(
+                            lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
+                                self.soup_to_selenium(x)),
+                            container.select(optional_term)))
+                        labels_not_none = list(filter(lambda x: x is not None, labels))
+                        if len(labels_not_none) > 0:
+                            labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                            return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    except:
+                        pass
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3754,8 +3758,9 @@ class WebappInternal(Base):
         while(time.time() < endtime):
 
             element = None
-
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if not element:
                 return
@@ -3789,7 +3794,9 @@ class WebappInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
