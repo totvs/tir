@@ -1482,7 +1482,9 @@ class WebappInternal(Base):
                     
                     while(old_value == self.search_browse_key_input_value(search_elements[1])):
                         time.sleep(0.1)
-                    success = search_key.lower().strip() in self.search_browse_key_input_value(search_elements[1]).strip().lower()
+                    search_key = re.sub(' ', '', search_key.lower().strip())
+                    input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
+                    success = search_key in input_value
 
                     if success:
                         break
