@@ -45,6 +45,7 @@ class WebappInternal(Base):
     >>> def __init__(self, config_path="", autostart=True):
     >>>     self.__webapp = WebappInternal(config_path, autostart)
     """
+
     def __init__(self, config_path="", autostart=True):
         """
         Definition of each global variable:
@@ -74,7 +75,10 @@ class WebappInternal(Base):
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
         }
-        self.base_container = ".tmodaldialog"
+        if self.webapp_shadowroot():
+            self.base_container = "wa-dialog"
+        else:
+            self.base_container = ".tmodaldialog"
 
         self.grid_check = []
         self.grid_counters = {}
@@ -2383,7 +2387,10 @@ class WebappInternal(Base):
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
         if element:
-            element_children = next((x for x in element.contents if self.element_name(x) in ["input", "select"]), None)
+            if not self.webapp_shadowroot():
+                element_children = next((x for x in element.contents if self.element_name(x) in ["input", "select"]), None)
+            else:
+                element_children = None
             return element_children if element_children is not None else element
         else:
             self.log_error("Element wasn't found.")
@@ -2901,14 +2908,18 @@ class WebappInternal(Base):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot():
-                    labels = list(map(
-                        lambda x: self.driver.execute_script("return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
-                                                             self.soup_to_selenium(x)),
-                        container.select(optional_term)))
-                    labels_not_none = list(filter(lambda x: x is not None, labels))
-                    if len(labels_not_none) > 0:
-                        labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
-                        return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    try:
+                        labels = list(map(
+                            lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
+                                self.soup_to_selenium(x)),
+                            container.select(optional_term)))
+                        labels_not_none = list(filter(lambda x: x is not None, labels))
+                        if len(labels_not_none) > 0:
+                            labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                            return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    except:
+                        pass
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3031,7 +3042,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog", check_error=True, twebview=False):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog,wa-text-input", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -3728,7 +3739,12 @@ class WebappInternal(Base):
         >>> oHelper.SetBranch("D MG 01 ")
         """
         logger().info(f"Setting branch: {branch}.")
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
+
+        if self.webapp_shadowroot():
+            term = '.dict-tpanel'
+        else:
+            term = "[style*='fwskin_seekbar_ico']"
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=2, main_container="body")
         Ret = self.fill_search_browse(branch, self.get_search_browse_elements())
         if Ret:
             self.SetButton('OK')
@@ -3754,8 +3770,9 @@ class WebappInternal(Base):
         while(time.time() < endtime):
 
             element = None
-
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if not element:
                 return
@@ -3789,7 +3806,9 @@ class WebappInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
@@ -5695,7 +5714,7 @@ class WebappInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog", check_error=True, twebview=False):
+    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False):
         """
         [Internal]
 
