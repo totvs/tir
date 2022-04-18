@@ -401,6 +401,29 @@ class Base(unittest.TestCase):
             current = current.find_parent()
         return current
 
+    def find_first_wa_panel_parent(self, element):
+        """
+        [Internal]
+
+        Finds first div parent element of another BeautifulSoup element.
+
+        If element is already a div, it will return the element.
+
+        :param element: BeautifulSoup element
+        :type element: BeautifulSoup object
+
+        :return: The first div parent of the element
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> parent_element = self.find_first_div_parent(my_element)
+        """
+        current = element
+        while(hasattr(current, "name") and self.element_name(current) != "wa-panel"):
+            current = current.find_parent()
+        return current
+
     def element_name(self, element_soup):
         """
         [internal]

@@ -1943,7 +1943,10 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
-        term=".tget, .tcombobox, .tmultiget"
+        if self.webapp_shadowroot():
+            term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
+        else:
+            term=".tget, .tcombobox, .tmultiget"
         position-=1
 
         if not input_field:
@@ -1951,7 +1954,10 @@ class WebappInternal(Base):
 
         try:
             while( time.time() < endtime and not label ):
-                container = self.get_current_container()
+                if self.webapp_shadowroot():
+                    container = self.get_current_shadow_root_container()
+                else:
+                    container = self.get_current_container()
                 labels = container.select("label")
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
@@ -1969,7 +1975,10 @@ class WebappInternal(Base):
             width_safe, height_safe = self.width_height(container_size)
 
             label_s  = lambda:self.soup_to_selenium(label)
-            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            if self.webapp_shadowroot():
+                xy_label = label_s().location
+            else:
+                xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
 
@@ -2014,7 +2023,10 @@ class WebappInternal(Base):
 
         """
         selenium_element = self.soup_to_selenium(element)
-        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
+        if self.webapp_shadowroot():
+            position = selenium_element.location
+        else:
+            position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
         return position
 
     def get_distance(self,label_pos,element_pos):
@@ -2373,6 +2385,9 @@ class WebappInternal(Base):
                     element = element_list[position]
             else:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
+                if self.webapp_shadowroot():   
+                    if not element:
+                        element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
 
         if element:
             if not self.webapp_shadowroot():
@@ -6780,6 +6795,25 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
 
+    def get_current_shadow_root_container(self):
+        """
+        [Internal]
+
+        An internal method designed to get the current container.
+        Returns the BeautifulSoup object that represents this container or NONE if nothing is found.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_current_container()
+        """
+        soup = self.get_current_DOM()
+        containers = self.zindex_sort(soup.select("wa-dialog"), True)
+        return next(iter(containers), None)
+
     def get_all_containers(self):
         """
         [Internal]
@@ -7245,7 +7279,11 @@ class WebappInternal(Base):
 
         for container in containers:
             iscorrect = True
-            container_class = list(filter(lambda x: "class" in x.attrs, container.select("div")))
+            if self.webapp_shadowroot():
+                selector = "wa-panel"
+            else:
+                selector = "div"    
+            container_class = list(filter(lambda x: "class" in x.attrs, container.select(selector)))
             if list(filter(lambda x: class_remove in x.attrs['class'], container_class)):
                 iscorrect = False
             if iscorrect:
@@ -7263,8 +7301,10 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> elements = self.filter_label_element(label_text, container)
         """
-
-        elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
+        if self.webapp_shadowroot():
+            elements = list(map(lambda x: self.find_first_wa_panel_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
+        else:
+            elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
 
     def filter_is_displayed(self, elements):
