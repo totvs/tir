@@ -1705,12 +1705,24 @@ class WebappInternal(Base):
                             self.driver.switch_to.default_content()
 
 
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(element))
+                    if self.webapp_shadowroot():
+                        selenium_input = element.find_element_by_tag_name('input')
+                        self.click(selenium_input)
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(element))
 
                     while(old_value == self.search_browse_key_input_value(search_elements[1])):
                         time.sleep(0.1)
-                    success = search_key.lower().strip() in self.search_browse_key_input_value(search_elements[1]).strip().lower()
+                    
+                    input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
+                    search_key = re.sub(' ', '', search_key.lower().strip())
+
+                    if self.webapp_shadowroot() and not input_value:
+                        selenium_element = self.soup_to_selenium(search_elements[1])
+                        input_value =  re.sub(' ', '', selenium_element.get_attribute('placeholder').strip().lower())
+
+                    success = search_key in input_value
 
                     if success:
                         break
@@ -1729,6 +1741,7 @@ class WebappInternal(Base):
             sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
             self.click(sel_input())
+
 
     def search_browse_column(self, search_column, search_elements, index=False):
         """
@@ -1750,12 +1763,20 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.search_browse_key("Filial*", search_elements)
         """
+        if self.webapp_shadowroot():
+            main_container = 'wa-dialog'
+            menupopup = 'wa-menu-popup.dict-tmenu'
+            checkbox_term = "wa-checkbox"
+        else:
+            main_container = '.tmodaldialog,.ui-dialog'
+            menupopup = '.tmenupopup.activationOwner'
+            checkbox_term = "span"
 
 
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
         sel_browse_column = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_column())
         self.click(sel_browse_column())
@@ -1763,31 +1784,47 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = True
 
-        self.wait_element_timeout(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
-        tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
+        self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
+        tmenupopup = next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
             if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
                 self.tmenu_out_iframe = False
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
-        self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
-        spans = tmenupopup.select("span")
+        if self.webapp_shadowroot():
+            div_columns = tmenupopup.select('.dict-tfolder')[0]
+            column_button = self.find_child_element('wa-tab-button', div_columns)[1]
+        else:
+            column_button = self.soup_to_selenium(tmenupopup.select('a')[1])
+
+        self.click(column_button)
+
+        spans = tmenupopup.select(checkbox_term)
 
         if ',' in search_column:
             search_column_itens = search_column.split(',')
             filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
-            for  item in filtered_column_itens:
-                span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+            for item in filtered_column_itens:
+                if self.webapp_shadowroot():
+                    span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
+                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+                else:
+                    span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+                    if not span:
+                        span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+                    self.click(self.soup_to_selenium(span))
+        else:
+            if self.webapp_shadowroot():
+                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
+                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+            else:
+                span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
                 if not span:
                     span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
                 self.click(self.soup_to_selenium(span))
-        else:
-            span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
-            if not span:
-                span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
-
-            self.click(self.soup_to_selenium(span))
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
