@@ -7754,7 +7754,7 @@ class WebappInternal(Base):
         Update the password in the Protheus password change request screen
         """
         container = self.get_current_container()
-        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
+        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog, wa-dialog", optional_term=".tsay"):
             user_login = self.GetValue(self.language.user_login)
             if user_login == self.config.user or self.config.user.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
