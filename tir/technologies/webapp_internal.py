@@ -3234,35 +3234,27 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        selenium_menu_element= lambda: self.soup_to_selenium(menu)
 
         try:
             for menuitem in menu_itens:
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
-
-                if self.webapp_shadowroot():
-                    #TODO ShadowRoot Desvio, nao compatibilidade do metodo self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
-                    if menu_parent:
-                        menu_item_presence = self.find_child_element(menu_itens_term, menu_parent)
-                    else:
-                        menu_item_presence = self.find_child_element(menu_itens_term, selenium_menu_element())
-                    subMenuElements = list(filter(lambda x: x.is_displayed(), menu_item_presence))
-                else:
-                    self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
-                    menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body")
-                    subMenuElements = menu.select(menu_itens_term)
-                    subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+                self.wait_until_to(expected_condition="presence_of_all_elements_located", element = f'{menu_term} {menu_itens_term}', locator=By.CSS_SELECTOR)
+                menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body, wa-dialog")
 
                 if not menu_item_presence and submenu:
                     submenu().click()
 
+                subMenuElements = self.get_current_DOM().select(menu_itens_term)
+                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+                
                 if self.webapp_shadowroot():
-                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.ID, x)) , subMenuElements))[0]
+                    sel_subMenuElements = (map(lambda x : self.find_child_element('span', x)[0], subMenuElements))
+                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.ID, x)) , sel_subMenuElements))[0]
                     submenu = lambda: child
                 else:
-                    while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
+                    while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", menu_itens_term):
                         menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                         subMenuElements = menu.select(menu_itens_term)
                         if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
