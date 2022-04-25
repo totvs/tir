@@ -1742,7 +1742,6 @@ class WebappInternal(Base):
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
             self.click(sel_input())
 
-
     def search_browse_column(self, search_column, search_elements, index=False):
         """
         [Internal]
@@ -1977,13 +1976,17 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.search_element_position(field)
         """
+
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
+            label_term = ".dict-tsay"
         else:
             term=".tget, .tcombobox, .tmultiget"
+            label_term = "label"
+
         position-=1
 
         if not input_field:
@@ -1991,14 +1994,18 @@ class WebappInternal(Base):
 
         try:
             while( time.time() < endtime and not label ):
-                if self.webapp_shadowroot():
-                    container = self.get_current_shadow_root_container()
-                else:
-                    container = self.get_current_container()
-                labels = container.select("label")
+                container = self.get_current_container()
+                labels = container.select(label_term)
+
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+
+                if self.webapp_shadowroot():
+                    view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x.attrs['caption']) ,labels))
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
+                else:
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
@@ -2421,10 +2428,11 @@ class WebappInternal(Base):
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
             else:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
-                if self.webapp_shadowroot():   
-                    if not element:
-                        element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
+                if self.webapp_shadowroot():
+                    element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
+                    element = self.find_child_element('input', element)[0]
+                else:
+                    element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
         if element:
             if not self.webapp_shadowroot():
@@ -2434,6 +2442,7 @@ class WebappInternal(Base):
             return element_children if element_children is not None else element
         else:
             self.log_error("Element wasn't found.")
+
 
     def get_web_value(self, element):
         """
@@ -2522,16 +2531,25 @@ class WebappInternal(Base):
             self.log_result(field, user_value, current_value)
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
-            if name_attr:
-                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+            if self.webapp_shadowroot():
+                self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
-                self.wait_element(field)
+                if name_attr:
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                else:
+                    self.wait_element(field)
+
 
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
+            
+            if self.webapp_shadowroot():
+                field_element = lambda: element
+            else:
+                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
             self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
             endtime = time.time() + self.config.time_out
@@ -7431,6 +7449,7 @@ class WebappInternal(Base):
 
         return container_filtered
 
+
     def filter_label_element(self, label_text, container):
         """
         [Internal]
@@ -7441,11 +7460,16 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> elements = self.filter_label_element(label_text, container)
         """
+        elements = []
         if self.webapp_shadowroot():
-            elements = list(map(lambda x: self.find_first_wa_panel_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
+            parent = container.find_all(caption=re.compile(f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))
+            for element in parent:
+                if list(map(lambda x: re.escape(label_text) in re.escape(x.text), self.find_child_element('label', element)))[0]:
+                    elements.append(element)
         else:
             elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
+
 
     def filter_is_displayed(self, elements):
         """
