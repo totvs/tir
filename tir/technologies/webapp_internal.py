@@ -69,7 +69,7 @@ class WebappInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": ".tmodaldialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
@@ -1705,12 +1705,24 @@ class WebappInternal(Base):
                             self.driver.switch_to.default_content()
 
 
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                    self.click(self.soup_to_selenium(element))
+                    if self.webapp_shadowroot():
+                        selenium_input = element.find_element_by_tag_name('input')
+                        self.click(selenium_input)
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                        self.click(self.soup_to_selenium(element))
 
                     while(old_value == self.search_browse_key_input_value(search_elements[1])):
                         time.sleep(0.1)
-                    success = search_key.lower().strip() in self.search_browse_key_input_value(search_elements[1]).strip().lower()
+                    
+                    input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
+                    search_key = re.sub(' ', '', search_key.lower().strip())
+
+                    if self.webapp_shadowroot() and not input_value:
+                        selenium_element = self.soup_to_selenium(search_elements[1])
+                        input_value =  re.sub(' ', '', selenium_element.get_attribute('placeholder').strip().lower())
+
+                    success = search_key in input_value
 
                     if success:
                         break
@@ -1750,12 +1762,20 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.search_browse_key("Filial*", search_elements)
         """
+        if self.webapp_shadowroot():
+            main_container = 'wa-dialog'
+            menupopup = 'wa-menu-popup.dict-tmenu'
+            checkbox_term = "wa-checkbox"
+        else:
+            main_container = '.tmodaldialog,.ui-dialog'
+            menupopup = '.tmenupopup.activationOwner'
+            checkbox_term = "span"
 
 
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
         sel_browse_column = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
-        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_column())
         self.click(sel_browse_column())
@@ -1763,31 +1783,47 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = True
 
-        self.wait_element_timeout(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
-        tmenupopup = next(iter(self.web_scrap(".tmenupopup.activationOwner", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
+        self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
+        tmenupopup = next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
             if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
                 self.tmenu_out_iframe = False
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
-        self.click(self.soup_to_selenium(tmenupopup.select('a')[1]))
-        spans = tmenupopup.select("span")
+        if self.webapp_shadowroot():
+            div_columns = tmenupopup.select('.dict-tfolder')[0]
+            column_button = self.find_child_element('wa-tab-button', div_columns)[1]
+        else:
+            column_button = self.soup_to_selenium(tmenupopup.select('a')[1])
+
+        self.click(column_button)
+
+        spans = tmenupopup.select(checkbox_term)
 
         if ',' in search_column:
             search_column_itens = search_column.split(',')
             filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
-            for  item in filtered_column_itens:
-                span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+            for item in filtered_column_itens:
+                if self.webapp_shadowroot():
+                    span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
+                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+                else:
+                    span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
+                    if not span:
+                        span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+                    self.click(self.soup_to_selenium(span))
+        else:
+            if self.webapp_shadowroot():
+                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
+                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+            else:
+                span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
                 if not span:
                     span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
                 self.click(self.soup_to_selenium(span))
-        else:
-            span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
-            if not span:
-                span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
-
-            self.click(self.soup_to_selenium(span))
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.tmenu_out_iframe = False
@@ -1940,13 +1976,17 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.search_element_position(field)
         """
+
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
+            label_term = ".dict-tsay"
         else:
             term=".tget, .tcombobox, .tmultiget"
+            label_term = "label"
+
         position-=1
 
         if not input_field:
@@ -1954,14 +1994,18 @@ class WebappInternal(Base):
 
         try:
             while( time.time() < endtime and not label ):
-                if self.webapp_shadowroot():
-                    container = self.get_current_shadow_root_container()
-                else:
-                    container = self.get_current_container()
-                labels = container.select("label")
+                container = self.get_current_container()
+                labels = container.select(label_term)
+
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+
+                if self.webapp_shadowroot():
+                    view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x.attrs['caption']) ,labels))
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
+                else:
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
@@ -2398,10 +2442,11 @@ class WebappInternal(Base):
                 if element_list and len(element_list) -1 >= position:
                     element = element_list[position]
             else:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
-                if self.webapp_shadowroot():   
-                    if not element:
-                        element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
+                if self.webapp_shadowroot():
+                    element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
+                    element = self.find_child_element('input', element)[0]
+                else:
+                    element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
         if element:
             if not self.webapp_shadowroot():
@@ -2411,6 +2456,7 @@ class WebappInternal(Base):
             return element_children if element_children is not None else element
         else:
             self.log_error("Element wasn't found.")
+
 
     def get_web_value(self, element):
         """
@@ -2499,16 +2545,25 @@ class WebappInternal(Base):
             self.log_result(field, user_value, current_value)
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
-            if name_attr:
-                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+            if self.webapp_shadowroot():
+                self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
-                self.wait_element(field)
+                if name_attr:
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                else:
+                    self.wait_element(field)
+
 
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
+            
+            if self.webapp_shadowroot():
+                field_element = lambda: element
+            else:
+                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
             self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
             endtime = time.time() + self.config.time_out
@@ -3220,35 +3275,27 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        selenium_menu_element= lambda: self.soup_to_selenium(menu)
 
         try:
             for menuitem in menu_itens:
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
-
-                if self.webapp_shadowroot():
-                    #TODO ShadowRoot Desvio, nao compatibilidade do metodo self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
-                    if menu_parent:
-                        menu_item_presence = self.find_child_element(menu_itens_term, menu_parent)
-                    else:
-                        menu_item_presence = self.find_child_element(menu_itens_term, selenium_menu_element())
-                    subMenuElements = list(filter(lambda x: x.is_displayed(), menu_item_presence))
-                else:
-                    self.wait_until_to(expected_condition="presence_of_all_elements_located", element = '.tmenu .tmenuitem', locator=By.CSS_SELECTOR)
-                    menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body")
-                    subMenuElements = menu.select(menu_itens_term)
-                    subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+                self.wait_until_to(expected_condition="presence_of_all_elements_located", element = f'{menu_term} {menu_itens_term}', locator=By.CSS_SELECTOR)
+                menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body, wa-dialog")
 
                 if not menu_item_presence and submenu:
                     submenu().click()
 
+                subMenuElements = self.get_current_DOM().select(menu_itens_term)
+                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+                
                 if self.webapp_shadowroot():
-                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.ID, x)) , subMenuElements))[0]
+                    sel_subMenuElements = (map(lambda x : self.find_child_element('span', x)[0], subMenuElements))
+                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.ID, x)) , sel_subMenuElements))[0]
                     submenu = lambda: child
                 else:
-                    while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", ".tmenuitem"):
+                    while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", menu_itens_term):
                         menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                         subMenuElements = menu.select(menu_itens_term)
                         if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
@@ -7419,6 +7466,7 @@ class WebappInternal(Base):
 
         return container_filtered
 
+
     def filter_label_element(self, label_text, container):
         """
         [Internal]
@@ -7429,11 +7477,16 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> elements = self.filter_label_element(label_text, container)
         """
+        elements = []
         if self.webapp_shadowroot():
-            elements = list(map(lambda x: self.find_first_wa_panel_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
+            parent = container.find_all(caption=re.compile(f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))
+            for element in parent:
+                if list(map(lambda x: re.escape(label_text) in re.escape(x.text), self.find_child_element('label', element)))[0]:
+                    elements.append(element)
         else:
             elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
+
 
     def filter_is_displayed(self, elements):
         """
@@ -7845,7 +7898,7 @@ class WebappInternal(Base):
         Update the password in the Protheus password change request screen
         """
         container = self.get_current_container()
-        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog", optional_term=".tsay"):
+        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog, wa-dialog", optional_term=".tsay"):
             user_login = self.GetValue(self.language.user_login)
             if user_login == self.config.user or self.config.user.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
