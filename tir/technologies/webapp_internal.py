@@ -2267,7 +2267,10 @@ class WebappInternal(Base):
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
-                    valtype = element.attrs["valuetype"]
+                    if self.webapp_shadowroot():
+                        valtype = self.value_type(element.attrs["type"]) 
+                    else:
+                        valtype = element.attrs["valuetype"]
 
                 self.scroll_to_element(input_field())
 
@@ -2350,6 +2353,17 @@ class WebappInternal(Base):
             self.log_error(f"Could not input value {value} in field {field}")
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
+    
+    def value_type(self, field_type)
+
+        if field_type == 'string':
+            return_type = 'C'
+        elif field_type == 'number':
+            return_type = 'N'
+        elif field_type == 'date':
+            return_type = 'D'
+
+        return return_type
 
     def get_field(self, field, name_attr=False, position=1, input_field=True, direction=None):
         """
@@ -5124,7 +5138,10 @@ class WebappInternal(Base):
                             time.sleep(2)
                             selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                             self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
-                            valtype = selenium_input().get_attribute("valuetype")
+                            if self.webapp_shadowroot():
+                               valtype = self.value_type(selenium_input().get_attribute("type")) 
+                            else:
+                                valtype = selenium_input().get_attribute("valuetype")
                             lenfield = len(self.get_element_value(selenium_input()))
                             user_value = field[1]
                             check_mask = self.check_mask(selenium_input())
@@ -5151,7 +5168,7 @@ class WebappInternal(Base):
                                     try_counter = 0
 
                                 if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
+                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     else:
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
