@@ -2398,7 +2398,7 @@ class WebappInternal(Base):
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
     
-    def value_type(self, field_type)
+    def value_type(self, field_type):
 
         if field_type == 'string':
             return_type = 'C'
