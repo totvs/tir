@@ -5212,7 +5212,7 @@ class WebappInternal(Base):
                                     try_counter = 0
 
                                 if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"
+                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     else:
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
