@@ -7726,10 +7726,14 @@ class WebappInternal(Base):
 
             logger().info(f"Checking Help on screen: {text}")
             # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
+            if self.webapp_shadowroot():
+                label_term = ".dict-tsay"
+            else:
+                label_term = ".tsay"
             self.wait_element_timeout(term=text_help, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5,
-                                      optional_term=".tsay", check_error=False)
+                                      optional_term=label_term, check_error=False)
             container = self.get_current_container()
-            container_filtered = container.select(".tsay")
+            container_filtered = container.select(label_term)
             container_text = ''
             for x in range(len(container_filtered)):
                 container_text += container_filtered[x].text + ' '
@@ -7757,7 +7761,7 @@ class WebappInternal(Base):
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
                 self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
+                 optional_term=label_term, presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
 
         if not text_extracted:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
