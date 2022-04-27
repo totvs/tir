@@ -3479,6 +3479,11 @@ class WebappInternal(Base):
         self.wait_blocker()
         container = self.get_current_container()
 
+        if self.webapp_shadowroot():
+            term_button="wa-button"
+        else:
+            term_button="button, .thbutton"
+
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
@@ -3490,11 +3495,7 @@ class WebappInternal(Base):
                 self.set_button_x(position, check_error)
                 return
             else:
-                if self.webapp_shadowroot():
-                    selector="wa-button"
-                else:
-                    selector="button, .thbutton"
-                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=selector, timeout=10, step=0.1, check_error=check_error)
+                self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
                 position -= 1
 
             layers = 0
@@ -3511,12 +3512,12 @@ class WebappInternal(Base):
 
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
-                    term_button = "wa-button"
                     soup = self.get_current_DOM()
-                    soup_element = soup.find(term_button, attrs={"caption": button})
-                    if not soup_element:
-                        soup_element = soup.find(term_button, attrs={"caption": "<u>"+button[0:1]+"</u>"+button[1:len(button)]})
-                    soup_element = self.soup_to_selenium(soup_element)
+                    soup_objects = soup.select(term_button)
+                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+                    regex = r"(^<.*)?" + re.escape(button[0:1]) + r"(.*>)?" + re.escape(button[1:len(button)])
+                    filtered_button = list(filter(lambda x: re.search(regex, x['caption']), soup_objects ))[0]
+                    soup_element = self.soup_to_selenium(filtered_button)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -3550,10 +3551,6 @@ class WebappInternal(Base):
                 if self.webapp_shadowroot():
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
-                    wait_until_element = soup.find(term_button, attrs={"caption": button})
-                    if not wait_until_element:
-                        wait_until_element = soup.find(term_button, attrs={"caption": "<u>"+button[0:1]+"</u>"+button[1:len(button)]})
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = wait_until_element, locator = By.XPATH)
                     self.click(soup_element)
                 else:
                     self.scroll_to_element(soup_element())
