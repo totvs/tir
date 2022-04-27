@@ -1998,9 +1998,9 @@ class WebappInternal(Base):
                 labels = container.select(label_term)
 
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                labels_list = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
-                if self.webapp_shadowroot():
+                if self.webapp_shadowroot() and not labels_list:
                     view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x.attrs['caption']) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
@@ -2972,7 +2972,7 @@ class WebappInternal(Base):
                 if label:
                     return self.find_label_element(term, container, input_field=input_field, direction=direction, position=position)
                 elif not re.match(r"\w+(_)", term):
-                    return self.filter_label_element(term, container) if self.filter_label_element(term, container) else []
+                    return self.filter_label_element(term, container, position=position) if self.filter_label_element(term, container, position=position) else []
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
@@ -6204,7 +6204,7 @@ class WebappInternal(Base):
         """
         try:
             if container:
-                elements = self.filter_label_element(label_text, container)
+                elements = self.filter_label_element(label_text, container, position)
             if elements:
                 for element in elements:
                     elem = self.search_element_position(label_text, position, input_field, direction)
@@ -7450,7 +7450,7 @@ class WebappInternal(Base):
         return container_filtered
 
 
-    def filter_label_element(self, label_text, container):
+    def filter_label_element(self, label_text, container, position):
         """
         [Internal]
         Filter and remove a specified character with regex, return only displayed elements if > 1.
@@ -7460,16 +7460,25 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> elements = self.filter_label_element(label_text, container)
         """
-        elements = []
+
+        elements = None
+        position -= 1
+
         if self.webapp_shadowroot():
-            parent = container.find_all(caption=re.compile(f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))
-            for element in parent:
-                if list(map(lambda x: re.escape(label_text) in re.escape(x.text), self.find_child_element('label', element)))[0]:
-                    elements.append(element)
+            if not(hasattr(container, 'text') and container.text.strip() != ''):
+                wa_text_view = container.select('wa-text-view')
+                wa_text_view_filtered = list(filter(lambda x: x.attrs['caption'] == label_text, wa_text_view))
+                if len(wa_text_view_filtered)-1 >= position:
+                    return [wa_text_view_filtered[position]]
+
+            if container:
+                elements = list(map(lambda x: self.find_first_wa_panel_parent(x),
+                                container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
         else:
             elements = list(map(lambda x: self.find_first_div_parent(x), container.find_all(text=re.compile(f"^{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"))))
-        return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
 
+        if elements:
+            return list(filter(lambda x: self.element_is_displayed(x), elements)) if len(elements) > 1 else elements
 
     def filter_is_displayed(self, elements):
         """
