@@ -3018,6 +3018,12 @@ class WebappInternal(Base):
                     f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, {second_term}')",
                     self.soup_to_selenium(x)),
                 container.select(optional_term)))
+            if len(list(filter(lambda x: x is not None and x, labels))) == 0:
+                labels = list(map(
+                    lambda x: self.driver.execute_script(
+                        f"return arguments[0].querySelectorAll('label, span, wa-dialog-header, {second_term}')",
+                        self.soup_to_selenium(x)),
+                    container.select(optional_term)))
             labels_not_none = list(filter(lambda x: x is not None and x, labels))
             if len(labels_not_none) > 0:
                 labels_displayed = list(filter(lambda x: x[0].is_displayed(), labels_not_none))
