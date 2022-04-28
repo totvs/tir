@@ -2903,12 +2903,13 @@ class WebappInternal(Base):
             logger().exception(f"Warning Finish method exception - {str(e)}")
             return False
 
-
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
+                      check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False,
+                      second_term=None):
         """
         [Internal]
 
-        Returns a BeautifulSoup object list based on the search parameters.
+        Returns a BeautifulSoup or selenium object list based on the search parameters.
 
         Does not support ScrapType.XPATH as scrap_type parameter value.
 
@@ -2925,8 +2926,8 @@ class WebappInternal(Base):
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
-        :return: List of BeautifulSoup4 elements based on search parameters.
-        :rtype: List of BeautifulSoup4 objects
+        :return: List of BeautifulSoup4 or Selenium elements based on search parameters.
+        :rtype: List of BeautifulSoup4 or Selenium objects
 
         Usage:
 
@@ -2993,14 +2994,7 @@ class WebappInternal(Base):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot():
-                    labels = list(map(
-                        lambda x: self.driver.execute_script("return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
-                                                             self.soup_to_selenium(x)),
-                        container.select(optional_term)))
-                    labels_not_none = list(filter(lambda x: x is not None, labels))
-                    if len(labels_not_none) > 0:
-                        labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
-                        return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    return self.selenium_web_scrap(term, container, optional_term, second_term)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3012,6 +3006,29 @@ class WebappInternal(Base):
             raise
         except Exception as e:
             self.log_error(str(e))
+
+    def selenium_web_scrap(self, term, container, optional_term, second_term):
+        """
+        [Internal]
+        Return selenium web element
+        """
+        try:
+            labels = list(map(
+                lambda x: self.driver.execute_script(
+                    f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, {second_term}')",
+                    self.soup_to_selenium(x)),
+                container.select(optional_term)))
+            labels_not_none = list(filter(lambda x: x is not None and x, labels))
+            if len(labels_not_none) > 0:
+                labels_displayed = list(filter(lambda x: x[0].is_displayed(), labels_not_none))
+                element = next(iter(list(filter(lambda x: term.lower() in x[0].text.lower(), labels_displayed))),
+                               None)
+                if not element and len(labels_not_none) == 1:
+                    element = list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed[0]))
+                if element:
+                    return element
+        except:
+            return None
 
     def search_for_errors(self, check_help=True):
         """
@@ -3567,17 +3584,26 @@ class WebappInternal(Base):
                     self.tmenu_out_iframe = True
 
                 soup_objects_filtered = None
-                while(time.time() < endtime and not soup_objects_filtered):
-                    soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED, optional_term=".tmenupopupitem", main_container="body", check_error=check_error)
+                while (time.time() < endtime and not soup_objects_filtered):
+                    soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
+                                                  optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
+                                                  check_error=check_error, second_term='wa-menu-popup-item')
                     soup_objects_filtered = self.filter_is_displayed(soup_objects)
 
-                contents = list(map(lambda x: x.contents, soup_objects_filtered))
-                soup_objects_filtered = next(iter(list(filter(lambda x: x[0].text.strip().lower() == sub_item.strip().lower(), contents))), None)
-
                 if soup_objects_filtered:
-                    soup_element = lambda : self.soup_to_selenium(soup_objects_filtered[0])
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects_filtered[0], locator = By.XPATH )
-                    self.click(soup_element())
+                    if self.webapp_shadowroot():
+                        EC.element_to_be_clickable(soup_objects_filtered[0])
+                    else:
+                        contents = list(map(lambda x: x.contents, soup_objects_filtered))
+                        soup_objects_filtered = next(iter(
+                            list(filter(lambda x: x[0].text.strip().lower() == sub_item.strip().lower(), contents))),
+                            None)
+                        soup_element = lambda: self.soup_to_selenium(soup_objects_filtered[0])
+                        self.wait_until_to(expected_condition="element_to_be_clickable",
+                                           element=soup_objects_filtered[0],
+                                           locator=By.XPATH)
+
+                    self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
                     self.tmenu_out_iframe = False
                 else:
 
@@ -3590,11 +3616,6 @@ class WebappInternal(Base):
                         soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     else:
                         self.log_error(f"Couldn't find element {button}")
-
-                    if self.webapp_shadowroot():
-                        element_selenium = self.driver.execute_script(
-                            "return arguments[0].shadowRoot.querySelector('wa-panel').shadowRoot.querySelector('button')",
-                            element_selenium)
             
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
