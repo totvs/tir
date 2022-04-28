@@ -1982,7 +1982,7 @@ class WebappInternal(Base):
         elem = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
-            label_term = ".dict-tsay"
+            label_term = ".dict-tsay, label"
         else:
             term=".tget, .tcombobox, .tmultiget"
             label_term = "label"
@@ -1998,10 +1998,11 @@ class WebappInternal(Base):
                 labels = container.select(label_term)
 
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                labels_list = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
-                if self.webapp_shadowroot() and not labels_list:
-                    view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x.attrs['caption']) ,labels))
+                if self.webapp_shadowroot():
+                    if not view_filtred:
+                        view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x['caption']) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
@@ -2444,7 +2445,6 @@ class WebappInternal(Base):
             else:
                 if self.webapp_shadowroot():
                     element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
-                    element = self.find_child_element('input', element)[0]
                 else:
                     element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
@@ -2559,10 +2559,7 @@ class WebappInternal(Base):
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
             
-            if self.webapp_shadowroot():
-                field_element = lambda: element
-            else:
-                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
@@ -2994,7 +2991,14 @@ class WebappInternal(Base):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot():
-                    return self.selenium_web_scrap(term, container, optional_term, second_term)
+                    labels = list(map(
+                        lambda x: self.driver.execute_script("return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
+                                                             self.soup_to_selenium(x)),
+                        container.select(optional_term)))
+                    labels_not_none = list(filter(lambda x: x is not None, labels))
+                    if len(labels_not_none) > 0:
+                        labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                        return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3535,6 +3539,7 @@ class WebappInternal(Base):
 
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
+                    self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
                     soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -7506,9 +7511,11 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            if not(hasattr(container, 'text') and container.text.strip() != ''):
+            if hasattr(container, 'text') and container.text.strip() == '':
                 wa_text_view = container.select('wa-text-view')
-                wa_text_view_filtered = list(filter(lambda x: x.attrs['caption'] == label_text, wa_text_view))
+                regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
+                wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
+                
                 if len(wa_text_view_filtered)-1 >= position:
                     return [wa_text_view_filtered[position]]
 
@@ -8459,8 +8466,13 @@ class WebappInternal(Base):
         return len(grid)
 
     def webapp_shadowroot(self):
-
-        return self.driver.execute_script("return app.VERSION").split('-')[0] >= "8.0.0"
+        current_ver = ''
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not current_ver:
+            current_ver = self.driver.execute_script("return app.VERSION")
+        current_ver = re.sub(r'\D','', current_ver)
+        current_ver = int(current_ver)
+        return current_ver >= 800
 
 
     def find_child_element(self, term, element):
