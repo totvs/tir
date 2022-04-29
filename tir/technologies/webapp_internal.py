@@ -2306,7 +2306,11 @@ class WebappInternal(Base):
                 valtype = "C"
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
-                interface_value = self.get_web_value(input_field())
+                if self.check_combobox(element):
+                    interface_value = self.return_selected_combo_value(element)
+                else:
+                    interface_value = self.get_web_value(input_field())
+
                 current_value = interface_value.strip()
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
@@ -2321,13 +2325,12 @@ class WebappInternal(Base):
 
                 try:
                     #Action for Combobox elements
-                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                    if self.check_combobox(element):
                         self.set_element_focus(input_field())
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
                         self.select_combo(element, main_value)
-                        current_value = self.get_web_value(input_field()).strip()
+                        current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
                     else:
                         self.wait_until_to( expected_condition = "visibility_of", element = input_field, timeout=True)
@@ -2378,8 +2381,7 @@ class WebappInternal(Base):
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             logger().info(f"Current field value: {current_value}")
 
-                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                    if self.check_combobox(element):
                         current_value = current_value[0:len(str(value))]
 
                     if re.match(r"^●+$", current_value):
@@ -2398,7 +2400,23 @@ class WebappInternal(Base):
             self.log_error(f"Could not input value {value} in field {field}")
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
-    
+
+    def check_combobox(self, element):
+        """
+
+        :param element:
+        :return: Return True if the field is a combobox
+        """
+
+        if self.webapp_shadowroot():
+            attr_class = 'dict-tcombobox'
+        else:
+            attr_class = 'tcombobox'
+
+        return ((hasattr(element, "attrs") and "class" in element.attrs and attr_class in element.attrs["class"]) or
+                (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and attr_class in
+                 element.find_parent().attrs["class"]))
+
     def value_type(self, field_type):
 
         if field_type == 'string':
@@ -7508,7 +7526,7 @@ class WebappInternal(Base):
                 wa_text_view = container.select('wa-text-view')
                 regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
                 wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
-                
+
                 if len(wa_text_view_filtered)-1 >= position:
                     return [wa_text_view_filtered[position]]
 
@@ -8457,16 +8475,6 @@ class WebappInternal(Base):
         """
 
         return len(grid)
-
-    def webapp_shadowroot(self):
-        current_ver = ''
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not current_ver:
-            current_ver = self.driver.execute_script("return app.VERSION")
-        current_ver = re.sub(r'\.(.*)','', current_ver)
-        current_ver = int(current_ver)
-        return current_ver >= 8
-
 
     def find_child_element(self, term, element):
         """
