@@ -2991,14 +2991,7 @@ class WebappInternal(Base):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot():
-                    labels = list(map(
-                        lambda x: self.driver.execute_script("return arguments[0].shadowRoot.querySelector('label, span, wa-dialog-header')",
-                                                             self.soup_to_selenium(x)),
-                        container.select(optional_term)))
-                    labels_not_none = list(filter(lambda x: x is not None, labels))
-                    if len(labels_not_none) > 0:
-                        labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
-                        return list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))
+                    return self.selenium_web_scrap(term, container, optional_term, second_term)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
