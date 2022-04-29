@@ -8463,9 +8463,9 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not current_ver:
             current_ver = self.driver.execute_script("return app.VERSION")
-        current_ver = re.sub(r'\D','', current_ver)
+        current_ver = re.sub(r'\.(.*)','', current_ver)
         current_ver = int(current_ver)
-        return current_ver >= 800
+        return current_ver >= 8
 
 
     def find_child_element(self, term, element):
