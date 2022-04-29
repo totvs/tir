@@ -1635,11 +1635,11 @@ class WebappInternal(Base):
 
         if not index:
 
-            search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
+            search_key = re.sub(r"(\s)?(\.+$)?", '', search_key.strip()).lower()
 
             tradiobuttonitens = soup.select(radio_term)
             if self.webapp_shadowroot():
-                tradiobuttonitens = self.find_child_element('.radioitem', tradiobuttonitens[0])
+                tradiobuttonitens = self.find_child_element('div', tradiobuttonitens[0])
                 tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
                 tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
             else:
@@ -1648,7 +1648,7 @@ class WebappInternal(Base):
 
             if tradiobuttonitens_not_ends_dots:
                 if self.webapp_shadowroot():
-                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
                     if radio:
                         radio.find_element_by_tag_name('input').click()
                         success = True
