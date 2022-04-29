@@ -8477,6 +8477,16 @@ class WebappInternal(Base):
 
         return len(grid)
 
+    def webapp_shadowroot(self):
+        current_ver = ''
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not current_ver:
+            current_ver = self.driver.execute_script("return app.VERSION")
+        current_ver = re.sub(r'\.(.*)','', current_ver)
+        current_ver = int(current_ver)
+        return current_ver >= 8
+
+
     def find_child_element(self, term, element):
         """
         Waits and find for shadow elements in a beautiful soup object and returns a list of elements found
