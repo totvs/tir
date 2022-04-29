@@ -2381,8 +2381,7 @@ class WebappInternal(Base):
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             logger().info(f"Current field value: {current_value}")
 
-                    if ((hasattr(element, "attrs") and "class" in element.attrs and "tcombobox" in element.attrs["class"]) or
-                    (hasattr(element.find_parent(), "attrs") and "class" in element.find_parent().attrs and "tcombobox" in element.find_parent().attrs["class"])):
+                    if self.check_combobox(element):
                         current_value = current_value[0:len(str(value))]
 
                     if re.match(r"^●+$", current_value):
