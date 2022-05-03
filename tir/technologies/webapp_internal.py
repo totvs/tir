@@ -5176,20 +5176,25 @@ class WebappInternal(Base):
 
                         while (time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container=selector_main_container)):
                             time.sleep(1)
-                            if not self.webapp_shadowroot():
+                            if self.webapp_shadowroot():
+                                self.scroll_to_element(selenium_column)
+                                self.click(selenium_column)
+                                self.set_element_focus(selenium_column) 
+                            else:
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                            else:
-                                    break
                             try:
-                                if not self.webapp_shadowroot():
-                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
-                                
-                                
+                                if self.webapp_shadowroot():
+                                    break                                                              
+                                else:
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()                                                                
                             except WebDriverException:
                                 try:
-                                    if not self.webapp_shadowroot():
+                                    if self.webapp_shadowroot():
+                                        self.send_keys(selenium_column, Keys.ENTER)
+                                        break
+                                    else:
                                         self.send_keys(selenium_column(), Keys.ENTER)
                                 except WebDriverException:
                                     pass
@@ -5205,9 +5210,6 @@ class WebappInternal(Base):
                         if self.webapp_shadowroot():
                             wait_selector = "wa-dialog"
                             position_fillgrid = initial_layer
-                            self.scroll_to_element(selenium_column)
-                            self.click(selenium_column)
-                            self.set_element_focus(selenium_column)
                         else:
                             position_fillgrid = initial_layer + 1
                             wait_selector = ".tmodaldialog"
@@ -5219,7 +5221,7 @@ class WebappInternal(Base):
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
-                        if self.webapp_shadowroot():
+                        if self.webapp_shadowroot():                            
                             child = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input, textarea')", self.soup_to_selenium(new_container))
                         else:
                             child = new_container.select("input, textarea")
@@ -5239,7 +5241,7 @@ class WebappInternal(Base):
                                 selenium_input = child
                             else:
                                 selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
-                            self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+                                self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
 
                             if self.webapp_shadowroot():
                                 valtype = self.value_type(new_container.get("type")) 
@@ -5248,21 +5250,22 @@ class WebappInternal(Base):
                                 check_mask = None
                             else:
                                 valtype = selenium_input().get_attribute("valuetype")
-                            lenfield = len(self.get_element_value(selenium_input()))
-                            user_value = field[1]
-                            check_mask = self.check_mask(selenium_input())
+                                lenfield = len(self.get_element_value(selenium_input()))
+                                user_value = field[1]
+                                check_mask = self.check_mask(selenium_input())
 
                             if check_mask:
                                 if (check_mask[0].startswith('@D') and user_value == ''):
                                     user_value = '00000000'
                                 user_value = self.remove_mask(user_value)
-                            if self.webapp_shadowroot():
-                                self.set_element_focus(selenium_input)
-                                self.click(selenium_input)
+                            if self.webapp_shadowroot():    
+                                ActionChains(self.driver).move_to_element(selenium_column).send_keys_to_element(selenium_column, Keys.ENTER).perform()                                                        
+                                self.driver.execute_script("return arguments[0].querySelector('label').innerHTML = '"+user_value+"'", columns[column_number])
                             else:
                                 self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                                 self.set_element_focus(selenium_input())
                                 self.click(selenium_input())
+                                
                             if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
@@ -5297,10 +5300,16 @@ class WebappInternal(Base):
 
                             try_endtime = self.config.time_out / 4
                             while try_endtime > 0:
-                                element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
+                                if self.webapp_shadowroot():
+                                    element_exist = new_container
+                                else:
+                                    element_exist = self.wait_element_timeout(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH, timeout = 10, presence=False)
                                 time.sleep(1)
                                 if element_exist:
-                                    current_value = self.get_element_text(selenium_column())
+                                    if self.webapp_shadowroot():
+                                        current_value = self.get_element_text(selenium_column)
+                                    else:
+                                        current_value = self.get_element_text(selenium_column())
                                     if current_value == None:
                                         current_value = ''
                                     break
