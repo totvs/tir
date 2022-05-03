@@ -401,6 +401,29 @@ class Base(unittest.TestCase):
             current = current.find_parent()
         return current
 
+    def find_first_wa_panel_parent(self, element):
+        """
+        [Internal]
+
+        Finds first div parent element of another BeautifulSoup element.
+
+        If element is already a div, it will return the element.
+
+        :param element: BeautifulSoup element
+        :type element: BeautifulSoup object
+
+        :return: The first div parent of the element
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> parent_element = self.find_first_div_parent(my_element)
+        """
+        current = element
+        while(hasattr(current, "name") and self.element_name(current) != "wa-panel"):
+            current = current.find_parent()
+        return current
+
     def element_name(self, element_soup):
         """
         [internal]
@@ -737,7 +760,8 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
-        combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        combo = self.return_combo_object(element)
 
         if index:
             index_number = self.return_combo_index(combo, option)
@@ -750,6 +774,26 @@ class Base(unittest.TestCase):
                 text_value = value.text
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+
+    def return_combo_object(self, element):
+        """
+
+        :param element:
+        :return:
+        """
+        if self.webapp_shadowroot():
+            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                      self.soup_to_selenium(element)))
+        else:
+            combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        return combo
+
+    def return_selected_combo_value(self, element):
+
+        combo = self.return_combo_object(element)
+
+        return combo.all_selected_options[0].text
 
     def send_keys(self, element, arg):
         """
@@ -1140,3 +1184,16 @@ class Base(unittest.TestCase):
         """
         self.driver.switch_to_default_content()
         return self.driver.find_elements_by_css_selector(selector)
+
+    def webapp_shadowroot(self):
+        """
+        [Internal]
+        """
+        current_ver = ''
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not current_ver:
+            current_ver = self.driver.execute_script("return app.VERSION")
+        current_ver = re.sub(r'\.(.*)', '', current_ver)
+        current_ver = int(current_ver)
+        return current_ver >= 8
+
