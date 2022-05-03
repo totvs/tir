@@ -4918,7 +4918,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5028,14 +5028,14 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             self.wait_element_timeout(term = column_name,
-                scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, main_container = 'wa-tgrid')
+                scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, main_container = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase")
         else:
             self.wait_element_timeout(term = column_name,
                 scrap_type = enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term = 'th label', main_container = 'body')
 
         endtime = time.time() + self.config.time_out
         if self.webapp_shadowroot():
-            while(self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="wa-tgrid") and time.time() < endtime):
+            while(self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body") and time.time() < endtime):
                 logger().debug("Waiting for container to be active")
                 time.sleep(1)            
         else:
@@ -5065,7 +5065,7 @@ class WebappInternal(Base):
                         logger().exception(str(err))
                         pass
                     if self.webapp_shadowroot():
-                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse")
+                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase")
                     else:
                         grids = container.select(".tgetdados, .tgrid, .tcbrowse")    
                     grids = self.filter_displayed_elements(grids)
@@ -5163,27 +5163,20 @@ class WebappInternal(Base):
 
                         while (time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container=selector_main_container)):
                             time.sleep(1)
-                            if self.webapp_shadowroot():
-                                self.scroll_to_element(selenium_column)
-                                self.click(selenium_column)
-                                self.set_element_focus(selenium_column)
-                            else:
+                            if not self.webapp_shadowroot():
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column())
-                            try:
-                                if self.webapp_shadowroot():
-                                    ActionChains(self.driver).move_to_element(selenium_column).send_keys_to_element(selenium_column, Keys.ENTER).perform()
+                            else:
                                     break
-                                else:
+                            try:
+                                if not self.webapp_shadowroot():
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(selenium_column(), Keys.ENTER).perform()
+                                
                                 
                             except WebDriverException:
                                 try:
-                                    if self.webapp_shadowroot():
-                                        self.send_keys(selenium_column, Keys.ENTER)
-                                        break
-                                    else:
+                                    if not self.webapp_shadowroot():
                                         self.send_keys(selenium_column(), Keys.ENTER)
                                 except WebDriverException:
                                     pass
@@ -5198,12 +5191,18 @@ class WebappInternal(Base):
                         if(field[1] == True): break # if boolean field finish here.
                         if self.webapp_shadowroot():
                             wait_selector = "wa-dialog"
+                            position_fillgrid = initial_layer
+                            self.scroll_to_element(selenium_column)
+                            self.click(selenium_column)
+                            self.set_element_focus(selenium_column)
                         else:
+                            position_fillgrid = initial_layer + 1
                             wait_selector = ".tmodaldialog"
-                        self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1, main_container="body")
+
+                        self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position_fillgrid, main_container='body')
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus"                            
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus"                            
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
@@ -5223,20 +5222,31 @@ class WebappInternal(Base):
                         if child_type == "input":
 
                             time.sleep(2)
+                            if self.webapp_shadowroot():
+                                selenium_input = child
+                            else:
                             selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                             self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+
                             if self.webapp_shadowroot():
-                               valtype = self.value_type(selenium_input().get_attribute("type")) 
+                                valtype = self.value_type(new_container.get("type")) 
+                                lenfield = len(self.get_element_value(selenium_input))
+                                user_value = field[1]
+                                check_mask = None
                             else:
                                 valtype = selenium_input().get_attribute("valuetype")
                             lenfield = len(self.get_element_value(selenium_input()))
                             user_value = field[1]
                             check_mask = self.check_mask(selenium_input())
+
                             if check_mask:
                                 if (check_mask[0].startswith('@D') and user_value == ''):
                                     user_value = '00000000'
                                 user_value = self.remove_mask(user_value)
-
+                            if self.webapp_shadowroot():
+                                self.set_element_focus(selenium_input)
+                                self.click(selenium_input)
+                            else:
                             self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
                             self.set_element_focus(selenium_input())
                             self.click(selenium_input())
@@ -6080,11 +6090,14 @@ class WebappInternal(Base):
         """
         if self.webapp_shadowroot():
             for row in rows:
+                column_grid = row.find_element_by_tag_name('td')
+                self.click(column_grid)
+                self.set_element_focus(column_grid)           
                 filtered_rows = self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", row)
                 if filtered_rows:
                    return row
                 else:
-                    filtered_rows = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('.selected-row')", row)                
+                    filtered_rows = self.driver.execute_script("return arguments[0].querySelector('.selected-row')", row)                
                     if filtered_rows:
                         return row
 
