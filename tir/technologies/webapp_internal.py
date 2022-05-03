@@ -5225,7 +5225,7 @@ class WebappInternal(Base):
                             if self.webapp_shadowroot():
                                 selenium_input = child
                             else:
-                            selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                                selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                             self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
 
                             if self.webapp_shadowroot():
