@@ -5247,9 +5247,9 @@ class WebappInternal(Base):
                                 self.set_element_focus(selenium_input)
                                 self.click(selenium_input)
                             else:
-                            self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
-                            self.set_element_focus(selenium_input())
-                            self.click(selenium_input())
+                                self.wait_until_to( expected_condition = "visibility_of", element = selenium_input, timeout=True)
+                                self.set_element_focus(selenium_input())
+                                self.click(selenium_input())
                             if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = bsoup_element, locator = By.XPATH, timeout=True)
