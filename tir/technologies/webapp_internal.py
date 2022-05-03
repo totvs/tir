@@ -2005,7 +2005,7 @@ class WebappInternal(Base):
                         view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x['caption']) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
-                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
 
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
@@ -3027,6 +3027,7 @@ class WebappInternal(Base):
         [Internal]
         Return selenium web element
         """
+        regx_sub = r"[\n?\s?]"
         try:
             labels = list(map(
                 lambda x: self.driver.execute_script(
@@ -3045,7 +3046,7 @@ class WebappInternal(Base):
                 element = next(iter(list(filter(lambda x: term.lower() in x[0].text.lower(), labels_displayed))),
                                None)
                 if not element and len(labels_not_none) == 1:
-                    element = list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed[0]))
+                    element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed[0]))
                 if element:
                     return element
         except:
@@ -3161,7 +3162,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog,wa-text-input", check_error=True, twebview=False):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog,wa-text-input", check_error=True, twebview=False, second_term=None):
         """
         [Internal]
 
@@ -3256,7 +3257,7 @@ class WebappInternal(Base):
                 selector = "div"
 
         if not element_list:
-            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)
+            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term)
             if not element_list:
                 return None
 
@@ -3553,10 +3554,11 @@ class WebappInternal(Base):
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
                     soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
-                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
-                    regex = r"(^<.*)?" + re.escape(button[0:1]) + r"(.*>)?" + re.escape(button[1:len(button)])
-                    filtered_button = list(filter(lambda x: re.search(regex, x['caption']), soup_objects ))[0]
-                    soup_element = self.soup_to_selenium(filtered_button)
+                    #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
+                    if soup_objects:
+                        regex = r"(^<.*)?" + re.escape(button[0:1]) + r"(.*>)?" + re.escape(button[1:len(button)])
+                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and re.search(regex, x['caption']), soup_objects ))[0]
+                        soup_element = self.soup_to_selenium(filtered_button)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -3571,7 +3573,7 @@ class WebappInternal(Base):
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
 
             if not soup_element:
-                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term="button", check_error=check_error)), None)
+                other_action = next(iter(self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, check_error=check_error)), None)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
 
@@ -3996,20 +3998,31 @@ class WebappInternal(Base):
         """
         self.wait_blocker()
 
+        if self.webapp_shadowroot():
+            term = '.dict-tfolder, wa-tab-page'
+            bt_term = ".dict-tfolder"
+        else:
+            term = '.tfolder.twidget, .button-bar a'
+            bt_term = ".button-bar a"
+
         element = ""
         position -= 1
 
-        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=".tfolder.twidget, .button-bar a")
+        self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=term, second_term='wa-tab-button')
 
         endtime  = time.time() + self.config.time_out
         half_config_timeout = time.time() + self.config.time_out / 2
 
-        while(time.time() < endtime and not element):
-            panels = self.web_scrap(term=".button-bar a", scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
-            panels_filtered = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
 
-            if time.time() >= half_config_timeout:
-                panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
+        while(time.time() < endtime and not element):
+            if self.webapp_shadowroot():
+                panels_filtered = self.web_scrap(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=bt_term ,main_container = self.containers_selectors["GetCurrentContainer"], second_term='wa-tab-button')
+            else:
+                panels = self.web_scrap(term=bt_term, scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
+                panels_filtered = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
+
+                if time.time() >= half_config_timeout:#TODO entender o objetivo da condição
+                    panels_filtered = list(filter(lambda x: x.text == folder_name, panels)) 
 
             if panels_filtered:
                 if position > 0:
@@ -4017,7 +4030,7 @@ class WebappInternal(Base):
                 else:
                     panel = next(iter(panels_filtered), None)
 
-                element = self.soup_to_selenium(panel) if panel else None
+                element = self.soup_to_selenium(panel) if panel and not self.webapp_shadowroot() else panel
 
                 if element:
                     self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
@@ -5931,7 +5944,7 @@ class WebappInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False):
+    def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False, second_term=None):
         """
         [Internal]
 
@@ -5963,7 +5976,7 @@ class WebappInternal(Base):
             logger().debug("Waiting for element")
 
         if presence:
-            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview) and time.time() < endtime):
+            while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview, second_term) and time.time() < endtime):
                 time.sleep(0.1)
         else:
             while (self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview) and time.time() < endtime):
@@ -5984,7 +5997,7 @@ class WebappInternal(Base):
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
 
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
 
             if element is not None:
 
