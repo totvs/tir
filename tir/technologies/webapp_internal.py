@@ -7562,7 +7562,7 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            if hasattr(container, 'text') and container.text.strip() == '':
+            if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
                 wa_text_view = container.select('wa-text-view')
                 regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
                 wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
