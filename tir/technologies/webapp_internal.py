@@ -805,7 +805,7 @@ class WebappInternal(Base):
             self.switch_to_iframe()
             enable = env().is_enabled()
         else:
-            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled())
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()) and not hasattr(environment_element, 'disabled')
 
         if enable:
             env_value = ''
@@ -1131,10 +1131,15 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_news_screen()
         """
+        if self.webapp_shadowroot():
+            term = 'wa-dialog> .dict-tpanel > .dict-tsay'
+        else:
+            term = '.tmodaldialog > .tpanel > .tsay'
+
         soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
+        modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
         if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
-         optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False):
+         optional_term=term, main_container="body", check_error = False):
             self.SetButton(self.language.close)
 
     def close_news_screen_after_routine(self):
@@ -6722,7 +6727,7 @@ class WebappInternal(Base):
 
         try:
             return self.element_is_displayed(
-                next(iter(self.web_scrap(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                next(iter(self.web_scrap(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
                      None))
         except:
             return False
@@ -7557,7 +7562,7 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            if hasattr(container, 'text') and container.text.strip() == '':
+            if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
                 wa_text_view = container.select('wa-text-view')
                 regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
                 wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
