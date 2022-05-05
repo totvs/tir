@@ -2365,7 +2365,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value).strip() == main_value:
+                                if self.remove_mask(current_number_value).strip() == main_value.replace(",", "").strip():
                                     break
                                 tries+=1
                                 try_counter+=1
@@ -2392,9 +2392,9 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower().strip() == main_value.lower().strip()
+                        success = current_value.lower().strip() == main_value.lower().replace(",", "").strip()
                     else:
-                        success = current_value == main_value
+                        success = current_value == main_value.replace(",", "").strip()
                 except:
                     continue
 
@@ -6276,6 +6276,10 @@ class WebappInternal(Base):
         elif try_counter == 1:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+        elif try_counter == 2:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
         else:
             element_function().send_keys(Keys.HOME)
