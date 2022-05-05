@@ -1192,8 +1192,12 @@ class Base(unittest.TestCase):
         current_ver = ''
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not current_ver:
-            current_ver = self.driver.execute_script("return app.VERSION")
+            try:
+                current_ver = self.driver.execute_script("return app.VERSION")
+            except:
+                current_ver = None
+        if not current_ver:
+            self.log_error('Can\'t find WebApp Version' )
         current_ver = re.sub(r'\.(.*)', '', current_ver)
         current_ver = int(current_ver)
         return current_ver >= 8
-

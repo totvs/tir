@@ -2722,7 +2722,7 @@ class WebappInternal(Base):
             self.environment_screen()
 
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
                 self.close_warning_screen()
                 self.close_modal()
 
@@ -2735,6 +2735,7 @@ class WebappInternal(Base):
 
     def wait_user_screen(self):
 
+        term = "[name=cGetUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input"
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
@@ -2744,7 +2745,7 @@ class WebappInternal(Base):
                 element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
             else:
                 soup = self.get_current_DOM()
-                element = next(iter(soup.select("[name='cGetUser'] > input")), None)
+                element = next(iter(soup.select(term)), None)
 
     def driver_refresh(self):
         """
