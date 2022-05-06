@@ -3563,7 +3563,11 @@ class WebappInternal(Base):
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     if soup_objects:
                         regex = r"(^<.*)?" + re.escape(button[0:1]) + r"(.*>)?" + re.escape(button[1:len(button)])
-                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and re.search(regex, x['caption']), soup_objects ))[0]
+                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and re.search(regex, x['caption']), soup_objects ))
+                        if len(filtered_button) > 1:
+                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]
+                        else:
+                            filtered_button = filtered_button[0]
                         soup_element = self.soup_to_selenium(filtered_button)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
