@@ -2570,7 +2570,10 @@ class WebappInternal(Base):
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
             if self.webapp_shadowroot():
-                self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
+                if re.match(r"\w+(_)", field):
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                else:
+                    self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 if name_attr:
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -2595,8 +2598,8 @@ class WebappInternal(Base):
 
             #Remove mask if present.
             if self.check_mask(field_element()):
-                current_value = self.remove_mask(current_value)
-                user_value = self.remove_mask(user_value)
+                current_value = self.remove_mask(current_value).replace(',','')
+                user_value = self.remove_mask(user_value).replace(',','')
             #If user value is string, Slice string to match user_value's length
             if type(current_value) is str:
                 current_value = current_value[0:len(str(user_value))]
@@ -3077,7 +3080,7 @@ class WebappInternal(Base):
             if not soup:
                 self.log_error("Search for erros couldn't find DOM")
             message = ""
-            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog, wa-dialog"), True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
