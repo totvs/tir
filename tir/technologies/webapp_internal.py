@@ -3569,7 +3569,11 @@ class WebappInternal(Base):
                         regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))
                         if len(filtered_button) > 1:
-                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]
+                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
+                            if not filtered_button:
+                                filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[0]
+                            else:
+                                filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
                         else:
                             filtered_button = filtered_button[0]
                         soup_element = self.soup_to_selenium(filtered_button)
@@ -7027,22 +7031,34 @@ class WebappInternal(Base):
             if not container:
                 self.log_error("Couldn't locate container.")
 
-            labels = container.select("label")
-            filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
-            filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
-            label = next(iter(filtered_labels), None)
+            if self.webapp_shadowroot():
+                labels = container.select("wa-text-view")
+                filtered_labels = list(filter(lambda x: label_name.lower() == x.get('caption').lower(), labels))[0]
+                label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+            else:
+                labels = container.select("label")
+                filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
+                filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
+                label = next(iter(filtered_labels), None)
 
         if not label:
             self.log_error("Couldn't find any labels.")
 
-        label_element = lambda: self.soup_to_selenium(label)
+        if self.webapp_shadowroot():
+            label_element = label
+            time.sleep(2)
+            self.scroll_to_element(label_element)
+            self.set_element_focus(label_element)
+            self.click(label_element)
+        else:
+            label_element = lambda: self.soup_to_selenium(label)
 
-        time.sleep(2)
-        self.scroll_to_element(label_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-        self.set_element_focus(label_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-        self.click(label_element())
+            time.sleep(2)
+            self.scroll_to_element(label_element())
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
+            self.set_element_focus(label_element())
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
+            self.click(label_element())
 
     def get_current_container(self):
         """
