@@ -347,6 +347,7 @@ class WebappInternal(Base):
             start_prog = lambda: self.soup_to_selenium(start_prog_element)
 
             if self.webapp_shadowroot():
+                time.sleep(2) #TODO analisar erro arguments[0].shadowRoot is null
                 start_prog_value = lambda: self.get_web_value(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", start_prog()))
             else:
                 start_prog_value = lambda: self.get_web_value(start_prog())
@@ -2570,7 +2571,10 @@ class WebappInternal(Base):
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
             if self.webapp_shadowroot():
-                self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
+                if re.match(r"\w+(_)", field):
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                else:
+                    self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 if name_attr:
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -2595,8 +2599,8 @@ class WebappInternal(Base):
 
             #Remove mask if present.
             if self.check_mask(field_element()):
-                current_value = self.remove_mask(current_value)
-                user_value = self.remove_mask(user_value)
+                current_value = self.remove_mask(current_value).replace(',','')
+                user_value = self.remove_mask(user_value).replace(',','')
             #If user value is string, Slice string to match user_value's length
             if type(current_value) is str:
                 current_value = current_value[0:len(str(user_value))]
@@ -3077,7 +3081,7 @@ class WebappInternal(Base):
             if not soup:
                 self.log_error("Search for erros couldn't find DOM")
             message = ""
-            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog"), True)), None)
+            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog, wa-dialog"), True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
@@ -3562,8 +3566,12 @@ class WebappInternal(Base):
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     if soup_objects:
-                        regex = r"(^<.*)?" + re.escape(button[0:1]) + r"(.*>)?" + re.escape(button[1:len(button)])
-                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and re.search(regex, x['caption']), soup_objects ))[0]
+                        regex = r"(<[^>]*>)?"
+                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))
+                        if len(filtered_button) > 1:
+                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]
+                        else:
+                            filtered_button = filtered_button[0]
                         soup_element = self.soup_to_selenium(filtered_button)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -6542,7 +6550,7 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input",
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
                 scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
 
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6615,7 +6623,7 @@ class WebappInternal(Base):
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input", timeout = 1,
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
             scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
 
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
