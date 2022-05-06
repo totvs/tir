@@ -3569,7 +3569,11 @@ class WebappInternal(Base):
                         regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))
                         if len(filtered_button) > 1:
-                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]
+                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
+                            if not filtered_button:
+                                filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[0]
+                            else:
+                                filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
                         else:
                             filtered_button = filtered_button[0]
                         soup_element = self.soup_to_selenium(filtered_button)
