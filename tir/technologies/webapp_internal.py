@@ -3571,7 +3571,7 @@ class WebappInternal(Base):
                         if len(filtered_button) > 1:
                             filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
                             if not filtered_button:
-                                filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[0]
+                                filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[-1]
                             else:
                                 filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
                         else:
@@ -3652,7 +3652,7 @@ class WebappInternal(Base):
                     result = False
                     self.tmenu_out_iframe = False
 
-                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
+                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
                     if soup_objects and len(soup_objects) - 1 >= position:
                         soup_element = lambda : self.soup_to_selenium(soup_objects[position])
