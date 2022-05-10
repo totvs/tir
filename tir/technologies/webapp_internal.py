@@ -836,6 +836,7 @@ class WebappInternal(Base):
             optional_term = "wa-button" if self.webapp_shadowroot() else "button"
             buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term,
                                      main_container="body")
+            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         button_element = next(iter(buttons), None) if buttons else None
 
