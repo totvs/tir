@@ -990,6 +990,8 @@ class Base(unittest.TestCase):
         >>> oHelper.Start()
         """
 
+        start_program = '#inputStartProg'
+
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
@@ -1009,7 +1011,7 @@ class Base(unittest.TestCase):
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
-                
+
             self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
@@ -1028,10 +1030,12 @@ class Base(unittest.TestCase):
                 self.driver.set_window_size(1366, 768)
             else:
                 self.driver.maximize_window()
-                   
+
             self.driver.get(self.config.url)
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
+
+        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
