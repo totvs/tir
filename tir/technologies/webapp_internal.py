@@ -2310,7 +2310,8 @@ class WebappInternal(Base):
                 input_field = lambda : self.soup_to_selenium(element)
 
             if input_field:
-                valtype = self.value_type(element.attrs["type"]) 
+                if 'type' in element.attrs:
+                    valtype = self.value_type(element.attrs["type"]) 
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
