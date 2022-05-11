@@ -836,6 +836,7 @@ class WebappInternal(Base):
             optional_term = "wa-button" if self.webapp_shadowroot() else "button"
             buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term,
                                      main_container="body")
+            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         button_element = next(iter(buttons), None) if buttons else None
 
@@ -3268,6 +3269,8 @@ class WebappInternal(Base):
 
         if not element_list:
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term)
+            if not element_list and f"wa-dialog[title*={self.language.warning}]" in term:
+                return container_element.get_attribute('title') == self.language.warning
             if not element_list:
                 return None
 
@@ -3708,16 +3711,14 @@ class WebappInternal(Base):
             system_info()
 
     def set_button_x(self, position=1, check_error=True):
-        position -= 1
         if self.webapp_shadowroot():
-            term_button = "wa-dialog"
-            soup = self.get_current_DOM()
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico']"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
-            wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position,
-                                            check_error=check_error)
-            soup = self.get_current_DOM() if not wait_button else self.get_current_container()
+        position -= 1
+        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
+        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
 
         close_list = soup.select(term_button)
         if not close_list:
@@ -3730,13 +3731,15 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            element_selenium = self.driver.execute_script(
-                "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')",
-                element_selenium)
+            if element_selenium.get_attribute('title') == self.language.warning:
+                script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
+                element_selenium = self.driver.execute_script(script, element_selenium)
+
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
 
         self.click(element_selenium)
+
 
     def click_sub_menu(self, sub_item):
         """
