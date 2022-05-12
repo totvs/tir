@@ -3571,7 +3571,7 @@ class WebappInternal(Base):
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     if soup_objects:
                         regex = r"(<[^>]*>)?"
-                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))
+                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
                         if len(filtered_button) > 1:
                             filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
                             if not filtered_button:
