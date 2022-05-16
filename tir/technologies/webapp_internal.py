@@ -2033,6 +2033,7 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
 
             if not input_field:
                 list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
@@ -2053,6 +2054,7 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
 
     def width_height(self, container_size):
 
@@ -3572,15 +3574,16 @@ class WebappInternal(Base):
                     if soup_objects:
                         regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
-                        if len(filtered_button) > 1:
-                            filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
-                            if not filtered_button:
-                                filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[-1]
+                        if filtered_button:
+                            if len(filtered_button) > 1:
+                                filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
+                                if not filtered_button:
+                                    filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[-1]
+                                else:
+                                    filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
                             else:
-                                filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
-                        else:
-                            filtered_button = filtered_button[0]
-                        soup_element = self.soup_to_selenium(filtered_button)
+                                filtered_button = filtered_button[0]
+                            soup_element = self.soup_to_selenium(filtered_button)
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
