@@ -2033,6 +2033,7 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
 
             if not input_field:
                 list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
@@ -2053,6 +2054,7 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
 
     def width_height(self, container_size):
 
