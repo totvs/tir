@@ -346,9 +346,9 @@ class WebappInternal(Base):
 
             start_prog = lambda: self.soup_to_selenium(start_prog_element)
 
+            endtime = time.time() + self.config.time_out
             if self.webapp_shadowroot():
-                time.sleep(2) #TODO analisar erro arguments[0].shadowRoot is null
-                start_prog_value = lambda: self.get_web_value(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", start_prog()))
+                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())), None))
             else:
                 start_prog_value = lambda: self.get_web_value(start_prog())
 
@@ -384,7 +384,7 @@ class WebappInternal(Base):
             env = lambda: self.soup_to_selenium(env_element)
 
             if self.webapp_shadowroot():
-                env_value = lambda: self.get_web_value(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", env()))
+                env_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', env())), None))
             else:
                 env_value = lambda: self.get_web_value(env())
 
@@ -411,9 +411,9 @@ class WebappInternal(Base):
                 raise ValueError(message)
 
             if self.webapp_shadowroot():
-                wa_buttons = self.driver.execute_script(
-                    "return document.querySelector('.startParameters').shadowRoot.querySelectorAll('wa-button')")
-                button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), wa_buttons))), None)
+                parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
+                buttons = self.find_shadow_element('wa-button', parameters_screen)
+                button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
             else:
                 button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
 
@@ -8563,19 +8563,29 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while not elements and time.time() < endtime:
-            if self.webapp_shadowroot():
-                try:
-                    element_dom = self.soup_to_selenium(self.get_current_DOM()) if not element else self.soup_to_selenium(element)
-                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
-                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
-                except:
-                    elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element)
-                    elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
-            else:
-                elements = element.find_elements_by_class_name(term)
+            try:
+                element_dom = self.soup_to_selenium(self.get_current_DOM()) if not element else self.soup_to_selenium(element)
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element_dom)
+                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
+            except:
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{term}')", element)
+                elements = list(filter(lambda x: EC.element_to_be_clickable(x), elements))
         if elements:
             return elements
         else:
             message = "Couldn't find child element."
             self.log_error(message)
             raise ValueError(message)
+
+
+    def find_shadow_element(self, term, objects):
+        elements = []
+        endtime = time.time() + self.config.time_out
+        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+
+        while not elements and time.time() < endtime:
+            try:
+                elements = list(map(lambda x: self.driver.execute_script(script, self.soup_to_selenium(x)), objects))
+            except:
+                elements = self.driver.execute_script(script, objects)
+            return elements if elements else None
