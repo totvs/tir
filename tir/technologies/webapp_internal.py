@@ -5221,7 +5221,9 @@ class WebappInternal(Base):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
-                            self.click(selenium_column())
+                            self.click(selenium_column(),
+                                       click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                selenium_column())
                             try:
                                 ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
                                     selenium_column(), Keys.ENTER).perform()
@@ -5301,7 +5303,8 @@ class WebappInternal(Base):
                                 self.click(selenium_input())
 
                             if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
-                                    self.get_current_container().next.attrs['class']:
+                                    self.get_current_container().next.attrs['class'] \
+                                    or 'dict-tget' in self.get_current_container().next.attrs['class']:
                                 bsoup_element = self.get_current_container().next
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
                                                    locator=By.XPATH, timeout=True)
@@ -5318,18 +5321,17 @@ class WebappInternal(Base):
 
                                 if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
                                         field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
-                                        field[0]] != "N") or valtype != "N"):
+                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     else:
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         else:
-                                            self.wait_element_timeout(term=".tmodaldialog.twidget",
+                                            self.wait_element_timeout(term=".tmodaldialog.twidget, wa-dialog",
                                                                       scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                                       position=initial_layer + 1, presence=False,
                                                                       main_container="body")
-                                            if self.element_exists(term=".tmodaldialog.twidget",
+                                            if self.element_exists(term=".tmodaldialog.twidget, wa-dialog",
                                                                    scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                                    position=initial_layer + 1, main_container="body"):
                                                 self.wait_until_to(expected_condition="element_to_be_clickable",
@@ -5337,8 +5339,7 @@ class WebappInternal(Base):
                                                                    timeout=True)
                                                 self.send_keys(selenium_input(), Keys.ENTER)
 
-                                elif lenfield == len(field[1]) and self.get_current_container().attrs[
-                                    'id'] != container_id:
+                                elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
                                     try:
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     except:
@@ -5354,10 +5355,7 @@ class WebappInternal(Base):
                                                                               timeout=10, presence=False)
                                 time.sleep(1)
                                 if element_exist:
-                                    if self.webapp_shadowroot():
-                                        current_value = self.get_element_text(selenium_column)
-                                    else:
-                                        current_value = self.get_element_text(selenium_column())
+                                    current_value = self.get_element_text(selenium_column())
                                     if current_value == None:
                                         current_value = ''
                                     break
@@ -5398,6 +5396,10 @@ class WebappInternal(Base):
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
             self.log_error(
                 f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
+
+    def check_get_class(self):
+        return 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
+        self.get_current_container().next.attrs['class'] or 'dict-tget' in self.get_current_container().next.attrs['class']
 
     def get_selenium_column_element(self, xpath):
         """
