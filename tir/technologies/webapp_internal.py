@@ -411,6 +411,7 @@ class WebappInternal(Base):
                 raise ValueError(message)
 
             if self.webapp_shadowroot():
+                self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
                 parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
                 buttons = self.find_shadow_element('wa-button', parameters_screen)
                 button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
@@ -854,8 +855,10 @@ class WebappInternal(Base):
 
         if self.config.poui_login:
             self.switch_to_iframe()
-
-        self.click(button())
+        
+        while time.time() < endtime and self.element_is_displayed(button()):
+            self.click(button())
+            time.sleep(2)
 
         if not self.config.poui_login:
             if self.webapp_shadowroot():
@@ -6023,7 +6026,10 @@ class WebappInternal(Base):
                 if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                     return False
                 self.restart_counter += 1
-                self.log_error(f"Element {term} not found!")
+                if presence:
+                    self.log_error(f"Element '{term}' not found!")
+                else:
+                    self.log_error(f"Unexpected element '{term}' found!")
 
         presence_endtime = time.time() + 10
         if presence:
