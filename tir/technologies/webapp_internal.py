@@ -856,9 +856,11 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
         
+        tryng = 1
         while time.time() < endtime and self.element_is_displayed(button()):
-            self.click(button())
-            logger().info(f'click on {button().text}')
+            self.click(button(), enum.ClickType.ACTIONCHAINS)
+            logger().info(f'click on {button().text} ,tentativa {tryng}')
+            tryng+=1
             time.sleep(2)
 
         if not self.config.poui_login:
