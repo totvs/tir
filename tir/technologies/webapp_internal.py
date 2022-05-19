@@ -858,6 +858,7 @@ class WebappInternal(Base):
         
         while time.time() < endtime and self.element_is_displayed(button()):
             self.click(button())
+            print(f'click on {button().text}')
             time.sleep(2)
 
         if not self.config.poui_login:
