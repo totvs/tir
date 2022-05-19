@@ -5155,8 +5155,11 @@ class WebappInternal(Base):
             else:
                 self.log_error("Grid element doesn't appear in DOM")
 
-            row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
-                next(iter(rows), None))
+            if self.webapp_shadowroot():
+                row = (next(iter(rows), None))
+            else:
+                row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
+                    next(iter(rows), None))
 
             if row:
                 if self.webapp_shadowroot():
@@ -5192,13 +5195,15 @@ class WebappInternal(Base):
                                                                                                                   field_to_label)
 
                         self.scroll_to_element(selenium_column())
-                        self.click(selenium_column())
+                        self.click(selenium_column(),
+                                   click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                            selenium_column())
                         self.set_element_focus(selenium_column())
 
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
                             selector_dialog = 'wa-dialog'
-                            selector_dialog_widget = '.dict-tgrid.focus, wa-dialog'
+                            selector_dialog_widget = "[data-advpl='tdialog']"
                             selector_main_container = 'body'
                         else:
                             selector_dialog = '.tmodaldialog'
@@ -5257,8 +5262,16 @@ class WebappInternal(Base):
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
                         if self.webapp_shadowroot():
-                            child = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')",
-                                                               self.soup_to_selenium(new_container))
+                            endtime_child = time.time() + self.config.time_out
+                            child = None
+                            while time.time() < endtime_child and not child:
+                                try:
+                                    child = self.driver.execute_script(
+                                        "return arguments[0].shadowRoot.querySelector('input')",
+                                        self.soup_to_selenium(new_container))
+                                except Exception as err:
+                                    logger().info(f'fillgrid child error: {str(err)}')
+                                    pass
                         else:
                             child = new_container.select("input, textarea")
 
@@ -5321,7 +5334,8 @@ class WebappInternal(Base):
 
                                 if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
                                         field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[field[0]] != "N") or valtype != "N"):
+                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
+                                        field[0]] != "N") or valtype != "N"):
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     else:
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
@@ -5339,7 +5353,8 @@ class WebappInternal(Base):
                                                                    timeout=True)
                                                 self.send_keys(selenium_input(), Keys.ENTER)
 
-                                elif lenfield == len(field[1]) and self.get_current_container().attrs['id'] != container_id:
+                                elif lenfield == len(field[1]) and self.get_current_container().attrs[
+                                    'id'] != container_id:
                                     try:
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     except:
@@ -5396,10 +5411,6 @@ class WebappInternal(Base):
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
             self.log_error(
                 f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
-
-    def check_get_class(self):
-        return 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
-        self.get_current_container().next.attrs['class'] or 'dict-tget' in self.get_current_container().next.attrs['class']
 
     def get_selenium_column_element(self, xpath):
         """
