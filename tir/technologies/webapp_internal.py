@@ -8594,7 +8594,7 @@ class WebappInternal(Base):
 
         while not elements and time.time() < endtime:
             try:
-                elements = list(map(lambda x: self.driver.execute_script(script, self.soup_to_selenium(x)), objects))
-            except:
                 elements = self.driver.execute_script(script, objects)
-            return elements if elements else None
+            except:
+                pass
+        return elements if elements else None
