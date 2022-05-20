@@ -6343,7 +6343,11 @@ class WebappInternal(Base):
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        if try_counter == 0:
+        if self.webapp_shadowroot():
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+        elif try_counter == 0:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
