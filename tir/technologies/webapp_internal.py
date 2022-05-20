@@ -3580,7 +3580,7 @@ class WebappInternal(Base):
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
                     soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
-                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     if soup_objects:
                         regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
@@ -3593,7 +3593,10 @@ class WebappInternal(Base):
                                     filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
                             else:
                                 filtered_button = filtered_button[0]
+
+                            id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
                             soup_element = self.soup_to_selenium(filtered_button)
+                            
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
