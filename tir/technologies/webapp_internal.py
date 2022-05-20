@@ -835,8 +835,7 @@ class WebappInternal(Base):
                 True, twebview=True)
         else:
             optional_term = "wa-button" if self.webapp_shadowroot() else "button"
-            buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term,
-                                     main_container="body")
+            buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
             buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         button_element = next(iter(buttons), None) if buttons else None
@@ -856,12 +855,17 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
         
+        click = 1
         tryng = 1
+        endtime = time.time() + self.config.time_out
         while time.time() < endtime and self.element_is_displayed(button()):
-            self.click(button(), enum.ClickType.ACTIONCHAINS)
-            logger().info(f'click on {button().text} ,tentativa {tryng}')
-            tryng+=1
+            self.click(button(), enum.ClickType(click))
+            logger().info(f'click on {button().text}, tentativa{tryng}')
+            tryng += 1
+            click += 1
             time.sleep(2)
+            if click == 4:
+                click = 1
 
         if not self.config.poui_login:
             if self.webapp_shadowroot():
@@ -6339,7 +6343,11 @@ class WebappInternal(Base):
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        if try_counter == 0:
+        if self.webapp_shadowroot():
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+        elif try_counter == 0:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
@@ -8636,7 +8644,7 @@ class WebappInternal(Base):
 
         while not elements and time.time() < endtime:
             try:
-                elements = list(map(lambda x: self.driver.execute_script(script, self.soup_to_selenium(x)), objects))
-            except:
                 elements = self.driver.execute_script(script, objects)
-            return elements if elements else None
+            except:
+                pass
+        return elements if elements else None
