@@ -637,7 +637,7 @@ class WebappInternal(Base):
                               twebview=True)
         else:
             if self.webapp_shadowroot():
-                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
+                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-input',
                                   scrap_type=enum.ScrapType.MIXED)
             else:
                 self.wait_element(self.language.database, main_container=container)
@@ -911,7 +911,7 @@ class WebappInternal(Base):
             self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
         else:
-            self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
+            self.log_error("Change Environment method did not find the element to perform the click or the element was not visible on the screen.")
 
         self.wait_blocker()
         self.close_warning_screen()
@@ -1872,7 +1872,7 @@ class WebappInternal(Base):
         current_value = self.get_element_value(sel_browse_input())
 
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and current_value.rstrip() != term.strip()):
+        while (time.time() < endtime and current_value.rstrip() != term.strip()[0:25]):
             try:
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
                 self.click(sel_browse_input())
@@ -1888,7 +1888,7 @@ class WebappInternal(Base):
                     self.get_search_browse_elements()
             except:
                 pass
-        if current_value.rstrip() != term.strip():
+        if current_value.rstrip() != term.strip()[0:25]:
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
