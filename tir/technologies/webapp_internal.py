@@ -637,7 +637,7 @@ class WebappInternal(Base):
                               twebview=True)
         else:
             if self.webapp_shadowroot():
-                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-input',
+                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
                                   scrap_type=enum.ScrapType.MIXED)
             else:
                 self.wait_element(self.language.database, main_container=container)
