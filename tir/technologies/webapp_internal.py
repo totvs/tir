@@ -673,8 +673,11 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
+        tryng = 1
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
+            logger().info(f"tentando preencher, {self.config.date.strip()}, tentativa{tryng}")
+            tryng += 1
             self.double_click(date())
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
