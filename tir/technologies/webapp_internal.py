@@ -606,6 +606,18 @@ class WebappInternal(Base):
         self.wait_element_timeout(term="[name='cGetUser'] > input",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
 
+    
+    def close_ballon_last_login(self):
+
+        bs4_close_button = lambda: next(iter(self.get_current_DOM().select('[style*=ballon_close]')), None)
+        
+        if bs4_close_button():
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and self.element_is_displayed(bs4_close_button()):
+                button = self.soup_to_selenium(bs4_close_button())
+                self.click(button)
+
+
     def environment_screen(self, change_env=False):
         """
         [Internal]
@@ -642,6 +654,8 @@ class WebappInternal(Base):
             else:
                 self.wait_element(self.language.database, main_container=container)
 
+        self.close_ballon_last_login()
+
         logger().info("Filling Date")
         if self.config.poui_login:
             base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
@@ -673,11 +687,8 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
-        tryng = 1
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
-            logger().info(f"tentando preencher, {self.config.date.strip()}, tentativa{tryng}")
-            tryng += 1
             self.double_click(date())
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
