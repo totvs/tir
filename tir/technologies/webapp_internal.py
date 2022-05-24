@@ -3322,7 +3322,6 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             menu_term = ".dict-tmenu"
             menu_itens_term = ".dict-tmenuitem"
-            menu_parent = ""
         else:
             menu_term = ".tmenu"
             menu_itens_term = ".tmenuitem"
@@ -3393,7 +3392,6 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
                 count+=1
-                menu_parent = submenu()
 
             #TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
