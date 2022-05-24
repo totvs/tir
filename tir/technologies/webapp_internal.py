@@ -945,11 +945,21 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime:
 
-            if self.wait_element_timeout(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, timeout = 1, optional_term="button", main_container="body"):
-                return next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body")), None)
-            elif self.wait_element_timeout(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = 1, main_container="body"):
-                tbuttons = self.filter_displayed_elements(self.web_scrap(term=".tpanel > .tpanel > .tbutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"), True)
-                element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
+            if self.webapp_shadowroot():
+                selector="wa-button"
+                class_selector=".dict-tbutton"
+            else:
+                selector="button"
+                class_selector=".tpanel > .tpanel > .tbutton"
+
+            if self.wait_element_timeout(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, timeout = 1, optional_term=selector, main_container="body"):
+                return next(iter(self.web_scrap(term=self.language.change_environment, scrap_type=enum.ScrapType.MIXED, optional_term=selector, main_container="body")), None)
+            elif self.wait_element_timeout(term=class_selector, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = 1, main_container="body"):
+                tbuttons = self.filter_displayed_elements(self.web_scrap(term=class_selector, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"), True)
+                if self.webapp_shadowroot():
+                    element = next(iter(list(filter(lambda x: 'TOTVS' in x.get('caption'), tbuttons))), None)
+                else:
+                    element = next(iter(list(filter(lambda x: 'TOTVS' in x.text, tbuttons))), None)
                 if element:
                     return element
 
