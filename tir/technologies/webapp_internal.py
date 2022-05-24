@@ -3381,7 +3381,8 @@ class WebappInternal(Base):
                     expanded = lambda: 'expanded' in submenu().get_attribute('class')
                     item_exist = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body, wa-dialog")
 
-                    while (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist()):
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
