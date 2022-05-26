@@ -989,7 +989,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        if isinstance(elements, list):
+            elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+
         return elements
 
 # User Methods
