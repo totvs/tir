@@ -662,7 +662,7 @@ class WebappInternal(Base):
                                         scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
         else:
             if self.webapp_shadowroot():
-                base_dates = self.web_scrap(term="[name='dDataBase']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                base_dates = self.web_scrap(term="[name='dDataBase'], [name='__dInfoData']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                             main_container='body',
                                             optional_term='wa-text-input')
             else:
@@ -707,7 +707,7 @@ class WebappInternal(Base):
             group_element = next(iter(group_element.select('input')), None)
         else:
             if self.webapp_shadowroot():
-                group_elements = self.web_scrap(term="[name='cGroup']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
             else:
@@ -752,7 +752,7 @@ class WebappInternal(Base):
             branch_element = next(iter(branch_element.select('input')), None)
         else:
             if self.webapp_shadowroot():
-                branch_elements = self.web_scrap(term="[name='cFil']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                branch_elements = self.web_scrap(term="[name='cFil'], [name='__cFil']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                  main_container='body',
                                                  optional_term='wa-text-input')
             else:
@@ -817,6 +817,7 @@ class WebappInternal(Base):
             raise ValueError(message)
 
         env = lambda: self.soup_to_selenium(environment_element)
+        
         if self.config.poui_login:
             self.switch_to_iframe()
             enable = env().is_enabled()
@@ -849,18 +850,21 @@ class WebappInternal(Base):
                 True, twebview=True)
         else:
             optional_term = "wa-button" if self.webapp_shadowroot() else "button"
-            buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
+            if self.webapp_shadowroot():
+                buttons = self.web_scrap(term=f"[caption*={label}]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', optional_term=optional_term)
+            else:
+                buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
+
             buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
-        button_element = next(iter(buttons), None) if buttons else None
+        if len(buttons) > 1:
+                button_element = buttons.pop()
+        else:
+            button_element = next(iter(buttons), None) if buttons else None
 
-        if self.webapp_shadowroot():
-            button = lambda: button_element
+        button = lambda: self.soup_to_selenium(button_element)
 
-        elif button_element and hasattr(button_element, "name") and hasattr(button_element, "parent"):
-            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
-
-        elif not change_env:
+        if not change_env and not button:
             self.restart_counter += 1
             message = f"Couldn't find {label} button."
             self.log_error(message)
@@ -870,12 +874,9 @@ class WebappInternal(Base):
             self.switch_to_iframe()
         
         click = 1
-        tryng = 1
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and self.element_is_displayed(button()):
             self.click(button(), enum.ClickType(click))
-            logger().info(f'click on {button().text}, tentativa{tryng}')
-            tryng += 1
             click += 1
             time.sleep(2)
             if click == 4:
@@ -3384,13 +3385,15 @@ class WebappInternal(Base):
                     if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find menu item: {menuitem}")
+
                 regex = r"(<[^>]*>)?"
                 if self.webapp_shadowroot():
                     child = list(filter(lambda x: hasattr(x,'caption') and re.sub(regex,'',x['caption'].lower()).startswith(menuitem.lower()), subMenuElements ))
                 else:
-                    child = list(filter(lambda x: x.text.startswith(menuitem) and EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), subMenuElements))
+                    child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))
 
                 child = next(iter(child), None)
+                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
 
                 if subMenuElements and submenu():
@@ -3400,9 +3403,10 @@ class WebappInternal(Base):
                     self.wait_blocker()
                     expanded = lambda: 'expanded' in submenu().get_attribute('class')
                     item_exist = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body, wa-dialog")
+                    tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
-                    while time.time() < endtime and (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist()):
+                    while time.time() < endtime and (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist() and not tmodal()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
