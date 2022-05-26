@@ -7336,7 +7336,10 @@ class WebappInternal(Base):
 
         tree_node = ""
 
-        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
+        if self.webapp_shadowroot():
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".dict-ttree")
+        else:
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
 
         endtime = time.time() + self.config.time_out
 
@@ -7344,7 +7347,10 @@ class WebappInternal(Base):
 
             container = self.get_current_container()
 
-            tree_node = container.select(".ttreenode")
+            if self.webapp_shadowroot():
+                tree_node = container.select("wa-tree-node")
+            else:
+                tree_node = container.select(".ttreenode")
 
         if not tree_node:
             self.log_error("Couldn't find tree element.")
@@ -7371,7 +7377,10 @@ class WebappInternal(Base):
 
             tr_class = list(filter(lambda x: "class" in x.attrs, tr))
 
-            ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+            if self.webapp_shadowroot():
+                ttreenode = list(filter(lambda x: "wa-tree-node" in x.attrs['class'], tr_class))
+            else:
+                ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
 
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
@@ -7384,12 +7393,15 @@ class WebappInternal(Base):
             else:
                 return False
         else:
-            tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
-            if tree_selected.find_all_next("span"):
-                if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
-                    return "expanded" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+            if self.webapp_shadowroot():
+                tree_selected = next(iter(list(filter(lambda x: label_filtered == x.get('caption').lower().strip(), treenode_selected))), None)
             else:
-                return False
+                tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+                if tree_selected.find_all_next("span"):
+                    if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
+                        return "expanded" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
+                else:
+                    return False
 
     def check_toggler(self, label_filtered, element):
         """
