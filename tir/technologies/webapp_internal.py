@@ -4779,7 +4779,13 @@ class WebappInternal(Base):
         >>> oHelper.SetFocus("A1_COD", grid_cell = True)
         """
         if grid_cell:
-            self.wait_element(field)
+            if self.webapp_shadowroot():
+                self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
+                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase',
+                                  main_container="body")
+            else:
+                self.wait_element(field)
+
 
             self.ClickGridCell(field, row_number)
             time.sleep(1)
@@ -5740,8 +5746,9 @@ class WebappInternal(Base):
         same_location = False
 
         self.wait_blocker()
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
+        self.wait_element(
+            term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase",
+            scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         endtime = time.time() + self.config.time_out
 
@@ -5752,36 +5759,68 @@ class WebappInternal(Base):
 
         while(not success and time.time() < endtime):
 
-            containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            container = next(iter(self.zindex_sort(containers, True)), None)
+            if self.webapp_shadowroot():
+                self.wait_element_timeout(term=column,
+                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
+                                          optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase',
+                                          main_container="body")
+                containers = self.get_current_container()
+            else:
+                self.wait_element_timeout(term=column, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out,
+                                          optional_term='label')
+                containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
+            container = next(iter(self.zindex_sort(containers, True)), None) if isinstance(containers, list) else containers
             if container:
-                grids = self.filter_displayed_elements(container.select(".tgetdados, .tgrid, .tcbrowse"))
+                grids = self.filter_displayed_elements(container.select(
+                    ".tgetdados, .tgrid, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase"))
 
                 if grids:
                     if len(grids) > 1:
                         grids, same_location = self.filter_non_obscured(grids, grid_number)
                         if same_location:
                             grid_number = 0
-                    grids = list(filter(lambda x:x.select("tbody tr"), grids))
+                    grids = list(filter(lambda x:x.select("tbody tr"), grids)) if list(filter(lambda x:x.select("tbody tr"), grids)) else grids
                     headers = self.get_headers_from_grids(grids)
                     if grid_number < len(grids):
-                        rows = grids[grid_number].select("tbody tr")
+                        if self.webapp_shadowroot():
+                            rows = self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(grids[grid_number]))
+                        else:
+                            rows = grids[grid_number].select("tbody tr")
+
                     if rows:
                         if row_number < len(rows):
-                            columns = rows[row_number].select("td")
+                            if self.webapp_shadowroot():
+                                columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", rows[row_number])
+                            else:
+                                columns = rows[row_number].select("td")
+
                     if columns:
                         if column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
-                            column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
+                            if self.webapp_shadowroot():
+                                column_element = lambda: columns[column_number]
+                            else:
+                                column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
+
                             if column_element_old_class == None:
                                 column_element_old_class = column_element().get_attribute("class")
 
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
+                            if self.webapp_shadowroot():
+                                self.wait_until_to(expected_condition="visibility_of", element=column_element)
+                            else:
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
                             self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
+                                if self.webapp_shadowroot():
+                                    self.wait_until_to(expected_condition="visibility_of", element=column_element)
+                                else:
+                                    self.wait_until_to(expected_condition="element_to_be_clickable",
+                                                       element=columns[column_number], locator=By.XPATH, timeout=True)
                                 self.wait_blocker()
                                 success = True
                             elif grids[grid_number] and "tcbrowse" in grids[grid_number].attrs['class']:
