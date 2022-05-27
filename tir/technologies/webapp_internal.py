@@ -822,7 +822,7 @@ class WebappInternal(Base):
             self.switch_to_iframe()
             enable = env().is_enabled()
         else:
-            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()) and not hasattr(environment_element, 'disabled')
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()) and not env().get_attribute('disabled')
 
         if enable:
             env_value = ''
