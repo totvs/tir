@@ -3806,10 +3806,18 @@ class WebappInternal(Base):
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
 
-        menu_id = self.zindex_sort(soup.select(".tmenupopup.active"), True)[0].attrs["id"]
+        if self.webapp_shadowroot():
+            selector = '.dict-tmenuitem.expanded.selected'
+        else:
+            selector = '.tmenupopup.active'
+        menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
         menu = self.driver.find_element_by_id(menu_id)
 
-        menu_itens = menu.find_elements(By.CSS_SELECTOR, ".tmenupopupitem")
+        if self.webapp_shadowroot():
+            class_selector = '.dict-tmenuitem'
+        else:
+            class_selector = ".tmenupopupitem"
+        menu_itens = menu.find_elements(By.CSS_SELECTOR, class_selector)
 
         result = self.find_sub_menu_text(sub_item, menu_itens)
 
