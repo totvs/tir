@@ -3364,9 +3364,10 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
+        last_index = len(menu_itens)-1
 
         try:
-            for menuitem in menu_itens:
+            for index, menuitem in enumerate(menu_itens):
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
@@ -3384,7 +3385,7 @@ class WebappInternal(Base):
                     subMenuElements = menu.select(menu_itens_term)
                     if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
                         self.restart_counter += 1
-                        self.log_error(f"Couldn't find menu item: {menuitem}")
+                        self.log_error(f"Couldn't find lateral menu")
 
                 regex = r"(<[^>]*>)?"
                 if self.webapp_shadowroot():
@@ -3392,7 +3393,11 @@ class WebappInternal(Base):
                 else:
                     child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))
 
-                child = next(iter(child), None)
+                if not child:
+                    self.restart_counter += 1
+                    self.log_error(f"Couldn't find menu item: {menuitem}")
+
+                child = next(reversed(child), None)
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
 
@@ -3406,7 +3411,7 @@ class WebappInternal(Base):
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
-                    while time.time() < endtime and (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist() and not tmodal()):
+                    while time.time() < endtime and (index != last_index and not expanded()) or (index == last_index and item_exist() and not tmodal()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
