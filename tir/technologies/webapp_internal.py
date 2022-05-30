@@ -3598,27 +3598,24 @@ class WebappInternal(Base):
                 logger().debug(f"***System Info*** Before Clicking on button:")
                 system_info()
 
+            regex = r"(<[^>]*>)?"
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
                     soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
+                    
                     if soup_objects:
-                        regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
-                        if filtered_button:
-                            if len(filtered_button) > 1:
-                                filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))
-                                if not filtered_button:
-                                    filtered_button = list(filter(lambda x: hasattr(x,'caption') and button in re.sub(regex,'',x['caption']), soup_objects ))[-1]
-                                else:
-                                    filtered_button = list(filter(lambda x: 'focus' in x.get('class'), filtered_button ))[0]        
-                            else:
-                                filtered_button = filtered_button[0]
 
-                            id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
-                            soup_element = self.soup_to_selenium(filtered_button)
+                        if filtered_button:
+                            filtered_button = next(reversed(filtered_button), None)
+                        else:
+                            filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
+
+                        id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
+                        soup_element = self.soup_to_selenium(filtered_button)
                             
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -3665,11 +3662,15 @@ class WebappInternal(Base):
                     self.wait_element_is_not_focused(soup_element)
 
             if sub_item and ',' not in sub_item:
+                logger().info(f"Clicking on {sub_item}")
                 if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
                     self.tmenu_out_iframe = True
 
                 soup_objects_filtered = None
                 while (time.time() < endtime and not soup_objects_filtered):
+                    if button == self.language.other_actions:
+                        self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
                                                   optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
                                                   check_error=check_error, second_term='wa-menu-popup-item')
