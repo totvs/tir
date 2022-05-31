@@ -5279,12 +5279,7 @@ class WebappInternal(Base):
                             selector_dialog_widget)
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                        if self.grid_memo_field:
-                            term = selector_dialog
-                        else:
-                            term = selector_dialog_widget
-
-                        while (time.time() < endtime and not self.element_exists(term=term,
+                        while (time.time() < endtime and not self.element_exists(term=selector_dialog,
                                                                                  scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                                                  position=tmodal_layer + 1,
                                                                                  main_container=selector_main_container)):
