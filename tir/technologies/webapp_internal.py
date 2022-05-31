@@ -4836,8 +4836,11 @@ class WebappInternal(Base):
                 if label_filtered and not self.element_is_displayed(label_filtered):
                     self.scroll_to_element( self.soup_to_selenium(label_filtered) )
 
+            if self.webapp_shadowroot():
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["GetCurrentContainer"], label=label, position=position)), None) 
+            else:
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
 
-            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
             if not element:
                 element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
             if element and not self.element_is_displayed(element):
