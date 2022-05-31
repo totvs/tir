@@ -3376,10 +3376,9 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        last_index = len(menu_itens)-1
 
         try:
-            for index, menuitem in enumerate(menu_itens):
+            for menuitem in menu_itens:
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
                 self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
@@ -3397,7 +3396,7 @@ class WebappInternal(Base):
                     subMenuElements = menu.select(menu_itens_term)
                     if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
                         self.restart_counter += 1
-                        self.log_error(f"Couldn't find lateral menu")
+                        self.log_error(f"Couldn't find menu item: {menuitem}")
 
                 regex = r"(<[^>]*>)?"
                 if self.webapp_shadowroot():
@@ -3405,11 +3404,7 @@ class WebappInternal(Base):
                 else:
                     child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))
 
-                if not child:
-                    self.restart_counter += 1
-                    self.log_error(f"Couldn't find menu item: {menuitem}")
-
-                child = next(reversed(child), None)
+                child = next(iter(child), None)
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
 
@@ -3423,7 +3418,7 @@ class WebappInternal(Base):
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
-                    while time.time() < endtime and (index != last_index and not expanded()) or (index == last_index and item_exist() and not tmodal()):
+                    while time.time() < endtime and (menuitem != menu_itens[-1] and not expanded()) or (menuitem == menu_itens[-1] and item_exist() and not tmodal()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
@@ -3617,12 +3612,11 @@ class WebappInternal(Base):
                     soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
-                    
                     if soup_objects:
+                        regex = r"(<[^>]*>)?"
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
-
                         if filtered_button:
-                            filtered_button = next(reversed(filtered_button), None)
+                            filtered_button = filtered_button [-1]
                         else:
                             filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
 
@@ -3681,9 +3675,6 @@ class WebappInternal(Base):
 
                 soup_objects_filtered = None
                 while (time.time() < endtime and not soup_objects_filtered):
-                    if button == self.language.other_actions:
-                        self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
-
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
                                                   optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
                                                   check_error=check_error, second_term='wa-menu-popup-item')
@@ -4837,7 +4828,11 @@ class WebappInternal(Base):
                     self.scroll_to_element( self.soup_to_selenium(label_filtered) )
 
 
-            element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+            if self.webapp_shadowroot():
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["GetCurrentContainer"], label=label, position=position)), None) 
+            else:
+                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+            
             if not element:
                 element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
             if element and not self.element_is_displayed(element):
@@ -7402,7 +7397,7 @@ class WebappInternal(Base):
         tree_node = ""
 
         if self.webapp_shadowroot():
-            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".dict-ttree")
+            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term="wa-tree-node")
         else:
             self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
 
