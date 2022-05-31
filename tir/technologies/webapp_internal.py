@@ -3807,28 +3807,30 @@ class WebappInternal(Base):
         soup = BeautifulSoup(content,"html.parser")
 
         if self.webapp_shadowroot():
-            selector = '.dict-tmenuitem.expanded.selected'
+            selector = '.dict-tmenuitem'
+            menu_id = list(filter(lambda x: x.get('caption') == sub_item, soup.select(selector)))[0].get('id')            
         else:
             selector = '.tmenupopup.active'
-        menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
+            menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
         menu = self.driver.find_element_by_id(menu_id)
 
         if self.webapp_shadowroot():
             class_selector = '.dict-tmenuitem'
+            item = menu
         else:
             class_selector = ".tmenupopupitem"
-        menu_itens = menu.find_elements(By.CSS_SELECTOR, class_selector)
+            menu_itens = menu.find_elements(By.CSS_SELECTOR, class_selector)
 
-        result = self.find_sub_menu_text(sub_item, menu_itens)
+            result = self.find_sub_menu_text(sub_item, menu_itens)
 
-        item = ""
-        if result[1]:
-            item = self.find_sub_menu_child(sub_item, result[1])
-        elif result[0]:
-            item = result[0]
+            item = ""
+            if result[1]:
+                item = self.find_sub_menu_child(sub_item, result[1])
+            elif result[0]:
+                item = result[0]
 
-        else:
-            return False
+            else:
+                return False
 
         if item:
             self.scroll_to_element(item)
