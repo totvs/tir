@@ -4548,13 +4548,8 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
                         tmodal_list = soup.select('.tmodaldialog')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
-
-                        if self.grid_memo_field:
-                            term = ".tmodaldialog"
-                        else:
-                            term = ".tmodaldialog.twidget.borderless"
                             
-                        while (time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
+                        while (time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
