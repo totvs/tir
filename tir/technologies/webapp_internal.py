@@ -6767,7 +6767,8 @@ class WebappInternal(Base):
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
         if restore_backup == True and self.parameters:
             return
-
+        #TODO sleep
+        time.sleep(3)
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
@@ -6781,6 +6782,7 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f" {method} error: {tmessagebox[0].text}")
 
+        time.sleep(3)
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, save_input=not self.config.autostart)
