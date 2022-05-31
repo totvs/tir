@@ -1894,10 +1894,22 @@ class WebappInternal(Base):
         sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
+        if self.webapp_shadowroot():
+            input_lenght = ''
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not input_lenght:
+                try:
+                    input_lenght = self.driver.execute_script('return arguments[0]._maxLength', sel_browse_input())
+                except:
+                    pass
+
+            if len(term.strip()) > input_lenght:
+                self.log_error(f"field length exceeded")
+
         current_value = self.get_element_value(sel_browse_input())
 
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and current_value.rstrip() != term.strip()[0:25]):
+        while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
                 self.click(sel_browse_input())
@@ -1913,7 +1925,7 @@ class WebappInternal(Base):
                     self.get_search_browse_elements()
             except:
                 pass
-        if current_value.rstrip() != term.strip()[0:25]:
+        if current_value.rstrip() != term.strip():
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
@@ -6765,7 +6777,8 @@ class WebappInternal(Base):
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
         if restore_backup == True and self.parameters:
             return
-
+        #TODO sleep
+        time.sleep(3)
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
@@ -6779,6 +6792,7 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f" {method} error: {tmessagebox[0].text}")
 
+        time.sleep(3)
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, save_input=not self.config.autostart)
