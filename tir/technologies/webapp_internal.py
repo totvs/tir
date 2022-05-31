@@ -3626,8 +3626,9 @@ class WebappInternal(Base):
                         else:
                             filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
 
-                        id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
-                        soup_element = self.soup_to_selenium(filtered_button)
+                        if filtered_button:
+                            id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
+                            soup_element = self.soup_to_selenium(filtered_button)
                             
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
