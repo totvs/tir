@@ -2360,7 +2360,7 @@ class WebappInternal(Base):
 
             if input_field:
                 if 'type' in element.attrs:
-                    valtype = self.value_type(element.attrs["type"]) 
+                    valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
@@ -3090,26 +3090,29 @@ class WebappInternal(Base):
         """
         regx_sub = r"[\n?\s?]"
         try:
-            labels = list(map(
+            labels_list = list(map(
                 lambda x: self.driver.execute_script(
                     f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, {second_term}')",
                     self.soup_to_selenium(x)),
                 container.select(optional_term)))
-            if len(list(filter(lambda x: x is not None and x, labels))) == 0:
-                labels = list(map(
+            if len(list(filter(lambda x: x is not None and x, labels_list))) == 0:
+                labels_list = list(map(
                     lambda x: self.driver.execute_script(
                         f"return arguments[0].querySelectorAll('label, span, wa-dialog-header, {second_term}')",
                         self.soup_to_selenium(x)),
                     container.select(optional_term)))
-            labels_not_none = list(filter(lambda x: x is not None and x, labels))
-            if len(labels_not_none) > 0:
-                labels_displayed = list(filter(lambda x: x[0].is_displayed(), labels_not_none))
-                element = next(iter(list(filter(lambda x: term.lower() in x[0].text.lower(), labels_displayed))),
-                               None)
-                if not element and len(labels_not_none) == 1:
-                    element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed[0]))
-                if element:
-                    return element
+
+            for labels in labels_list:
+                labels_not_none = list(filter(lambda x: x is not None and x, labels))
+                if len(labels_not_none) > 0:
+                    labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                    if labels_displayed:
+                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))),
+                                       None)
+                        if not element and len(labels_not_none) == 1:
+                            element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
+                        if element:
+                            return [element]
         except:
             return None
 
@@ -3478,6 +3481,9 @@ class WebappInternal(Base):
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
+
+            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"): #TODO avaliar outra forma de validar a presença
+                self.close_news_screen()
 
         except AssertionError as error:
             raise error
@@ -5136,7 +5142,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase',
+                                      optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid',
                                       main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
@@ -5179,7 +5185,7 @@ class WebappInternal(Base):
                         logger().exception(str(err))
                         pass
                     if self.webapp_shadowroot():
-                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase")
+                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid")
                     else:
                         grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                     grids = self.filter_displayed_elements(grids)
@@ -5263,11 +5269,13 @@ class WebappInternal(Base):
                                                                                                                   headers,
                                                                                                                   field_to_label)
 
-                        self.scroll_to_element(selenium_column())
-                        self.click(selenium_column(),
-                                   click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
-                            selenium_column())
-                        self.set_element_focus(selenium_column())
+                        endtime_selected_cell = time.time() + self.config.time_out
+                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
+                            self.scroll_to_element(selenium_column())
+                            self.click(selenium_column(),
+                                       click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                selenium_column())
+                            self.set_element_focus(selenium_column())
 
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
@@ -5321,7 +5329,7 @@ class WebappInternal(Base):
                                           position=position_fillgrid, main_container='body')
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog"
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid"
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
@@ -5475,6 +5483,12 @@ class WebappInternal(Base):
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
             self.log_error(
                 f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
+
+    def selected_cell(self, element):
+        """
+        [Internal]
+        """
+        return element.get_attribute('class') == 'selected-cell'
 
     def get_selenium_column_element(self, xpath):
         """
@@ -5771,10 +5785,11 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
+        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid"
 
         self.wait_blocker()
         self.wait_element(
-            term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase",
+            term=term,
             scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         endtime = time.time() + self.config.time_out
@@ -5789,7 +5804,7 @@ class WebappInternal(Base):
             if self.webapp_shadowroot():
                 self.wait_element_timeout(term=column,
                                           scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                          optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase',
+                                          optional_term=term,
                                           main_container="body")
                 containers = self.get_current_container()
             else:
@@ -5799,8 +5814,7 @@ class WebappInternal(Base):
 
             container = next(iter(self.zindex_sort(containers, True)), None) if isinstance(containers, list) else containers
             if container:
-                grids = self.filter_displayed_elements(container.select(
-                    ".tgetdados, .tgrid, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase"))
+                grids = self.filter_displayed_elements(container.select(term))
 
                 if grids:
                     if len(grids) > 1:
@@ -5839,7 +5853,7 @@ class WebappInternal(Base):
                                 self.wait_until_to(expected_condition="visibility_of", element=column_element)
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
-                            self.click(column_element())
+                            self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
@@ -7148,14 +7162,19 @@ class WebappInternal(Base):
             if not container:
                 self.log_error("Couldn't locate container.")
 
-            labels_boxs = container.select("span")
-            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
+            labels_boxs = container.select("span, wa-checkbox")
+            if self.webapp_shadowroot():
+                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.get('caption').lower(), labels_boxs))
+            else:
+                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
 
             if position <= len(filtered_labels_boxs):
                 position -= 1
-                label_box = filtered_labels_boxs[position].parent
-                if 'tcheckbox' in label_box.get_attribute_list('class'):
+                label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[position]
+                if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                     label_box_element = lambda: self.soup_to_selenium(label_box)
+                    if self.webapp_shadowroot():
+                        label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
                     self.click(label_box_element())
                 else:
                     self.log_error("Index the Ckeckbox invalid.")
@@ -7758,10 +7777,14 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
+            regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
             if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
                 wa_text_view = container.select('wa-text-view')
-                regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
                 wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
+
+                if not wa_text_view_filtered:
+                    wa_text_view = container.select('wa-panel>wa-checkbox')
+                    wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
 
                 if len(wa_text_view_filtered)-1 >= position:
                     return [wa_text_view_filtered[position]]
