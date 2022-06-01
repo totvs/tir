@@ -3479,6 +3479,9 @@ class WebappInternal(Base):
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
 
+            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"): #TODO avaliar outra forma de validar a presença
+                self.close_news_screen()
+
         except AssertionError as error:
             raise error
         except Exception as error:
@@ -7148,14 +7151,19 @@ class WebappInternal(Base):
             if not container:
                 self.log_error("Couldn't locate container.")
 
-            labels_boxs = container.select("span")
-            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
+            labels_boxs = container.select("span, wa-checkbox")
+            if self.webapp_shadowroot():
+                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.get('caption').lower(), labels_boxs))
+            else:
+                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
 
             if position <= len(filtered_labels_boxs):
                 position -= 1
-                label_box = filtered_labels_boxs[position].parent
-                if 'tcheckbox' in label_box.get_attribute_list('class'):
+                label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[position]
+                if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                     label_box_element = lambda: self.soup_to_selenium(label_box)
+                    if self.webapp_shadowroot():
+                        label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
                     self.click(label_box_element())
                 else:
                     self.log_error("Index the Ckeckbox invalid.")
@@ -7758,10 +7766,14 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
+            regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
             if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
                 wa_text_view = container.select('wa-text-view')
-                regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
                 wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
+
+                if not wa_text_view_filtered:
+                    wa_text_view = container.select('wa-panel>wa-checkbox')
+                    wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
 
                 if len(wa_text_view_filtered)-1 >= position:
                     return [wa_text_view_filtered[position]]
