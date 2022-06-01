@@ -3479,6 +3479,9 @@ class WebappInternal(Base):
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
 
+            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"): #TODO avaliar outra forma de validar a presença
+                self.close_news_screen()
+
         except AssertionError as error:
             raise error
         except Exception as error:
