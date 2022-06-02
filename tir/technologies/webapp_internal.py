@@ -6628,6 +6628,9 @@ class WebappInternal(Base):
                 except Exception as e:
                     logger().exception(f"Warning Log Error Close {str(e)}")
 
+        if stack_item != "setUpClass":
+            self.restart_counter = 0
+
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
             if self.restart_counter >= 3:
                 self.restart_counter = 0
