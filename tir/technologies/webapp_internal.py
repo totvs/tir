@@ -7347,7 +7347,10 @@ class WebappInternal(Base):
 
                 tree_node = self.find_tree_bs(label_filtered)
 
-                tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+                if self.webapp_shadowroot():
+                    tree_node_filtered = tree_node
+                else: 
+                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node_filtered))
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
@@ -7365,33 +7368,51 @@ class WebappInternal(Base):
 
                     for element in elements:
                         if not success:
-                            element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
+                            if self.webapp_shadowroot():
+                                element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)              
+                            else:
+                                element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
-                            if "data" in element_class.get_attribute_list("class"):
-                                element_class =  element_class.select("img, span")
+                                if "data" in element_class.get_attribute_list("class"):
+                                    element_class =  element_class.select("img, span")
 
                             for element_class_item in element_class:
                                 if not success:
-
-                                    element_click = lambda: self.soup_to_selenium(element_class_item)
+                                    if self.webapp_shadowroot():
+                                        element_click = element_class_item
+                                    else:
+                                        element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
+                                        if self.webapp_shadowroot():
+                                            element_tree = element_click
+                                        else:
+                                            element_tree = element_click()
+
                                         if last_item:
                                             start_time = time.time()
                                             self.wait_blocker()
-                                            self.scroll_to_element(element_click())
-                                            element_click().click()
-                                            if self.check_toggler(label_filtered, element):
+                                            self.scroll_to_element(element_tree)
+                                            element_tree.click()
+                                            if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    if self.webapp_shadowroot():
+                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
+                                                    else:
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
-                                                if right_click:
-                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
-                                                success = self.clicktree_status_selected(label_filtered)
+                                                if self.check_toggler(label_filtered, element):
+                                                    success = self.check_hierarchy(label_filtered)
+                                                    if success and right_click:
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                else:
+                                                    if right_click:
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
-                                            self.scroll_to_element(element_click())
-                                            element_click().click()
+                                            self.scroll_to_element(element_tree)
+                                            element_tree.click()
                                             success = self.check_hierarchy(label_filtered)
 
                                         try_counter += 1
@@ -7435,7 +7456,8 @@ class WebappInternal(Base):
             container = self.get_current_container()
 
             if self.webapp_shadowroot():
-                tree_node = container.select("wa-tree-node")
+                tree = container.select("wa-tree")
+                tree_node = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(tree[0]))                
             else:
                 tree_node = container.select(".ttreenode")
 
@@ -7553,17 +7575,20 @@ class WebappInternal(Base):
 
         node_check = None
 
-        while (counter <= 3 and not node_check):
+        if self.webapp_shadowroot():
+            return True
+        else:
+            while (counter <= 3 and not node_check):
 
-            treenode_parent_id = self.treenode_selected(label).attrs['id']
+                treenode_parent_id = self.treenode_selected(label).attrs['id']
 
-            treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
+                treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
 
-            node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
+                node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
 
-            counter += 1
+                counter += 1
 
-        return True if node_check else self.clicktree_status_selected(label, check_expanded=True)
+            return True if node_check else self.clicktree_status_selected(label, check_expanded=True)
 
     def GridTree(self, column , tree_path, right_click = False):
         """
