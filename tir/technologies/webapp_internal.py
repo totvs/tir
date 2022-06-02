@@ -8762,13 +8762,9 @@ class WebappInternal(Base):
 
 
     def find_shadow_element(self, term, objects):
-        elements = []
-        endtime = time.time() + self.config.time_out
         script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
-
-        while not elements and time.time() < endtime:
-            try:
-                elements = self.driver.execute_script(script, objects)
-            except:
-                pass
+        try:
+            elements = self.driver.execute_script(script, objects)
+        except:
+            pass
         return elements if elements else None
