@@ -5605,11 +5605,16 @@ class WebappInternal(Base):
 
         while(time.time() < endtime and not success):
 
-            containers = self.web_scrap(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            containers = self.web_scrap(term=".tmodaldialog, wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             container = next(iter(self.zindex_sort(containers, True)), None)
 
             if container:
-                grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+                if self.webapp_shadowroot():
+                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse"
+                else:
+                    grid_term = ".tgetdados, .tgrid, .tcbrowse"
+                
+                grids = container.select(grid_term)
                 grids = self.filter_displayed_elements(grids)
 
             if grids:
@@ -5618,8 +5623,12 @@ class WebappInternal(Base):
 
                 if field[3] > len(grids):
                     self.log_error(self.language.messages.grid_number_error)
-
-                rows = grids[field[3]].select("tbody tr")
+                
+                if self.webapp_shadowroot():
+                    grid = self.soup_to_selenium(grids[field[3]])
+                    rows = self.find_shadow_element('tbody tr', grid)
+                else:
+                    rows = grids[field[3]].select("tbody tr")
 
                 if rows:
                     if field[0] > len(rows)-1:
@@ -5631,7 +5640,10 @@ class WebappInternal(Base):
                     field_element = next(iter(field), None)
 
                     if field_element != None and len(rows) -1 >= field_element:
-                        columns = rows[field_element].select("td")
+                        if self.webapp_shadowroot():
+                            columns = rows[field_element].find_elements_by_css_selector('td')
+                        else:
+                            columns = rows[field_element].select("td")
 
                 if columns and rows:
 
