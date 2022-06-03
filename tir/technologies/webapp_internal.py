@@ -4816,7 +4816,7 @@ class WebappInternal(Base):
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
-                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase',
+                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb',#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
                                   main_container="body")
             else:
                 self.wait_element(field)
@@ -5031,7 +5031,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5142,8 +5142,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid',
-                                      main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5185,7 +5184,7 @@ class WebappInternal(Base):
                         logger().exception(str(err))
                         pass
                     if self.webapp_shadowroot():
-                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid")
+                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
                     else:
                         grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                     grids = self.filter_displayed_elements(grids)
@@ -5270,7 +5269,7 @@ class WebappInternal(Base):
                                                                                                                   field_to_label)
 
                         endtime_selected_cell = time.time() + self.config.time_out
-                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
+                        while time.time() < endtime_selected_cell and self.selected_cell(selenium_column()):
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column(),
                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
@@ -5329,7 +5328,7 @@ class WebappInternal(Base):
                                           position=position_fillgrid, main_container='body')
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid"
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb"
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
@@ -5610,7 +5609,7 @@ class WebappInternal(Base):
 
             if container:
                 if self.webapp_shadowroot():
-                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse"
+                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
                 else:
                     grid_term = ".tgetdados, .tgrid, .tcbrowse"
                 
@@ -5797,7 +5796,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid"
+        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
 
         self.wait_blocker()
         self.wait_element(
