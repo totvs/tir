@@ -2083,7 +2083,10 @@ class WebappInternal(Base):
             list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
 
             if not input_field:
-                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+                if self.webapp_shadowroot():
+                    list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower(), list_in_range))
+                else:
+                    list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
@@ -4273,10 +4276,10 @@ class WebappInternal(Base):
                             count +=1
 
             except Exception as e:
-                self.log_error(f"Content doesn't found on the screen! {str(e)}")
+                logger().exception(f"Content doesn't found on the screen! {str(e)}")
 
         if len(index_number) < 1:
-            self.log_error(f"Content doesn't found on the screen! {first_content}")
+            logger().exception(f"Content doesn't found on the screen! {first_content}")
 
         tr = grid.select('tbody > tr')
 
@@ -5328,7 +5331,7 @@ class WebappInternal(Base):
                                           position=position_fillgrid, main_container='body')
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb"
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget"
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
