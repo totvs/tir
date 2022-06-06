@@ -2083,7 +2083,10 @@ class WebappInternal(Base):
             list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
 
             if not input_field:
-                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+                if self.webapp_shadowroot():
+                    list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower(), list_in_range))
+                else:
+                    list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
             position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
