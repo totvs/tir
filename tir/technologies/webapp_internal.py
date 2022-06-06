@@ -4276,10 +4276,10 @@ class WebappInternal(Base):
                             count +=1
 
             except Exception as e:
-                self.log_error(f"Content doesn't found on the screen! {str(e)}")
+                logger().exception(f"Content doesn't found on the screen! {str(e)}")
 
         if len(index_number) < 1:
-            self.log_error(f"Content doesn't found on the screen! {first_content}")
+            logger().exception(f"Content doesn't found on the screen! {first_content}")
 
         tr = grid.select('tbody > tr')
 
@@ -5331,7 +5331,7 @@ class WebappInternal(Base):
                                           position=position_fillgrid, main_container='body')
                         soup = self.get_current_DOM()
                         if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb"
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget"
                         else:
                             new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
