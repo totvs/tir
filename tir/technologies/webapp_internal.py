@@ -5151,7 +5151,8 @@ class WebappInternal(Base):
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                       optional_term='th label', main_container='body')
 
-        endtime = time.time() + self.config.time_out
+        #TODO validar loop 
+        '''endtime = time.time() + self.config.time_out
         if self.webapp_shadowroot():
             while (self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        position=initial_layer + 1, main_container="body") and time.time() < endtime):
@@ -5161,11 +5162,10 @@ class WebappInternal(Base):
             while (self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        position=initial_layer + 1, main_container="body") and time.time() < endtime):
                 logger().debug("Waiting for container to be active")
-                time.sleep(1)
+                time.sleep(1)'''
 
         endtime = time.time() + self.config.time_out
-        while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',',
-                                                                                             '') and time.time() < endtime):
+        while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
 
             endtime_row = time.time() + self.config.time_out
             while (time.time() < endtime_row and grid_reload):
@@ -5279,24 +5279,18 @@ class WebappInternal(Base):
                                 selenium_column())
                             self.set_element_focus(selenium_column())
 
-                        soup = self.get_current_DOM()
-                        if self.webapp_shadowroot():
-                            selector_dialog = 'wa-dialog'
-                            selector_dialog_widget = "[data-advpl='tdialog']"
-                            selector_main_container = 'body'
-                        else:
-                            selector_dialog = '.tmodaldialog'
-                            selector_dialog_widget = '.tmodaldialog.twidget.borderless'
-                            selector_main_container = 'body'
+                        
 
-                        tmodal_list = soup.select(selector_dialog) if self.grid_memo_field else soup.select(
-                            selector_dialog_widget)
+                        if self.webapp_shadowroot():
+                            term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
+                        else:
+                            term = ".tmodaldialog"
+
+                        soup = self.get_current_DOM()
+                        tmodal_list = soup.select(term)
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                        while (time.time() < endtime and not self.element_exists(term=selector_dialog,
-                                                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                                 position=tmodal_layer + 1,
-                                                                                 main_container=selector_main_container)):
+                        while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                             time.sleep(1)
                             self.scroll_to_element(selenium_column())
                             self.set_element_focus(selenium_column())
@@ -5320,28 +5314,29 @@ class WebappInternal(Base):
                                 break
 
                         if (field[1] == True): break  # if boolean field finish here.
+
                         if self.webapp_shadowroot():
                             wait_selector = "wa-dialog"
                             position_fillgrid = initial_layer
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget"
                         else:
-                            position_fillgrid = initial_layer + 1
                             wait_selector = ".tmodaldialog"
+                            position_fillgrid = initial_layer + 1
+                            new_container_selector = ".tmodaldialog.twidget"
 
                         self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                           position=position_fillgrid, main_container='body')
+
                         soup = self.get_current_DOM()
-                        if self.webapp_shadowroot():
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget"
-                        else:
-                            new_container_selector = ".tmodaldialog.twidget"
                         new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
+
                         if self.webapp_shadowroot():
                             endtime_child = time.time() + self.config.time_out
                             child = None
                             while time.time() < endtime_child and not child:
                                 try:
                                     child = self.driver.execute_script(
-                                        "return arguments[0].shadowRoot.querySelector('input')",
+                                        "return arguments[0].shadowRoot.querySelector('input, textarea')",
                                         self.soup_to_selenium(new_container))
                                 except Exception as err:
                                     logger().info(f'fillgrid child error: {str(err)}')
@@ -5436,8 +5431,9 @@ class WebappInternal(Base):
 
                             try_endtime = self.config.time_out / 4
                             while try_endtime > 0:
+                                try_endtime = try_endtime - 10
                                 if self.webapp_shadowroot():
-                                    element_exist = new_container
+                                    element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body')
                                 else:
                                     element_exist = self.wait_element_timeout(term=xpath_soup(child[0]),
                                                                               scrap_type=enum.ScrapType.XPATH,
@@ -5447,7 +5443,6 @@ class WebappInternal(Base):
                                     current_value = self.get_element_text(selenium_column())
                                     if current_value == None:
                                         current_value = ''
-                                    break
                                 else:
                                     try_endtime = try_endtime - 10
                                     containers = self.get_current_DOM().select(
