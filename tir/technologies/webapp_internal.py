@@ -164,7 +164,7 @@ class WebappInternal(Base):
         except ValueError as e:
             self.log_error(str(e))
         except Exception as e:
-            self.log_error(str(e))
+            logger().exception(str(e))
 
     def user_screen_tss(self):
         """
@@ -282,7 +282,7 @@ class WebappInternal(Base):
         except ValueError as error:
             self.log_error(error)
         except Exception as e:
-            self.log_error(str(e))
+            logger().exception(str(e))
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
@@ -1433,7 +1433,7 @@ class WebappInternal(Base):
             logger().exception(f"Warning set program raise AssertionError: {str(error)}")
             raise error
         except Exception as e:
-            self.log_error(str(e))
+            logger().exception(str(e))
 
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
@@ -1505,7 +1505,7 @@ class WebappInternal(Base):
                 logger().debug("Success")
 
         except Exception as e:
-            self.log_error(str(e))
+            logger().exception(str(e))
 
     def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
         """
@@ -2103,7 +2103,7 @@ class WebappInternal(Base):
             raise error
         except Exception as error:
             logger().exception(str(error))
-            self.log_error(str(error))
+            
 
 
     def width_height(self, container_size):
@@ -3084,7 +3084,7 @@ class WebappInternal(Base):
         except AssertionError:
             raise
         except Exception as e:
-            self.log_error(str(e))
+            logger().exception(str(e))
 
     def selenium_web_scrap(self, term, container, optional_term, second_term):
         """
@@ -3493,7 +3493,6 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.restart_counter += 1
-            self.log_error(str(error))
 
 
     def expanded_menu(self, element):
@@ -3767,7 +3766,6 @@ class WebappInternal(Base):
             raise
         except Exception as error:
             logger().exception(str(error))
-            self.log_error(str(error))
 
         if self.config.smart_test:
             logger().debug(f"***System Info*** After Clicking on button:")
@@ -4716,7 +4714,7 @@ class WebappInternal(Base):
         except WebDriverException as e:
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
-            self.log_error(str(error))
+            logger().exception(str(error))
 
     def supported_keys(self, key = ""):
         """
@@ -5150,19 +5148,6 @@ class WebappInternal(Base):
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                       optional_term='th label', main_container='body')
-
-        #TODO validar loop 
-        '''endtime = time.time() + self.config.time_out
-        if self.webapp_shadowroot():
-            while (self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       position=initial_layer + 1, main_container="body") and time.time() < endtime):
-                logger().debug("Waiting for container to be active")
-                time.sleep(1)
-        else:
-            while (self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       position=initial_layer + 1, main_container="body") and time.time() < endtime):
-                logger().debug("Waiting for container to be active")
-                time.sleep(1)'''
 
         endtime = time.time() + self.config.time_out
         while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
