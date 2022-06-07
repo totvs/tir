@@ -2084,7 +2084,7 @@ class WebappInternal(Base):
 
             if not input_field:
                 if self.webapp_shadowroot():
-                    list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower(), list_in_range))
+                    list_in_range = list(filter(lambda x: field.strip().lower() != x.previousSibling.getText().strip().lower().replace('*', ''), list_in_range))
                 else:
                     list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
@@ -2094,6 +2094,11 @@ class WebappInternal(Base):
             if distance:
                 elem          = min(distance, key = lambda x: x[1])
                 elem          = list_in_range[elem[0]]
+
+                if self.webapp_shadowroot():
+                    if field.strip().lower() != elem.previousSibling.getText().strip().lower().replace('*',''):
+                        list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower().replace('*', ''), list_in_range))
+                        elem = list_in_range[0]
 
             if not elem:
                 self.log_error(f"Label '{field}' wasn't found")
