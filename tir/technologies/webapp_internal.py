@@ -2625,6 +2625,11 @@ class WebappInternal(Base):
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
 
             if self.webapp_shadowroot():
+                container = self.get_current_container()
+                labels = container.select('label')
+                current_list = list(filter(lambda x: field.strip().lower() == x.getText().strip().lower().replace('*', ''), labels))
+                field = current_list[0].nextSibling.get('name').replace('M->','')
+
                 if re.match(r"\w+(_)", field):
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 else:
@@ -2634,7 +2639,6 @@ class WebappInternal(Base):
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 else:
                     self.wait_element(field)
-
 
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
