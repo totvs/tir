@@ -2562,10 +2562,15 @@ class WebappInternal(Base):
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
-        elif element.tag_name == "select":
-            current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value'))
-            selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
-            web_value = selected_element.text
+        elif element.tag_name == "select" or element.tag_name == "wa-combobox":# TODO criar uma função para testar as duas condições.
+            if self.webapp_shadowroot():
+                is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.find_shadow_element('option', element)))), None)
+                if is_selected:
+                    web_value = is_selected.text
+            else:
+                current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value'))
+                selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
+                web_value = selected_element.text
         else:
             web_value = element.get_attribute("value")
 
@@ -2628,13 +2633,17 @@ class WebappInternal(Base):
                 if re.match(r"\w+(_)", field):
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 else:
-                    self.wait_element(term=f'[caption*={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
+                    container = self.get_current_container()
+                    labels = container.select('label')
+                    current_list = list(filter(lambda x: field.strip().lower() == x.getText().strip().lower().replace('*', ''), labels))
+                    field = current_list[0].nextSibling.get('name').replace('M->','')
+                    
+                    self.wait_element(term=f'[name$={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 if name_attr:
                     self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 else:
                     self.wait_element(field)
-
 
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
@@ -2647,7 +2656,8 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             current_value =  ''
             while(time.time() < endtime and not current_value):
-                current_value = self.get_web_value(field_element()).strip()
+                if self.get_web_value(field_element()):
+                    current_value = self.get_web_value(field_element()).strip()
 
             logger().info(f"Value for Field {field} is: {current_value}")
 
