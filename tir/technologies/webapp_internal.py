@@ -2562,10 +2562,15 @@ class WebappInternal(Base):
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
-        elif element.tag_name == "select":
-            current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value'))
-            selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
-            web_value = selected_element.text
+        elif element.tag_name == "select" or element.tag_name == "wa-combobox":# TODO criar uma função para testar as duas condições.
+            if self.webapp_shadowroot():
+                is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.find_shadow_element('option', element)))), None)
+                if is_selected:
+                    web_value = is_selected.text
+            else:
+                current_select = 0 if element.get_attribute('value') == '' else int(element.get_attribute('value'))
+                selected_element = element.find_elements(By.CSS_SELECTOR, "option")[current_select]
+                web_value = selected_element.text
         else:
             web_value = element.get_attribute("value")
 
@@ -2651,7 +2656,8 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             current_value =  ''
             while(time.time() < endtime and not current_value):
-                current_value = self.get_web_value(field_element()).strip()
+                if self.get_web_value(field_element()):
+                    current_value = self.get_web_value(field_element()).strip()
 
             logger().info(f"Value for Field {field} is: {current_value}")
 
