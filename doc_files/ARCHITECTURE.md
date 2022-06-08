@@ -1,6 +1,6 @@
 # TIR Architecture
 
-This tool was idealized to work with any type of TOTVS Web technology.
+This tool was idealized to work with any type of Web technology.
 
 To achieve this, the whole project is built in this particular architecture:
 
@@ -24,7 +24,7 @@ The core classes
 
 Each technology should inherit the **base.py** class. It already handles the basic functionalities so now the only thing left is to create all methods that are specific to each technology.
 
-e.g. A method for choosing an option from the menu could be different for each TOTVS technology.
+e.g. A method for choosing an option from the menu could be different for each technology.
 
 This class must have the **internal** suffix after its name. At this point not all methods are designed for the user, so now we must define the user classes.
 
