@@ -313,7 +313,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.filter_displayed_elements">
-<span class="sig-name descname"><span class="pre">filter_displayed_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.filter_displayed_elements" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_displayed_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.filter_displayed_elements" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Receives a BeautifulSoup element list and filters only the displayed elements.</p>
 <dl class="field-list simple">
@@ -401,7 +401,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.get_current_DOM">
-<span class="sig-name descname"><span class="pre">get_current_DOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.get_current_DOM" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_current_DOM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.get_current_DOM" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Returns current HTML DOM parsed as a BeautifulSoup object</p>
 <dl class="field-list simple">
@@ -678,7 +678,7 @@ naming convention.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.soup_to_selenium">
-<span class="sig-name descname"><span class="pre">soup_to_selenium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.soup_to_selenium" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">soup_to_selenium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup_object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.soup_to_selenium" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>An abstraction of the Selenium call to simplify the conversion of elements.</p>
 <dl class="field-list simple">
@@ -708,13 +708,6 @@ naming convention.</p>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.core.base.Base.switch_to_iframe">
-<span class="sig-name descname"><span class="pre">switch_to_iframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.switch_to_iframe" title="Permalink to this definition"></a></dt>
-<dd><p>[Internal]
-:return:</p>
 </dd></dl>
 
 <dl class="py method">
