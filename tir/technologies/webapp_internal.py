@@ -1473,7 +1473,7 @@ class WebappInternal(Base):
             else:
                 self.wait_element(term)
             # find element
-            element = self.get_field(term,name_attr).find_parent()
+            element = self.get_field(term,name_attr).find_parent() if not self.webapp_shadowroot() else self.get_field(term,name_attr)
             if not(element):
                 raise Exception("Couldn't find element")
 
@@ -1484,7 +1484,7 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
             else:
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi]")),None)
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup]")),None)
                 icon_s = self.soup_to_selenium(icon)
                 container = self.get_current_container()
                 self.click(icon_s)
@@ -4213,10 +4213,11 @@ class WebappInternal(Base):
 
     def performing_click(self, element_bs4, class_grid):
 
-        self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4,
-                           locator=By.XPATH)
-
-        element = lambda: self.soup_to_selenium(element_bs4)
+        if not self.webapp_shadowroot():
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4, locator=By.XPATH)
+            element = lambda: self.soup_to_selenium(element_bs4)
+        else:
+            element = lambda: element_bs4
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
@@ -4261,7 +4262,7 @@ class WebappInternal(Base):
                     elif itens:
                         index_number = df.loc[(df[first_column] == first_content)].index.array
                     elif first_column and first_content:
-                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))))
+                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
                         first_column_values = df[first_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
@@ -4288,29 +4289,32 @@ class WebappInternal(Base):
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
-
-        tr = grid.select('tbody > tr')
+        
+        if self.webapp_shadowroot():
+            sel_grid  = self.soup_to_selenium(grid)
+            tr = self.find_shadow_element('tbody > tr', sel_grid)
+        else:
+            tr = grid.select('tbody > tr')
 
         if hasattr(index_number, '__iter__'):
             for index in index_number:
-                element_bs4 = next(iter(tr[index].select('td')))
+                element_td = next(iter(tr[index].find_elements_by_css_selector('td')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
                 self.wait_blocker()
-                self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
+                self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
         else:
             index = index_number
-            element_bs4 = next(iter(tr[index].select('td')))
+            element_td = next(iter(tr[index].select('td')))
             self.wait_blocker()
-            self.performing_additional_click(element_bs4, tr, index, class_grid, grid_number)
+            self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
+
 
     def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
-
         if element_bs4:
             success = False
-            td = next(iter(tr[index].select('td')))
+            td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
 
-            if hasattr(td, 'style'):
-
-                last_box_state = td.attrs['style']
+            if hasattr(td, 'style') or self.webapp_shadowroot():
+                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style'] 
 
                 endtime = time.time() + self.config.time_out
                 while time.time() < endtime and not success:
@@ -4321,24 +4325,43 @@ class WebappInternal(Base):
                     if tmodal:
                         return
                     grid = self.get_grid(grid_number=grid_number)
-                    tr = grid.select('tbody > tr')
-                    td = next(iter(tr[index].select('td')))
-                    new_box_state = td.attrs['style']
+
+                    if self.webapp_shadowroot():
+                        sel_grid  = self.soup_to_selenium(grid)
+                        tr = self.find_shadow_element('tbody > tr', sel_grid)
+                        td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
+                        new_box_state = td.get_attribute('style')
+                    else:
+                        tr = grid.select('tbody > tr')
+                        td = next(iter(tr[index].select('td')))
+                        new_box_state = td.attrs['style']
                     success = last_box_state != new_box_state
+
             else:
                 logger().debug(f"Couldn't check box element td: {str(td)}")
 
-    def grid_dataframe(self, grid_number=0):
 
-        self.wait_element(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+    def grid_dataframe(self, grid_number=0):
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         grid = self.get_grid(grid_number=grid_number)
 
-        df = (next(iter(pd.read_html(str(grid)))))
+        if self.webapp_shadowroot():
+            shadow_grid = self.soup_to_selenium(grid)
+            shadow_table = next(iter(self.find_shadow_element('table', shadow_grid)),None)
+            shadow_html = shadow_table.get_attribute('outerHTML')
+            df = (next(iter(pd.read_html(str(shadow_html)))))
+        else:
+            df = (next(iter(pd.read_html(str(grid)))))
 
         converters = {c: lambda x: str(x) for c in df.columns}
 
-        df, grid = (next(iter(pd.read_html(str(grid), converters=converters)), None), grid)
+        if self.webapp_shadowroot():
+            df, grid = (next(iter(pd.read_html(str(shadow_html), converters=converters)), None), grid)
+        else:
+            df, grid = (next(iter(pd.read_html(str(grid), converters=converters)), None), grid)
 
         if not df.empty:
             df = df.fillna('Not Value')
@@ -4549,9 +4572,10 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
         while(time.time() < endtime and not grids):
             if not grid_element:
-                grids = self.web_scrap(term=".tgetdados,.tgrid,.tcbrowse,.tmsselbr", scrap_type=enum.ScrapType.CSS_SELECTOR)
+                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -6602,12 +6626,14 @@ class WebappInternal(Base):
         if self.config.new_log:
             self.execution_flow()
 
-        if self.config.screenshot:
+        proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
+
+        if self.config.screenshot and proceed_action():
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+        if proceed_action():
             self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
@@ -6635,7 +6661,7 @@ class WebappInternal(Base):
         if stack_item != "setUpClass":
             self.restart_counter = 0
 
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+        if proceed_action():
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
