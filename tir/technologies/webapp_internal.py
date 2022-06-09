@@ -1473,7 +1473,7 @@ class WebappInternal(Base):
             else:
                 self.wait_element(term)
             # find element
-            element = self.get_field(term,name_attr).find_parent()
+            element = self.get_field(term,name_attr).find_parent() if not self.webapp_shadowroot() else self.get_field(term,name_attr)
             if not(element):
                 raise Exception("Couldn't find element")
 
@@ -1484,7 +1484,7 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
             else:
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi]")),None)
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup]")),None)
                 icon_s = self.soup_to_selenium(icon)
                 container = self.get_current_container()
                 self.click(icon_s)
@@ -6626,12 +6626,14 @@ class WebappInternal(Base):
         if self.config.new_log:
             self.execution_flow()
 
-        if self.config.screenshot:
+        proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
+
+        if self.config.screenshot and proceed_action():
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line:
             self.log.new_line(False, log_message)
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+        if proceed_action():
             self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
@@ -6659,7 +6661,7 @@ class WebappInternal(Base):
         if stack_item != "setUpClass":
             self.restart_counter = 0
 
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+        if proceed_action():
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
