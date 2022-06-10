@@ -381,10 +381,10 @@ class Log:
 
         try:
             if self.folder:
-                path = Path(self.folder, "new_log", self.station)
+                path = Path(self.folder, "new_log")
                 os.makedirs(path)
             else:
-                path = Path("Log", self.station)
+                path = Path("Log")
                 os.makedirs(path)
         except OSError:
             pass

@@ -3105,7 +3105,7 @@ class WebappInternal(Base):
         try:
             labels_list = list(map(
                 lambda x: self.driver.execute_script(
-                    f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, {second_term}')",
+                    f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node, {second_term}')",
                     self.soup_to_selenium(x)),
                 container.select(optional_term)))
             if len(list(filter(lambda x: x is not None and x, labels_list))) == 0:
@@ -7591,11 +7591,13 @@ class WebappInternal(Base):
 
         container = self.get_current_container()
 
-        tr = container.select("tr")
-
-        tr_class = list(filter(lambda x: "class" in x.attrs, tr))
-
-        return list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+        if self.webapp_shadowroot():
+           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[0]))
+           return tr
+        else: 
+            tr = container.select("tr")
+            tr_class = list(filter(lambda x: "class" in x.attrs, tr))
+            return list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
 
     def check_hierarchy(self, label):
         """
@@ -7835,11 +7837,10 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
-            if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
+            regex = r"([\?\*\.\:]+)?"
+            if hasattr(container, 'text') and container.text.strip() == '' or '?' in container.text.strip():
                 wa_text_view = container.select('wa-text-view')
-                wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
-
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
                 if not wa_text_view_filtered:
                     wa_text_view = container.select('wa-panel>wa-checkbox')
                     wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
