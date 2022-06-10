@@ -7835,11 +7835,10 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            regex = f".*{re.escape(label_text)}" + r"([\s\?:\*\.]+)?"
-            if hasattr(container, 'text') and container.text.strip() == '' or container.text.strip() == '?':
+            regex = r"([\?\*\.\:]+)?"
+            if hasattr(container, 'text') and container.text.strip() == '' or '?' in container.text.strip():
                 wa_text_view = container.select('wa-text-view')
-                wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
-
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
                 if not wa_text_view_filtered:
                     wa_text_view = container.select('wa-panel>wa-checkbox')
                     wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
