@@ -2049,14 +2049,16 @@ class WebappInternal(Base):
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
+                regex = r"(<[^>]*>)?"
                 labels = container.select(label_term)
-
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x['caption']) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(field.lower().strip()) ,labels))
+                    if len(view_filtred) > 1:
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (field.lower().strip()) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
@@ -2628,23 +2630,11 @@ class WebappInternal(Base):
             self.log_result(field, user_value, current_value)
         else:
             field = re.sub(r"(\:*)(\?*)", "", field).strip()
-
-            if self.webapp_shadowroot():
-                if re.match(r"\w+(_)", field):
-                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                else:
-                    container = self.get_current_container()
-                    labels = container.select('label')
-                    current_list = list(filter(lambda x: field.strip().lower() == x.getText().strip().lower().replace('*', ''), labels))
-                    field = current_list[0].nextSibling.get('name').replace('M->','')
-                    
-                    self.wait_element(term=f'[name$={field}]', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if name_attr:
+                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
-                if name_attr:
-                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-                else:
-                    self.wait_element(field)
-
+                self.wait_element(field)
+                
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
@@ -7838,9 +7828,12 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             regex = r"([\?\*\.\:]+)?"
+            label_text =  re.sub(regex, '', label_text)
             if hasattr(container, 'text') and container.text.strip() == '' or '?' in container.text.strip():
                 wa_text_view = container.select('wa-text-view')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
+                if len(wa_text_view_filtered) > 1:
+                    wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
                 if not wa_text_view_filtered:
                     wa_text_view = container.select('wa-panel>wa-checkbox')
                     wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
