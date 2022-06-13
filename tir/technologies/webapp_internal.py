@@ -2049,14 +2049,14 @@ class WebappInternal(Base):
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
+                regex = r"(<[^>]*>)?"
                 labels = container.select(label_term)
-
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.search(r"(^<.*)?{}([^a-zA-Z0-9]+)?".format(re.escape(field)),x['caption']) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(field.lower().strip()) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
