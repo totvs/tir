@@ -7838,6 +7838,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             regex = r"([\?\*\.\:]+)?"
+            label_text =  re.sub(regex, '', label_text)
             if hasattr(container, 'text') and container.text.strip() == '' or '?' in container.text.strip():
                 wa_text_view = container.select('wa-text-view')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
