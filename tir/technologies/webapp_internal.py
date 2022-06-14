@@ -7836,7 +7836,7 @@ class WebappInternal(Base):
         position -= 1
 
         if self.webapp_shadowroot():
-            regex = r"([\?\*\.\:]+)?"
+            regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
             wa_text_view = container.select('wa-text-view')
