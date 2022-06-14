@@ -4332,7 +4332,7 @@ class WebappInternal(Base):
 
 
     def grid_dataframe(self, grid_number=0):
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -4562,7 +4562,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
         while(time.time() < endtime and not grids):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
