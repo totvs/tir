@@ -2449,7 +2449,7 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower().strip() == main_value.lower().replace(",", "").strip()
+                        success = current_value.lower().replace(",", "").strip() == main_value.lower().replace(",", "").strip()
                     else:
                         success = current_value == main_value.replace(",", "").strip()
                 except:
