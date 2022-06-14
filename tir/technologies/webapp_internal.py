@@ -4915,27 +4915,36 @@ class WebappInternal(Base):
                 self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
-                self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-                #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
+                if self.webapp_shadowroot():
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio", position=position)
+                else:
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
+                 
 
         if not element_list:
-            self.log_error("Couldn't find input element")
+            self.log_error(f"Couldn't find {field} radio element")
 
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
+        
+        if self.webapp_shadowroot():
+            self.scroll_to_element(element)
 
-        if 'input' not in element and element:
-            input_element = next(iter(element.find_parent().select("input")), None)
+            self.double_click(element)#TODO verificar a utilização de um unico click
+        else:
+            if 'input' not in element and element:
+                input_element = next(iter(element.find_parent().select("input")), None)
+                    
+            if not input_element:
+                self.log_error(f"Couldn't find {field} input element")
 
-        if not input_element:
-            self.log_error("Couldn't find input element")
+            xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
-        xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
+            self.scroll_to_element(xpath_input())
 
-        self.scroll_to_element(xpath_input())
-
-        self.click(xpath_input())
+            self.click(xpath_input())
 
     def result_checkbox(self, field, value):
         """
