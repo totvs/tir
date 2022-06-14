@@ -4332,7 +4332,7 @@ class WebappInternal(Base):
 
 
     def grid_dataframe(self, grid_number=0):
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -4562,7 +4562,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
         while(time.time() < endtime and not grids):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4915,27 +4915,36 @@ class WebappInternal(Base):
                 self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
-                self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
-                #element = next(iter(self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox span")), None)
-                element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
+                if self.webapp_shadowroot():
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio", position=position)
+                else:
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
+                 
 
         if not element_list:
-            self.log_error("Couldn't find input element")
+            self.log_error(f"Couldn't find {field} radio element")
 
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
+        
+        if self.webapp_shadowroot():
+            self.scroll_to_element(element)
 
-        if 'input' not in element and element:
-            input_element = next(iter(element.find_parent().select("input")), None)
+            self.double_click(element)#TODO verificar a utilização de um unico click
+        else:
+            if 'input' not in element and element:
+                input_element = next(iter(element.find_parent().select("input")), None)
+                    
+            if not input_element:
+                self.log_error(f"Couldn't find {field} input element")
 
-        if not input_element:
-            self.log_error("Couldn't find input element")
+            xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
-        xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
+            self.scroll_to_element(xpath_input())
 
-        self.scroll_to_element(xpath_input())
-
-        self.click(xpath_input())
+            self.click(xpath_input())
 
     def result_checkbox(self, field, value):
         """
@@ -7829,17 +7838,22 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             regex = r"([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
-            if hasattr(container, 'text') and container.text.strip() == '' or '?' in container.text.strip():
-                wa_text_view = container.select('wa-text-view')
-                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
-                if len(wa_text_view_filtered) > 1:
-                    wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
-                if not wa_text_view_filtered:
-                    wa_text_view = container.select('wa-panel>wa-checkbox')
-                    wa_text_view_filtered = list(filter(lambda x: re.search(regex , x['caption']), wa_text_view))
 
-                if len(wa_text_view_filtered)-1 >= position:
-                    return [wa_text_view_filtered[position]]
+            wa_text_view = container.select('wa-text-view')
+            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
+            if len(wa_text_view_filtered) > 1:
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
+                
+            if not wa_text_view_filtered:
+                wa_text_view = container.select('wa-panel>wa-checkbox')
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
+
+            if not wa_text_view_filtered:
+                wa_text_view = container.select('label')
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text.lower().strip()) == (label_text.lower().strip()), wa_text_view))
+
+            if len(wa_text_view_filtered)-1 >= position:
+                return [wa_text_view_filtered[position]]
 
             if container:
                 elements = list(map(lambda x: self.find_first_wa_panel_parent(x),
