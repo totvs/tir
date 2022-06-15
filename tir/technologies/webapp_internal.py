@@ -2056,9 +2056,9 @@ class WebappInternal(Base):
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip().startswith(field.lower().strip()) ,labels))
                     if len(view_filtred) > 1:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip() == (field.lower().strip()) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
