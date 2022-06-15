@@ -6630,7 +6630,7 @@ class WebappInternal(Base):
         if self.config.screenshot and proceed_action():
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
-        if new_log_line:
+        if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action():
             self.log.save_file()
