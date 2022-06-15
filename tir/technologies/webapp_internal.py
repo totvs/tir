@@ -75,6 +75,11 @@ class WebappInternal(Base):
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
         }
+
+        self.grid_selectors = {
+            "new_web_app": ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr"
+        }
+
         if self.webapp_shadowroot():
             self.base_container = "wa-dialog"
         else:
@@ -4175,7 +4180,6 @@ class WebappInternal(Base):
 
             if len(fields) == 2 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
-                # self.click_box_dataframe(first_column=fields[0], second_column=fields[1], first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and not select_all:
@@ -4332,7 +4336,10 @@ class WebappInternal(Base):
 
 
     def grid_dataframe(self, grid_number=0):
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        """
+        [Internal]
+        """
+        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -4562,7 +4569,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
         while(time.time() < endtime and not grids):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4841,8 +4848,7 @@ class WebappInternal(Base):
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
-                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb',#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
-                                  main_container="body")
+                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb', main_container="body")
             else:
                 self.wait_element(field)
 
@@ -5812,7 +5818,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"
 
         self.wait_blocker()
         self.wait_element(
