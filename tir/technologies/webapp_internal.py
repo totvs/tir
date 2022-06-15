@@ -5290,7 +5290,7 @@ class WebappInternal(Base):
                                                                                                                   field_to_label)
 
                         endtime_selected_cell = time.time() + self.config.time_out
-                        while time.time() < endtime_selected_cell and self.selected_cell(selenium_column()):
+                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column(),
                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
