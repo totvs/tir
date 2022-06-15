@@ -7857,17 +7857,18 @@ class WebappInternal(Base):
             label_text =  re.sub(regex, '', label_text)
 
             wa_text_view = container.select('wa-text-view')
-            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
-            if len(wa_text_view_filtered) > 1:
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
-                
+            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
+            
             if not wa_text_view_filtered:
                 wa_text_view = container.select('wa-panel>wa-checkbox')
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
 
+            if len(wa_text_view_filtered) > 1:
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
+
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label')
-                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text.lower().strip()) == (label_text.lower().strip()), wa_text_view))
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
 
             if len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
