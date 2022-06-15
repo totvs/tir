@@ -2056,9 +2056,9 @@ class WebappInternal(Base):
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip().startswith(field.lower().strip()) ,labels))
                     if len(view_filtred) > 1:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip() == (field.lower().strip()) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
@@ -5290,7 +5290,7 @@ class WebappInternal(Base):
                                                                                                                   field_to_label)
 
                         endtime_selected_cell = time.time() + self.config.time_out
-                        while time.time() < endtime_selected_cell and self.selected_cell(selenium_column()):
+                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column(),
                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
@@ -7857,17 +7857,18 @@ class WebappInternal(Base):
             label_text =  re.sub(regex, '', label_text)
 
             wa_text_view = container.select('wa-text-view')
-            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
-            if len(wa_text_view_filtered) > 1:
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
-                
+            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
+            
             if not wa_text_view_filtered:
                 wa_text_view = container.select('wa-panel>wa-checkbox')
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
 
+            if len(wa_text_view_filtered) > 1:
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
+
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label')
-                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text.lower().strip()) == (label_text.lower().strip()), wa_text_view))
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
 
             if len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
