@@ -75,6 +75,11 @@ class WebappInternal(Base):
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
         }
+
+        self.grid_selectors = {
+            "new_web_app": ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr"
+        }
+
         if self.webapp_shadowroot():
             self.base_container = "wa-dialog"
         else:
@@ -2056,9 +2061,9 @@ class WebappInternal(Base):
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()).startswith(field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip().startswith(field.lower().strip()) ,labels))
                     if len(view_filtred) > 1:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption'].lower().strip()) == (field.lower().strip()) ,labels))
+                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip() == (field.lower().strip()) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
@@ -4175,7 +4180,6 @@ class WebappInternal(Base):
 
             if len(fields) == 2 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
-                # self.click_box_dataframe(first_column=fields[0], second_column=fields[1], first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and len(content_list) == 2 and not select_all:
                 self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
             elif len(fields) == 1 and not select_all:
@@ -4332,7 +4336,10 @@ class WebappInternal(Base):
 
 
     def grid_dataframe(self, grid_number=0):
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        """
+        [Internal]
+        """
+        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -4562,7 +4569,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
-        term = ".dict-tgetdados,.dict-tgrid,.dict-tcbrowse,.dict-tmsselbr,.dict-twbrowse" if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
         while(time.time() < endtime and not grids):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -4841,8 +4848,7 @@ class WebappInternal(Base):
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
-                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb',#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
-                                  main_container="body")
+                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb', main_container="body")
             else:
                 self.wait_element(field)
 
@@ -5290,7 +5296,7 @@ class WebappInternal(Base):
                                                                                                                   field_to_label)
 
                         endtime_selected_cell = time.time() + self.config.time_out
-                        while time.time() < endtime_selected_cell and self.selected_cell(selenium_column()):
+                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column(),
                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
@@ -5812,7 +5818,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"#".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"
 
         self.wait_blocker()
         self.wait_element(
@@ -6630,7 +6636,7 @@ class WebappInternal(Base):
         if self.config.screenshot and proceed_action():
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
-        if new_log_line:
+        if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action():
             self.log.save_file()
@@ -7396,12 +7402,15 @@ class WebappInternal(Base):
                         elements = list(filter(lambda x: self.element_is_displayed(x), elements))
 
                         if hierarchy:
-                            elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+                            if not self.webapp_shadowroot():                                
+                                elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
 
                     for element in elements:
                         if not success:
-                            if self.webapp_shadowroot():
-                                element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)              
+                            if self.webapp_shadowroot():                                
+                                element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)
+                                if not element_class:
+                                    element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
                             else:
                                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
@@ -7442,27 +7451,38 @@ class WebappInternal(Base):
                                                         self.send_action(action=self.click, element=element_click, right_click=right_click)
                                                     success = self.clicktree_status_selected(label_filtered)
                                         else:
-                                            self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
-                                            self.scroll_to_element(element_tree)
-                                            element_tree.click()
+                                            if self.webapp_shadowroot():
+                                                element_is_closed = element.get_attribute('closed')
+                                                if element_is_closed:
+                                                    self.scroll_to_element(element_tree)
+                                                    element_tree.click()
+                                                else: 
+                                                    element.click()
+                                            else: 
+                                                self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
+                                                self.scroll_to_element(element_tree)
+                                                element_tree.click()                                                
                                             success = self.check_hierarchy(label_filtered)
 
                                         try_counter += 1
                                     except:
                                         pass
 
-                            if not success:
-                                try:
-                                    element_click = lambda: self.soup_to_selenium(element_class_item.parent)
-                                    self.scroll_to_element(element_click())
-                                    element_click().click()
-                                    success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
-                                except:
-                                    pass
+                                if not success:
+                                    try:
+                                        element_click = lambda: self.soup_to_selenium(element_class_item.parent)
+                                        self.scroll_to_element(element_click())
+                                        element_click().click()
+                                        success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
+                                    except:
+                                        pass
 
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
-                hierarchy = treenode_selected.attrs['hierarchy']
+                if self.webapp_shadowroot():
+                    hierarchy = treenode_selected.get_attribute('hierarchy')
+                else:
+                    hierarchy = treenode_selected.attrs['hierarchy']
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
@@ -7578,7 +7598,10 @@ class WebappInternal(Base):
 
         ttreenode = self.treenode()
 
-        treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
+        if self.webapp_shadowroot(): 
+            treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
+        else:
+            treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
         return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
 
@@ -7840,17 +7863,18 @@ class WebappInternal(Base):
             label_text =  re.sub(regex, '', label_text)
 
             wa_text_view = container.select('wa-text-view')
-            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()).startswith(label_text.lower().strip()), wa_text_view))
-            if len(wa_text_view_filtered) > 1:
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()) == (label_text.lower().strip()), wa_text_view))
-                
+            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
+            
             if not wa_text_view_filtered:
                 wa_text_view = container.select('wa-panel>wa-checkbox')
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
 
+            if len(wa_text_view_filtered) > 1:
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
+
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label')
-                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text.lower().strip()) == (label_text.lower().strip()), wa_text_view))
+                wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
 
             if len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
