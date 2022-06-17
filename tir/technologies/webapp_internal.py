@@ -1780,14 +1780,22 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't search the key: {search_key} on screen.")
 
         else:
-            tradiobuttonitens = soup.select(".tradiobuttonitem input")
+            if self.webapp_shadowroot():
+                waradio = soup.select("wa-radio")[0]
+                if waradio:
+                    tradiobuttonitens = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('input')", self.soup_to_selenium(waradio)) 
+            else:
+                tradiobuttonitens = soup.select(".tradiobuttonitem input")
             if len(tradiobuttonitens) < search_key + 1:
                 self.log_error("Key index out of range.")
             trb_input = tradiobuttonitens[search_key]
-
-            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
-            self.click(sel_input())
+            if self.webapp_shadowroot():
+                if trb_input:
+                    trb_input.click()
+            else:
+                sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
+                self.click(sel_input())
 
     def search_browse_column(self, search_column, search_elements, index=False):
         """
