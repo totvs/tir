@@ -77,7 +77,7 @@ class WebappInternal(Base):
         }
 
         self.grid_selectors = {
-            "new_web_app": ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr"
+            "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse"
         }
 
         if self.webapp_shadowroot():
@@ -1780,14 +1780,22 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't search the key: {search_key} on screen.")
 
         else:
-            tradiobuttonitens = soup.select(".tradiobuttonitem input")
+            if self.webapp_shadowroot():
+                waradio = soup.select("wa-radio")[0]
+                if waradio:
+                    tradiobuttonitens = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('input')", self.soup_to_selenium(waradio)) 
+            else:
+                tradiobuttonitens = soup.select(".tradiobuttonitem input")
             if len(tradiobuttonitens) < search_key + 1:
                 self.log_error("Key index out of range.")
             trb_input = tradiobuttonitens[search_key]
-
-            sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
-            self.click(sel_input())
+            if self.webapp_shadowroot():
+                if trb_input:
+                    trb_input.click()
+            else:
+                sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
+                self.click(sel_input())
 
     def search_browse_column(self, search_column, search_elements, index=False):
         """
@@ -4301,23 +4309,31 @@ class WebappInternal(Base):
             self.wait_blocker()
             self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
 
-
     def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
         if element_bs4:
             success = False
             td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
 
             if hasattr(td, 'style') or self.webapp_shadowroot():
-                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style'] 
+                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
 
                 endtime = time.time() + self.config.time_out
                 while time.time() < endtime and not success:
+
+                    soup = self.get_current_DOM()
+
+                    term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
+                    tmodal_list = soup.select(term)
+                    tmodal_layer = len(tmodal_list) if tmodal_list else 0
+
                     self.performing_click(element_bs4, class_grid)
                     self.wait_blocker()
                     time.sleep(2)
-                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+
+                    tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False, position=tmodal_layer + 1)
                     if tmodal:
                         return
+
                     grid = self.get_grid(grid_number=grid_number)
 
                     if self.webapp_shadowroot():
@@ -5342,7 +5358,7 @@ class WebappInternal(Base):
                         if self.webapp_shadowroot():
                             wait_selector = "wa-dialog"
                             position_fillgrid = initial_layer
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget"
+                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget, .dict-tcombobox"
                         else:
                             wait_selector = ".tmodaldialog"
                             position_fillgrid = initial_layer + 1
@@ -5370,7 +5386,7 @@ class WebappInternal(Base):
 
                         child_type = "input"
                         option_text = ""
-                        if not child:
+                        if not child or 'dict-tcombobox' in new_container['class']:
                             if self.webapp_shadowroot():
                                 child = self.driver.execute_script(
                                     "return arguments[0].shadowRoot.querySelector('select')",
@@ -5479,21 +5495,28 @@ class WebappInternal(Base):
                                             "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                         return
                         else:
-                            option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])],
-                                                           map(lambda x: x.text, child[0].select('option'))))
-                            option_value_dict = dict(
-                                map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                            option_value = self.get_element_value(
-                                self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                            if self.webapp_shadowroot():
+                                option_list = child.find_elements_by_tag_name('option')
+                                option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
+                                option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
+                                option_value = self.get_element_value(child)
+                            else:
+
+                                option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
+                                option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
                             option_text = next(iter(option_text_list), None)
                             if not option_text:
                                 self.log_error("Couldn't find option")
                             if (option_text != option_value_dict[option_value]):
-                                self.select_combo(child[0], field[1])
+                                self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
                                 if field[1] in option_text[0:len(field[1])]:
                                     current_value = field[1]
                             else:
-                                self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                if self.webapp_shadowroot():
+                                    self.send_keys(child, Keys.TAB)
+                                else:
+                                    self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                 current_value = field[1]
 
             if not check_value:
@@ -5818,7 +5841,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"
+        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse"
 
         self.wait_blocker()
         self.wait_element(
