@@ -77,7 +77,7 @@ class WebappInternal(Base):
         }
 
         self.grid_selectors = {
-            "new_web_app": ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr"
+            "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse"
         }
 
         if self.webapp_shadowroot():
@@ -4301,23 +4301,31 @@ class WebappInternal(Base):
             self.wait_blocker()
             self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
 
-
     def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
         if element_bs4:
             success = False
             td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
 
             if hasattr(td, 'style') or self.webapp_shadowroot():
-                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style'] 
+                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
 
                 endtime = time.time() + self.config.time_out
                 while time.time() < endtime and not success:
+
+                    soup = self.get_current_DOM()
+
+                    term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
+                    tmodal_list = soup.select(term)
+                    tmodal_layer = len(tmodal_list) if tmodal_list else 0
+
                     self.performing_click(element_bs4, class_grid)
                     self.wait_blocker()
                     time.sleep(2)
-                    tmodal = self.element_exists(term=".tmodaldialog.twidget.active", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+
+                    tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False, position=tmodal_layer + 1)
                     if tmodal:
                         return
+
                     grid = self.get_grid(grid_number=grid_number)
 
                     if self.webapp_shadowroot():
@@ -5818,7 +5826,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, .dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid,.dict-brgetddb"
+        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse"
 
         self.wait_blocker()
         self.wait_element(
