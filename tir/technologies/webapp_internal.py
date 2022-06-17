@@ -5514,7 +5514,7 @@ class WebappInternal(Base):
                                     current_value = field[1]
                             else:
                                 if self.webapp_shadowroot():
-                                    self.send_keys(child, Keys.ENTER)
+                                    self.send_keys(child, Keys.TAB)
                                 else:
                                     self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
                                 current_value = field[1]
