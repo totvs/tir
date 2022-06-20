@@ -2062,7 +2062,7 @@ class WebappInternal(Base):
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
-                regex = r"(<[^>]*>)?"
+                regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
@@ -7896,12 +7896,8 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view')
+            wa_text_view = container.select('wa-text-view, wa-checkbox')
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
-            
-            if not wa_text_view_filtered:
-                wa_text_view = container.select('wa-panel>wa-checkbox')
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
