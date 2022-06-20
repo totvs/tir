@@ -2062,7 +2062,7 @@ class WebappInternal(Base):
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
-                regex = r"(<[^>]*>)?"
+                regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
