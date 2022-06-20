@@ -6716,11 +6716,19 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
-            self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if self.webapp_shadowroot():
+                selector = ".dict-tbtnbmp2"        
+            else:
+                selector = ".ttoolbar, .tbtnbmp"
+
+            self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
-            tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+            if self.webapp_shadowroot():
+                tbtnbmp_img = self.on_screen_enabled(container.select(".dict-tbtnbmp2"))
+            else:
+                tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
 
             if icon_text not in tbtnbmp_img_str:
@@ -6728,7 +6736,10 @@ class WebappInternal(Base):
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
 
             if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
-                icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
+                if self.webapp_shadowroot():
+                    icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))[position]
+                else:
+                    icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
 
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
