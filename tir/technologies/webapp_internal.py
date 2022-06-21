@@ -5272,11 +5272,9 @@ class WebappInternal(Base):
             else:
                 self.log_error("Grid element doesn't appear in DOM")
 
-            if self.webapp_shadowroot():
-                row = (next(iter(rows), None))
-            else:
-                row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
-                    next(iter(rows), None))
+
+            row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
+                next(iter(rows), None))
 
             if row:
                 if self.webapp_shadowroot():
@@ -5774,34 +5772,42 @@ class WebappInternal(Base):
         grids = ''
         endtime = time.time() + self.config.time_out
         self.down_loop_grid = True
+
         while(not grids and time.time() < endtime):
             soup = self.get_current_DOM()
 
-            containers = soup.select(".tmodaldialog.twidget")
+            containers = self.get_current_container()
             if containers:
                 containers = self.zindex_sort(containers, True)
-                grids = self.filter_displayed_elements(containers[0].select(".tgetdados, .tgrid"))
+                container = next(iter(containers), None) if isinstance(containers, list) else containers
+                if container:
+                    term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid"
+                    grids = self.filter_displayed_elements(container.select(term))
 
             time.sleep(1)
 
         if grids:
             if field[2] > len(grids):
                 self.log_error(self.language.messages.grid_number_error)
-            rows = grids[field[2]].select("tbody tr")
+
+            if self.webapp_shadowroot():
+                shadowroot_tr = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grids[field[2]]))
+
+            rows = shadowroot_tr() if self.webapp_shadowroot() else grids[field[2]].select("tbody tr")
             row = self.get_selected_row(rows)
             if row:
-                columns = row.select("td")
+                columns = self.find_shadow_element('td', self.soup_to_selenium(grids[field[2]])) if self.webapp_shadowroot() else row.select("td")
                 if columns:
-                    second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
-                    # self.scroll_to_element(second_column())
+                    second_column = lambda: next(iter(columns)) if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
-                    self.wait_until_to(expected_condition="visibility_of_element_located", element = columns[0], locator=By.XPATH )
 
                     ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
-
+                    term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
                     endtime = time.time() + self.config.time_out
-                    while (time.time() < endtime and not(self.element_exists(term=".tgetdados tbody tr, .tgrid tbody tr", scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows)+1))):
+                    while (time.time() < endtime and not (
+                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                        position=len(rows) + 1) or len(shadowroot_tr()) > 1)):
                         if self.config.debug_log:
                             logger().debug("Waiting for the new line to show")
                         time.sleep(1)
@@ -6349,9 +6355,6 @@ class WebappInternal(Base):
         """
         if self.webapp_shadowroot():
             for row in rows:
-                column_grid = row.find_element_by_tag_name('td')
-                self.click(column_grid)
-                self.set_element_focus(column_grid)           
                 filtered_rows = self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", row)
                 if filtered_rows:
                    return row
