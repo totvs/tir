@@ -2062,16 +2062,17 @@ class WebappInternal(Base):
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
-                regex = r"(<[^>]*>)?"
+                regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
                 view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip().startswith(field.lower().strip()) ,labels))
-                    if len(view_filtred) > 1:
-                        view_filtred = list(filter(lambda x: re.sub(regex, '', x['caption']).lower().strip() == (field.lower().strip()) ,labels))
+                        field =  re.sub(regex, '', field).lower().strip()
+                        view_filtred = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,labels))
+                        if len(view_filtred) > 1:
+                            view_filtred = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels))
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
@@ -6719,11 +6720,19 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
-            self.wait_element(term=".ttoolbar, .tbtnbmp", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if self.webapp_shadowroot():
+                selector = ".dict-tbtnbmp2"        
+            else:
+                selector = ".ttoolbar, .tbtnbmp"
+
+            self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
             container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
-            tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+            if self.webapp_shadowroot():
+                tbtnbmp_img = self.on_screen_enabled(container.select(".dict-tbtnbmp2"))
+            else:
+                tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
 
             if icon_text not in tbtnbmp_img_str:
@@ -6731,7 +6740,10 @@ class WebappInternal(Base):
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
 
             if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
-                icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
+                if self.webapp_shadowroot():
+                    icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))[position]
+                else:
+                    icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
 
             else:
                 buttons = self.on_screen_enabled(container.select("button[style]"))
@@ -7888,12 +7900,8 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view')
+            wa_text_view = container.select('wa-text-view, wa-checkbox')
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
-            
-            if not wa_text_view_filtered:
-                wa_text_view = container.select('wa-panel>wa-checkbox')
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.search(regex , x['caption']), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
