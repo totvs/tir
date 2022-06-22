@@ -1411,7 +1411,9 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+                    if not self.webapp_shadowroot():#TODO revisar mecanismo de espera para objeto selenium
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
 
@@ -1730,6 +1732,9 @@ class WebappInternal(Base):
                         self.driver.switch_to.default_content()
                         content = self.driver.page_source
                         soup = BeautifulSoup(content,"html.parser")
+                        if self.webapp_shadowroot():
+                            remove_focus = soup.select('body')[0]
+                            ActionChains(self.driver).move_to_element(self.soup_to_selenium(remove_focus)).perform() 
                     else:
                         pass
             if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() == "sigaadv":
@@ -2367,13 +2372,17 @@ class WebappInternal(Base):
                 continue
 
             main_element = element
+            multiget = "dict-tmultiget" if self.webapp_shadowroot() else "tmultiget"
 
-            if "tmultiget" in element.attrs['class'] if self.element_name(element) == 'div' else None:
-                textarea = element.select("textarea")
+            if multiget in element.attrs['class']:
+                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element)))) if self.webapp_shadowroot() else element.select("textarea")
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
                 else:
-                    input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
+                    if self.webapp_shadowroot():
+                        input_field = lambda : textarea
+                    else:
+                        input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
             else:
                 input_field = lambda : self.soup_to_selenium(element)
 
@@ -2390,6 +2399,7 @@ class WebappInternal(Base):
                 current_value = interface_value.strip()
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
+                valtype=''
 
                 if self.element_name(element) == "input":
                     if self.webapp_shadowroot():
@@ -4196,23 +4206,33 @@ class WebappInternal(Base):
 
 
         if select_all:
-            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            optional_term = "wa-button" if self.webapp_shadowroot() else "label span"
+            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
 
             grid = self.get_grid(grid_number)
 
-            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
 
             if select_all and is_select_all_button:
-                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
-                element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
+                if self.webapp_shadowroot():
+                    element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)), None)
+                else:
+                    element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+
                 if element:
-                    box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
-                th = next(iter(grid.select('th')))
-                th_element = self.soup_to_selenium(th)
-                th_element.click()
+                th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                    iter(grid.select('th')))
+
+                if th:
+                    th_element = next(iter(th)) if self.webapp_shadowroot() else self.soup_to_selenium(th)
+                    th_element.click()
+                else:
+                    self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid):
 
@@ -4292,6 +4312,7 @@ class WebappInternal(Base):
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
+            self.log_error(f"Content doesn't found on the screen! {first_content}")
         
         if self.webapp_shadowroot():
             sel_grid  = self.soup_to_selenium(grid)
@@ -8173,7 +8194,10 @@ class WebappInternal(Base):
             container_filtered = container.select(label_term)
             container_text = ''
             for x in range(len(container_filtered)):
-                container_text += container_filtered[x].text + ' '
+                if self.webapp_shadowroot():
+                    container_text += container_filtered[x].get('caption') + ' '
+                else:
+                    container_text += container_filtered[x].text + ' '
 
             try:
                 text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
