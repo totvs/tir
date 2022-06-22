@@ -2372,13 +2372,17 @@ class WebappInternal(Base):
                 continue
 
             main_element = element
+            multiget = "dict-tmultiget" if self.webapp_shadowroot() else "tmultiget"
 
-            if "tmultiget" in element.attrs['class'] if self.element_name(element) == 'div' else None:
-                textarea = element.select("textarea")
+            if multiget in element.attrs['class']:
+                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element)))) if self.webapp_shadowroot() else element.select("textarea")
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
                 else:
-                    input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
+                    if self.webapp_shadowroot():
+                        input_field = lambda : textarea
+                    else:
+                        input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
             else:
                 input_field = lambda : self.soup_to_selenium(element)
 
@@ -2395,6 +2399,7 @@ class WebappInternal(Base):
                 current_value = interface_value.strip()
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
+                valtype=''
 
                 if self.element_name(element) == "input":
                     if self.webapp_shadowroot():
