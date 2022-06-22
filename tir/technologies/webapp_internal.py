@@ -8176,7 +8176,10 @@ class WebappInternal(Base):
             container_filtered = container.select(label_term)
             container_text = ''
             for x in range(len(container_filtered)):
-                container_text += container_filtered[x].text + ' '
+                if self.webapp_shadowroot():
+                    container_text += container_filtered[x].get('caption') + ' '
+                else:
+                    container_text += container_filtered[x].text + ' '
 
             try:
                 text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
