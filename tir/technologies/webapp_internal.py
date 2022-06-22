@@ -4196,23 +4196,33 @@ class WebappInternal(Base):
 
 
         if select_all:
-            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            optional_term = "wa-button" if self.webapp_shadowroot() else "label span"
+            self.wait_element_timeout(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
 
             grid = self.get_grid(grid_number)
 
-            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
+            is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
 
             if select_all and is_select_all_button:
-                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term="label span")
-                element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
+                if self.webapp_shadowroot():
+                    element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)), None)
+                else:
+                    element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+
                 if element:
-                    box = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
-                th = next(iter(grid.select('th')))
-                th_element = self.soup_to_selenium(th)
-                th_element.click()
+                th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                    iter(grid.select('th')))
+
+                if th:
+                    th_element = next(iter(th)) if self.webapp_shadowroot() else self.soup_to_selenium(th)
+                    th_element.click()
+                else:
+                    self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid):
 
@@ -4292,6 +4302,7 @@ class WebappInternal(Base):
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
+            self.log_error(f"Content doesn't found on the screen! {first_content}")
         
         if self.webapp_shadowroot():
             sel_grid  = self.soup_to_selenium(grid)
