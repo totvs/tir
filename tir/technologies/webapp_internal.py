@@ -1730,6 +1730,9 @@ class WebappInternal(Base):
                         self.driver.switch_to.default_content()
                         content = self.driver.page_source
                         soup = BeautifulSoup(content,"html.parser")
+                        if self.webapp_shadowroot():
+                            remove_focus = soup.select('body')[0]
+                            ActionChains(self.driver).move_to_element(self.soup_to_selenium(remove_focus)).perform() 
                     else:
                         pass
             if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() == "sigaadv":
