@@ -1411,7 +1411,9 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+                    if not self.webapp_shadowroot():#TODO revisar mecanismo de espera para objeto selenium
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
 
