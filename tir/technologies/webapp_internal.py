@@ -6695,7 +6695,7 @@ class WebappInternal(Base):
             self.log.new_line(False, log_message)
         if proceed_action():
             self.log.save_file()
-        if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
+        if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
             self.restart()
