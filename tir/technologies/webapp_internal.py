@@ -2372,7 +2372,7 @@ class WebappInternal(Base):
             main_element = element
             multiget = "dict-tmultiget" if self.webapp_shadowroot() else "tmultiget"
 
-            if multiget in element.attrs['class']:
+            if multiget in element.attrs['class'] if element.get('class') else None:
                 textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element)))) if self.webapp_shadowroot() else element.select("textarea")
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
@@ -2385,6 +2385,8 @@ class WebappInternal(Base):
                 input_field = lambda : self.soup_to_selenium(element)
 
             if input_field:
+                valtype=''
+                
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
@@ -2397,7 +2399,6 @@ class WebappInternal(Base):
                 current_value = interface_value.strip()
                 interface_value_size = len(interface_value)
                 user_value_size = len(value)
-                valtype=''
 
                 if self.element_name(element) == "input":
                     if self.webapp_shadowroot():
@@ -3108,22 +3109,30 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
-    def selenium_web_scrap(self, term, container, optional_term, second_term):
+    def selenium_web_scrap(self, term, container, optional_term, second_term=None):
         """
         [Internal]
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
         try:
-            labels_list = list(map(
-                lambda x: self.driver.execute_script(
-                    f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node, {second_term}')",
-                    self.soup_to_selenium(x)),
-                container.select(optional_term)))
-            if len(list(filter(lambda x: x is not None and x, labels_list))) == 0:
+            if second_term:
                 labels_list = list(map(
                     lambda x: self.driver.execute_script(
-                        f"return arguments[0].querySelectorAll('label, span, wa-dialog-header, {second_term}')",
+                        f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node, {second_term}')",
+                        self.soup_to_selenium(x)),
+                    container.select(optional_term)))
+
+                if len(list(filter(lambda x: x is not None and x, labels_list))) == 0:
+                    labels_list = list(map(
+                        lambda x: self.driver.execute_script(
+                            f"return arguments[0].querySelectorAll('label, span, wa-dialog-header, {second_term}')",
+                            self.soup_to_selenium(x)),
+                        container.select(optional_term)))
+            else:
+                labels_list = list(map(
+                    lambda x: self.driver.execute_script(
+                        f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node')",
                         self.soup_to_selenium(x)),
                     container.select(optional_term)))
 
@@ -7302,8 +7311,12 @@ class WebappInternal(Base):
 
             if self.webapp_shadowroot():
                 labels = container.select("wa-text-view")
-                filtered_labels = list(filter(lambda x: label_name.lower() == x.get('caption').lower(), labels))[0]
-                label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+                filtered_labels = next(iter(list(filter(lambda x: x.get('caption') and label_name.lower() == x.get('caption').lower(), labels))),None)
+                if filtered_labels:
+                    label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+                else:
+                    label = next(iter(self.web_scrap(term=label_name)))
+
             else:
                 labels = container.select("label")
                 filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
@@ -7928,6 +7941,8 @@ class WebappInternal(Base):
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
+                if not wa_text_view_filtered:
+                   wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio')
 
             if len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
