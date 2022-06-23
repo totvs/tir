@@ -1,4 +1,5 @@
 import logging
+import time
 from logging.config import dictConfig
 from tir.technologies.core.config import ConfigLoader
 from datetime import datetime
@@ -12,6 +13,7 @@ config = ConfigLoader()
 
 filename = None
 folder = None
+file_path = None
 
 def logger(logger='root'):
     """
@@ -20,15 +22,16 @@ def logger(logger='root'):
 
     global filename
     global folder
+    global file_path
 
     today = datetime.today()
 
-    if not filename:
+    if not file_path:
         filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
 
         folder = create_folder()
 
-        create_file(folder, filename)
+        file_path = create_file(folder, filename)
 
     if config.smart_test or config.debug_log:
         logging_config = {
@@ -135,5 +138,13 @@ def create_file(folder, filename):
 
     """
 
-    with open(Path(folder, filename), "w", ):
-        pass
+    success = False
+
+    endtime = time.time() + config.time_out
+
+    while (time.time() < endtime and not success):
+        try:
+            with open(Path(folder, filename), "w", ):
+                return True
+        except Exception as error:
+            logger().debug(str(error))
