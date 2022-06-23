@@ -1365,20 +1365,18 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_program("MATA020")
         """
+
+        cget_term = '[name=cGet]'
         try:
             logger().info(f"Setting program: {program}")
 
-            if self.webapp_shadowroot():
-                cGet_term = "[name=cGet][class=dict-tget]"
-            else:
-                cGet_term = "[name=cGet] > input"
-                self.wait_element(term=cGet_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
+            if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-
-            self.wait_element(term=cGet_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
-            tget = next(iter(soup.select("[name=cGet]")), None)
+            tget = next(iter(soup.select(cget_term)), None)
             if tget:
                 if self.webapp_shadowroot():
                     tget_img = next(iter(tget.select(".button-image")), None)
