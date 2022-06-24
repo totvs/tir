@@ -3169,7 +3169,11 @@ class WebappInternal(Base):
             if not soup:
                 self.log_error("Search for erros couldn't find DOM")
             message = ""
-            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog, wa-dialog"), True)), None)
+            if self.webapp_shadowroot():
+                selector = "wa-dialog"
+            else:
+                selector = ".tmodaldialog, .ui-dialog"
+            top_layer = next(iter(self.zindex_sort(soup.select(selector), True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
@@ -3177,13 +3181,24 @@ class WebappInternal(Base):
         if not top_layer:
             return None
 
-        icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
-        icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
+        if self.webapp_shadowroot():
+            icon_alert = next(iter(top_layer.select("wa-image[src*='fwskin_info_ico.png']")), None)
+        else:
+            icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
+
+        if self.webapp_shadowroot():
+            icon_error_log = next(iter(top_layer.select("wa-image[src*='openclosing.png']")), None)
+        else:
+            icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
+
         if (not icon_alert or not check_help) and not icon_error_log:
             return None
 
         if icon_alert:
-            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
+            if self.webapp_shadowroot():
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.get('caption').strip(), top_layer.select(".dict-tsay")))
+            else:
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
             if self.language.messages.error_msg_required in label:
                 message = self.language.messages.error_msg_required
             elif "help:" in label.lower() and self.language.problem in label:
@@ -3192,16 +3207,25 @@ class WebappInternal(Base):
                 return None
 
         elif icon_error_log:
-            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
-            textarea = next(iter(top_layer.select("textarea")), None)
-            textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
+            if self.webapp_shadowroot():
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.get('caption').strip(), top_layer.select(".dict-tbutton")))
+                textarea = next(iter(top_layer.select(".dict-tmultiget")), None) 
+                textarea_value = textarea.get('contexttext')
+            else:
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
+                textarea = next(iter(top_layer.select("textarea")), None)
+                textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
 
             error_paragraphs = textarea_value.split("\n\n")
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
-            button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
-            self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
+            if self.webapp_shadowroot():
+                button = next(iter(filter(lambda x: self.language.details.lower() in x.get('caption').lower().replace('<u>', '').replace('</u>',''),top_layer.select("wa-button"))), None)
+                self.driver.execute_script(f"return arguments[0].click()", self.soup_to_selenium(button))
+            else:
+                button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
+                self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
         self.log_error(message)
@@ -3661,6 +3685,9 @@ class WebappInternal(Base):
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
 
                         if filtered_button:
+                            parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                            if parents_actives:
+                                filtered_button = parents_actives
                             filtered_button = next(reversed(filtered_button), None)
                         else:
                             filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
