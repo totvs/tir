@@ -7576,10 +7576,13 @@ class WebappInternal(Base):
 
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
-                if self.webapp_shadowroot():
-                    hierarchy = treenode_selected.get_attribute('hierarchy')
+                if treenode_selected:
+                    if self.webapp_shadowroot():
+                        hierarchy = treenode_selected.get_attribute('hierarchy')
+                    else:
+                        hierarchy = treenode_selected.attrs['hierarchy']
                 else:
-                    hierarchy = treenode_selected.attrs['hierarchy']
+                    success = False
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
@@ -7697,6 +7700,10 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot(): 
             treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
+            if len(treenode_selected) == 0:
+                self.ClickLabel(label_filtered)
+                ttreenode = self.treenode() 
+                treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
