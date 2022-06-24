@@ -3661,6 +3661,9 @@ class WebappInternal(Base):
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
 
                         if filtered_button:
+                            parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                            if parents_actives:
+                                filtered_button = parents_actives
                             filtered_button = next(reversed(filtered_button), None)
                         else:
                             filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
