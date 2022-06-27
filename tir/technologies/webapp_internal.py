@@ -3141,7 +3141,7 @@ class WebappInternal(Base):
                 if len(labels_not_none) > 0:
                     labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
                     if labels_displayed:
-                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))),
+                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
                         if not element and len(labels_not_none) == 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
@@ -6534,8 +6534,12 @@ class WebappInternal(Base):
         """
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
-            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+            if self.webapp_shadowroot():
+                term = '.ditc-tsay'
+            else:
+                term = '.tsay'
+            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, check_error=False):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
