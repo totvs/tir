@@ -7483,9 +7483,9 @@ class WebappInternal(Base):
                 tree_node = self.find_tree_bs(label_filtered)
 
                 if self.webapp_shadowroot():
-                    tree_node_filtered = tree_node
+                    tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
                 else: 
-                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node_filtered))
+                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
@@ -7517,14 +7517,11 @@ class WebappInternal(Base):
                             for element_class_item in element_class:
                                 if not success:
                                     if self.webapp_shadowroot():
-                                        element_click = element_class_item
+                                        element_click = lambda: element_class_item
                                     else:
                                         element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        if self.webapp_shadowroot():
-                                            element_tree = element_click
-                                        else:
-                                            element_tree = element_click()
+                                        element_tree = element_click()
 
                                         if last_item:
                                             start_time = time.time()
@@ -7549,12 +7546,13 @@ class WebappInternal(Base):
                                                     success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             if self.webapp_shadowroot():
-                                                element_is_closed = element.get_attribute('closed')
-                                                if element_is_closed:
-                                                    self.scroll_to_element(element_tree)
+                                                self.tree_base_element = label_filtered, element_class_item
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true'
+                                                self.scroll_to_element(element_tree)
+
+                                                endtime_click = time.time() + self.config.time_out
+                                                while time.time() < endtime_click and element_is_closed():
                                                     element_tree.click()
-                                                else: 
-                                                    element.click()
                                             else: 
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
@@ -7576,13 +7574,10 @@ class WebappInternal(Base):
 
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
-                if treenode_selected:
-                    if self.webapp_shadowroot():
-                        hierarchy = treenode_selected.get_attribute('hierarchy')
-                    else:
-                        hierarchy = treenode_selected.attrs['hierarchy']
+                if self.webapp_shadowroot():
+                    hierarchy = treenode_selected.get_attribute('hierarchy')
                 else:
-                    success = False
+                    hierarchy = treenode_selected.attrs['hierarchy']
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
@@ -7700,10 +7695,6 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot(): 
             treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
-            if len(treenode_selected) == 0:
-                self.ClickLabel(label_filtered)
-                ttreenode = self.treenode() 
-                treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
