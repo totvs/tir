@@ -3169,7 +3169,11 @@ class WebappInternal(Base):
             if not soup:
                 self.log_error("Search for erros couldn't find DOM")
             message = ""
-            top_layer = next(iter(self.zindex_sort(soup.select(".tmodaldialog, .ui-dialog, wa-dialog"), True)), None)
+            if self.webapp_shadowroot():
+                selector = "wa-dialog"
+            else:
+                selector = ".tmodaldialog, .ui-dialog"
+            top_layer = next(iter(self.zindex_sort(soup.select(selector), True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
@@ -3177,13 +3181,24 @@ class WebappInternal(Base):
         if not top_layer:
             return None
 
-        icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
-        icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
+        if self.webapp_shadowroot():
+            icon_alert = next(iter(top_layer.select("wa-image[src*='fwskin_info_ico.png']")), None)
+        else:
+            icon_alert = next(iter(top_layer.select("img[src*='fwskin_info_ico.png']")), None)
+
+        if self.webapp_shadowroot():
+            icon_error_log = next(iter(top_layer.select("wa-image[src*='openclosing.png']")), None)
+        else:
+            icon_error_log = next(iter(top_layer.select("img[src*='openclosing.png']")), None)
+
         if (not icon_alert or not check_help) and not icon_error_log:
             return None
 
         if icon_alert:
-            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
+            if self.webapp_shadowroot():
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.get('caption').strip(), top_layer.select(".dict-tsay")))
+            else:
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
             if self.language.messages.error_msg_required in label:
                 message = self.language.messages.error_msg_required
             elif "help:" in label.lower() and self.language.problem in label:
@@ -3192,16 +3207,25 @@ class WebappInternal(Base):
                 return None
 
         elif icon_error_log:
-            label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
-            textarea = next(iter(top_layer.select("textarea")), None)
-            textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
+            if self.webapp_shadowroot():
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.get('caption').strip(), top_layer.select(".dict-tbutton")))
+                textarea = next(iter(top_layer.select(".dict-tmultiget")), None) 
+                textarea_value = textarea.get('contexttext')
+            else:
+                label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
+                textarea = next(iter(top_layer.select("textarea")), None)
+                textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
 
             error_paragraphs = textarea_value.split("\n\n")
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
-            button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
-            self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
+            if self.webapp_shadowroot():
+                button = next(iter(filter(lambda x: self.language.details.lower() in x.get('caption').lower().replace('<u>', '').replace('</u>',''),top_layer.select("wa-button"))), None)
+                self.driver.execute_script(f"return arguments[0].click()", self.soup_to_selenium(button))
+            else:
+                button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
+                self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
         self.log_error(message)
@@ -3661,6 +3685,9 @@ class WebappInternal(Base):
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
 
                         if filtered_button:
+                            parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                            if parents_actives:
+                                filtered_button = parents_actives
                             filtered_button = next(reversed(filtered_button), None)
                         else:
                             filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
@@ -7453,9 +7480,9 @@ class WebappInternal(Base):
                 tree_node = self.find_tree_bs(label_filtered)
 
                 if self.webapp_shadowroot():
-                    tree_node_filtered = tree_node
+                    tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
                 else: 
-                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node_filtered))
+                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
@@ -7487,14 +7514,11 @@ class WebappInternal(Base):
                             for element_class_item in element_class:
                                 if not success:
                                     if self.webapp_shadowroot():
-                                        element_click = element_class_item
+                                        element_click = lambda: element_class_item
                                     else:
                                         element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        if self.webapp_shadowroot():
-                                            element_tree = element_click
-                                        else:
-                                            element_tree = element_click()
+                                        element_tree = element_click()
 
                                         if last_item:
                                             start_time = time.time()
@@ -7504,10 +7528,7 @@ class WebappInternal(Base):
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    if self.webapp_shadowroot():
-                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
-                                                    else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
@@ -7519,12 +7540,13 @@ class WebappInternal(Base):
                                                     success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             if self.webapp_shadowroot():
-                                                element_is_closed = element.get_attribute('closed')
-                                                if element_is_closed:
-                                                    self.scroll_to_element(element_tree)
+                                                self.tree_base_element = label_filtered, element_class_item
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true'
+                                                self.scroll_to_element(element_tree)
+
+                                                endtime_click = time.time() + self.config.time_out
+                                                while time.time() < endtime_click and element_is_closed():
                                                     element_tree.click()
-                                                else: 
-                                                    element.click()
                                             else: 
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
@@ -8600,7 +8622,7 @@ class WebappInternal(Base):
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
                 if right_click:
-                    soup_select = self.get_soup_select(".tmenupopupitem")
+                    soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
                         action(element(), right_click=right_click)
                         self.wait_blocker()
