@@ -3141,7 +3141,7 @@ class WebappInternal(Base):
                 if len(labels_not_none) > 0:
                     labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
                     if labels_displayed:
-                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower(), labels_displayed))),
+                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
                         if not element and len(labels_not_none) == 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
@@ -6534,8 +6534,12 @@ class WebappInternal(Base):
         """
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
-            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+            if self.webapp_shadowroot():
+                term = '.ditc-tsay'
+            else:
+                term = '.tsay'
+            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, check_error=False):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
@@ -6698,9 +6702,6 @@ class WebappInternal(Base):
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 
-        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
-        routine_name = routine_name if routine_name else "error"
-
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
@@ -6715,7 +6716,7 @@ class WebappInternal(Base):
 
         proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
 
-        if self.config.screenshot and proceed_action():
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line and proceed_action():
@@ -7483,9 +7484,9 @@ class WebappInternal(Base):
                 tree_node = self.find_tree_bs(label_filtered)
 
                 if self.webapp_shadowroot():
-                    tree_node_filtered = tree_node
+                    tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
                 else: 
-                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node_filtered))
+                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
                 elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
 
@@ -7517,14 +7518,11 @@ class WebappInternal(Base):
                             for element_class_item in element_class:
                                 if not success:
                                     if self.webapp_shadowroot():
-                                        element_click = element_class_item
+                                        element_click = lambda: element_class_item
                                     else:
                                         element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        if self.webapp_shadowroot():
-                                            element_tree = element_click
-                                        else:
-                                            element_tree = element_click()
+                                        element_tree = element_click()
 
                                         if last_item:
                                             start_time = time.time()
@@ -7534,10 +7532,7 @@ class WebappInternal(Base):
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    if self.webapp_shadowroot():
-                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
-                                                    else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
@@ -7549,12 +7544,13 @@ class WebappInternal(Base):
                                                     success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             if self.webapp_shadowroot():
-                                                element_is_closed = element.get_attribute('closed')
-                                                if element_is_closed:
-                                                    self.scroll_to_element(element_tree)
+                                                self.tree_base_element = label_filtered, element_class_item
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true'
+                                                self.scroll_to_element(element_tree)
+
+                                                endtime_click = time.time() + self.config.time_out
+                                                while time.time() < endtime_click and element_is_closed():
                                                     element_tree.click()
-                                                else: 
-                                                    element.click()
                                             else: 
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
@@ -7576,13 +7572,10 @@ class WebappInternal(Base):
 
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
-                if treenode_selected:
-                    if self.webapp_shadowroot():
-                        hierarchy = treenode_selected.get_attribute('hierarchy')
-                    else:
-                        hierarchy = treenode_selected.attrs['hierarchy']
+                if self.webapp_shadowroot():
+                    hierarchy = treenode_selected.get_attribute('hierarchy')
                 else:
-                    success = False
+                    hierarchy = treenode_selected.attrs['hierarchy']
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
@@ -7700,10 +7693,6 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot(): 
             treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
-            if len(treenode_selected) == 0:
-                self.ClickLabel(label_filtered)
-                ttreenode = self.treenode() 
-                treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
@@ -8637,7 +8626,7 @@ class WebappInternal(Base):
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
                 if right_click:
-                    soup_select = self.get_soup_select(".tmenupopupitem")
+                    soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
                         action(element(), right_click=right_click)
                         self.wait_blocker()
