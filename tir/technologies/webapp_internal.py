@@ -6671,9 +6671,6 @@ class WebappInternal(Base):
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 
-        routine_name = self.config.routine if ">" not in self.config.routine else self.config.routine.split(">")[-1].strip()
-        routine_name = routine_name if routine_name else "error"
-
         stack_item = self.log.get_testcase_stack()
         test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
         log_message = f"{test_number} {message}"
@@ -6688,7 +6685,7 @@ class WebappInternal(Base):
 
         proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
 
-        if self.config.screenshot and proceed_action():
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         if new_log_line and proceed_action():
