@@ -7531,10 +7531,7 @@ class WebappInternal(Base):
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    if self.webapp_shadowroot():
-                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
-                                                    else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
@@ -8628,7 +8625,7 @@ class WebappInternal(Base):
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
                 if right_click:
-                    soup_select = self.get_soup_select(".tmenupopupitem")
+                    soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
                         action(element(), right_click=right_click)
                         self.wait_blocker()
