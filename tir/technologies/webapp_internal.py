@@ -4263,8 +4263,21 @@ class WebappInternal(Base):
                     iter(grid.select('th')))
 
                 if th:
-                    th_element = next(iter(th)) if self.webapp_shadowroot() else self.soup_to_selenium(th)
-                    th_element.click()
+                    if self.webapp_shadowroot():
+                        first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                        if first_cell:
+                            current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                            before_box = current_box()
+                            endtime = time.time() + self.config.time_out
+                            while time.time() < endtime and current_box() == before_box:
+                                th_element = next(iter(th))
+                                th_element.click()
+                        else:
+                            th_element = next(iter(th))
+                            th_element.click()
+                    else:
+                        th_element = self.soup_to_selenium(th)
+                        th_element.click()
                 else:
                     self.log_error("Couldn't find ClickBox item")
 
