@@ -1374,6 +1374,23 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
+                endtime = time.time() + 30
+                while (time.time() < endtime):
+
+                    element_finish = None
+
+                    element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
+                                                    optional_term=".tsay, .tgroupbox, wa-text-view",
+                                                    main_container=self.containers_selectors["AllContainers"],
+                                                    check_help=False)
+
+                    if element_finish:
+                        self.SetButton("Cancelar")
+                        break
+
+                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                    time.sleep(1)
 
             soup = self.get_current_DOM()
             tget = next(iter(soup.select(cget_term)), None)
@@ -3428,7 +3445,25 @@ class WebappInternal(Base):
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not self.webapp_shadowroot():
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform() 
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
+            endtime = time.time() + 30
+            while (time.time() < endtime):
+
+                element_finish = None
+
+                element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
+                                                optional_term=".tsay, .tgroupbox, wa-text-view",
+                                                main_container=self.containers_selectors["AllContainers"],
+                                                check_help=False)
+
+                if element_finish:
+                    self.SetButton("Cancelar")
+                    break
+
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                time.sleep(1)
+
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
         soup = self.get_current_DOM()
