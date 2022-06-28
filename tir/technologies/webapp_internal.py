@@ -73,7 +73,7 @@ class WebappInternal(Base):
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
-            "Containers": ".tmodaldialog,.ui-dialog"
+            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
         }
 
         self.grid_selectors = {
@@ -1374,6 +1374,23 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
+                endtime = time.time() + 30
+                while (time.time() < endtime):
+
+                    element_finish = None
+
+                    element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
+                                                    optional_term=".tsay, .tgroupbox, wa-text-view",
+                                                    main_container=self.containers_selectors["AllContainers"],
+                                                    check_help=False)
+
+                    if element_finish:
+                        self.SetButton("Cancelar")
+                        break
+
+                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                    time.sleep(1)
 
             soup = self.get_current_DOM()
             tget = next(iter(soup.select(cget_term)), None)
@@ -3428,7 +3445,25 @@ class WebappInternal(Base):
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not self.webapp_shadowroot():
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform() 
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
+            endtime = time.time() + 30
+            while (time.time() < endtime):
+
+                element_finish = None
+
+                element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
+                                                optional_term=".tsay, .tgroupbox, wa-text-view",
+                                                main_container=self.containers_selectors["AllContainers"],
+                                                check_help=False)
+
+                if element_finish:
+                    self.SetButton("Cancelar")
+                    break
+
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                time.sleep(1)
+
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
         soup = self.get_current_DOM()
@@ -4263,8 +4298,21 @@ class WebappInternal(Base):
                     iter(grid.select('th')))
 
                 if th:
-                    th_element = next(iter(th)) if self.webapp_shadowroot() else self.soup_to_selenium(th)
-                    th_element.click()
+                    if self.webapp_shadowroot():
+                        first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                        if first_cell:
+                            current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                            before_box = current_box()
+                            endtime = time.time() + self.config.time_out
+                            while time.time() < endtime and current_box() == before_box:
+                                th_element = next(iter(th))
+                                th_element.click()
+                        else:
+                            th_element = next(iter(th))
+                            th_element.click()
+                    else:
+                        th_element = self.soup_to_selenium(th)
+                        th_element.click()
                 else:
                     self.log_error("Couldn't find ClickBox item")
 
@@ -4945,13 +4993,14 @@ class WebappInternal(Base):
                 if label_filtered and not self.element_is_displayed(label_filtered):
                     self.scroll_to_element( self.soup_to_selenium(label_filtered) )
 
-            if self.webapp_shadowroot():
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["GetCurrentContainer"], label=label, position=position)), None) 
-            else:
+            element = ''
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not element:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
 
-            if not element:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+                if not element:
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+
             if element and not self.element_is_displayed(element):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
@@ -5143,7 +5192,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -7967,7 +8016,7 @@ class WebappInternal(Base):
                 if not wa_text_view_filtered:
                    wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio')
 
-            if len(wa_text_view_filtered)-1 >= position:
+            if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
 
             if container:
