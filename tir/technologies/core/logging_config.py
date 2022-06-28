@@ -148,3 +148,5 @@ def create_file(folder, filename):
                 return True
         except Exception as error:
             logger().debug(str(error))
+
+        time.sleep(30)

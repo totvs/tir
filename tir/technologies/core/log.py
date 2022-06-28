@@ -394,10 +394,13 @@ class Log:
         if self.config.smart_test:
             open("log_exec_file.txt", "w")
 
-        with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
-            json_file.write(json_data)
-
-        logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        try:
+            with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
+                json_file.write(json_data)
+            logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        except Exception as error:
+            logger().debug(f"Fail in create json file in: {Path(path, log_file)}: Error: {str(error)}")
+            pass
 
     def ident_test(self):
         """
