@@ -73,7 +73,7 @@ class WebappInternal(Base):
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
-            "Containers": ".tmodaldialog,.ui-dialog"
+            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
         }
 
         self.grid_selectors = {
@@ -4958,13 +4958,14 @@ class WebappInternal(Base):
                 if label_filtered and not self.element_is_displayed(label_filtered):
                     self.scroll_to_element( self.soup_to_selenium(label_filtered) )
 
-            if self.webapp_shadowroot():
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["GetCurrentContainer"], label=label, position=position)), None) 
-            else:
+            element = ''
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not element:
                 element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
 
-            if not element:
-                element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+                if not element:
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+
             if element and not self.element_is_displayed(element):
                 self.scroll_to_element( self.soup_to_selenium(element) )
 
@@ -7980,7 +7981,7 @@ class WebappInternal(Base):
                 if not wa_text_view_filtered:
                    wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio')
 
-            if len(wa_text_view_filtered)-1 >= position:
+            if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
 
             if container:
