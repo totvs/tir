@@ -5191,7 +5191,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
