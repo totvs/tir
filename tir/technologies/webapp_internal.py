@@ -1370,8 +1370,6 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
 
-            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
@@ -1391,6 +1389,8 @@ class WebappInternal(Base):
 
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     time.sleep(1)
+
+            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
             soup = self.get_current_DOM()
             tget = next(iter(soup.select(cget_term)), None)
@@ -3444,7 +3444,6 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
-        self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
