@@ -8357,7 +8357,7 @@ class WebappInternal(Base):
         """
         position -= 1
 
-        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup")
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup, wa-menu-popup-item")
 
         label = label.lower().strip()
 
@@ -8373,7 +8373,9 @@ class WebappInternal(Base):
 
                 tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-                tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
+                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, tmenupopupitem_displayed))
+                if not tmenupopupitem_filtered:
+                    tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
 
                 if tmenupopupitem_filtered and len(tmenupopupitem_filtered) -1 >= position:
                     tmenupopupitem_filtered = tmenupopupitem_filtered[position]
@@ -8398,7 +8400,7 @@ class WebappInternal(Base):
 
         body = next(iter(soup.select("body")))
 
-        return body.select(".tmenupopupitem")
+        return body.select(".tmenupopupitem, wa-menu-popup-item")
 
     def get_release(self):
         """
