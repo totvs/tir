@@ -7509,6 +7509,8 @@ class WebappInternal(Base):
         labels = list(map(str.strip, treepath.split(">")))
 
         for row, label in enumerate(labels):
+            
+            label = re.sub(r'[ ]{2,}',' ',label).strip()
 
             self.wait_blocker()
 
