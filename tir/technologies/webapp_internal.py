@@ -2489,7 +2489,8 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower().replace(",", "").strip() == main_value.lower().replace(",", "").strip()
+                        replace = r'[\s,:]'
+                        success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', main_value).lower()
                     else:
                         success = current_value == main_value.replace(",", "").strip()
                 except:
