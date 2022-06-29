@@ -1370,8 +1370,6 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
 
-            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
@@ -1391,6 +1389,8 @@ class WebappInternal(Base):
 
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
                     time.sleep(1)
+
+            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
             soup = self.get_current_DOM()
             tget = next(iter(soup.select(cget_term)), None)
@@ -2489,7 +2489,8 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        success = current_value.lower().replace(",", "").strip() == main_value.lower().replace(",", "").strip()
+                        replace = r'[\s,:]'
+                        success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', main_value).lower()
                     else:
                         success = current_value == main_value.replace(",", "").strip()
                 except:
@@ -3443,7 +3444,6 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
-        self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
@@ -4541,23 +4541,43 @@ class WebappInternal(Base):
         grid = self.get_grid(grid_number)
         get_current = lambda: self.selected_row(grid_number)
 
-        column_enumeration = list(enumerate(grid.select("thead label")))
-        chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
-        column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
-
-        current = get_current()
-        td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
-
-        frozen_table = next(iter(grid.select('table.frozen-table')),None)
-        if (not self.click_grid_td(td()) and not frozen_table):
-            self.log_error(" Couldn't click on column, td class or tr is not selected ")
+        if self.webapp_shadowroot():
+            column_enumeration = list(self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('thead th')",
+                                self.soup_to_selenium(grid)))
+            chosen_column = next(iter(list(filter(lambda x: column.lower() in x.text.lower(), column_enumeration))), None)
+            column_index = chosen_column.get_attribute('id') if chosen_column else self.log_error("Couldn't find chosen column.")
+            current_td = f"td[id='{column_index}']"
+            td = lambda: next(iter(self.driver.execute_script(
+                            f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",
+                            self.soup_to_selenium(grid), None)))
+            ''' TO-DO
+            frozen_table = next(iter(self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('table.frozen-table')",
+                                self.soup_to_selenium(grid))),None)
+            if (not self.click_grid_td(td()) and not frozen_table):
+                self.log_error(" Couldn't click on column, td class or tr is not selected ")
+            '''
+        else:
+            column_enumeration = list(enumerate(grid.select("thead label")))
+            chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+            column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
+            current = get_current()
+            td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+            frozen_table = next(iter(grid.select('table.frozen-table')),None)
+        
+            if (not self.click_grid_td(td()) and not frozen_table):
+                self.log_error(" Couldn't click on column, td class or tr is not selected ") 
 
         while( time.time() < endtime and  not td_element ):
-
             grid = self.get_grid(grid_number)
-            current = get_current()
-
-            td_list = grid.select(f"td[id='{column_index}']")
+            if self.webapp_shadowroot():
+                td_list = self.driver.execute_script(
+                            f"return arguments[0].shadowRoot.querySelectorAll('td')",
+                            self.soup_to_selenium(grid))
+            else:
+                current = get_current()
+                td_list = grid.select(f"td[id='{column_index}']")
             td_element_not_filtered = next(iter(td_list), None)
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
             td_element = next(iter(td_list_filtered), None)
@@ -5757,7 +5777,7 @@ class WebappInternal(Base):
 
             if container:
                 if self.webapp_shadowroot():
-                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb,.dict-twbrowse"
                 else:
                     grid_term = ".tgetdados, .tgrid, .tcbrowse"
                 
@@ -7509,6 +7529,8 @@ class WebappInternal(Base):
         labels = list(map(str.strip, treepath.split(">")))
 
         for row, label in enumerate(labels):
+            
+            label = re.sub(r'[ ]{2,}',' ',label).strip()
 
             self.wait_blocker()
 
@@ -8357,7 +8379,7 @@ class WebappInternal(Base):
         """
         position -= 1
 
-        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup")
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, main_container="body", optional_term=".tmenupopup, wa-menu-popup-item")
 
         label = label.lower().strip()
 
@@ -8373,7 +8395,9 @@ class WebappInternal(Base):
 
                 tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-                tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
+                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, tmenupopupitem_displayed))
+                if not tmenupopupitem_filtered:
+                    tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
 
                 if tmenupopupitem_filtered and len(tmenupopupitem_filtered) -1 >= position:
                     tmenupopupitem_filtered = tmenupopupitem_filtered[position]
@@ -8398,7 +8422,7 @@ class WebappInternal(Base):
 
         body = next(iter(soup.select("body")))
 
-        return body.select(".tmenupopupitem")
+        return body.select(".tmenupopupitem, wa-menu-popup-item")
 
     def get_release(self):
         """
