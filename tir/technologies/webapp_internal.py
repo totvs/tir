@@ -5756,7 +5756,7 @@ class WebappInternal(Base):
 
             if container:
                 if self.webapp_shadowroot():
-                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb"
+                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb,.dict-twbrowse"
                 else:
                     grid_term = ".tgetdados, .tgrid, .tcbrowse"
                 
