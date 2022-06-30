@@ -7616,7 +7616,7 @@ class WebappInternal(Base):
                                         else:
                                             if self.webapp_shadowroot():
                                                 self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true'
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or not self.treenode_selected(label_filtered)
                                                 self.scroll_to_element(element_tree)
 
                                                 endtime_click = time.time() + self.config.time_out
@@ -7643,10 +7643,11 @@ class WebappInternal(Base):
 
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered)
-                if self.webapp_shadowroot():
-                    hierarchy = treenode_selected.get_attribute('hierarchy')
-                else:
-                    hierarchy = treenode_selected.attrs['hierarchy']
+                if treenode_selected:
+                    if self.webapp_shadowroot():
+                        hierarchy = treenode_selected.get_attribute('hierarchy')
+                    else:
+                        hierarchy = treenode_selected.attrs['hierarchy']
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
