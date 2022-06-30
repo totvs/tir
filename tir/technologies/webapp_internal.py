@@ -4534,65 +4534,67 @@ class WebappInternal(Base):
         grid_number -= 1
         td_element = None
         actions = ActionChains(self.driver)
-
+        
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
         endtime = time.time() + self.config.time_out
-
+        
         grid = self.get_grid(grid_number)
-        get_current = lambda: self.selected_row(grid_number)
-
         if self.webapp_shadowroot():
-            column_enumeration = list(self.driver.execute_script(
-                                "return arguments[0].shadowRoot.querySelectorAll('thead th')",
-                                self.soup_to_selenium(grid)))
+            rows = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('tbody tr')", self.soup_to_selenium(grid))
+            get_current = self.get_selected_row(rows)            
+            column_enumeration = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead th')", self.soup_to_selenium(grid))
             chosen_column = next(iter(list(filter(lambda x: column.lower() in x.text.lower(), column_enumeration))), None)
             column_index = chosen_column.get_attribute('id') if chosen_column else self.log_error("Couldn't find chosen column.")
-            current_td = f"td[id='{column_index}']"
-            td = lambda: next(iter(self.driver.execute_script(
-                            f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",
-                            self.soup_to_selenium(grid), None)))
-            ''' TO-DO
-            frozen_table = next(iter(self.driver.execute_script(
-                                "return arguments[0].shadowRoot.querySelectorAll('table.frozen-table')",
-                                self.soup_to_selenium(grid))),None)
-            if (not self.click_grid_td(td()) and not frozen_table):
-                self.log_error(" Couldn't click on column, td class or tr is not selected ")
-            '''
+            current_td = f'td[id="{column_index}"]'
+
+            current = get_current
+            td = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",self.soup_to_selenium(grid))
         else:
+            get_current = lambda: self.selected_row(grid_number)
             column_enumeration = list(enumerate(grid.select("thead label")))
             chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
             column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
+            
             current = get_current()
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+
             frozen_table = next(iter(grid.select('table.frozen-table')),None)
-        
             if (not self.click_grid_td(td()) and not frozen_table):
-                self.log_error(" Couldn't click on column, td class or tr is not selected ") 
+                self.log_error(" Couldn't click on column, td class or tr is not selected ")
 
         while( time.time() < endtime and  not td_element ):
+            
             grid = self.get_grid(grid_number)
             if self.webapp_shadowroot():
-                td_list = self.driver.execute_script(
-                            f"return arguments[0].shadowRoot.querySelectorAll('td')",
-                            self.soup_to_selenium(grid))
+                current = get_current
+                td_list = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",self.soup_to_selenium(grid))
             else:
                 current = get_current()
                 td_list = grid.select(f"td[id='{column_index}']")
+            
             td_element_not_filtered = next(iter(td_list), None)
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
             td_element = next(iter(td_list_filtered), None)
 
-            if not td_element and next(self.scroll_grid_check_elements_change(xpath_soup(td_element_not_filtered))):
-                actions.key_down(Keys.PAGE_DOWN).perform()
-                self.wait_element_is_not_displayed(td().parent)
+            if self.webapp_shadowroot():
+                if not td_element:
+                    td_element_not_filtered.click()
+                    actions.key_down(Keys.PAGE_DOWN).perform()
+
+            else:
+                if not td_element and next(self.scroll_grid_check_elements_change(xpath_soup(td_element_not_filtered))):
+                    actions.key_down(Keys.PAGE_DOWN).perform()
+                    self.wait_element_is_not_displayed(td().parent)
 
         if not td_element:
             self.log_error("Scroll Grid couldn't find the element")
+        else:
+            td_element.click()
 
-        if frozen_table:
+        if not self.webapp_shadowroot() and frozen_table:
             self.soup_to_selenium(td_element.next_sibling).click()
-
-        self.click(self.soup_to_selenium(td_element))
+            
+            self.click(self.soup_to_selenium(td_element))
 
     def click_grid_td(self, td_soup):
         """
