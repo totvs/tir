@@ -1285,6 +1285,8 @@ class WebappInternal(Base):
 
         self.SetButton(self.language.close)
 
+        self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
+                          optional_term='wa-button, button, .thbutton', presence=False)
 
     def set_log_info_tss(self):
 
@@ -1372,23 +1374,14 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
-                endtime = time.time() + 30
-                while (time.time() < endtime):
+            else:
+                soup = self.get_current_DOM()
 
-                    element_finish = None
+                dialog_layer = len(soup.select('wa-dialog'))
 
-                    element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
-                                                    optional_term=".tsay, .tgroupbox, wa-text-view",
-                                                    main_container=self.containers_selectors["AllContainers"],
-                                                    check_help=False)
-
-                    if element_finish:
-                        self.SetButton("Cancelar")
-                        break
-
+                if dialog_layer > 1:
+                    logger().debug('Escape to menu')
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                    time.sleep(1)
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -2115,8 +2108,9 @@ class WebappInternal(Base):
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
-            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
-            list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
+            not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
+            list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not 'contexttext' in x.attrs, list_in_range))
+            #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
                 if self.webapp_shadowroot():
@@ -3446,23 +3440,14 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
-            endtime = time.time() + 30
-            while (time.time() < endtime):
+        else:
+            soup = self.get_current_DOM()
 
-                element_finish = None
+            dialog_layer = len(soup.select('wa-dialog'))
 
-                element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
-                                                optional_term=".tsay, .tgroupbox, wa-text-view",
-                                                main_container=self.containers_selectors["AllContainers"],
-                                                check_help=False)
-
-                if element_finish:
-                    self.SetButton("Cancelar")
-                    break
-
+            if dialog_layer > 1:
+                logger().debug('Escape to menu')
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                time.sleep(1)
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -4534,65 +4519,67 @@ class WebappInternal(Base):
         grid_number -= 1
         td_element = None
         actions = ActionChains(self.driver)
-
+        
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
         endtime = time.time() + self.config.time_out
-
+        
         grid = self.get_grid(grid_number)
-        get_current = lambda: self.selected_row(grid_number)
-
         if self.webapp_shadowroot():
-            column_enumeration = list(self.driver.execute_script(
-                                "return arguments[0].shadowRoot.querySelectorAll('thead th')",
-                                self.soup_to_selenium(grid)))
+            rows = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('tbody tr')", self.soup_to_selenium(grid))
+            get_current = self.get_selected_row(rows)            
+            column_enumeration = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead th')", self.soup_to_selenium(grid))
             chosen_column = next(iter(list(filter(lambda x: column.lower() in x.text.lower(), column_enumeration))), None)
             column_index = chosen_column.get_attribute('id') if chosen_column else self.log_error("Couldn't find chosen column.")
-            current_td = f"td[id='{column_index}']"
-            td = lambda: next(iter(self.driver.execute_script(
-                            f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",
-                            self.soup_to_selenium(grid), None)))
-            ''' TO-DO
-            frozen_table = next(iter(self.driver.execute_script(
-                                "return arguments[0].shadowRoot.querySelectorAll('table.frozen-table')",
-                                self.soup_to_selenium(grid))),None)
-            if (not self.click_grid_td(td()) and not frozen_table):
-                self.log_error(" Couldn't click on column, td class or tr is not selected ")
-            '''
+            current_td = f'td[id="{column_index}"]'
+
+            current = get_current
+            td = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",self.soup_to_selenium(grid))
         else:
+            get_current = lambda: self.selected_row(grid_number)
             column_enumeration = list(enumerate(grid.select("thead label")))
             chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
             column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
+            
             current = get_current()
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
+
             frozen_table = next(iter(grid.select('table.frozen-table')),None)
-        
             if (not self.click_grid_td(td()) and not frozen_table):
-                self.log_error(" Couldn't click on column, td class or tr is not selected ") 
+                self.log_error(" Couldn't click on column, td class or tr is not selected ")
 
         while( time.time() < endtime and  not td_element ):
+            
             grid = self.get_grid(grid_number)
             if self.webapp_shadowroot():
-                td_list = self.driver.execute_script(
-                            f"return arguments[0].shadowRoot.querySelectorAll('td')",
-                            self.soup_to_selenium(grid))
+                current = get_current
+                td_list = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('{current_td}')",self.soup_to_selenium(grid))
             else:
                 current = get_current()
                 td_list = grid.select(f"td[id='{column_index}']")
+            
             td_element_not_filtered = next(iter(td_list), None)
             td_list_filtered  = list(filter(lambda x: x.text.strip() == match_value and self.element_is_displayed(x) ,td_list))
             td_element = next(iter(td_list_filtered), None)
 
-            if not td_element and next(self.scroll_grid_check_elements_change(xpath_soup(td_element_not_filtered))):
-                actions.key_down(Keys.PAGE_DOWN).perform()
-                self.wait_element_is_not_displayed(td().parent)
+            if self.webapp_shadowroot():
+                if not td_element:
+                    td_element_not_filtered.click()
+                    actions.key_down(Keys.PAGE_DOWN).perform()
+
+            else:
+                if not td_element and next(self.scroll_grid_check_elements_change(xpath_soup(td_element_not_filtered))):
+                    actions.key_down(Keys.PAGE_DOWN).perform()
+                    self.wait_element_is_not_displayed(td().parent)
 
         if not td_element:
             self.log_error("Scroll Grid couldn't find the element")
+        else:
+            td_element.click()
 
-        if frozen_table:
+        if not self.webapp_shadowroot() and frozen_table:
             self.soup_to_selenium(td_element.next_sibling).click()
-
-        self.click(self.soup_to_selenium(td_element))
+            
+            self.click(self.soup_to_selenium(td_element))
 
     def click_grid_td(self, td_soup):
         """
@@ -8439,7 +8426,7 @@ class WebappInternal(Base):
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
         >>> if self.oHelper.get_release() >= '12.1.023':
-        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001')
         """
 
         return self.log.release
