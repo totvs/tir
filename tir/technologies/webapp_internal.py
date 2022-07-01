@@ -1285,6 +1285,8 @@ class WebappInternal(Base):
 
         self.SetButton(self.language.close)
 
+        self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
+                          optional_term='wa-button, button, .thbutton', presence=False)
 
     def set_log_info_tss(self):
 
@@ -1372,23 +1374,14 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
-                endtime = time.time() + 30
-                while (time.time() < endtime):
+            else:
+                soup = self.get_current_DOM()
 
-                    element_finish = None
+                dialog_layer = len(soup.select('wa-dialog'))
 
-                    element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
-                                                    optional_term=".tsay, .tgroupbox, wa-text-view",
-                                                    main_container=self.containers_selectors["AllContainers"],
-                                                    check_help=False)
-
-                    if element_finish:
-                        self.SetButton("Cancelar")
-                        break
-
+                if dialog_layer > 1:
+                    logger().debug('Escape to menu')
                     ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                    time.sleep(1)
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -3447,23 +3440,14 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        else: #TODO Criar outro mecanismo para verificar se existe uma tela sobreposta ao menu.
-            endtime = time.time() + 30
-            while (time.time() < endtime):
+        else:
+            soup = self.get_current_DOM()
 
-                element_finish = None
+            dialog_layer = len(soup.select('wa-dialog'))
 
-                element_finish = self.web_scrap(term='Finalizar', scrap_type=enum.ScrapType.MIXED,
-                                                optional_term=".tsay, .tgroupbox, wa-text-view",
-                                                main_container=self.containers_selectors["AllContainers"],
-                                                check_help=False)
-
-                if element_finish:
-                    self.SetButton("Cancelar")
-                    break
-
+            if dialog_layer > 1:
+                logger().debug('Escape to menu')
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-                time.sleep(1)
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -8442,7 +8426,7 @@ class WebappInternal(Base):
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
         >>> if self.oHelper.get_release() >= '12.1.023':
-        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001')
         """
 
         return self.log.release
