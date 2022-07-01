@@ -2115,8 +2115,9 @@ class WebappInternal(Base):
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
-            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
-            list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range))
+            not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
+            list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not 'contexttext' in x.attrs, list_in_range))
+            #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
                 if self.webapp_shadowroot():
