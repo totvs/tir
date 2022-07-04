@@ -2109,7 +2109,7 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
-            list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not 'contexttext' in x.attrs, list_in_range))
+            list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not x.get('contexttext'), list_in_range))
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
@@ -3851,7 +3851,7 @@ class WebappInternal(Base):
 
     def set_button_x(self, position=1, check_error=True):
         if self.webapp_shadowroot():
-            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico']"
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-dialog"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
@@ -3870,7 +3870,7 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning:
+            if element_selenium.get_attribute('title') == self.language.warning or 'fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image'):
                 script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
                 element_selenium = self.driver.execute_script(script, element_selenium)
 
@@ -5558,7 +5558,10 @@ class WebappInternal(Base):
                                         self.send_keys(selenium_input(), Keys.ENTER)
                                     else:
                                         if not (re.match(r"[0-9]+,[0-9]+", user_value)):
-                                            self.send_keys(selenium_input(), Keys.ENTER)
+                                            try:
+                                                self.send_keys(selenium_input(), Keys.ENTER)
+                                            except:
+                                                pass
                                         else:
                                             self.wait_element_timeout(term=".tmodaldialog.twidget, wa-dialog",
                                                                       scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6347,7 +6350,11 @@ class WebappInternal(Base):
             if term == "[name='cGetUser']":
                 self.close_resolution_screen()
             else:
-                if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
+                if self.webapp_shadowroot():
+                    class_term = "wa-dialog"
+                else:
+                    class_term = ".ui-button.ui-dialog-titlebar-close[title='Close']"
+                if  class_term in term:
                     return False
                 self.restart_counter += 1
                 if presence:
@@ -7394,7 +7401,7 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             if self.webapp_shadowroot():
-                labels = container.select("wa-text-view")
+                labels = container.select("wa-text-view, wa-checkbox")
                 filtered_labels = next(iter(list(filter(lambda x: x.get('caption') and label_name.lower() == x.get('caption').lower(), labels))),None)
                 if filtered_labels:
                     label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
@@ -7409,6 +7416,9 @@ class WebappInternal(Base):
 
         if not label:
             self.log_error("Couldn't find any labels.")
+
+        if type(label) == Tag:
+            label = self.soup_to_selenium(label)
 
         if self.webapp_shadowroot():
             label_element = label
