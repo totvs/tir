@@ -3851,7 +3851,7 @@ class WebappInternal(Base):
 
     def set_button_x(self, position=1, check_error=True):
         if self.webapp_shadowroot():
-            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico']"
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-dialog"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
@@ -3870,7 +3870,7 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning:
+            if element_selenium.get_attribute('title') == self.language.warning or 'fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image'):
                 script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
                 element_selenium = self.driver.execute_script(script, element_selenium)
 
@@ -6347,7 +6347,11 @@ class WebappInternal(Base):
             if term == "[name='cGetUser']":
                 self.close_resolution_screen()
             else:
-                if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
+                if self.webapp_shadowroot():
+                    class_term = "wa-dialog"
+                else:
+                    class_term = ".ui-button.ui-dialog-titlebar-close[title='Close']"
+                if  class_term in term:
                     return False
                 self.restart_counter += 1
                 if presence:
