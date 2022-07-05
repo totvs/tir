@@ -3870,7 +3870,7 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning or 'fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image'):
+            if element_selenium.get_attribute('title') == self.language.warning or ('fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image') and element_selenium.tag_name == 'wa-dialog') :
                 script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
                 element_selenium = self.driver.execute_script(script, element_selenium)
 
