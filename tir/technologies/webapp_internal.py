@@ -5995,6 +5995,8 @@ class WebappInternal(Base):
 
                 if grids:
                     if len(grids) > 1:
+
+                        grids = self.filter_active_tabs(grids)
                         grids, same_location = self.filter_non_obscured(grids, grid_number)
                         if same_location:
                             grid_number = 0
@@ -6068,6 +6070,19 @@ class WebappInternal(Base):
             return [next(iter(list(self.zindex_sort(same_position, reverse=True))))], True
 
         return elements, False
+
+    def filter_active_tabs(self, grids):
+        """
+
+        :param grids:
+        :return:
+        """
+
+        filtered_grids = list(filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, grids))
+
+        if filtered_grids:
+
+            return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, grids))
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
         """
@@ -6212,10 +6227,11 @@ class WebappInternal(Base):
 
         for item in grids:
             if self.webapp_shadowroot():
-                labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('label')",
+                labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
                                                                     self.soup_to_selenium(item))
             else:
                 labels = item.select("thead tr label")
+
             if labels:
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
@@ -8467,7 +8483,7 @@ class WebappInternal(Base):
         Update the password in the Protheus password change request screen
         """
         container = self.get_current_container()
-        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog, wa-dialog", optional_term=".tsay"):
+        if container and self.element_exists(term=self.language.change_password, scrap_type=enum.ScrapType.MIXED, main_container=".tmodaldialog, wa-dialog", optional_term=".tsay, wa-text-view"):
             user_login = self.GetValue(self.language.user_login)
             if user_login == self.config.user or self.config.user.lower() == "admin":
                 self.SetValue(self.language.current_password, self.config.password)
