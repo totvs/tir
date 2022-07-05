@@ -5315,331 +5315,332 @@ class WebappInternal(Base):
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                       optional_term='th label', main_container='body')
+        try:
+            endtime = time.time() + self.config.time_out
+            while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
 
-        endtime = time.time() + self.config.time_out
-        while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
+                endtime_row = time.time() + self.config.time_out
+                while (time.time() < endtime_row and grid_reload):
 
-            endtime_row = time.time() + self.config.time_out
-            while (time.time() < endtime_row and grid_reload):
+                    if not field[4]:
+                        grid_reload = False
 
-                if not field[4]:
-                    grid_reload = False
-
-                if self.webapp_shadowroot():
-                    container = self.get_current_shadow_root_container()
-                else:
-                    container = self.get_current_container()
-
-                if container:
-                    try:
-                        container_id = self.soup_to_selenium(container).get_attribute("id") if self.soup_to_selenium(
-                            container) else None
-                    except Exception as err:
-                        container_id = None
-                        logger().exception(str(err))
-                        pass
                     if self.webapp_shadowroot():
-                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                        container = self.get_current_shadow_root_container()
                     else:
-                        grids = container.select(".tgetdados, .tgrid, .tcbrowse")
-                    grids = self.filter_displayed_elements(grids)
+                        container = self.get_current_container()
 
-                count = 0
-                headers_from_grids = self.get_headers_from_grids(grids, duplicate_fields)
-                for header_grid in headers_from_grids:
-                    if column_name not in header_grid:
-                        grids.pop(count)
+                    if container:
+                        try:
+                            container_id = self.soup_to_selenium(container).get_attribute("id") if self.soup_to_selenium(
+                                container) else None
+                        except Exception as err:
+                            container_id = None
+                            logger().exception(str(err))
+                            pass
+                        if self.webapp_shadowroot():
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                        else:
+                            grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+                        grids = self.filter_displayed_elements(grids)
+
+                    count = 0
+                    headers_from_grids = self.get_headers_from_grids(grids, duplicate_fields)
+                    for header_grid in headers_from_grids:
+                        if column_name not in header_grid:
+                            grids.pop(count)
+                        else:
+                            count = count + 1
+
+                    if grids:
+                        headers = self.get_headers_from_grids(grids, duplicate_fields)
+                        if field[2] + 1 > len(grids):
+                            grid_reload = True
+                        else:
+                            grid_id = grids[field[2]].attrs["id"]
+                            if grid_id not in self.grid_counters:
+                                self.grid_counters[grid_id] = 0
+
+                            down_loop = 0
+                            if self.webapp_shadowroot():
+                                rows = self.driver.execute_script(
+                                    "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                    self.soup_to_selenium(grids[field[2]]))
+                            else:
+                                rows = grids[field[2]].select("tbody tr")
                     else:
-                        count = count + 1
+                        grid_reload = True
+
+                    if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
+                        grid_reload = False
+
+                if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
+                    self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
                 if grids:
-                    headers = self.get_headers_from_grids(grids, duplicate_fields)
                     if field[2] + 1 > len(grids):
-                        grid_reload = True
+                        self.log_error(
+                            f'{self.language.messages.grid_number_error} Grid number: {field[2] + 1} Grids in the screen: {len(grids)}')
+                else:
+                    self.log_error("Grid element doesn't appear in DOM")
+
+
+                row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
+                    next(iter(rows), None))
+
+                if row:
+                    if self.webapp_shadowroot():
+                        row_id = row.get_attribute("id")
                     else:
-                        grid_id = grids[field[2]].attrs["id"]
-                        if grid_id not in self.grid_counters:
-                            self.grid_counters[grid_id] = 0
+                        row_id = row.attrs["id"]
+                    while (int(row_id) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[
+                        4] is None and time.time() < endtime:
+                        self.new_grid_line(field, False)
+                        row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+                        down_loop += 1
+                    self.down_loop_grid = False
+                    if self.webapp_shadowroot():
+                        columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
+                    else:
+                        columns = row.select("td")
+                    if columns:
+                        if column_name in headers[field[2]]:
+                            column_number = headers[field[2]][column_name]
 
-                        down_loop = 0
-                        if self.webapp_shadowroot():
-                            rows = self.driver.execute_script(
-                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
-                                self.soup_to_selenium(grids[field[2]]))
-                        else:
-                            rows = grids[field[2]].select("tbody tr")
-                else:
-                    grid_reload = True
-
-                if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
-                    grid_reload = False
-
-            if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
-                self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
-
-            if grids:
-                if field[2] + 1 > len(grids):
-                    self.log_error(
-                        f'{self.language.messages.grid_number_error} Grid number: {field[2] + 1} Grids in the screen: {len(grids)}')
-            else:
-                self.log_error("Grid element doesn't appear in DOM")
-
-
-            row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
-                next(iter(rows), None))
-
-            if row:
-                if self.webapp_shadowroot():
-                    row_id = row.get_attribute("id")
-                else:
-                    row_id = row.attrs["id"]
-                while (int(row_id) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[
-                    4] is None and time.time() < endtime:
-                    self.new_grid_line(field, False)
-                    row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
-                    down_loop += 1
-                self.down_loop_grid = False
-                if self.webapp_shadowroot():
-                    columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
-                else:
-                    columns = row.select("td")
-                if columns:
-                    if column_name in headers[field[2]]:
-                        column_number = headers[field[2]][column_name]
-
-                        current_value = columns[column_number].text.strip()
-                        current_value = self.remove_mask(current_value).strip()
-
-                        if self.webapp_shadowroot():
-                            selenium_column = lambda: columns[column_number]
-                        else:
-                            xpath = xpath_soup(columns[column_number])
-                            selenium_column = lambda: self.get_selenium_column_element(
-                                xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field,
-                                                                                                                  grid_id,
-                                                                                                                  row,
-                                                                                                                  headers,
-                                                                                                                  field_to_label)
-
-                        endtime_selected_cell = time.time() + self.config.time_out
-                        while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
-                            self.scroll_to_element(selenium_column())
-                            self.click(selenium_column(),
-                                       click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
-                                selenium_column())
-                            self.set_element_focus(selenium_column())
-
-                        
-
-                        if self.webapp_shadowroot():
-                            term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
-                        else:
-                            term = ".tmodaldialog"
-
-                        soup = self.get_current_DOM()
-                        tmodal_list = soup.select(term)
-                        tmodal_layer = len(tmodal_list) if tmodal_list else 0
-
-                        while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                            time.sleep(1)
-                            self.scroll_to_element(selenium_column())
-                            self.set_element_focus(selenium_column())
-                            self.click(selenium_column(),
-                                       click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
-                                selenium_column())
-                            try:
-                                ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
-                                    selenium_column(), Keys.ENTER).perform()
-                            except WebDriverException:
-                                try:
-                                    self.send_keys(selenium_column(), Keys.ENTER)
-                                except WebDriverException:
-                                    pass
-                            except:
-                                pass
-
-                            time.sleep(1)
-                            if (field[1] == True):
-                                field_one = ''
-                                break
-
-                        if (field[1] == True): break  # if boolean field finish here.
-
-                        if self.webapp_shadowroot():
-                            wait_selector = "wa-dialog"
-                            position_fillgrid = initial_layer
-                            new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget, .dict-tcombobox"
-                        else:
-                            wait_selector = ".tmodaldialog"
-                            position_fillgrid = initial_layer + 1
-                            new_container_selector = ".tmodaldialog.twidget"
-
-                        self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                          position=position_fillgrid, main_container='body')
-
-                        soup = self.get_current_DOM()
-                        new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
-
-                        if self.webapp_shadowroot():
-                            endtime_child = time.time() + self.config.time_out
-                            child = None
-                            while time.time() < endtime_child and not child:
-                                try:
-                                    child = self.driver.execute_script(
-                                        "return arguments[0].shadowRoot.querySelector('input, textarea')",
-                                        self.soup_to_selenium(new_container))
-                                except Exception as err:
-                                    logger().info(f'fillgrid child error: {str(err)}')
-                                    pass
-                        else:
-                            child = new_container.select("input, textarea")
-
-                        child_type = "input"
-                        option_text = ""
-                        if not child or 'dict-tcombobox' in new_container['class']:
-                            if self.webapp_shadowroot():
-                                child = self.driver.execute_script(
-                                    "return arguments[0].shadowRoot.querySelector('select')",
-                                    self.soup_to_selenium(new_container))
-                            else:
-                                child = new_container.select("select")
-                            child_type = "select"
-
-                        if child_type == "input":
-
-                            time.sleep(2)
-                            if self.webapp_shadowroot():
-                                selenium_input = lambda: child
-                                EC.visibility_of(child)
-                            else:
-                                selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
-                                self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+                            current_value = columns[column_number].text.strip()
+                            current_value = self.remove_mask(current_value).strip()
 
                             if self.webapp_shadowroot():
-                                valtype = self.value_type(new_container.get("type"))
+                                selenium_column = lambda: columns[column_number]
                             else:
-                                valtype = selenium_input().get_attribute("valuetype")
+                                xpath = xpath_soup(columns[column_number])
+                                selenium_column = lambda: self.get_selenium_column_element(
+                                    xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field,
+                                                                                                                    grid_id,
+                                                                                                                    row,
+                                                                                                                    headers,
+                                                                                                                    field_to_label)
 
-                            lenfield = len(self.get_element_value(selenium_input()))
-                            user_value = field[1]
-                            check_mask = self.check_mask(selenium_input())
+                            endtime_selected_cell = time.time() + self.config.time_out
+                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
+                                self.scroll_to_element(selenium_column())
+                                self.click(selenium_column(),
+                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                    selenium_column())
+                                self.set_element_focus(selenium_column())
 
-                            if check_mask:
-                                if (check_mask[0].startswith('@D') and user_value == ''):
-                                    user_value = '00000000'
-                                user_value = self.remove_mask(user_value)
+                            
 
-                                self.wait_until_to(expected_condition="visibility_of", element=selenium_input,
-                                                   timeout=True)
-                                self.set_element_focus(selenium_input())
-                                self.click(selenium_input())
+                            if self.webapp_shadowroot():
+                                term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
+                            else:
+                                term = ".tmodaldialog"
 
-                            if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
-                                    self.get_current_container().next.attrs['class'] \
-                                    or 'dict-tget' in self.get_current_container().next.attrs['class']:
-                                bsoup_element = self.get_current_container().next
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
-                                                   locator=By.XPATH, timeout=True)
-                                self.try_send_keys(selenium_input, user_value, try_counter)
-                                if self.grid_memo_field:
-                                    self.SetButton('Ok')
-                                    check_value = False
-                                    self.grid_memo_field = False
+                            soup = self.get_current_DOM()
+                            tmodal_list = soup.select(term)
+                            tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                                if try_counter < 2:
-                                    try_counter += 1
-                                else:
-                                    try_counter = 0
-
-                                if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
-                                        field[1])) or lenfield > len(field[1])):
-                                    if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
-                                        field[0]] != "N") or valtype != "N"):
-                                        self.send_keys(selenium_input(), Keys.ENTER)
-                                    else:
-                                        if not (re.match(r"[0-9]+,[0-9]+", user_value)):
-                                            try:
-                                                self.send_keys(selenium_input(), Keys.ENTER)
-                                            except:
-                                                pass
-                                        else:
-                                            self.wait_element_timeout(term=".tmodaldialog.twidget, wa-dialog",
-                                                                      scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                      position=initial_layer + 1, presence=False,
-                                                                      main_container="body")
-                                            if self.element_exists(term=".tmodaldialog.twidget, wa-dialog",
-                                                                   scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                   position=initial_layer + 1, main_container="body"):
-                                                self.wait_until_to(expected_condition="element_to_be_clickable",
-                                                                   element=bsoup_element, locator=By.XPATH,
-                                                                   timeout=True)
-                                                self.send_keys(selenium_input(), Keys.ENTER)
-
-                                elif lenfield == len(field[1]) and self.get_current_container().attrs[
-                                    'id'] != container_id:
-                                    try:
-                                        self.send_keys(selenium_input(), Keys.ENTER)
-                                    except:
-                                        pass
-
-                            try_endtime = self.config.time_out / 4
-                            while try_endtime > 0:
-                                try_endtime = try_endtime - 10
-                                if self.webapp_shadowroot():
-                                    element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body')
-                                else:
-                                    element_exist = self.wait_element_timeout(term=xpath_soup(child[0]),
-                                                                              scrap_type=enum.ScrapType.XPATH,
-                                                                              timeout=10, presence=False)
+                            while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                                 time.sleep(1)
-                                if element_exist:
-                                    current_value = self.get_element_text(selenium_column())
-                                    if current_value == None:
-                                        current_value = ''
-                                else:
-                                    try_endtime = try_endtime - 10
-                                    containers = self.get_current_DOM().select(
-                                        self.containers_selectors["GetCurrentContainer"])
-                                    if child[0].parent.parent in containers:
-                                        containers.remove(child[0].parent.parent)
-                                    container_current = next(iter(self.zindex_sort(containers, True)))
-                                    if container_current.attrs['id'] != container_id:
-                                        logger().debug(
-                                            "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
-                                        return
-                        else:
-                            if self.webapp_shadowroot():
-                                option_list = child.find_elements_by_tag_name('option')
-                                option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
-                                option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
-                                option_value = self.get_element_value(child)
-                            else:
+                                self.scroll_to_element(selenium_column())
+                                self.set_element_focus(selenium_column())
+                                self.click(selenium_column(),
+                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                    selenium_column())
+                                try:
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
+                                        selenium_column(), Keys.ENTER).perform()
+                                except WebDriverException:
+                                    try:
+                                        self.send_keys(selenium_column(), Keys.ENTER)
+                                    except WebDriverException:
+                                        pass
+                                except:
+                                    pass
 
-                                option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
-                                option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                                option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
-                            option_text = next(iter(option_text_list), None)
-                            if not option_text:
-                                self.log_error("Couldn't find option")
-                            if (option_text != option_value_dict[option_value]):
-                                self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
-                                if field[1] in option_text[0:len(field[1])]:
-                                    current_value = field[1]
+                                time.sleep(1)
+                                if (field[1] == True):
+                                    field_one = ''
+                                    break
+
+                            if (field[1] == True): break  # if boolean field finish here.
+
+                            if self.webapp_shadowroot():
+                                wait_selector = "wa-dialog"
+                                position_fillgrid = initial_layer
+                                new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget, .dict-tcombobox"
+                            else:
+                                wait_selector = ".tmodaldialog"
+                                position_fillgrid = initial_layer + 1
+                                new_container_selector = ".tmodaldialog.twidget"
+
+                            self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            position=position_fillgrid, main_container='body')
+
+                            soup = self.get_current_DOM()
+                            new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
+
+                            if self.webapp_shadowroot():
+                                endtime_child = time.time() + self.config.time_out
+                                child = None
+                                while time.time() < endtime_child and not child:
+                                    try:
+                                        child = self.driver.execute_script(
+                                            "return arguments[0].shadowRoot.querySelector('input, textarea')",
+                                            self.soup_to_selenium(new_container))
+                                    except Exception as err:
+                                        logger().info(f'fillgrid child error: {str(err)}')
+                                        pass
+                            else:
+                                child = new_container.select("input, textarea")
+
+                            child_type = "input"
+                            option_text = ""
+                            if not child or 'dict-tcombobox' in new_container['class']:
+                                if self.webapp_shadowroot():
+                                    child = self.driver.execute_script(
+                                        "return arguments[0].shadowRoot.querySelector('select')",
+                                        self.soup_to_selenium(new_container))
+                                else:
+                                    child = new_container.select("select")
+                                child_type = "select"
+
+                            if child_type == "input":
+
+                                time.sleep(2)
+                                if self.webapp_shadowroot():
+                                    selenium_input = lambda: child
+                                    EC.visibility_of(child)
+                                else:
+                                    selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                                    self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+
+                                if self.webapp_shadowroot():
+                                    valtype = self.value_type(new_container.get("type"))
+                                else:
+                                    valtype = selenium_input().get_attribute("valuetype")
+
+                                lenfield = len(self.get_element_value(selenium_input()))
+                                user_value = field[1]
+                                check_mask = self.check_mask(selenium_input())
+
+                                if check_mask or valtype == 'N':
+                                    if (check_mask and check_mask[0].startswith('@D') and user_value == ''):
+                                        user_value = '00000000'
+                                    user_value = self.remove_mask(user_value)
+
+                                    self.wait_until_to(expected_condition="visibility_of", element=selenium_input,
+                                                    timeout=True)
+                                    self.set_element_focus(selenium_input())
+                                    self.click(selenium_input())
+
+                                if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
+                                        self.get_current_container().next.attrs['class'] \
+                                        or 'dict-tget' in self.get_current_container().next.attrs['class']:
+                                    bsoup_element = self.get_current_container().next
+                                    self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
+                                                    locator=By.XPATH, timeout=True)
+                                    self.try_send_keys(selenium_input, user_value, try_counter)
+                                    if self.grid_memo_field:
+                                        self.SetButton('Ok')
+                                        check_value = False
+                                        self.grid_memo_field = False
+
+                                    if try_counter < 2:
+                                        try_counter += 1
+                                    else:
+                                        try_counter = 0
+
+                                    if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
+                                            field[1])) or lenfield > len(field[1])):
+                                        if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
+                                            field[0]] != "N") or valtype != "N"):
+                                            self.send_keys(selenium_input(), Keys.ENTER)
+                                        else:
+                                            if not (re.match(r"[0-9]+,[0-9]+", user_value)):
+                                                self.send_keys(selenium_input(), Keys.ENTER)
+                                            else:
+                                                self.wait_element_timeout(term=".tmodaldialog.twidget, wa-dialog",
+                                                                        scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                        position=initial_layer + 1, presence=False,
+                                                                        main_container="body")
+                                                if self.element_exists(term=".tmodaldialog.twidget, wa-dialog",
+                                                                    scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                    position=initial_layer + 1, main_container="body"):
+                                                    self.wait_until_to(expected_condition="element_to_be_clickable",
+                                                                    element=bsoup_element, locator=By.XPATH,
+                                                                    timeout=True)
+                                                    self.send_keys(selenium_input(), Keys.ENTER)
+
+                                    elif lenfield == len(field[1]) and self.get_current_container().attrs[
+                                        'id'] != container_id:
+                                        try:
+                                            self.send_keys(selenium_input(), Keys.ENTER)
+                                        except:
+                                            pass
+
+                                try_endtime = self.config.time_out / 4
+                                while try_endtime > 0:
+                                    try_endtime = try_endtime - 10
+                                    if self.webapp_shadowroot():
+                                        element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body')
+                                    else:
+                                        element_exist = self.wait_element_timeout(term=xpath_soup(child[0]),
+                                                                                scrap_type=enum.ScrapType.XPATH,
+                                                                                timeout=10, presence=False)
+                                    time.sleep(1)
+                                    if element_exist:
+                                        current_value = self.get_element_text(selenium_column())
+                                        if current_value == None:
+                                            current_value = ''
+                                    else:
+                                        try_endtime = try_endtime - 10
+                                        containers = self.get_current_DOM().select(
+                                            self.containers_selectors["GetCurrentContainer"])
+                                        if child[0].parent.parent in containers:
+                                            containers.remove(child[0].parent.parent)
+                                        container_current = next(iter(self.zindex_sort(containers, True)))
+                                        if container_current.attrs['id'] != container_id:
+                                            logger().debug(
+                                                "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
+                                            return
                             else:
                                 if self.webapp_shadowroot():
-                                    self.send_keys(child, Keys.TAB)
+                                    option_list = child.find_elements_by_tag_name('option')
+                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
+                                    option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
+                                    option_value = self.get_element_value(child)
                                 else:
-                                    self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
-                                current_value = field[1]
 
-            if not check_value:
-                break
+                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
+                                    option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                    option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                option_text = next(iter(option_text_list), None)
+                                if not option_text:
+                                    self.log_error("Couldn't find option")
+                                if (option_text != option_value_dict[option_value]):
+                                    self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
+                                    if field[1] in option_text[0:len(field[1])]:
+                                        current_value = field[1]
+                                else:
+                                    if self.webapp_shadowroot():
+                                        self.send_keys(child, Keys.TAB)
+                                    else:
+                                        self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                    current_value = field[1]
 
-        if (check_value and self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '')):
-            self.search_for_errors()
-            self.check_grid_error(grids, headers, column_name, rows, columns, field)
-            self.log_error(
-                f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
+                if not check_value:
+                    break
+            if (check_value and self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '')):
+                self.search_for_errors()
+                self.check_grid_error(grids, headers, column_name, rows, columns, field)
+                self.log_error(
+                    f"Current value: {current_value} | Couldn't fill input: {field_one} value in Column: '{column_name}' of Grid: '{headers[field[2]].keys()}'.")
+
+        except Exception as e:
+            logger().exception(f"fill grid error: {str(e)}")
+            self.log_error(f'fill grid error: {str(e)}')
+
 
     def selected_cell(self, element):
         """
