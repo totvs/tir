@@ -2819,6 +2819,12 @@ class WebappInternal(Base):
                 self.close_warning_screen()
                 self.close_modal()
 
+            self.set_log_info()
+
+            self.log.country = self.config.country
+            self.log.execution_id = self.config.execution_id
+            self.log.issue = self.config.issue
+
 
             if self.config.routine:
                 if self.routine == 'SetLateralMenu':
@@ -4703,6 +4709,9 @@ class WebappInternal(Base):
             else:
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
+            if self.webapp_shadowroot():
+                grids = self.filter_active_tabs(grids)
+
             if grids:
                 grids = list(filter(lambda x: self.element_is_displayed(x), grids))
 
@@ -5595,12 +5604,11 @@ class WebappInternal(Base):
                                             current_value = ''
                                     else:
                                         try_endtime = try_endtime - 10
-                                        containers = self.get_current_DOM().select(
-                                            self.containers_selectors["GetCurrentContainer"])
-                                        if child[0].parent.parent in containers:
+                                        containers = self.get_current_DOM().select(self.containers_selectors["GetCurrentContainer"])
+                                        if isinstance(child, list) and child[0].parent.parent in containers:
                                             containers.remove(child[0].parent.parent)
                                         container_current = next(iter(self.zindex_sort(containers, True)))
-                                        if container_current.attrs['id'] != container_id:
+                                        if container_current.attrs['id'] != container_id and try_endtime < 0:
                                             logger().debug(
                                                 "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                             return
@@ -5997,7 +6005,9 @@ class WebappInternal(Base):
                 if grids:
                     if len(grids) > 1:
 
-                        grids = self.filter_active_tabs(grids)
+                        if self.webapp_shadowroot():
+                            grids = self.filter_active_tabs(grids)
+
                         grids, same_location = self.filter_non_obscured(grids, grid_number)
                         if same_location:
                             grid_number = 0
@@ -6105,28 +6115,45 @@ class WebappInternal(Base):
         """
         grid_number -= 1
         column -=1 if column > 0 else 0
+        header = None
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse", scrap_type=enum.ScrapType.CSS_SELECTOR)
-        grid  = self.get_grid(grid_number)
+        self.wait_element(term=f".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, {self.grid_selectors['new_web_app']}", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        grid = self.get_grid(grid_number)
         header = self.get_headers_from_grids(grid)
+
         if not column_name:
-            column_element = grid.select('thead label')[column].parent.parent
-            column_element_selenium = self.soup_to_selenium(column_element)
+
+            if self.webapp_shadowroot():
+                column_element_selenium = self.find_shadow_element('thead label', self.soup_to_selenium(grid))[column]
+                self.wait.until(EC.visibility_of((column_element_selenium)))
+            else:
+                column_element = grid.select('thead label')[column].parent.parent
+                column_element_selenium = self.soup_to_selenium(column_element)
+                self.wait_until_to(expected_condition="element_to_be_clickable", element=column_element,
+                                   locator=By.XPATH)
+
             self.set_element_focus(column_element_selenium)
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = column_element, locator = By.XPATH )
             column_element_selenium.click()
         else:
             column_name =column_name.lower()
-            header = self.get_headers_from_grids(grid)
 
             if column_name in header[grid_number]:
                 column_number = header[grid_number][column_name]
 
-            column_element = grid.select('thead label')[column_number].parent.parent
-            column_element_selenium = self.soup_to_selenium(column_element)
-            self.set_element_focus(column_element_selenium)
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = column_element, locator = By.XPATH )
-            column_element_selenium.click()
+            if self.webapp_shadowroot():
+                column_element_selenium = self.find_shadow_element('thead label', self.soup_to_selenium(grid))[column_number]
+                if column_element_selenium:
+                    self.wait.until(EC.visibility_of((column_element_selenium)))
+            else:
+                column_element = grid.select('thead label')[column_number].parent.parent
+                column_element_selenium = self.soup_to_selenium(column_element)
+                self.wait_until_to(expected_condition="element_to_be_clickable", element=column_element,
+                                   locator=By.XPATH)
+
+            if column_element_selenium:
+                self.set_element_focus(column_element_selenium)
+
+                self.click(column_element_selenium)
 
     def search_column_index(self, grid, column):
         column_enumeration = list(enumerate(grid.select("thead label")))
@@ -6225,18 +6252,24 @@ class WebappInternal(Base):
         """
 
         headers = []
+        labels = None
 
-        for item in grids:
-            if self.webapp_shadowroot():
-                labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
-                                                                    self.soup_to_selenium(item))
-            else:
-                labels = item.select("thead tr label")
+        if isinstance(grids, list):
+            for item in grids:
+                if self.webapp_shadowroot():
+                    labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
+                                                                        self.soup_to_selenium(item))
+                else:
+                    labels = item.select("thead tr label")
 
-            if labels:
-                keys = list(map(lambda x: x.text.strip().lower(), labels))
-                values = list(map(lambda x: x[0], enumerate(labels)))
-                headers.append(dict(zip(keys, values)))
+        elif self.webapp_shadowroot():
+            labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
+                                       self.soup_to_selenium(grids))
+
+        if labels:
+            keys = list(map(lambda x: x.text.strip().lower(), labels))
+            values = list(map(lambda x: x[0], enumerate(labels)))
+            headers.append(dict(zip(keys, values)))
 
         if len(duplicate_fields) > 0:
             duplicated_key = duplicate_fields[0].lower()
@@ -9034,6 +9067,9 @@ class WebappInternal(Base):
 
 
     def find_shadow_element(self, term, objects):
+
+        elements = None
+
         script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
         try:
             elements = self.driver.execute_script(script, objects)
