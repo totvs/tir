@@ -220,7 +220,7 @@ class LanguagePack:
             "ConfirmNewPassword": "Confirmar nova senha",
             "Yes": "Sim",
             "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
-            "File Name": "Nome do Arquivo:",
+            "File Name": "Nome do Arquivo",
 			"Open": "Abrir",
             "Warning": "Atenção",
             "News": "Novidades do programa"

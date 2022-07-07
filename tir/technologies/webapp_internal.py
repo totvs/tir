@@ -6560,26 +6560,40 @@ class WebappInternal(Base):
         >>> oHelper.SetFilePath(r"C:\\folder")
         >>> oHelper.SetFilePath(r"C:\\folder","save")
         """
-        self.wait_element(self.language.file_name)
-        element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
+        if self.webapp_shadowroot():
+            self.wait_element(self.language.file_name, enum.ScrapType.MIXED, optional_term='wa-file-picker')
+            soup = self.get_current_DOM()
+            containers_soup = next(iter(soup.select('wa-file-picker')), None)
+            element = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(containers_soup))), None)        
+        else:
+            self.wait_element(self.language.file_name)
+            element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
         if element:
-            self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
-            self.send_keys(element, value)
-        elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
-        if elements:
-            for line in elements:
-                if button != "":
-                    if line.text.strip().upper() == button.upper():
-                        self.click(line)
-                        break
-                elif line.text.strip().upper() == self.language.open.upper():
-                     self.click(line)
-                     break
-                elif line.text.strip().upper() == self.language.save.upper():
-                     self.click(line)
-                     break
-                else:
-                    self.log_error(f"Button: {button} not found")
+            if self.webapp_shadowroot():
+                split_path = value.split('\\')
+                for path in split_path:
+                    path_button = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('div').querySelector('button')", element)
+                    if path_button:
+                        path_button.click()
+                simple_tree_nodes = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(element))), None)        
+            else:
+                self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
+                self.send_keys(element, value)
+                elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
+                if elements:
+                    for line in elements:
+                        if button != "":
+                            if line.text.strip().upper() == button.upper():
+                                self.click(line)
+                                break
+                        elif line.text.strip().upper() == self.language.open.upper():
+                            self.click(line)
+                            break
+                        elif line.text.strip().upper() == self.language.save.upper():
+                            self.click(line)
+                            break
+                        else:
+                            self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
         """
