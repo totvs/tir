@@ -5775,12 +5775,13 @@ class WebappInternal(Base):
             container = next(iter(self.zindex_sort(containers, True)), None)
 
             if container:
-                if self.webapp_shadowroot():
-                    grid_term = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb,.dict-twbrowse"
-                else:
-                    grid_term = ".tgetdados, .tgrid, .tcbrowse"
+                grid_term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
                 
                 grids = container.select(grid_term)
+
+                if self.webapp_shadowroot():
+                    grids = self.filter_active_tabs(grids)
+
                 grids = self.filter_displayed_elements(grids)
 
             if grids:
