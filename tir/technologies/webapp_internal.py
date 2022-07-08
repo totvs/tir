@@ -889,8 +889,8 @@ class WebappInternal(Base):
 
         if not self.config.poui_login:
             if self.webapp_shadowroot():
-                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
-                                  scrap_type=enum.ScrapType.MIXED, presence=False)
+                self.wait_element_timeout(term=self.language.database, scrap_type=enum.ScrapType.MIXED, timeout = 120, optional_term='wa-text-view', main_container="body", presence=False)
+                #self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',scrap_type=enum.ScrapType.MIXED, presence=False)
             else:
                 self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False,
                                   optional_term="input", main_container=container)
