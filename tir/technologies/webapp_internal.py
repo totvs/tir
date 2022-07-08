@@ -6564,36 +6564,36 @@ class WebappInternal(Base):
             self.wait_element(self.language.file_name, enum.ScrapType.MIXED, optional_term='wa-file-picker')
             soup = self.get_current_DOM()
             containers_soup = next(iter(soup.select('wa-file-picker')), None)
-            element = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(containers_soup))), None)        
+            element = self.driver.execute_script(f"return arguments[0].shadowRoot.getElementById('txtPath')", self.soup_to_selenium(containers_soup))
+            if element:
+                self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))                
+                self.send_keys(element, value)
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
+                possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
+                elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
         else:
             self.wait_element(self.language.file_name)
             element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
-        if element:
-            if self.webapp_shadowroot():
-                split_path = value.split('\\')
-                for path in split_path:
-                    path_button = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('div').querySelector('button')", element)
-                    if path_button:
-                        path_button.click()
-                simple_tree_nodes = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(element))), None)        
-            else:
+
+            if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
                 self.send_keys(element, value)
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
-                if elements:
-                    for line in elements:
-                        if button != "":
-                            if line.text.strip().upper() == button.upper():
-                                self.click(line)
-                                break
-                        elif line.text.strip().upper() == self.language.open.upper():
-                            self.click(line)
-                            break
-                        elif line.text.strip().upper() == self.language.save.upper():
-                            self.click(line)
-                            break
-                        else:
-                            self.log_error(f"Button: {button} not found")
+
+        if elements:
+            for line in elements:
+                if button != "":
+                    if line.text.strip().upper() == button.upper():
+                        self.click(line)
+                        break
+                if line.text.strip().upper() == self.language.open.upper():
+                    self.click(line)
+                    break
+                if line.text.strip().upper() == self.language.save.upper():
+                    self.click(line)
+                    break
+                
+                self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
         """
