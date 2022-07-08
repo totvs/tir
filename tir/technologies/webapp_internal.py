@@ -6663,7 +6663,7 @@ class WebappInternal(Base):
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
-                term = '.ditc-tsay'
+                term = '.dict-tsay, .dict-panel'
             else:
                 term = '.tsay'
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
