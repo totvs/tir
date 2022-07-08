@@ -308,7 +308,7 @@ class Log:
 
         json_data = json.dumps(data)
 
-        endtime = time.time() + 30
+        endtime = time.time() + 120
 
         while (time.time() < endtime and not success):
 
