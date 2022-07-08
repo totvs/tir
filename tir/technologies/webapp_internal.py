@@ -8137,7 +8137,7 @@ class WebappInternal(Base):
         
         if isinstance(element, list):
             call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))  
-            for n in call_stack: logger().debug('element_is_displayed Error:',n.function)
+            for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
         if element_selenium:
