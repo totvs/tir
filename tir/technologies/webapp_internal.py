@@ -439,11 +439,13 @@ class WebappInternal(Base):
         user_text = self.config.user_cfg if admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
+        shadow_root = not self.config.poui_login
+
         if self.config.smart_test and admin_user and not self.config.user_cfg:
             user_text = "admin"
             password_text = "1234"
 
-        if self.webapp_shadowroot():
+        if self.webapp_shadowroot(shadow_root=shadow_root):
             get_user = '[name=cGetUser]'
             get_password = '[name=cGetPsw]'
         else:
@@ -487,7 +489,7 @@ class WebappInternal(Base):
 
             user = lambda: self.soup_to_selenium(user_element)
 
-            if self.webapp_shadowroot():
+            if self.webapp_shadowroot(shadow_root=shadow_root):
                 user_value = lambda: self.get_web_value(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", user()))
             else:
                 user_value = lambda: self.get_web_value(user())
@@ -567,7 +569,7 @@ class WebappInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        if self.webapp_shadowroot():
+        if self.webapp_shadowroot(shadow_root=shadow_root):
             wa_buttons = self.driver.execute_script(
                 "return document.querySelectorAll('wa-button')")
             button_element = next(
@@ -583,7 +585,7 @@ class WebappInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        if self.webapp_shadowroot():
+        if self.webapp_shadowroot(shadow_root=shadow_root):
             button = lambda: button_element
         else:
             button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
@@ -622,7 +624,6 @@ class WebappInternal(Base):
                 button = self.soup_to_selenium(bs4_close_button())
                 self.click(button)
 
-
     def environment_screen(self, change_env=False):
         """
         [Internal]
@@ -649,11 +650,13 @@ class WebappInternal(Base):
             label = self.language.enter
             container = ".twindow"
 
+        shadow_root = not self.config.poui_login
+
         if self.config.poui_login:
             self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR,
                               twebview=True)
         else:
-            if self.webapp_shadowroot():
+            if self.webapp_shadowroot(shadow_root=shadow_root):
                 self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
                                   scrap_type=enum.ScrapType.MIXED)
             else:
@@ -666,8 +669,9 @@ class WebappInternal(Base):
             base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                         scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
         else:
-            if self.webapp_shadowroot():
-                base_dates = self.web_scrap(term="[name='dDataBase'], [name='__dInfoData']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                base_dates = self.web_scrap(term="[name='dDataBase'], [name='__dInfoData']",
+                                            scrap_type=enum.ScrapType.CSS_SELECTOR,
                                             main_container='body',
                                             optional_term='wa-text-input')
             else:
@@ -711,8 +715,9 @@ class WebappInternal(Base):
             group_element = group_element.find_parent('pro-company-lookup')
             group_element = next(iter(group_element.select('input')), None)
         else:
-            if self.webapp_shadowroot():
-                group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
             else:
@@ -756,8 +761,9 @@ class WebappInternal(Base):
             branch_element = branch_element.find_parent('pro-branch-lookup')
             branch_element = next(iter(branch_element.select('input')), None)
         else:
-            if self.webapp_shadowroot():
-                branch_elements = self.web_scrap(term="[name='cFil'], [name='__cFil']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                branch_elements = self.web_scrap(term="[name='cFil'], [name='__cFil']",
+                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                  main_container='body',
                                                  optional_term='wa-text-input')
             else:
@@ -801,7 +807,7 @@ class WebappInternal(Base):
             environment_element = environment_element.find_parent('pro-system-module-lookup')
             environment_element = next(iter(environment_element.select('input')), None)
         else:
-            if self.webapp_shadowroot():
+            if self.webapp_shadowroot(shadow_root=shadow_root):
                 environment_elements = self.web_scrap(term="[name='cAmb']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                       main_container='body',
                                                       optional_term='wa-text-input')
@@ -822,7 +828,7 @@ class WebappInternal(Base):
             raise ValueError(message)
 
         env = lambda: self.soup_to_selenium(environment_element)
-        
+
         if self.config.poui_login:
             self.switch_to_iframe()
             enable = env().is_enabled()
@@ -854,16 +860,17 @@ class WebappInternal(Base):
                                twebview=True),
                 True, twebview=True)
         else:
-            optional_term = "wa-button" if self.webapp_shadowroot() else "button"
-            if self.webapp_shadowroot():
-                buttons = self.web_scrap(term=f"[caption*={label}]", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', optional_term=optional_term)
+            optional_term = "wa-button" if self.webapp_shadowroot(shadow_root=shadow_root) else "button"
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                buttons = self.web_scrap(term=f"[caption*={label}]", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                         main_container='body', optional_term=optional_term)
             else:
                 buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
 
             buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         if len(buttons) > 1:
-                button_element = buttons.pop()
+            button_element = buttons.pop()
         else:
             button_element = next(iter(buttons), None) if buttons else None
 
@@ -877,18 +884,21 @@ class WebappInternal(Base):
 
         if self.config.poui_login:
             self.switch_to_iframe()
-        
+
         click = 1
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and self.element_is_displayed(button()):
             self.click(button(), enum.ClickType(click))
+            if self.config.poui_login:
+                break
+
             click += 1
             time.sleep(2)
             if click == 4:
                 click = 1
 
         if not self.config.poui_login:
-            if self.webapp_shadowroot():
+            if self.webapp_shadowroot(shadow_root=shadow_root):
                 self.wait_element_timeout(term=self.language.database, scrap_type=enum.ScrapType.MIXED, timeout = 120, optional_term='wa-text-view', main_container="body", presence=False)
                 #self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',scrap_type=enum.ScrapType.MIXED, presence=False)
             else:
@@ -3107,13 +3117,13 @@ class WebappInternal(Base):
                 if label:
                     return self.find_label_element(term, container, input_field=input_field, direction=direction, position=position)
                 elif not re.match(r"\w+(_)", term):
-                    return self.filter_label_element(term, container, position=position) if self.filter_label_element(term, container, position=position) else []
+                    return self.filter_label_element(term, container, position=position, twebview=twebview) if self.filter_label_element(term, container, position=position, twebview=twebview) else []
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
                 return container.select(term)
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
-                if self.webapp_shadowroot():
+                if self.webapp_shadowroot() and not twebview:
                     return self.selenium_web_scrap(term, container, optional_term, second_term)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
@@ -3385,7 +3395,7 @@ class WebappInternal(Base):
             try:
                 if twebview:
                     self.switch_to_iframe()
-                    return  self.driver.find_element(By.CSS_SELECTOR, selector)
+                    return self.driver.find_element(By.CSS_SELECTOR, selector)
                 else:
                     element_list = container_element.find_elements(by, selector)
             except:
@@ -5319,7 +5329,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5348,7 +5358,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                         grids = self.filter_displayed_elements(grids)
@@ -6566,7 +6576,8 @@ class WebappInternal(Base):
             containers_soup = next(iter(soup.select('wa-file-picker')), None)
             element = self.driver.execute_script(f"return arguments[0].shadowRoot.getElementById('txtPath')", self.soup_to_selenium(containers_soup))
             if element:
-                self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))                
+                self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
+
                 self.send_keys(element, value)
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
@@ -6592,7 +6603,7 @@ class WebappInternal(Base):
                 if line.text.strip().upper() == self.language.save.upper():
                     self.click(line)
                     break
-                
+                    
                 self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
@@ -8071,7 +8082,7 @@ class WebappInternal(Base):
         return container_filtered
 
 
-    def filter_label_element(self, label_text, container, position):
+    def filter_label_element(self, label_text, container, position, twebview=False):
         """
         [Internal]
         Filter and remove a specified character with regex, return only displayed elements if > 1.
@@ -8085,7 +8096,9 @@ class WebappInternal(Base):
         elements = None
         position -= 1
 
-        if self.webapp_shadowroot():
+        shadow_root = not twebview
+
+        if self.webapp_shadowroot(shadow_root=shadow_root):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
