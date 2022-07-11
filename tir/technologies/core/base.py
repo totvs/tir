@@ -533,7 +533,7 @@ class Base(unittest.TestCase):
         iframe_displayed = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not iframes:
-            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
+            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
 
             if iframes:
                 iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
@@ -541,7 +541,7 @@ class Base(unittest.TestCase):
                 self.driver.switch_to.default_content()
 
             if iframe_displayed:
-                self.driver.switch_to.frame(iframe_displayed)
+                self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """
@@ -1188,12 +1188,17 @@ class Base(unittest.TestCase):
         self.driver.switch_to_default_content()
         return self.driver.find_elements_by_css_selector(selector)
 
-    def webapp_shadowroot(self):
+    def webapp_shadowroot(self, shadow_root=True):
         """
         [Internal]
         """
+
+        if not shadow_root:
+            return False
+
         if self.webapp_version:
             return self.webapp_version
+
         current_ver = ''
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not current_ver:
