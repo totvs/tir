@@ -833,8 +833,7 @@ class WebappInternal(Base):
             self.switch_to_iframe()
             enable = env().is_enabled()
         else:
-            enable = ("disabled" not in environment_element.parent.attrs[
-                "class"] and env().is_enabled()) and not env().get_attribute('disabled')
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()) and not env().get_attribute('disabled')
 
         if enable:
             env_value = ''
@@ -866,10 +865,9 @@ class WebappInternal(Base):
                 buttons = self.web_scrap(term=f"[caption*={label}]", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                          main_container='body', optional_term=optional_term)
             else:
-                buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term,
-                                         second_term='button', main_container="body")
+                buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
 
-            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons))
+            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         if len(buttons) > 1:
             button_element = buttons.pop()
@@ -901,8 +899,8 @@ class WebappInternal(Base):
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
-                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
-                                  scrap_type=enum.ScrapType.MIXED, presence=False)
+                self.wait_element_timeout(term=self.language.database, scrap_type=enum.ScrapType.MIXED, timeout = 120, optional_term='wa-text-view', main_container="body", presence=False)
+                #self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',scrap_type=enum.ScrapType.MIXED, presence=False)
             else:
                 self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False,
                                   optional_term="input", main_container=container)
@@ -5331,7 +5329,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5360,7 +5358,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                         grids = self.filter_displayed_elements(grids)
@@ -6576,36 +6574,36 @@ class WebappInternal(Base):
             self.wait_element(self.language.file_name, enum.ScrapType.MIXED, optional_term='wa-file-picker')
             soup = self.get_current_DOM()
             containers_soup = next(iter(soup.select('wa-file-picker')), None)
-            element = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(containers_soup))), None)        
+            element = self.driver.execute_script(f"return arguments[0].shadowRoot.getElementById('txtPath')", self.soup_to_selenium(containers_soup))
+            if element:
+                self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
+                self.send_keys(element, value)
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
+                possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
+                elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
         else:
             self.wait_element(self.language.file_name)
             element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
-        if element:
-            if self.webapp_shadowroot():
-                split_path = value.split('\\')
-                for path in split_path:
-                    path_button = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('div').querySelector('button')", element)
-                    if path_button:
-                        path_button.click()
-                simple_tree_nodes = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(element))), None)        
-            else:
+
+            if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
                 self.send_keys(element, value)
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
-                if elements:
-                    for line in elements:
-                        if button != "":
-                            if line.text.strip().upper() == button.upper():
-                                self.click(line)
-                                break
-                        elif line.text.strip().upper() == self.language.open.upper():
-                            self.click(line)
-                            break
-                        elif line.text.strip().upper() == self.language.save.upper():
-                            self.click(line)
-                            break
-                        else:
-                            self.log_error(f"Button: {button} not found")
+
+        if elements:
+            for line in elements:
+                if button != "":
+                    if line.text.strip().upper() == button.upper():
+                        self.click(line)
+                        break
+                if line.text.strip().upper() == self.language.open.upper():
+                    self.click(line)
+                    break
+                if line.text.strip().upper() == self.language.save.upper():
+                    self.click(line)
+                    break
+
+                self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
         """
@@ -6675,7 +6673,7 @@ class WebappInternal(Base):
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
-                term = '.ditc-tsay'
+                term = '.dict-tsay, .dict-panel'
             else:
                 term = '.tsay'
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
@@ -8151,7 +8149,7 @@ class WebappInternal(Base):
         
         if isinstance(element, list):
             call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))  
-            for n in call_stack: logger().debug('element_is_displayed Error:',n.function)
+            for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
         if element_selenium:
