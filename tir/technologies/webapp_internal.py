@@ -6577,6 +6577,7 @@ class WebappInternal(Base):
             element = self.driver.execute_script(f"return arguments[0].shadowRoot.getElementById('txtPath')", self.soup_to_selenium(containers_soup))
             if element:
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
+
                 self.send_keys(element, value)
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
@@ -6602,7 +6603,7 @@ class WebappInternal(Base):
                 if line.text.strip().upper() == self.language.save.upper():
                     self.click(line)
                     break
-
+                    
                 self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
