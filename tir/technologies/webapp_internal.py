@@ -5319,7 +5319,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5348,7 +5348,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                         grids = self.filter_displayed_elements(grids)
