@@ -265,17 +265,7 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
-            if self.webapp_shadowroot():
-                term = '.dict-tmenu'
-            else:
-                term = '.tmenu'
-
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (
-            not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_warning_screen()
-                self.close_coin_screen()
-                self.close_modal()
+            self.close_screen_before_menu()
 
             if save_input:
                 self.set_log_info()
@@ -298,6 +288,17 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
+
+    def close_screen_before_menu(self):
+
+        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+            self.close_warning_screen()
+            self.close_coin_screen()
+            self.close_modal()
 
     def service_process_bat_file(self):
         """
@@ -1057,6 +1058,8 @@ class WebappInternal(Base):
         >>> self.close_coin_screen()
         """
 
+        logger().debug('Closing coin screen!')
+
         if self.webapp_shadowroot():
             selector = "wa-dialog > wa-panel > wa-text-view"
         else:
@@ -1118,6 +1121,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
+
+        logger().debug('Closing warning screen!')
 
         if self.webapp_shadowroot():
             selector = "wa-dialog"
@@ -1384,14 +1389,12 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            else:
-                soup = self.get_current_DOM()
+            elif self.check_layers('wa-dialog') > 1:
+                logger().debug('Escape to menu')
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-                dialog_layer = len(soup.select('wa-dialog'))
-
-                if dialog_layer > 1:
-                    logger().debug('Escape to menu')
-                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            if self.check_layers('wa-dialog') > 1:
+                self.close_screen_before_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1460,6 +1463,14 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+    def check_layers(self, term):
+        """
+        [Internal]
+        """
+
+        soup = self.get_current_DOM()
+
+        return len(soup.select(term))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -3456,14 +3467,12 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        else:
-            soup = self.get_current_DOM()
+        elif self.check_layers('wa-dialog') > 1:
+            logger().debug('Escape to menu')
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-            dialog_layer = len(soup.select('wa-dialog'))
-
-            if dialog_layer > 1:
-                logger().debug('Escape to menu')
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        if self.check_layers('wa-dialog') > 1:
+            self.close_screen_before_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -5623,29 +5632,29 @@ class WebappInternal(Base):
                                                 "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                             return
                             else:
-                                if self.webapp_shadowroot():
-                                    option_list = child.find_elements_by_tag_name('option')
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
-                                    option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
-                                    option_value = self.get_element_value(child)
-                                else:
-
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
-                                    option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                                    option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
-                                option_text = next(iter(option_text_list), None)
-                                if not option_text:
-                                    self.log_error("Couldn't find option")
-                                if (option_text != option_value_dict[option_value]):
-                                    self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
-                                    if field[1] in option_text[0:len(field[1])]:
-                                        current_value = field[1]
-                                else:
+                                if child:
                                     if self.webapp_shadowroot():
-                                        self.send_keys(child, Keys.TAB)
+                                        option_list = child.find_elements_by_tag_name('option')
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
+                                        option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
+                                        option_value = self.get_element_value(child)
                                     else:
-                                        self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
-                                    current_value = field[1]
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
+                                        option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                    option_text = next(iter(option_text_list), None)
+                                    if not option_text:
+                                        self.log_error("Couldn't find option")
+                                    if (option_text != option_value_dict[option_value]):
+                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
+                                        if field[1] in option_text[0:len(field[1])]:
+                                            current_value = field[1]
+                                    else:
+                                        if self.webapp_shadowroot():
+                                            self.send_keys(child, Keys.TAB)
+                                        else:
+                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                        current_value = field[1]
 
                 if not check_value:
                     break
