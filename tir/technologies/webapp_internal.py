@@ -265,17 +265,7 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
-            if self.webapp_shadowroot():
-                term = '.dict-tmenu'
-            else:
-                term = '.tmenu'
-
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (
-            not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_warning_screen()
-                self.close_coin_screen()
-                self.close_modal()
+            self.close_screen_before_menu()
 
             if save_input:
                 self.set_log_info()
@@ -298,6 +288,17 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
+
+    def close_screen_before_menu(self):
+
+        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+            self.close_warning_screen()
+            self.close_coin_screen()
+            self.close_modal()
 
     def service_process_bat_file(self):
         """
@@ -1057,6 +1058,8 @@ class WebappInternal(Base):
         >>> self.close_coin_screen()
         """
 
+        logger().debug('Closing coin screen!')
+
         if self.webapp_shadowroot():
             selector = "wa-dialog > wa-panel > wa-text-view"
         else:
@@ -1118,6 +1121,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
+
+        logger().debug('Closing warning screen!')
 
         if self.webapp_shadowroot():
             selector = "wa-dialog"
@@ -1384,14 +1389,12 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            else:
-                soup = self.get_current_DOM()
+            elif self.check_layers('wa-dialog') > 1:
+                logger().debug('Escape to menu')
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-                dialog_layer = len(soup.select('wa-dialog'))
-
-                if dialog_layer > 1:
-                    logger().debug('Escape to menu')
-                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            if self.check_layers('wa-dialog') > 1:
+                self.close_screen_before_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1460,6 +1463,14 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+    def check_layers(self, term):
+        """
+        [Internal]
+        """
+
+        soup = self.get_current_DOM()
+
+        return len(soup.select(term))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -3456,14 +3467,12 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        else:
-            soup = self.get_current_DOM()
+        elif self.check_layers('wa-dialog') > 1:
+            logger().debug('Escape to menu')
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-            dialog_layer = len(soup.select('wa-dialog'))
-
-            if dialog_layer > 1:
-                logger().debug('Escape to menu')
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        if self.check_layers('wa-dialog') > 1:
+            self.close_screen_before_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
