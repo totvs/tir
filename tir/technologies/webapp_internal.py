@@ -5623,29 +5623,29 @@ class WebappInternal(Base):
                                                 "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                             return
                             else:
-                                if self.webapp_shadowroot():
-                                    option_list = child.find_elements_by_tag_name('option')
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
-                                    option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
-                                    option_value = self.get_element_value(child)
-                                else:
-
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
-                                    option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                                    option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
-                                option_text = next(iter(option_text_list), None)
-                                if not option_text:
-                                    self.log_error("Couldn't find option")
-                                if (option_text != option_value_dict[option_value]):
-                                    self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
-                                    if field[1] in option_text[0:len(field[1])]:
-                                        current_value = field[1]
-                                else:
+                                if child:
                                     if self.webapp_shadowroot():
-                                        self.send_keys(child, Keys.TAB)
+                                        option_list = child.find_elements_by_tag_name('option')
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
+                                        option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
+                                        option_value = self.get_element_value(child)
                                     else:
-                                        self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
-                                    current_value = field[1]
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
+                                        option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                    option_text = next(iter(option_text_list), None)
+                                    if not option_text:
+                                        self.log_error("Couldn't find option")
+                                    if (option_text != option_value_dict[option_value]):
+                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
+                                        if field[1] in option_text[0:len(field[1])]:
+                                            current_value = field[1]
+                                    else:
+                                        if self.webapp_shadowroot():
+                                            self.send_keys(child, Keys.TAB)
+                                        else:
+                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                        current_value = field[1]
 
                 if not check_value:
                     break
