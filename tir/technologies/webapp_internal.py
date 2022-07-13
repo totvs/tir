@@ -5373,14 +5373,6 @@ class WebappInternal(Base):
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                         grids = self.filter_displayed_elements(grids)
 
-                    count = 0
-                    headers_from_grids = self.get_headers_from_grids(grids, duplicate_fields)
-                    for header_grid in headers_from_grids:
-                        if column_name not in header_grid:
-                            grids.pop(count)
-                        else:
-                            count = count + 1
-
                     if grids:
                         headers = self.get_headers_from_grids(grids, duplicate_fields)
                         if field[2] + 1 > len(grids):
@@ -6283,14 +6275,19 @@ class WebappInternal(Base):
                 else:
                     labels = item.select("thead tr label")
 
+                if labels:
+                    keys = list(map(lambda x: x.text.strip().lower(), labels))
+                    values = list(map(lambda x: x[0], enumerate(labels)))
+                    headers.append(dict(zip(keys, values)))
+
         elif self.webapp_shadowroot():
             labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
                                        self.soup_to_selenium(grids))
 
-        if labels:
-            keys = list(map(lambda x: x.text.strip().lower(), labels))
-            values = list(map(lambda x: x[0], enumerate(labels)))
-            headers.append(dict(zip(keys, values)))
+            if labels:
+                keys = list(map(lambda x: x.text.strip().lower(), labels))
+                values = list(map(lambda x: x[0], enumerate(labels)))
+                headers.append(dict(zip(keys, values)))
 
         if len(duplicate_fields) > 0:
             duplicated_key = duplicate_fields[0].lower()
