@@ -7681,9 +7681,10 @@ class WebappInternal(Base):
                                     try:
                                         if self.webapp_shadowroot():
                                             element_tree = element_click
-                                            element_tree.click()
-                                            if 'selected' not in element.get_attribute("class"):
+                                            if not right_click:                                                
                                                 element_tree.click()
+                                                if 'selected' not in element.get_attribute("class"):
+                                                    element_tree.click()
                                         else:
                                             element_tree = element_click()
 
