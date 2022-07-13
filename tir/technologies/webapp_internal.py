@@ -6684,7 +6684,7 @@ class WebappInternal(Base):
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
-                term = '.dict-tsay, .dict-panel'
+                term = '.dict-tsay'
             else:
                 term = '.tsay'
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
@@ -7663,6 +7663,9 @@ class WebappInternal(Base):
                                 element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)
                                 if not element_class:
                                     element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
+                                if not element_class:
+                                    if element.get_attribute('icon') != None:
+                                        element_class = [element]
                             else:
                                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
@@ -7672,11 +7675,18 @@ class WebappInternal(Base):
                             for element_class_item in element_class:
                                 if not success:
                                     if self.webapp_shadowroot():
-                                        element_click = lambda: element_class_item
+                                        element_click = element_class_item
                                     else:
                                         element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        element_tree = element_click()
+                                        if self.webapp_shadowroot():
+                                            element_tree = element_click
+                                            if not right_click:                                                
+                                                element_tree.click()
+                                                if 'selected' not in element.get_attribute("class"):
+                                                    element_tree.click()
+                                        else:
+                                            element_tree = element_click()
 
                                         if last_item:
                                             start_time = time.time()
@@ -7686,7 +7696,10 @@ class WebappInternal(Base):
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    if self.webapp_shadowroot():
+                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
+                                                    else:
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
@@ -7699,12 +7712,15 @@ class WebappInternal(Base):
                                         else:
                                             if self.webapp_shadowroot():
                                                 self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or not self.treenode_selected(label_filtered)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered)
                                                 self.scroll_to_element(element_tree)
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
-                                                    element_tree.click()
+                                                    element_tree.click() 
+                                                    element_closed_click = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')", element_tree)
+                                                    if element_closed_click:
+                                                        element_closed_click.click()
                                             else: 
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
