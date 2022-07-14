@@ -3175,6 +3175,11 @@ class WebappInternal(Base):
                         self.soup_to_selenium(x)),
                     container.select(optional_term)))
 
+            if len(labels_list) == 0:
+                labels_list = self.driver.execute_script(
+                    f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node')",
+                    self.soup_to_selenium(container))
+
             for labels in labels_list:
                 labels_not_none = list(filter(lambda x: x is not None and x, labels))
                 if len(labels_not_none) > 0:
@@ -6684,8 +6689,9 @@ class WebappInternal(Base):
                 term = '.dict-tsay'
             else:
                 term = '.tsay'
+            
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, check_error=False):
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
