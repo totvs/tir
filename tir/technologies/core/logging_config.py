@@ -147,6 +147,6 @@ def create_file(folder, filename):
             with open(Path(folder, filename), "w", ):
                 return True
         except Exception as error:
+            time.sleep(30)
             logger().debug(str(error))
 
-        time.sleep(30)

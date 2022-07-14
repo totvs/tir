@@ -265,17 +265,7 @@ class WebappInternal(Base):
 
             self.environment_screen()
 
-            if self.webapp_shadowroot():
-                term = '.dict-tmenu'
-            else:
-                term = '.tmenu'
-
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (
-            not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                self.close_warning_screen()
-                self.close_coin_screen()
-                self.close_modal()
+            self.close_screen_before_menu()
 
             if save_input:
                 self.set_log_info()
@@ -298,6 +288,17 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
+
+    def close_screen_before_menu(self):
+
+        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+            self.close_warning_screen()
+            self.close_coin_screen()
+            self.close_modal()
 
     def service_process_bat_file(self):
         """
@@ -833,8 +834,7 @@ class WebappInternal(Base):
             self.switch_to_iframe()
             enable = env().is_enabled()
         else:
-            enable = ("disabled" not in environment_element.parent.attrs[
-                "class"] and env().is_enabled()) and not env().get_attribute('disabled')
+            enable = ("disabled" not in environment_element.parent.attrs["class"] and env().is_enabled()) and not env().get_attribute('disabled')
 
         if enable:
             env_value = ''
@@ -866,10 +866,9 @@ class WebappInternal(Base):
                 buttons = self.web_scrap(term=f"[caption*={label}]", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                          main_container='body', optional_term=optional_term)
             else:
-                buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term,
-                                         second_term='button', main_container="body")
+                buttons = self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term, second_term='button', main_container="body")
 
-            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons))
+            buttons = list(filter(lambda x: self.element_is_displayed(x), buttons ))
 
         if len(buttons) > 1:
             button_element = buttons.pop()
@@ -901,8 +900,8 @@ class WebappInternal(Base):
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
-                self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',
-                                  scrap_type=enum.ScrapType.MIXED, presence=False)
+                self.wait_element_timeout(term=self.language.database, scrap_type=enum.ScrapType.MIXED, timeout = 120, optional_term='wa-text-view', main_container="body", presence=False)
+                #self.wait_element(self.language.database, main_container='body', optional_term='wa-text-view',scrap_type=enum.ScrapType.MIXED, presence=False)
             else:
                 self.wait_element(term=self.language.database, scrap_type=enum.ScrapType.MIXED, presence=False,
                                   optional_term="input", main_container=container)
@@ -1059,6 +1058,8 @@ class WebappInternal(Base):
         >>> self.close_coin_screen()
         """
 
+        logger().debug('Closing coin screen!')
+
         if self.webapp_shadowroot():
             selector = "wa-dialog > wa-panel > wa-text-view"
         else:
@@ -1120,6 +1121,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
+
+        logger().debug('Closing warning screen!')
 
         if self.webapp_shadowroot():
             selector = "wa-dialog"
@@ -1386,14 +1389,12 @@ class WebappInternal(Base):
 
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            else:
-                soup = self.get_current_DOM()
+            elif self.check_layers('wa-dialog') > 1:
+                logger().debug('Escape to menu')
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-                dialog_layer = len(soup.select('wa-dialog'))
-
-                if dialog_layer > 1:
-                    logger().debug('Escape to menu')
-                    ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            if self.check_layers('wa-dialog') > 1:
+                self.close_screen_before_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1462,6 +1463,14 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+    def check_layers(self, term):
+        """
+        [Internal]
+        """
+
+        soup = self.get_current_DOM()
+
+        return len(soup.select(term))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -3458,14 +3467,12 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot():
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        else:
-            soup = self.get_current_DOM()
+        elif self.check_layers('wa-dialog') > 1:
+            logger().debug('Escape to menu')
+            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-            dialog_layer = len(soup.select('wa-dialog'))
-
-            if dialog_layer > 1:
-                logger().debug('Escape to menu')
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+        if self.check_layers('wa-dialog') > 1:
+            self.close_screen_before_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -5331,7 +5338,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5360,18 +5367,11 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
+                            grids = self.filter_active_tabs(grids)
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
                         grids = self.filter_displayed_elements(grids)
-
-                    count = 0
-                    headers_from_grids = self.get_headers_from_grids(grids, duplicate_fields)
-                    for header_grid in headers_from_grids:
-                        if column_name not in header_grid:
-                            grids.pop(count)
-                        else:
-                            count = count + 1
 
                     if grids:
                         headers = self.get_headers_from_grids(grids, duplicate_fields)
@@ -5625,29 +5625,29 @@ class WebappInternal(Base):
                                                 "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
                                             return
                             else:
-                                if self.webapp_shadowroot():
-                                    option_list = child.find_elements_by_tag_name('option')
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
-                                    option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
-                                    option_value = self.get_element_value(child)
-                                else:
-
-                                    option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
-                                    option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                                    option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
-                                option_text = next(iter(option_text_list), None)
-                                if not option_text:
-                                    self.log_error("Couldn't find option")
-                                if (option_text != option_value_dict[option_value]):
-                                    self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
-                                    if field[1] in option_text[0:len(field[1])]:
-                                        current_value = field[1]
-                                else:
+                                if child:
                                     if self.webapp_shadowroot():
-                                        self.send_keys(child, Keys.TAB)
+                                        option_list = child.find_elements_by_tag_name('option')
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
+                                        option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
+                                        option_value = self.get_element_value(child)
                                     else:
-                                        self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
-                                    current_value = field[1]
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
+                                        option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
+                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                    option_text = next(iter(option_text_list), None)
+                                    if not option_text:
+                                        self.log_error("Couldn't find option")
+                                    if (option_text != option_value_dict[option_value]):
+                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
+                                        if field[1] in option_text[0:len(field[1])]:
+                                            current_value = field[1]
+                                    else:
+                                        if self.webapp_shadowroot():
+                                            self.send_keys(child, Keys.TAB)
+                                        else:
+                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                        current_value = field[1]
 
                 if not check_value:
                     break
@@ -6275,14 +6275,19 @@ class WebappInternal(Base):
                 else:
                     labels = item.select("thead tr label")
 
+                if labels:
+                    keys = list(map(lambda x: x.text.strip().lower(), labels))
+                    values = list(map(lambda x: x[0], enumerate(labels)))
+                    headers.append(dict(zip(keys, values)))
+
         elif self.webapp_shadowroot():
             labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
                                        self.soup_to_selenium(grids))
 
-        if labels:
-            keys = list(map(lambda x: x.text.strip().lower(), labels))
-            values = list(map(lambda x: x[0], enumerate(labels)))
-            headers.append(dict(zip(keys, values)))
+            if labels:
+                keys = list(map(lambda x: x.text.strip().lower(), labels))
+                values = list(map(lambda x: x[0], enumerate(labels)))
+                headers.append(dict(zip(keys, values)))
 
         if len(duplicate_fields) > 0:
             duplicated_key = duplicate_fields[0].lower()
@@ -6576,36 +6581,37 @@ class WebappInternal(Base):
             self.wait_element(self.language.file_name, enum.ScrapType.MIXED, optional_term='wa-file-picker')
             soup = self.get_current_DOM()
             containers_soup = next(iter(soup.select('wa-file-picker')), None)
-            element = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(containers_soup))), None)        
+            element = self.driver.execute_script(f"return arguments[0].shadowRoot.getElementById('txtPath')", self.soup_to_selenium(containers_soup))
+            if element:
+                self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
+
+                self.send_keys(element, value)
+                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
+                possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
+                elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
         else:
             self.wait_element(self.language.file_name)
             element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
-        if element:
-            if self.webapp_shadowroot():
-                split_path = value.split('\\')
-                for path in split_path:
-                    path_button = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('div').querySelector('button')", element)
-                    if path_button:
-                        path_button.click()
-                simple_tree_nodes = next(iter(self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-simple-tree-node')", self.soup_to_selenium(element))), None)        
-            else:
+
+            if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
                 self.send_keys(element, value)
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
-                if elements:
-                    for line in elements:
-                        if button != "":
-                            if line.text.strip().upper() == button.upper():
-                                self.click(line)
-                                break
-                        elif line.text.strip().upper() == self.language.open.upper():
-                            self.click(line)
-                            break
-                        elif line.text.strip().upper() == self.language.save.upper():
-                            self.click(line)
-                            break
-                        else:
-                            self.log_error(f"Button: {button} not found")
+
+        if elements:
+            for line in elements:
+                if button != "":
+                    if line.text.strip().upper() == button.upper():
+                        self.click(line)
+                        break
+                if line.text.strip().upper() == self.language.open.upper():
+                    self.click(line)
+                    break
+                if line.text.strip().upper() == self.language.save.upper():
+                    self.click(line)
+                    break
+                    
+                self.log_error(f"Button: {button} not found")
 
     def MessageBoxClick(self, button_text):
         """
@@ -6675,7 +6681,7 @@ class WebappInternal(Base):
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
-                term = '.ditc-tsay'
+                term = '.dict-tsay'
             else:
                 term = '.tsay'
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
@@ -7654,6 +7660,9 @@ class WebappInternal(Base):
                                 element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)
                                 if not element_class:
                                     element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
+                                if not element_class:
+                                    if element.get_attribute('icon') != None:
+                                        element_class = [element]
                             else:
                                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
@@ -7663,11 +7672,18 @@ class WebappInternal(Base):
                             for element_class_item in element_class:
                                 if not success:
                                     if self.webapp_shadowroot():
-                                        element_click = lambda: element_class_item
+                                        element_click = element_class_item
                                     else:
                                         element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        element_tree = element_click()
+                                        if self.webapp_shadowroot():
+                                            element_tree = element_click
+                                            if not right_click:                                                
+                                                element_tree.click()
+                                                if 'selected' not in element.get_attribute("class"):
+                                                    element_tree.click()
+                                        else:
+                                            element_tree = element_click()
 
                                         if last_item:
                                             start_time = time.time()
@@ -7677,7 +7693,10 @@ class WebappInternal(Base):
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
-                                                    self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    if self.webapp_shadowroot():
+                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
+                                                    else:
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
@@ -7690,12 +7709,15 @@ class WebappInternal(Base):
                                         else:
                                             if self.webapp_shadowroot():
                                                 self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or not self.treenode_selected(label_filtered)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered)
                                                 self.scroll_to_element(element_tree)
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
-                                                    element_tree.click()
+                                                    element_tree.click() 
+                                                    element_closed_click = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')", element_tree)
+                                                    if element_closed_click:
+                                                        element_closed_click.click()
                                             else: 
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
@@ -8151,7 +8173,7 @@ class WebappInternal(Base):
         
         if isinstance(element, list):
             call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))  
-            for n in call_stack: logger().debug('element_is_displayed Error:',n.function)
+            for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
         if element_selenium:
