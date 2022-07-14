@@ -58,9 +58,14 @@ class NumExec(ConfigLoader):
         :return json status response:
         """
 
+        proxies = {
+            "http": None,
+            "https": None,
+        }
+
         data = {'num_exec': self.num_exec, 'ip_exec': self.ipExec}
 
-        response = requests.post(url.strip(), json=data)
+        response = requests.post(url.strip(), json=data, proxies=proxies)
 
         json_data = json.loads(response.text)
 
