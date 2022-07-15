@@ -2429,7 +2429,7 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                interface_value_size = len(interface_value)
+                interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
