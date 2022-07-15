@@ -2429,7 +2429,7 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                interface_value_size = len(interface_value)
+                interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
@@ -3176,9 +3176,9 @@ class WebappInternal(Base):
                     container.select(optional_term)))
 
             if len(labels_list) == 0:
-                labels_list = self.driver.execute_script(
+                labels_list = [self.driver.execute_script(
                     f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node')",
-                    self.soup_to_selenium(container))
+                    self.soup_to_selenium(container))]
 
             for labels in labels_list:
                 labels_not_none = list(filter(lambda x: x is not None and x, labels))
