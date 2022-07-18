@@ -5944,7 +5944,11 @@ class WebappInternal(Base):
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
 
-                    ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+                    try:
+                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+                    except MoveTargetOutOfBoundsException:
+                        ActionChains(self.driver).send_keys(Keys.DOWN).perform()
+
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
                     endtime = time.time() + self.config.time_out
                     while (time.time() < endtime and not (
