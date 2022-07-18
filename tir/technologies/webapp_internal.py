@@ -4862,7 +4862,7 @@ class WebappInternal(Base):
         """
         key = key.upper()
         endtime = time.time() + self.config.time_out
-        hotkey = ["CTRL","ALT"]
+        hotkey = ["CTRL","ALT","SHIFT"]
         grid_number-=1
         tries = 0
         success = False
@@ -4881,7 +4881,7 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
-                        self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
+                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -4890,16 +4890,14 @@ class WebappInternal(Base):
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform())
+                        success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
-                    self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
+                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = False)
-                else:
-                    success = True
 
 
         except WebDriverException as e:
