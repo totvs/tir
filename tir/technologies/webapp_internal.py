@@ -6513,7 +6513,7 @@ class WebappInternal(Base):
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
-            if element is not None:
+            if element is not None and type(element) == Tag:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
