@@ -2081,6 +2081,7 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
+        active_tab = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
             label_term = ".dict-tsay, label"
@@ -2128,7 +2129,9 @@ class WebappInternal(Base):
                 xy_label = label_s().location
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if input_field:
+                active_tab = self.find_active_parents(label)
+            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
             list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not x.get('contexttext'), list_in_range))
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
@@ -2155,6 +2158,12 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             
+
+    def find_active_parents(self, bs4_element):
+        active_parents = []
+        if bs4_element.parents:
+            active_parents = list(filter(lambda x: x.get('active') == '', bs4_element.parents))
+        return next(iter(active_parents), None)
 
 
     def width_height(self, container_size):
@@ -3847,7 +3856,7 @@ class WebappInternal(Base):
             elif ',' in sub_item:
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
-                self.click_sub_menu(filtered_sub_itens[len(filtered_sub_itens)-1])
+                self.click_sub_menu(filtered_sub_itens)
 
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
@@ -3910,15 +3919,15 @@ class WebappInternal(Base):
         self.click(element_selenium)
 
 
-    def click_sub_menu(self, sub_item):
+    def click_sub_menu(self, filtered_sub_itens):
         """
         [Internal]
 
         Clicks on the sub menu of buttons. Returns True if succeeded.
         Internal method of SetButton.
 
-        :param sub_item: The menu item that should be clicked.
-        :type sub_item: str
+        :param filtered_sub_itens: The menu item that should be clicked.
+        :type filtered_sub_itens: str
 
         :return: Boolean if click was successful.
         :rtype: bool
@@ -3928,6 +3937,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.click_sub_menu("Process")
         """
+
+        regex = r"(<[^>]*>)?"
+
+        sub_item = filtered_sub_itens[len(filtered_sub_itens) - 1]
+
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
 
@@ -3936,7 +3950,8 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             selector = '.dict-tmenuitem'
-            menu_id = list(filter(lambda x: x.get('caption') == sub_item, soup.select(selector)))[0].get('id')            
+            parent_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens[-2], soup.select(selector)))[0].get('id')
+            menu_id = list(filter(lambda x: x.get('caption') == sub_item and x.parent.get('id') == parent_id, soup.select(selector)))[0].get('id')
         else:
             selector = '.tmenupopup.active'
             menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
@@ -6513,7 +6528,7 @@ class WebappInternal(Base):
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
-            if element is not None:
+            if element is not None and type(element) == Tag:
                 sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
