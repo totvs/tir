@@ -2130,7 +2130,7 @@ class WebappInternal(Base):
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             if input_field:
-                active_tab = self.tab_is_active(label)
+                active_tab = self.find_active_parents(label)
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
             list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not x.get('contexttext'), list_in_range))
@@ -2159,7 +2159,7 @@ class WebappInternal(Base):
             logger().exception(str(error))
             
 
-    def tab_is_active(self, bs4_element):
+    def find_active_parents(self, bs4_element):
         active_parents = []
         if bs4_element.parents:
             active_parents = list(filter(lambda x: x.get('active') == '', bs4_element.parents))
