@@ -2081,6 +2081,7 @@ class WebappInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
+        active_tab = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
             label_term = ".dict-tsay, label"
@@ -2128,7 +2129,9 @@ class WebappInternal(Base):
                 xy_label = label_s().location
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if input_field:
+                active_tab = self.tab_is_active(label)
+            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
             list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not x.get('contexttext'), list_in_range))
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
@@ -2155,6 +2158,12 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             
+
+    def tab_is_active(self, bs4_element):
+        active_parents = []
+        if bs4_element.parents:
+            active_parents = list(filter(lambda x: x.get('active') == '', bs4_element.parents))
+        return next(iter(active_parents), None)
 
 
     def width_height(self, container_size):
