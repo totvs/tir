@@ -3847,7 +3847,7 @@ class WebappInternal(Base):
             elif ',' in sub_item:
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
-                self.click_sub_menu(filtered_sub_itens[len(filtered_sub_itens)-1])
+                self.click_sub_menu(filtered_sub_itens)
 
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
@@ -3910,15 +3910,15 @@ class WebappInternal(Base):
         self.click(element_selenium)
 
 
-    def click_sub_menu(self, sub_item):
+    def click_sub_menu(self, filtered_sub_itens):
         """
         [Internal]
 
         Clicks on the sub menu of buttons. Returns True if succeeded.
         Internal method of SetButton.
 
-        :param sub_item: The menu item that should be clicked.
-        :type sub_item: str
+        :param filtered_sub_itens: The menu item that should be clicked.
+        :type filtered_sub_itens: str
 
         :return: Boolean if click was successful.
         :rtype: bool
@@ -3928,6 +3928,11 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.click_sub_menu("Process")
         """
+
+        regex = r"(<[^>]*>)?"
+
+        sub_item = filtered_sub_itens[len(filtered_sub_itens) - 1]
+
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
 
@@ -3936,7 +3941,8 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             selector = '.dict-tmenuitem'
-            menu_id = list(filter(lambda x: x.get('caption') == sub_item, soup.select(selector)))[0].get('id')            
+            parent_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens[-2], soup.select(selector)))[0].get('id')
+            menu_id = list(filter(lambda x: x.get('caption') == sub_item and x.parent.get('id') == parent_id, soup.select(selector)))[0].get('id')
         else:
             selector = '.tmenupopup.active'
             menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
