@@ -2429,7 +2429,7 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                interface_value_size = len(interface_value)
+                interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
@@ -3176,9 +3176,9 @@ class WebappInternal(Base):
                     container.select(optional_term)))
 
             if len(labels_list) == 0:
-                labels_list = self.driver.execute_script(
+                labels_list = [self.driver.execute_script(
                     f"return arguments[0].shadowRoot.querySelectorAll('label, span, wa-dialog-header, wa-tree-node')",
-                    self.soup_to_selenium(container))
+                    self.soup_to_selenium(container))]
 
             for labels in labels_list:
                 labels_not_none = list(filter(lambda x: x is not None and x, labels))
@@ -4862,7 +4862,7 @@ class WebappInternal(Base):
         """
         key = key.upper()
         endtime = time.time() + self.config.time_out
-        hotkey = ["CTRL","ALT"]
+        hotkey = ["CTRL","ALT","SHIFT"]
         grid_number-=1
         tries = 0
         success = False
@@ -4881,7 +4881,7 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
-                        self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
+                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -4890,16 +4890,14 @@ class WebappInternal(Base):
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
                         self.set_element_focus(element())
-                        self.send_action(ActionChains(self.driver).move_to_element(element()).key_down(self.supported_keys(key)).perform)
+                        success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(self.supported_keys(key)).perform)
                         tries +=1
 
                 elif additional_key:
-                    self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
+                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = False)
-                else:
-                    success = True
 
 
         except WebDriverException as e:
@@ -5944,7 +5942,11 @@ class WebappInternal(Base):
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
 
-                    ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+                    try:
+                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+                    except MoveTargetOutOfBoundsException:
+                        ActionChains(self.driver).send_keys(Keys.DOWN).perform()
+
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
                     endtime = time.time() + self.config.time_out
                     while (time.time() < endtime and not (
