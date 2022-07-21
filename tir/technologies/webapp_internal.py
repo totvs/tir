@@ -3813,7 +3813,8 @@ class WebappInternal(Base):
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
                                                   optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
                                                   check_error=check_error, second_term='wa-menu-popup-item')
-                    soup_objects_filtered = self.filter_is_displayed(soup_objects)
+                    if soup_objects:                             
+                        soup_objects_filtered = self.filter_is_displayed(soup_objects)
 
                 if soup_objects_filtered:
                     if self.webapp_shadowroot():
