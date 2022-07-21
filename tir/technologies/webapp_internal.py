@@ -2438,7 +2438,8 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
