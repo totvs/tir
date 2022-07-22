@@ -2438,7 +2438,8 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
@@ -3789,6 +3790,10 @@ class WebappInternal(Base):
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
                     self.click(soup_element)
+                    if button.lower() == self.language.other_actions.lower():
+                        popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+                        while time.time() < endtime and not popup_item():
+                            self.click(soup_element)
                 else:
                     self.scroll_to_element(soup_element())
                     self.set_element_focus(soup_element())
@@ -3812,7 +3817,8 @@ class WebappInternal(Base):
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
                                                   optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
                                                   check_error=check_error, second_term='wa-menu-popup-item')
-                    soup_objects_filtered = self.filter_is_displayed(soup_objects)
+                    if soup_objects:                             
+                        soup_objects_filtered = self.filter_is_displayed(soup_objects)
 
                 if soup_objects_filtered:
                     if self.webapp_shadowroot():
@@ -4904,7 +4910,7 @@ class WebappInternal(Base):
                         time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
-                        self.set_element_focus(element())
+                        self.send_action(self.set_element_focus(element())) 
                         success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(self.supported_keys(key)).perform)
                         tries +=1
 
