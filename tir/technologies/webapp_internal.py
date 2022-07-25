@@ -1063,7 +1063,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             selector = "wa-dialog > wa-panel > wa-text-view"
         else:
-            selector = "tmodaldialog > .tpanel > .tsay"
+            selector = ".tmodaldialog > .tpanel > .tsay"
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
@@ -1300,8 +1300,9 @@ class WebappInternal(Base):
 
         self.SetButton(self.language.close)
 
-        self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
-                          optional_term='wa-button, button, .thbutton', presence=False)
+        if self.webapp_shadowroot():
+            self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
+                            optional_term='wa-button, button, .thbutton', presence=False)
 
     def set_log_info_tss(self):
 
@@ -2438,8 +2439,10 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
-                interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
+                if self.webapp_shadowroot():
+                    interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                else:
+                    interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
