@@ -2134,7 +2134,7 @@ class WebappInternal(Base):
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
             if self.search_stack('SetValue'):
-                list_in_range = self.not_read_only(list_in_range)
+                list_in_range = self.filter_not_read_only(list_in_range)
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
@@ -2160,7 +2160,7 @@ class WebappInternal(Base):
             logger().exception(str(error))
             
 
-    def not_read_only(self, list_objects):
+    def filter_not_read_only(self, list_objects):
         '''
         [Internal]
 
