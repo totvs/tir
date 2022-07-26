@@ -2133,8 +2133,9 @@ class WebappInternal(Base):
             if input_field:
                 active_tab = self.find_active_parents(label)
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
-            not_readonly_in_class = lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class")
-            list_in_range = list(filter(lambda x: not_readonly_in_class(x) and not x.get('contexttext'), list_in_range))
+            list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
+            if self.search_stack('SetValue'):
+                list_in_range = self.filter_not_read_only(list_in_range)
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
@@ -2159,6 +2160,17 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             
+
+    def filter_not_read_only(self, list_objects):
+        '''
+        [Internal]
+
+        Return: Objects List not read only
+        '''
+        return list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly") or 
+            'readonly' not in self.soup_to_selenium(x).get_attribute("class") or
+            'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
+
 
     def find_active_parents(self, bs4_element):
         active_parents = []
@@ -3629,6 +3641,7 @@ class WebappInternal(Base):
                 span = self.find_child_element('span', element)
                 parent_menu = next(iter(span), None)
             else:
+                label_expanded = next(iter(element.select('label')), None)
                 parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
