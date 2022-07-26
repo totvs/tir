@@ -3638,6 +3638,7 @@ class WebappInternal(Base):
                 span = self.find_child_element('span', element)
                 parent_menu = next(iter(span), None)
             else:
+                label_expanded = next(iter(element.select('label')), None)
                 parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
