@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-TOTVS Interface Robot
+Test Interface Robot
 =====================
 .. image:: img/completoCor.png
    :width: 800
