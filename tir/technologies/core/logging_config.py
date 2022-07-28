@@ -28,6 +28,8 @@ def logger(logger='root'):
 
         folder = create_folder()
 
+        create_file(folder, filename)
+
     if config.smart_test or config.debug_log:
         logging_config = {
             'version': 1,
@@ -125,3 +127,13 @@ def create_folder():
         pass
 
     return path
+
+def create_file(folder, filename):
+    """
+    Creates an empty file before logger
+    [Internal]
+
+    """
+
+    with open(Path(folder, filename), "w", ):
+        pass
