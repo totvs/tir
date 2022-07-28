@@ -177,7 +177,7 @@ class Log:
         Returns a string with the current testcase name
         [Internal]
         """
-        return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass', x.function) or re.search('test_', x.function), inspect.stack())))), None)
+        return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass|test_|tearDownClass', x.function), inspect.stack())))), None)
 
     def checks_empty_line(self):
         """
