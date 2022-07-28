@@ -2594,7 +2594,7 @@ class WebappInternal(Base):
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
-                return container.select(term)
+                return list(filter(lambda x: self.element_is_displayed(x), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -2800,7 +2800,7 @@ class WebappInternal(Base):
                 if self.config.poui_login:
                     self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
                     return self.driver.find_element(By.CSS_SELECTOR, selector)
-                element_list = container_element.find_elements(by, selector)
+                element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
             except StaleElementReferenceException:
                 pass
         else:
