@@ -1301,7 +1301,7 @@ class WebappInternal(Base):
         self.SetButton(self.language.close)
 
         self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
-                          optional_term='wa-button, button, .thbutton', presence=False)
+                        optional_term='wa-button, button, .thbutton', presence=False, main_container=".tmodaldialog,.ui-dialog,body,wa-dialog") #TODO veririficar a proteção de um container nao existente na tela com presence false
 
     def set_log_info_tss(self):
 
