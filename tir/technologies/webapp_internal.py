@@ -2134,7 +2134,7 @@ class WebappInternal(Base):
                 active_tab = self.find_active_parents(label)
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
-            if self.search_stack('SetValue'):
+            if self.search_stack('SetValue') and list_in_range:
                 list_in_range = self.filter_not_read_only(list_in_range)
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
@@ -2167,9 +2167,9 @@ class WebappInternal(Base):
 
         Return: Objects List not read only
         '''
-        return list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly") or 
-            'readonly' not in self.soup_to_selenium(x).get_attribute("class") or
-            'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
+        list_objects = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_objects))
+        list_objects = list(filter(lambda x: 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
+        return list_objects
 
 
     def find_active_parents(self, bs4_element):
@@ -2451,10 +2451,8 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                if self.webapp_shadowroot():
-                    interface_value_size = self.driver.execute_script('return arguments[0]._maxLength', input_field())
-                else:
-                    interface_value_size = len(interface_value)
+                get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
