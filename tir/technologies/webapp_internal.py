@@ -2134,7 +2134,7 @@ class WebappInternal(Base):
                 active_tab = self.find_active_parents(label)
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
-            if self.search_stack('SetValue'):
+            if self.search_stack('SetValue') and list_in_range:
                 list_in_range = self.filter_not_read_only(list_in_range)
             #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
@@ -2167,9 +2167,9 @@ class WebappInternal(Base):
 
         Return: Objects List not read only
         '''
-        return list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly") and 
-            'readonly' not in self.soup_to_selenium(x).get_attribute("class") or
-            'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
+        list_objects = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_objects))
+        list_objects = list(filter(lambda x: 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
+        return list_objects
 
 
     def find_active_parents(self, bs4_element):
