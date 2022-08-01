@@ -7677,6 +7677,8 @@ class WebappInternal(Base):
         :return:
         """
 
+        file = re.sub('auto', '', file)
+
         file_extension = file[-4:].lower()
 
         full_path = f'{self.config.baseline_spool}\\{file}'
@@ -7754,7 +7756,7 @@ class WebappInternal(Base):
             if datetime:
                 line = re.sub(datetime.group(0), '"DateTime">2015-01-01T00:00:00', line)
             if width:
-                line = re.sub(datetime.group(0), 'ss:Width="100"', line)
+                line = re.sub(width.group(0), 'ss:Width="100"', line)
 
         return line
 
