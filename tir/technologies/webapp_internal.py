@@ -2167,7 +2167,7 @@ class WebappInternal(Base):
 
         Return: Objects List not read only
         '''
-        return list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly") or 
+        return list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly") and 
             'readonly' not in self.soup_to_selenium(x).get_attribute("class") or
             'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_objects))
 
