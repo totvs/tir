@@ -6728,8 +6728,12 @@ class WebappInternal(Base):
                 term = '.tsay'
             
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            if self.webapp_shadowroot():
+                if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
+                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            else:
+                if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
         """
