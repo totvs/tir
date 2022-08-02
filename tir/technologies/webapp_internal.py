@@ -7686,7 +7686,7 @@ class WebappInternal(Base):
         auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
 
         if pathlib.Path(f'{auto_file_path}').exists():
-            pathlib.Path(f'{auto_file_path}').unlink()
+            return auto_file_path
 
         with open(full_path) as file_obj:
             readlines = file_obj.readlines()
