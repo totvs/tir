@@ -1703,18 +1703,21 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
-        self.click(sel_browse_key())
+        self.click(sel_browse_key().is_displayed())
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
+            self.click(sel_browse_key())
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
         else:
             soup = self.get_current_DOM()
 
         if not index:
-
-            search_key = re.sub(r"(\s)?(\.+$)?", '', search_key.strip()).lower()
+            if self.webapp_shadowroot():
+                search_key = re.sub(r"(\s)?(\.+$)?", '', search_key.strip()).lower()
+            else:
+                search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
             tradiobuttonitens = soup.select(radio_term)
             if self.webapp_shadowroot():
