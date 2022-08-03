@@ -4623,7 +4623,7 @@ class WebappInternal(Base):
                         self.set_element_focus(selenium_column())
 
                         soup = self.get_current_DOM()
-                        tmodal_list = soup.select('.tmodaldialog') if  self.grid_memo_field else soup.select('.tmodaldialog.twidget.borderless')
+                        tmodal_list = soup.select('.tmodaldialog')
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
                             
                         while (time.time() < endtime and not self.element_exists(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=tmodal_layer + 1, main_container="body")):
