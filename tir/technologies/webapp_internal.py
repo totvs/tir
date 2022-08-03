@@ -1703,18 +1703,21 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
-        self.click(sel_browse_key())
+        self.click(sel_browse_key().is_displayed())
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
+            self.click(sel_browse_key())
             content = self.driver.page_source
             soup = BeautifulSoup(content,"html.parser")
         else:
             soup = self.get_current_DOM()
 
         if not index:
-
-            search_key = re.sub(r"(\s)?(\.+$)?", '', search_key.strip()).lower()
+            if self.webapp_shadowroot():
+                search_key = re.sub(r"(\s)?(\.+$)?", '', search_key.strip()).lower()
+            else:
+                search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
             tradiobuttonitens = soup.select(radio_term)
             if self.webapp_shadowroot():
@@ -2451,8 +2454,11 @@ class WebappInternal(Base):
                     interface_value = self.get_web_value(input_field())
 
                 current_value = interface_value.strip()
-                get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
-                interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
+                if self.webapp_shadowroot():
+                    get_max_lenght = lambda: self.driver.execute_script('return arguments[0]._maxLength', input_field())
+                    interface_value_size = get_max_lenght() if input_field().tag_name != 'textarea' else len(value)+1
+                else:
+                    interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
                 if self.element_name(element) == "input":
@@ -6026,7 +6032,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse"
+        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
 
         self.wait_blocker()
         self.wait_element(
@@ -6728,8 +6734,12 @@ class WebappInternal(Base):
                 term = '.tsay'
             
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
-            if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            if self.webapp_shadowroot():
+                if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
+                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+            else:
+                if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
+                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
     def try_send_keys(self, element_function, key, try_counter=0):
         """
