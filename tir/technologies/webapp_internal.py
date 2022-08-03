@@ -6031,7 +6031,7 @@ class WebappInternal(Base):
         columns =  None
         rows = None
         same_location = False
-        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse"
+        term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
 
         self.wait_blocker()
         self.wait_element(
