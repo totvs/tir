@@ -5570,6 +5570,9 @@ class WebappInternal(Base):
                                     child = new_container.select("select")
                                 child_type = "select"
 
+                            if isinstance(child, list):
+                                child = next(iter(child), None)
+
                             if child_type == "input":
 
                                 time.sleep(2)
@@ -5578,7 +5581,7 @@ class WebappInternal(Base):
                                     EC.visibility_of(child)
                                 else:
                                     selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
-                                    self.wait_element(term=xpath_soup(child[0]), scrap_type=enum.ScrapType.XPATH)
+                                    self.wait_element(term=xpath_soup(child), scrap_type=enum.ScrapType.XPATH)
 
                                 if self.webapp_shadowroot():
                                     valtype = self.value_type(new_container.get("type"))
@@ -5650,7 +5653,7 @@ class WebappInternal(Base):
                                     if self.webapp_shadowroot():
                                         element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body')
                                     else:
-                                        element_exist = self.wait_element_timeout(term=xpath_soup(child[0]),
+                                        element_exist = self.wait_element_timeout(term=xpath_soup(child),
                                                                                 scrap_type=enum.ScrapType.XPATH,
                                                                                 timeout=10, presence=False)
                                     time.sleep(1)
@@ -5661,8 +5664,8 @@ class WebappInternal(Base):
                                     else:
                                         try_endtime = try_endtime - 10
                                         containers = self.get_current_DOM().select(self.containers_selectors["GetCurrentContainer"])
-                                        if isinstance(child, list) and child[0].parent.parent in containers:
-                                            containers.remove(child[0].parent.parent)
+                                        if isinstance(child, list) and child.parent.parent in containers:
+                                            containers.remove(child.parent.parent)
                                         container_current = next(iter(self.zindex_sort(containers, True)))
                                         if container_current.attrs['id'] != container_id and try_endtime < 0:
                                             logger().debug(
@@ -5676,21 +5679,21 @@ class WebappInternal(Base):
                                         option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
                                         option_value = self.get_element_value(child)
                                     else:
-                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child[0].select('option'))))
-                                        option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child[0].select('option')))
-                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child[0])))
+                                        option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child.select('option'))))
+                                        option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child.select('option')))
+                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child)))
                                     option_text = next(iter(option_text_list), None)
                                     if not option_text:
                                         self.log_error("Couldn't find option")
                                     if (option_text != option_value_dict[option_value]):
-                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child[0], field[1])
+                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
                                         if field[1] in option_text[0:len(field[1])]:
                                             current_value = field[1]
                                     else:
                                         if self.webapp_shadowroot():
                                             self.send_keys(child, Keys.TAB)
                                         else:
-                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child[0])), Keys.ENTER)
+                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child)), Keys.ENTER)
                                         current_value = field[1]
 
                 if not check_value:
