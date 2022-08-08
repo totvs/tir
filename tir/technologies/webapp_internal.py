@@ -1020,6 +1020,7 @@ class WebappInternal(Base):
         logger().info(f"Change to the user: {user}")
         self.Setup(initial_program, date, group, branch)
 
+
     def close_modal(self):
         """
         [Internal]
@@ -1031,12 +1032,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_modal()
         """
+        dialog_term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
+        button_term = ".dict-tbrowsebutton" if self.webapp_shadowroot() else ".tbrowsebutton"
         soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error = False):
-            buttons = modals[0].select(".tbrowsebutton")
+        modals = self.zindex_sort(soup.select(dialog_term), True)
+        if modals and self.element_exists(term=f"{dialog_term} {button_term}", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error = False):
+            buttons = modals[0].select(button_term)
             if buttons:
-                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
+                if self.webapp_shadowroot():
+                    regex = r"(<[^>]*>)?"
+                    close_button = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).strip() == self.language.close ,buttons))
+                else:
+                    close_button = list(filter(lambda x: x.text == self.language.close, buttons))
+                close_button = next(iter(close_button),None)
                 time.sleep(0.5)
                 selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
@@ -1045,6 +1053,7 @@ class WebappInternal(Base):
                         self.click(selenium_close_button())
                     except:
                         pass
+
 
     def close_coin_screen(self):
         """
