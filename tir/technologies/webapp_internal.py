@@ -6061,13 +6061,13 @@ class WebappInternal(Base):
         while(not success and time.time() < endtime):
 
             if self.webapp_shadowroot():
-                self.wait_element_timeout(term=column,
+                self.wait_element_timeout(term=column_name,
                                           scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                           optional_term=term,
                                           main_container="body")
                 containers = self.get_current_container()
             else:
-                self.wait_element_timeout(term=column, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out,
+                self.wait_element_timeout(term=column_name, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out,
                                           optional_term='label')
                 containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -7779,7 +7779,8 @@ class WebappInternal(Base):
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
-                                                    element_tree.click() 
+                                                    if element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '':
+                                                        element_tree.click() 
                                                     element_closed_click = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')", element_tree)
                                                     if element_closed_click:
                                                         element_closed_click.click()
