@@ -7779,7 +7779,8 @@ class WebappInternal(Base):
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
-                                                    element_tree.click() 
+                                                    if element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '':
+                                                        element_tree.click() 
                                                     element_closed_click = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')", element_tree)
                                                     if element_closed_click:
                                                         element_closed_click.click()
