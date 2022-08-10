@@ -3766,7 +3766,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
-                    soup = self.get_current_container()
+                    soup = self.get_current_DOM()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     
@@ -3784,6 +3784,8 @@ class WebappInternal(Base):
                         if filtered_button:
                             id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
                             soup_element = self.soup_to_selenium(filtered_button)
+                            self.scroll_to_element(soup_element)
+                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
                             
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
