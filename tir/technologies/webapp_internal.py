@@ -3781,9 +3781,13 @@ class WebappInternal(Base):
                         else:
                             next_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
 
+                        if not next_button:
+                            next_button = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container = self.containers_selectors["SetButton"])
+                            next_button = next(iter(next_button), None)
+
                         if next_button:
-                            id_parent_element = next_button['id'] if hasattr(next_button, 'id') else None
-                            soup_element = self.soup_to_selenium(next_button)
+                            id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
+                            soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                             self.scroll_to_element(soup_element)
                             soup_element = soup_element if self.element_is_displayed(soup_element) else None
                             
