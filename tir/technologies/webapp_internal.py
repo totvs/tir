@@ -6990,23 +6990,29 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
             if self.webapp_shadowroot():
-                selector = ".dict-tbtnbmp2"        
+                selector = "wa-toolbar, .dict-tbtnbmp2"        
             else:
                 selector = ".ttoolbar, .tbtnbmp"
 
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
-            container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
+            if self.webapp_shadowroot():
+                container = next(iter(self.zindex_sort(soup.select("wa-dialog"))), None)
+            else:
+                container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
             if self.webapp_shadowroot():
-                tbtnbmp_img = self.on_screen_enabled(container.select(".dict-tbtnbmp2"))
+                tbtnbmp_img = self.on_screen_enabled(container.select("wa-toolbar,.dict-tbtnbmp2"))
             else:
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
 
             if icon_text not in tbtnbmp_img_str:
                 container = self.get_current_container()
-                tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+                if self.webapp_shadowroot():
+                    tbtnbmp_img = self.on_screen_enabled(container.select("wa-toolbar,.dict-tbtnbmp2"))
+                else:
+                    tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
 
             if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
                 if self.webapp_shadowroot():
@@ -7200,7 +7206,10 @@ class WebappInternal(Base):
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
             self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
 
-            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if self.webapp_shadowroot():
+                self.wait_element(term="wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            else:
+                self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
             self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
 
             if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
