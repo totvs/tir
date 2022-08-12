@@ -13,7 +13,6 @@ Test Interface Robot
    :caption: User Documentation:
 
    webapp
-   poui
    configjson
 
 .. toctree::
@@ -21,7 +20,6 @@ Test Interface Robot
    :caption: TIR internal classes:
 
    webapp_internal
-   poui_internal
    base
    enumerations
    log
