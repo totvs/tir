@@ -1712,7 +1712,7 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
-        self.click(sel_browse_key().is_displayed())
+        self.click(sel_browse_key())
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
