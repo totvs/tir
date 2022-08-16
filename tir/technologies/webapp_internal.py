@@ -2968,15 +2968,14 @@ class WebappInternal(Base):
             while( time.time() < endtime and not element ):
 
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                soup = self.get_current_DOM()
-                element = soup.find_all(text=self.language.finish)
+                element = self.element_exists(self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term='wa-button, button, .thbutton', main_container='.tmodaldialog,.ui-dialog, wa-dialog, body')
+                if element:
+                    self.SetButton(self.language.finish)
 
-                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button, button, .thbutton", timeout=5, step=0.5, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body")
 
             if not element:
                 logger().warning("Warning method finish use driver.refresh. element not found")
-
-            self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
     def click_button_finish(self, click_counter=None):
         """
@@ -6993,32 +6992,45 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
             if self.webapp_shadowroot():
-                selector = ".dict-tbtnbmp2"        
+                selector = "wa-toolbar, .dict-tbtnbmp2"        
             else:
                 selector = ".ttoolbar, .tbtnbmp"
 
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
             soup = self.get_current_DOM()
-            container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
+            if self.webapp_shadowroot():
+                container = next(iter(self.zindex_sort(soup.select("wa-dialog"))), None)
+            else:
+                container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
             if self.webapp_shadowroot():
-                tbtnbmp_img = self.on_screen_enabled(container.select(".dict-tbtnbmp2"))
+                tbtnbmp_img = self.on_screen_enabled(container.select("wa-toolbar,.dict-tbtnbmp2"))
             else:
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
 
             if icon_text not in tbtnbmp_img_str:
                 container = self.get_current_container()
-                tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
+                if self.webapp_shadowroot():
+                    tbtnbmp_img = self.on_screen_enabled(container.select("wa-toolbar,.dict-tbtnbmp2"))
+                else:
+                    tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
 
             if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
                 if self.webapp_shadowroot():
-                    icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))[position]
+                    icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))
+                    if icon and isinstance(icon, list):
+                        icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))[position]
                 else:
                     icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
 
-            else:
-                buttons = self.on_screen_enabled(container.select("button[style]"))
+            if not icon:
+
+                if self.webapp_shadowroot():
+                    buttons = self.on_screen_enabled(container.select('wa-button'))
+                else:
+                    buttons = self.on_screen_enabled(container.select("button[style]"))
+
                 logger().info("Searching for Icon")
                 if buttons:
                     filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
@@ -7203,31 +7215,36 @@ class WebappInternal(Base):
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
             self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
 
-            self.wait_element(term=".ttoolbar", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
             self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
 
-            if self.element_exists(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR):
+            endtime = time.time() + self.config.time_out
 
-                endtime = time.time() + self.config.time_out
+            while(time.time() < endtime and not label_param):
 
-                while(time.time() < endtime and not label_param):
-
-                    container = self.get_current_container()
+                container = self.get_current_container()
+                if self.webapp_shadowroot():
+                    label_serv1 = next(iter(self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))))
+                else:
                     img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
                     label_serv1 = next(iter(img_serv1.parent.select('label')), None)
 
-                    if label_serv1:
-                        self.ClickTree(label_serv1.text.strip())
-                        self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
-                        container = self.get_current_container()
+                if label_serv1:
+                    self.ClickTree(label_serv1.text.strip())
+                    self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
+                    container = self.get_current_container()
+                    if self.webapp_shadowroot():
+                        img_param = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))[1]
+                    else:
                         img_param = next(iter(container.select("img[src*='bmpparam']")), None )
-                        if img_param and img_param.parent.__bool__():
-                            label_param = next(iter(img_param.parent.select('label')), None)
 
-                            self.ClickTree(label_param.text.strip())
+                    if img_param:
+                        label_param = img_param if self.webapp_shadowroot() else next(iter(img_param.parent.select('label')), None)
 
-                if not label_param:
-                    self.log_error(f"Couldn't find Icon")
+                        self.ClickTree(label_param.text.strip())
+
+            if not label_param:
+                self.log_error(f"Couldn't find Icon")
 
             self.ClickIcon(self.language.search)
 
@@ -7381,12 +7398,15 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             tooltip_term = 'wa-tooltip'
-            element_function = lambda: element
-            ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform() 
+            element_function = lambda: next(iter(self.find_shadow_element('button', self.soup_to_selenium(element))))
+            try:
+                ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform()
+            except:
+                ActionChains(self.driver).move_to_element(element_function()).perform()
         else:
             tooltip_term = '.ttooltip'
             element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())   
+            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
 
         time.sleep(2)
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, tooltip_term)
@@ -7672,19 +7692,19 @@ class WebappInternal(Base):
 
         logger().info(f"Clicking on Tree: {treepath}")
 
-        hierarchy=None
+        hierarchy = None
 
         position -= 1
 
         labels = list(map(str.strip, treepath.split(">")))
 
         for row, label in enumerate(labels):
-            
-            label = re.sub(r'[ ]{2,}',' ',label).strip()
+
+            label = re.sub(r'[ ]{2,}', ' ', label).strip()
 
             self.wait_blocker()
 
-            last_item = True if row == len(labels)-1 else False
+            last_item = True if row == len(labels) - 1 else False
 
             success = False
 
@@ -7700,36 +7720,44 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
 
-            while((time.time() < endtime) and (try_counter < 3 and not success)):
+            while ((time.time() < endtime) and (try_counter < 3 and not success)):
 
                 tree_node = self.find_tree_bs(label_filtered)
 
                 if self.webapp_shadowroot():
                     tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
-                else: 
-                    tree_node_filtered = list(filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+                else:
+                    tree_node_filtered = list(
+                        filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
 
-                elements = list(filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x), tree_node_filtered))
+                elements = list(
+                    filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x),
+                           tree_node_filtered))
 
                 if elements:
 
                     if position:
                         elements = elements[position] if len(elements) >= position + 1 else next(iter(elements))
                         if hierarchy:
-                             elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs['hierarchy'] != hierarchy else None
+                            elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs[
+                                'hierarchy'] != hierarchy else None
                     else:
                         elements = list(filter(lambda x: self.element_is_displayed(x), elements))
 
                         if hierarchy:
-                            if not self.webapp_shadowroot():                                
-                                elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs['hierarchy'] != hierarchy, elements))
+                            if not self.webapp_shadowroot():
+                                elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs[
+                                    'hierarchy'] != hierarchy, elements))
 
                     for element in elements:
                         if not success:
-                            if self.webapp_shadowroot():                                
-                                element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')", element)
+                            if self.webapp_shadowroot():
+                                element_class = self.driver.execute_script(
+                                    f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')",
+                                    element)
                                 if not element_class:
-                                    element_class = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
+                                    element_class = self.driver.execute_script(
+                                        f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
                                 if not element_class:
                                     if element.get_attribute('icon') != None:
                                         element_class = [element]
@@ -7737,7 +7765,7 @@ class WebappInternal(Base):
                                 element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
 
                                 if "data" in element_class.get_attribute_list("class"):
-                                    element_class =  element_class.select("img, span")
+                                    element_class = element_class.select("img, span")
 
                             for element_class_item in element_class:
                                 if not success:
@@ -7748,7 +7776,7 @@ class WebappInternal(Base):
                                     try:
                                         if self.webapp_shadowroot():
                                             element_tree = element_click
-                                            if not right_click:                                                
+                                            if not right_click:
                                                 element_tree.click()
                                                 if 'selected' not in element.get_attribute("class"):
                                                     element_tree.click()
@@ -7758,41 +7786,54 @@ class WebappInternal(Base):
                                         if last_item:
                                             start_time = time.time()
                                             self.wait_blocker()
-                                            self.scroll_to_element(element_tree)
-                                            element_tree.click()
+                                            if self.webapp_shadowroot():
+                                                if not element.get_attribute('selected'):
+                                                    self.scroll_to_element(element_tree)
+                                                    element_tree.click()
+
                                             if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
-                                                        self.click((element_click), enum.ClickType.SELENIUM , right_click)
+                                                        self.click((element_click), enum.ClickType.SELENIUM,
+                                                                   right_click)
                                                     else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                        self.send_action(action=self.click, element=element_click,
+                                                                         right_click=right_click)
                                             else:
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
                                                     if success and right_click:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                        self.send_action(action=self.click, element=element_click,
+                                                                         right_click=right_click)
                                                 else:
                                                     if right_click:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                        self.send_action(action=self.click, element=element_click,
+                                                                         right_click=right_click)
                                                     success = self.clicktree_status_selected(label_filtered)
                                         else:
                                             if self.webapp_shadowroot():
                                                 self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered)
+                                                element_is_closed = lambda: element.get_attribute(
+                                                    'closed') == 'true' or element.get_attribute(
+                                                    'closed') == '' or not self.treenode_selected(label_filtered)
                                                 self.scroll_to_element(element_tree)
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
-                                                    if element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '':
-                                                        element_tree.click() 
-                                                    element_closed_click = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')", element_tree)
+                                                    if element.get_attribute(
+                                                            'closed') == 'true' or element.get_attribute(
+                                                            'closed') == '':
+                                                        element_tree.click()
+                                                    element_closed_click = self.driver.execute_script(
+                                                        f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')",
+                                                        element_tree)
                                                     if element_closed_click:
                                                         element_closed_click.click()
-                                            else: 
+                                            else:
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_tree)
-                                                element_tree.click()                                                
+                                                element_tree.click()
                                             success = self.check_hierarchy(label_filtered)
 
                                         try_counter += 1
