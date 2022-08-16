@@ -3770,26 +3770,25 @@ class WebappInternal(Base):
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     
-                    if soup_objects:
+                    if soup_objects and not filtered_button:
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
 
-                        if filtered_button:
-                            parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
-                            if parents_actives:
-                                filtered_button = parents_actives
-                            next_button = next(iter(filtered_button), None)
-                        else:
-                            next_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
+                    if filtered_button and len(filtered_button) - 1 >= position:
+                        parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                        if parents_actives:
+                            filtered_button = parents_actives
+                        next_button = filtered_button[position]
+                    else:
+                        filtered_button = list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))
 
-                        if not next_button:
-                            next_button = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container = self.containers_selectors["SetButton"])
-                            next_button = next(iter(next_button), None)
+                    if not filtered_button:
+                        filtered_button = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container = self.containers_selectors["SetButton"])
 
-                        if next_button:
-                            id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
-                            soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
-                            self.scroll_to_element(soup_element)
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                    if next_button:
+                        id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
+                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        self.scroll_to_element(soup_element)
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
                             
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
