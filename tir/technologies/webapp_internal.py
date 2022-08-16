@@ -1712,7 +1712,7 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
-        self.click(sel_browse_key().is_displayed())
+        self.click(sel_browse_key())
 
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
@@ -3765,26 +3765,29 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
-                    soup = self.get_current_DOM()
+                    soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
                     
-                    if soup_objects:
+                    if soup_objects and not filtered_button:
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
 
-                        if filtered_button:
-                            parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
-                            if parents_actives:
-                                filtered_button = parents_actives
-                            filtered_button = next(reversed(filtered_button), None)
-                        else:
-                            filtered_button = next(iter(list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))), None)
+                    if filtered_button and len(filtered_button) - 1 >= position:
+                        parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                        if parents_actives:
+                            filtered_button = parents_actives
+                        next_button = filtered_button[position]
+                    else:
+                        filtered_button = list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))
 
-                        if filtered_button:
-                            id_parent_element = filtered_button['id'] if hasattr(filtered_button, 'id') else None
-                            soup_element = self.soup_to_selenium(filtered_button)
-                            self.scroll_to_element(soup_element)
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                    if not filtered_button:
+                        filtered_button = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container = self.containers_selectors["SetButton"])
+
+                    if next_button:
+                        id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
+                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        self.scroll_to_element(soup_element)
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
                             
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
