@@ -2968,15 +2968,14 @@ class WebappInternal(Base):
             while( time.time() < endtime and not element ):
 
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
-                soup = self.get_current_DOM()
-                element = soup.find_all(text=self.language.finish)
+                element = self.element_exists(self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term='wa-button, button, .thbutton', main_container='.tmodaldialog,.ui-dialog, wa-dialog, body')
+                if element:
+                    self.SetButton(self.language.finish)
 
-                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", timeout=5, step=0.5, main_container="body")
+                self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button, button, .thbutton", timeout=5, step=0.5, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body")
 
             if not element:
                 logger().warning("Warning method finish use driver.refresh. element not found")
-
-            self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
     def click_button_finish(self, click_counter=None):
         """
@@ -7017,7 +7016,7 @@ class WebappInternal(Base):
             if tbtnbmp_img and len(tbtnbmp_img) -1 >= position:
                 if self.webapp_shadowroot():
                     icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))
-                    if icon and hasattr(icon, list):
+                    if icon and isinstance(icon, list):
                         icon = list(filter(lambda x: icon_text == x.get("title"), tbtnbmp_img))[position]
                 else:
                     icon = list(filter(lambda x: icon_text == self.soup_to_selenium(x).get_attribute("alt"), tbtnbmp_img))[position]
@@ -7396,11 +7395,11 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             tooltip_term = 'wa-tooltip'
-            element_function = lambda: element
+            element_function = lambda: next(iter(self.find_shadow_element('button', self.soup_to_selenium(element))))
             try:
                 ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform()
             except:
-                ActionChains(self.driver).move_to_element(self.soup_to_selenium(element_function())).perform()
+                ActionChains(self.driver).move_to_element(element_function()).perform()
         else:
             tooltip_term = '.ttooltip'
             element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
