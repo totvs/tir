@@ -3762,6 +3762,7 @@ class WebappInternal(Base):
                 system_info()
 
             regex = r"(<[^>]*>)?"
+            filtered_button = []
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
