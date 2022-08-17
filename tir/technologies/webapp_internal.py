@@ -3088,6 +3088,9 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03") 
         """
+
+        initial_program = ['sigaadv', 'sigamdi']
+
         self.wait_blocker()
         container = self.get_current_container()
 
@@ -3121,7 +3124,6 @@ class WebappInternal(Base):
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                 soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
-
                 if soup_objects and len(soup_objects) - 1 >= position:
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
                     soup_element = lambda : self.soup_to_selenium(soup_objects[position])
@@ -3151,7 +3153,7 @@ class WebappInternal(Base):
                 self.scroll_to_element(soup_element())
                 self.set_element_focus(soup_element())
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
-                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() == 'sigaadv':
+                if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() in initial_program:
                     self.click(soup_element())
                 else:
                     self.send_action(self.click, soup_element)
