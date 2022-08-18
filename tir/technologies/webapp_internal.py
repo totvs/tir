@@ -8238,7 +8238,7 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view, wa-checkbox')
+            wa_text_view = container.select('wa-text-view, wa-checkbox, wa-button')
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
