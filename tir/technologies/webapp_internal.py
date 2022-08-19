@@ -5136,8 +5136,8 @@ class WebappInternal(Base):
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 if self.webapp_shadowroot():
-                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio")
-                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio", position=position)
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio, wa-checkbox")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio, wa-checkbox", position=position)
                 else:
                     self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
                     element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
