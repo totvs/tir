@@ -3763,6 +3763,7 @@ class WebappInternal(Base):
 
             regex = r"(<[^>]*>)?"
             filtered_button = []
+            next_button = None
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
@@ -5136,8 +5137,8 @@ class WebappInternal(Base):
                 element_list = self.web_scrap(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, position=position)
             else:
                 if self.webapp_shadowroot():
-                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio")
-                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio", position=position)
+                    self.wait_element(field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio, wa-checkbox")
+                    element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, second_term='label', optional_term="wa-radio, wa-checkbox", position=position)
                 else:
                     self.wait_element(field, scrap_type=enum.ScrapType.MIXED, optional_term="label")
                     element_list = self.web_scrap(term=field, scrap_type=enum.ScrapType.MIXED, optional_term=".tradiobutton .tradiobuttonitem label, .tcheckbox input", position=position)
