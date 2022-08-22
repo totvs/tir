@@ -68,7 +68,7 @@ class WebappInternal(Base):
             webdriver_exception = e
 
         self.containers_selectors = {
-            "SetButton" : ".tmodaldialog,.ui-dialog",
+            "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
             "GetCurrentContainer": ".tmodaldialog, wa-dialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
@@ -3770,9 +3770,12 @@ class WebappInternal(Base):
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
-                    
+
                     if soup_objects and not filtered_button:
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
+
+                        if not filtered_button:
+                            filtered_button = self.return_soup_by_selenium(elements=soup_objects, term=button, selectors='label, span')
 
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
@@ -3790,7 +3793,7 @@ class WebappInternal(Base):
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         self.scroll_to_element(soup_element)
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
-                            
+
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
@@ -3852,7 +3855,7 @@ class WebappInternal(Base):
                     soup_objects = self.web_scrap(term=sub_item, scrap_type=enum.ScrapType.MIXED,
                                                   optional_term=".tmenupopupitem, wa-menu-popup", main_container="body",
                                                   check_error=check_error, second_term='wa-menu-popup-item')
-                    if soup_objects:                             
+                    if soup_objects:
                         soup_objects_filtered = self.filter_is_displayed(soup_objects)
 
                 if soup_objects_filtered:
@@ -3881,7 +3884,7 @@ class WebappInternal(Base):
                         soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                     else:
                         self.log_error(f"Couldn't find element {button}")
-            
+
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
@@ -9247,3 +9250,22 @@ class WebappInternal(Base):
         except:
             pass
         return elements if elements else None
+
+    def return_soup_by_selenium(self, elements, term, selectors):
+        """
+
+        :param elements:
+        :param term:
+        :return:
+        """
+
+        element_list = []
+
+        for element in elements:
+            shadow_root = next(iter(self.find_shadow_element(selectors, self.soup_to_selenium(element))), None)
+
+            if shadow_root:
+                if term.lower().strip() == shadow_root.text.lower().strip():
+                    element_list.append(element)
+
+        return element_list
