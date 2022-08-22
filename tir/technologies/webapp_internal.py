@@ -7600,7 +7600,7 @@ class WebappInternal(Base):
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
-            self.click(label_element)
+            self.send_action(action=self.click, element=lambda: label_element)
         else:
             label_element = lambda: self.soup_to_selenium(label)
 
