@@ -4948,7 +4948,7 @@ class WebappInternal(Base):
                         time.sleep(2)
                         Id = self.driver.execute_script(script)
                         element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
-                        self.send_action(self.set_element_focus(element())) 
+                        self.set_element_focus(element())
                         success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(self.supported_keys(key)).perform)
                         tries +=1
 
