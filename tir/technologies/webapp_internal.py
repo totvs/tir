@@ -7596,23 +7596,22 @@ class WebappInternal(Base):
             self.log_error("Couldn't find any labels.")
 
         if type(label) == Tag:
-            label = self.soup_to_selenium(label)
+            bs_label = self.soup_to_selenium(label)
 
         if self.webapp_shadowroot():
-            label_element = label
+            label_element = bs_label
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
             self.send_action(action=self.click, element=lambda: label_element)
         else:
-            label_element = lambda: self.soup_to_selenium(label)
-
             time.sleep(2)
-            self.scroll_to_element(label_element())
+            label_element = bs_label
+            self.scroll_to_element(label_element)
             self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-            self.set_element_focus(label_element())
+            self.set_element_focus(label_element)
             self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-            self.click(label_element())
+            self.click(label_element)
 
     def get_current_container(self):
         """
@@ -7733,7 +7732,7 @@ class WebappInternal(Base):
                     tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
                 else:
                     tree_node_filtered = list(
-                        filter(lambda x: "hidden" not in x.parent.parent.parent.parent.attrs['class'], tree_node))
+                        filter(lambda x: not x.find_parents(class_='hidden'), tree_node))
 
                 elements = list(
                     filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x),
@@ -7774,43 +7773,38 @@ class WebappInternal(Base):
 
                             for element_class_item in element_class:
                                 if not success:
-                                    if self.webapp_shadowroot():
-                                        element_click = element_class_item
-                                    else:
-                                        element_click = lambda: self.soup_to_selenium(element_class_item)
                                     try:
-                                        if self.webapp_shadowroot():
-                                            element_tree = element_click
+                                        if self.webapp_shadowroot(): # exclusive shadow_root condition 
+                                            element_click = lambda: element_class_item
                                             if not right_click:
-                                                element_tree.click()
-                                                if 'selected' not in element.get_attribute("class"):
-                                                    element_tree.click()
+                                                element_click.click()
+                                                if 'selected' not in element_click.get_attribute("class"):
+                                                    element_click.click()
                                         else:
-                                            element_tree = element_click()
-
+                                            element_click = lambda: self.soup_to_selenium(element_class_item)
+                                        
                                         if last_item:
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
                                                 if not element.get_attribute('selected'):
-                                                    self.scroll_to_element(element_tree)
-                                                    element_tree.click()
+                                                    self.scroll_to_element(element_click())
+                                                    element_click().click()
 
-                                            if self.webapp_shadowroot():
                                                 success = self.check_hierarchy(label_filtered)
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
-                                                        self.click((element_click), enum.ClickType.SELENIUM,
+                                                        self.click(element_click(), enum.ClickType.SELENIUM,
                                                                    right_click)
                                                     else:
-                                                        self.send_action(action=self.click, element=element_click,
-                                                                         right_click=right_click)
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
+                                                self.scroll_to_element(element_click())
+                                                element_click().click()
                                                 if self.check_toggler(label_filtered, element):
                                                     success = self.check_hierarchy(label_filtered)
                                                     if success and right_click:
-                                                        self.send_action(action=self.click, element=element_click,
-                                                                         right_click=right_click)
+                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
                                                 else:
                                                     if right_click:
                                                         self.send_action(action=self.click, element=element_click,
@@ -8242,8 +8236,8 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view, wa-checkbox, wa-button')
-            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
+            wa_text_view = container.select('wa-text-view, wa-checkbox, wa-button, wa-tree')
+            wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
@@ -8252,7 +8246,7 @@ class WebappInternal(Base):
                 wa_text_view = container.select('label')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
                 if not wa_text_view_filtered:
-                   wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio')
+                   wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio, wa-tree')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
