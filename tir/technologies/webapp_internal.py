@@ -7782,9 +7782,9 @@ class WebappInternal(Base):
                                         if self.webapp_shadowroot(): # exclusive shadow_root condition 
                                             element_click = lambda: element_class_item
                                             if not right_click:
-                                                element_click.click()
-                                                if 'selected' not in element_click.get_attribute("class"):
-                                                    element_click.click()
+                                                element_click().click()
+                                                if 'selected' not in element_click().get_attribute("class"):
+                                                    element_click().click()
                                         else:
                                             element_click = lambda: self.soup_to_selenium(element_class_item)
                                         
