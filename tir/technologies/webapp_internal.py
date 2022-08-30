@@ -2143,7 +2143,8 @@ class WebappInternal(Base):
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             if input_field:
-                active_tab = self.find_active_parents(label)
+                active_tab = self.filter_active_tabs(container)
+
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
             if self.search_stack('SetValue') and list_in_range:
@@ -6164,18 +6165,22 @@ class WebappInternal(Base):
 
         return elements, False
 
-    def filter_active_tabs(self, grids):
+    def filter_active_tabs(self, object):
         """
 
-        :param grids:
-        :return:
+        :param object:
+        :return: return the object if parent wa-tab-page is active
         """
 
-        filtered_grids = list(filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, grids))
+        if isinstance(object, list):
+            filtered_object = list(
+                filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, object))
 
-        if filtered_grids:
+            if filtered_object:
+                return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
 
-            return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, grids))
+        elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
+            return object if 'active' in object.find_parent('wa-tab-page').attrs else None
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
         """
@@ -7569,6 +7574,7 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
+        bs_label = ''
         label = ''
         self.wait_element(label_name)
         logger().info(f"Clicking on {label_name}")
@@ -7599,14 +7605,14 @@ class WebappInternal(Base):
             bs_label = self.soup_to_selenium(label)
 
         if self.webapp_shadowroot():
-            label_element = bs_label
+            label_element = bs_label if bs_label else label
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
             self.send_action(action=self.click, element=lambda: label_element)
         else:
             time.sleep(2)
-            label_element = bs_label
+            label_element = bs_label if bs_label else label
             self.scroll_to_element(label_element)
             self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
             self.set_element_focus(label_element)
@@ -7777,9 +7783,9 @@ class WebappInternal(Base):
                                         if self.webapp_shadowroot(): # exclusive shadow_root condition 
                                             element_click = lambda: element_class_item
                                             if not right_click:
-                                                element_click.click()
-                                                if 'selected' not in element_click.get_attribute("class"):
-                                                    element_click.click()
+                                                element_click().click()
+                                                if 'selected' not in element_click().get_attribute("class"):
+                                                    element_click().click()
                                         else:
                                             element_click = lambda: self.soup_to_selenium(element_class_item)
                                         
@@ -8233,6 +8239,7 @@ class WebappInternal(Base):
         shadow_root = not twebview
 
         if self.webapp_shadowroot(shadow_root=shadow_root):
+            sl_term = label_text
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
@@ -8246,7 +8253,7 @@ class WebappInternal(Base):
                 wa_text_view = container.select('label')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
                 if not wa_text_view_filtered:
-                   wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio, wa-tree')
+                   wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
