@@ -7574,6 +7574,7 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
+        bs_label = ''
         label = ''
         self.wait_element(label_name)
         logger().info(f"Clicking on {label_name}")
@@ -7604,14 +7605,14 @@ class WebappInternal(Base):
             bs_label = self.soup_to_selenium(label)
 
         if self.webapp_shadowroot():
-            label_element = bs_label
+            label_element = bs_label if bs_label else label
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
             self.send_action(action=self.click, element=lambda: label_element)
         else:
             time.sleep(2)
-            label_element = bs_label
+            label_element = bs_label if bs_label else label
             self.scroll_to_element(label_element)
             self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
             self.set_element_focus(label_element)
@@ -8238,6 +8239,7 @@ class WebappInternal(Base):
         shadow_root = not twebview
 
         if self.webapp_shadowroot(shadow_root=shadow_root):
+            sl_term = label_text
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
@@ -8251,7 +8253,7 @@ class WebappInternal(Base):
                 wa_text_view = container.select('label')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
                 if not wa_text_view_filtered:
-                   wa_text_view_filtered= self.selenium_web_scrap(term=label_text, container=container, optional_term='wa-radio, wa-tree')
+                   wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
