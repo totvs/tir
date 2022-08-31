@@ -3961,7 +3961,7 @@ class WebappInternal(Base):
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
 
-        self.click(element_selenium)
+        self.send_action(action=self.click, element=lambda : element_selenium)
 
 
     def click_sub_menu(self, filtered_sub_itens):
