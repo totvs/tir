@@ -5066,10 +5066,10 @@ class WebappInternal(Base):
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
-                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb', main_container="body")
+                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb',
+                                  main_container="body")
             else:
                 self.wait_element(field)
-
 
             self.ClickGridCell(field, row_number)
             time.sleep(1)
@@ -5086,24 +5086,36 @@ class WebappInternal(Base):
 
                 label_text_filtered = re.sub(r"[:;*?]", "", field)
                 label_filtered = next(iter(list(filter(
-                    lambda x: re.sub(r"[:;*?]", "",  x.text) == label_text_filtered, labels))), None)
+                    lambda x: re.sub(r"[:;*?]", "", x.text) == label_text_filtered, labels))), None)
 
                 if label_filtered and not self.element_is_displayed(label_filtered):
-                    self.scroll_to_element( self.soup_to_selenium(label_filtered) )
+                    self.scroll_to_element(self.soup_to_selenium(label_filtered))
 
             element = ''
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not element:
-                element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label", main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+                element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, optional_term="label",
+                                         main_container=self.containers_selectors["Containers"], label=label,
+                                         position=position)
+                if isinstance(element, list):
+                    element = next(iter(element), None)
 
                 if not element:
-                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = self.containers_selectors["Containers"], label=label, position=position)), None)
+                    element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                       main_container=self.containers_selectors["Containers"],
+                                                       label=label, position=position)), None)
+
+            if self.webapp_shadowroot():
+                element = self.soup_to_selenium(element)
+                input_element = next(iter(self.find_shadow_element('input', element)), None)
+                if input_element:
+                    element = input_element
+
+            element = element if self.webapp_shadowroot() else self.soup_to_selenium(element)
 
             if element and not self.element_is_displayed(element):
-                self.scroll_to_element( self.soup_to_selenium(element) )
-
+                self.scroll_to_element(element)
             try:
-                element = self.soup_to_selenium(element)
                 self.set_element_focus(element)
                 if self.driver.switch_to_active_element() != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
