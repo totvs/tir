@@ -3472,7 +3472,6 @@ class WebappInternal(Base):
         else:
             return len(element_list) >= position
 
-
     def SetLateralMenu(self, menu_itens, save_input=True):
         """
         Navigates through the lateral menu using provided menu path.
@@ -3491,18 +3490,19 @@ class WebappInternal(Base):
 
         submenu = ""
         wait_screen = True if menu_itens != self.language.menu_about else False
+        used_ids = []
 
         if save_input:
             self.routine = 'SetLateralMenu'
             self.config.routine = menu_itens
-        
+
         if self.webapp_shadowroot():
             menu_term = ".dict-tmenu"
             menu_itens_term = ".dict-tmenuitem"
         else:
             menu_term = ".tmenu"
             menu_itens_term = ".tmenuitem"
-        
+
         logger().info(f"Navigating lateral menu: {menu_itens}")
 
         endtime = time.time() + self.config.time_out
@@ -3525,66 +3525,87 @@ class WebappInternal(Base):
         menu = menu_xpath[0]
         child = menu
         count = 0
-        last_index = len(menu_itens)-1
+        last_index = len(menu_itens) - 1
 
         try:
             for index, menuitem in enumerate(menu_itens):
                 logger().info(f'Menu item: "{menuitem}"')
                 self.wait_blocker()
-                self.wait_until_to(expected_condition="element_to_be_clickable", element = menu_term, locator=By.CSS_SELECTOR )
-                self.wait_until_to(expected_condition="presence_of_all_elements_located", element = f'{menu_term} {menu_itens_term}', locator=By.CSS_SELECTOR)
-                menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED, timeout = self.config.time_out, optional_term=menu_itens_term, main_container="body, wa-dialog")
+                self.wait_until_to(expected_condition="element_to_be_clickable", element=menu_term,
+                                   locator=By.CSS_SELECTOR)
+                self.wait_until_to(expected_condition="presence_of_all_elements_located",
+                                   element=f'{menu_term} {menu_itens_term}', locator=By.CSS_SELECTOR)
+                menu_item_presence = self.wait_element_timeout(term=menuitem, scrap_type=enum.ScrapType.MIXED,
+                                                               timeout=self.config.time_out,
+                                                               optional_term=menu_itens_term,
+                                                               main_container="body, wa-dialog")
 
                 if not menu_item_presence and submenu:
                     submenu().click()
 
                 subMenuElements = self.get_current_DOM().select(menu_itens_term)
                 subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
-                
-                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}", menu_itens_term):
+
+                while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}",
+                                                                                                menu_itens_term):
                     menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                     subMenuElements = menu.select(menu_itens_term)
-                    if time.time() > endtime and (not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term, menu_itens_term)):
+                    if time.time() > endtime and (
+                            not subMenuElements or len(subMenuElements) < self.children_element_count(menu_term,
+                                                                                                      menu_itens_term)):
                         self.restart_counter += 1
                         self.log_error(f"Couldn't find lateral menu")
 
                 regex = r"(<[^>]*>)?"
                 if self.webapp_shadowroot():
-                    child = list(filter(lambda x: hasattr(x,'caption') and re.sub(regex,'',x['caption'].lower()).startswith(menuitem.lower()), subMenuElements ))
+                    child = list(filter(
+                        lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower()).startswith(
+                            menuitem.lower()), subMenuElements))
                 else:
                     child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))
+
+                child = list(filter(lambda x: x.attrs['id'] not in used_ids, child))
+
+                child = next(iter(child), None)
+
+                if hasattr(child, 'attrs'):
+                    used_ids.append(child.attrs['id'])
 
                 if not child:
                     self.restart_counter += 1
                     self.log_error(f"Couldn't find menu item: {menuitem}")
 
-                child = next(reversed(child), None)
                 self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
                 submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
 
                 if subMenuElements and submenu():
                     self.expanded_menu(child)
                     self.scroll_to_element(submenu())
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = child, locator = By.XPATH )
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=child, locator=By.XPATH)
                     self.wait_blocker()
                     expanded = lambda: 'expanded' in submenu().get_attribute('class')
-                    item_exist = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body, wa-dialog")
+                    item_exist = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED,
+                                                             optional_term=menu_itens_term,
+                                                             main_container="body, wa-dialog")
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
-                    while time.time() < endtime and (index != last_index and not expanded()) or (index == last_index and item_exist() and not tmodal()):
+                    while time.time() < endtime and (index != last_index and not expanded()) or (
+                            index == last_index and item_exist() and not tmodal()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot(): #TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
-                            self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED, optional_term=menu_itens_term, main_container="body")
+                        if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+                            self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
+                                              optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
                 else:
                     self.restart_counter += 1
                     self.log_error(f"Error - Menu Item does not exist: {menuitem}")
-                count+=1
+                count += 1
 
-            #TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+            used_ids = []
+            # TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
                 if not re.search("\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
@@ -3596,11 +3617,11 @@ class WebappInternal(Base):
 
                 child_object = next(iter(
                     self.web_scrap(term=child_attrs, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                main_container="body")), None)
+                                   main_container="body")), None)
 
                 counter_child = 1
                 if menuitem != self.language.menu_about.split('>')[1].strip():
-                    while (time.time() < endtime) and (child_is_displayed and counter_child <=3):
+                    while (time.time() < endtime) and (child_is_displayed and counter_child <= 3):
                         time.sleep(1)
 
                         try:
@@ -3620,15 +3641,16 @@ class WebappInternal(Base):
                                         if not re.search("\([0-9]\)$", child.text):
                                             self.slm_click_last_item(f"#{child.attrs['id']} > label")
                             else:
-                                counter_child +=1
+                                counter_child += 1
                         except:
-                            counter_child +=1
+                            counter_child += 1
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
 
-            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"): #TODO avaliar outra forma de validar a presença
+            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                   main_container="body"):  # TODO avaliar outra forma de validar a presença
                 self.close_news_screen()
 
         except AssertionError as error:
@@ -3636,7 +3658,6 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
             self.restart_counter += 1
-
 
     def expanded_menu(self, element):
         if self.webapp_shadowroot():
