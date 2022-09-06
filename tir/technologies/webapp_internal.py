@@ -3225,7 +3225,7 @@ class WebappInternal(Base):
                     if labels_displayed:
                         element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
-                        if not element and len(labels_not_none) == 1:
+                        if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
                             return [element]
@@ -4309,7 +4309,9 @@ class WebappInternal(Base):
                 if position > 0:
                     panel = panels_filtered[position] if position < len(panels_filtered) else None
                 else:
-                    panel = next(iter(panels_filtered), None)
+                    while isinstance(panels_filtered, list):
+                        panels_filtered = next(iter(panels_filtered), None)
+                    panel = panels_filtered
 
                 element = self.soup_to_selenium(panel) if panel and not self.webapp_shadowroot() else panel
 
