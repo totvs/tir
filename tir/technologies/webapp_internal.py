@@ -5892,12 +5892,13 @@ class WebappInternal(Base):
                 
                 grids = container.select(grid_term)
 
+            if grids:
+
                 if self.webapp_shadowroot():
                     grids = self.filter_active_tabs(grids)
 
                 grids = self.filter_displayed_elements(grids)
 
-            if grids:
                 headers = self.get_headers_from_grids(grids)
                 column_name = ""
 
