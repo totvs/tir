@@ -7443,10 +7443,16 @@ class WebappInternal(Base):
         """
         has_text = False
         expected_text = re.sub(' ', '', expected_text.lower())
+        element_function = False
 
         if self.webapp_shadowroot():
             tooltip_term = 'wa-tooltip'
-            element_function = lambda: next(iter(self.find_shadow_element('button', self.soup_to_selenium(element))))
+            if type(element) == Tag:
+                element = self.soup_to_selenium(element)
+            if self.find_shadow_element('button', element):
+                element_function = lambda: next(iter(self.find_shadow_element('button', element)))
+            elif element:
+                element_function = lambda: element
             try:
                 ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform()
             except:
@@ -7462,7 +7468,8 @@ class WebappInternal(Base):
             tooltips = self.get_current_DOM().select(tooltip_term)
         if tooltips:
             has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
-        self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
+        if element_function:
+            self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
         return has_text
 
     def WaitFieldValue(self, field, expected_value):
