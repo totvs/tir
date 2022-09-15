@@ -1728,14 +1728,19 @@ class WebappInternal(Base):
             else:
                 search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = soup.select(radio_term)
-            if self.webapp_shadowroot():
-                tradiobuttonitens = self.find_child_element('div', tradiobuttonitens[0])
-                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
-                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
-            else:
-                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+            tradiobuttonitens = next(iter(soup.select(radio_term)), None)
+
+            if tradiobuttonitens:
+                if self.webapp_shadowroot():
+                    tradiobuttonitens = self.find_child_element('div', tradiobuttonitens)
+                    tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                    tradiobuttonitens_not_ends_dots = list(
+                        filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
+                else:
+                    tradiobuttonitens_ends_dots = list(
+                        filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                    tradiobuttonitens_not_ends_dots = list(
+                        filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
                 if self.webapp_shadowroot():
