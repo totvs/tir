@@ -1728,14 +1728,19 @@ class WebappInternal(Base):
             else:
                 search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = soup.select(radio_term)
-            if self.webapp_shadowroot():
-                tradiobuttonitens = self.find_child_element('div', tradiobuttonitens[0])
-                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
-                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
-            else:
-                tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-                tradiobuttonitens_not_ends_dots = list(filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+            tradiobuttonitens = next(iter(soup.select(radio_term)), None)
+
+            if tradiobuttonitens:
+                if self.webapp_shadowroot():
+                    tradiobuttonitens = self.find_child_element('div', tradiobuttonitens)
+                    tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                    tradiobuttonitens_not_ends_dots = list(
+                        filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
+                else:
+                    tradiobuttonitens_ends_dots = list(
+                        filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                    tradiobuttonitens_not_ends_dots = list(
+                        filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
             if tradiobuttonitens_not_ends_dots:
                 if self.webapp_shadowroot():
@@ -6552,7 +6557,7 @@ class WebappInternal(Base):
 
             if element is not None:
 
-                sel_element = lambda:self.soup_to_selenium(element)
+                sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
                 sel_element_isdisplayed = False
 
                 while(not sel_element_isdisplayed and time.time() < presence_endtime):
@@ -8298,7 +8303,7 @@ class WebappInternal(Base):
                 wa_text_view = container.select('label')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
                 if not wa_text_view_filtered:
-                   wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree')
+                   wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree, wa-tgrid')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
                 return [wa_text_view_filtered[position]]
