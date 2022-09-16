@@ -4507,7 +4507,11 @@ class WebappInternal(Base):
 
         if hasattr(index_number, '__iter__'):
             for index in index_number:
-                element_td = next(iter(tr[index].find_elements_by_css_selector('td')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
+
+                if len(tr) < index:
+                    self.log_error(f"Couldn't check box element in line: {index+1}")
+
+                element_td = next(iter(tr[index].find_elements_by_css_selector('td'))) if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
                 self.wait_blocker()
                 self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
         else:
