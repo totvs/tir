@@ -1703,6 +1703,8 @@ class WebappInternal(Base):
             main_container = '.tmodaldialog,.ui-dialog'
             radio_term = '.tradiobuttonitem input'
 
+        tradiobuttonitens = None
+
         success = False
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
@@ -1728,105 +1730,107 @@ class WebappInternal(Base):
             else:
                 search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
-            tradiobuttonitens = next(iter(soup.select(radio_term)), None)
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not tradiobuttonitens:
+                tradiobuttonitens = next(iter(soup.select(radio_term)), None)
 
-            if tradiobuttonitens:
-                if self.webapp_shadowroot():
-                    tradiobuttonitens = self.find_child_element('div', tradiobuttonitens)
-                    tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
-                    tradiobuttonitens_not_ends_dots = list(
-                        filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
-                else:
-                    tradiobuttonitens_ends_dots = list(
-                        filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-                    tradiobuttonitens_not_ends_dots = list(
-                        filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
-
-            if tradiobuttonitens_not_ends_dots:
-                if self.webapp_shadowroot():
-                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
-                    if radio:
-                        radio.find_element_by_tag_name('input').click()
-                        success = True
-                else:
-                    radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                    if radio:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
-                        self.click(self.soup_to_selenium(radio))
-                        success = True
-
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
-                for element in tradiobuttonitens_ends_dots:
-                    
+                if tradiobuttonitens:
                     if self.webapp_shadowroot():
-                        selenium_input = element.find_element_by_tag_name('input')
-                        self.click(selenium_input)
+                        tradiobuttonitens = self.find_child_element('div', tradiobuttonitens)
+                        tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
+                        tradiobuttonitens_not_ends_dots = list(
+                            filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
                     else:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                        selenium_input = lambda : self.soup_to_selenium(element)
-                        self.click(selenium_input())
-                    time.sleep(1)
+                        tradiobuttonitens_ends_dots = list(
+                            filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                        tradiobuttonitens_not_ends_dots = list(
+                            filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
 
-                    try_get_tooltip = 0
-
-                    while (not success and try_get_tooltip < 3):
-                        success = self.check_element_tooltip(element, search_key, contains=True)
-                        try_get_tooltip += 1
-
-                    if success:
-                        break
-                    elif self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
-                        self.driver.switch_to.default_content()
-                        content = self.driver.page_source
-                        soup = BeautifulSoup(content,"html.parser")
+                    if tradiobuttonitens_not_ends_dots:
                         if self.webapp_shadowroot():
-                            remove_focus = soup.select('body')[0]
-                            ActionChains(self.driver).move_to_element(self.soup_to_selenium(remove_focus)).perform() 
-                    else:
-                        pass
-            if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() == "sigaadv":
-                for element in tradiobuttonitens_ends_dots:
+                            radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
+                            if radio:
+                                radio.find_element_by_tag_name('input').click()
+                                success = True
+                        else:
+                            radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                            if radio:
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
+                                self.click(self.soup_to_selenium(radio))
+                                success = True
 
-                    old_value = self.search_browse_key_input_value(search_elements[1])
+                    if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
+                        for element in tradiobuttonitens_ends_dots:
 
-                    if tradiobuttonitens.index(element) == 0:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tradiobuttonitens_ends_dots[1], locator = By.XPATH )
-                        self.click(self.soup_to_selenium(tradiobuttonitens_ends_dots[1]))
+                            if self.webapp_shadowroot():
+                                selenium_input = element.find_element_by_tag_name('input')
+                                self.click(selenium_input)
+                            else:
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                                selenium_input = lambda : self.soup_to_selenium(element)
+                                self.click(selenium_input())
+                            time.sleep(1)
 
-                        while(old_value == self.search_browse_key_input_value(search_elements[1])):
-                            time.sleep(0.1)
-                        old_value = self.search_browse_key_input_value(search_elements[1])
+                            try_get_tooltip = 0
 
-                        if not self.driver.find_elements_by_css_selector(".tradiobuttonitem input"):
-                            self.get_current_DOM()
-                            self.set_element_focus(sel_browse_key())
-                            self.click(sel_browse_key())
-                            self.driver.switch_to.default_content()
+                            while (not success and try_get_tooltip < 3):
+                                success = self.check_element_tooltip(element, search_key, contains=True)
+                                try_get_tooltip += 1
+
+                            if success:
+                                break
+                            elif self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                                self.driver.switch_to.default_content()
+                                content = self.driver.page_source
+                                soup = BeautifulSoup(content,"html.parser")
+                                if self.webapp_shadowroot():
+                                    remove_focus = soup.select('body')[0]
+                                    ActionChains(self.driver).move_to_element(self.soup_to_selenium(remove_focus)).perform()
+                            else:
+                                pass
+                    if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() == "sigaadv":
+                        for element in tradiobuttonitens_ends_dots:
+
+                            old_value = self.search_browse_key_input_value(search_elements[1])
+
+                            if tradiobuttonitens.index(element) == 0:
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tradiobuttonitens_ends_dots[1], locator = By.XPATH )
+                                self.click(self.soup_to_selenium(tradiobuttonitens_ends_dots[1]))
+
+                                while(old_value == self.search_browse_key_input_value(search_elements[1])):
+                                    time.sleep(0.1)
+                                old_value = self.search_browse_key_input_value(search_elements[1])
+
+                                if not self.driver.find_elements_by_css_selector(".tradiobuttonitem input"):
+                                    self.get_current_DOM()
+                                    self.set_element_focus(sel_browse_key())
+                                    self.click(sel_browse_key())
+                                    self.driver.switch_to.default_content()
 
 
-                    if self.webapp_shadowroot():
-                        selenium_input = element.find_element_by_tag_name('input')
-                        self.click(selenium_input)
-                    else:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
-                        self.click(self.soup_to_selenium(element))
+                            if self.webapp_shadowroot():
+                                selenium_input = element.find_element_by_tag_name('input')
+                                self.click(selenium_input)
+                            else:
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
+                                self.click(self.soup_to_selenium(element))
 
-                    while(old_value == self.search_browse_key_input_value(search_elements[1])):
-                        time.sleep(0.1)
-                    
-                    input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
-                    search_key = re.sub(' ', '', search_key.lower().strip())
+                            while(old_value == self.search_browse_key_input_value(search_elements[1])):
+                                time.sleep(0.1)
 
-                    if self.webapp_shadowroot() and not input_value:
-                        selenium_element = self.soup_to_selenium(search_elements[1])
-                        input_value =  re.sub(' ', '', selenium_element.get_attribute('placeholder').strip().lower())
+                            input_value = re.sub(' ', '', self.search_browse_key_input_value(search_elements[1]).strip().lower())
+                            search_key = re.sub(' ', '', search_key.lower().strip())
 
-                    success = search_key in input_value
+                            if self.webapp_shadowroot() and not input_value:
+                                selenium_element = self.soup_to_selenium(search_elements[1])
+                                input_value =  re.sub(' ', '', selenium_element.get_attribute('placeholder').strip().lower())
 
-                    if success:
-                        break
-                    else:
-                        pass
+                            success = search_key in input_value
+
+                            if success:
+                                break
+                            else:
+                                pass
 
             if not success:
                 self.log_error(f"Couldn't search the key: {search_key} on screen.")
