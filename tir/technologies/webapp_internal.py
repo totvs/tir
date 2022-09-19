@@ -1719,10 +1719,6 @@ class WebappInternal(Base):
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
             self.click(sel_browse_key())
-            content = self.driver.page_source
-            soup = BeautifulSoup(content,"html.parser")
-        else:
-            soup = self.get_current_DOM()
 
         if not index:
             if self.webapp_shadowroot():
@@ -1732,6 +1728,7 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not tradiobuttonitens:
+                soup = self.get_current_DOM()
                 tradiobuttonitens = next(iter(soup.select(radio_term)), None)
 
                 if tradiobuttonitens:
@@ -1781,8 +1778,7 @@ class WebappInternal(Base):
                                 break
                             elif self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
                                 self.driver.switch_to.default_content()
-                                content = self.driver.page_source
-                                soup = BeautifulSoup(content,"html.parser")
+                                soup = self.get_current_DOM()
                                 if self.webapp_shadowroot():
                                     remove_focus = soup.select('body')[0]
                                     ActionChains(self.driver).move_to_element(self.soup_to_selenium(remove_focus)).perform()
