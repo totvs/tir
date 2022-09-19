@@ -7663,7 +7663,7 @@ class WebappInternal(Base):
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
-            self.send_action(action=self.click, element=lambda: label_element)
+            self.send_action(action=self.click, element=lambda: label_element, value=enum.ClickType.SELENIUM)
         else:
             time.sleep(2)
             label_element = bs_label if bs_label else label
