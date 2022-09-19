@@ -1091,6 +1091,18 @@ class Webapp():
         >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.__webapp.ClickImage(img_name,double_click)
+    
+    def ClickMenuFunctional(self,menu_name,menu_option):
+        """Click on the functional menu.
+        :param menu_option: Item to be clicked.
+        :type menu_option: src
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickMenuFunctional("label","bottom") 
+        """
+        self.__webapp.ClickMenuFunctional(menu_name,menu_option)
 
     def ProgramScreen(self, initial_program=""):
         """
