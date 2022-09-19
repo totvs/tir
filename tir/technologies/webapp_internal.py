@@ -6990,6 +6990,7 @@ class WebappInternal(Base):
 
         if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
+            time.sleep(1)
 
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
