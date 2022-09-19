@@ -6990,6 +6990,7 @@ class WebappInternal(Base):
 
         if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
+            time.sleep(1)
 
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
@@ -7663,7 +7664,7 @@ class WebappInternal(Base):
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
-            self.send_action(action=self.click, element=lambda: label_element)
+            self.send_action(action=self.click, element=lambda: label_element, value=enum.ClickType.SELENIUM)
         else:
             time.sleep(2)
             label_element = bs_label if bs_label else label
