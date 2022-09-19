@@ -5197,11 +5197,15 @@ class WebappInternal(Base):
 
         if element_list and len(element_list) -1 >= position:
             element = element_list[position]
-        
-        if self.webapp_shadowroot():
-            self.scroll_to_element(element)
 
-            self.double_click(element)#TODO verificar a utilização de um unico click
+        if self.webapp_shadowroot():
+            if isinstance(element, list):
+                element = next(iter(element), None)
+
+            if element:
+                self.scroll_to_element(element)
+
+                self.double_click(element)  # TODO verificar a utilização de um unico click
         else:
             if 'input' not in element and element:
                 input_element = next(iter(element.find_parent().select("input")), None)
