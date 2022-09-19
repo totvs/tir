@@ -1098,7 +1098,7 @@ class Webapp():
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickMenuFunctional("label","bottom") 
+        >>> oHelper.ClickMenuFunctional("label","button") 
         """
         self.__webapp.ClickMenuFunctional(menu_name,menu_option)
 
