@@ -1704,6 +1704,7 @@ class WebappInternal(Base):
             radio_term = '.tradiobuttonitem input'
 
         tradiobuttonitens = None
+        soup = self.get_current_DOM()
 
         success = False
         if index and not isinstance(search_key, int):
