@@ -7606,10 +7606,11 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             labels_boxs = container.select("span, wa-checkbox")
+            label_box_name = label_box_name.lower().strip()
             if self.webapp_shadowroot():
-                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.get('caption').lower(), labels_boxs))
+                filtered_labels_boxs = list(filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
             else:
-                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.text.lower(), labels_boxs))
+                filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
 
             if position <= len(filtered_labels_boxs):
                 position -= 1
