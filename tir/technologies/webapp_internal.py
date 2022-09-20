@@ -6610,7 +6610,8 @@ class WebappInternal(Base):
         >>> self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button", timeout=10, step=0.1)
         """
         self.twebview_context = twebview
-
+        
+        element = None
         success = False
         if presence:
             endtime = time.time() + timeout
@@ -6630,9 +6631,14 @@ class WebappInternal(Base):
         if presence and success:
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)), None)
-            if element is not None and type(element) == Tag:
-                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            while time.time() < endtime and not element:
+                element = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)
+            
+            if element is not None:
+                element = next(iter(element), None)
+                if type(element) == Tag:
+                    sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+
                 endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
