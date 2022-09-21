@@ -24,16 +24,21 @@ def logger(logger='root'):
     global folder
     global file_path
 
-    today = datetime.today()
-
-    if not file_path:
-        filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
-
-        folder = create_folder()
-
-        file_path = create_file(folder, filename)
+    logger = 'console' #TODO configuração temporaria para o server.
 
     if config.smart_test or config.debug_log:
+
+        today = datetime.today()
+
+        file_handler = True if logger == 'root' else False
+
+        if not file_path and file_handler:
+            filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
+
+            folder = create_folder()
+
+            file_path = create_file(folder, filename)
+
         logging_config = {
             'version': 1,
             'loggers': {
@@ -41,6 +46,10 @@ def logger(logger='root'):
                     'level': 'DEBUG',
                     'handlers': ['debug_console_handler', 'debug_file_handler']
                 },
+                'console': {  # console logger
+                    'level': 'DEBUG',
+                    'handlers': ['debug_console_handler']
+                }
             },
             'handlers': {
                 'debug_console_handler': {
@@ -52,7 +61,7 @@ def logger(logger='root'):
                 'debug_file_handler': {
                     'level': 'DEBUG',
                     'formatter': 'info',
-                    'filename': Path(folder, filename),
+                    'filename': Path(folder, filename) if file_handler else 'none.log',
                     'class': 'logging.FileHandler',
                     'mode': 'a'
                 },
