@@ -7005,7 +7005,7 @@ class WebappInternal(Base):
 
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
-        if proceed_action():
+        if proceed_action() and self.log.has_csv_condition():
             self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
@@ -7570,7 +7570,8 @@ class WebappInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
@@ -8250,6 +8251,9 @@ class WebappInternal(Base):
 
             if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
                 self.WaitProcessing(string, timeout)
+
+        if len(self.log.table_rows[1:]) > 0 and not self.log.csv_log:
+            self.log.save_file()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
