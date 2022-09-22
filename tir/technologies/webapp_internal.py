@@ -3909,13 +3909,17 @@ class WebappInternal(Base):
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container = self.containers_selectors["SetButton"], check_error=check_error)
                     soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
                     if soup_objects and len(soup_objects) - 1 >= position:
-                        soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                        if  type(soup_objects[position]) == Tag:
+                            soup_element = lambda : self.soup_to_selenium(soup_objects[position])
+                        else:
+                            soup_element = lambda : soup_objects[position]
                     else:
                         self.log_error(f"Couldn't find element {button}")
 
                     self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
+                    if not self.webapp_shadowroot():
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
                     self.send_action(self.click, soup_element)
 
                     result  = self.click_sub_menu(sub_item)
@@ -4012,21 +4016,27 @@ class WebappInternal(Base):
 
         regex = r"(<[^>]*>)?"
 
-        sub_item = filtered_sub_itens[len(filtered_sub_itens) - 1]
 
+        selector = '.dict-tmenuitem' if self.webapp_shadowroot() else '.tmenupopup.active'
         if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
 
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
 
-        if self.webapp_shadowroot():
-            selector = '.dict-tmenuitem'
-            parent_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens[-2], soup.select(selector)))[0].get('id')
-            menu_id = list(filter(lambda x: x.get('caption') == sub_item and x.parent.get('id') == parent_id, soup.select(selector)))[0].get('id')
+        if isinstance(filtered_sub_itens, list):
+            sub_item = filtered_sub_itens[len(filtered_sub_itens) - 1]
+            if self.webapp_shadowroot():
+                parent_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens[-2], soup.select(selector)))[0].get('id')
+                menu_id = list(filter(lambda x: x.get('caption') == sub_item and x.parent.get('id') == parent_id, soup.select(selector)))[0].get('id')
+            else:
+                menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
         else:
-            selector = '.tmenupopup.active'
-            menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
+            if self.webapp_shadowroot():
+                menu_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens, soup.select(selector)))[0].get('id')
+            else:
+                menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
+                
         menu = self.driver.find_element_by_id(menu_id)
 
         if self.webapp_shadowroot():
@@ -7005,7 +7015,7 @@ class WebappInternal(Base):
 
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
-        if proceed_action():
+        if proceed_action() and self.log.has_csv_condition():
             self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
@@ -7570,7 +7580,8 @@ class WebappInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
@@ -8250,6 +8261,9 @@ class WebappInternal(Base):
 
             if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
                 self.WaitProcessing(string, timeout)
+
+        if len(self.log.table_rows[1:]) > 0 and not self.log.csv_log:
+            self.log.save_file()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
