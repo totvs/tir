@@ -133,18 +133,22 @@ class Log:
             if self.config.smart_test:
                 open("log_exec_file.txt", "w")
 
-            if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
-                with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
-                    csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
-                    csv_writer_header.writerow(self.table_rows[0])
-                    csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                    for line in self.table_rows[1:]:
-                        csv_writer.writerow(line)
+            with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
+                csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
+                csv_writer_header.writerow(self.table_rows[0])
+                csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+                for line in self.table_rows[1:]:
+                    csv_writer.writerow(line)
 
-                logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
+            logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
 
                             
-                self.csv_log.append(self.get_testcase_stack())
+            self.csv_log.append(self.get_testcase_stack())
+
+    def has_csv_condition(self):
+
+        return ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (
+                    self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
 
     def set_seconds(self, initial_time):
         """
