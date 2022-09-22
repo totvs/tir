@@ -8262,7 +8262,7 @@ class WebappInternal(Base):
             if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
                 self.WaitProcessing(string, timeout)
 
-        if len(self.log.table_rows[1:]) > 0 and not self.log.csv_log:
+        if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
             self.log.save_file()
 
         if self.config.num_exec:
