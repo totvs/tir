@@ -373,7 +373,7 @@ class WebappInternal(Base):
                 self.send_keys(start_prog(), initial_program)
                 try_counter += 1 if (try_counter < 1) else -1
 
-            if (start_prog_value().strip() != initial_program.strip()):
+            if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
                 message = "Couldn't fill Program input element."
                 self.log_error(message)
