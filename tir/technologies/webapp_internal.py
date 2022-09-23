@@ -354,12 +354,12 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             if self.webapp_shadowroot():
-                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())), None))
+                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())))).strip() if self.find_shadow_element('input', start_prog()) else None
             else:
                 start_prog_value = lambda: self.get_web_value(start_prog())
 
             endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (start_prog_value().strip() != initial_program.strip())):
+            while (time.time() < endtime and (start_prog_value() != initial_program.strip())):
 
                 if try_counter == 0:
                     start_prog = lambda: self.soup_to_selenium(start_prog_element)
@@ -373,7 +373,7 @@ class WebappInternal(Base):
                 self.send_keys(start_prog(), initial_program)
                 try_counter += 1 if (try_counter < 1) else -1
 
-            if (start_prog_value().strip() != initial_program.strip()):
+            if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
                 message = "Couldn't fill Program input element."
                 self.log_error(message)
