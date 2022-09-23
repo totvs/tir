@@ -354,12 +354,12 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             if self.webapp_shadowroot():
-                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())), None))
+                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())))).strip() if self.find_shadow_element('input', start_prog()) else None
             else:
                 start_prog_value = lambda: self.get_web_value(start_prog())
 
             endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (start_prog_value().strip() != initial_program.strip())):
+            while (time.time() < endtime and (start_prog_value() != initial_program.strip())):
 
                 if try_counter == 0:
                     start_prog = lambda: self.soup_to_selenium(start_prog_element)
