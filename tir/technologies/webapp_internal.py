@@ -2421,6 +2421,7 @@ class WebappInternal(Base):
             self.wait_element(field)
 
         success = False
+        try_counter = 0
         endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
@@ -2513,6 +2514,10 @@ class WebappInternal(Base):
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)       
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                if try_counter > 3:
+                                    self.double_click(input_field())
+                                    ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                try_counter += 1
                         #if Number input
                         else:
                             tries = 0
