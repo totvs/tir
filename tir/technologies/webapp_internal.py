@@ -7920,23 +7920,23 @@ class WebappInternal(Base):
                                                 element_is_closed = lambda: element.get_attribute(
                                                     'closed') == 'true' or element.get_attribute(
                                                     'closed') == '' or not self.treenode_selected(label_filtered)
-                                                self.scroll_to_element(element_tree)
+                                                self.scroll_to_element(element_click())
 
                                                 endtime_click = time.time() + self.config.time_out
                                                 while time.time() < endtime_click and element_is_closed():
                                                     if element.get_attribute(
                                                             'closed') == 'true' or element.get_attribute(
                                                             'closed') == '':
-                                                        element_tree.click()
+                                                        element_click().click()
                                                     element_closed_click = self.driver.execute_script(
                                                         f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')",
-                                                        element_tree)
+                                                        element_click())
                                                     if element_closed_click:
                                                         element_closed_click.click()
                                             else:
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
-                                                self.scroll_to_element(element_tree)
-                                                element_tree.click()
+                                                self.scroll_to_element(element_click())
+                                                element_click().click()
                                             success = self.check_hierarchy(label_filtered)
 
                                         try_counter += 1
