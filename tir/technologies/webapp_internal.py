@@ -1715,11 +1715,8 @@ class WebappInternal(Base):
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
+        self.driver.switch_to.default_content()
         self.click(sel_browse_key())
-
-        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
-            self.driver.switch_to.default_content()
-            self.click(sel_browse_key())
 
         if not index:
             if self.webapp_shadowroot():
@@ -1730,7 +1727,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not tradiobuttonitens:
                 soup = self.get_current_DOM()
-                tradiobuttonitens = next(iter(soup.select(radio_term)), None)
+                tradiobuttonitens = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
 
                 if tradiobuttonitens:
                     if self.webapp_shadowroot():
@@ -1742,7 +1739,7 @@ class WebappInternal(Base):
                         tradiobuttonitens_ends_dots = list(
                             filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
                         tradiobuttonitens_not_ends_dots = list(
-                            filter(lambda x: not re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                            filter(lambda x: not re.search(r"(\.\.)$", x.next.text), tradiobuttonitens))
 
                     if tradiobuttonitens_not_ends_dots:
                         if self.webapp_shadowroot():
