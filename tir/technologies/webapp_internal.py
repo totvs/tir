@@ -8081,8 +8081,8 @@ class WebappInternal(Base):
 
         ttreenode = self.treenode()
 
-        if self.webapp_shadowroot():
-            treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class'), ttreenode))
+        if self.webapp_shadowroot(): 
+            treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class') or x.get_attribute('selected'), ttreenode))
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
