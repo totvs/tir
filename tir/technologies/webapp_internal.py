@@ -4536,46 +4536,48 @@ class WebappInternal(Base):
             self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
 
     def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
-        if element_bs4:
-            success = False
-            td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
+        try:
+            if element_bs4:
+                success = False
+                td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
 
-            if hasattr(td, 'style') or self.webapp_shadowroot():
-                last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
+                if hasattr(td, 'style') or self.webapp_shadowroot():
+                    last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
 
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not success:
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and not success:
 
-                    soup = self.get_current_DOM()
+                        soup = self.get_current_DOM()
 
-                    term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
-                    tmodal_list = soup.select(term)
-                    tmodal_layer = len(tmodal_list) if tmodal_list else 0
+                        term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
+                        tmodal_list = soup.select(term)
+                        tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                    self.performing_click(element_bs4, class_grid)
-                    self.wait_blocker()
-                    time.sleep(2)
+                        self.performing_click(element_bs4, class_grid)
+                        self.wait_blocker()
+                        time.sleep(2)
 
-                    tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False, position=tmodal_layer + 1)
-                    if tmodal:
-                        return
+                        tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False, position=tmodal_layer + 1)
+                        if tmodal:
+                            return
 
-                    grid = self.get_grid(grid_number=grid_number)
+                        grid = self.get_grid(grid_number=grid_number)
 
-                    if self.webapp_shadowroot():
-                        sel_grid  = self.soup_to_selenium(grid)
-                        tr = self.find_shadow_element('tbody > tr', sel_grid)
-                        td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
-                        new_box_state = td.get_attribute('style')
-                    else:
-                        tr = grid.select('tbody > tr')
-                        td = next(iter(tr[index].select('td')))
-                        new_box_state = td.attrs['style']
-                    success = last_box_state != new_box_state
+                        if self.webapp_shadowroot():
+                            sel_grid  = self.soup_to_selenium(grid)
+                            tr = self.find_shadow_element('tbody > tr', sel_grid)
+                            td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
+                            new_box_state = td.get_attribute('style')
+                        else:
+                            tr = grid.select('tbody > tr')
+                            td = next(iter(tr[index].select('td')))
+                            new_box_state = td.attrs['style']
+                        success = last_box_state != new_box_state
 
-            else:
-                logger().debug(f"Couldn't check box element td: {str(td)}")
-
+                else:
+                    logger().debug(f"Couldn't check box element td: {str(td)}")
+        except Exception as error:
+            self.log_error(f"Couldn't check box element: {str(error)}")
 
     def grid_dataframe(self, grid_number=0):
         """
