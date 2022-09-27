@@ -47,7 +47,7 @@ setup(
         'requests',
         'pyodbc',
         'psutil',
-        'lxml==4.6.3'
+        'lxml==4.6.5'
     ],
     packages=find_packages(),
     scripts=[],

@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-TOTVS Interface Robot
+Test Interface Robot
 =====================
 .. image:: img/completoCor.png
    :width: 800
@@ -13,6 +13,7 @@ TOTVS Interface Robot
    :caption: User Documentation:
 
    webapp
+   poui
    configjson
 
 .. toctree::
@@ -20,6 +21,7 @@ TOTVS Interface Robot
    :caption: TIR internal classes:
 
    webapp_internal
+   poui_internal
    base
    enumerations
    log
