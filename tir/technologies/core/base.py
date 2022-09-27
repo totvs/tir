@@ -1069,7 +1069,7 @@ class Base(unittest.TestCase):
         >>> oHelper.Start()
         """
 
-        start_program = '#inputStartProg'
+        start_program = '#inputStartProg, #selectStartProg'
 
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
