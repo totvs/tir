@@ -8892,7 +8892,7 @@ class WebappInternal(Base):
             This method return data as a string if necessary use some method to convert data like int().
 
         >>> config.json
-        >>> "CSVPath" : "C:\\temp"
+        >>> CSVPath : "C:\\temp"
 
         :param csv_file: .csv file name
         :type csv_file: str
