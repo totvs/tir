@@ -3478,7 +3478,7 @@ class WebappInternal(Base):
         else:
             return len(element_list) >= position
 
-    def SetLateralMenu(self, menu_itens, save_input=True):
+    def SetLateralMenu(self, menu_itens, save_input=True, click_menu_functional=False):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
@@ -3641,7 +3641,7 @@ class WebappInternal(Base):
                                     self.wait_blocker()
                                     time.sleep(1)
 
-                                    if elapsed_time >= 20:
+                                    if elapsed_time >= 20 and not click_menu_functional:
                                         start_time = time.time()
                                         logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
                                         if not re.search("\([0-9]\)$", child.text):
@@ -8860,6 +8860,33 @@ class WebappInternal(Base):
                     else:
                         success = self.click(element_selenium())
         return success
+
+    def ClickMenuFunctional(self,menu_name,menu_option):
+
+        regex = r"•."
+
+        if webapp_shadowroot():
+            class_selector = '.dict-tpanel > .dict-tsay'
+        else:
+            class_selector = '.tpanel > .tsay'
+
+        endtime = time.time() + self.config.time_out
+        soup = self.get_current_DOM()
+        class_menu_itens = soup.select(class_selector)
+        
+        if webapp_shadowroot(): 
+            menu_titles = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, class_menu_itens))      
+            name_title = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), menu_titles))
+        else:
+            menu_titles = list(filter(lambda x: 'font-size: 16px' in x.attrs['style'], class_menu_itens))
+            name_title = next(iter(list(filter(lambda x: menu_name == x.text, menu_titles))), None)
+        
+        while ((time.time() < endtime) and name_title.string != menu_option):
+            name_title = name_title.nextSibling
+
+        self.click(self.soup_to_selenium(name_title))
+                  
+        return
 
     def img_src_filtered(self, img_soup):
 
