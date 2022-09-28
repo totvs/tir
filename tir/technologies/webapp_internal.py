@@ -7631,41 +7631,44 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             labels_boxs = container.select("span, wa-checkbox")
-            label_box_name = label_box_name.lower().strip()
+            label_box_name = label_box_name.lower().strip() # TODO implementar while
             if self.webapp_shadowroot():
                 filtered_labels_boxs = list(filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
             else:
                 filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
             if not filtered_labels_boxs:
-                filtered_labels_boxs = list(
-                    filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+                filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
             if position <= len(filtered_labels_boxs):
                 position -= 1
                 label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[position]
+
                 if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                     label_box_element = lambda: self.soup_to_selenium(label_box)
                     if self.webapp_shadowroot():
                         label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
-                    self.click(label_box_element())
-                label_box = filtered_labels_boxs[position].parent
-                if label_box.find_next('img'):
-                    if hasattr(label_box.find_next('img'), 'src'):
-                        img = label_box.find_next('img').attrs['src'].split('/')[-1] if \
-                        label_box.find_next('img').attrs['src'] else None
-                if 'tcheckbox' in label_box.get_attribute_list('class') or img == 'lbno_mdi.png':
-                    label_box_element = lambda: self.soup_to_selenium(label_box)
-                    self.wait_until_to(expected_condition="element_to_be_clickable", element=label_box,
-                                       locator=By.XPATH)
-                    if double_click:
-                        self.double_click(label_box_element())
+                    success = self.send_action(action=self.click, element=label_box_element)
+
+                if not success:
+                    label_box = filtered_labels_boxs[position].parent
+                    if label_box.find_next('img'):
+                        if hasattr(label_box.find_next('img'), 'src'):
+                            img = label_box.find_next('img').attrs['src'].split('/')[-1] if \
+                            label_box.find_next('img').attrs['src'] else None
+
+                    if 'tcheckbox' in label_box.get_attribute_list('class') or img == 'lbno_mdi.png':
+                        label_box_element = lambda: self.soup_to_selenium(label_box)
+                        self.wait_until_to(expected_condition="element_to_be_clickable", element=label_box,
+                                        locator=By.XPATH)
+                        if double_click:
+                            self.double_click(label_box_element())
+                        else:
+                            self.click(label_box_element())
                     else:
-                        self.click(label_box_element())
-                else:
-                    self.log_error("Index the Ckeckbox invalid.")
+                        self.log_error("Checkbox index is invalid.")
             else:
-                self.log_error("Index the Ckeckbox invalid.")
+                self.log_error("Checkbox index is invalid.")
         else:
-            self.log_error("Index the Ckeckbox invalid.")
+            self.log_error("Checkbox index is invalid.")
 
     def ClickLabel(self, label_name):
         """
