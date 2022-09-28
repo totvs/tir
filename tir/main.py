@@ -680,7 +680,7 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
 
-    def SetLateralMenu(self, menuitens, click_menu_functional):
+    def SetLateralMenu(self, menuitens, click_menu_functional=False):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
