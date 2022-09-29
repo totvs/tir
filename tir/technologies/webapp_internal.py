@@ -9410,3 +9410,50 @@ class WebappInternal(Base):
                     element_list.append(element)
 
         return element_list
+
+    def click(self, element, click_type=enum.ClickType.JS, right_click=False):
+        """
+        [Internal]
+
+        Clicks on the Selenium element.
+
+        Supports three types of clicking: JavaScript, pure Selenium and Selenium's ActionChains.
+
+        Default is JavaScript clicking.
+
+        :param element: Selenium element
+        :type element: Selenium object
+        :param click_type: ClickType enum. - **Default:** enum.ClickType.JS
+        :type click_type: enum.ClickType
+        :param right_click: Clicks with the right button of the mouse in the last element of the tree.
+        :type string: bool
+
+        Usage:
+
+        >>> #Defining the element:
+        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> #Calling the method
+        >>> self.click(element(), click_type=enum.ClickType.JS)
+        """
+        try:
+            if right_click:
+                ActionChains(self.driver).context_click(element).perform()
+            else:
+                self.scroll_to_element(element)
+                if click_type == enum.ClickType.JS:
+                    self.driver.execute_script("arguments[0].click()", element)
+                elif click_type == enum.ClickType.SELENIUM:
+                    element.click()
+                elif click_type == enum.ClickType.ACTIONCHAINS:
+                    ActionChains(self.driver).move_to_element(element).click().perform()
+
+            return True
+
+        except StaleElementReferenceException:
+            logger().exception("********Element Stale click*********")
+            return False
+        except Exception as e:
+            message = f"Warning click method Exception: {str(e)}"
+            logger().exception(message)
+            self.log_error(message)
+            return False
