@@ -4541,7 +4541,9 @@ class WebappInternal(Base):
         try:
             if element_bs4:
                 success = False
-                td = next(iter(tr[index].find_elements_by_css_selector('td > div')))  if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
+                td = next(
+                    iter(tr[index].find_elements_by_css_selector('td > div'))) if self.webapp_shadowroot() else next(
+                    iter(tr[index].select('td')))
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
@@ -4559,23 +4561,29 @@ class WebappInternal(Base):
                         self.wait_blocker()
                         time.sleep(2)
 
-                        tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False, position=tmodal_layer + 1)
+                        tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                     main_container="body", check_error=False,
+                                                     position=tmodal_layer + 1)
                         if tmodal:
                             return
 
                         grid = self.get_grid(grid_number=grid_number)
 
                         if self.webapp_shadowroot():
-                            sel_grid  = self.soup_to_selenium(grid)
+                            sel_grid = self.soup_to_selenium(grid)
                             tr = self.find_shadow_element('tbody > tr', sel_grid)
-                            td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
+
+                            if len(tr) - 1 >= index:
+                                td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
+                            else:
+                                tr = next(iter(tr))
+                                td = next(iter(tr.find_elements_by_css_selector('td > div')))
                             new_box_state = td.get_attribute('style')
                         else:
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
                         success = last_box_state != new_box_state
-
                 else:
                     logger().debug(f"Couldn't check box element td: {str(td)}")
         except Exception as error:
