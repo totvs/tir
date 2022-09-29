@@ -9435,25 +9435,33 @@ class WebappInternal(Base):
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
-        try:
-            if right_click:
-                ActionChains(self.driver).context_click(element).perform()
-            else:
-                self.scroll_to_element(element)
-                if click_type == enum.ClickType.JS:
-                    self.driver.execute_script("arguments[0].click()", element)
-                elif click_type == enum.ClickType.SELENIUM:
-                    element.click()
-                elif click_type == enum.ClickType.ACTIONCHAINS:
-                    ActionChains(self.driver).move_to_element(element).click().perform()
 
-            return True
+        success = False
+        message = ''
+        endtime = time.time() + 30
+        while time.time() < endtime and not success:
+            try:
+                if right_click:
+                    ActionChains(self.driver).context_click(element).perform()
+                else:
+                    self.scroll_to_element(element)
+                    if click_type == enum.ClickType.JS:
+                        self.driver.execute_script("arguments[0].click()", element)
+                    elif click_type == enum.ClickType.SELENIUM:
+                        element.click()
+                    elif click_type == enum.ClickType.ACTIONCHAINS:
+                        ActionChains(self.driver).move_to_element(element).click().perform()
 
-        except StaleElementReferenceException:
-            logger().exception("********Element Stale click*********")
-            return False
-        except Exception as e:
-            message = f"Warning click method Exception: {str(e)}"
-            logger().exception(message)
+                return True
+
+            except StaleElementReferenceException:
+                logger().debug("********Element Stale click*********")
+                success = False
+            except Exception as e:
+                message = f"Warning click method Exception: {str(e)}"
+                logger().debug(message)
+                success = False
+                time.sleep(1)
+
+        if not success:
             self.log_error(message)
-            return False
