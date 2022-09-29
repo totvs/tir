@@ -3830,7 +3830,9 @@ class WebappInternal(Base):
 
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
-                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+
+                    if isinstance(soup_objects, list):
+                        soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
 
                     if soup_objects and len(soup_objects) - 1 >= position:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH, timeout=True)
@@ -3913,7 +3915,10 @@ class WebappInternal(Base):
                     self.tmenu_out_iframe = False
 
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container = self.containers_selectors["SetButton"], check_error=check_error)
-                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+
+                    if isinstance(soup_objects, list):
+                        soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects ))
+
                     if soup_objects and len(soup_objects) - 1 >= position:
                         if  type(soup_objects[position]) == Tag:
                             soup_element = lambda : self.soup_to_selenium(soup_objects[position])
