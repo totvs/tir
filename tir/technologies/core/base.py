@@ -477,16 +477,14 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-
-        self.twebview_context = twebview
-
-        self.driver.switch_to.default_content()
-
-        if self.config.new_log:
-            self.execution_flow()
-            
-
         try:
+
+            self.twebview_context = twebview
+
+            self.driver.switch_to.default_content()
+
+            if self.config.new_log:
+                self.execution_flow()
             
             if self.twebview_context:
                 self.switch_to_iframe()
