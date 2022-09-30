@@ -1716,7 +1716,10 @@ class WebappInternal(Base):
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_key())
         self.driver.switch_to.default_content()
-        self.click(sel_browse_key())
+        menu_tab = lambda: self.element_exists(term=radio_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not menu_tab():
+            self.click(sel_browse_key())
 
         if not index:
             if self.webapp_shadowroot():
