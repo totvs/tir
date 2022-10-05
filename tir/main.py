@@ -680,7 +680,7 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
 
-    def SetLateralMenu(self, menuitens, click_menu_functional=False):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
@@ -693,7 +693,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__webapp.SetLateralMenu(menuitens, click_menu_functional)
+        self.__webapp.SetLateralMenu(menuitens, save_input, click_menu_functional)
 
     def SetParameters(self):
         """
