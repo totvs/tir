@@ -3607,6 +3607,7 @@ class WebappInternal(Base):
                     while time.time() < endtime and (index != last_index and not expanded()) or (
                             index == last_index and item_exist() and not tmodal()):
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
+                        time.sleep(2)
 
                     if count < len(menu_itens) - 1:
                         if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
