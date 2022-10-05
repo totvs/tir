@@ -2154,6 +2154,9 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             if input_field:
                 active_tab = self.filter_active_tabs(container)
+                active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page')))
+                if active_childs:
+                    active_tab = next(iter(active_childs), None)
 
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
@@ -2518,10 +2521,6 @@ class WebappInternal(Base):
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
-                                if try_counter > 3:
-                                    self.double_click(input_field())
-                                    ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
-                                try_counter += 1
                         #if Number input
                         else:
                             tries = 0
