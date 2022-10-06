@@ -2154,7 +2154,7 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             if input_field:
                 active_tab = self.filter_active_tabs(container)
-                active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page')))
+                active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
                 if active_childs:
                     active_tab = next(iter(active_childs), None)
 
