@@ -792,7 +792,10 @@ class Base(unittest.TestCase):
 
         combo = self.return_combo_object(element)
 
-        return combo.all_selected_options[0].text
+        if combo.all_selected_options:
+            return combo.all_selected_options[0].text
+        else:
+            return ''
 
     def send_keys(self, element, arg):
         """
