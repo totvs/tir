@@ -3515,11 +3515,13 @@ class WebappInternal(Base):
             menu_itens_term = ".dict-tmenuitem"
             term = f"[caption='{self.language.news}']"
             optional_term_news = ""
+            scrap_type = enum.ScrapType.CSS_SELECTOR
         else:
             menu_term = ".tmenu"
             menu_itens_term = ".tmenuitem"
             term = self.language.news
             optional_term_news = ".tmodaldialog > .tpanel > .tsay"
+            scrap_type = enum.ScrapType.MIXED
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
 
@@ -3669,7 +3671,7 @@ class WebappInternal(Base):
                 self.close_coin_screen_after_routine()
                 self.close_news_screen_after_routine()
 
-            if self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+            if self.element_exists(term=term, scrap_type=scrap_type,
                                    main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
                 self.close_news_screen()
 
