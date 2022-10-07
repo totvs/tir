@@ -6095,7 +6095,9 @@ class WebappInternal(Base):
             if row:
                 columns = self.find_shadow_element('td', self.soup_to_selenium(grids[field[2]])) if self.webapp_shadowroot() else row.select("td")
                 if columns:
-                    second_column = lambda: next(iter(columns)) if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(columns[1]))
+                    second_column = lambda: self.driver.find_element_by_xpath(xpath_soup(
+                        next(iter(columns)))) if self.webapp_shadowroot() else self.driver.find_element_by_xpath(
+                        xpath_soup(columns[1]))
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
 
