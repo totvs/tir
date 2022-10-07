@@ -3513,9 +3513,13 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             menu_term = ".dict-tmenu"
             menu_itens_term = ".dict-tmenuitem"
+            term = f"[caption='{self.language.news}']"
+            optional_term_news = ""
         else:
             menu_term = ".tmenu"
             menu_itens_term = ".tmenuitem"
+            term = self.language.news
+            optional_term_news = ".tmodaldialog > .tpanel > .tsay"
 
         logger().info(f"Navigating lateral menu: {menu_itens}")
 
@@ -3665,8 +3669,8 @@ class WebappInternal(Base):
                 self.close_coin_screen_after_routine()
                 self.close_news_screen_after_routine()
 
-            if self.element_exists(term=f"[caption='{self.language.news}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                   main_container="body"):  # TODO avaliar outra forma de validar a presença
+            if self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                   main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
                 self.close_news_screen()
 
         except AssertionError as error:
