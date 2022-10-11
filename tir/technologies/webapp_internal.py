@@ -3611,7 +3611,9 @@ class WebappInternal(Base):
 
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and (index != last_index and not expanded()) or (
-                            index == last_index and item_exist() and not tmodal()):
+                            index == last_index and item_exist() and not tmodal()) and not clicked_menu:
+                        if click_menu_functional:
+                            clicked_menu = True
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
                         time.sleep(2)
 
@@ -8900,7 +8902,7 @@ class WebappInternal(Base):
 
         regex = r"•."
 
-        if webapp_shadowroot():
+        if self.webapp_shadowroot():
             class_selector = '.dict-tpanel > .dict-tsay'
         else:
             class_selector = '.tpanel > .tsay'
@@ -8909,15 +8911,21 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         class_menu_itens = soup.select(class_selector)
         
-        if webapp_shadowroot(): 
-            menu_titles = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, class_menu_itens))      
-            name_title = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), menu_titles))
+        if self.webapp_shadowroot():
+            name_title = next(iter(list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == menu_name.lower().strip(), class_menu_itens))), None)      
+            text_name_title = name_title.get('caption')
         else:
             menu_titles = list(filter(lambda x: 'font-size: 16px' in x.attrs['style'], class_menu_itens))
             name_title = next(iter(list(filter(lambda x: menu_name == x.text, menu_titles))), None)
+            text_name_title = name_title.string
         
-        while ((time.time() < endtime) and name_title.string != menu_option):
+        
+        while ((time.time() < endtime) and re.sub(regex, '',text_name_title) != menu_option):
             name_title = name_title.nextSibling
+            if self.webapp_shadowroot():
+                text_name_title = name_title.get('caption')
+            else:
+                text_name_title = name_title.string
 
         self.click(self.soup_to_selenium(name_title))
                   
