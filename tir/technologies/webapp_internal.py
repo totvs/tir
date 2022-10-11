@@ -2034,15 +2034,21 @@ class WebappInternal(Base):
             blocker = None
             soup = self.get_current_DOM()
             blocker_container = self.blocker_containers(soup)
+            
             if blocker_container:
-                blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
-                    'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
+                if self.webapp_shadowroot():
+                    blocker_container = self.soup_to_selenium(blocker_container)
+                    blocker = blocker_container.get_property('blocked')
+                else:
+                    blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
+                        'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
 
             if blocker:
                 result = True
             else:
                 return False
         return result
+
 
     def blocker_containers(self, soup):
         """
@@ -3595,8 +3601,13 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Couldn't find menu item: {menuitem}")
 
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
-                submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                try:
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
+                    submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                except:
+                    logger().info(f'not child xpath')
+                    self.wait.until(EC.element_to_be_clickable((By.ID, child['id'])))
+                    submenu = lambda: self.driver.find_element_by_id(child['id'])
 
                 if subMenuElements and submenu():
                     self.expanded_menu(child)
