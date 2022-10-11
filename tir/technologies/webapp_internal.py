@@ -3595,8 +3595,13 @@ class WebappInternal(Base):
                     self.restart_counter += 1
                     self.log_error(f"Couldn't find menu item: {menuitem}")
 
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
-                submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                try:
+                    self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
+                    submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
+                except:
+                    logger().info(f'not child xpath')
+                    self.wait.until(EC.element_to_be_clickable((By.ID, child['id'])))
+                    submenu = lambda: self.driver.find_element_by_id(child['id'])
 
                 if subMenuElements and submenu():
                     self.expanded_menu(child)
