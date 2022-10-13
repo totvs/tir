@@ -24,9 +24,9 @@ def logger(logger='root'):
     global folder
     global file_path
 
-    logger = 'console' #TODO configuração temporaria para o server.
-
     if config.smart_test or config.debug_log:
+
+        logger = 'console'  # TODO configuração temporaria para o server.
 
         today = datetime.today()
 
