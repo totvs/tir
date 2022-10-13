@@ -3621,6 +3621,9 @@ class WebappInternal(Base):
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
+                    
+                    clicked_menu = False
+
                     while time.time() < endtime and (index != last_index and not expanded()) or (
                             index == last_index and item_exist() and not tmodal()) and not clicked_menu:
                         if click_menu_functional:
