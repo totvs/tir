@@ -5622,8 +5622,6 @@ class WebappInternal(Base):
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
 
-
-
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
                             else:
@@ -5659,16 +5657,9 @@ class WebappInternal(Base):
                             if (field[1] == True): break  # if boolean field finish here.
 
                             if self.webapp_shadowroot():
-                                wait_selector = "wa-dialog"
-                                position_fillgrid = initial_layer
                                 new_container_selector = ".dict-tget.focus,.dict-msbrgetdbase.focus, wa-dialog, .dict-tgrid, .dict-brgetddb, .dict-tget, .dict-tmultiget, .dict-tcombobox"
                             else:
-                                wait_selector = ".tmodaldialog"
-                                position_fillgrid = initial_layer + 1
                                 new_container_selector = ".tmodaldialog.twidget"
-
-                            self.wait_element(term=wait_selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                            position=position_fillgrid, main_container='body')
 
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
