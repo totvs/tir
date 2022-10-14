@@ -72,7 +72,7 @@ class WebappInternal(Base):
             "GetCurrentContainer": ".tmodaldialog, wa-dialog",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
-            "BlockerContainers": ".tmodaldialog,.ui-dialog",
+            "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
             "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
         }
 
