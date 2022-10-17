@@ -5520,6 +5520,7 @@ class WebappInternal(Base):
             while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
                 logger().debug('Trying fill grid!')
                 endtime_row = time.time() + self.config.time_out
+                logger().debug('logging!')
                 while (time.time() < endtime_row and grid_reload):
 
                     if not field[4]:
@@ -5567,45 +5568,55 @@ class WebappInternal(Base):
                     if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
                         grid_reload = False
 
+                logger().debug('logging!')
                 if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                     self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
                 if grids:
+                    logger().debug('logging!')
                     if field[2] + 1 > len(grids):
                         self.log_error(
                             f'{self.language.messages.grid_number_error} Grid number: {field[2] + 1} Grids in the screen: {len(grids)}')
                 else:
                     self.log_error("Grid element doesn't appear in DOM")
 
-
+                logger().debug('logging!')
                 row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
                     next(iter(rows), None))
+                logger().debug('logging!')
 
                 if row:
                     if self.webapp_shadowroot():
                         row_id = row.get_attribute("id")
                     else:
                         row_id = row.attrs["id"]
+                    logger().debug('logging!')
                     while (int(row_id) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[
                         4] is None and time.time() < endtime:
+                        logger().debug('logging!')
                         self.new_grid_line(field, False)
+                        logger().debug('logging!')
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
+                        logger().debug('logging!')
                         down_loop += 1
                     self.down_loop_grid = False
                     if self.webapp_shadowroot():
                         columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
                     else:
+                        logger().debug('logging!')
                         columns = row.select("td")
                     if columns:
                         if column_name in headers[field[2]]:
                             column_number = headers[field[2]][column_name]
 
                             current_value = columns[column_number].text.strip()
+                            logger().debug('logging!')
                             current_value = self.remove_mask(current_value).strip()
-
+                            logger().debug('logging!')
                             if self.webapp_shadowroot():
                                 selenium_column = lambda: columns[column_number]
                             else:
+                                logger().debug('logging!')
                                 xpath = xpath_soup(columns[column_number])
                                 selenium_column = lambda: self.get_selenium_column_element(
                                     xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field,
@@ -5614,7 +5625,9 @@ class WebappInternal(Base):
                                                                                                                     headers,
                                                                                                                     field_to_label)
 
+                            logger().debug('logging!')
                             endtime_selected_cell = time.time() + self.config.time_out
+                            logger().debug('logging!')
                             while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
@@ -5622,14 +5635,17 @@ class WebappInternal(Base):
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
 
+                            logger().debug('logging!')
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
                             else:
                                 term = ".tmodaldialog"
 
+                            logger().debug('logging!')
                             soup = self.get_current_DOM()
                             tmodal_list = soup.select(term)
                             tmodal_layer = len(tmodal_list) if tmodal_list else 0
+                            logger().debug('logging!')
 
                             while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                                 time.sleep(1)
