@@ -5516,9 +5516,9 @@ class WebappInternal(Base):
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                       optional_term='th label', main_container='body')
         try:
-            endtime = time.time() + self.config.time_out
+            endtime = time.time() + self.config.time_out + 300
             while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
-
+                logger().debug('Trying fill grid!')
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
 
@@ -5633,6 +5633,7 @@ class WebappInternal(Base):
 
                             while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                                 time.sleep(1)
+                                logger().debug('Trying open cell in grid!')
                                 self.scroll_to_element(selenium_column())
                                 self.set_element_focus(selenium_column())
                                 self.click(selenium_column(),
