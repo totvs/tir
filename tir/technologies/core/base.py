@@ -1111,13 +1111,27 @@ class Base(unittest.TestCase):
             else:
                 self.driver.maximize_window()
 
-            self.driver.get(self.config.url)
+            self.get_url()
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+
+    def get_url(self):
+
+        get_url = False
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not get_url):
+
+            logger().debug('Get URL')
+            try:
+                self.driver.get(self.config.url)
+                get_url = True
+            except:
+                get_url = False
 
     def TearDown(self):
         """
