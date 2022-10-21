@@ -3198,7 +3198,7 @@ class WebappInternal(Base):
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
-                return list(filter(lambda x: self.element_is_displayed(x), container.select(term)))
+                return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot() and not twebview:
                     return self.selenium_web_scrap(term, container, optional_term, second_term)
@@ -8450,13 +8450,13 @@ class WebappInternal(Base):
         """
         return list(filter(lambda x: self.element_is_displayed(x), elements))
 
-    def element_is_displayed(self, element):
+    def element_is_displayed(self, element=None, twebview=False):
         """
         [Internal]
 
         """
         if type(element) == Tag:
-            element_selenium = self.soup_to_selenium(element)
+            element_selenium = self.soup_to_selenium(element, twebview)
         else:
             element_selenium = element
 
