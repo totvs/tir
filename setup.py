@@ -12,7 +12,7 @@ with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
 setup(
-    description='TOTVS Interface Robot',
+    description='Test Interface Robot',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='tir_engpro',

@@ -91,6 +91,7 @@ class Base(unittest.TestCase):
         self.last_test_case = None
         self.message = ""
         self.expected = True
+        self.webapp_version= ''
 
         try:
             self.log.user = os.getlogin()
@@ -401,6 +402,29 @@ class Base(unittest.TestCase):
             current = current.find_parent()
         return current
 
+    def find_first_wa_panel_parent(self, element):
+        """
+        [Internal]
+
+        Finds first div parent element of another BeautifulSoup element.
+
+        If element is already a div, it will return the element.
+
+        :param element: BeautifulSoup element
+        :type element: BeautifulSoup object
+
+        :return: The first div parent of the element
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> parent_element = self.find_first_div_parent(my_element)
+        """
+        current = element
+        while(hasattr(current, "name") and self.element_name(current) != "wa-panel"):
+            current = current.find_parent()
+        return current
+
     def element_name(self, element_soup):
         """
         [internal]
@@ -453,16 +477,14 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-
-        self.twebview_context = twebview
-
-        self.driver.switch_to.default_content()
-
-        if self.config.new_log:
-            self.execution_flow()
-            
-
         try:
+
+            self.twebview_context = twebview
+
+            self.driver.switch_to.default_content()
+
+            if self.config.new_log:
+                self.execution_flow()
             
             if self.twebview_context:
                 self.switch_to_iframe()
@@ -509,7 +531,7 @@ class Base(unittest.TestCase):
         iframe_displayed = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not iframes:
-            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"]')
+            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
 
             if iframes:
                 iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
@@ -517,7 +539,7 @@ class Base(unittest.TestCase):
                 self.driver.switch_to.default_content()
 
             if iframe_displayed:
-                self.driver.switch_to.frame(iframe_displayed)
+                self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """
@@ -737,7 +759,8 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
-        combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        combo = self.return_combo_object(element)
 
         if index:
             index_number = self.return_combo_index(combo, option)
@@ -750,6 +773,29 @@ class Base(unittest.TestCase):
                 text_value = value.text
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+
+    def return_combo_object(self, element):
+        """
+
+        :param element:
+        :return:
+        """
+        if self.webapp_shadowroot():
+            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                      self.soup_to_selenium(element)))
+        else:
+            combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        return combo
+
+    def return_selected_combo_value(self, element):
+
+        combo = self.return_combo_object(element)
+
+        if combo.all_selected_options:
+            return combo.all_selected_options[0].text
+        else:
+            return ''
 
     def send_keys(self, element, arg):
         """
@@ -945,7 +991,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        if isinstance(elements, list):
+            elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+
         return elements
 
 # User Methods
@@ -1022,7 +1070,7 @@ class Base(unittest.TestCase):
         >>> oHelper.Start()
         """
 
-        start_program = '#inputStartProg'
+        start_program = '#inputStartProg, #selectStartProg'
 
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
@@ -1063,13 +1111,27 @@ class Base(unittest.TestCase):
             else:
                 self.driver.maximize_window()
 
-            self.driver.get(self.config.url)
+            self.get_url()
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
         self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+
+    def get_url(self):
+
+        get_url = False
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not get_url):
+
+            logger().debug('Get URL')
+            try:
+                self.driver.get(self.config.url)
+                get_url = True
+            except:
+                get_url = False
 
     def TearDown(self):
         """
@@ -1144,3 +1206,29 @@ class Base(unittest.TestCase):
         """
         self.driver.switch_to_default_content()
         return self.driver.find_elements_by_css_selector(selector)
+
+    def webapp_shadowroot(self, shadow_root=True):
+        """
+        [Internal]
+        """
+
+        if not shadow_root:
+            return False
+
+        if self.webapp_version:
+            return self.webapp_version
+
+        current_ver = ''
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not current_ver:
+            try:
+                current_ver = self.driver.execute_script("return app.VERSION")
+            except:
+                current_ver = None
+
+        if not current_ver:
+            self.log_error('Can\'t find WebApp Version' )
+
+        current_ver = re.sub(r'\.(.*)', '', current_ver)
+        self.webapp_version = int(current_ver) >= 8
+        return self.webapp_version

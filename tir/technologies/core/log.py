@@ -133,18 +133,22 @@ class Log:
             if self.config.smart_test:
                 open("log_exec_file.txt", "w")
 
-            if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
-                with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
-                    csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
-                    csv_writer_header.writerow(self.table_rows[0])
-                    csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                    for line in self.table_rows[1:]:
-                        csv_writer.writerow(line)
+            with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
+                csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
+                csv_writer_header.writerow(self.table_rows[0])
+                csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+                for line in self.table_rows[1:]:
+                    csv_writer.writerow(line)
 
-                logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
+            logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
 
                             
-                self.csv_log.append(self.get_testcase_stack())
+            self.csv_log.append(self.get_testcase_stack())
+
+    def has_csv_condition(self):
+
+        return ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (
+                    self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
 
     def set_seconds(self, initial_time):
         """
@@ -308,7 +312,7 @@ class Log:
 
         json_data = json.dumps(data)
 
-        endtime = time.time() + 120
+        endtime = time.time() + 30
 
         while (time.time() < endtime and not success):
 
@@ -381,10 +385,10 @@ class Log:
 
         try:
             if self.folder:
-                path = Path(self.folder, "new_log", self.station)
+                path = Path(self.folder, "new_log")
                 os.makedirs(path)
             else:
-                path = Path("Log", self.station)
+                path = Path("Log")
                 os.makedirs(path)
         except OSError:
             pass
@@ -394,10 +398,13 @@ class Log:
         if self.config.smart_test:
             open("log_exec_file.txt", "w")
 
-        with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
-            json_file.write(json_data)
-
-        logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        try:
+            with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
+                json_file.write(json_data)
+            logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        except Exception as error:
+            logger().debug(f"Fail in create json file in: {Path(path, log_file)}: Error: {str(error)}")
+            pass
 
     def ident_test(self):
         """

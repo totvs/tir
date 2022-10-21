@@ -680,7 +680,7 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
 
-    def SetLateralMenu(self, menuitens):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
@@ -693,7 +693,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__webapp.SetLateralMenu(menuitens)
+        self.__webapp.SetLateralMenu(menuitens, save_input, click_menu_functional)
 
     def SetParameters(self):
         """
@@ -1091,6 +1091,18 @@ class Webapp():
         >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.__webapp.ClickImage(img_name,double_click)
+    
+    def ClickMenuFunctional(self,menu_name,menu_option):
+        """Click on the functional menu.
+        :param menu_option: Item to be clicked.
+        :type menu_option: src
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickMenuFunctional("label","button") 
+        """
+        self.__webapp.ClickMenuFunctional(menu_name,menu_option)
 
     def ProgramScreen(self, initial_program=""):
         """
