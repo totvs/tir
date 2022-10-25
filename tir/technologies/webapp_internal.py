@@ -2038,7 +2038,7 @@ class WebappInternal(Base):
             if blocker_container:
                 if self.webapp_shadowroot():
                     blocker_container = self.soup_to_selenium(blocker_container)
-                    blocker = blocker_container.get_property('blocked')
+                    blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(blocker_container, 'get_property') else None
                 else:
                     blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
                         'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
