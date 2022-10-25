@@ -5056,7 +5056,7 @@ class WebappInternal(Base):
                                 self.supported_keys(key)).perform)
                             tries += 1
                         else:
-                            self.send_action(ActionChains(self.driver).send_keys(self.supported_keys(key)).perform)
+                            success = self.send_action(ActionChains(self.driver).send_keys(self.supported_keys(key)).perform)
 
                 elif additional_key:
                     success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
