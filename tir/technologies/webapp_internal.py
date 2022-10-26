@@ -2041,7 +2041,7 @@ class WebappInternal(Base):
             if blocker_container:
                 if self.webapp_shadowroot():
                     blocker_container = self.soup_to_selenium(blocker_container)
-                    blocker = blocker_container.get_property('blocked')
+                    blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(blocker_container, 'get_property') else None
                 else:
                     blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
                         'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
@@ -5052,10 +5052,14 @@ class WebappInternal(Base):
                     else:
                         time.sleep(2)
                         Id = self.driver.execute_script(script)
-                        element = lambda: self.driver.find_element_by_id(Id) if Id else self.driver.find_element(By.TAG_NAME, "html")
-                        self.set_element_focus(element())
-                        success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(self.supported_keys(key)).perform)
-                        tries +=1
+                        if Id:
+                            element = lambda: self.driver.find_element_by_id(Id)
+                            self.set_element_focus(element())
+                            success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(
+                                self.supported_keys(key)).perform)
+                            tries += 1
+                        else:
+                            success = self.send_action(ActionChains(self.driver).send_keys(self.supported_keys(key)).perform)
 
                 elif additional_key:
                     success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
