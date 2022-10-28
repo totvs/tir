@@ -1138,6 +1138,7 @@ class WebappInternal(Base):
         else:
             selector = ".ui-dialog > .ui-dialog-titlebar"
 
+        time.sleep(1)
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
@@ -1268,6 +1269,8 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
+
+        logger().info('Getting log info')
 
         if self.webapp_shadowroot():
             term_dialog = 'wa-dialog'
@@ -4370,6 +4373,7 @@ class WebappInternal(Base):
                     panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
 
             if panels_filtered:
+                self.scroll_to_element(panels_filtered[position])
                 if position > 0:
                     panel = panels_filtered[position] if position < len(panels_filtered) else None
                 else:
