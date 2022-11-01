@@ -2899,7 +2899,7 @@ class WebappInternal(Base):
                 self.program_screen(self.config.initial_program)
 
             self.wait_user_screen()
-            if 'POUILogin' in self.config.json_data:
+            if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 self.config.poui_login = True
 
             self.user_screen()
@@ -2930,7 +2930,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            if 'POUILogin' in self.config.json_data:
+            if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 soup = self.get_current_DOM(twebview=True)
                 element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
             else:
