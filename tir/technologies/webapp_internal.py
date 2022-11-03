@@ -4504,6 +4504,8 @@ class WebappInternal(Base):
                 evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
                 arguments[0].dispatchEvent(evt);"
             self.driver.execute_script(event, element())
+        elif class_grid == 'dict-msbrgetdbase':
+            self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
         elif class_grid != "tgrid":
             ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                 element(), Keys.ENTER).perform()
