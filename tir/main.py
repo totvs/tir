@@ -931,7 +931,7 @@ class Webapp():
 
     def IfExists(self, string='', timeout=5):
         """
-        Returns the element if exists in timeout or return False if not exist after timeout.
+        Returns True if element exists in timeout or return False if not exist.
 
         :param string: String that will hold the wait.
         :type string: str
@@ -941,10 +941,12 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.IfExists("Aviso", timeout=10)
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
         """
 
-        self.__webapp.WaitShow(string, timeout, throw_error=False)
+        return self.__webapp.WaitShow(string, timeout, throw_error=False)
 
     def ClickTree(self, treepath, right_click=False, position=1):
         """

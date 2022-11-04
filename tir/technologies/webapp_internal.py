@@ -4274,7 +4274,7 @@ class WebappInternal(Base):
                                      main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
-                return element
+                return True
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
