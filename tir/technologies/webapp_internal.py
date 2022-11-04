@@ -4274,7 +4274,7 @@ class WebappInternal(Base):
                                      main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
-                return element
+                return True
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
@@ -4492,13 +4492,10 @@ class WebappInternal(Base):
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
-        try:
-            element().click()
-        except:
-            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
+
         time.sleep(1)
 
-        if class_grid == 'tmsselbr':
+        if class_grid == 'tmsselbr' or class_grid == 'dict-msselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
             event = "var evt = document.createEvent('MouseEvents');\
                 evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\

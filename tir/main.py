@@ -929,6 +929,25 @@ class Webapp():
         """
         self.__webapp.WaitShow(string)
 
+    def IfExists(self, string='', timeout=5):
+        """
+        Returns True if element exists in timeout or return False if not exist.
+
+        :param string: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
+        """
+
+        return self.__webapp.WaitShow(string, timeout, throw_error=False)
+
     def ClickTree(self, treepath, right_click=False, position=1):
         """
         Clicks on TreeView component.
