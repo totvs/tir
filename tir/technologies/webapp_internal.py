@@ -4495,7 +4495,7 @@ class WebappInternal(Base):
 
         time.sleep(1)
 
-        if class_grid == 'tmsselbr':
+        if class_grid == 'tmsselbr' or class_grid == 'dict-msselbr':
             ActionChains(self.driver).move_to_element(element()).click(element()).perform()
             event = "var evt = document.createEvent('MouseEvents');\
                 evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
