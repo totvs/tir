@@ -4492,10 +4492,7 @@ class WebappInternal(Base):
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
-        try:
-            element().click()
-        except:
-            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
+
         time.sleep(1)
 
         if class_grid == 'tmsselbr':
