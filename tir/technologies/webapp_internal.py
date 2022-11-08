@@ -147,7 +147,7 @@ class WebappInternal(Base):
             enviroment = self.config.environment if self.config.environment else enviroment
 
             self.containers_selectors["SetButton"] = "body"
-            self.containers_selectors["GetCurrentContainer"] = ".tmodaldialog, body"
+            self.containers_selectors["GetCurrentContainer"] = "wa-dialog, .tmodaldialog, body"
 
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program, enviroment)
@@ -1330,22 +1330,36 @@ class WebappInternal(Base):
 
         label_element = None
 
-        self.SetButton("Sobre")
+        self.SetButton("Sobre...")
 
         soup = self.get_current_DOM()
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not label_element):
             soup = self.get_current_DOM()
-            label_element = soup.find_all("label", string="Versão do TSS:")
+            if self.webapp_shadowroot(): 
+                container = self.get_current_shadow_root_container()
+                element_header = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('wa-dialog-header')",self.soup_to_selenium(container))
+                if element_header:
+                    if "Sobre o TSS..." in element_header.text:
+                        label_element = element_header
+            else:
+                label_element = soup.find_all("label", string="Versão do TSS:")
 
         if not label_element:
             raise ValueError("SetupTss fail about screen not found")
 
-        labels = list(map(lambda x: x.text, soup.select("label")))
+        if self.webapp_shadowroot(): 
+            shadowroot_labels = self.driver.execute_script("return arguments[0].querySelectorAll('wa-text-view')",self.soup_to_selenium(container))
+            labels = list(map(lambda x: x.text, shadowroot_labels))
+        else:
+            labels = list(map(lambda x: x.text, soup.select("label")))
         label = labels[labels.index("Versão do TSS:")+1]
         self.log.release = next(iter(re.findall(r"[\d.]*\d+", label)), None)
 
-        self.SetButton('x')
+        if self.webapp_shadowroot(): 
+            self.driver.execute_script("return arguments[0].shadowRoot.querySelector('button').click()",element_header)
+        else:
+            self.SetButton('x')
 
     def get_language(self):
         """
