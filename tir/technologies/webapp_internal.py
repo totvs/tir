@@ -1109,8 +1109,11 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
                  optional_term=coin_term, timeout=10, main_container = "body", check_error = False)
 
-                tmodal_coin_screen = next(iter(self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=coin_term, main_container="body", check_error = False, check_help = False)), None)
+                tmodal_coin_screen = self.web_scrap(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=coin_term, main_container="body", check_error = False, check_help = False)
+
+                if tmodal_coin_screen:
+                    tmodal_coin_screen = next(iter(tmodal_coin_screen), None)
 
                 if tmodal_coin_screen and tmodal_coin_screen in tmodaldialog_list:
                     tmodaldialog_list.remove(tmodal_coin_screen.parent.parent)
@@ -1175,8 +1178,11 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
                     optional_term=title_term, timeout=10, main_container = "body", check_error = False)
 
-                tmodal_warning_screen = next(iter(self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=title_term, main_container="body", check_error = False, check_help = False)), None)
+                tmodal_warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=title_term, main_container="body", check_error = False, check_help = False)
+
+                if tmodal_warning_screen:
+                    tmodal_warning_screen = next(iter(tmodal_warning_screen), None)
 
                 if tmodal_warning_screen and tmodal_warning_screen in uidialog_list:
                     uidialog_list.remove(tmodal_warning_screen.parent.parent)
@@ -1214,13 +1220,10 @@ class WebappInternal(Base):
         [internal]
         This method is responsible for closing the "news screen" that opens after searching for the routine
         """
-        endtime = time.time() + self.config.time_out
-
-        self.wait_element_timeout(term=".workspace-container", scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out, main_container="body", check_error = False)
 
         tmodaldialog_list = []
 
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -1229,8 +1232,11 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
                  optional_term=".tsay", timeout=10, main_container = "body", check_error = False)
 
-                tmodal_news_screen = next(iter(self.web_scrap(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)), None)
+                tmodal_news_screen = self.web_scrap(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
+                    optional_term=".tmodaldialog > .tpanel > .tsay", main_container="body", check_error = False, check_help = False)
+
+                if tmodal_news_screen:
+                    tmodal_news_screen = next(iter(tmodal_news_screen), None)
 
                 if tmodal_news_screen and tmodal_news_screen in tmodaldialog_list:
                     tmodaldialog_list.remove(tmodal_news_screen.parent.parent)
