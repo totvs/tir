@@ -468,85 +468,94 @@ class WebappInternal(Base):
         self.set_multilanguage()
 
         try_counter = 0
-
-        if self.config.poui_login:
-            soup = self.get_current_DOM(twebview=True)
-        else:
-            soup = self.get_current_DOM()
-
-        logger().info("Filling User")
-
-        try:
-            if self.config.poui_login:
-                user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
-            else:
-                user_element = next(iter(soup.select(get_user)), None)
-
-            if user_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find User input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            user = lambda: self.soup_to_selenium(user_element)
-
-            if self.webapp_shadowroot(shadow_root=shadow_root):
-                user_value = lambda: self.get_web_value(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", user()))
-            else:
-                user_value = lambda: self.get_web_value(user())
-
-        except AttributeError as e:
-            self.log_error(str(e))
-            raise AttributeError(e)
-
+        user_value = ''
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (user_value().strip() != user_text.strip())):
+        while (time.time() < endtime and (user_value.strip() != user_text.strip())):
 
-            if try_counter == 0:
+            if self.config.poui_login:
+                soup = self.get_current_DOM(twebview=True)
+            else:
+                soup = self.get_current_DOM()
+
+            logger().info("Filling User")
+
+            try:
+                if self.config.poui_login:
+                    user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
+                else:
+                    user_element = next(iter(soup.select(get_user)), None)
+
+                if user_element is None:
+                    self.restart_counter += 1
+                    message = "Couldn't find User input element."
+                    self.log_error(message)
+                    raise ValueError(message)
+
+            except AttributeError as e:
+                self.log_error(str(e))
+                raise AttributeError(e)
+
+            if self.webapp_shadowroot():
                 user = lambda: self.soup_to_selenium(user_element)
             else:
-                user = lambda: self.soup_to_selenium(user_element.parent)
+                if try_counter == 0:
+                    user = lambda: self.soup_to_selenium(user_element)
+                else:
+                    user = lambda: self.soup_to_selenium(user_element.parent)
 
             self.set_element_focus(user())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=user_element, locator=By.XPATH,
                                timeout=True)
             self.double_click(user())
-            # self.send_keys(user(), Keys.HOME)
             self.send_keys(user(), user_text)
             self.send_keys(user(), Keys.ENTER)
+
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                user_value = self.get_web_value(
+                    self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input')", user()))
+            else:
+                user_value = self.get_web_value(user())
+
+            if not user_value:
+                user_value = ''
+
             try_counter += 1 if (try_counter < 1) else -1
 
-        if (user_value().strip() != user_text.strip()):
+        if (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
             raise ValueError(message)
 
-        # loop_control = True
-
-        # while(loop_control):
-        logger().info("Filling Password")
-        if self.config.poui_login:
-            password_element = next(iter(soup.select(".po-input-icon-right")), None)
-        else:
-            password_element = next(iter(soup.select(get_password)), None)
-
-        if password_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find User input element."
-            self.log_error(message)
-            raise ValueError(message)
-
-        password = lambda: self.soup_to_selenium(password_element)
-        password_value = self.get_web_value(password())
-        endtime = time.time() + self.config.time_out
         try_counter = 0
+        password_value = ''
+        endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
 
-            if try_counter == 0:
+            if self.config.poui_login:
+                soup = self.get_current_DOM(twebview=True)
+            else:
+                soup = self.get_current_DOM()
+
+            logger().info("Filling Password")
+            if self.config.poui_login:
+                password_element = next(iter(soup.select(".po-input-icon-right")), None)
+            else:
+                password_element = next(iter(soup.select(get_password)), None)
+
+            if password_element is None:
+                self.restart_counter += 1
+                message = "Couldn't find User input element."
+                self.log_error(message)
+                raise ValueError(message)
+
+            if self.webapp_shadowroot():
                 password = lambda: self.soup_to_selenium(password_element)
             else:
-                password = lambda: self.soup_to_selenium(password_element.parent)
+                if try_counter == 0:
+                    password = lambda: self.soup_to_selenium(password_element)
+                else:
+                    password = lambda: self.soup_to_selenium(password_element.parent)
 
             self.set_element_focus(password())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=password_element, locator=By.XPATH,
@@ -561,6 +570,10 @@ class WebappInternal(Base):
                 self.send_keys(password(), Keys.TAB)
 
             password_value = self.get_web_value(password())
+
+            if not password_value:
+                password_value = ''
+
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
