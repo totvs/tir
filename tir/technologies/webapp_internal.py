@@ -4406,7 +4406,9 @@ class WebappInternal(Base):
                     panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
 
             if panels_filtered:
-                self.scroll_to_element(panels_filtered[position])
+                if self.webapp_shadowroot():
+                    self.scroll_to_element(panels_filtered[position])
+
                 if position > 0:
                     panel = panels_filtered[position] if position < len(panels_filtered) else None
                 else:
