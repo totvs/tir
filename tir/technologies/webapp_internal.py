@@ -8323,7 +8323,7 @@ class WebappInternal(Base):
             if self.webapp_shadowroot():
                 div.click()
                 ActionChains(self.driver).send_keys(Keys.ENTER).perform()
-                return len_grid_lines
+                self.wait_gridTree(len_grid_lines, timeout=10)
             else:
                 line = div.parent.parent
                 td = next(iter(line.select('td')), None)
@@ -8345,16 +8345,18 @@ class WebappInternal(Base):
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
         ActionChains(self.driver).send_keys(Keys.ENTER).perform()
 
-    def wait_gridTree(self, n_lines):
+    def wait_gridTree(self, n_lines, timeout=None):
         """
         [Internal]
         Wait until the GridTree line count increases or decreases.
 
         """
 
+        timeout = self.config.time_out if not timeout else timeout
+
         grid_selectors = '.dict-tcbrowse' if self.webapp_shadowroot() else '.tcbrowse'
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + timeout
         grid = self.get_grid(grid_element=grid_selectors)
 
         while (time.time() < endtime and n_lines == self.lenght_grid_lines(grid) ):
