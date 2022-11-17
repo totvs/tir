@@ -6431,8 +6431,16 @@ class WebappInternal(Base):
                 self.click(column_element_selenium)
 
     def search_column_index(self, grid, column):
-        column_enumeration = list(enumerate(grid.select("thead label")))
-        chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+
+        if self.webapp_shadowroot():
+            column_enumeration = list(enumerate(self.find_shadow_element('thead label', self.soup_to_selenium(grid))))
+            chosen_column = list(filter(lambda x: column.lower().strip() == x[1].text.lower().strip(),
+                                        column_enumeration))
+
+        else:
+            column_enumeration = list(enumerate(grid.select("thead label")))
+            chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
+
         if chosen_column:
             column_index = chosen_column[0]
         else:
@@ -8257,7 +8265,7 @@ class WebappInternal(Base):
 
             return True if node_check else self.clicktree_status_selected(label, check_expanded=True)
 
-    def GridTree(self, column , tree_path, right_click = False):
+    def GridTree(self, column, tree_path, right_click=False):
         """
         Clicks on Grid TreeView component.
 
@@ -8280,15 +8288,15 @@ class WebappInternal(Base):
         tree_list = list(map(str.strip, tree_path.split(">")))
         last_item = tree_list.pop()
 
-        grid = self.get_grid(grid_element = '.tcbrowse')
-        column_index = self.search_column_index(grid, column)
+        grid_selectors = '.dict-tcbrowse' if self.webapp_shadowroot() else '.tcbrowse'
 
-        while(time.time() < endtime and tree_list ):
+        while (time.time() < endtime and tree_list):
 
             len_grid_lines = self.expand_treeGrid(column, tree_list[0])
 
-            grid = self.get_grid(grid_element = '.tcbrowse')
-            column_index = self.search_column_index(grid, column)
+            grid = self.get_grid(grid_element=grid_selectors)
+
+            self.wait_blocker()
 
             if self.lenght_grid_lines(grid) > len_grid_lines:
                 tree_list.remove(tree_list[0])
@@ -8296,14 +8304,20 @@ class WebappInternal(Base):
                 len_grid_lines = self.expand_treeGrid(column, tree_list[0])
                 tree_list.remove(tree_list[0])
 
-        grid = self.get_grid(grid_element = '.tcbrowse')
+        grid = self.get_grid(grid_element=grid_selectors)
         column_index = self.search_column_index(grid, column)
 
         div = self.search_grid_by_text(grid, last_item, column_index)
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = div, locator = By.XPATH )
-        div_s = self.soup_to_selenium(div)
-        time.sleep(2)# TODO: alterar antes de subir na master
-        self.click((div_s), enum.ClickType.SELENIUM , right_click)
+
+        if div:
+            if self.webapp_shadowroot():
+                time.sleep(2)
+                self.click((div), enum.ClickType.SELENIUM, right_click)
+            else:
+                self.wait_until_to(expected_condition="element_to_be_clickable", element=div, locator=By.XPATH)
+                div_s = self.soup_to_selenium(div)
+                time.sleep(2)
+                self.click((div_s), enum.ClickType.SELENIUM, right_click)
 
     def expand_treeGrid(self, column, item):
         """
@@ -8313,14 +8327,25 @@ class WebappInternal(Base):
         Returns len of grid lines
 
         """
-        grid = self.get_grid(grid_element = '.tcbrowse')
+
+        grid_selectors = '.dict-tcbrowse' if self.webapp_shadowroot() else '.tcbrowse'
+
+        grid = self.get_grid(grid_element = grid_selectors)
         column_index = self.search_column_index(grid, column)
         len_grid_lines = self.lenght_grid_lines(grid)
         div = self.search_grid_by_text(grid, item, column_index)
-        line = div.parent.parent
-        td = next(iter(line.select('td')), None)
-        self.expand_tree_grid_line(td)
-        self.wait_gridTree(len_grid_lines)
+
+        if div:
+            if self.webapp_shadowroot():
+                div.click()
+                ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                self.wait_gridTree(len_grid_lines, timeout=10)
+            else:
+                line = div.parent.parent
+                td = next(iter(line.select('td')), None)
+                self.expand_tree_grid_line(td)
+                self.wait_gridTree(len_grid_lines)
+
         return len_grid_lines
 
     def expand_tree_grid_line(self, element_soup):
@@ -8334,19 +8359,24 @@ class WebappInternal(Base):
         element_selenium().click()
         self.wait_blocker()
         self.wait_until_to(expected_condition="element_to_be_clickable", element = element_soup, locator = By.XPATH )
-        self.send_keys(element_selenium(), Keys.ENTER)
+        ActionChains(self.driver).send_keys(Keys.ENTER).perform()
 
-    def wait_gridTree(self, n_lines):
+    def wait_gridTree(self, n_lines, timeout=None):
         """
         [Internal]
         Wait until the GridTree line count increases or decreases.
 
         """
-        endtime = time.time() + self.config.time_out
-        grid = self.get_grid(grid_element = '.tcbrowse')
+
+        timeout = self.config.time_out if not timeout else timeout
+
+        grid_selectors = '.dict-tcbrowse' if self.webapp_shadowroot() else '.tcbrowse'
+
+        endtime = time.time() + timeout
+        grid = self.get_grid(grid_element=grid_selectors)
 
         while (time.time() < endtime and n_lines == self.lenght_grid_lines(grid) ):
-            grid = self.get_grid(grid_element = '.tcbrowse')
+            grid = self.get_grid(grid_element=grid_selectors)
 
 
     def search_grid_by_text(self, grid, text, column_index):
@@ -8356,11 +8386,19 @@ class WebappInternal(Base):
         Returns the div containing the text
 
         """
-        columns_list = grid.select('td')
-        columns_list_filtered = list(filter(lambda x: int(x.attrs['id']) == column_index  ,columns_list))
-        div_list = list(map(lambda x: next(iter(x.select('div')), None)  ,columns_list_filtered))
-        div = next(iter(list(filter(lambda x: (text.strip() == x.text.strip() and x.parent.parent.attrs['id'] != '0') ,div_list))), None)
-        return div
+        if self.webapp_shadowroot():
+            columns_list = self.find_shadow_element('td', self.soup_to_selenium(grid))
+            element = next(iter(list(filter(lambda x: text.strip() == x.text.strip(), columns_list))), None)
+            if element:
+                return element
+
+        else:
+            columns_list = grid.select('td')
+
+            columns_list_filtered = list(filter(lambda x: int(x.attrs['id']) == column_index  ,columns_list))
+            div_list = list(map(lambda x: next(iter(x.select('div')), None)  ,columns_list_filtered))
+            div = next(iter(list(filter(lambda x: (text.strip() == x.text.strip() and x.parent.parent.attrs['id'] != '0', div_list))), None))
+            return div
 
     def lenght_grid_lines(self, grid):
         """
@@ -8368,7 +8406,14 @@ class WebappInternal(Base):
         Returns the leght of grid.
 
         """
-        grid_lines = grid.select("tbody tr")
+
+        grid_lines = None
+
+        if self.webapp_shadowroot():
+            grid_lines = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+        else:
+            grid_lines = grid.select("tbody tr")
+
         return len(grid_lines)
 
     def TearDown(self):
