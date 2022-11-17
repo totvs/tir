@@ -3889,7 +3889,7 @@ class WebappInternal(Base):
                         if not soup_objects:
                             script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
                             filtered_button = self.driver.execute_script(script, self.soup_to_selenium(soup))
-
+                            
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
                         if parents_actives:
