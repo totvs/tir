@@ -3874,6 +3874,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
+                    self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
@@ -3884,6 +3885,11 @@ class WebappInternal(Base):
                         if not filtered_button:
                             filtered_button = self.return_soup_by_selenium(elements=soup_objects, term=button, selectors='label, span')
 
+                    if self.webapp_shadowroot():
+                        if not soup_objects:
+                            script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
+                            filtered_button = self.driver.execute_script(script, self.soup_to_selenium(soup))
+                            
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
                         if parents_actives:
@@ -4580,9 +4586,15 @@ class WebappInternal(Base):
 
                     if len(index_number) < 1 and count <= 3:
                         first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        if self.webapp_shadowroot():
+                            if not first_element_focus:
+                                first_element_focus = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('tbody tr td')", self.soup_to_selenium(grid))
                         if first_element_focus:
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
-                            self.soup_to_selenium(first_element_focus).click()
+                            if self.webapp_shadowroot():
+                                first_element_focus.click()
+                            else:    
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                                self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                         self.wait_blocker()
                         df, grid = self.grid_dataframe(grid_number=grid_number)
@@ -6348,6 +6360,10 @@ class WebappInternal(Base):
 
             if filtered_object:
                 return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
+            else:
+                filtered_object = next(iter(object))
+                if filtered_object.name == 'wa-tgrid':
+                    return [filtered_object]            
 
         elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
             return object if 'active' in object.find_parent('wa-tab-page').attrs else None
