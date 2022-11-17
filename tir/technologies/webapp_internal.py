@@ -8280,6 +8280,8 @@ class WebappInternal(Base):
 
             grid = self.get_grid(grid_element=grid_selectors)
 
+            self.wait_blocker()
+
             if self.lenght_grid_lines(grid) > len_grid_lines:
                 tree_list.remove(tree_list[0])
             else:
