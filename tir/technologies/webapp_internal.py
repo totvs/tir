@@ -4580,9 +4580,15 @@ class WebappInternal(Base):
 
                     if len(index_number) < 1 and count <= 3:
                         first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        if self.webapp_shadowroot():
+                            if not first_element_focus:
+                                first_element_focus = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('tbody tr td')", self.soup_to_selenium(grid))
                         if first_element_focus:
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
-                            self.soup_to_selenium(first_element_focus).click()
+                            if self.webapp_shadowroot():
+                                first_element_focus.click()
+                            else:    
+                                self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                                self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                         self.wait_blocker()
                         df, grid = self.grid_dataframe(grid_number=grid_number)
@@ -6348,6 +6354,10 @@ class WebappInternal(Base):
 
             if filtered_object:
                 return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
+            else:
+                filtered_object = next(iter(object))
+                if filtered_object.name == 'wa-tgrid':
+                    return [filtered_object]            
 
         elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
             return object if 'active' in object.find_parent('wa-tab-page').attrs else None
