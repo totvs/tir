@@ -69,7 +69,7 @@ class WebappInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
-            "GetCurrentContainer": ".tmodaldialog, wa-dialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
@@ -3874,7 +3874,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
-                    self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
+                    #self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
@@ -3889,7 +3889,8 @@ class WebappInternal(Base):
                         if not soup_objects:
                             script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
                             filtered_button = self.driver.execute_script(script, self.soup_to_selenium(soup))
-                            
+                            filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
+
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
                         if parents_actives:
