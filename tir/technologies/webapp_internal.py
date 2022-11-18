@@ -3614,7 +3614,7 @@ class WebappInternal(Base):
                     submenu().click()
 
                 subMenuElements = self.get_current_DOM().select(menu_itens_term)
-                subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
+                
 
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}",
                                                                                                 menu_itens_term):
@@ -3640,8 +3640,10 @@ class WebappInternal(Base):
 
                 if hasattr(child, 'attrs'):
                     used_ids.append(child.attrs['id'])
+                
+                self.scroll_to_element(self.soup_to_selenium(child))
 
-                if not child:
+                if not child or not self.element_is_displayed(child):
                     self.restart_counter += 1
                     self.log_error(f"Couldn't find menu item: {menuitem}")
 
