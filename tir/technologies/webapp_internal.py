@@ -4697,6 +4697,7 @@ class WebappInternal(Base):
         while count < 3 and not success():
             self.wait_blocker()
             sel_grid.click()
+            count += 1
 
         
     def grid_dataframe(self, grid_number=0):
