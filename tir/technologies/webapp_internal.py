@@ -4548,6 +4548,7 @@ class WebappInternal(Base):
         elif class_grid == 'dict-msbrgetdbase':
             self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
         elif class_grid != "tgrid":
+            element().click()
             ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                 element(), Keys.ENTER).perform()
         else:
@@ -4652,6 +4653,7 @@ class WebappInternal(Base):
                         tmodal_list = soup.select(term)
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
+                        self.set_grid_focus(grid_number)
                         self.performing_click(element_bs4, class_grid)
                         self.wait_blocker()
                         time.sleep(2)
@@ -4683,7 +4685,21 @@ class WebappInternal(Base):
                     logger().debug(f"Couldn't check box element td: {str(td)}")
         except Exception as error:
             self.log_error(f"Couldn't check box element: {str(error)}")
+    
+    def set_grid_focus(self, grid_number=0):
+        """
+        [Internal]
+        """
+        count = 0
+        df, grid = self.grid_dataframe(grid_number=grid_number)
+        sel_grid  = self.soup_to_selenium(grid)
+        success = lambda: 'focus' in sel_grid.get_attribute('class')
+        while count < 3 and not success():
+            self.wait_blocker()
+            sel_grid.click()
+            count += 1
 
+        
     def grid_dataframe(self, grid_number=0):
         """
         [Internal]
