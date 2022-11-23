@@ -159,7 +159,7 @@ class WebappInternal(Base):
                 self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
 
             self.user_screen_tss()
-            self.set_log_info_tss()
+            self.set_log_info_config() if self.config.log_info_config else self.set_log_info_tss()
 
             if self.config.num_exec:
                 if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
@@ -268,7 +268,7 @@ class WebappInternal(Base):
             self.close_screen_before_menu()
 
             if save_input:
-                self.set_log_info()
+                self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
@@ -1373,6 +1373,25 @@ class WebappInternal(Base):
             self.driver.execute_script("return arguments[0].shadowRoot.querySelector('button').click()",element_header)
         else:
             self.SetButton('x')
+
+    def set_log_info_config(self):
+        """
+        [Internal]
+        """
+
+        if self.config.release:
+            self.log.release = self.config.release
+            self.log.version = self.config.release.split('.')[0]
+
+        if self.config.top_database:
+            self.log.database = self.config.top_database
+
+        if self.config.build_version:
+            self.log.build_version = self.config.build_version
+
+        if self.config.lib_version:
+            self.log.lib_version = self.config.lib_version
+
 
     def get_language(self):
         """
@@ -2943,7 +2962,7 @@ class WebappInternal(Base):
                 self.close_warning_screen()
                 self.close_modal()
 
-            self.set_log_info()
+            self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
