@@ -1205,7 +1205,6 @@ class WebappInternal(Base):
             except Exception as e:
                 logger().exception(str(e))
 
-
     def close_news_screen(self):
         """
         [Internal]
@@ -1219,13 +1218,15 @@ class WebappInternal(Base):
         """
         if self.webapp_shadowroot():
             term = 'wa-dialog> .dict-tpanel > .dict-tsay'
+            news_term = 'Novidades do Produto'  # TODO add to language
         else:
             term = '.tmodaldialog > .tpanel > .tsay'
+            news_term = self.language.news
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
-        if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
-         optional_term=term, main_container="body", check_error = False):
+        if modals and self.element_exists(term=news_term, scrap_type=enum.ScrapType.MIXED,
+                                          optional_term=term, main_container="body", check_error=False):
             self.SetButton(self.language.close)
 
     def close_news_screen_after_routine(self):
