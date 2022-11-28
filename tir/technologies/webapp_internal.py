@@ -6205,6 +6205,7 @@ class WebappInternal(Base):
                 if container:
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid"
                     grids = self.filter_displayed_elements(container.select(term))
+                    grids = self.filter_active_tabs(grids)
 
             time.sleep(1)
 
@@ -6864,6 +6865,8 @@ class WebappInternal(Base):
                     filtered_rows = self.driver.execute_script("return arguments[0].querySelector('.selected-row')", row)
                     if filtered_rows:
                         return row
+                    else:
+                        return next(reversed(rows), None)                
 
         else:
             filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
