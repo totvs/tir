@@ -2070,8 +2070,6 @@ class WebappInternal(Base):
         self.driver.switch_to.default_content()
         return input_value
 
-
-
     def wait_blocker(self):
         """
         [Internal]
@@ -2085,26 +2083,27 @@ class WebappInternal(Base):
         result = True
         endtime = time.time() + 300
 
-        while(time.time() < endtime and result):
+        while (time.time() < endtime and result):
             blocker_container = None
             blocker = None
-            soup = self.get_current_DOM()
-            blocker_container = self.blocker_containers(soup)
-            
+            soup = lambda: self.get_current_DOM()
+            blocker_container = lambda: self.blocker_containers(soup())
+
             if blocker_container:
                 if self.webapp_shadowroot():
-                    blocker_container = self.soup_to_selenium(blocker_container)
-                    blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(blocker_container, 'get_property') else None
+                    blocker_container = self.soup_to_selenium(blocker_container())
+                    blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
+                        blocker_container, 'get_property') else None
                 else:
                     blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
-                        'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(blocker_container, 'attrs') else None
+                        'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
+                            blocker_container, 'attrs') else None
 
             if blocker:
                 result = True
             else:
                 return False
         return result
-
 
     def blocker_containers(self, soup):
         """
@@ -2516,6 +2515,9 @@ class WebappInternal(Base):
             if element:
                 input_field = lambda : self.soup_to_selenium(element)
                 self.scroll_to_element(input_field())
+                logger().info(f"Element: {field} Found!")
+
+            logger().info(f"Filling element: {field}")
 
             if not element or not self.element_is_displayed(element):
                 continue
@@ -6205,6 +6207,7 @@ class WebappInternal(Base):
                 if container:
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid"
                     grids = self.filter_displayed_elements(container.select(term))
+                    grids = self.filter_active_tabs(grids)
 
             time.sleep(1)
 
@@ -6864,6 +6867,8 @@ class WebappInternal(Base):
                     filtered_rows = self.driver.execute_script("return arguments[0].querySelector('.selected-row')", row)
                     if filtered_rows:
                         return row
+                    else:
+                        return next(reversed(rows), None)                
 
         else:
             filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
