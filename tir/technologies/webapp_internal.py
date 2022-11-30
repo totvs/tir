@@ -1218,14 +1218,12 @@ class WebappInternal(Base):
         """
         if self.webapp_shadowroot():
             term = 'wa-dialog> .dict-tpanel > .dict-tsay'
-            news_term = 'Novidades do Produto'  # TODO add to language
         else:
             term = '.tmodaldialog > .tpanel > .tsay'
-            news_term = self.language.news
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
-        if modals and self.element_exists(term=news_term, scrap_type=enum.ScrapType.MIXED,
+        if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
                                           optional_term=term, main_container="body", check_error=False):
             self.SetButton(self.language.close)
 
@@ -3585,7 +3583,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             menu_term = ".dict-tmenu"
             menu_itens_term = ".dict-tmenuitem"
-            term = f"[caption='{self.language.news}']"
+            term = f"[caption^='{self.language.news}']"
             optional_term_news = ""
             scrap_type = enum.ScrapType.CSS_SELECTOR
         else:
@@ -3754,7 +3752,8 @@ class WebappInternal(Base):
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
                 self.close_news_screen_after_routine()
-
+            
+            self.wait_blocker()
             if self.element_exists(term=term, scrap_type=scrap_type,
                                    main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
                 self.close_news_screen()

@@ -223,7 +223,7 @@ class LanguagePack:
             "File Name": "Nome do Arquivo",
 			"Open": "Abrir",
             "Warning": "Atenção",
-            "News": "Novidades do programa"
+            "News": "Novidades do"
         }
         spanish = {
             "User": "Usuário",
