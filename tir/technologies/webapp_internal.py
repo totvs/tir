@@ -2217,8 +2217,8 @@ class WebappInternal(Base):
             if input_field:
                 active_tab = self.filter_active_tabs(container)
                 active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
-                labels_in_tab = next(iter(active_childs), None).contents
-                if labels_in_tab:
+                labels_in_tab = next(iter(active_childs), None)
+                if labels_in_tab != None and labels_in_tab.contents != None:
                     label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab))
                     if label_class:
                         if len(label_class) > 0:
