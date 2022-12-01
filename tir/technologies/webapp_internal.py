@@ -2094,7 +2094,7 @@ class WebappInternal(Base):
                         blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
                             blocker_container, 'get_property') else None
                     else:
-                        blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
+                        blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
                             'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
                                 blocker_container, 'attrs') else None
             except:
@@ -2214,10 +2214,22 @@ class WebappInternal(Base):
                 xy_label = label_s().location
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            
             if input_field:
                 active_tab = self.filter_active_tabs(container)
                 active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
-                if active_childs:
+                labels_in_tab = next(iter(active_childs), None)
+                if labels_in_tab != None and labels_in_tab.contents != None:
+                    label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
+                    if label_class:
+                        if len(label_class) > 0:
+                            is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
+                            label_tab = len(is_label_in_tab) > 0
+                        else:
+                            label_tab = True
+                    else:
+                        label_tab = True
+                if active_childs and label_tab:
                     active_tab = next(iter(active_childs), None)
                     active_tab_labels = active_tab.select(label_term)
                     filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
