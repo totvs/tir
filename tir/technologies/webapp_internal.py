@@ -2094,7 +2094,7 @@ class WebappInternal(Base):
                         blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
                             blocker_container, 'get_property') else None
                     else:
-                        blocker = soup.select('.ajax-blocker') if len(soup.select('.ajax-blocker')) > 0 else \
+                        blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
                             'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
                                 blocker_container, 'attrs') else None
             except:
