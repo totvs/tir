@@ -2220,9 +2220,12 @@ class WebappInternal(Base):
                 labels_in_tab = next(iter(active_childs), None).contents
                 if labels_in_tab:
                     label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab))
-                    if len(label_class) > 0:
-                        is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
-                        label_tab = len(is_label_in_tab) > 0
+                    if label_class:
+                        if len(label_class) > 0:
+                            is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
+                            label_tab = len(is_label_in_tab) > 0
+                        else:
+                            label_tab = True
                     else:
                         label_tab = True
                 if active_childs and label_tab:
