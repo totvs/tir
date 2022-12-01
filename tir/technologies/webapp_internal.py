@@ -2214,12 +2214,13 @@ class WebappInternal(Base):
                 xy_label = label_s().location
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+            
             if input_field:
                 active_tab = self.filter_active_tabs(container)
                 active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
                 labels_in_tab = next(iter(active_childs), None)
                 if labels_in_tab != None and labels_in_tab.contents != None:
-                    label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab))
+                    label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
                     if label_class:
                         if len(label_class) > 0:
                             is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
