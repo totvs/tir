@@ -7431,6 +7431,7 @@ class WebappInternal(Base):
         while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
             scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
 
+            logger().info("Start while timeout: parameter_url")
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
                 optional_term=None, label=False, main_container="body")
             if( tmessagebox ):
