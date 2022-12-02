@@ -7355,6 +7355,7 @@ class WebappInternal(Base):
             while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
                 scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
 
+                logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
                     optional_term=None, label=False, main_container="body")
                 if( tmessagebox ):
@@ -7362,6 +7363,7 @@ class WebappInternal(Base):
                     self.log_error(f" AddParameter error: {tmessagebox[0].text}")
 
                 if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+                    logger().info(f"Enter if tmessagebox: {parameter}")
                     self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                         branch}&a={value}&Env={self.config.environment}""")
         else:
