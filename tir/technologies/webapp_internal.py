@@ -2918,6 +2918,8 @@ class WebappInternal(Base):
             x3_dictionaries = self.create_x3_tuple()
             value = self.check_grid(field_array, x3_dictionaries, get_value=True)
 
+        logger().info(f"Current value: {value}")
+
         if ( not value ):
             self.log_error("GetValue element is none")
 
