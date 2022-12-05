@@ -1178,7 +1178,7 @@ class WebappInternal(Base):
             workspace_term = ".workspace-container"
 
         self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out, main_container="body", check_error = False)
+            timeout = self.config.time_out / 2, main_container="body", check_error = False)
 
         uidialog_list = []
 
@@ -2917,6 +2917,8 @@ class WebappInternal(Base):
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
             value = self.check_grid(field_array, x3_dictionaries, get_value=True)
+
+        logger().info(f"Current value: {value}")
 
         if ( not value ):
             self.log_error("GetValue element is none")
