@@ -1178,7 +1178,7 @@ class WebappInternal(Base):
             workspace_term = ".workspace-container"
 
         self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out, main_container="body", check_error = False)
+            timeout = self.config.time_out / 2, main_container="body", check_error = False)
 
         uidialog_list = []
 
