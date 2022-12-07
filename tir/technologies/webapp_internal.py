@@ -7422,6 +7422,7 @@ class WebappInternal(Base):
         """
 
         endtime = time.time() + self.config.time_out
+        halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
         if restore_backup == True and self.parameters:
             return
@@ -7441,7 +7442,14 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f" {method} error: {tmessagebox[0].text}")
 
+            if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+                logger().info(f"parameter_url: {function_to_call} again")
+                self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                        self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
+                
+
         time.sleep(3)
+        logger().info(f"Finish parameter_url while")
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, save_input=not self.config.autostart)
