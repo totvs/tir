@@ -1232,3 +1232,14 @@ class Base(unittest.TestCase):
         current_ver = re.sub(r'\.(.*)', '', current_ver)
         self.webapp_version = int(current_ver) >= 8
         return self.webapp_version
+
+    def find_shadow_element(self, term, objects):
+
+        elements = None
+
+        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        try:
+            elements = self.driver.execute_script(script, objects)
+        except:
+            pass
+        return elements if elements else None
