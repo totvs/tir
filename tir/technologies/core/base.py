@@ -7,6 +7,7 @@ import sys
 import os
 import random
 import string
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -1072,6 +1073,11 @@ class Base(unittest.TestCase):
 
         start_program = '#inputStartProg, #selectStartProg'
 
+        try:
+            self.sc_query('Protheus_robo01')
+        except Exception as err:
+            logger().debug(f'sc_query exception: {err}')
+
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
@@ -1243,3 +1249,13 @@ class Base(unittest.TestCase):
         except:
             pass
         return elements if elements else None
+
+    def sc_query(self, service):
+        os.system(f'SC QUERY {service} | FIND "RUNNING"')
+        try:
+            stdout = subprocess.check_output(f'SC QUERY {service} | FIND "RUNNING"', shell=True, text=True)
+            if list(filter(lambda x: 'RUNNING' in x, stdout)):
+                logger().debug(f'{service} is running')
+        except:
+            logger().debug(f'{service} is being started')
+            os.system(f'net start {service}')
