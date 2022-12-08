@@ -2940,6 +2940,11 @@ class WebappInternal(Base):
         webdriver_exception = None
 
         try:
+            self.sc_query('Protheus_robo01')
+        except Exception as err:
+            logger().debug(f'sc_query exception: {err}')
+
+        try:
             if self.restart_counter == 2:
                 logger().info("Closing the Browser")
                 self.driver.close()
@@ -3022,6 +3027,12 @@ class WebappInternal(Base):
             logger().info("Driver Refresh")
 
         self.driver.refresh()
+
+        try:
+            self.sc_query('Protheus_robo01')
+        except Exception as err:
+            logger().debug(f'sc_query exception: {err}')
+
         self.wait_blocker()
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform()
 
@@ -7420,7 +7431,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.parameter_url(restore_backup=False)
         """
-
+        try_counter = False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -7442,10 +7453,11 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f" {method} error: {tmessagebox[0].text}")
 
-            if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+            if ( not tmessagebox and ((endtime) - time.time() < halftime) and not try_counter):
                 logger().info(f"parameter_url: {function_to_call} again")
                 self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                         self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
+                try_counter = True
                 
 
         time.sleep(3)
