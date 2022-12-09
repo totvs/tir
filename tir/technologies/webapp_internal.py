@@ -2589,7 +2589,10 @@ class WebappInternal(Base):
                         self.set_element_focus(input_field())
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
-                        self.select_combo(element, main_value)
+                        if main_value == '':
+                           self.select_combo(element, main_value, index=True) 
+                        else:
+                            self.select_combo(element, main_value)
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
                     else:
