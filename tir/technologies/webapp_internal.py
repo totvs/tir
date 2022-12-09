@@ -437,6 +437,9 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
+
+        logger().debug('Filling user screen')
+
         user_text = self.config.user_cfg if admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
@@ -615,6 +618,8 @@ class WebappInternal(Base):
 
         Refresh the page - retry load user_screen
         """
+
+        logger().debug('Reloading user screen')
 
         self.driver_refresh()
 
@@ -3023,6 +3028,12 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.driver_refresh()
         """
+
+        try:
+            self.sc_query('Protheus_robo01')
+        except Exception as err:
+            logger().debug(f'sc_query exception: {err}')
+
         if self.config.smart_test or self.config.debug_log:
             logger().info("Driver Refresh")
 
@@ -7351,6 +7362,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.AddParameter("MV_MVCSA1", "", ".F.", ".F.", ".F.")
         """
+
+        logger().info(f"AddParameter: {parameter}")
+
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
