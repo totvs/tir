@@ -5,6 +5,8 @@ import inspect
 import os
 import random
 import uuid
+import glob
+import shutil
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -102,6 +104,8 @@ class WebappInternal(Base):
         self.grid_memo_field = False
         self.range_multiplier = None
         self.routine = None
+        self.test_suite = []
+        self.current_test_suite = self.log.get_file_name('testsuite')
 
         if not Base.driver:
             Base.driver = self.driver
@@ -2589,7 +2593,10 @@ class WebappInternal(Base):
                         self.set_element_focus(input_field())
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
-                        self.select_combo(element, main_value)
+                        if main_value == '':
+                           self.select_combo(element, main_value, index=True) 
+                        else:
+                            self.select_combo(element, main_value)
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
                     else:
@@ -7268,6 +7275,8 @@ class WebappInternal(Base):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
+                self.check_dmp_file()
+
             if (stack_item == "setUpClass") :
                 try:
                     self.driver.close()
@@ -8584,6 +8593,8 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
+            self.check_dmp_file()
+
         try:
             self.driver.close()
         except Exception as e:
@@ -9700,3 +9711,20 @@ class WebappInternal(Base):
                     element_list.append(element)
 
         return element_list
+
+    def check_dmp_file(self):
+        """
+        [Internal]
+        """
+
+        source_path = r'E:\smart_test\slaves\robo01\protheus\bin\appserver\*.dmp' #TODO caminho temporario
+        destination_path = r'E:\smart_test\console' #TODO caminho temporario
+
+        files = glob.glob(source_path)
+
+        if files:
+            for file in files:
+                if file and self.current_test_suite not in self.test_suite:
+                    logger().debug(f'.dmp file found: "{file}" in "{source_path}" moving to: "{destination_path}"')
+                    shutil.move(file, destination_path)
+                    self.test_suite.append(self.log.get_file_name('testsuite'))
