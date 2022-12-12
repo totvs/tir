@@ -6974,6 +6974,7 @@ class WebappInternal(Base):
 
                 self.log_error(f"Button: {button} not found")
 
+
     def MessageBoxClick(self, button_text):
         """
         Clicks on desired button inside a Messagebox element.
@@ -6986,17 +6987,24 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.MessageBoxClick("Ok")
         """
-        self.wait_element(".messagebox-container", enum.ScrapType.CSS_SELECTOR)
+        regx_sub = r"[\n?\s?]"
+        if self.webapp_shadowroot():
+            box_term = "wa-message-box"
+            self.wait_element(term=box_term, main_container='body', scrap_type = enum.ScrapType.CSS_SELECTOR)
+        else:
+            box_term = ".messagebox-container"
+            self.wait_element(box_term, enum.ScrapType.CSS_SELECTOR)
 
         content = self.driver.page_source
         soup = BeautifulSoup(content,"html.parser")
-        container = soup.select(".messagebox-container")
+        container = soup.select(box_term)
         if container:
-            buttons = container[0].select(".ui-button")
-            button = list(filter(lambda x: x.text.lower() == button_text.lower(), buttons))
+            buttons = self.find_shadow_element('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button") 
+            button = list(filter(lambda x: re.sub(regx_sub,'', x.text).lower() == button_text.lower(), buttons))
             if button:
-                selenium_button = self.driver.find_element_by_xpath(xpath_soup(button[0]))
+                selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element_by_xpath(xpath_soup(button[0])) 
                 self.click(selenium_button)
+
 
     def get_enchoice_button_ids(self, layer):
         """
@@ -7053,6 +7061,16 @@ class WebappInternal(Base):
             else:
                 if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
                     self.errors.append(f"{self.language.messages.text_not_found}({text})")
+
+        if element_type == "message-box":
+            logger().info(f"Checking text on screen: {text}")
+
+            term = 'wa-message-box'
+
+            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
+                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+
 
     def try_send_keys(self, element_function, key, try_counter=0):
         """
@@ -8630,7 +8648,7 @@ class WebappInternal(Base):
                 wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
 
             if not wa_text_view_filtered:
-                wa_text_view = container.select('label')
+                wa_text_view = container.select('label, span')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
                 if not wa_text_view_filtered:
                    wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree, wa-tgrid')
