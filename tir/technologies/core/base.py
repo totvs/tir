@@ -1204,7 +1204,7 @@ class Base(unittest.TestCase):
         """
 
         for i, j in enumerate(combo.options):
-            if j.text.lower() in option:
+            if not j.get_attribute('disabled') and j.text.lower() in option:
                 return i
 
     def return_iframe(self, selector):
