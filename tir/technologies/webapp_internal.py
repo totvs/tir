@@ -9593,6 +9593,15 @@ class WebappInternal(Base):
                         if not span_label.text.lower() in language:
                             self.set_language_poui(language, po_select)
 
+        elif self.webapp_shadowroot():
+            if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
+                                 check_error=False):
+                tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
+                selects = tcombobox
+                language = self.return_select_language()
+                if language:
+                    self.select_combo(selects, language, index=True)
+        
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
                                  check_error=False):
 
