@@ -2951,10 +2951,11 @@ class WebappInternal(Base):
         """
         webdriver_exception = None
 
-        try:
-            self.sc_query('Protheus_robo01')
-        except Exception as err:
-            logger().debug(f'sc_query exception: {err}')
+        if self.config.smart_test:
+            try:
+                self.sc_query('Protheus_robo01')
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
 
         try:
             if self.restart_counter == 2:
@@ -3036,20 +3037,22 @@ class WebappInternal(Base):
         >>> self.driver_refresh()
         """
 
-        try:
-            self.sc_query('Protheus_robo01')
-        except Exception as err:
-            logger().debug(f'sc_query exception: {err}')
+        if self.config.smart_test:
+            try:
+                self.sc_query('Protheus_robo01')
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
 
         if self.config.smart_test or self.config.debug_log:
             logger().info("Driver Refresh")
 
         self.driver.refresh()
 
-        try:
-            self.sc_query('Protheus_robo01')
-        except Exception as err:
-            logger().debug(f'sc_query exception: {err}')
+        if self.config.smart_test:
+            try:
+                self.sc_query('Protheus_robo01')
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
 
         self.wait_blocker()
         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.F5).key_up(Keys.CONTROL).perform()
