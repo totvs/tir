@@ -1121,7 +1121,8 @@ class Base(unittest.TestCase):
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
-        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
+        if not self.config.skip_environment:
+            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
