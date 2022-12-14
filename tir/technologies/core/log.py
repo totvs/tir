@@ -454,7 +454,7 @@ class Log:
         if self.search_stack("log_error"):
             screenshot_file = self.screenshot_file_name("error", stack_item)
         elif self.search_stack("CheckResult"):
-            screenshot_file = self.screenshot_file_name("CheckResult_result_divergence", stack_item)
+            screenshot_file = self.screenshot_file_name("CheckResult", stack_item)
         else:
             screenshot_file = self.screenshot_file_name(stack_item)
 
