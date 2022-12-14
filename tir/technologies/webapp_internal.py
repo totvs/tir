@@ -295,6 +295,8 @@ class WebappInternal(Base):
 
     def close_screen_before_menu(self):
 
+        logger().debug('Closing screen before the menu')
+
         term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
 
         endtime = time.time() + self.config.time_out
@@ -1464,10 +1466,13 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().debug('Escape to menu')
+                self.log.screenshot_file_name(description='set_program',stack_item=self.get_testcase_stack())  # TODO trecho inserido para analise
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
             if self.check_layers('wa-dialog') > 1:
+                logger().debug('Found layers after Escape to menu')
                 self.close_screen_before_menu()
+                self.log.screenshot_file_name(description='set_program',stack_item=self.get_testcase_stack())  # TODO trecho inserido para analise
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -2113,6 +2118,11 @@ class WebappInternal(Base):
                 result = True
             else:
                 return False
+
+        if time.time() > endtime:
+            logger().debug('wait_blocker timeout')
+            self.log.screenshot_file_name(description='wait_blocker', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
+
         return result
 
     def blocker_containers(self, soup):
@@ -3651,10 +3661,13 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         elif self.check_layers('wa-dialog') > 1:
             logger().debug('Escape to menu')
+            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
         if self.check_layers('wa-dialog') > 1:
+            logger().debug('Found layers after Escape to menu')
             self.close_screen_before_menu()
+            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -9593,6 +9606,15 @@ class WebappInternal(Base):
                         if not span_label.text.lower() in language:
                             self.set_language_poui(language, po_select)
 
+        elif self.webapp_shadowroot():
+            if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
+                                 check_error=False):
+                tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
+                selects = tcombobox
+                language = self.return_select_language()
+                if language:
+                    self.select_combo(selects, language, index=True)
+        
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
                                  check_error=False):
 
