@@ -79,7 +79,7 @@ class WebappInternal(Base):
         }
 
         self.grid_selectors = {
-            "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse"
+            "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse, .dict-tsbrowse"
         }
 
         if self.webapp_shadowroot():
@@ -1466,13 +1466,13 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().debug('Escape to menu')
-                self.log.screenshot_file_name(description='set_program',stack_item=self.get_testcase_stack())  # TODO trecho inserido para analise
+                self.log.screenshot_file_name(description='set_program', stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
             if self.check_layers('wa-dialog') > 1:
                 logger().debug('Found layers after Escape to menu')
                 self.close_screen_before_menu()
-                self.log.screenshot_file_name(description='set_program',stack_item=self.get_testcase_stack())  # TODO trecho inserido para analise
+                self.log.screenshot_file_name(description='set_program', stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -2121,7 +2121,7 @@ class WebappInternal(Base):
 
         if time.time() > endtime:
             logger().debug('wait_blocker timeout')
-            self.log.screenshot_file_name(description='wait_blocker', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
+            self.log.screenshot_file_name(description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         return result
 
@@ -2903,7 +2903,7 @@ class WebappInternal(Base):
 
         self.compare_field_values(field, user_value, captured_value, message)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False, position=0):
         """
         Gets the current value or text of element.
 
@@ -2938,7 +2938,7 @@ class WebappInternal(Base):
         else:
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
-            value = self.check_grid(field_array, x3_dictionaries, get_value=True)
+            value = self.check_grid(field_array, x3_dictionaries, get_value=True, position=position)
 
         logger().info(f"Current value: {value}")
 
@@ -3661,13 +3661,13 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         elif self.check_layers('wa-dialog') > 1:
             logger().debug('Escape to menu')
-            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
+            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
         if self.check_layers('wa-dialog') > 1:
             logger().debug('Found layers after Escape to menu')
             self.close_screen_before_menu()
-            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.get_testcase_stack())#TODO trecho inserido para analise
+            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -6086,7 +6086,7 @@ class WebappInternal(Base):
 
         return ret
 
-    def check_grid(self, field, x3_dictionaries, get_value=False):
+    def check_grid(self, field, x3_dictionaries, get_value=False, position=0):
         """
         [Internal]
 
@@ -6145,7 +6145,7 @@ class WebappInternal(Base):
 
                 grids = self.filter_displayed_elements(grids)
 
-                headers = self.get_headers_from_grids(grids)
+                headers = self.get_headers_from_grids(grids, duplicate_fields=[field[1], position])
                 column_name = ""
 
                 if field[3] > len(grids):
@@ -6639,6 +6639,9 @@ class WebappInternal(Base):
 
         headers = []
         labels = None
+        index = []
+        duplicated_key = str(duplicate_fields[0]).lower()
+        duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
 
         if isinstance(grids, list):
             for item in grids:
@@ -6661,14 +6664,13 @@ class WebappInternal(Base):
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
-
-        if len(duplicate_fields) > 0:
-            duplicated_key = duplicate_fields[0].lower()
-            duplicated_value = duplicate_fields[1]
-
+        
+        for idx, value in enumerate(keys):
+            if value == duplicated_key:
+                index.append(idx)
+        if len(index) > 1:
             for header in headers:
-                if duplicated_key in header:
-                    header[duplicated_key] = duplicated_value
+                header[duplicated_key] = index[duplicated_value]
 
         return headers
 
