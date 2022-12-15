@@ -1471,8 +1471,9 @@ class WebappInternal(Base):
 
             if self.check_layers('wa-dialog') > 1:
                 logger().debug('Found layers after Escape to menu')
+                self.log.screenshot_file_name(description='set_program',
+                                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 self.close_screen_before_menu()
-                self.log.screenshot_file_name(description='set_program', stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -3666,8 +3667,9 @@ class WebappInternal(Base):
 
         if self.check_layers('wa-dialog') > 1:
             logger().debug('Found layers after Escape to menu')
+            self.log.screenshot_file_name(description='SetLateralMenu',
+                                          stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
             self.close_screen_before_menu()
-            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
