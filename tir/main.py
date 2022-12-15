@@ -317,7 +317,7 @@ class Webapp():
         """
         self.__webapp.ClickLabel(label_name)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False, position=0):
         """
         Gets the current value or text of element.
 
@@ -337,7 +337,7 @@ class Webapp():
         >>> # Calling the method:
         >>> current_value = oHelper.GetValue("A1_COD")
         """
-        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
+        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field, position)
 
     def LoadGrid(self):
         """
