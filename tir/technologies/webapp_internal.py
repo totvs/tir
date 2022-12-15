@@ -2917,6 +2917,8 @@ class WebappInternal(Base):
         :type grid_number: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -6640,8 +6642,7 @@ class WebappInternal(Base):
         headers = []
         labels = None
         index = []
-        duplicated_key = str(duplicate_fields[0]).lower()
-        duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
+
 
         if isinstance(grids, list):
             for item in grids:
@@ -6664,13 +6665,16 @@ class WebappInternal(Base):
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
-        
-        for idx, value in enumerate(keys):
-            if value == duplicated_key:
-                index.append(idx)
-        if len(index) > 1:
-            for header in headers:
-                header[duplicated_key] = index[duplicated_value]
+
+        if duplicate_fields:
+            duplicated_key = str(duplicate_fields[0]).lower()
+            duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
+            for idx, value in enumerate(keys):
+                if value == duplicated_key:
+                    index.append(idx)
+            if len(index) > 1:
+                for header in headers:
+                    header[duplicated_key] = index[duplicated_value]
 
         return headers
 
