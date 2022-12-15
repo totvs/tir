@@ -6642,8 +6642,7 @@ class WebappInternal(Base):
         headers = []
         labels = None
         index = []
-        duplicated_key = str(duplicate_fields[0]).lower()
-        duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
+
 
         if isinstance(grids, list):
             for item in grids:
@@ -6666,13 +6665,16 @@ class WebappInternal(Base):
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
-        
-        for idx, value in enumerate(keys):
-            if value == duplicated_key:
-                index.append(idx)
-        if len(index) > 1:
-            for header in headers:
-                header[duplicated_key] = index[duplicated_value]
+
+        if duplicate_fields:
+            duplicated_key = str(duplicate_fields[0]).lower()
+            duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
+            for idx, value in enumerate(keys):
+                if value == duplicated_key:
+                    index.append(idx)
+            if len(index) > 1:
+                for header in headers:
+                    header[duplicated_key] = index[duplicated_value]
 
         return headers
 
