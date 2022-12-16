@@ -271,6 +271,16 @@ class WebappInternal(Base):
 
             self.close_screen_before_menu()
 
+            cget_term = '[name=cGet]'
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
+                logger().debug('Waiting menu screen after environment screen')
+                time.sleep(10)
+
+            if time.time() > endtime:
+                self.restart_counter + 1
+                self.log_error(f"'Unable to load screen '{cget_term}' content.")
+
             if save_input:
                 self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
 
@@ -1466,13 +1476,14 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().debug('Escape to menu')
-                self.log.screenshot_file_name(description='set_program', stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+                self.log.take_screenshot_log(driver=self.driver, description='set_program',
+                                             stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
             if self.check_layers('wa-dialog') > 1:
                 logger().debug('Found layers after Escape to menu')
-                self.log.screenshot_file_name(description='set_program',
-                                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+                self.log.take_screenshot_log(driver=self.driver, description='set_program',
+                                             stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 self.close_screen_before_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -2122,7 +2133,7 @@ class WebappInternal(Base):
 
         if time.time() > endtime:
             logger().debug('wait_blocker timeout')
-            self.log.screenshot_file_name(description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         return result
 
@@ -3664,13 +3675,14 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         elif self.check_layers('wa-dialog') > 1:
             logger().debug('Escape to menu')
-            self.log.screenshot_file_name(description='SetLateralMenu', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
+                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
         if self.check_layers('wa-dialog') > 1:
             logger().debug('Found layers after Escape to menu')
-            self.log.screenshot_file_name(description='SetLateralMenu',
-                                          stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+            self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
+                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
             self.close_screen_before_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
