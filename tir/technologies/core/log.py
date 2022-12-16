@@ -416,7 +416,7 @@ class Log:
 
         return (ct_method, ct_number)
 
-    def take_screenshot_log(self, driver, stack_item="", test_number=""):
+    def take_screenshot_log(self, driver, description="", stack_item="", test_number=""):
         """
         [Internal]
 
@@ -456,7 +456,7 @@ class Log:
         elif self.search_stack("CheckResult"):
             screenshot_file = self.screenshot_file_name("CheckResult", stack_item)
         else:
-            screenshot_file = self.screenshot_file_name(stack_item)
+            screenshot_file = self.screenshot_file_name(description=description, stack_item=stack_item)
 
         if self.config.debug_log:
             logger().debug(f"take_screenshot_log in:{datetime.now()}\n")
