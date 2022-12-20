@@ -1252,11 +1252,17 @@ class Base(unittest.TestCase):
         return elements if elements else None
 
     def sc_query(self, service):
-        os.system(f'SC QUERY {service} | FIND "RUNNING"')
-        try:
-            stdout = subprocess.check_output(f'SC QUERY {service} | FIND "RUNNING"', shell=True, text=True)
-            if list(filter(lambda x: 'RUNNING' in x, stdout)):
-                logger().debug(f'{service} is running')
-        except:
-            logger().debug(f'{service} is being started')
-            os.system(f'net start {service}')
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            try:
+                logger().debug(f'Trying start: {service} service.')
+                os.system(f'SC QUERY {service} | FIND "RUNNING"')
+                stdout = subprocess.check_output(f'SC QUERY {service} | FIND "RUNNING"', shell=True, text=True).split(':')
+                success = True if list(filter(lambda x: 'RUNNING' in x, stdout)) else False
+                if success:
+                    logger().debug(f'{service} is running')
+            except:
+                logger().debug(f'{service} is being started')
+                os.system(f'net start {service}')
