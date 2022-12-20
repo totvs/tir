@@ -439,7 +439,7 @@ class Log:
             stack_item = self.get_testcase_stack()
 
         if stack_item == "setUpClass":
-            stack_item = self.get_file_name("testsuite")
+            stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("testsuite")}'
 
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
@@ -451,7 +451,7 @@ class Log:
 
         today = datetime.today()
 
-        if self.search_stack("log_error"):
+        if self.search_stack("log_error") and not description:
             screenshot_file = self.screenshot_file_name("error", stack_item)
         elif self.search_stack("CheckResult"):
             screenshot_file = self.screenshot_file_name("CheckResult", stack_item)
