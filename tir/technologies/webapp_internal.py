@@ -315,6 +315,9 @@ class WebappInternal(Base):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
+            logger().debug('screenshot after close_screen_before_menu')
+            self.log.take_screenshot_log(driver=self.driver, description='close_screen_before_menu',
+                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
 
     def service_process_bat_file(self):
         """
@@ -2993,6 +2996,8 @@ class WebappInternal(Base):
         except WebDriverException as e:
             webdriver_exception = e
 
+        logger().debug('screenshot after restart driver_refresh.')
+        self.log.take_screenshot_log(self.driver, 'restart', stack_item=self.log.get_testcase_stack())
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
             self.assertTrue(False, message)

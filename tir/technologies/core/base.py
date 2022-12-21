@@ -1073,10 +1073,11 @@ class Base(unittest.TestCase):
 
         start_program = '#inputStartProg, #selectStartProg'
 
-        try:
-            self.sc_query('Protheus_robo01')
-        except Exception as err:
-            logger().debug(f'sc_query exception: {err}')
+        if self.config.smart_test:
+            try:
+                self.sc_query('Protheus_robo01')
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
 
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
