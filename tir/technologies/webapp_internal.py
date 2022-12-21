@@ -5584,7 +5584,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse, .dict-tget"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5695,7 +5695,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5725,7 +5725,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget")
                             grids = self.filter_active_tabs(grids)
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
@@ -6432,7 +6432,10 @@ class WebappInternal(Base):
                                 self.wait_until_to(expected_condition="visibility_of", element=column_element)
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
+                            '''
                             self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
+                            '''
+                            self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
@@ -6454,16 +6457,17 @@ class WebappInternal(Base):
 
         same_position = []
 
-        main_element = self.soup_to_selenium(elements[grid_number])
+        if len(elements) <= grid_number:
+            main_element = self.soup_to_selenium(elements[grid_number])
 
-        x, y = main_element.location['x'], main_element.location['y']
+            x, y = main_element.location['x'], main_element.location['y']
 
-        for element in elements:
-            selenium_element = self.soup_to_selenium(element)
+            for element in elements:
+                selenium_element = self.soup_to_selenium(element)
 
-            if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
-                    not main_element == selenium_element:
-                same_position.append(element)
+                if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
+                        not main_element == selenium_element:
+                    same_position.append(element)
 
         if same_position:
             same_position.append(elements[grid_number])
