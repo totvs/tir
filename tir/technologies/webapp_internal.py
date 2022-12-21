@@ -5972,7 +5972,7 @@ class WebappInternal(Base):
                                 while try_endtime > 0:
                                     try_endtime = try_endtime - 10
                                     if self.webapp_shadowroot():
-                                        element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body')
+                                        element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body', check_error=False)
                                     else:
                                         element_exist = self.wait_element_timeout(term=xpath_soup(child),
                                                                                 scrap_type=enum.ScrapType.XPATH,
