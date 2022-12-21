@@ -8952,6 +8952,7 @@ class WebappInternal(Base):
         text_problem_extracted  = ""
         text_solution_extracted = ""
         text_extracted = ""
+        regex = r"(<[^>]*>)"
 
         if not button:
             button = self.get_single_button().text
@@ -8972,7 +8973,7 @@ class WebappInternal(Base):
             container_text = ''
             for x in range(len(container_filtered)):
                 if self.webapp_shadowroot():
-                    container_text += container_filtered[x].get('caption') + ' '
+                    container_text += re.sub(regex, ' ',container_filtered[x].get('caption')) + ' '
                 else:
                     container_text += container_filtered[x].text + ' '
 
