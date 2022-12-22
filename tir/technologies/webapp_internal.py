@@ -315,9 +315,6 @@ class WebappInternal(Base):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
-            logger().debug('screenshot after close_screen_before_menu')
-            self.log.take_screenshot_log(driver=self.driver, description='close_screen_before_menu',
-                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
 
     def service_process_bat_file(self):
         """
@@ -361,7 +358,6 @@ class WebappInternal(Base):
             self.wait_element(term=input_environment, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
             soup = self.get_current_DOM()
 
-            logger().info("Filling Initial Program")
             start_prog_element = next(iter(soup.select(start_program)), None)
             if start_prog_element is None:
                 self.restart_counter += 1
@@ -380,12 +376,15 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and (start_prog_value() != initial_program.strip())):
 
+                logger().info(f'Filling Initial Program: "{initial_program}"')
+
                 if try_counter == 0:
                     start_prog = lambda: self.soup_to_selenium(start_prog_element)
                 else:
                     start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
 
                 self.set_element_focus(start_prog())
+                self.click(start_prog())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
@@ -398,7 +397,6 @@ class WebappInternal(Base):
                 self.log_error(message)
                 raise ValueError(message)
 
-            logger().info("Filling Environment")
             env_element = next(iter(soup.select(input_environment)), None)
             if env_element is None:
                 self.restart_counter += 1
@@ -417,12 +415,15 @@ class WebappInternal(Base):
             try_counter = 0
             while (time.time() < endtime and (env_value().strip() != self.config.environment.strip())):
 
+                logger().info(f'Filling Environment: "{self.config.environment}"')
+
                 if try_counter == 0:
                     env = lambda: self.soup_to_selenium(env_element)
                 else:
                     env = lambda: self.soup_to_selenium(env_element.parent)
 
                 self.set_element_focus(env())
+                self.click(env())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
@@ -702,7 +703,6 @@ class WebappInternal(Base):
 
         self.close_ballon_last_login()
 
-        logger().info("Filling Date")
         if self.config.poui_login:
             base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                         scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
@@ -736,6 +736,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
+            logger().info(f'Filling Date: "{self.config.date}"')
             self.double_click(date())
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
@@ -745,7 +746,6 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-        logger().info("Filling Group")
         if self.config.poui_login:
             group_elements = self.web_scrap(term=self.language.group, main_container='body',
                                             scrap_type=enum.ScrapType.TEXT, twebview=True)
@@ -782,6 +782,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
+            logger().info(f'Filling Group: "{self.config.group}"')
             self.double_click(group())
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
@@ -791,7 +792,6 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-        logger().info("Filling Branch")
         if self.config.poui_login:
             branch_elements = self.web_scrap(term=self.language.branch, main_container='body',
                                              scrap_type=enum.ScrapType.TEXT, twebview=True)
@@ -828,6 +828,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
+            logger().info(f'Filling Branch: "{self.config.branch}"')
             self.double_click(branch())
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
@@ -837,7 +838,6 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-        logger().info("Filling Environment")
         if self.config.poui_login:
             environment_elements = self.web_scrap(term=self.language.environment, main_container='body',
                                                   scrap_type=enum.ScrapType.TEXT, twebview=True)
@@ -881,6 +881,7 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and env_value.strip() != self.config.module.strip()):
+                logger().info(f'Filling Environment: "{self.config.module}"')
                 self.double_click(env())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
@@ -926,6 +927,7 @@ class WebappInternal(Base):
         click = 1
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and self.element_is_displayed(button()):
+            logger().info('Clicking on Button')
             self.click(button(), enum.ClickType(click))
             if self.config.poui_login:
                 break
@@ -5584,7 +5586,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse, .dict-tget"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5695,7 +5697,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5725,7 +5727,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget")
                             grids = self.filter_active_tabs(grids)
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
@@ -6432,7 +6434,10 @@ class WebappInternal(Base):
                                 self.wait_until_to(expected_condition="visibility_of", element=column_element)
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
+                            '''
                             self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
+                            '''
+                            self.click(column_element())
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
@@ -6454,16 +6459,17 @@ class WebappInternal(Base):
 
         same_position = []
 
-        main_element = self.soup_to_selenium(elements[grid_number])
+        if len(elements) <= grid_number:
+            main_element = self.soup_to_selenium(elements[grid_number])
 
-        x, y = main_element.location['x'], main_element.location['y']
+            x, y = main_element.location['x'], main_element.location['y']
 
-        for element in elements:
-            selenium_element = self.soup_to_selenium(element)
+            for element in elements:
+                selenium_element = self.soup_to_selenium(element)
 
-            if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
-                    not main_element == selenium_element:
-                same_position.append(element)
+                if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
+                        not main_element == selenium_element:
+                    same_position.append(element)
 
         if same_position:
             same_position.append(elements[grid_number])
