@@ -2213,7 +2213,10 @@ class WebappInternal(Base):
         position-=1
 
         if not input_field:
-            term=".tsay"
+            if self.webapp_shadowroot():
+                term=".dict-tsay"
+            else:    
+                term=".tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -2221,7 +2224,10 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                if self.webapp_shadowroot():
+                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.get('caption')) ,labels_displayed)) 
+                else:
+                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
@@ -2284,7 +2290,7 @@ class WebappInternal(Base):
 
             if not input_field:
                 if self.webapp_shadowroot():
-                    list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower(), list_in_range))
+                    list_in_range = list(filter(lambda x: x.previousSibling and field.strip().lower() == re.sub(regex, '', x.previousSibling.get('caption')).strip().lower(), list_in_range))
                 else:
                     list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
@@ -2793,7 +2799,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label":
+        if element.tag_name == "label" or element.tag_name == "wa-text-view":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
@@ -2872,7 +2878,10 @@ class WebappInternal(Base):
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
-            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            if self.webapp_shadowroot():
+                field_element = lambda : self.soup_to_selenium(element)
+            else:    
+                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
