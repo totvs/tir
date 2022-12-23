@@ -2987,14 +2987,7 @@ class WebappInternal(Base):
                 logger().debug(f'sc_query exception: {err}')
 
         try:
-            if self.restart_counter == 2:
-                logger().info("Closing the Browser")
-                self.driver.close()
-                logger().info("Starting the Browser")
-                self.Start()
-            else:
-                logger().info("Refreshing the Browser")
-                self.driver_refresh()
+            self.restart_browser()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -6829,6 +6822,7 @@ class WebappInternal(Base):
                 if  class_term in term:
                     return False
                 self.restart_counter += 1
+                logger().debug(f'wait_element doesn\'t found term: {term}')
                 if presence:
                     self.log_error(f"Element '{term}' not found!")
                 else:
@@ -9785,3 +9779,13 @@ class WebappInternal(Base):
                     logger().debug(f'.dmp file found: "{file}" in "{source_path}" moving to: "{destination_path}"')
                     shutil.move(file, destination_path)
                     self.test_suite.append(self.log.get_file_name('testsuite'))
+
+    def restart_browser(self):
+        """
+        [Internal]
+        """
+
+        logger().info("Closing the Browser")
+        self.driver.close()
+        logger().info("Starting the Browser")
+        self.Start()
