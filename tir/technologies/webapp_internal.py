@@ -2213,7 +2213,10 @@ class WebappInternal(Base):
         position-=1
 
         if not input_field:
-            term=".tsay"
+            if self.webapp_shadowroot():
+                term=".dict-tsay"
+            else:    
+                term=".tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -2221,7 +2224,10 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                if self.webapp_shadowroot():
+                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.get('caption')) ,labels_displayed)) 
+                else:
+                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
@@ -2284,7 +2290,7 @@ class WebappInternal(Base):
 
             if not input_field:
                 if self.webapp_shadowroot():
-                    list_in_range = list(filter(lambda x: field.strip().lower() == x.previousSibling.getText().strip().lower(), list_in_range))
+                    list_in_range = list(filter(lambda x: x.previousSibling and field.strip().lower() == re.sub(regex, '', x.previousSibling.get('caption')).strip().lower(), list_in_range))
                 else:
                     list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
@@ -2793,7 +2799,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label":
+        if element.tag_name == "label" or element.tag_name == "wa-text-view":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
@@ -2872,7 +2878,10 @@ class WebappInternal(Base):
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
-            field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+            if self.webapp_shadowroot():
+                field_element = lambda : self.soup_to_selenium(element)
+            else:    
+                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             self.set_element_focus(field_element())
             self.scroll_to_element(field_element())
@@ -2987,14 +2996,7 @@ class WebappInternal(Base):
                 logger().debug(f'sc_query exception: {err}')
 
         try:
-            if self.restart_counter == 2:
-                logger().info("Closing the Browser")
-                self.driver.close()
-                logger().info("Starting the Browser")
-                self.Start()
-            else:
-                logger().info("Refreshing the Browser")
-                self.driver_refresh()
+            self.restart_browser()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -6434,10 +6436,9 @@ class WebappInternal(Base):
                                 self.wait_until_to(expected_condition="visibility_of", element=column_element)
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
-                            '''
+
                             self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
-                            '''
-                            self.click(column_element())
+
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
                             if column_element_old_class != column_element().get_attribute("class") or 'selected' in column_element().get_attribute("class") :
@@ -6459,7 +6460,7 @@ class WebappInternal(Base):
 
         same_position = []
 
-        if len(elements) <= grid_number:
+        if len(elements) >= grid_number:
             main_element = self.soup_to_selenium(elements[grid_number])
 
             x, y = main_element.location['x'], main_element.location['y']
@@ -6829,6 +6830,7 @@ class WebappInternal(Base):
                 if  class_term in term:
                     return False
                 self.restart_counter += 1
+                logger().debug(f'wait_element doesn\'t found term: {term}')
                 if presence:
                     self.log_error(f"Element '{term}' not found!")
                 else:
@@ -9785,3 +9787,13 @@ class WebappInternal(Base):
                     logger().debug(f'.dmp file found: "{file}" in "{source_path}" moving to: "{destination_path}"')
                     shutil.move(file, destination_path)
                     self.test_suite.append(self.log.get_file_name('testsuite'))
+
+    def restart_browser(self):
+        """
+        [Internal]
+        """
+
+        logger().info("Closing the Browser")
+        self.driver.close()
+        logger().info("Starting the Browser")
+        self.Start()
