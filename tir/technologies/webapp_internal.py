@@ -7,6 +7,7 @@ import random
 import uuid
 import glob
 import shutil
+import cv2
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -15,7 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 import tir.technologies.core.enumerations as enum
-from tir.technologies.core.log import Log
+from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
@@ -2214,10 +2215,7 @@ class WebappInternal(Base):
         position-=1
 
         if not input_field:
-            if self.webapp_shadowroot():
-                term=".dict-tsay"
-            else:    
-                term=".tsay"
+            term=".tsay, .dict-tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -2225,10 +2223,7 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                if self.webapp_shadowroot():
-                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.get('caption')) ,labels_displayed)) 
-                else:
-                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
@@ -2800,7 +2795,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label" or element.tag_name == "wa-text-view":
+        if element.tag_name == "label":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
@@ -9384,7 +9379,13 @@ class WebappInternal(Base):
 
         soup_after_event = soup_before_event
 
+        self.wait_blocker()
         soup_select = None
+        str_img_before= 'screen_before_action.png'
+        str_img_after= 'screen_after_action.png'
+
+        self.driver.save_screenshot(str_img_before)
+        screen_before_action = cv2.imread(str_img_before, 0)
 
         endtime = time.time() + self.config.time_out
         try:
@@ -9409,8 +9410,32 @@ class WebappInternal(Base):
                     soup_after_event = soup_before_event
                 else:
                     soup_after_event = self.get_current_DOM()
+                
+                self.driver.save_screenshot(str_img_after)
+                screen_after_action = cv2.imread(str_img_after, 0)
+                diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
+                
+                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc:
+                    try:
+                        if self.config.log_http:
+                            folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
+                                            self.config.execution_id, self.log.get_file_name('testsuite'))
+                            path = pathlib.Path(folder_path)
+                            os.makedirs(pathlib.Path(folder_path))
+                        else:
+                            path = pathlib.Path("Log", socket.gethostname())
+                            os.makedirs(pathlib.Path("Log", socket.gethostname()))
+                    except OSError:
+                        pass
+
+                    folder_path_before = f'{path}\\{self.log.get_testcase_stack()}_{str_img_before}'
+                    folder_path_after = f'{path}\\{self.log.get_testcase_stack()}_{str_img_after}'
+                    cv2.imwrite(folder_path_before, screen_before_action)
+                    cv2.imwrite(folder_path_after, screen_after_action)
+                    cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
 
                 time.sleep(1)
+
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
@@ -9420,6 +9445,22 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
+
+
+    def image_compare(self, img1, img2):
+        """
+        Returns differences between 2 images in Gray Scale.
+
+        :param img1: cv2 object.
+        :param img2: cv2 object
+        :return: Mean Squared Error (Matching error) between the images.
+        """
+        h, w = img1.shape
+        diff = cv2.subtract(img1, img2)
+        err = nump.sum(diff**2)
+        mse = err/(float(h*w))
+        return mse, diff
+
 
     def get_soup_select(self, selector):
         """
