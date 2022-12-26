@@ -6460,17 +6460,15 @@ class WebappInternal(Base):
 
         same_position = []
 
-        if len(elements) >= grid_number:
-            main_element = self.soup_to_selenium(elements[grid_number])
+        main_element = self.soup_to_selenium(elements[grid_number])
+        x, y = main_element.location['x'], main_element.location['y']
 
-            x, y = main_element.location['x'], main_element.location['y']
+        for element in elements:
+            selenium_element = self.soup_to_selenium(element)
 
-            for element in elements:
-                selenium_element = self.soup_to_selenium(element)
-
-                if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
-                        not main_element == selenium_element:
-                    same_position.append(element)
+            if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
+                    not main_element == selenium_element:
+                same_position.append(element)
 
         if same_position:
             same_position.append(elements[grid_number])
