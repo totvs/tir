@@ -2794,7 +2794,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label":
+        if element.tag_name == "label" or element.tag_name == "wa-text-view":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
