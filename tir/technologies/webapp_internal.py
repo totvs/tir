@@ -7,6 +7,7 @@ import random
 import uuid
 import glob
 import shutil
+import cv2
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -15,7 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 import tir.technologies.core.enumerations as enum
-from tir.technologies.core.log import Log
+from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
@@ -271,15 +272,16 @@ class WebappInternal(Base):
 
             self.close_screen_before_menu()
 
-            cget_term = '[name=cGet]'
-            endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
-                logger().debug('Waiting menu screen after environment screen')
-                time.sleep(10)
+            if initial_program.lower() != 'sigacfg':
+                cget_term = '[name=cGet]'
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
+                    logger().debug('Waiting menu screen after environment screen')
+                    time.sleep(10)
 
-            if time.time() > endtime:
-                self.restart_counter + 1
-                self.log_error(f"'Unable to load screen '{cget_term}' content.")
+                if time.time() > endtime:
+                    self.restart_counter + 1
+                    self.log_error(f"'Unable to load screen '{cget_term}' content.")
 
             if save_input:
                 self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
@@ -1481,14 +1483,14 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().debug('Escape to menu')
-                self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                                             stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
+                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
             if self.check_layers('wa-dialog') > 1:
                 logger().debug('Found layers after Escape to menu')
-                self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                                             stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
+                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
                 self.close_screen_before_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -2138,7 +2140,7 @@ class WebappInternal(Base):
 
         if time.time() > endtime:
             logger().debug('wait_blocker timeout')
-            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            # self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         return result
 
@@ -2213,10 +2215,7 @@ class WebappInternal(Base):
         position-=1
 
         if not input_field:
-            if self.webapp_shadowroot():
-                term=".dict-tsay"
-            else:    
-                term=".tsay"
+            term=".tsay, .dict-tsay"
 
         try:
             while( time.time() < endtime and not label ):
@@ -2224,10 +2223,7 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                if self.webapp_shadowroot():
-                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.get('caption')) ,labels_displayed)) 
-                else:
-                    view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
@@ -2799,7 +2795,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label" or element.tag_name == "wa-text-view":
+        if element.tag_name == "label":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
@@ -3000,8 +2996,8 @@ class WebappInternal(Base):
         except WebDriverException as e:
             webdriver_exception = e
 
-        logger().debug('screenshot after restart driver_refresh.')
-        self.log.take_screenshot_log(self.driver, 'restart', stack_item=self.log.get_testcase_stack())
+        # logger().debug('screenshot after restart driver_refresh.')
+        # self.log.take_screenshot_log(self.driver, 'restart', stack_item=self.log.get_testcase_stack())
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
             self.assertTrue(False, message)
@@ -3684,14 +3680,14 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
         elif self.check_layers('wa-dialog') > 1:
             logger().debug('Escape to menu')
-            self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
+            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
         if self.check_layers('wa-dialog') > 1:
             logger().debug('Found layers after Escape to menu')
-            self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-                                         stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
+            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
+            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
             self.close_screen_before_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -5707,9 +5703,7 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out + 300
             while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
-                logger().debug('Trying fill grid!')
                 endtime_row = time.time() + self.config.time_out
-                logger().debug('logging!')
                 while (time.time() < endtime_row and grid_reload):
 
                     if not field[4]:
@@ -5757,55 +5751,43 @@ class WebappInternal(Base):
                     if (field[4] is not None) and not (field[4] > len(rows) - 1 or field[4] < 0):
                         grid_reload = False
 
-                logger().debug('logging!')
                 if (field[4] is not None) and (field[4] > len(rows) - 1 or field[4] < 0):
                     self.log_error(f"Couldn't select the specified row: {field[4] + 1}")
 
                 if grids:
-                    logger().debug('logging!')
                     if field[2] + 1 > len(grids):
                         self.log_error(
                             f'{self.language.messages.grid_number_error} Grid number: {field[2] + 1} Grids in the screen: {len(grids)}')
                 else:
                     self.log_error("Grid element doesn't appear in DOM")
 
-                logger().debug('logging!')
                 row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
                     next(iter(rows), None))
-                logger().debug('logging!')
 
                 if row:
                     if self.webapp_shadowroot():
                         row_id = row.get_attribute("id")
                     else:
                         row_id = row.attrs["id"]
-                    logger().debug('logging!')
                     while (int(row_id) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[
                         4] is None and time.time() < endtime:
-                        logger().debug('logging!')
                         self.new_grid_line(field, False)
-                        logger().debug('logging!')
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
-                        logger().debug('logging!')
                         down_loop += 1
                     self.down_loop_grid = False
                     if self.webapp_shadowroot():
                         columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
                     else:
-                        logger().debug('logging!')
                         columns = row.select("td")
                     if columns:
                         if column_name in headers[field[2]]:
                             column_number = headers[field[2]][column_name]
 
                             current_value = columns[column_number].text.strip()
-                            logger().debug('logging!')
                             current_value = self.remove_mask(current_value).strip()
-                            logger().debug('logging!')
                             if self.webapp_shadowroot():
                                 selenium_column = lambda: columns[column_number]
                             else:
-                                logger().debug('logging!')
                                 xpath = xpath_soup(columns[column_number])
                                 selenium_column = lambda: self.get_selenium_column_element(
                                     xpath) if self.get_selenium_column_element(xpath) else self.try_recover_lost_line(field,
@@ -5814,9 +5796,7 @@ class WebappInternal(Base):
                                                                                                                     headers,
                                                                                                                     field_to_label)
 
-                            logger().debug('logging!')
                             endtime_selected_cell = time.time() + self.config.time_out
-                            logger().debug('logging!')
                             while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
@@ -5824,17 +5804,14 @@ class WebappInternal(Base):
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
 
-                            logger().debug('logging!')
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
                             else:
                                 term = ".tmodaldialog"
 
-                            logger().debug('logging!')
                             soup = self.get_current_DOM()
                             tmodal_list = soup.select(term)
                             tmodal_layer = len(tmodal_list) if tmodal_list else 0
-                            logger().debug('logging!')
 
                             while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                                 time.sleep(1)
@@ -6460,17 +6437,15 @@ class WebappInternal(Base):
 
         same_position = []
 
-        if len(elements) >= grid_number:
-            main_element = self.soup_to_selenium(elements[grid_number])
+        main_element = self.soup_to_selenium(elements[grid_number])
+        x, y = main_element.location['x'], main_element.location['y']
 
-            x, y = main_element.location['x'], main_element.location['y']
+        for element in elements:
+            selenium_element = self.soup_to_selenium(element)
 
-            for element in elements:
-                selenium_element = self.soup_to_selenium(element)
-
-                if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
-                        not main_element == selenium_element:
-                    same_position.append(element)
+            if x == selenium_element.location['x'] and y == selenium_element.location['y'] and \
+                    not main_element == selenium_element:
+                same_position.append(element)
 
         if same_position:
             same_position.append(elements[grid_number])
@@ -9404,7 +9379,13 @@ class WebappInternal(Base):
 
         soup_after_event = soup_before_event
 
+        self.wait_blocker()
         soup_select = None
+        str_img_before= 'screen_before_action.png'
+        str_img_after= 'screen_after_action.png'
+
+        self.driver.save_screenshot(str_img_before)
+        screen_before_action = cv2.imread(str_img_before, 0)
 
         endtime = time.time() + self.config.time_out
         try:
@@ -9429,8 +9410,32 @@ class WebappInternal(Base):
                     soup_after_event = soup_before_event
                 else:
                     soup_after_event = self.get_current_DOM()
+                
+                self.driver.save_screenshot(str_img_after)
+                screen_after_action = cv2.imread(str_img_after, 0)
+                diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
+                
+                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc:
+                    try:
+                        if self.config.log_http:
+                            folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
+                                            self.config.execution_id, self.log.get_file_name('testsuite'))
+                            path = pathlib.Path(folder_path)
+                            os.makedirs(pathlib.Path(folder_path))
+                        else:
+                            path = pathlib.Path("Log", socket.gethostname())
+                            os.makedirs(pathlib.Path("Log", socket.gethostname()))
+                    except OSError:
+                        pass
+
+                    folder_path_before = f'{path}\\{self.log.get_testcase_stack()}_{str_img_before}'
+                    folder_path_after = f'{path}\\{self.log.get_testcase_stack()}_{str_img_after}'
+                    cv2.imwrite(folder_path_before, screen_before_action)
+                    cv2.imwrite(folder_path_after, screen_after_action)
+                    cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
 
                 time.sleep(1)
+
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
@@ -9440,6 +9445,22 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
+
+
+    def image_compare(self, img1, img2):
+        """
+        Returns differences between 2 images in Gray Scale.
+
+        :param img1: cv2 object.
+        :param img2: cv2 object
+        :return: Mean Squared Error (Matching error) between the images.
+        """
+        h, w = img1.shape
+        diff = cv2.subtract(img1, img2)
+        err = nump.sum(diff**2)
+        mse = err/(float(h*w))
+        return mse, diff
+
 
     def get_soup_select(self, selector):
         """
