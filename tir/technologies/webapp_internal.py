@@ -3980,7 +3980,7 @@ class WebappInternal(Base):
             while(time.time() < endtime and not soup_element):
                 if self.webapp_shadowroot():
                     self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
-                    #self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
+                    self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
