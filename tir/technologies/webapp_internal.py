@@ -736,17 +736,25 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
+        click_type = 1
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
             logger().info(f'Filling Date: "{self.config.date}"')
-            self.double_click(date())
+            self.wait_blocker()
+            self.click(date(), click_type=enum.ClickType(click_type))
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
             self.send_keys(date(), self.config.date)
             base_date_value = self.get_web_value(date())
+            logger().debug(f'')
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+            time.sleep(1)
+            click_type += 1
+            if click_type > 3:
+                click_type = 1
 
         if self.config.poui_login:
             group_elements = self.web_scrap(term=self.language.group, main_container='body',
@@ -782,10 +790,12 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
+        click_type = 1
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
             logger().info(f'Filling Group: "{self.config.group}"')
-            self.double_click(group())
+            self.wait_blocker()
+            self.click(group(), click_type=enum.ClickType(click_type))
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
@@ -793,6 +803,11 @@ class WebappInternal(Base):
             group_value = self.get_web_value(group())
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+            time.sleep(1)
+            click_type += 1
+            if click_type > 3:
+                click_type = 1
 
         if self.config.poui_login:
             branch_elements = self.web_scrap(term=self.language.branch, main_container='body',
@@ -828,10 +843,12 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
+        click_type = 1
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
             logger().info(f'Filling Branch: "{self.config.branch}"')
-            self.double_click(branch())
+            self.wait_blocker()
+            self.click(branch(), click_type=enum.ClickType(click_type))
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
             ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
@@ -839,6 +856,11 @@ class WebappInternal(Base):
             branch_value = self.get_web_value(branch())
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+            time.sleep(1)
+            click_type += 1
+            if click_type > 3:
+                click_type = 1
 
         if self.config.poui_login:
             environment_elements = self.web_scrap(term=self.language.environment, main_container='body',
@@ -881,10 +903,12 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 self.switch_to_iframe()
 
+            click_type = 1
             endtime = time.time() + self.config.time_out
             while (time.time() < endtime and env_value.strip() != self.config.module.strip()):
                 logger().info(f'Filling Environment: "{self.config.module}"')
-                self.double_click(env())
+                self.wait_blocker()
+                self.click(env(), click_type=enum.ClickType(click_type))
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
@@ -894,6 +918,11 @@ class WebappInternal(Base):
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
                 time.sleep(1)
                 self.close_warning_screen()
+
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
         if self.config.poui_login:
             buttons = self.filter_displayed_elements(
@@ -930,6 +959,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and self.element_is_displayed(button()):
             logger().info('Clicking on Button')
+            self.wait_blocker()
             self.click(button(), enum.ClickType(click))
             if self.config.poui_login:
                 break
@@ -2139,7 +2169,7 @@ class WebappInternal(Base):
                 return False
 
         if time.time() > endtime:
-            logger().debug('wait_blocker timeout')
+            logger().debug(f'wait_blocker timeout: {blocker} blocker container {blocker_container}')
             # self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
 
         return result
@@ -2790,6 +2820,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> current_value = self.get_web_value(selenium_field_element)
         """
+
+        web_value = None
+
         if element.tag_name == "div":
             element_children = element.find_element(By.CSS_SELECTOR, "div > * ")
             if element_children is not None:
@@ -2811,6 +2844,7 @@ class WebappInternal(Base):
         else:
             web_value = element.get_attribute("value")
 
+        logger().debug(f"Current value: {web_value}")
         return web_value
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
