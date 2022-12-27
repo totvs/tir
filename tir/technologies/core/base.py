@@ -176,6 +176,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if right_click:
                 ActionChains(self.driver).context_click(element).perform()
@@ -240,6 +243,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.double_click(element())
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if click_type == enum.ClickType.SELENIUM:
                 self.scroll_to_element(element)
