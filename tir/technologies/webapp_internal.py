@@ -8,6 +8,7 @@ import uuid
 import glob
 import shutil
 import cv2
+import socket
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
