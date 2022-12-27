@@ -2795,7 +2795,7 @@ class WebappInternal(Base):
             if element_children is not None:
                 element = element_children
 
-        if element.tag_name == "label":
+        if element.tag_name == "label" or element.tag_name == "wa-text-view":
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
@@ -5584,7 +5584,7 @@ class WebappInternal(Base):
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse, .dict-tget"
+                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
             else:
                 selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5695,7 +5695,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget',main_container="body")
+                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
@@ -5723,7 +5723,7 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
                         if self.webapp_shadowroot():
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse, .dict-tget")
+                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
                             grids = self.filter_active_tabs(grids)
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
