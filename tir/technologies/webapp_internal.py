@@ -6449,7 +6449,9 @@ class WebappInternal(Base):
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
 
-                            self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
+                            endtime_click = time.time() + self.config.time_out/2
+                            while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
+                                self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
