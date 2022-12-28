@@ -633,7 +633,7 @@ class WebappInternal(Base):
         if self.config.poui_login:
             self.switch_to_iframe()
 
-        self.click(button())
+        self.send_action(self.click, button)
 
     def reload_user_screen(self):
         """
@@ -748,7 +748,6 @@ class WebappInternal(Base):
                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
             self.send_keys(date(), self.config.date)
             base_date_value = self.get_web_value(date())
-            logger().debug(f'')
             if self.config.poui_login:
                 ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
@@ -2154,6 +2153,7 @@ class WebappInternal(Base):
             try:
                 if blocker_container:
                     if self.webapp_shadowroot():
+                        blocker_container_soup = blocker_container()
                         blocker_container = self.soup_to_selenium(blocker_container())
                         blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
                             blocker_container, 'get_property') else None
@@ -2170,8 +2170,23 @@ class WebappInternal(Base):
                 return False
 
         if time.time() > endtime:
-            logger().debug(f'wait_blocker timeout: {blocker} blocker container {blocker_container}')
-            # self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            if hasattr(blocker_container_soup, 'attrs'):
+                blocker_container_soup_info = str(blocker_container_soup.attrs)
+
+                if hasattr(blocker_container_soup, 'id'):
+                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
+
+                if hasattr(blocker_container_soup, 'title'):
+                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
+
+            else:
+                blocker_container_soup_info = blocker_container_soup[:1000]
+
+            logger().debug(f'wait_blocker timeout: {blocker} blocker container {str(blocker_container_soup_info)}')
+            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            if self.search_stack("Setup"):
+                self.restart_counter + 1
+                self.log_error('Blocked property timeout')
 
         return result
 
@@ -9422,6 +9437,7 @@ class WebappInternal(Base):
         self.driver.save_screenshot(str_img_before)
         screen_before_action = cv2.imread(str_img_before, 0)
 
+        click_type = 1
         endtime = time.time() + self.config.time_out
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
@@ -9435,7 +9451,7 @@ class WebappInternal(Base):
                     action(element(), value)
                 elif element:
                     self.set_element_focus(element())
-                    action(element())
+                    action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
 
@@ -9445,6 +9461,10 @@ class WebappInternal(Base):
                     soup_after_event = soup_before_event
                 else:
                     soup_after_event = self.get_current_DOM()
+
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
                 
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
