@@ -5417,17 +5417,17 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                        main_container=self.containers_selectors["Containers"],
                                                        label=label, position=position)), None)
+            if element:
+                if self.webapp_shadowroot():
+                    element = self.soup_to_selenium(element)
+                    input_element = next(iter(self.find_shadow_element('input', element)), None)
+                    if input_element:
+                        element = input_element
 
-            if self.webapp_shadowroot():
-                element = self.soup_to_selenium(element)
-                input_element = next(iter(self.find_shadow_element('input', element)), None)
-                if input_element:
-                    element = input_element
+                element = element if self.webapp_shadowroot() else self.soup_to_selenium(element)
 
-            element = element if self.webapp_shadowroot() else self.soup_to_selenium(element)
-
-            if element and not self.element_is_displayed(element):
-                self.scroll_to_element(element)
+                if element and not self.element_is_displayed(element):
+                    self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
                 if self.driver.switch_to_active_element() != element:
