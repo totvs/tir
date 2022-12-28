@@ -5417,17 +5417,17 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                        main_container=self.containers_selectors["Containers"],
                                                        label=label, position=position)), None)
+            if element:
+                if self.webapp_shadowroot():
+                    element = self.soup_to_selenium(element)
+                    input_element = next(iter(self.find_shadow_element('input', element)), None)
+                    if input_element:
+                        element = input_element
 
-            if self.webapp_shadowroot():
-                element = self.soup_to_selenium(element)
-                input_element = next(iter(self.find_shadow_element('input', element)), None)
-                if input_element:
-                    element = input_element
+                element = element if self.webapp_shadowroot() else self.soup_to_selenium(element)
 
-            element = element if self.webapp_shadowroot() else self.soup_to_selenium(element)
-
-            if element and not self.element_is_displayed(element):
-                self.scroll_to_element(element)
+                if element and not self.element_is_displayed(element):
+                    self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
                 if self.driver.switch_to_active_element() != element:
@@ -6449,7 +6449,9 @@ class WebappInternal(Base):
                             else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element = columns[column_number], locator = By.XPATH, timeout=True)
 
-                            self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
+                            endtime_click = time.time() + self.config.time_out/2
+                            while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
+                                self.click(column_element(), click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
