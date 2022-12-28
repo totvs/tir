@@ -720,8 +720,8 @@ class Base(unittest.TestCase):
         """
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
-        except StaleElementReferenceException:
-            logger().exception("********Element Stale scroll_to_element*********")
+        except Exception as e:
+            logger().exception(f"********Warining scroll_to_element exception: {str(e)}*********")
             pass
 
     def search_zindex(self,element):
