@@ -704,8 +704,6 @@ class WebappInternal(Base):
             else:
                 self.wait_element(self.language.database, main_container=container)
 
-        self.close_ballon_last_login()
-
         if self.config.poui_login:
             base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                         scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
