@@ -5721,6 +5721,7 @@ class WebappInternal(Base):
         try_counter = 1
         grid_reload = True
         check_value = field[5]
+        grid_class=[]
 
         if (field[1] == True):
             field_one = 'is a boolean value'
@@ -5865,12 +5866,12 @@ class WebappInternal(Base):
 
                             while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
                                 time.sleep(1)
+                                grid_class= grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
-                                self.scroll_to_element(selenium_column())
-                                self.set_element_focus(selenium_column())
-                                self.click(selenium_column(),
-                                        click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
-                                    selenium_column())
+                                if not 'dict-msbrgetdbase' in grid_class:
+                                    self.scroll_to_element(selenium_column())
+                                    self.set_element_focus(selenium_column())
+                                self.send_action(action=ActionChains(self.driver).click(selenium_column()).perform) if self.webapp_shadowroot() else self.click(selenium_column())
                                 try:
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
                                         selenium_column(), Keys.ENTER).perform()
