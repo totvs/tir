@@ -4177,7 +4177,9 @@ class WebappInternal(Base):
             elif ',' in sub_item:
                 list_sub_itens = sub_item.split(',')
                 filtered_sub_itens = list(map(lambda x: x.strip(), list_sub_itens))
-                self.click_sub_menu(filtered_sub_itens)
+                sucess = self.click_sub_menu(filtered_sub_itens)
+                if not sucess:
+                    self.log_error(f"Couldn't find element {sub_item}")
 
             buttons = [self.language.Ok, self.language.confirm, self.language.finish,self.language.save, self.language.exit, self.language.next, "x"]
 
@@ -4272,13 +4274,19 @@ class WebappInternal(Base):
         if isinstance(filtered_sub_itens, list):
             sub_item = filtered_sub_itens[len(filtered_sub_itens) - 1]
             if self.webapp_shadowroot():
-                parent_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens[-2], soup.select(selector)))[0].get('id')
-                menu_id = list(filter(lambda x: x.get('caption') == sub_item and x.parent.get('id') == parent_id, soup.select(selector)))[0].get('id')
+                parent_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == filtered_sub_itens[-2], soup.select(selector)), None)
+                if parent_id:
+                    parent_id = parent_id.get('id')
+                    menu_id = next(filter(lambda x: x.get('caption').strip() == sub_item and x.parent.get('id') == parent_id, soup.select(selector)), None)
+                    if menu_id:
+                        menu_id = menu_id.get('id')
             else:
                 menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
         else:
             if self.webapp_shadowroot():
-                menu_id = list(filter(lambda x: re.sub(regex, '', x.get('caption')) == filtered_sub_itens, soup.select(selector)))[0].get('id')
+                menu_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == filtered_sub_itens, soup.select(selector)), None)
+                if menu_id:
+                    menu_id= menu_id.get('id')
             else:
                 menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
 
