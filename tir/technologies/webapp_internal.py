@@ -787,7 +787,6 @@ class WebappInternal(Base):
             else:
                 base_date = next(iter(base_dates), None)
 
-
             if base_date:
                 date = lambda: self.soup_to_selenium(base_date)
 
