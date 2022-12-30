@@ -17,6 +17,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 import tir.technologies.core.enumerations as enum
+from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
@@ -786,33 +787,29 @@ class WebappInternal(Base):
             else:
                 base_date = next(iter(base_dates), None)
 
-            if base_date is None:
-                self.restart_counter += 1
-                message = "Couldn't find Date input element."
-                self.log_error(message)
-                raise ValueError(message)
 
-            date = lambda: self.soup_to_selenium(base_date)
+            if base_date:
+                date = lambda: self.soup_to_selenium(base_date)
 
-            if self.config.poui_login:
-                self.switch_to_iframe()
+                if self.config.poui_login:
+                    self.switch_to_iframe()
 
-            logger().info(f'Filling Date: "{self.config.date}"')
+                logger().info(f'Filling Date: "{self.config.date}"')
 
-            self.wait_blocker()
-            self.click(date(), click_type=enum.ClickType(click_type))
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(date(), self.config.date)
-            base_date_value = self.get_web_value(date())
-            if self.config.poui_login:
-                ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                self.wait_blocker()
+                self.click(date(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(date(), self.config.date)
+                base_date_value = self.get_web_value(date())
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-            time.sleep(1)
-            click_type += 1
-            if click_type > 3:
-                click_type = 1
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
@@ -846,32 +843,27 @@ class WebappInternal(Base):
                 else:
                     group_element = next(iter(group_elements), None)
 
-            if group_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find Group input element."
-                self.log_error(message)
-                raise ValueError(message)
+            if group_element:
+                group = lambda: self.soup_to_selenium(group_element)
 
-            group = lambda: self.soup_to_selenium(group_element)
+                if self.config.poui_login:
+                    self.switch_to_iframe()
 
-            if self.config.poui_login:
-                self.switch_to_iframe()
+                logger().info(f'Filling Group: "{self.config.group}"')
+                self.wait_blocker()
+                self.click(group(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(group(), self.config.group)
+                group_value = self.get_web_value(group())
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-            logger().info(f'Filling Group: "{self.config.group}"')
-            self.wait_blocker()
-            self.click(group(), click_type=enum.ClickType(click_type))
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(group(), self.config.group)
-            group_value = self.get_web_value(group())
-            if self.config.poui_login:
-                ActionChains(self.driver).send_keys(Keys.TAB).perform()
-
-            time.sleep(1)
-            click_type += 1
-            if click_type > 3:
-                click_type = 1
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filliing_branch(self, shadow_root=None, container=None):
         """
@@ -905,32 +897,27 @@ class WebappInternal(Base):
                 else:
                     branch_element = next(iter(branch_elements), None)
 
-            if branch_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find Branch input element."
-                self.log_error(message)
-                raise ValueError(message)
+            if branch_element:
+                branch = lambda: self.soup_to_selenium(branch_element)
 
-            branch = lambda: self.soup_to_selenium(branch_element)
-
-            if self.config.poui_login:
-                self.switch_to_iframe()
-
-                logger().info(f'Filling Branch: "{self.config.branch}"')
-                self.wait_blocker()
-                self.click(branch(), click_type=enum.ClickType(click_type))
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(branch(), self.config.branch)
-                branch_value = self.get_web_value(branch())
                 if self.config.poui_login:
-                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                    self.switch_to_iframe()
 
-                time.sleep(1)
-                click_type += 1
-                if click_type > 3:
-                    click_type = 1
+                    logger().info(f'Filling Branch: "{self.config.branch}"')
+                    self.wait_blocker()
+                    self.click(branch(), click_type=enum.ClickType(click_type))
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                    self.send_keys(branch(), self.config.branch)
+                    branch_value = self.get_web_value(branch())
+                    if self.config.poui_login:
+                        ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+                    time.sleep(1)
+                    click_type += 1
+                    if click_type > 3:
+                        click_type = 1
 
     def filling_environment(self, shadow_root=None, container=None):
         """
@@ -963,42 +950,37 @@ class WebappInternal(Base):
                 else:
                     environment_element = next(iter(environment_elements), None)
 
-            if environment_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find Module input element."
-                self.log_error(message)
-                raise ValueError(message)
+            if environment_element:
+                env = lambda: self.soup_to_selenium(environment_element)
 
-            env = lambda: self.soup_to_selenium(environment_element)
-
-            if self.config.poui_login:
-                self.switch_to_iframe()
-                enable = env().is_enabled()
-            else:
-                enable = ("disabled" not in environment_element.parent.attrs[
-                    "class"] and env().is_enabled()) and not env().get_attribute('disabled')
-
-            if enable:
                 if self.config.poui_login:
                     self.switch_to_iframe()
+                    enable = env().is_enabled()
+                else:
+                    enable = ("disabled" not in environment_element.parent.attrs[
+                        "class"] and env().is_enabled()) and not env().get_attribute('disabled')
 
-            logger().info(f'Filling Environment: "{self.config.module}"')
-            self.wait_blocker()
-            self.click(env(), click_type=enum.ClickType(click_type))
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(env(), self.config.module)
-            env_value = self.get_web_value(env())
-            if self.config.poui_login:
-                ActionChains(self.driver).send_keys(Keys.TAB).perform()
-            time.sleep(1)
-            self.close_warning_screen()
+                if enable:
+                    if self.config.poui_login:
+                        self.switch_to_iframe()
 
-            time.sleep(1)
-            click_type += 1
-            if click_type > 3:
-                click_type = 1
+                logger().info(f'Filling Environment: "{self.config.module}"')
+                self.wait_blocker()
+                self.click(env(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(env(), self.config.module)
+                env_value = self.get_web_value(env())
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                time.sleep(1)
+                self.close_warning_screen()
+
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
