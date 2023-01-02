@@ -696,7 +696,7 @@ class WebappInternal(Base):
 
         self.filling_group(shadow_root=shadow_root, container=container)
 
-        self.filliing_branch(shadow_root=shadow_root, container=container)
+        self.filling_branch(shadow_root=shadow_root, container=container)
 
         self.filling_environment(shadow_root=shadow_root, container=container)
 
@@ -864,7 +864,7 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
-    def filliing_branch(self, shadow_root=None, container=None):
+    def filling_branch(self, shadow_root=None, container=None):
         """
 
         """
@@ -902,21 +902,21 @@ class WebappInternal(Base):
                 if self.config.poui_login:
                     self.switch_to_iframe()
 
-                    logger().info(f'Filling Branch: "{self.config.branch}"')
-                    self.wait_blocker()
-                    self.click(branch(), click_type=enum.ClickType(click_type))
-                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.send_keys(branch(), self.config.branch)
-                    branch_value = self.get_web_value(branch())
-                    if self.config.poui_login:
-                        ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                logger().info(f'Filling Branch: "{self.config.branch}"')
+                self.wait_blocker()
+                self.click(branch(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(branch(), self.config.branch)
+                branch_value = self.get_web_value(branch())
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-                    time.sleep(1)
-                    click_type += 1
-                    if click_type > 3:
-                        click_type = 1
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filling_environment(self, shadow_root=None, container=None):
         """
