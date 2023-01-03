@@ -2185,10 +2185,10 @@ class WebappInternal(Base):
                 blocker_container_soup_info = blocker_container_soup[:1000]
 
             logger().debug(f'wait_blocker timeout: {blocker} blocker container {str(blocker_container_soup_info)}')
-            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
-            if self.search_stack("Setup"):
-                self.restart_counter + 1
-                self.log_error('Blocked property timeout')
+            # self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            # if self.search_stack("Setup"):
+            #     self.restart_counter + 1
+            #     self.log_error('Blocked property timeout')
 
         return result
 
