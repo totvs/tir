@@ -2172,20 +2172,8 @@ class WebappInternal(Base):
                 return False
 
         if time.time() > endtime:
-            if hasattr(blocker_container_soup, 'attrs'):
-                blocker_container_soup_info = str(blocker_container_soup.attrs)
-
-                if hasattr(blocker_container_soup, 'id'):
-                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
-
-                if hasattr(blocker_container_soup, 'title'):
-                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
-
-            else:
-                blocker_container_soup_info = blocker_container_soup[:1000]
-
-            logger().debug(f'wait_blocker timeout: {blocker} blocker container {str(blocker_container_soup_info)}')
-            # self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
+            self.check_blocked_container(blocker_container_soup)
+            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
             # if self.search_stack("Setup"):
             #     self.restart_counter + 1
             #     self.log_error('Blocked property timeout')
@@ -2217,6 +2205,36 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
 
+    def check_blocked_container(self, blocker_container_soup):
+        """
+
+        :return:
+        """
+
+        try:
+
+            if hasattr(blocker_container_soup, 'attrs'):
+                blocker_container_soup_info = str(blocker_container_soup.attrs)
+
+                if hasattr(blocker_container_soup, 'id'):
+                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
+
+                if hasattr(blocker_container_soup, 'title'):
+                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
+
+            else:
+                blocker_container_soup_info = blocker_container_soup[:1000]
+
+            logger().debug(f'wait_blocker timeout | blocker container: {str(blocker_container_soup_info)}')
+
+            soup = lambda: self.get_current_DOM()
+
+            containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
+
+            for container in containers:
+                logger().debug(f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']}")
+        except:
+            pass
 
     def get_panel_name_index(self, panel_name):
         """
@@ -6973,6 +6991,7 @@ class WebappInternal(Base):
                         continue
         return success
 
+
     def get_selected_row(self, rows):
         """
         [Internal]
@@ -6991,16 +7010,13 @@ class WebappInternal(Base):
         >>> selected_row = self.get_selected_row(rows)
         """
         if self.webapp_shadowroot():
-            for row in rows:
-                filtered_rows = self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", row)
-                if filtered_rows:
-                   return row
-                else:
-                    filtered_rows = self.driver.execute_script("return arguments[0].querySelector('.selected-row')", row)
-                    if filtered_rows:
-                        return row
-                    else:
-                        return next(reversed(rows), None)                
+            filtered_rows = list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", x),rows))
+            if filtered_rows:
+                return next(iter(filtered_rows), None)
+
+            filtered_rows =list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('.selected-row')", x),rows))
+            if filtered_rows:
+                return next(iter(filtered_rows), None)
 
         else:
             filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
@@ -7010,6 +7026,8 @@ class WebappInternal(Base):
                 filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
                 if filtered_rows:
                     return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
+        return next(reversed(rows), None)   
+
 
     def SetFilePath(self, value, button = ""):
         """
