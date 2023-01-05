@@ -645,7 +645,7 @@ class WebappInternal(Base):
 
         logger().debug('Reloading user screen')
 
-        self.driver_refresh()
+        self.restart_browser()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
@@ -653,7 +653,7 @@ class WebappInternal(Base):
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
 
-        self.wait_element_timeout(term="[name='cGetUser'] > input",
+        self.wait_element_timeout(term="[name='cGetUser']",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
 
 
@@ -2144,7 +2144,7 @@ class WebappInternal(Base):
         logger().debug("Waiting blocker to continue...")
         soup = None
         result = True
-        endtime = time.time() + 300
+        endtime = time.time() + self.config.time_out / 5
 
         while (time.time() < endtime and result):
             blocker_container = None
@@ -2166,6 +2166,9 @@ class WebappInternal(Base):
             except:
                 pass
 
+            logger().debug(f'Blocker status: {blocker}')
+            time.sleep(1)
+
             if blocker:
                 result = True
             else:
@@ -2173,10 +2176,6 @@ class WebappInternal(Base):
 
         if time.time() > endtime:
             self.check_blocked_container(blocker_container_soup)
-            self.log.take_screenshot_log(driver=self.driver, description='wait_blocker', stack_item=self.log.get_testcase_stack())#TODO trecho inserido para analise
-            # if self.search_stack("Setup"):
-            #     self.restart_counter + 1
-            #     self.log_error('Blocked property timeout')
 
         return result
 
@@ -9902,5 +9901,18 @@ class WebappInternal(Base):
 
         logger().info("Closing the Browser")
         self.driver.close()
+        self.close_process()
         logger().info("Starting the Browser")
         self.Start()
+
+    def close_process(self):
+        """
+        [Internal]
+        """
+        logger().debug('Closing process')
+        try:
+            os.system("taskkill /f /im firefox.exe")
+            os.system("taskkill /f /im geckodriver.exe")
+        except Exception as e:
+            logger().debug(f'Close process error: {str(e)}')
+
