@@ -7419,7 +7419,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not icon and not success):
             if self.webapp_shadowroot():
-                selector = "wa-toolbar, .dict-tbtnbmp2"
+                selector = "wa-toolbar, .dict-tbtnbmp2, .dict-tbtnbmp"
             else:
                 selector = ".ttoolbar, .tbtnbmp"
 
@@ -7431,7 +7431,7 @@ class WebappInternal(Base):
                 container = next(iter(self.zindex_sort(soup.select(".tmodaldialog"))), None)
             container = container if container else soup
             if self.webapp_shadowroot():
-                tbtnbmp_img = self.on_screen_enabled(container.select("wa-toolbar,.dict-tbtnbmp2"))
+                tbtnbmp_img = self.on_screen_enabled(container.select(selector))
             else:
                 tbtnbmp_img = self.on_screen_enabled(container.select(".tbtnbmp > img"))
             tbtnbmp_img_str = " ".join(str(x) for x in tbtnbmp_img) if tbtnbmp_img else ''
