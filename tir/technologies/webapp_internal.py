@@ -9493,14 +9493,12 @@ class WebappInternal(Base):
                     soup_after_event = self.get_current_DOM()
 
                 click_type += 1
-                if click_type > 3:
-                    click_type = 1
-                
+
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
                 diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
                 
-                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc:
+                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and click_type > 3:
                     try:
                         if self.config.log_http:
                             folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
@@ -9518,6 +9516,9 @@ class WebappInternal(Base):
                     cv2.imwrite(folder_path_before, screen_before_action)
                     cv2.imwrite(folder_path_after, screen_after_action)
                     cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
+                
+                if click_type > 3:
+                    click_type = 1
 
                 time.sleep(1)
 
