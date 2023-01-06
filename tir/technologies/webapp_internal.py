@@ -2321,6 +2321,8 @@ class WebappInternal(Base):
             if input_field:
                 active_tab = self.filter_active_tabs(container)
                 active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
+                if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
+                   active_childs = [active_tab] 
                 labels_in_tab = next(iter(active_childs), None)
                 if labels_in_tab != None and labels_in_tab.contents != None:
                     label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
@@ -2673,6 +2675,10 @@ class WebappInternal(Base):
                     interface_value_size = len(interface_value)
                 user_value_size = len(value)
 
+                if valtype == 'D' and user_value_size > interface_value_size:
+                    main_value_bkp = main_value
+                    main_value = value[0:6] + value[8:10]
+
                 if self.element_name(element) == "input":
                     if self.webapp_shadowroot():
                         valtype = self.value_type(element.attrs["type"])
@@ -2712,6 +2718,8 @@ class WebappInternal(Base):
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                if valtype == 'D' and user_value_size > interface_value_size:
+                                    main_value = main_value_bkp
                         #if Number input
                         else:
                             tries = 0
@@ -6553,6 +6561,14 @@ class WebappInternal(Base):
 
         elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
             return object if 'active' in object.find_parent('wa-tab-page').attrs else None
+        elif isinstance(object, Tag):
+            if hasattr(object, 'opened') and 'opened' in object.attrs:
+                panels_object = object.select('.dict-tscrollarea')
+                if panels_object:
+                    filtered_object = next(iter(panels_object))
+                    if filtered_object.contents:
+                        return next(iter(filtered_object.contents))
+           
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
         """
