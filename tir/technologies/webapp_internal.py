@@ -4715,7 +4715,7 @@ class WebappInternal(Base):
                 else:
                     self.log_error("Couldn't find ClickBox item")
 
-    def performing_click(self, element_bs4, class_grid):
+    def performing_click(self, element_bs4, class_grid, click_type=1):
 
         if not self.webapp_shadowroot():
             self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4, locator=By.XPATH)
@@ -4727,21 +4727,21 @@ class WebappInternal(Base):
         self.scroll_to_element(element())
 
         time.sleep(1)
-
-        if class_grid == 'tmsselbr' or class_grid == 'dict-msselbr':
-            ActionChains(self.driver).move_to_element(element()).click(element()).perform()
-            event = "var evt = document.createEvent('MouseEvents');\
-                evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
-                arguments[0].dispatchEvent(evt);"
-            self.driver.execute_script(event, element())
-        elif class_grid == 'dict-msbrgetdbase':
-            self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
-        elif class_grid != "tgrid":
-            element().click()
-            ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                element(), Keys.ENTER).perform()
-        else:
-            self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
+        try:
+            if click_type == 1:
+                ActionChains(self.driver).move_to_element(element()).click(element()).perform()
+                event = "var evt = document.createEvent('MouseEvents');\
+                    evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
+                    arguments[0].dispatchEvent(evt);"
+                self.driver.execute_script(event, element())
+            elif click_type == 2:
+                self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
+            elif click_type == 3:
+                element().click()
+                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                    element(), Keys.ENTER).perform()
+        except:
+            pass
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
 
@@ -4832,7 +4832,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
-
+                    click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
 
@@ -4843,7 +4843,7 @@ class WebappInternal(Base):
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                         self.set_grid_focus(grid_number)
-                        self.performing_click(element_bs4, class_grid)
+                        self.performing_click(element_bs4, class_grid, click_type)
                         self.wait_blocker()
                         time.sleep(2)
 
@@ -4870,6 +4870,9 @@ class WebappInternal(Base):
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
                         success = last_box_state != new_box_state
+                        click_type += 1
+                        if click_type > 3:
+                            click_type = 1
                 else:
                     logger().debug(f"Couldn't check box element td: {str(td)}")
         except Exception as error:
