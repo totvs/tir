@@ -2100,8 +2100,10 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and current_value.rstrip() != term.strip()):
             try:
+                self.wait_blocker()
+                logger().info(f'Filling: {term}')
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
-                self.click(sel_browse_input())
+                self.send_action(action=self.click, element=sel_browse_input)
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
@@ -2110,6 +2112,7 @@ class WebappInternal(Base):
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
+                time.sleep(1)
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
             except:
