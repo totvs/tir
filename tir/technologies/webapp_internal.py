@@ -76,7 +76,7 @@ class WebappInternal(Base):
             "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
             "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
-            "ClickImage": ".tmodaldialog",
+            "ClickImage": "wa-dialog, .tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
             "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
         }
@@ -9269,15 +9269,23 @@ class WebappInternal(Base):
         >>> oHelper.ClickImage("img_name")
         >>> oHelper.ClickImage("img_name",double_click=True)
         """
-        self.wait_element(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
+        if self.webapp_shadowroot():
+            term=".dict-tbtnbmp2"
+        else:
+            term="div.tbtnbmp > img, div.tbitmap > img"
+        
+        self.wait_element(term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
 
         success = None
         endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
 
-            img_list = self.web_scrap(term="div.tbtnbmp > img, div.tbitmap > img", scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
-            img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
+            img_list = self.web_scrap(term, scrap_type=enum.ScrapType.CSS_SELECTOR , main_container = self.containers_selectors["ClickImage"])
+            if self.webapp_shadowroot():
+                img_list_filtered = list(filter(lambda x: img_name == x.previous.get('caption'), img_list))
+            else:
+                img_list_filtered = list(filter(lambda x: img_name == self.img_src_filtered(x),img_list))
             img_soup = next(iter(img_list_filtered), None)
 
             if img_soup:
@@ -9938,4 +9946,3 @@ class WebappInternal(Base):
             os.system("taskkill /f /im geckodriver.exe")
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
-
