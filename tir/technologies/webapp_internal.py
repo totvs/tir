@@ -9488,6 +9488,7 @@ class WebappInternal(Base):
 
         click_type = 1
         endtime = time.time() + self.config.time_out
+        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
