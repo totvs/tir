@@ -8099,7 +8099,7 @@ class WebappInternal(Base):
             time.sleep(2)
             self.scroll_to_element(label_element)
             self.set_element_focus(label_element)
-            self.send_action(action=self.click, element=lambda: label_element, value=enum.ClickType.SELENIUM)
+            self.send_action(action=self.click, element=lambda: label_element)
         else:
             time.sleep(2)
             label_element = bs_label if bs_label else label
@@ -9499,6 +9499,7 @@ class WebappInternal(Base):
 
         click_type = 1
         endtime = time.time() + self.config.time_out
+        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
 
@@ -9527,8 +9528,8 @@ class WebappInternal(Base):
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
                 diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
-                
-                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and click_type > 3:
+
+                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and time.time() > half_endtime:
                     try:
                         if self.config.log_http:
                             folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
