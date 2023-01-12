@@ -9516,8 +9516,8 @@ class WebappInternal(Base):
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
                 diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
-                
-                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and click_type > 3:
+
+                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and time.time() > half_endtime:
                     try:
                         if self.config.log_http:
                             folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
