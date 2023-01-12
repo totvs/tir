@@ -4129,7 +4129,7 @@ class WebappInternal(Base):
                 if self.webapp_shadowroot():
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
-                    self.click(soup_element)
+                    self.send_action(action=self.click, element=lambda: soup_element)
                     if button.lower() == self.language.other_actions.lower():
                         popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                         while time.time() < endtime and not popup_item():
