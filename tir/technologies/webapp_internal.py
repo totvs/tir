@@ -2323,30 +2323,33 @@ class WebappInternal(Base):
             
             if input_field:
                 active_tab = self.filter_active_tabs(container)
-                active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
-                if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
-                   active_childs = [active_tab] 
-                labels_in_tab = next(iter(active_childs), None)
-                if labels_in_tab != None and labels_in_tab.contents != None:
-                    label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
-                    if label_class:
-                        if len(label_class) > 0:
-                            is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
-                            label_tab = len(is_label_in_tab) > 0
-                        else:
-                            label_tab = True
-                    else:
-                        label_tab = True
-                if active_childs and label_tab:
-                    active_tab = next(iter(active_childs), None)
-                    active_tab_labels = active_tab.select(label_term)
-                    filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
-                    if not filtered_labels:
-                        filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,labels))
-                        if len(filtered_labels) > 1:
-                            filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels))
-                    if not filtered_labels:
-                        active_tab = None
+
+                if active_tab:
+                    active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
+                    if active_childs:
+                        if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
+                           active_childs = [active_tab]
+                        labels_in_tab = next(iter(active_childs), None)
+                        if labels_in_tab != None and labels_in_tab.contents != None:
+                            label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
+                            if label_class:
+                                if len(label_class) > 0:
+                                    is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
+                                    label_tab = len(is_label_in_tab) > 0
+                                else:
+                                    label_tab = True
+                            else:
+                                label_tab = True
+                        if active_childs and label_tab:
+                            active_tab = next(iter(active_childs), None)
+                            active_tab_labels = active_tab.select(label_term)
+                            filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
+                            if not filtered_labels:
+                                filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,labels))
+                                if len(filtered_labels) > 1:
+                                    filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels))
+                            if not filtered_labels:
+                                active_tab = None
 
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
