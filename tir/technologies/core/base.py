@@ -1239,7 +1239,6 @@ class Base(unittest.TestCase):
             while time.time() < endtime and not current_ver:
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
-                    current_ver = False
                     if current_ver:
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
