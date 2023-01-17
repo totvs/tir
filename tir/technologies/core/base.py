@@ -1235,7 +1235,7 @@ class Base(unittest.TestCase):
         current_ver = ''
 
         for i in range(3):
-            endtime = time.time() + 1
+            endtime = time.time() + self.config.time_out
             while time.time() < endtime and not current_ver:
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
