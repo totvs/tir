@@ -85,11 +85,6 @@ class WebappInternal(Base):
             "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse, .dict-tsbrowse"
         }
 
-        if self.webapp_shadowroot():
-            self.base_container = "wa-dialog"
-        else:
-            self.base_container = ".tmodaldialog"
-
         self.grid_check = []
         self.grid_counters = {}
         self.grid_input = []
@@ -121,6 +116,11 @@ class WebappInternal(Base):
 
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
+
+        if self.webapp_shadowroot():
+            self.base_container = "wa-dialog"
+        else:
+            self.base_container = ".tmodaldialog"
 
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
