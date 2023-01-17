@@ -5798,6 +5798,9 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out + 300
             while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
+                if self.remove_mask(current_value).strip().replace(',', '').isnumeric() and field_one.replace(',', '').isnumeric():
+                   if float(current_value) == float(field_one):
+                        break 
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
 
@@ -6095,7 +6098,7 @@ class WebappInternal(Base):
 
                 if not check_value:
                     break
-            if (check_value and self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '')):
+            if (check_value and self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and (self.remove_mask(current_value).strip().replace(',', '').isnumeric() and field_one.replace(',', '').isnumeric() and float(current_value) != float(field_one))):
                 self.search_for_errors()
                 self.check_grid_error(grids, headers, column_name, rows, columns, field)
                 self.log_error(
