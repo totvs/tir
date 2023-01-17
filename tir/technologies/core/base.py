@@ -1233,19 +1233,25 @@ class Base(unittest.TestCase):
             return self.webapp_version
 
         current_ver = ''
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not current_ver:
-            try:
-                current_ver = self.driver.execute_script("return app.VERSION")
-            except:
-                current_ver = None
+
+        for i in range(3):
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not current_ver:
+                try:
+                    current_ver = self.driver.execute_script("return app.VERSION")
+                    if current_ver:
+                        current_ver = re.sub(r'\.(.*)', '', current_ver)
+                        self.webapp_version = int(current_ver) >= 8
+                        return self.webapp_version
+                except:
+                    current_ver = None
+
+            if not current_ver:
+                self.driver.close()
+                self.Start()
 
         if not current_ver:
             self.log_error('Can\'t find WebApp Version' )
-
-        current_ver = re.sub(r'\.(.*)', '', current_ver)
-        self.webapp_version = int(current_ver) >= 8
-        return self.webapp_version
 
     def find_shadow_element(self, term, objects):
 
