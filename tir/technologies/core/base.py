@@ -1254,10 +1254,6 @@ class Base(unittest.TestCase):
         if not current_ver:
             self.log_error('Can\'t find WebApp Version' )
 
-        current_ver = re.sub(r'\.(.*)', '', current_ver)
-        self.webapp_version = int(current_ver) >= 8
-        return self.webapp_version
-
     def find_shadow_element(self, term, objects):
 
         elements = None
