@@ -3070,7 +3070,7 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -3151,7 +3151,7 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -3162,7 +3162,7 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -9920,8 +9920,8 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        source_path = r'E:\smart_test\slaves\robo01\protheus\bin\appserver\*.dmp' #TODO caminho temporario
-        destination_path = r'E:\smart_test\console' #TODO caminho temporario
+        source_path = self.config.appserver_folder
+        destination_path = self.config.destination_folder
 
         files = glob.glob(source_path)
 

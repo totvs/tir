@@ -1081,7 +1081,7 @@ class Base(unittest.TestCase):
 
         if self.config.smart_test:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
