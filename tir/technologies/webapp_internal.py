@@ -3068,9 +3068,9 @@ class WebappInternal(Base):
         """
         webdriver_exception = None
 
-        if self.config.smart_test:
+        if self.config.appserver_service:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -3149,9 +3149,9 @@ class WebappInternal(Base):
         >>> self.driver_refresh()
         """
 
-        if self.config.smart_test:
+        if self.config.appserver_service:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -3160,9 +3160,9 @@ class WebappInternal(Base):
 
         self.driver.refresh()
 
-        if self.config.smart_test:
+        if self.config.appserver_service:
             try:
-                self.sc_query('Protheus_robo01')
+                self.sc_query(self.config.appserver_service)
             except Exception as err:
                 logger().debug(f'sc_query exception: {err}')
 
@@ -7407,7 +7407,8 @@ class WebappInternal(Base):
                     self.restart_counter = 3
                     self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
-                self.check_dmp_file()
+                if self.config.check_dump:
+                    self.check_dmp_file()
 
             if (stack_item == "setUpClass") :
                 try:
@@ -8725,7 +8726,8 @@ class WebappInternal(Base):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
 
-            self.check_dmp_file()
+            if self.config.check_dump:
+                self.check_dmp_file()
 
         try:
             self.driver.close()
@@ -9938,8 +9940,8 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        source_path = r'E:\smart_test\slaves\robo01\protheus\bin\appserver\*.dmp' #TODO caminho temporario
-        destination_path = r'E:\smart_test\console' #TODO caminho temporario
+        source_path = self.config.appserver_folder
+        destination_path = self.config.destination_folder
 
         files = glob.glob(source_path)
 
