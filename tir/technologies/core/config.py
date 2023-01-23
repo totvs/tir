@@ -78,3 +78,7 @@ class ConfigLoader:
         self.top_database = str(data["TopDataBase"]) if "TopDataBase" in data else "MSSQL"
         self.lib_version = str(data["Lib"]) if "Lib" in data else "lib_version"
         self.build_version = str(data["Build"]) if "Build" in data else "build_version"
+        self.appserver_folder = str(data["AppServerFolder"]) if "AppServerFolder" in data else ""
+        self.destination_folder = str(data["DestinationFolder"]) if "DestinationFolder" in data else ""
+        self.appserver_service = str(data["AppServerService"]) if "AppServerService" in data else ""
+        self.check_dump = ("CheckDump" in data and bool(data["CheckDump"]))
