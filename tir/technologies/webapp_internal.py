@@ -9492,8 +9492,10 @@ class WebappInternal(Base):
         """
 
         soup_before_event = self.get_current_DOM()
-
         soup_after_event = soup_before_event
+
+        classes_before = self.get_active_parent_class(element)
+        classes_after = classes_before
 
         self.wait_blocker()
         soup_select = None
@@ -9507,8 +9509,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         half_endtime = time.time() + self.config.time_out / 2
         try:
-            while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
-
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (classes_before == classes_after)):
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
@@ -9529,13 +9530,15 @@ class WebappInternal(Base):
                 else:
                     soup_after_event = self.get_current_DOM()
 
+                classes_after = self.get_active_parent_class(element)
+
                 click_type += 1
 
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
                 diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
 
-                if self.config.smart_test and soup_before_event == soup_after_event and diff_calc and time.time() > half_endtime:
+                if self.config.smart_test and soup_before_event == soup_after_event and classes_before == classes_after and diff_calc and time.time() > half_endtime:
                     try:
                         if self.config.log_http:
                             folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
@@ -9547,18 +9550,16 @@ class WebappInternal(Base):
                             os.makedirs(pathlib.Path("Log", socket.gethostname()))
                     except OSError:
                         pass
-
                     folder_path_before = f'{path}\\{self.log.get_testcase_stack()}_{str_img_before}'
                     folder_path_after = f'{path}\\{self.log.get_testcase_stack()}_{str_img_after}'
                     cv2.imwrite(folder_path_before, screen_before_action)
                     cv2.imwrite(folder_path_after, screen_after_action)
                     cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
-                
+
                 if click_type > 3:
                     click_type = 1
 
                 time.sleep(1)
-
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
@@ -9567,7 +9568,24 @@ class WebappInternal(Base):
 
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
+            logger().debug(f'send_action selenium status: {classes_after != classes_before}')
         return soup_before_event != soup_after_event
+
+
+    def get_active_parent_class(self, element=None):
+        """
+        Returns class list of an element's parent
+        """
+        try:
+            if element:
+                parent_sl = element().parent.switch_to.active_element
+                if parent_sl:
+                    sl_classes = list(map(lambda x: x.get_attribute('class'), self.find_shadow_element('div', parent_sl))) if self.find_shadow_element('div', parent_sl) else None
+                    return sl_classes
+            return
+        except Exception:
+            if self.config.smart_test or self.config.debug_log:
+                logger().exception(f"Warning Exception get_active_parent_class: {str(e)}")
 
 
     def image_compare(self, img1, img2):
