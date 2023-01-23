@@ -1079,7 +1079,7 @@ class Base(unittest.TestCase):
 
         start_program = '#inputStartProg, #selectStartProg'
 
-        if self.config.smart_test:
+        if self.config.appserver_service:
             try:
                 self.sc_query(self.config.appserver_service)
             except Exception as err:

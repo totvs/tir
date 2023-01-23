@@ -81,3 +81,4 @@ class ConfigLoader:
         self.appserver_folder = str(data["AppServerFolder"]) if "AppServerFolder" in data else ""
         self.destination_folder = str(data["DestinationFolder"]) if "DestinationFolder" in data else ""
         self.appserver_service = str(data["AppServerService"]) if "AppServerService" in data else ""
+        self.check_dump = ("CheckDump" in data and bool(data["CheckDump"]))
