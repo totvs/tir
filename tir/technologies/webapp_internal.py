@@ -9585,7 +9585,7 @@ class WebappInternal(Base):
                     sl_classes = list(map(lambda x: x.get_attribute('class'), self.find_shadow_element('div', parent_sl))) if self.find_shadow_element('div', parent_sl) else None
                     return sl_classes
             return
-        except Exception:
+        except Exception as e:
             if self.config.smart_test or self.config.debug_log:
                 logger().exception(f"Warning Exception get_active_parent_class: {str(e)}")
 
