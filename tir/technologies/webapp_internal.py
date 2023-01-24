@@ -9943,7 +9943,7 @@ class WebappInternal(Base):
         source_path = self.config.appserver_folder
         destination_path = self.config.destination_folder
 
-        files = glob.glob(source_path)
+        files = glob.glob(str(pathlib.Path(source_path, "*.dmp")))
 
         if files:
             for file in files:
