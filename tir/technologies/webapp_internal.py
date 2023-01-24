@@ -2234,7 +2234,10 @@ class WebappInternal(Base):
             containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
 
             for container in containers:
-                logger().debug(f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']}")
+                blocked = hasattr(container, 'attrs') and 'blocked' in container.attrs
+
+                logger().debug(
+                    f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
         except:
             pass
 
