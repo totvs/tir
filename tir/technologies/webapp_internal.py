@@ -8924,21 +8924,24 @@ class WebappInternal(Base):
         :param string:
         :return:
         """
+
+        string = ""
+
         if string_left:
             string = string_left
-        else:
+        elif string_right:
             string = string_right
 
-        if string:
-            self.wait_element(string)
+        labels = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
+                                optional_term=".tsay, .tgroupbox, wa-text-view, label",
+                                main_container=self.containers_selectors["GetCurrentContainer"], check_help=False)
 
-        container = self.get_current_container()
-
-        labels = container.select('label')
-
-        label = next(iter(list(filter(lambda x: string.lower() in x.text.lower(), labels))))
-
-        return self.get_text_position(label.text, string_left, string_right)
+        if labels:
+            if string:
+                label = next(iter(list(filter(lambda x: string.lower() in x.text.lower(), labels))))
+                return self.get_text_position(label.text, string_left, string_right)
+            else:
+                return next(iter(labels)).text
 
     def get_text_position(self, text="", string_left="", string_right=""):
         """
@@ -8953,8 +8956,6 @@ class WebappInternal(Base):
             return text[len(string_left):].strip()
         elif string_right:
             return text[:-len(string_right)].strip()
-        else:
-            return text.strip()
 
     def wait_smart_erp_environment(self):
         """
