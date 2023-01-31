@@ -2038,8 +2038,7 @@ class WebappInternal(Base):
             for item in filtered_column_itens:
                 if self.webapp_shadowroot():
                     span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
-                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
-                    self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+                    self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
                 else:
                     span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
                     if not span:
@@ -2048,8 +2047,7 @@ class WebappInternal(Base):
         else:
             if self.webapp_shadowroot():
                 span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
-                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS)
-                self.click(self.soup_to_selenium(span), click_type=enum.ClickType.ACTIONCHAINS) #TODO click unico nao funciona de forma alguma
+                self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
             else:
                 span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
                 if not span:
@@ -9485,7 +9483,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None):
         """
 
         Sends an action to element and compare it object state change.
@@ -9494,6 +9492,8 @@ class WebappInternal(Base):
         :param element: selenium element as a reference
         :param value: send keys value
         :param right_click: True if you want a right click
+        :param click_type: ClickType enum. 1-3 types- **Default:** None
+        :type click_type: int
         :return: True if there was a change in the object
         """
 
@@ -9511,7 +9511,10 @@ class WebappInternal(Base):
         self.driver.save_screenshot(str_img_before)
         screen_before_action = cv2.imread(str_img_before, 0)
 
-        click_type = 1
+        main_click_type = click_type
+
+        click_type = 1 if not main_click_type else click_type
+
         endtime = time.time() + self.config.time_out
         half_endtime = time.time() + self.config.time_out / 2
         try:
@@ -9538,7 +9541,7 @@ class WebappInternal(Base):
 
                 classes_after = self.get_active_parent_class(element)
 
-                click_type += 1
+                click_type = click_type+1 if not main_click_type else click_type
 
                 self.driver.save_screenshot(str_img_after)
                 screen_after_action = cv2.imread(str_img_after, 0)
