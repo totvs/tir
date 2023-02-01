@@ -6369,7 +6369,7 @@ class WebappInternal(Base):
                 if container:
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid"
                     grids = self.filter_displayed_elements(container.select(term))
-                    grids = self.filter_active_tabs(grids)
+                    grids = self.filter_active_tabs(grids) if self.webapp_shadowroot() else grids
 
             time.sleep(1)
 
