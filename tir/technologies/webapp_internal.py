@@ -6304,12 +6304,19 @@ class WebappInternal(Base):
         :param element:
         :return:
         """
+        term = ".dict-tmultiget" if self.webapp_shadowroot() else "textarea"
+        self.soup_to_selenium(element).click() if type(element) == Tag else element.click()
 
-        self.soup_to_selenium(element).click()
         ActionChains(self.driver).key_down(Keys.ENTER).perform()
         container = self.get_current_container()
-        textarea = next(iter(container.select("textarea")), None)
-        content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+        textarea = next(iter(container.select(term)), None)
+
+        if self.webapp_shadowroot() and textarea:
+            textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(textarea))))
+            content = self.driver.execute_script(f"return arguments[0].value",textarea).strip()
+        else:
+            content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+
         self.SetButton('Ok')
 
         return content
