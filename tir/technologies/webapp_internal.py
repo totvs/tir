@@ -3183,7 +3183,7 @@ class WebappInternal(Base):
         text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
-        click_counter = 1
+        optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
 
         if self.config.coverage:
             endtime = time.time() + timeout
@@ -3195,21 +3195,17 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_up(Keys.CONTROL).perform()
 
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
+                 optional_term=optional_term, timeout=5, step=1, main_container="body", check_error = False)
 
                 if element:
-                    if self.click_button_finish(click_counter):
-                        self.WaitShow(string)
-                        text_cover = self.search_text(selector=".tsay", text=string)
-                        if text_cover:
-                            logger().info(string)
-                            timeout = endtime - time.time()
-                            if timeout > 0:
-                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
-                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
-                    click_counter += 1
-                    if click_counter > 3:
-                        click_counter = 1
+                    self.SetButton(self.language.finish)
+                    text_cover = self.WaitShow(string, timeout=10, throw_error=False)
+                    if text_cover:
+                        logger().debug(string)
+                        logger().debug("Waiting for coverage to finish.")
+                        self.WaitHide(string, throw_error=False)
+                        logger().debug("Finished coverage.")
+
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -8690,6 +8686,7 @@ class WebappInternal(Base):
         webdriver_exception = None
         timeout = 1500
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
 
         if self.config.coverage:
             try:
@@ -8708,7 +8705,7 @@ class WebappInternal(Base):
                 self.environment_screen()
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
-                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                     self.close_warning_screen()
                 self.Finish()
             elif not webdriver_exception:
