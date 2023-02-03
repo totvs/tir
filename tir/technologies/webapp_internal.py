@@ -3183,7 +3183,7 @@ class WebappInternal(Base):
         text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
-        click_counter = 1
+        optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
 
         if self.config.coverage:
             endtime = time.time() + timeout
@@ -3195,21 +3195,17 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_up(Keys.CONTROL).perform()
 
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
+                 optional_term=optional_term, timeout=5, step=1, main_container="body", check_error = False)
 
                 if element:
-                    if self.click_button_finish(click_counter):
-                        self.WaitShow(string)
-                        text_cover = self.search_text(selector=".tsay", text=string)
-                        if text_cover:
-                            logger().info(string)
-                            timeout = endtime - time.time()
-                            if timeout > 0:
-                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
-                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
-                    click_counter += 1
-                    if click_counter > 3:
-                        click_counter = 1
+                    self.SetButton(self.language.finish)
+                    text_cover = self.WaitShow(string, timeout=10, throw_error=False)
+                    if text_cover:
+                        logger().debug(string)
+                        logger().debug("Waiting for coverage to finish.")
+                        self.WaitHide(string, throw_error=False)
+                        logger().debug("Finished coverage.")
+
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -6304,12 +6300,19 @@ class WebappInternal(Base):
         :param element:
         :return:
         """
+        term = ".dict-tmultiget" if self.webapp_shadowroot() else "textarea"
+        self.soup_to_selenium(element).click() if type(element) == Tag else element.click()
 
-        self.soup_to_selenium(element).click()
         ActionChains(self.driver).key_down(Keys.ENTER).perform()
         container = self.get_current_container()
-        textarea = next(iter(container.select("textarea")), None)
-        content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+        textarea = next(iter(container.select(term)), None)
+
+        if self.webapp_shadowroot() and textarea:
+            textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(textarea))))
+            content = self.driver.execute_script(f"return arguments[0].value",textarea).strip()
+        else:
+            content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
+
         self.SetButton('Ok')
 
         return content
@@ -8690,6 +8693,7 @@ class WebappInternal(Base):
         webdriver_exception = None
         timeout = 1500
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
 
         if self.config.coverage:
             try:
@@ -8708,7 +8712,7 @@ class WebappInternal(Base):
                 self.environment_screen()
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
-                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
                     self.close_warning_screen()
                 self.Finish()
             elif not webdriver_exception:
