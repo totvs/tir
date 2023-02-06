@@ -47,7 +47,8 @@ setup(
         'requests',
         'pyodbc',
         'psutil',
-        'lxml==4.6.5'
+        'lxml==4.6.5',
+        'opencv-python==4.6.0.66'
     ],
     packages=find_packages(),
     scripts=[],

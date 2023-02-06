@@ -317,7 +317,7 @@ class Webapp():
         """
         self.__webapp.ClickLabel(label_name)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False, position=0):
         """
         Gets the current value or text of element.
 
@@ -331,13 +331,15 @@ class Webapp():
         :type grid_number: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling the method:
         >>> current_value = oHelper.GetValue("A1_COD")
         """
-        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
+        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field, position)
 
     def LoadGrid(self):
         """

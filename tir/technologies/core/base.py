@@ -7,6 +7,7 @@ import sys
 import os
 import random
 import string
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -175,6 +176,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if right_click:
                 ActionChains(self.driver).context_click(element).perform()
@@ -239,6 +243,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.double_click(element())
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if click_type == enum.ClickType.SELENIUM:
                 self.scroll_to_element(element)
@@ -713,8 +720,8 @@ class Base(unittest.TestCase):
         """
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
-        except StaleElementReferenceException:
-            logger().exception("********Element Stale scroll_to_element*********")
+        except Exception as e:
+            logger().exception(f"********Warining scroll_to_element exception: {str(e)}*********")
             pass
 
     def search_zindex(self,element):
@@ -1072,6 +1079,12 @@ class Base(unittest.TestCase):
 
         start_program = '#inputStartProg, #selectStartProg'
 
+        if self.config.appserver_service:
+            try:
+                self.sc_query(self.config.appserver_service)
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
+
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
@@ -1115,7 +1128,8 @@ class Base(unittest.TestCase):
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
-        self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
+        if not self.config.skip_environment:
+            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
@@ -1198,7 +1212,7 @@ class Base(unittest.TestCase):
         """
 
         for i, j in enumerate(combo.options):
-            if j.text.lower() in option:
+            if not j.get_attribute('disabled') and j.text.lower() in option:
                 return i
 
     def return_iframe(self, selector):
@@ -1219,16 +1233,49 @@ class Base(unittest.TestCase):
             return self.webapp_version
 
         current_ver = ''
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not current_ver:
-            try:
-                current_ver = self.driver.execute_script("return app.VERSION")
-            except:
-                current_ver = None
+
+        for i in range(3):
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not current_ver:
+                try:
+                    current_ver = self.driver.execute_script("return app.VERSION")
+                    if current_ver:
+                        current_ver = re.sub(r'\.(.*)', '', current_ver)
+                        self.webapp_version = int(current_ver) >= 8
+                        return self.webapp_version
+                except:
+                    current_ver = None
+
+            if not current_ver:
+                self.driver.close()
+                self.Start()
 
         if not current_ver:
             self.log_error('Can\'t find WebApp Version' )
 
-        current_ver = re.sub(r'\.(.*)', '', current_ver)
-        self.webapp_version = int(current_ver) >= 8
-        return self.webapp_version
+    def find_shadow_element(self, term, objects):
+
+        elements = None
+
+        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        try:
+            elements = self.driver.execute_script(script, objects)
+        except:
+            pass
+        return elements if elements else None
+
+    def sc_query(self, service):
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            try:
+                logger().debug(f'Trying start: {service} service.')
+                os.system(f'SC QUERY {service} | FIND "RUNNING"')
+                stdout = subprocess.check_output(f'SC QUERY {service} | FIND "RUNNING"', shell=True, text=True).split(':')
+                success = True if list(filter(lambda x: 'RUNNING' in x, stdout)) else False
+                if success:
+                    logger().debug(f'{service} is running')
+            except:
+                logger().debug(f'{service} is being started')
+                os.system(f'net start {service}')

@@ -69,8 +69,16 @@ class ConfigLoader:
         self.logurl1 = str(data["LogUrl1"]) if "LogUrl1" in data else ""
         self.logurl2 = str(data["LogUrl2"]) if "LogUrl2" in data else ""
         self.parameter_url = bool(data["ParameterUrl"]) if "ParameterUrl" in data else False
-        self.release = str(data["Release"]) if "Release" in data else ""
         self.log_http = str(data["LogHttp"]) if "LogHttp" in data else ""
         self.baseline_spool = str(data["BaseLine_Spool"]) if "BaseLine_Spool" in data else ""
         self.check_value = (bool(data["CheckValue"]) if "CheckValue" in data else None)
         self.poui_login = bool(data["POUILogin"]) if "POUILogin" in data else False
+        self.log_info_config = bool(data["LogInfoConfig"]) if "LogInfoConfig" in data else False
+        self.release = str(data["Release"]) if "Release" in data else "12.1.2210"
+        self.top_database = str(data["TopDataBase"]) if "TopDataBase" in data else "MSSQL"
+        self.lib_version = str(data["Lib"]) if "Lib" in data else "lib_version"
+        self.build_version = str(data["Build"]) if "Build" in data else "build_version"
+        self.appserver_folder = str(data["AppServerFolder"]) if "AppServerFolder" in data else ""
+        self.destination_folder = str(data["DestinationFolder"]) if "DestinationFolder" in data else ""
+        self.appserver_service = str(data["AppServerService"]) if "AppServerService" in data else ""
+        self.check_dump = ("CheckDump" in data and bool(data["CheckDump"]))
