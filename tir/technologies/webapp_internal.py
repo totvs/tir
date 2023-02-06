@@ -3467,6 +3467,9 @@ class WebappInternal(Base):
                     if labels_displayed:
                         element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
+                        if not element:
+                            element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
+                                       None)
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
