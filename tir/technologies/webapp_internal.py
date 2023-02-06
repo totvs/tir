@@ -9168,7 +9168,7 @@ class WebappInternal(Base):
 
                 tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, tmenupopupitem_displayed))
+                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption').lower().replace('<u>', '').replace('</u>','').strip() and x['caption'].lower().replace('<u>', '').replace('</u>','').strip() == label, tmenupopupitem_displayed))
                 if not tmenupopupitem_filtered:
                     tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
 
