@@ -237,7 +237,7 @@ class WebappInternal(Base):
 
             if save_input:
                 self.config.initial_program = initial_program
-                self.config.date = re.sub('([\d]{2}).?([\d]{2}).?([\d]{4})', r'\1/\2/\3', date)
+                self.config.date = self.date_format(date)
                 self.config.group = group
                 self.config.branch = branch
                 self.config.module = module
@@ -306,6 +306,22 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
+            
+    def date_format(self, date):
+        """
+
+        :param date:
+        :return:
+        """
+        pattern_ddmmaaaa = '([\d]{2}).?([\d]{2}).?([\d]{4})'
+        pattern_ddmmaa = '([\d]{2}).?([\d]{2}).?([\d]{2})'
+
+        date_formated = re.sub(pattern_ddmmaaaa, r'\1/\2/\3', date)
+
+        if not re.match(pattern_ddmmaaaa, date_formated):
+            date_formated = re.sub(pattern_ddmmaa, r'\1/\2/\3', date)
+
+        return date_formated
 
     def close_screen_before_menu(self):
 
