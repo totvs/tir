@@ -1410,12 +1410,12 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             if self.webapp_shadowroot(): 
                 container = self.get_current_shadow_root_container()
-                element_header = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('wa-dialog-header')",self.soup_to_selenium(container))
-                if element_header:
-                    if "Sobre o TSS..." in element_header.text:
+                if container.has_attr('title') and "Sobre o TSS..." in container.get('title'):
+                    element_header = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('wa-dialog-header')",self.soup_to_selenium(container))
+                    if element_header:
                         label_element = element_header
-            else:
-                label_element = soup.find_all("label", string="Versão do TSS:")
+                else:
+                    label_element = soup.find_all("label", string="Versão do TSS:")
 
         if not label_element:
             raise ValueError("SetupTss fail about screen not found")
@@ -3467,6 +3467,9 @@ class WebappInternal(Base):
                     if labels_displayed:
                         element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
+                        if not element:
+                            element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
+                                       None)
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
@@ -4066,7 +4069,7 @@ class WebappInternal(Base):
                     #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
 
                     if soup_objects and not filtered_button:
-                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()), soup_objects ))
+                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()) and self.element_is_displayed(x), soup_objects ))
 
                         if not filtered_button:
                             filtered_button = self.return_soup_by_selenium(elements=soup_objects, term=button, selectors='label, span')
@@ -9165,7 +9168,7 @@ class WebappInternal(Base):
 
                 tmenupopupitem_displayed = list(filter(lambda x: self.element_is_displayed(x), tmenupopupitem))
 
-                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == label, tmenupopupitem_displayed))
+                tmenupopupitem_filtered = list(filter(lambda x: x.get('caption').lower().replace('<u>', '').replace('</u>','').strip() and x['caption'].lower().replace('<u>', '').replace('</u>','').strip() == label, tmenupopupitem_displayed))
                 if not tmenupopupitem_filtered:
                     tmenupopupitem_filtered = list(filter(lambda x: x.text.lower().strip() == label, tmenupopupitem_displayed))
 
