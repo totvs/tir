@@ -316,12 +316,12 @@ class WebappInternal(Base):
         pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
         pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
 
-        date_formated = re.sub(pattern_1, r'\1/\2/\3', date)
+        formatted_date = re.sub(pattern_1, r'\1/\2/\3', date)
 
-        if not re.match(pattern_1, date_formated):
-            date_formated = re.sub(pattern_2, r'\1/\2/\3', date)
+        if not re.match(pattern_1, formatted_date):
+            formatted_date = re.sub(pattern_2, r'\1/\2/\3', date)
 
-        return date_formated
+        return formatted_date
 
     def merge_date_mask(self, base_date, date):
 
