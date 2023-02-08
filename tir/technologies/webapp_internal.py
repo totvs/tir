@@ -237,7 +237,7 @@ class WebappInternal(Base):
 
             if save_input:
                 self.config.initial_program = initial_program
-                self.config.date = re.sub('([\d]{2}).?([\d]{2}).?([\d]{4})', r'\1/\2/\3', date)
+                self.config.date = self.date_format(date)
                 self.config.group = group
                 self.config.branch = branch
                 self.config.module = module
@@ -306,6 +306,37 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
+            
+    def date_format(self, date):
+        """
+
+        :param date:
+        :return:
+        """
+        pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
+        pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
+
+        date_formated = re.sub(pattern_1, r'\1/\2/\3', date)
+
+        if not re.match(pattern_1, date_formated):
+            date_formated = re.sub(pattern_2, r'\1/\2/\3', date)
+
+        return date_formated
+
+    def merge_date_mask(self, base_date, date):
+
+
+        pattern_1 = r"\d{2}/\d{2}/\d{4}"
+        pattern_2 = r"\d{2}/\d{2}/\d{2}"
+
+        match1 = re.match(pattern_1, base_date)
+        match2 = re.match(pattern_2, base_date)
+
+        if match1:
+            return date
+        elif match2:
+            split_date = date.split('/')
+            return f"{split_date[0]}/{split_date[1]}/{split_date[-1][-2:]}"
 
     def close_screen_before_menu(self):
 
@@ -801,7 +832,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                 self.send_keys(date(), self.config.date)
-                base_date_value = self.get_web_value(date())
+                base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                 if self.config.poui_login:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
