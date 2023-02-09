@@ -2132,7 +2132,7 @@ class WebappInternal(Base):
                 self.wait_blocker()
                 logger().info(f'Filling: {term}')
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
-                self.send_action(action=self.click, element=sel_browse_input)
+                self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
