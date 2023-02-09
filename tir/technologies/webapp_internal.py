@@ -2132,7 +2132,7 @@ class WebappInternal(Base):
                 self.wait_blocker()
                 logger().info(f'Filling: {term}')
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
-                self.send_action(action=self.click, element=sel_browse_input)
+                self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
@@ -2307,7 +2307,7 @@ class WebappInternal(Base):
         active_tab = []
         if self.webapp_shadowroot():
             term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
-            label_term = ".dict-tsay, label"
+            label_term = ".dict-tsay, label, wa-button"
         else:
             term=".tget, .tcombobox, .tmultiget"
             label_term = "label"
@@ -2356,7 +2356,7 @@ class WebappInternal(Base):
             if input_field:
                 active_tab = self.filter_active_tabs(container)
 
-                if active_tab:
+                if active_tab and active_tab != container:
                     active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
                     if active_childs:
                         if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
@@ -2399,7 +2399,7 @@ class WebappInternal(Base):
             position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
             distance      = self.get_distance_by_direction(xy_label, position_list, direction)
             if distance:
-                elem          = min(distance, key = lambda x: x[1])
+                elem          = min(distance, key = lambda x: abs(x[1]))
                 elem          = list_in_range[elem[0]]
 
             if not elem:
@@ -2514,12 +2514,18 @@ class WebappInternal(Base):
                 lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
                                xy_elem[1]['x'] - width_safe <= xy_label['x']), position_list))
 
+        elif direction.lower() == 'left':
+            return list(filter(
+                lambda xy_elem: (xy_elem[1]['x'] + width_safe <= xy_label['x']) and (xy_elem[1]['y'] + height_safe  >= xy_label['y']), position_list))
+
+
+
     def get_distance_by_direction(self, xy_label, position_list, direction):
 
         if not direction:
             get_distance = self.get_distance
 
-        elif direction.lower() == 'right':
+        elif direction.lower() == 'right' or direction.lower() == 'left':
             get_distance = self.get_distance_x
 
         elif direction.lower() == 'down':
