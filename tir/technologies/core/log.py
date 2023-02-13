@@ -131,7 +131,7 @@ class Log:
                 pass
 
             if self.config.smart_test:
-                open("log_exec_file.txt", "w")
+                self.log_exec_file()
 
             with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
                 csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
@@ -144,6 +144,34 @@ class Log:
 
                             
             self.csv_log.append(self.get_testcase_stack())
+
+    def log_exec_file(self):
+        """
+        [Internal]
+        """
+
+        before_modification = None
+
+        log_exec_file = "log_exec_file.txt"
+
+        logger().debug(f"Writing {log_exec_file}")
+
+        logger().debug(f"Script folder source: {os.getcwd()}")
+
+        if os.path.exists(log_exec_file):
+            before_modification = os.path.getmtime(log_exec_file)
+            logger().debug(f"Before modification: {datetime.fromtimestamp(os.path.getmtime(log_exec_file)).strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            logger().debug(f"{log_exec_file} file doesn't exist.")
+
+        logger().debug(f"Creating {log_exec_file} file")
+        open("log_exec_file.txt", "w")
+
+        after_modification = os.path.getmtime(log_exec_file)
+        logger().debug(f"After modification: {datetime.fromtimestamp(os.path.getmtime(log_exec_file)).strftime('%Y-%m-%d %H:%M:%S')}")
+
+        if before_modification != after_modification:
+            logger().debug(f"{log_exec_file} file update successfully")
 
     def has_csv_condition(self):
 
@@ -396,7 +424,7 @@ class Log:
         log_file = f"{self.user}_{uuid.uuid4().hex}.json"
 
         if self.config.smart_test:
-            open("log_exec_file.txt", "w")
+            self.log_exec_file()
 
         try:
             with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:

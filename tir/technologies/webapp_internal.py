@@ -117,11 +117,6 @@ class WebappInternal(Base):
         if not self.config.smart_test and self.config.issue:
             self.check_mot_exec()
 
-        if self.webapp_shadowroot():
-            self.base_container = "wa-dialog"
-        else:
-            self.base_container = ".tmodaldialog"
-
         if webdriver_exception:
             message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
             self.restart_counter = 3
@@ -3401,6 +3396,8 @@ class WebappInternal(Base):
 
         self.twebview_context = twebview
 
+        self.base_container = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
+
         try:
             endtime = time.time() + self.config.time_out
             container =  None
@@ -3676,6 +3673,8 @@ class WebappInternal(Base):
         element_list = []
         containers = None
         self.twebview_context = twebview
+
+        self.base_container = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
 
         if scrap_type == enum.ScrapType.SCRIPT:
             return bool(self.driver.execute_script(term))
