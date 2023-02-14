@@ -791,7 +791,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
             if self.config.poui_login:
@@ -843,7 +843,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
             if self.config.poui_login:
@@ -897,7 +897,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
             if self.config.poui_login:
@@ -952,7 +952,7 @@ class WebappInternal(Base):
         click_type = 1
         env_value = ''
         enable = True
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
 
             if self.config.poui_login:
@@ -7404,6 +7404,10 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        if self.config.smart_test:
+            self.log.log_exec_file()
+
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")
 
@@ -7990,6 +7994,9 @@ class WebappInternal(Base):
         self.expected = expected
         log_message = f"{self.log.ident_test()[1]} - "
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
+
+        if self.config.smart_test:
+            self.log.log_exec_file()
 
         if self.grid_input or self.grid_check:
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
@@ -8728,6 +8735,9 @@ class WebappInternal(Base):
 
         if self.config.new_log:
             self.execution_flow()
+
+        if self.config.smart_test:
+            self.log.log_exec_file()
 
         webdriver_exception = None
         timeout = 1500
@@ -10012,6 +10022,18 @@ class WebappInternal(Base):
         self.close_process()
         logger().info("Starting the Browser")
         self.Start()
+
+        try:
+            line_parameters_url = f"{self.config.url}/?StartProg={self.config.initial_program}&Env={self.config.environment}"
+            logger().debug(f"Get url with line parameters: {line_parameters_url}")
+            self.get_url(line_parameters_url)
+        except:
+            pass
+
+        time.sleep(10)
+
+        logger().debug(f"Get url {self.config.url}")
+        self.get_url()
 
     def close_process(self):
         """
