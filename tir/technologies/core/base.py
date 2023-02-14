@@ -1133,16 +1133,18 @@ class Base(unittest.TestCase):
 
         self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
-    def get_url(self):
+    def get_url(self, url=None):
 
         get_url = False
+
+        url = self.config.url if not url else url
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not get_url):
 
             logger().debug('Get URL')
             try:
-                self.driver.get(self.config.url)
+                self.driver.get(url)
                 get_url = True
             except:
                 get_url = False
