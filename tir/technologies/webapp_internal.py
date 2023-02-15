@@ -6557,7 +6557,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
-                                self.send_action(action=ActionChains(self.driver).click(column_element()).perform) if self.webapp_shadowroot() else self.click(column_element())
+                                self.send_action(action=self.click, element=column_element, click_type=3) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
@@ -9553,8 +9553,15 @@ class WebappInternal(Base):
         soup_before_event = self.get_current_DOM()
         soup_after_event = soup_before_event
 
-        classes_before = self.get_active_parent_class(element)
+        parent_classes_before = self.get_active_parent_class(element)
+        parent_classes_after = parent_classes_before
+
+        classes_before = ''
         classes_after = classes_before
+
+        if element:
+            classes_before = self.get_selenium_attribute(element(), 'class')
+            classes_after = classes_before
 
         self.wait_blocker()
         soup_select = None
@@ -9571,7 +9578,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         half_endtime = time.time() + self.config.time_out / 2
         try:
-            while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (classes_before == classes_after)):
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
@@ -9592,7 +9599,10 @@ class WebappInternal(Base):
                 else:
                     soup_after_event = self.get_current_DOM()
 
-                classes_after = self.get_active_parent_class(element)
+                parent_classes_after = self.get_active_parent_class(element)
+
+                if element:
+                    classes_after = self.get_selenium_attribute(element(), 'class')
 
                 click_type = click_type+1 if not main_click_type else click_type
 
@@ -9600,7 +9610,7 @@ class WebappInternal(Base):
                 screen_after_action = cv2.imread(str_img_after, 0)
                 diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
 
-                if self.config.smart_test and soup_before_event == soup_after_event and classes_before == classes_after and diff_calc and time.time() > half_endtime:
+                if self.config.smart_test and soup_before_event == soup_after_event and parent_classes_before == parent_classes_after and diff_calc and time.time() > half_endtime:
                     try:
                         if self.config.log_http:
                             folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
@@ -9630,8 +9640,15 @@ class WebappInternal(Base):
 
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
-            logger().debug(f'send_action selenium status: {classes_after != classes_before}')
+            logger().debug(f'send_action selenium status: {parent_classes_before != parent_classes_after}')
         return soup_before_event != soup_after_event
+
+
+    def get_selenium_attribute(self, element, attribute):
+        try:
+            return element.get_attribute(attribute)
+        except StaleElementReferenceException:
+            return None
 
 
     def get_active_parent_class(self, element=None):
