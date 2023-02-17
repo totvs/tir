@@ -4348,7 +4348,7 @@ class WebappInternal(Base):
                 parent_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == filtered_sub_itens[-2], soup.select(selector)), None)
                 if parent_id:
                     parent_id = parent_id.get('id')
-                    menu_id = next(filter(lambda x: x.get('caption').strip() == sub_item and x.parent.get('id') == parent_id, soup.select(selector)), None)
+                    menu_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == sub_item and x.parent.get('id') == parent_id, soup.select(selector)), None)
                     if menu_id:
                         menu_id = menu_id.get('id')
             else:
