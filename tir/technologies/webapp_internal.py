@@ -3733,6 +3733,9 @@ class WebappInternal(Base):
                     return self.driver.find_element(By.CSS_SELECTOR, selector)
                 else:
                     element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
+                    if not element_list:
+                        self.driver.execute_script("return arguments[0].scrollIntoView(true);", self.soup_to_selenium(container))
+                        element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
             except:
                 pass
         else:
