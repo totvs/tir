@@ -2171,7 +2171,7 @@ class WebappInternal(Base):
         logger().debug("Waiting blocker to continue...")
         soup = None
         result = True
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
 
         while (time.time() < endtime and result):
             blocker_container = None
@@ -4348,7 +4348,7 @@ class WebappInternal(Base):
                 parent_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == filtered_sub_itens[-2], soup.select(selector)), None)
                 if parent_id:
                     parent_id = parent_id.get('id')
-                    menu_id = next(filter(lambda x: x.get('caption').strip() == sub_item and x.parent.get('id') == parent_id, soup.select(selector)), None)
+                    menu_id = next(filter(lambda x: re.sub(regex, '', x.get('caption')).strip() == sub_item and x.parent.get('id') == parent_id, soup.select(selector)), None)
                     if menu_id:
                         menu_id = menu_id.get('id')
             else:
@@ -7421,6 +7421,7 @@ class WebappInternal(Base):
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.initial_time = datetime.today()
         self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
 
@@ -7994,6 +7995,7 @@ class WebappInternal(Base):
         self.expected = expected
         log_message = f"{self.log.ident_test()[1]} - "
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.initial_time = datetime.today()
 
         if self.config.smart_test:
             self.log.log_exec_file()
