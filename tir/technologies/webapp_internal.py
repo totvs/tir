@@ -5474,6 +5474,9 @@ class WebappInternal(Base):
         >>> oHelper.SetFocus("A1_COD")
         >>> oHelper.SetFocus("A1_COD", grid_cell = True)
         """
+
+        logger().debug(f"Setting focus on element {field}.")
+
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
@@ -5487,7 +5490,6 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)
         else:
-            logger().debug(f"Setting focus on element {field}.")
 
             label = False if re.match(r"\w+(_)", field) else True
 
@@ -6503,7 +6505,7 @@ class WebappInternal(Base):
 
             if self.webapp_shadowroot():
                 self.wait_element_timeout(term=column_name,
-                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
+                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out / 3,
                                           optional_term=term,
                                           main_container="body")
                 containers = self.get_current_container()
@@ -6521,10 +6523,11 @@ class WebappInternal(Base):
 
                         if self.webapp_shadowroot():
                             grids = self.filter_active_tabs(grids)
+                        else:
+                            grids, same_location = self.filter_non_obscured(grids, grid_number)
+                            if same_location:
+                                grid_number = 0
 
-                        grids, same_location = self.filter_non_obscured(grids, grid_number)
-                        if same_location:
-                            grid_number = 0
                     grids = list(filter(lambda x:x.select("tbody tr"), grids)) if list(filter(lambda x:x.select("tbody tr"), grids)) else grids
                     headers = self.get_headers_from_grids(grids)
                     if grid_number < len(grids):
