@@ -9570,11 +9570,6 @@ class WebappInternal(Base):
 
         self.wait_blocker()
         soup_select = None
-        str_img_before= 'screen_before_action.png'
-        str_img_after= 'screen_after_action.png'
-
-        self.driver.save_screenshot(str_img_before)
-        screen_before_action = cv2.imread(str_img_before, 0)
 
         main_click_type = click_type
 
@@ -9610,28 +9605,6 @@ class WebappInternal(Base):
                     classes_after = self.get_selenium_attribute(element(), 'class')
 
                 click_type = click_type+1 if not main_click_type else click_type
-
-                self.driver.save_screenshot(str_img_after)
-                screen_after_action = cv2.imread(str_img_after, 0)
-                diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
-
-                if self.config.smart_test and soup_before_event == soup_after_event and parent_classes_before == parent_classes_after and diff_calc and time.time() > half_endtime:
-                    try:
-                        if self.config.log_http:
-                            folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
-                                            self.config.execution_id, self.log.get_file_name('testsuite'))
-                            path = pathlib.Path(folder_path)
-                            os.makedirs(pathlib.Path(folder_path))
-                        else:
-                            path = pathlib.Path("Log", socket.gethostname())
-                            os.makedirs(pathlib.Path("Log", socket.gethostname()))
-                    except OSError:
-                        pass
-                    folder_path_before = f'{path}\\{self.log.get_testcase_stack()}_{str_img_before}'
-                    folder_path_after = f'{path}\\{self.log.get_testcase_stack()}_{str_img_after}'
-                    cv2.imwrite(folder_path_before, screen_before_action)
-                    cv2.imwrite(folder_path_after, screen_after_action)
-                    cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
 
                 if click_type > 3:
                     click_type = 1
