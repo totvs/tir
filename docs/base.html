@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base &mdash; TIR 1.0.0 documentation</title>
@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> TIR
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            TIR
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -47,7 +53,51 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="webapp_internal.html">Webapp Internal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="poui_internal.html">Poui Internal</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Base</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tir.technologies.core.base.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.AssertFalse"><code class="docutils literal notranslate"><span class="pre">Base.AssertFalse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.AssertTrue"><code class="docutils literal notranslate"><span class="pre">Base.AssertTrue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.SetTIRConfig"><code class="docutils literal notranslate"><span class="pre">Base.SetTIRConfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.Start"><code class="docutils literal notranslate"><span class="pre">Base.Start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.TearDown"><code class="docutils literal notranslate"><span class="pre">Base.TearDown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.assert_result"><code class="docutils literal notranslate"><span class="pre">Base.assert_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.click"><code class="docutils literal notranslate"><span class="pre">Base.click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_name"><code class="docutils literal notranslate"><span class="pre">Base.element_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.filter_displayed_elements"><code class="docutils literal notranslate"><span class="pre">Base.filter_displayed_elements()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_div_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_div_parent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_wa_panel_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_wa_panel_parent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_label_element"><code class="docutils literal notranslate"><span class="pre">Base.find_label_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.finish_testcase"><code class="docutils literal notranslate"><span class="pre">Base.finish_testcase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_current_DOM"><code class="docutils literal notranslate"><span class="pre">Base.get_current_DOM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_text"><code class="docutils literal notranslate"><span class="pre">Base.get_element_text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_value"><code class="docutils literal notranslate"><span class="pre">Base.get_element_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.log_error"><code class="docutils literal notranslate"><span class="pre">Base.log_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.move_to_element"><code class="docutils literal notranslate"><span class="pre">Base.move_to_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.normalize_config_name"><code class="docutils literal notranslate"><span class="pre">Base.normalize_config_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_index"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_object"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_object()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_iframe"><code class="docutils literal notranslate"><span class="pre">Base.return_iframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_to_element"><code class="docutils literal notranslate"><span class="pre">Base.scroll_to_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.search_stack"><code class="docutils literal notranslate"><span class="pre">Base.search_stack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.search_zindex"><code class="docutils literal notranslate"><span class="pre">Base.search_zindex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.select_combo"><code class="docutils literal notranslate"><span class="pre">Base.select_combo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.send_keys"><code class="docutils literal notranslate"><span class="pre">Base.send_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.set_element_focus"><code class="docutils literal notranslate"><span class="pre">Base.set_element_focus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.soup_to_selenium"><code class="docutils literal notranslate"><span class="pre">Base.soup_to_selenium()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.start_testcase"><code class="docutils literal notranslate"><span class="pre">Base.start_testcase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.switch_to_iframe"><code class="docutils literal notranslate"><span class="pre">Base.switch_to_iframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.take_screenshot"><code class="docutils literal notranslate"><span class="pre">Base.take_screenshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.web_scrap"><code class="docutils literal notranslate"><span class="pre">Base.web_scrap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.webapp_shadowroot"><code class="docutils literal notranslate"><span class="pre">Base.webapp_shadowroot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.zindex_sort"><code class="docutils literal notranslate"><span class="pre">Base.zindex_sort()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="enumerations.html">Enumerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="log.html">Log</a></li>
 </ul>
@@ -65,8 +115,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Base</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Base</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/base.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,7 +127,7 @@
            <div itemprop="articleBody">
              
   <section id="module-tir">
-<span id="base"></span><h1>Base<a class="headerlink" href="#module-tir" title="Permalink to this headline"></a></h1>
+<span id="base"></span><h1>Base<a class="headerlink" href="#module-tir" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base" title="Permalink to this definition"></a></dt>
@@ -86,14 +136,14 @@
 <p>If no config_path is passed, it will read the config.json file that exists in the same
 folder as the file that would execute this module.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>config_path</strong> (<em>str</em>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
 <li><p><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -148,10 +198,10 @@ than the ones defined at <strong>config.json</strong></p>
 <li><p>Module - str</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The config to be changed.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value that would be set.</p></li>
+<li><p><strong>config_name</strong> (<em>str</em>) – The config to be changed.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value that would be set.</p></li>
 </ul>
 </dd>
 </dl>
@@ -190,8 +240,8 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Asserts the result based on the expected value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>expected</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Expected value</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expected</strong> (<em>bool</em>) – Expected value</p>
 </dd>
 </dl>
 <p>Usage :</p>
@@ -209,7 +259,7 @@ than the ones defined at <strong>config.json</strong></p>
 <p>Supports three types of clicking: JavaScript, pure Selenium and Selenium’s ActionChains.</p>
 <p>Default is JavaScript clicking.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p></li>
 <li><p><strong>click_type</strong> (<em>enum.ClickType</em>) – ClickType enum. - <strong>Default:</strong> enum.ClickType.JS</p></li>
@@ -232,12 +282,12 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Validates and stores field in the self.errors array if the values are different.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Field name</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – User input value</p></li>
-<li><p><strong>captured_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Interface captured value</p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Error message if comparison fails</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Field name</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – User input value</p></li>
+<li><p><strong>captured_value</strong> (<em>str</em>) – Interface captured value</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Error message if comparison fails</p></li>
 </ul>
 </dd>
 </dl>
@@ -254,7 +304,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Clicks two times on the Selenium element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
 </dl>
@@ -273,19 +323,19 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Returns a boolean if element exists on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The first term to use on a search of element</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first term to use on a search of element</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType</em>) – Type of element search. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if element is present. False if element is not present.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -307,7 +357,7 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="sig-name descname"><span class="pre">execution_flow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.execution_flow" title="Permalink to this definition"></a></dt>
 <dd><p>Method that is responsible to control log flow in an execution</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -319,16 +369,16 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Receives a BeautifulSoup element list and filters only the displayed elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>List of BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
-<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>elements</strong> (<em>List</em><em> of </em><em>BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of filtered BeautifulSoup elements</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of BeautifulSoup objects</p>
 </dd>
 </dl>
@@ -349,13 +399,36 @@ than the ones defined at <strong>config.json</strong></p>
 <p>Finds first div parent element of another BeautifulSoup element.</p>
 <p>If element is already a div, it will return the element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>BeautifulSoup object</em>) – BeautifulSoup element</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The first div parent of the element</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BeautifulSoup object</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parent_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_first_div_parent</span><span class="p">(</span><span class="n">my_element</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.find_first_wa_panel_parent">
+<span class="sig-name descname"><span class="pre">find_first_wa_panel_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.find_first_wa_panel_parent" title="Permalink to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Finds first div parent element of another BeautifulSoup element.</p>
+<p>If element is already a div, it will return the element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>BeautifulSoup object</em>) – BeautifulSoup element</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first div parent of the element</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>BeautifulSoup object</p>
 </dd>
 </dl>
@@ -371,16 +444,16 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Find input element next to label containing the label_text parameter.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The label text to be searched</p></li>
+<li><p><strong>label_text</strong> (<em>str</em>) – The label text to be searched</p></li>
 <li><p><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A list containing a BeautifulSoup object next to the label</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of BeautifulSoup objects</p>
 </dd>
 </dl>
@@ -395,7 +468,7 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="sig-name descname"><span class="pre">finish_testcase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.finish_testcase" title="Permalink to this definition"></a></dt>
 <dd><p>Method that is responsable to finish testcase and send the log and execution time of testcase.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -407,10 +480,10 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Returns current HTML DOM parsed as a BeautifulSoup object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>BeautifulSoup parsed DOM</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>BeautifulSoup object</p>
 </dd>
 </dl>
@@ -427,14 +500,14 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Gets element text.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Element text</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -452,14 +525,14 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Gets element value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Element value</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -477,10 +550,10 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Finishes execution of test case with an error and creates the log information for that test.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Message to be logged</p></li>
-<li><p><strong>new_log_line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Message to be logged</p></li>
+<li><p><strong>new_log_line</strong> (<em>bool</em>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
 </dl>
@@ -497,7 +570,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>[Internal]</p>
 <p>Move focus to element on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
 </dl>
@@ -517,14 +590,14 @@ than the ones defined at <strong>config.json</strong></p>
 <p>Normalizes the config name string to respect the config object
 naming convention.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The config name string to be normalized.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config_name</strong> (<em>str</em>) – The config name string to be normalized.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The config name string normalized.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -538,13 +611,26 @@ naming convention.</p>
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_combo_index">
 <span class="sig-name descname"><span class="pre">return_combo_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_combo_index" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>combo</strong> – </p></li>
 <li><p><strong>option</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_combo_object">
+<span class="sig-name descname"><span class="pre">return_combo_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_combo_object" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -561,7 +647,7 @@ naming convention.</p>
 <dd><p>[Internal]</p>
 <p>Scroll to element on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
 </dl>
@@ -579,14 +665,14 @@ naming convention.</p>
 <span class="sig-name descname"><span class="pre">search_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.search_stack" title="Permalink to this definition"></a></dt>
 <dd><p>Returns True if passed function is present in the call stack.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>function</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of the function</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>function</strong> (<em>str</em>) – Name of the function</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean if passed function is present or not in the call stack.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -604,14 +690,14 @@ naming convention.</p>
 <p>Internal function created to be used inside lambda of zindex_sort method.</p>
 <p>Only works if element has Style attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>BeautifulSoup object</em>) – BeautifulSoup element</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>z-index value</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -626,10 +712,10 @@ naming convention.</p>
 <span class="sig-name descname"><span class="pre">select_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.select_combo" title="Permalink to this definition"></a></dt>
 <dd><p>Selects the option on the combobox.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Beautiful Soup object</em>) – Combobox element</p></li>
-<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Option to be selected</p></li>
+<li><p><strong>option</strong> (<em>str</em>) – Option to be selected</p></li>
 </ul>
 </dd>
 </dl>
@@ -646,10 +732,10 @@ naming convention.</p>
 <dd><p>[Internal]</p>
 <p>Clicks two times on the Selenium element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p></li>
-<li><p><strong>arg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</p></li>
+<li><p><strong>arg</strong> (<em>str</em><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</p></li>
 </ul>
 </dd>
 </dl>
@@ -670,7 +756,7 @@ naming convention.</p>
 <dd><p>[Internal]</p>
 <p>Sets focus on element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p>
 </dd>
 </dl>
@@ -689,13 +775,13 @@ naming convention.</p>
 <dd><p>[Internal]</p>
 <p>An abstraction of the Selenium call to simplify the conversion of elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>soup_object</strong> (<em>BeautifulSoup object</em>) – The BeautifulSoup object to be converted.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The object converted to a Selenium object.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Selenium object</p>
 </dd>
 </dl>
@@ -711,7 +797,7 @@ naming convention.</p>
 <span class="sig-name descname"><span class="pre">start_testcase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.start_testcase" title="Permalink to this definition"></a></dt>
 <dd><p>Method that starts testcase time and testcase info.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -730,11 +816,11 @@ naming convention.</p>
 <dd><p>[Internal]</p>
 <p>Takes a screenshot and saves on the screenshot folder defined in config.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> – The name of the screenshot file.</p>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -751,19 +837,19 @@ naming convention.</p>
 <p>Returns a BeautifulSoup object list based on the search parameters.</p>
 <p>Does not support ScrapType.XPATH as scrap_type parameter value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The first search term. A text or a selector</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first search term. A text or a selector</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
-<li><p><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
+<li><p><strong>label</strong> (<em>bool</em>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
+<li><p><strong>main_container</strong> (<em>str</em>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of BeautifulSoup4 elements based on search parameters.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of BeautifulSoup4 objects</p>
 </dd>
 </dl>
@@ -781,22 +867,28 @@ naming convention.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.webapp_shadowroot">
+<span class="sig-name descname"><span class="pre">webapp_shadowroot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.webapp_shadowroot" title="Permalink to this definition"></a></dt>
+<dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.zindex_sort">
 <span class="sig-name descname"><span class="pre">zindex_sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.zindex_sort" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Sorts list of BeautifulSoup elements based on z-index style attribute.</p>
 <p>Only works if elements have Style attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>List of BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
-<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>elements</strong> (<em>List</em><em> of </em><em>BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of sorted BeautifulSoup elements based on zindex.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of BeautifulSoup objects</p>
 </dd>
 </dl>
