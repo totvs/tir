@@ -4121,7 +4121,7 @@ class WebappInternal(Base):
                             filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
                             
                     if filtered_button and len(filtered_button) - 1 >= position:
-                        parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                        parents_actives =  list(filter(lambda x: x.parent and hasattr(x.parent, 'attrs') and 'active' in x.parent.attrs, filtered_button ))
                         if parents_actives:
                             filtered_button = parents_actives
                         next_button = filtered_button[position]
