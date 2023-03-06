@@ -2349,13 +2349,34 @@ class WebappInternal(Base):
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
             
             if input_field:
-                active_tab = self.filter_active_tabs(label, input_field)
+                active_tab = self.filter_active_tabs(container)
 
-                if active_tab:
-                    if type(active_tab) is not list:
-                        logger().debug(f"wa-panel active_tab")
-                        active_tab = [active_tab]
-                    active_tab = next(iter(active_tab), None)
+                if active_tab :
+                    active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
+                    if active_childs:
+                        if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
+                           active_childs = [active_tab]
+                        labels_in_tab = next(iter(active_childs), None)
+                        if labels_in_tab != None and labels_in_tab.contents != None:
+                            label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
+                            if label_class:
+                                if len(label_class) > 0:
+                                    is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
+                                    label_tab = len(is_label_in_tab) > 0
+                                else:
+                                    label_tab = True
+                            else:
+                                label_tab = True
+                        if active_childs and label_tab:
+                            active_tab = next(iter(active_childs), None)
+                            active_tab_labels = active_tab.select(label_term)
+                            filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
+                            if not filtered_labels:
+                                filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,active_tab_labels))
+                                if len(filtered_labels) > 1:
+                                    filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,active_tab_labels))
+                            if not filtered_labels:
+                                active_tab = None
 
 
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
@@ -6579,9 +6600,10 @@ class WebappInternal(Base):
 
         return elements, False
 
-    def filter_active_tabs(self, object, input_field=None):
-        """
 
+    def filter_active_tabs(self, object):
+        """
+        
         :param object:
         :return: return the object if parent wa-tab-page is active
         """
@@ -6590,16 +6612,13 @@ class WebappInternal(Base):
         if isinstance(object, list):
             filtered_object = list(
                 filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, object))
-
+            
             if filtered_object:
                 return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
             else:
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
-                    return [filtered_object]
-        elif object.find_parents('wa-tab-page') and input_field:
-            filtered_object = list(filter(lambda x: hasattr(x, 'attrs') and 'active' in x.attrs , object.find_parents('wa-tab-page')))
-            return filtered_object
+                    return [filtered_object] 
 
         elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
             return object if 'active' in object.find_parent('wa-tab-page').attrs else None
