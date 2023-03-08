@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webapp &mdash; TIR 1.0.0 documentation</title>
@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -27,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> TIR
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            TIR
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -39,7 +45,74 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tir.main.Webapp"><code class="docutils literal notranslate"><span class="pre">Webapp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.AddParameter"><code class="docutils literal notranslate"><span class="pre">Webapp.AddParameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.AssertFalse"><code class="docutils literal notranslate"><span class="pre">Webapp.AssertFalse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.AssertTrue"><code class="docutils literal notranslate"><span class="pre">Webapp.AssertTrue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ChangeEnvironment"><code class="docutils literal notranslate"><span class="pre">Webapp.ChangeEnvironment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ChangeUser"><code class="docutils literal notranslate"><span class="pre">Webapp.ChangeUser()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.CheckHelp"><code class="docutils literal notranslate"><span class="pre">Webapp.CheckHelp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.CheckResult"><code class="docutils literal notranslate"><span class="pre">Webapp.CheckResult()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.CheckView"><code class="docutils literal notranslate"><span class="pre">Webapp.CheckView()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickBox"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickCheckBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickFolder"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickFolder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickGridCell"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickGridCell()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickGridHeader"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickGridHeader()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickIcon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickImage"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickImage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickLabel"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickLabel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickListBox"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickListBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickMenuFunctional"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickMenuFunctional()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickMenuPopUpItem"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickMenuPopUpItem()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickTree"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickTree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.F3"><code class="docutils literal notranslate"><span class="pre">Webapp.F3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.Finish"><code class="docutils literal notranslate"><span class="pre">Webapp.Finish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetConfigValue"><code class="docutils literal notranslate"><span class="pre">Webapp.GetConfigValue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetGrid"><code class="docutils literal notranslate"><span class="pre">Webapp.GetGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetRelease"><code class="docutils literal notranslate"><span class="pre">Webapp.GetRelease()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetText"><code class="docutils literal notranslate"><span class="pre">Webapp.GetText()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetValue"><code class="docutils literal notranslate"><span class="pre">Webapp.GetValue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GridTree"><code class="docutils literal notranslate"><span class="pre">Webapp.GridTree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.IfExists"><code class="docutils literal notranslate"><span class="pre">Webapp.IfExists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LengthGridLines"><code class="docutils literal notranslate"><span class="pre">Webapp.LengthGridLines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LoadGrid"><code class="docutils literal notranslate"><span class="pre">Webapp.LoadGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LogOff"><code class="docutils literal notranslate"><span class="pre">Webapp.LogOff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.MessageBoxClick"><code class="docutils literal notranslate"><span class="pre">Webapp.MessageBoxClick()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.OpenCSV"><code class="docutils literal notranslate"><span class="pre">Webapp.OpenCSV()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.Program"><code class="docutils literal notranslate"><span class="pre">Webapp.Program()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ProgramScreen"><code class="docutils literal notranslate"><span class="pre">Webapp.ProgramScreen()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.QueryExecute"><code class="docutils literal notranslate"><span class="pre">Webapp.QueryExecute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ReportComparison"><code class="docutils literal notranslate"><span class="pre">Webapp.ReportComparison()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.RestoreParameters"><code class="docutils literal notranslate"><span class="pre">Webapp.RestoreParameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.Screenshot"><code class="docutils literal notranslate"><span class="pre">Webapp.Screenshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ScrollGrid"><code class="docutils literal notranslate"><span class="pre">Webapp.ScrollGrid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SearchBrowse"><code class="docutils literal notranslate"><span class="pre">Webapp.SearchBrowse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetBranch"><code class="docutils literal notranslate"><span class="pre">Webapp.SetBranch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetButton"><code class="docutils literal notranslate"><span class="pre">Webapp.SetButton()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetFilePath"><code class="docutils literal notranslate"><span class="pre">Webapp.SetFilePath()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetFocus"><code class="docutils literal notranslate"><span class="pre">Webapp.SetFocus()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetKey"><code class="docutils literal notranslate"><span class="pre">Webapp.SetKey()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetLateralMenu"><code class="docutils literal notranslate"><span class="pre">Webapp.SetLateralMenu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetParameters"><code class="docutils literal notranslate"><span class="pre">Webapp.SetParameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetTIRConfig"><code class="docutils literal notranslate"><span class="pre">Webapp.SetTIRConfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetTabEDAPP"><code class="docutils literal notranslate"><span class="pre">Webapp.SetTabEDAPP()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetValue"><code class="docutils literal notranslate"><span class="pre">Webapp.SetValue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.Setup"><code class="docutils literal notranslate"><span class="pre">Webapp.Setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.SetupTSS"><code class="docutils literal notranslate"><span class="pre">Webapp.SetupTSS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.Start"><code class="docutils literal notranslate"><span class="pre">Webapp.Start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.StartDB"><code class="docutils literal notranslate"><span class="pre">Webapp.StartDB()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.StopDB"><code class="docutils literal notranslate"><span class="pre">Webapp.StopDB()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.TearDown"><code class="docutils literal notranslate"><span class="pre">Webapp.TearDown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.WaitFieldValue"><code class="docutils literal notranslate"><span class="pre">Webapp.WaitFieldValue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.WaitHide"><code class="docutils literal notranslate"><span class="pre">Webapp.WaitHide()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.WaitProcessing"><code class="docutils literal notranslate"><span class="pre">Webapp.WaitProcessing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.WaitShow"><code class="docutils literal notranslate"><span class="pre">Webapp.WaitShow()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="poui.html">Poui</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configjson.html">Config.json</a></li>
 </ul>
@@ -65,8 +138,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Webapp</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Webapp</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/webapp.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,20 +150,20 @@
            <div itemprop="articleBody">
              
   <section id="module-tir">
-<span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Permalink to this headline"></a></h1>
+<span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.main.Webapp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Webapp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition"></a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>config_path</strong> (<em>str</em>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
 <li><p><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -98,13 +171,13 @@
 <span class="sig-name descname"><span class="pre">AddParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">portuguese_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">english_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spanish_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Permalink to this definition"></a></dt>
 <dd><p>Adds a parameter to the queue of parameters to be set by SetParameters method.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The parameter name.</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The branch to be filled in parameter edit screen.</p></li>
-<li><p><strong>portuguese_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value for a portuguese repository.</p></li>
-<li><p><strong>english_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value for an english repository.</p></li>
-<li><p><strong>spanish_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value for a spanish repository.</p></li>
+<li><p><strong>parameter</strong> (<em>str</em>) – The parameter name.</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to be filled in parameter edit screen.</p></li>
+<li><p><strong>portuguese_value</strong> (<em>str</em>) – The value for a portuguese repository.</p></li>
+<li><p><strong>english_value</strong> (<em>str</em>) – The value for an english repository.</p></li>
+<li><p><strong>spanish_value</strong> (<em>str</em>) – The value for a spanish repository.</p></li>
 </ul>
 </dd>
 </dl>
@@ -147,12 +220,12 @@
 <dd><p>Clicks on the change environment area of Protheus Webapp and
 fills the environment screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>module</strong> (<em>str</em>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 </dl>
@@ -168,12 +241,12 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeUser" title="Permalink to this definition"></a></dt>
 <dd><p>Change the user.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The initial program to load. - <strong>Default:</strong> “” (previous initial_program)</p></li>
-<li><p><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (previous date)</p></li>
-<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “previous date group”</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “previous branch”</p></li>
+<li><p><strong>initial_program</strong> (<em>str</em>) – The initial program to load. - <strong>Default:</strong> “” (previous initial_program)</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (previous date)</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – The group to fill on the environment screen. - <strong>Default:</strong> “previous date group”</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to fill on the environment screen. - <strong>Default:</strong> “previous branch”</p></li>
 </ul>
 </dd>
 </dl>
@@ -193,14 +266,14 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">CheckHelp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_problem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_solution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Text to be checked.</p></li>
-<li><p><strong>text_help</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Only the help text will be checked.</p></li>
-<li><p><strong>text_problem</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Only the problem text will be checked.</p></li>
-<li><p><strong>text_solution</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Only the solution text will be checked.</p></li>
-<li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Button to be clicked.</p></li>
-<li><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Check the text with high accuracy.</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – Text to be checked.</p></li>
+<li><p><strong>text_help</strong> (<em>str</em>) – Only the help text will be checked.</p></li>
+<li><p><strong>text_problem</strong> (<em>str</em>) – Only the problem text will be checked.</p></li>
+<li><p><strong>text_solution</strong> (<em>str</em>) – Only the solution text will be checked.</p></li>
+<li><p><strong>button</strong> (<em>str</em>) – Button to be clicked.</p></li>
+<li><p><strong>verbosity</strong> (<em>bool</em>) – Check the text with high accuracy.</p></li>
 </ul>
 </dd>
 </dl>
@@ -224,17 +297,17 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">CheckResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value that the field is expected to contain.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
-<li><p><strong>input_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – False if the desired field is not an input type .</p></li>
-<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Desired direction to search for the element, currently accepts right and down.</p></li>
-<li><p><strong>grid_memo_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – The value that the field is expected to contain.</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>line</strong> (<em>int</em>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>name_attr</strong> (<em>bool</em>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
+<li><p><strong>input_field</strong> (<em>bool</em>) – False if the desired field is not an input type .</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – Desired direction to search for the element, currently accepts right and down.</p></li>
+<li><p><strong>grid_memo_field</strong> (<em>bool</em>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>
@@ -263,10 +336,10 @@ fills the environment screen.</p>
 <dd><p>Checks if a certain text is present in the screen at the time and takes an action.</p>
 <p>“help” - closes element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Text to be checked.</p></li>
-<li><p><strong>element_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Type of element. - <strong>Default:</strong> “help”</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – Text to be checked.</p></li>
+<li><p><strong>element_type</strong> (<em>str</em>) – Type of element. - <strong>Default:</strong> “help”</p></li>
 </ul>
 </dd>
 </dl>
@@ -282,13 +355,13 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Checkbox elements of a grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Comma divided string with values that must be checked, combine with content_list.</p></li>
-<li><p><strong>content_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Comma divided string with values that must be checked. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>select_all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if all options should be selected. - <strong>Default:</strong> False</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Comma divided string with values that must be checked, combine with content_list.</p></li>
+<li><p><strong>content_list</strong> (<em>str</em>) – Comma divided string with values that must be checked. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>select_all</strong> (<em>bool</em>) – Boolean if all options should be selected. - <strong>Default:</strong> False</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>itens</strong> (<em>bool</em>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
 </ul>
 </dd>
 </dl>
@@ -316,11 +389,11 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickCheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_box_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickCheckBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Label in box on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label_box_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The label box name</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – index label box on interface</p></li>
-<li><p><strong>double_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – True if a double click in element is necessary.</p></li>
+<li><p><strong>label_box_name</strong> (<em>str</em>) – The label box name</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – index label box on interface</p></li>
+<li><p><strong>double_click</strong> (<em>bool</em>) – True if a double click in element is necessary.</p></li>
 </ul>
 </dd>
 </dl>
@@ -336,10 +409,10 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickFolder" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on folder elements on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>folder_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Which folder item should be clicked.</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – In case of two or more folders with the same name in the screen, you could choose by position in order</p></li>
+<li><p><strong>folder_name</strong> (<em>str</em>) – Which folder item should be clicked.</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – In case of two or more folders with the same name in the screen, you could choose by position in order</p></li>
 </ul>
 </dd>
 </dl>
@@ -357,11 +430,11 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickGridCell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridCell" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Cell of a Grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The column that should be clicked.</p></li>
-<li><p><strong>row_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – The column that should be clicked.</p></li>
+<li><p><strong>row_number</strong> (<em>int</em>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -377,11 +450,11 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickGridHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridHeader" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Cell of a Grid Header.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – The column index that should be clicked.</p></li>
+<li><p><strong>column</strong> (<em>int</em>) – The column index that should be clicked.</p></li>
 <li><p><strong>column_name</strong> – The column index that should be clicked.</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -399,10 +472,10 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icon_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickIcon" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on an Icon button based on its tooltip text.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>icon_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The tooltip text.</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>icon_text</strong> (<em>str</em>) – The tooltip text.</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -433,8 +506,8 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickLabel" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Label on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>label_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The label name</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label_name</strong> (<em>str</em>) – The label name</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -449,8 +522,8 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickListBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickListBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Item based in a text in a window tlistbox</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Text in windows to be clicked.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – Text in windows to be clicked.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -461,15 +534,28 @@ fills the environment screen.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Webapp.ClickMenuFunctional">
+<span class="sig-name descname"><span class="pre">ClickMenuFunctional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">menu_option</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuFunctional" title="Permalink to this definition"></a></dt>
+<dd><p>Click on the functional menu.
+:param menu_option: Item to be clicked.
+:type menu_option: src</p>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickMenuFunctional</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span><span class="s2">&quot;button&quot;</span><span class="p">)</span> 
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickMenuPopUpItem">
 <span class="sig-name descname"><span class="pre">ClickMenuPopUpItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuPopUpItem" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on MenuPopUp Item based in a text</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Text in MenuPopUp to be clicked.</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – Text in MenuPopUp to be clicked.</p></li>
 <li><p><strong>right_click</strong> – Button to be clicked.</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – index item text</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – index item text</p></li>
 </ul>
 </dd>
 </dl>
@@ -487,7 +573,7 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">ClickTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on TreeView component.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p></li>
 <li><p><strong>right_click</strong> – Clicks with the right button of the mouse in the last element of the tree.</p></li>
@@ -514,11 +600,11 @@ fills the environment screen.</p>
 3.Click()</p>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The term that must be searched.</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – True: searchs element by name.</p></li>
-<li><p><strong>send_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – True: try open standard search field send key F3.</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The term that must be searched.</p></li>
+<li><p><strong>name_attr</strong> (<em>bool</em>) – True: searchs element by name.</p></li>
+<li><p><strong>send_key</strong> (<em>bool</em>) – True: try open standard search field send key F3.</p></li>
 </ul>
 </dd>
 </dl>
@@ -550,10 +636,10 @@ fills the environment screen.</p>
 <dt class="sig sig-object py" id="tir.main.Webapp.GetConfigValue">
 <span class="sig-name descname"><span class="pre">GetConfigValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetConfigValue" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>json_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Json Key in config.json</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_key</strong> (<em>str</em>) – Json Key in config.json</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Json Key item in config.json</p>
 </dd>
 </dl>
@@ -564,22 +650,22 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">GetGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetGrid" title="Permalink to this definition"></a></dt>
 <dd><p>Gets a grid BeautifulSoup object from the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid_number</strong> – The number of the grid on the screen.</p></li>
 <li><p><strong>grid_element</strong> – Grid class name in HTML ex: “.tgrid”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
 </dd>
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Grid BeautifulSoup object</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>BeautifulSoup object</p>
 </dd>
 </dl>
@@ -595,11 +681,11 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">GetRelease</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetRelease" title="Permalink to this definition"></a></dt>
 <dd><p>Get the current release from Protheus.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The current release from Protheus.</p>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -621,10 +707,10 @@ fills the environment screen.</p>
 <p>If the string_right was filled then the left side content is return.</p>
 <p>If no parameter was filled so the full content is return.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>string_left</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String of the left side of content.</p></li>
-<li><p><strong>string_right</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String of the right side of content.</p></li>
+<li><p><strong>string_left</strong> (<em>str</em>) – String of the left side of content.</p></li>
+<li><p><strong>string_right</strong> (<em>str</em>) – String of the right side of content.</p></li>
 </ul>
 </dd>
 </dl>
@@ -639,16 +725,17 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetValue">
-<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition"></a></dt>
 <dd><p>Gets the current value or text of element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_memo_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>line</strong> (<em>int</em>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_memo_field</strong> (<em>bool</em>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which duplicated element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -664,7 +751,7 @@ fills the environment screen.</p>
 <span class="sig-name descname"><span class="pre">GridTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GridTree" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Grid TreeView component.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>treepath</strong> – String that contains the access path for the item separate by “&gt;” .</p></li>
 <li><p><strong>right_click</strong> – Clicks with the right button of the mouse in the last element of the tree.</p></li>
@@ -676,6 +763,27 @@ fills the environment screen.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Right GridTree example:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">GridTree</span><span class="p">(</span><span class="s2">&quot;element 1 &gt; element 2 &gt; element 3&quot;</span><span class="p">,</span> <span class="n">right_click</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Webapp.IfExists">
+<span class="sig-name descname"><span class="pre">IfExists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.IfExists" title="Permalink to this definition"></a></dt>
+<dd><p>Returns True if element exists in timeout or return False if not exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> (<em>str</em>) – String that will hold the wait.</p></li>
+<li><p><strong>timeout</strong> (<em>str</em>) – Timeout that wait before return.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exist</span> <span class="o">=</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">IfExists</span><span class="p">(</span><span class="s2">&quot;Aviso&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">IfExists</span><span class="p">(</span><span class="s2">&quot;Aviso&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found!&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -725,8 +833,8 @@ of a grid. After running, the queues would be empty.</p>
 <span class="sig-name descname"><span class="pre">MessageBoxClick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button_text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.MessageBoxClick" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on desired button inside a Messagebox element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>button_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Desired button to click.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>button_text</strong> (<em>str</em>) – Desired button to click.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -750,15 +858,15 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>csv_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – .csv file name</p></li>
-<li><p><strong>delimiter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Delimiter option such like ‘;’ or ‘,’ or ‘|’</p></li>
-<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – To files with Header is possible return only a column by header name or Int value for no header files</p></li>
-<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Indicate with the file contains a Header or not default is Header None</p></li>
-<li><p><strong>filter_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Is possible to filter a specific value by column and value content, if value is int starts with number 1</p></li>
-<li><p><strong>filter_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Value used in pair with filter_column parameter</p></li>
-<li><p><strong>filter_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If you want filter a value by column, this parameter need to be a True value</p></li>
+<li><p><strong>csv_file</strong> (<em>str</em>) – .csv file name</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – Delimiter option such like ‘;’ or ‘,’ or ‘|’</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – To files with Header is possible return only a column by header name or Int value for no header files</p></li>
+<li><p><strong>header</strong> (<em>bool</em>) – Indicate with the file contains a Header or not default is Header None</p></li>
+<li><p><strong>filter_column</strong> (<em>str</em><em> or </em><em>int</em>) – Is possible to filter a specific value by column and value content, if value is int starts with number 1</p></li>
+<li><p><strong>filter_value</strong> (<em>str</em>) – Value used in pair with filter_column parameter</p></li>
+<li><p><strong>filter_data</strong> (<em>bool</em>) – If you want filter a value by column, this parameter need to be a True value</p></li>
 </ul>
 </dd>
 </dl>
@@ -801,8 +909,8 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 <p>Only used when the Initial Program is the module Ex: SIGAFAT.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The program name</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>program_name</strong> (<em>str</em>) – The program name</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -847,16 +955,16 @@ Parameters:
 <p>dbq_oracle_server parameter is necessary only for Oracle connection.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – ANSI SQL estatement query</p></li>
-<li><p><strong>database_driver</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – ODBC Driver database name</p></li>
-<li><p><strong>dbq_oracle_server</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Only for Oracle: DBQ format:Host:Port/oracle instance</p></li>
-<li><p><strong>database_server</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Database Server Name</p></li>
-<li><p><strong>database_port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Database port default port=1521</p></li>
-<li><p><strong>database_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Database Name</p></li>
-<li><p><strong>database_user</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – User Database Name</p></li>
-<li><p><strong>database_password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Database password</p></li>
+<li><p><strong>query</strong> (<em>str</em>) – ANSI SQL estatement query</p></li>
+<li><p><strong>database_driver</strong> (<em>str</em>) – ODBC Driver database name</p></li>
+<li><p><strong>dbq_oracle_server</strong> (<em>str</em>) – Only for Oracle: DBQ format:Host:Port/oracle instance</p></li>
+<li><p><strong>database_server</strong> (<em>str</em>) – Database Server Name</p></li>
+<li><p><strong>database_port</strong> (<em>int</em>) – Database port default port=1521</p></li>
+<li><p><strong>database_name</strong> (<em>str</em>) – Database Name</p></li>
+<li><p><strong>database_user</strong> (<em>str</em>) – User Database Name</p></li>
+<li><p><strong>database_password</strong> (<em>str</em>) – Database password</p></li>
 </ul>
 </dd>
 </dl>
@@ -894,10 +1002,10 @@ Parameters:
 ‘ss:Width=”100”’</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>base_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Base file that reflects the expected. If doesn’t exist make a copy of auto and then rename to base</p></li>
-<li><p><strong>current_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Current file recently impressed, this file is use to generate file_auto automatically.</p></li>
+<li><p><strong>base_file</strong> (<em>str</em>) – Base file that reflects the expected. If doesn’t exist make a copy of auto and then rename to base</p></li>
+<li><p><strong>current_file</strong> (<em>str</em>) – Current file recently impressed, this file is use to generate file_auto automatically.</p></li>
 </ul>
 </dd>
 </dl>
@@ -929,11 +1037,11 @@ Parameters:
 <span class="sig-name descname"><span class="pre">Screenshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Screenshot" title="Permalink to this definition"></a></dt>
 <dd><p>Takes a screenshot and saves on the screenshot folder defined in config.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>filename</strong> – The name of the screenshot file.</p>
 </dd>
-<dt class="field-even">Type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -948,11 +1056,11 @@ Parameters:
 <span class="sig-name descname"><span class="pre">ScrollGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ScrollGrid" title="Permalink to this definition"></a></dt>
 <dd><p>Scrolls Grid until a matching column is found.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The column to be matched.</p></li>
-<li><p><strong>match_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value to be matched in defined column.</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The column to be matched.</p></li>
+<li><p><strong>match_value</strong> (<em>str</em>) – The value to be matched in defined column.</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -975,13 +1083,13 @@ it will search using the chosen key.</p>
 <p>It will search using the first search box on the screen, but if an <strong>identifier</strong>
 is provided, it will search on the chosen search box.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The term that must be searched.</p></li>
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
-<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</p></li>
-<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Whether the key is an index or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The search column to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The term that must be searched.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
+<li><p><strong>identifier</strong> (<em>str</em>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</p></li>
+<li><p><strong>index</strong> (<em>bool</em>) – Whether the key is an index or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – The search column to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 </dl>
@@ -1018,8 +1126,8 @@ is provided, it will search on the chosen search box.</p>
 <span class="sig-name descname"><span class="pre">SetBranch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">branch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetBranch" title="Permalink to this definition"></a></dt>
 <dd><p>Chooses the branch on the branch selection screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The branch that would be chosen.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>branch</strong> (<em>str</em>) – The branch that would be chosen.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1034,11 +1142,11 @@ is provided, it will search on the chosen search box.</p>
 <span class="sig-name descname"><span class="pre">SetButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Permalink to this definition"></a></dt>
 <dd><p>Method that clicks on a button on the screen.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Button to be clicked.</p></li>
-<li><p><strong>sub_item</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Sub item to be clicked inside the first button. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>button</strong> (<em>str</em>) – Button to be clicked.</p></li>
+<li><p><strong>sub_item</strong> (<em>str</em>) – Sub item to be clicked inside the first button. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -1061,10 +1169,10 @@ is provided, it will search on the chosen search box.</p>
 <p>Necessary informed the button name or the program will select the current button name.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Path to be inputted.</p></li>
-<li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name button from path screen.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – Path to be inputted.</p></li>
+<li><p><strong>button</strong> (<em>str</em>) – Name button from path screen.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1081,12 +1189,12 @@ is provided, it will search on the chosen search box.</p>
 <span class="sig-name descname"><span class="pre">SetFocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFocus" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the current focus on the desired field.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The field that must receive the focus.</p></li>
-<li><p><strong>grid_cell</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Indicates if the element that deserve focus is on a grid.</p></li>
-<li><p><strong>row_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Number of row in case of multiples rows.</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field that must receive the focus.</p></li>
+<li><p><strong>grid_cell</strong> (<em>bool</em>) – Indicates if the element that deserve focus is on a grid.</p></li>
+<li><p><strong>row_number</strong> (<em>int</em>) – Number of row in case of multiples rows.</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -1111,14 +1219,14 @@ is provided, it will search on the chosen search box.</p>
 </div>
 <p>Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete …</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Key that would be pressed</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if action must be applied on a grid. (Usually with DOWN key)</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – Key that would be pressed</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if action must be applied on a grid. (Usually with DOWN key)</p></li>
 <li><p><strong>grid_number</strong> (<em>int
 :param additional_key: Key additional that would be pressed.</em>) – Grid number of which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>wait_show</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String that will hold the wait after press a key.</p></li>
-<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – The amount of time each step should wait. - <strong>Default:</strong> 3</p></li>
+<li><p><strong>wait_show</strong> (<em>str</em>) – String that will hold the wait after press a key.</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – The amount of time each step should wait. - <strong>Default:</strong> 3</p></li>
 </ul>
 </dd>
 </dl>
@@ -1143,12 +1251,12 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetLateralMenu">
-<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_menu_functional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Permalink to this definition"></a></dt>
 <dd><p>Navigates through the lateral menu using provided menu path.
 e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>menu_itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String with the path to the menu.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>menu_itens</strong> (<em>str</em>) – String with the path to the menu.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1194,10 +1302,10 @@ than the ones defined at <strong>config.json</strong></p>
 <li><p>Module</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The config to be changed.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value that would be set.</p></li>
+<li><p><strong>config_name</strong> (<em>str</em>) – The config to be changed.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value that would be set.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1213,8 +1321,8 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="sig-name descname"><span class="pre">SetTabEDAPP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTabEDAPP" title="Permalink to this definition"></a></dt>
 <dd><p>Chooses the table on the generic query (EDAPP).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The table that would be chosen.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>table</strong> (<em>str</em>) – The table that would be chosen.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1233,20 +1341,20 @@ than the ones defined at <strong>config.json</strong></p>
 <p>Attention don’t use  position parameter with  grid parameter True.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The field name or label to receive the value</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The value to be inputted on the element.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</p></li>
-<li><p><strong>row</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Row number that will be filled</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field name or label to receive the value</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value to be inputted on the element.</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</p></li>
+<li><p><strong>row</strong> (<em>int</em>) – Row number that will be filled</p></li>
+<li><p><strong>name_attr</strong> (<em>bool</em>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
 <li><p><strong>check_value</strong> – Boolean ignore input check - <strong>Default:</strong> True</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_memo_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
-<li><p><strong>range_multiplier</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.</p></li>
-<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Desired direction to search for the element from a label, currently accepts right and down.</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_memo_field</strong> (<em>bool</em>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>range_multiplier</strong> (<em>int</em>) – Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – Desired direction to search for the element from a label, currently accepts right and down.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1292,13 +1400,13 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="sig-name descname"><span class="pre">Setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Setup" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The initial program to load.</p></li>
-<li><p><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “99”</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “01”</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>initial_program</strong> (<em>str</em>) – The initial program to load.</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – The group to fill on the environment screen. - <strong>Default:</strong> “99”</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to fill on the environment screen. - <strong>Default:</strong> “01”</p></li>
+<li><p><strong>module</strong> (<em>str</em>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 </dl>
@@ -1318,10 +1426,10 @@ than the ones defined at <strong>config.json</strong></p>
 <p>This method use the user and password from config.json.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The initial program to load.</p></li>
-<li><p><strong>environment</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The initial environment to load.</p></li>
+<li><p><strong>initial_program</strong> (<em>str</em>) – The initial program to load.</p></li>
+<li><p><strong>environment</strong> (<em>str</em>) – The initial environment to load.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1347,7 +1455,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dt class="sig sig-object py" id="tir.main.Webapp.StartDB">
 <span class="sig-name descname"><span class="pre">StartDB</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StartDB" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>connection object</p>
 </dd>
 </dl>
@@ -1362,7 +1470,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dt class="sig sig-object py" id="tir.main.Webapp.StopDB">
 <span class="sig-name descname"><span class="pre">StopDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StopDB" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>connection</strong> – connection object</p>
 </dd>
 </dl>
@@ -1390,10 +1498,10 @@ than the ones defined at <strong>config.json</strong></p>
 <dd><p>Wait until field has expected value.
 Recommended for Trigger fields.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The desired field.</p></li>
-<li><p><strong>expected_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The expected value.</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The desired field.</p></li>
+<li><p><strong>expected_value</strong> (<em>str</em>) – The expected value.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1409,7 +1517,7 @@ Recommended for Trigger fields.</p>
 <span class="sig-name descname"><span class="pre">WaitHide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition"></a></dt>
 <dd><p>Search string that was sent and wait hide the elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>itens</strong> – String that will hold the wait.</p>
 </dd>
 </dl>
@@ -1425,8 +1533,8 @@ Recommended for Trigger fields.</p>
 <span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition"></a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String that will hold the wait.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String that will hold the wait.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1441,7 +1549,7 @@ Recommended for Trigger fields.</p>
 <span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition"></a></dt>
 <dd><p>Search string that was sent and wait show the elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>itens</strong> – String that will hold the wait.</p>
 </dd>
 </dl>

@@ -2351,7 +2351,7 @@ class WebappInternal(Base):
             if input_field:
                 active_tab = self.filter_active_tabs(container)
 
-                if active_tab and active_tab != container:
+                if active_tab :
                     active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
                     if active_childs:
                         if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
@@ -2372,11 +2372,12 @@ class WebappInternal(Base):
                             active_tab_labels = active_tab.select(label_term)
                             filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
                             if not filtered_labels:
-                                filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,labels))
+                                filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,active_tab_labels))
                                 if len(filtered_labels) > 1:
-                                    filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels))
+                                    filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,active_tab_labels))
                             if not filtered_labels:
                                 active_tab = None
+
 
             list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) if not active_tab else active_tab.select(term)
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
@@ -4120,7 +4121,7 @@ class WebappInternal(Base):
                             filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
                             
                     if filtered_button and len(filtered_button) - 1 >= position:
-                        parents_actives =  list(filter(lambda x: x.parent and 'active' in x.parent.attrs, filtered_button ))
+                        parents_actives =  list(filter(lambda x: x.parent and hasattr(x.parent, 'attrs') and 'active' in x.parent.attrs, filtered_button ))
                         if parents_actives:
                             filtered_button = parents_actives
                         next_button = filtered_button[position]
@@ -6611,23 +6612,25 @@ class WebappInternal(Base):
 
         return elements, False
 
+
     def filter_active_tabs(self, object):
         """
-
+        
         :param object:
         :return: return the object if parent wa-tab-page is active
         """
 
+
         if isinstance(object, list):
             filtered_object = list(
                 filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, object))
-
+            
             if filtered_object:
                 return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
             else:
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
-                    return [filtered_object]            
+                    return [filtered_object] 
 
         elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
             return object if 'active' in object.find_parent('wa-tab-page').attrs else None
@@ -9615,11 +9618,6 @@ class WebappInternal(Base):
 
         self.wait_blocker()
         soup_select = None
-        str_img_before= 'screen_before_action.png'
-        str_img_after= 'screen_after_action.png'
-
-        self.driver.save_screenshot(str_img_before)
-        screen_before_action = cv2.imread(str_img_before, 0)
 
         main_click_type = click_type
 
@@ -9655,28 +9653,6 @@ class WebappInternal(Base):
                     classes_after = self.get_selenium_attribute(element(), 'class')
 
                 click_type = click_type+1 if not main_click_type else click_type
-
-                self.driver.save_screenshot(str_img_after)
-                screen_after_action = cv2.imread(str_img_after, 0)
-                diff_calc, diff_img = self.image_compare(screen_before_action, screen_after_action)
-
-                if self.config.smart_test and soup_before_event == soup_after_event and parent_classes_before == parent_classes_after and diff_calc and time.time() > half_endtime:
-                    try:
-                        if self.config.log_http:
-                            folder_path = pathlib.Path(self.config.log_http, self.config.country, self.config.release, self.config.issue,
-                                            self.config.execution_id, self.log.get_file_name('testsuite'))
-                            path = pathlib.Path(folder_path)
-                            os.makedirs(pathlib.Path(folder_path))
-                        else:
-                            path = pathlib.Path("Log", socket.gethostname())
-                            os.makedirs(pathlib.Path("Log", socket.gethostname()))
-                    except OSError:
-                        pass
-                    folder_path_before = f'{path}\\{self.log.get_testcase_stack()}_{str_img_before}'
-                    folder_path_after = f'{path}\\{self.log.get_testcase_stack()}_{str_img_after}'
-                    cv2.imwrite(folder_path_before, screen_before_action)
-                    cv2.imwrite(folder_path_after, screen_after_action)
-                    cv2.imwrite(f'{path}\\{self.log.get_testcase_stack()}_diff.png', diff_img)
 
                 if click_type > 3:
                     click_type = 1
