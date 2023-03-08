@@ -5174,7 +5174,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -5185,6 +5185,8 @@ class WebappInternal(Base):
         :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
+        :param grid_list: Return all grids.
+        :type grid_list: bool
 
         Usage:
 
@@ -5208,7 +5210,9 @@ class WebappInternal(Base):
                 grids = list(filter(lambda x: self.element_is_displayed(x), grids))
 
                 if grids:
-                    if len(grids) - 1 >= grid_number:
+                    if grid_list:
+                        return grids
+                    elif len(grids) - 1 >= grid_number:
                         return grids[grid_number]
 
         if not grids:
@@ -5475,6 +5479,9 @@ class WebappInternal(Base):
         >>> oHelper.SetFocus("A1_COD")
         >>> oHelper.SetFocus("A1_COD", grid_cell = True)
         """
+
+        logger().debug(f"Setting focus on element {field}.")
+
         if grid_cell:
             if self.webapp_shadowroot():
                 self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
@@ -5488,7 +5495,6 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)
         else:
-            logger().debug(f"Setting focus on element {field}.")
 
             label = False if re.match(r"\w+(_)", field) else True
 
@@ -5829,7 +5835,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
-                                      scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
+                                      scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out / 5,
                                       optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
         else:
             self.wait_element_timeout(term=column_name,
@@ -5865,10 +5871,15 @@ class WebappInternal(Base):
                             grids = self.filter_active_tabs(grids)
                         else:
                             grids = container.select(".tgetdados, .tgrid, .tcbrowse")
+
                         grids = self.filter_displayed_elements(grids)
 
                     if grids:
                         headers = self.get_headers_from_grids(grids, duplicate_fields)
+
+                        if not column_name in headers[field[2]]:
+                            field[2] = self.return_header_index(column_name, headers)
+
                         if field[2] + 1 > len(grids):
                             grid_reload = True
                         else:
@@ -5958,7 +5969,7 @@ class WebappInternal(Base):
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
                                     self.set_element_focus(selenium_column())
-                                self.send_action(action=ActionChains(self.driver).click(selenium_column()).perform) if self.webapp_shadowroot() else self.click(selenium_column())
+                                self.send_action(self.send_action(action=self.click, element=selenium_column, click_type=3)) if self.webapp_shadowroot() else self.click(selenium_column())
                                 try:
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
                                         selenium_column(), Keys.ENTER).perform()
@@ -6504,7 +6515,7 @@ class WebappInternal(Base):
 
             if self.webapp_shadowroot():
                 self.wait_element_timeout(term=column_name,
-                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
+                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out / 3,
                                           optional_term=term,
                                           main_container="body")
                 containers = self.get_current_container()
@@ -6522,10 +6533,11 @@ class WebappInternal(Base):
 
                         if self.webapp_shadowroot():
                             grids = self.filter_active_tabs(grids)
+                        else:
+                            grids, same_location = self.filter_non_obscured(grids, grid_number)
+                            if same_location:
+                                grid_number = 0
 
-                        grids, same_location = self.filter_non_obscured(grids, grid_number)
-                        if same_location:
-                            grid_number = 0
                     grids = list(filter(lambda x:x.select("tbody tr"), grids)) if list(filter(lambda x:x.select("tbody tr"), grids)) else grids
                     headers = self.get_headers_from_grids(grids)
                     if grid_number < len(grids):
@@ -6652,6 +6664,7 @@ class WebappInternal(Base):
         grid_number -= 1
         column -=1 if column > 0 else 0
         header = None
+        column_number = None
 
         self.wait_element(term=f".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse, {self.grid_selectors['new_web_app']}", scrap_type=enum.ScrapType.CSS_SELECTOR)
         grid = self.get_grid(grid_number)
@@ -6677,6 +6690,10 @@ class WebappInternal(Base):
 
             if column_name in header[grid_number]:
                 column_number = header[grid_number][column_name]
+            else:
+                grid = self.return_grid_by_index(column_name)
+                header = self.get_headers_from_grids(grid)
+                column_number = header[0][column_name]
 
             if self.webapp_shadowroot():
                 column_element_selenium = self.find_shadow_element('thead label', self.soup_to_selenium(grid))[column_number]
@@ -6692,6 +6709,34 @@ class WebappInternal(Base):
                 self.set_element_focus(column_element_selenium)
 
                 self.click(column_element_selenium)
+
+    def return_grid_by_index(self, column_name):
+        """
+        [Internal]
+        """
+
+        grids = self.get_grid(grid_list=True)
+
+        header_index = self.return_header_index(column_name)
+
+        if header_index:
+            return grids[header_index]
+
+    def return_header_index(self, column_name=None, headers=None):
+        """
+        [Internal]
+        """
+
+        grids = self.get_grid(grid_list=True)
+
+        if not headers:
+            headers = self.get_headers_from_grids(grids)
+
+        if column_name:
+            header = next(iter(list(filter(lambda x: column_name.lower() in x, headers))), None)
+
+        if header:
+            return headers.index(header)
 
     def search_column_index(self, grid, column):
 
