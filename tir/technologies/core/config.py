@@ -73,6 +73,7 @@ class ConfigLoader:
         self.baseline_spool = str(data["BaseLine_Spool"]) if "BaseLine_Spool" in data else ""
         self.check_value = (bool(data["CheckValue"]) if "CheckValue" in data else None)
         self.poui_login = bool(data["POUILogin"]) if "POUILogin" in data else False
+        self.poui = bool(data["POUI"]) if "POUI" in data else False
         self.log_info_config = bool(data["LogInfoConfig"]) if "LogInfoConfig" in data else False
         self.release = str(data["Release"]) if "Release" in data else "12.1.2210"
         self.top_database = str(data["TopDataBase"]) if "TopDataBase" in data else "MSSQL"
