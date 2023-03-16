@@ -1469,7 +1469,7 @@ class PouiInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=True):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False):
         """
         [Internal]
 
@@ -1504,6 +1504,9 @@ class PouiInternal(Base):
         >>> #Elements with class "my_class" and text "my_text"
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
+
+        twebview = True if not self.config.poui else False
+
         try:
             endtime = time.time() + self.config.time_out
             container =  None
@@ -1959,7 +1962,7 @@ class PouiInternal(Base):
             logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
-    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True, twebview=True):
+    def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True):
         """
         [Internal]
 
@@ -1983,6 +1986,9 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.wait_element(term=".ui-button.ui-dialog-titlebar-close[title='Close']", scrap_type=enum.ScrapType.CSS_SELECTOR)
         """
+
+        twebview = True if not self.config.poui else False
+
         endtime = time.time() + self.config.time_out
         if self.config.debug_log:
             logger().debug("Waiting for element")
@@ -2015,7 +2021,8 @@ class PouiInternal(Base):
 
             if element is not None:
 
-                self.switch_to_iframe()
+                if twebview:
+                    self.switch_to_iframe()
 
                 sel_element = lambda:self.soup_to_selenium(element)
                 sel_element_isdisplayed = False
@@ -3224,7 +3231,10 @@ class PouiInternal(Base):
 
         position -= 1
         element = None
-        self.twebview_context = True
+
+        if not self.config.poui:
+            self.twebview_context = True
+
         logger().info(f"Clicking on {field}")
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
@@ -3276,7 +3286,10 @@ class PouiInternal(Base):
         """
         position -= 1
         element = None
-        self.twebview_context = True
+
+        if not self.config.poui:
+            self.twebview_context = True
+
         logger().info(f"Clicking on {button}")
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
@@ -3308,7 +3321,10 @@ class PouiInternal(Base):
         """
         position -= 1
         element = None
-        self.twebview_context = True
+
+        if not self.config.poui:
+            self.twebview_context = True
+
         logger().info(f"Clicking on Widget")
         self.wait_element(term="po-widget")
         endtime = time.time() + self.config.time_out
@@ -3407,7 +3423,10 @@ class PouiInternal(Base):
         :return: None
         """
         element = None
-        self.twebview_context = True
+
+        if not self.config.poui:
+            self.twebview_context = True
+
         logger().info(f"Searching: {content}")
         self.wait_element(term='po-page')
         endtime = time.time() + self.config.time_out
@@ -3420,10 +3439,11 @@ class PouiInternal(Base):
             if po_page:
                 page_list = next(iter(po_page.find_all_next('div', 'po-page-list-filter-wrapper')), None)
 
-                input = next(iter(page_list.select('input')), None)
+                if page_list:
+                    input = next(iter(page_list.select('input')), None)
 
-                if input:
-                    element = lambda: self.soup_to_selenium(input)
+                    if input:
+                        element = lambda: self.soup_to_selenium(input)
 
         if not element:
             self.log_error("Couldn't find element")
@@ -3460,7 +3480,10 @@ class PouiInternal(Base):
         :return: None
         """
         element = None
-        self.twebview_context = True
+
+        if not self.config.poui:
+            self.twebview_context = True
+
         index_number = []
         count = 0
         column_index_number = None
