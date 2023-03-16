@@ -2168,6 +2168,8 @@ class WebappInternal(Base):
 
         """
 
+        twebview = True if self.config.poui_login else False
+
         logger().debug("Waiting blocker to continue...")
         soup = None
         result = True
@@ -2176,11 +2178,11 @@ class WebappInternal(Base):
         while (time.time() < endtime and result):
             blocker_container = None
             blocker = None
-            soup = lambda: self.get_current_DOM()
+            soup = lambda: self.get_current_DOM(twebview=twebview)
             blocker_container = lambda: self.blocker_containers(soup())
 
             try:
-                if blocker_container:
+                if blocker_container():
                     if self.webapp_shadowroot():
                         blocker_container_soup = blocker_container()
                         blocker_container = self.soup_to_selenium(blocker_container())
@@ -9603,7 +9605,9 @@ class WebappInternal(Base):
         :return: True if there was a change in the object
         """
 
-        soup_before_event = self.get_current_DOM()
+        twebview = True if self.config.poui_login else False
+
+        soup_before_event = self.get_current_DOM(twebview=twebview)
         soup_after_event = soup_before_event
 
         parent_classes_before = self.get_active_parent_class(element)
@@ -9645,7 +9649,7 @@ class WebappInternal(Base):
                 elif soup_select == []:
                     soup_after_event = soup_before_event
                 else:
-                    soup_after_event = self.get_current_DOM()
+                    soup_after_event = self.get_current_DOM(twebview=twebview)
 
                 parent_classes_after = self.get_active_parent_class(element)
 
@@ -9661,7 +9665,7 @@ class WebappInternal(Base):
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
-                logger().exception(f"Warning Exception send_action {str(e)}")
+                logger().debug(f"Warning Exception send_action {str(e)}")
             return False
 
         if self.config.smart_test or self.config.debug_log:
@@ -9707,7 +9711,6 @@ class WebappInternal(Base):
         mse = err/(float(h*w))
         return mse, diff
 
-
     def get_soup_select(self, selector):
         """
         Get a soup select object.
@@ -9715,7 +9718,10 @@ class WebappInternal(Base):
         :param selector: Css selector
         :return: Return a soup select object
         """
-        soup =  self.get_current_DOM()
+
+        twebview = True if self.config.poui_login else False
+
+        soup = self.get_current_DOM(twebview=twebview)
 
         return soup.select(selector)
 

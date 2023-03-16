@@ -1493,7 +1493,7 @@ class Poui():
         >>> oHelper.ClickButton('Cancelar')
         :return:
         """
-        self.__poui.click_button(button, position, selector="div > po-button", container=False)
+        self.__poui.click_button(button, position, selector="po-button", container=False)
 
     def AssertFalse(self, expected=False, script_message=''):
         """
