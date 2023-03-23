@@ -5881,8 +5881,9 @@ class WebappInternal(Base):
 
                         if not column_name in headers[field[2]]:
                             field[2] = self.return_header_index(column_name, headers)
+                            column_name = next(iter(filter(lambda x: re.sub(' ', '', column_name) in re.sub(' ', '', x), headers[field[2]].keys())),'')
 
-                        if field[2] + 1 > len(grids):
+                        if field[2] is not None and field[2] + 1 > len(grids):
                             grid_reload = True
                         else:
                             grid_id = grids[field[2]].attrs["id"]
@@ -6734,8 +6735,15 @@ class WebappInternal(Base):
         if not headers:
             headers = self.get_headers_from_grids(grids)
 
-        if column_name:
+        if column_name and headers:
             header = next(iter(list(filter(lambda x: column_name.lower() in x, headers))), None)
+            if not header: # if not find header, do inverse search with regex in headers keys'
+                column_name =  re.sub(' ', '', column_name).lower()
+                for hd in headers:
+                    header = next(iter(list(filter(lambda x: column_name in re.sub(' ', '', x).lower(), hd.keys()))), None)
+                    if header:
+                        header = next(iter(list(filter(lambda x: header.lower() in x, headers))), None)
+                        break
 
         if header:
             return headers.index(header)
