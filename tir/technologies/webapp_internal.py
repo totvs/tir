@@ -6270,8 +6270,9 @@ class WebappInternal(Base):
         columns = None
         headers = None
         rows = None
-
-        success  = False
+        obscured_row = None
+        down_count = 0
+        success = False
 
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -6312,17 +6313,23 @@ class WebappInternal(Base):
                     rows = grids[field[3]].select("tbody tr")
 
                 if rows:
-                    if field[0] > len(rows)-1:
+                    if field[0] > len(rows) - 1:
+                        grid_lenght = self.lenght_grid_lines(grids[field[3]])
                         if get_value:
                             return ''
+                        elif grid_lenght > field[0]:
+                            obscured_row, down_count = self.get_obscure_gridline(grids[field[3]], field[0])
                         else:
                             self.log_error(self.language.messages.grid_line_error)
 
                     field_element = next(iter(field), None)
 
-                    if field_element != None and len(rows) -1 >= field_element:
+                    if field_element != None and len(rows) - 1 >= field_element or obscured_row:
                         if self.webapp_shadowroot():
-                            columns = rows[field_element].find_elements_by_css_selector('td')
+                            if obscured_row:
+                                columns = obscured_row.find_elements_by_css_selector('td')
+                            else:
+                                columns = rows[field_element].find_elements_by_css_selector('td')
                         else:
                             columns = rows[field_element].select("td")
 
@@ -6345,11 +6352,55 @@ class WebappInternal(Base):
                     if success and get_value and text:
                         return text
 
+        for i in range(down_count):
+            ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+
         field_name = f"({field[0]}, {column_name})"
         self.log_result(field_name, field[2], text)
         logger().info(f"Collected value: {text}")
         if not success:
-            self.check_grid_error( grids, headers, column_name, rows, columns, field )
+            self.check_grid_error(grids, headers, column_name, rows, columns, field)
+
+
+    def get_obscure_gridline(self, grid, row_num=0):
+        """
+        [Internal]
+        :param grid:
+        :param row_num:
+        :return obscured row based in row number:
+        """
+        grid_lines = None
+        row_list = []
+
+        if self.webapp_shadowroot():
+            grid_lines = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+            before_texts = list(map(lambda x: x.text, before_texts))
+            after_texts = []
+            down_count = 0
+            if grid_lines():
+                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
+                endtime = time.time() + self.config.time_out
+                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
+
+                    after_texts = list(map(lambda x: x.text, grid_lines()))
+
+                    for i in after_texts:
+                        if i not in before_texts:
+                            before_texts.append(i)
+
+                    if len(before_texts) > row_num:
+                        row_list = list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))
+                        break
+
+                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                    down_count += 1
+                    self.wait_blocker()
+
+                    after_texts = list(map(lambda x: x.text, grid_lines()))
+
+            return next(iter(row_list), None), down_count
+
 
     def check_grid_memo(self, element):
         """
@@ -8780,9 +8831,33 @@ class WebappInternal(Base):
         grid_lines = None
 
         if self.webapp_shadowroot():
-            grid_lines = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+
+            grid_lines = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+            before_texts = list(map(lambda x: x.text, before_texts))
+            after_texts = []
+            down_count = 0
+            if grid_lines():
+                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
+                endtime = time.time() + self.config.time_out
+                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
+
+                    after_texts = list(map(lambda x: x.text, grid_lines()))
+                    for i in after_texts:
+                        if i not in before_texts:
+                            before_texts.append(i)
+
+                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                    down_count += 1
+                    self.wait_blocker()
+
+                    after_texts = list(map(lambda x: x.text, grid_lines()))
+                for i in range(down_count):
+                    ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+
+                return len(before_texts)
         else:
-            grid_lines = grid.select("tbody tr")
+            return len(grid.select("tbody tr"))
 
         return len(grid_lines)
 
