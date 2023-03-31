@@ -2117,7 +2117,7 @@ class WebappInternal(Base):
                     pass
 
             if len(term.strip()) > input_lenght:
-                self.log_error(f"field length exceeded")
+                self.log_error(f"Browse term length exceeded input lenght: {input_lenght}")
 
         current_value = self.get_element_value(sel_browse_input())
 
