@@ -4079,6 +4079,7 @@ class WebappInternal(Base):
         logger().info(f"Clicking on {button}")
 
         try:
+            restore_zoom = False
             soup_element  = ""
             if (button.lower() == "x"):
                 self.set_button_x(position, check_error)
@@ -4138,6 +4139,11 @@ class WebappInternal(Base):
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         self.scroll_to_element(soup_element)
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                        if soup_element == None:
+                            bodySoup = self.get_current_DOM().select('body')
+                            self.driver.execute_script("arguments[0].style.cssText+='transform: scale(0.8)';", self.soup_to_selenium(bodySoup[0]))
+                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                            restore_zoom = True
 
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -4179,6 +4185,11 @@ class WebappInternal(Base):
                         popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                         while time.time() < endtime and not popup_item():
                             self.click(soup_element)
+                    if restore_zoom:
+                        bodySoup = self.get_current_DOM().select('body')
+                        self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
+
                 else:
                     self.scroll_to_element(soup_element())
                     self.set_element_focus(soup_element())
