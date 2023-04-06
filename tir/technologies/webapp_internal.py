@@ -6610,6 +6610,12 @@ class WebappInternal(Base):
                             rows = self.driver.execute_script(
                                 "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
                                 self.soup_to_selenium(grids[grid_number]))
+
+                            if not rows and len(headers) < len(grids):
+                                grids = list(filter(lambda x: self.get_headers_from_grids(x), grids))
+                                rows = self.driver.execute_script(
+                                    "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                    self.soup_to_selenium(grids[grid_number]))
                         else:
                             rows = grids[grid_number].select("tbody tr")
 
