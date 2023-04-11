@@ -4474,7 +4474,7 @@ class WebappInternal(Base):
         for child in current_itens:
             if "container" in child.get_attribute("class"):
                 containers.append(child)
-            elif child.text.lower() == menu_item.lower():
+            elif child.text.lower().rstrip() == menu_item.lower().rstrip():
                 submenu = child
 
         return (submenu, containers)
