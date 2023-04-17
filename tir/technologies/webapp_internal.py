@@ -2767,7 +2767,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value).strip() == main_value.replace(",", "").strip():
+                                if self.remove_mask(current_number_value, valtype).strip() == main_value.replace(",", "").strip():
                                     break
                                 tries+=1
                                 try_counter+=1
@@ -2779,7 +2779,7 @@ class WebappInternal(Base):
                             return
 
                         if self.check_mask(input_field()):
-                            current_value = self.remove_mask(self.get_web_value(input_field()).strip())
+                            current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
                             if re.findall(r"\s", current_value):
                                 current_value = re.sub(r"\s", "", current_value)
                         else:
@@ -5269,7 +5269,7 @@ class WebappInternal(Base):
 
         return (mask != "" and mask is not None and (re.findall(reg, mask)))
 
-    def remove_mask(self, string):
+    def remove_mask(self, string, valtype=None):
         """
         [Internal]
 
@@ -5290,13 +5290,16 @@ class WebappInternal(Base):
         >>> # value_without_mask == "111111111"
         """
         if type(string) is str:
-            caracter = (r'[.\/+-]')
-            if string[0:4] != 'http':
-                match = re.findall(caracter, string)
-                if match:
-                    string = re.sub(caracter, '', string)
+            if valtype == 'N':
+                return string
+            else:
+                caracter = (r'[.\/+-]')
+                if string[0:4] != 'http':
+                    match = re.findall(caracter, string)
+                    if match:
+                        string = re.sub(caracter, '', string)
 
-            return string
+                return string
 
     def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3 ):
         """
