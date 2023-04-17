@@ -2697,7 +2697,7 @@ class WebappInternal(Base):
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
 
-                unmasked_value = self.remove_mask(value, valtype)
+                unmasked_value = self.remove_mask(value)
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
