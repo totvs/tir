@@ -5277,8 +5277,6 @@ class WebappInternal(Base):
 
         :param string: The string that would have its characters removed.
         :type string: str
-        :param valtype: field value type.
-        :type string: str
 
         :return: The string with its special characters removed.
         :rtype: str
