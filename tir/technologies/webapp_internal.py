@@ -2697,7 +2697,7 @@ class WebappInternal(Base):
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
 
-                unmasked_value = self.remove_mask(value)
+                unmasked_value = self.remove_mask(value, valtype)
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
@@ -2767,7 +2767,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value).replace(",", "").strip() == main_value.replace(",", "").strip():
+                                if self.remove_mask(current_number_value, valtype).replace(",", "").strip() == main_value.replace(",", "").strip():
                                     break
                                 tries+=1
                                 try_counter+=1
