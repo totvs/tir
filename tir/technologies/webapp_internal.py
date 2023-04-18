@@ -2338,7 +2338,7 @@ class WebappInternal(Base):
             if not label:
                 self.log_error(f"Label: '{field}'' wasn't found.")
 
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
 
             container_size = self.get_element_size(container['id'])
             # The safe values add to postion of element
@@ -2661,16 +2661,10 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
 
         while(time.time() < endtime and not success):
-            unmasked_value = self.remove_mask(value)
 
             logger().info(f"Looking for element: {field}")
 
-            if field.lower() == self.language.From.lower():
-                element = self.get_field("cDeCond", name_attr=True, direction=direction)
-            elif field.lower() == self.language.To.lower():
-                element = self.get_field("cAteCond", name_attr=True, direction=direction)
-            else:
-                element = self.get_field(field, name_attr, position, direction=direction)
+            element = self.get_field(field, name_attr, position, direction=direction)
 
             if element:
                 input_field = lambda : self.soup_to_selenium(element)
@@ -2702,6 +2696,8 @@ class WebappInternal(Base):
 
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
+
+                unmasked_value = self.remove_mask(value)
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
@@ -3449,6 +3445,7 @@ class WebappInternal(Base):
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
+                self.scroll_to_container(container, term)
                 return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot() and not twebview:
@@ -3464,6 +3461,21 @@ class WebappInternal(Base):
             raise
         except Exception as e:
             logger().exception(str(e))
+
+    def scroll_to_container(self, container, term):
+        """
+
+        :param container:
+        :param term:
+        :return:
+        """
+        scroll_container = container.select(term)
+
+        if scroll_container:
+            if isinstance(scroll_container, list):
+                self.scroll_to_element(self.soup_to_selenium(container.select(term)[0]))
+            else:
+                self.scroll_to_element(self.soup_to_selenium(container.select(term)))
 
     def selenium_web_scrap(self, term, container, optional_term, second_term=None):
         """
@@ -7102,6 +7114,7 @@ class WebappInternal(Base):
             if element is not None:
 
                 sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
+                self.scroll_to_element(sel_element())
                 sel_element_isdisplayed = False
 
                 while(not sel_element_isdisplayed and time.time() < presence_endtime):
