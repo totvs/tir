@@ -2767,7 +2767,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value, valtype).strip() == main_value.replace(",", "").strip():
+                                if self.remove_mask(current_number_value).replace(",", "").strip() == main_value.replace(",", "").strip():
                                     break
                                 tries+=1
                                 try_counter+=1
@@ -2794,7 +2794,7 @@ class WebappInternal(Base):
                     if re.match(r"^●+$", current_value):
                         success = len(current_value) == len(str(value).strip())
                     elif ignore_case:
-                        replace = r'[\s,:]'
+                        replace = r'[\s,\.:]'
                         success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', main_value).lower()
                     else:
                         success = current_value == main_value.replace(",", "").strip()
