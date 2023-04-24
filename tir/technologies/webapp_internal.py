@@ -7133,7 +7133,7 @@ class WebappInternal(Base):
                         pass
 
 
-    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body", check_error=True, twebview=False):
+    def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body", check_error=True, twebview=False):
         """
         [Internal]
 
@@ -7191,7 +7191,6 @@ class WebappInternal(Base):
                 if type(element) == Tag:
                     sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-                endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
                         time.sleep(0.1)
