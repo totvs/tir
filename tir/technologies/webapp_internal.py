@@ -7186,7 +7186,7 @@ class WebappInternal(Base):
 
             element = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, position=position)
 
-            if element is not None:
+            if element:
                 element = next(iter(element), None)
                 if type(element) == Tag:
                     sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
