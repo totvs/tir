@@ -48,7 +48,8 @@ setup(
         'pyodbc',
         'psutil',
         'lxml==4.6.5',
-        'opencv-python==4.6.0.66'
+        'opencv-python==4.6.0.66',
+        'chromedriver-autoinstaller==0.4.0'
     ],
     packages=find_packages(),
     scripts=[],
