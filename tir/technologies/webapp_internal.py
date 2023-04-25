@@ -6970,7 +6970,7 @@ class WebappInternal(Base):
                     index.append(idx)
             if len(index) > 1:
                 for header in headers:
-                    header[duplicated_key] = index[duplicated_value]
+                    header[duplicated_key] = duplicated_value
 
         return headers
 
