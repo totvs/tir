@@ -4312,14 +4312,21 @@ class WebappInternal(Base):
             system_info()
 
     def set_button_x(self, position=1, check_error=True):
+        endtime = self.config.time_out/2
         if self.webapp_shadowroot():
-            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-dialog"
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
         position -= 1
-        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
-        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
+        wait_button = self.wait_element_timeout(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=endtime, position=position, check_error=check_error)
+
+        if wait_button:
+            soup = self.get_current_container()
+            if hasattr(soup, 'attrs') and 'title' in soup.attrs and f'{self.language.warning}' in soup.attrs['title']:
+                soup = self.get_current_DOM()
+        else:
+            soup = self.get_current_DOM()
 
         close_list = soup.select(term_button)
         if not close_list:
@@ -7183,15 +7190,15 @@ class WebappInternal(Base):
         if presence and success:
             if self.config.debug_log:
                 logger().debug("Element found! Waiting for element to be displayed.")
-            while time.time() < endtime and not element:
-                element = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview)
 
-            if element is not None:
+            element = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, position=position)
+
+            if element:
                 element = next(iter(element), None)
                 if type(element) == Tag:
                     sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-                endtime = time.time() + timeout
+
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
                         time.sleep(0.1)
