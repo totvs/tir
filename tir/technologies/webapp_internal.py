@@ -2697,7 +2697,7 @@ class WebappInternal(Base):
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"]) if self.webapp_shadowroot() else None
 
-                unmasked_value = self.remove_mask(value, valtype)
+                unmasked_value = self.remove_mask(value, valtype, input_field())
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
@@ -2767,7 +2767,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if self.remove_mask(current_number_value, valtype).replace(",", "").strip() == main_value.replace(",", "").strip():
+                                if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
                                     break
                                 tries+=1
                                 try_counter+=1
@@ -5269,7 +5269,7 @@ class WebappInternal(Base):
 
         return (mask != "" and mask is not None and (re.findall(reg, mask)))
 
-    def remove_mask(self, string, valtype=None):
+    def remove_mask(self, string, valtype=None, element=None):
         """
         [Internal]
 
@@ -5289,6 +5289,10 @@ class WebappInternal(Base):
         """
         if type(string) is str:
             if valtype == 'N':
+                if element:
+                    pattern = (r'\,')
+                    if re.findall(pattern, element.get_attribute('picture')):
+                        re.sub('\.', '', string)
                 return string
             else:
                 caracter = (r'[.\/+-]')
