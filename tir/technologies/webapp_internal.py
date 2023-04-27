@@ -5299,7 +5299,7 @@ class WebappInternal(Base):
                 if element:
                     pattern = (r'\,')
                     if re.findall(pattern, element.get_attribute('picture')):
-                        re.sub('\.', '', string)
+                        string = re.sub('\.', '', string)
                 return string
             else:
                 caracter = (r'[.\/+-]')
