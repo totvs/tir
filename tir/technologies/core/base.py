@@ -28,7 +28,6 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
-from pathlib import Path
 
 class Base(unittest.TestCase):
     """
