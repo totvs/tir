@@ -28,6 +28,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
+from pathlib import Path
 
 class Base(unittest.TestCase):
     """
@@ -1282,3 +1283,10 @@ class Base(unittest.TestCase):
             except:
                 logger().debug(f'{service} is being started')
                 os.system(f'net start {service}')
+
+    def create_folder(self, path):
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass

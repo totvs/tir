@@ -25,6 +25,7 @@ from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 import pathlib
+import json
 
 class PouiInternal(Base):
     """
@@ -2721,7 +2722,7 @@ class PouiInternal(Base):
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
         >>> if self.oHelper.get_release() >= '12.1.023':
-        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001)
+        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001')
         """
 
         return self.log.release
@@ -2744,7 +2745,7 @@ class PouiInternal(Base):
             This method return data as a string if necessary use some method to convert data like int().
 
         >>> config.json
-        >>> "CSVPath" : "C:\\temp"
+        >>> CSVPath : 'C:\\temp'
 
         :param csv_file: .csv file name
         :type csv_file: str
@@ -3143,7 +3144,7 @@ class PouiInternal(Base):
 
         logger().info(f"Input Value in:'{field}'")
         
-        input_field = self.return_input_element(field, position)
+        input_field = self.return_input_element(field, position, term="[class*='po-input']")
 
         self.switch_to_iframe()
 
@@ -3157,7 +3158,7 @@ class PouiInternal(Base):
         input_field_element().clear()
         input_field_element().send_keys(value)
     
-    def return_input_element(self, field=None, position=1):
+    def return_input_element(self, field=None, position=1, term=None):
         """
         [Internal]
         Returns input element based on field
@@ -3166,10 +3167,10 @@ class PouiInternal(Base):
         position -= 1
         input_field = ''
         self.twebview_context = True
-        self.wait_element(term="[class*='po-input']")
+        self.wait_element(term=term)
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term="[class*='po-input']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
                 po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
                 if po_input_span:
@@ -3367,37 +3368,7 @@ class PouiInternal(Base):
         if self.config.new_log:
             self.execution_flow()
 
-        webdriver_exception = None
-        timeout = 1500
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
-
-        if self.config.coverage:
-            try:
-                self.driver_refresh()
-            except WebDriverException as e:
-                logger().exception(str(e))
-                webdriver_exception = e
-
-            if webdriver_exception:
-                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                logger().debug(message)
-
-            if not webdriver_exception and not self.tss:
-                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-                self.user_screen()
-                self.environment_screen()
-                endtime = time.time() + self.config.time_out
-                while (time.time() < endtime and (
-                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                    self.close_warning_screen()
-                self.Finish()
-            elif not webdriver_exception:
-                self.SetupTSS(self.config.initial_program, self.config.environment )
-                self.SetButton(self.language.exit)
-                self.SetButton(self.language.yes)
-
-            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
-                self.WaitProcessing(string, timeout)
+        self.coverage()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
@@ -3408,6 +3379,30 @@ class PouiInternal(Base):
             self.driver.close()
         except Exception as e:
             logger().exception(f"Warning tearDown Close {str(e)}")
+
+    def coverage(self):
+        """
+        [Internal]
+        """
+        # Put coverage data into file.
+        data = self.driver.execute_script('return window.__coverage__')
+
+        project_folder = list(data)[0].split('src')[0]
+
+        folder_path = os.path.join(project_folder, ".nyc_output", "out")
+
+        self.create_folder(folder_path)
+
+        file_name = f"{str(time.time())}.json"
+        file_path = os.path.join(folder_path, file_name)
+
+        with open(file_path, 'w') as outfile:
+            json.dump(data, outfile)
+
+        # Generate HTML coverage report
+        os.system("cd %s && %s report --reporter=lcov --reporter=text-summary" % (
+            project_folder,
+            os.path.join(project_folder, "node_modules", ".bin", "nyc")))
             
     def POSearch(self, content):
         """
