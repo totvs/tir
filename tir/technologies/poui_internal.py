@@ -2274,6 +2274,8 @@ class PouiInternal(Base):
         """
         logger().warning(f"Warning log_error {message}")
 
+        self.coverage()
+
         if self.config.smart_test:
             logger().debug(f"***System Info*** in log_error():")
             system_info()
@@ -3389,11 +3391,11 @@ class PouiInternal(Base):
 
         project_folder = list(data)[0].split('src')[0]
 
-        folder_path = os.path.join(project_folder, ".nyc_output", "out")
+        folder_path = os.path.join(project_folder, ".nyc_output")
 
         self.create_folder(folder_path)
 
-        file_name = f"{str(time.time())}.json"
+        file_name = f"out{str(time.time())}.json"
         file_path = os.path.join(folder_path, file_name)
 
         with open(file_path, 'w') as outfile:
