@@ -2602,7 +2602,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
 
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -5682,7 +5682,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[]):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0):
         """
         [Internal]
 
@@ -5710,7 +5710,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position])
 
     def check_grid_appender(self, line, column, value, grid_number=0):
         """
@@ -5910,7 +5910,7 @@ class WebappInternal(Base):
                         grids = self.filter_displayed_elements(grids)
 
                     if grids:
-                        headers = self.get_headers_from_grids(grids, duplicate_fields)
+                        headers = self.get_headers_from_grids(grids, column_name=column_name, position=field[7], duplicate_fields=duplicate_fields)
 
                         if not column_name in headers[field[2]]:
                             field[2] = self.return_header_index(column_name, headers)
@@ -6333,7 +6333,7 @@ class WebappInternal(Base):
 
                 grids = self.filter_displayed_elements(grids)
 
-                headers = self.get_headers_from_grids(grids, duplicate_fields=[field[1], position])
+                headers = self.get_headers_from_grids(grids, column_name=field[1], position=position)
                 column_name = ""
 
                 if field[3] > len(grids):
@@ -6924,7 +6924,7 @@ class WebappInternal(Base):
 
         return regex[:-1]
 
-    def get_headers_from_grids(self, grids, duplicate_fields=[]):
+    def get_headers_from_grids(self, grids, column_name='', position=0, duplicate_fields=[]):
         """
         [Internal]
 
@@ -6945,7 +6945,7 @@ class WebappInternal(Base):
         headers = []
         labels = None
         index = []
-
+        labels_list= []
 
         if isinstance(grids, list):
             for item in grids:
@@ -6957,6 +6957,7 @@ class WebappInternal(Base):
 
                 if labels:
                     keys = list(map(lambda x: x.text.strip().lower(), labels))
+                    labels_list.append(keys)
                     values = list(map(lambda x: x[0], enumerate(labels)))
                     headers.append(dict(zip(keys, values)))
 
@@ -6966,18 +6967,26 @@ class WebappInternal(Base):
 
             if labels:
                 keys = list(map(lambda x: x.text.strip().lower(), labels))
+                labels_list.append(keys)
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
 
-        if duplicate_fields:
-            duplicated_key = str(duplicate_fields[0]).lower()
-            duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
-            for idx, value in enumerate(keys):
-                if value == duplicated_key:
-                    index.append(idx)
-            if len(index) > 1:
-                for header in headers:
-                    header[duplicated_key] = duplicated_value
+        if column_name:
+            if duplicate_fields:
+                duplicated_key = str(duplicate_fields[0]).lower()
+                duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
+            else:
+                duplicated_key = column_name.lower()
+                duplicated_value = position-1 if position > 0 else 0
+
+            for labels in labels_list:
+                for idx, value in enumerate(labels):
+                    if value == duplicated_key:
+                        index.append(idx)
+                if len(index) > 1:
+                    for header in headers:
+                        if duplicated_key in header:
+                            header[duplicated_key] = duplicated_value if duplicate_fields else index[duplicated_value]
 
         return headers
 
