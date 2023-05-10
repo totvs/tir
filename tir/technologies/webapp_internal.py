@@ -3970,7 +3970,8 @@ class WebappInternal(Base):
 
             if wait_screen and self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
-                self.close_coin_screen_after_routine()
+                if self.log.release < '12.1.2210':
+                    self.close_coin_screen_after_routine()
                 self.close_news_screen_after_routine()
             
             self.wait_blocker()
