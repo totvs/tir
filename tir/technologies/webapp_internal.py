@@ -8390,7 +8390,7 @@ class WebappInternal(Base):
         containers = soup.select(self.containers_selectors["AllContainers"])
         return containers
 
-    def ClickTree(self, treepath, right_click=False, position=1):
+    def ClickTree(self, treepath, right_click=False, position=1, tree_number=0):
         """
         Clicks on TreeView component.
 
@@ -8406,9 +8406,9 @@ class WebappInternal(Base):
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """
-        self.click_tree(treepath, right_click, position)
+        self.click_tree(treepath, right_click, position, tree_number)
 
-    def click_tree(self, treepath, right_click, position):
+    def click_tree(self, treepath, right_click, position, tree_number):
         """
         [Internal]
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
@@ -8419,6 +8419,7 @@ class WebappInternal(Base):
         hierarchy = None
 
         position -= 1
+        tree_number = tree_number-1 if tree_number > 0 else 0
 
         labels = list(map(str.strip, treepath.split(">")))
 
@@ -8446,7 +8447,7 @@ class WebappInternal(Base):
 
             while ((time.time() < endtime) and (try_counter < 3 and not success)):
 
-                tree_node = self.find_tree_bs(label_filtered)
+                tree_node = self.find_tree_bs(label_filtered, tree_number)
 
                 if self.webapp_shadowroot():
                     tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
@@ -8533,9 +8534,7 @@ class WebappInternal(Base):
                                         else:
                                             if self.webapp_shadowroot():
                                                 self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute(
-                                                    'closed') == 'true' or element.get_attribute(
-                                                    'closed') == '' or not self.treenode_selected(label_filtered)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
                                                 self.scroll_to_element(element_click())
 
                                                 endtime_click = time.time() + self.config.time_out
@@ -8569,7 +8568,7 @@ class WebappInternal(Base):
                                         pass
 
             if not last_item:
-                treenode_selected = self.treenode_selected(label_filtered)
+                treenode_selected = self.treenode_selected(label_filtered, tree_number)
                 if treenode_selected:
                     if self.webapp_shadowroot():
                         hierarchy = treenode_selected.get_attribute('hierarchy')
@@ -8579,7 +8578,7 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
 
-    def find_tree_bs(self, label):
+    def find_tree_bs(self, label, tree_number):
         """
         [Internal]
 
@@ -8601,7 +8600,9 @@ class WebappInternal(Base):
 
             if self.webapp_shadowroot():
                 tree = container.select("wa-tree")
-                tree_node = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(tree[0]))
+                if len(tree) >= tree_number:
+                    tree = tree[tree_number]
+                    tree_node = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(tree))
             else:
                 tree_node = container.select(".ttreenode")
 
@@ -8682,13 +8683,13 @@ class WebappInternal(Base):
         else:
             return False
 
-    def treenode_selected(self, label_filtered):
+    def treenode_selected(self, label_filtered, tree_number=0):
         """
         [Internal]
         Returns a tree node selected by label
         """
 
-        ttreenode = self.treenode()
+        ttreenode = self.treenode(tree_number)
 
         if self.webapp_shadowroot(): 
             treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class') or x.get_attribute('selected'), ttreenode))
@@ -8697,7 +8698,7 @@ class WebappInternal(Base):
 
         return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
 
-    def treenode(self):
+    def treenode(self, tree_number=0):
         """
 
         :return: treenode bs4 object
@@ -8706,7 +8707,7 @@ class WebappInternal(Base):
         container = self.get_current_container()
 
         if self.webapp_shadowroot():
-           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[0]))
+           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[tree_number]))
            return tr
         else:
             tr = container.select("tr")
