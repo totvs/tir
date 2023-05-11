@@ -28,6 +28,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
+import chromedriver_autoinstaller
 
 class Base(unittest.TestCase):
     """
@@ -1098,7 +1099,8 @@ class Base(unittest.TestCase):
             firefox_options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
+            chromedriver_path = chromedriver_autoinstaller.install()
+            driver_path = chromedriver_path
             chrome_options = ChromeOpt()
             chrome_options.set_headless(self.config.headless)
             chrome_options.add_argument('--log-level=3')
@@ -1282,3 +1284,10 @@ class Base(unittest.TestCase):
             except:
                 logger().debug(f'{service} is being started')
                 os.system(f'net start {service}')
+
+    def create_folder(self, path):
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
