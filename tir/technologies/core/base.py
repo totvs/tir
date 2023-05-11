@@ -1282,3 +1282,10 @@ class Base(unittest.TestCase):
             except:
                 logger().debug(f'{service} is being started')
                 os.system(f'net start {service}')
+
+    def create_folder(self, path):
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
