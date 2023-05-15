@@ -950,7 +950,7 @@ class Webapp():
 
         return self.__webapp.WaitShow(string, timeout, throw_error=False)
 
-    def ClickTree(self, treepath, right_click=False, position=1):
+    def ClickTree(self, treepath, right_click=False, position=1, tree_number=1):
         """
         Clicks on TreeView component.
 
@@ -966,7 +966,7 @@ class Webapp():
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """ 
-        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
+        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position, tree_number=tree_number)
 
     def GridTree(self, column, treepath,  right_click=False):
         """
@@ -1493,7 +1493,7 @@ class Poui():
         >>> oHelper.ClickButton('Cancelar')
         :return:
         """
-        self.__poui.click_button(button, position, selector="div > po-button", container=False)
+        self.__poui.click_button(button, position, selector="po-button", container=False)
 
     def AssertFalse(self, expected=False, script_message=''):
         """

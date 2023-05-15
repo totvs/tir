@@ -28,6 +28,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
+import chromedriver_autoinstaller
 
 class Base(unittest.TestCase):
     """
@@ -486,14 +487,12 @@ class Base(unittest.TestCase):
         """
         try:
 
-            self.twebview_context = twebview
-
             self.driver.switch_to.default_content()
 
             if self.config.new_log:
                 self.execution_flow()
-            
-            if self.twebview_context:
+
+            if twebview:
                 self.switch_to_iframe()
                 self.twebview_context = False
                 return BeautifulSoup(self.driver.page_source, "html.parser")
@@ -534,19 +533,21 @@ class Base(unittest.TestCase):
         [Internal]
         :return:
         """
-        iframes = None
-        iframe_displayed = None
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not iframes:
-            iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
 
-            if iframes:
-                iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
-            else:
-                self.driver.switch_to.default_content()
+        if not self.config.poui:
+            iframes = None
+            iframe_displayed = None
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not iframes:
+                iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
 
-            if iframe_displayed:
-                self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
+                if iframes:
+                    iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+                else:
+                    self.driver.switch_to.default_content()
+
+                if iframe_displayed:
+                    self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """
@@ -1098,7 +1099,8 @@ class Base(unittest.TestCase):
             firefox_options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
+            chromedriver_path = chromedriver_autoinstaller.install()
+            driver_path = chromedriver_path
             chrome_options = ChromeOpt()
             chrome_options.set_headless(self.config.headless)
             chrome_options.add_argument('--log-level=3')
@@ -1128,10 +1130,11 @@ class Base(unittest.TestCase):
 
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
-        if not self.config.skip_environment:
-            self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
+        if not self.config.poui:
+            if not self.config.skip_environment:
+                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
 
-        self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+            self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
     def get_url(self, url=None):
 
@@ -1281,3 +1284,10 @@ class Base(unittest.TestCase):
             except:
                 logger().debug(f'{service} is being started')
                 os.system(f'net start {service}')
+
+    def create_folder(self, path):
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
