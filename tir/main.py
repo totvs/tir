@@ -958,6 +958,8 @@ class Webapp():
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
+        :param tree_number: Tree position for cases where there is more than one tree on exibits.
+        :type string: int
 
         Usage:
 
@@ -965,6 +967,8 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
+        >>> # tree_number example:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3", position=2)
         """ 
         self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position, tree_number=tree_number)
 

@@ -2554,6 +2554,8 @@ class WebappInternal(Base):
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
+        :param position: Position should be used to select an especific element when there is more than one of same  
+        :type name_attr: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
         :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
@@ -8400,6 +8402,8 @@ class WebappInternal(Base):
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
+        :param tree_number: Tree position for cases where there is more than one tree on exibits.
+        :type string: int
 
         Usage:
 
