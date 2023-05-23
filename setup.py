@@ -44,7 +44,7 @@ setup(
         'selenium==3.8.0',
         'six==1.16.0',
         'enum34==1.1.10',
-        'requests==2.29.0',
+        'requests==2.31.0',
         'pyodbc==4.0.39',
         'psutil==5.9.5',
         'lxml==4.6.5',
