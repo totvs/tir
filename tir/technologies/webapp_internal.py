@@ -2196,7 +2196,6 @@ class WebappInternal(Base):
                 pass
 
             logger().debug(f'Blocker status: {blocker}')
-            time.sleep(1)
 
             if blocker:
                 result = True
