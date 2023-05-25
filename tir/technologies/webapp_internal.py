@@ -6712,9 +6712,10 @@ class WebappInternal(Base):
         """
         
         :param object:
-        :return: return the object if parent wa-tab-page is active
+        :return: return the object if parent wa-tab-page is active else []
         """
-
+        if not object:
+            return []
 
         if isinstance(object, list):
             filtered_object = list(
