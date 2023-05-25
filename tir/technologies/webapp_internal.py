@@ -829,7 +829,7 @@ class WebappInternal(Base):
                 self.send_keys(date(), self.config.date)
                 base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                 if self.config.poui_login:
-                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                    ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
 
                 time.sleep(1)
                 click_type += 1
