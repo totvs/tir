@@ -2530,7 +2530,7 @@ class WebappInternal(Base):
 
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
 
