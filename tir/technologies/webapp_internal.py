@@ -829,7 +829,7 @@ class WebappInternal(Base):
                 self.send_keys(date(), self.config.date)
                 base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                 if self.config.poui_login:
-                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                    ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
 
                 time.sleep(1)
                 click_type += 1
@@ -2196,7 +2196,6 @@ class WebappInternal(Base):
                 pass
 
             logger().debug(f'Blocker status: {blocker}')
-            time.sleep(1)
 
             if blocker:
                 result = True
@@ -2531,7 +2530,7 @@ class WebappInternal(Base):
 
         return list(map(lambda x: (x[0], get_distance(xy_label, x[1])), position_list))
 
-    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=None, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
+    def SetValue(self, field, value, grid=False, grid_number=1, ignore_case=True, row=None, name_attr=False, position = 1, check_value=True, grid_memo_field=False, range_multiplier=None, direction=None, duplicate_fields=[]):
         """
         Sets value of an input element.
 
@@ -5874,11 +5873,7 @@ class WebappInternal(Base):
         else:
             column_name = field[0].lower().strip()
 
-        if self.webapp_shadowroot():
-            self.wait_element_timeout(term=column_name,
-                                      scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out / 5,
-                                      optional_term='.dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse',main_container="body")
-        else:
+        if not self.webapp_shadowroot():
             self.wait_element_timeout(term=column_name,
                                       scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out,
                                       optional_term='th label', main_container='body')
@@ -6005,7 +6000,6 @@ class WebappInternal(Base):
                             tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                             while (time.time() < endtime and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                time.sleep(1)
                                 grid_class= grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
@@ -6025,7 +6019,7 @@ class WebappInternal(Base):
                                 except:
                                     pass
 
-                                time.sleep(1)
+
                                 if (field[1] == True):
                                     field_one = ''
                                     break
@@ -6070,7 +6064,7 @@ class WebappInternal(Base):
 
                             if child_type == "input":
 
-                                time.sleep(2)
+                                # time.sleep(2)
                                 if self.webapp_shadowroot():
                                     selenium_input = lambda: child
                                     EC.visibility_of(child)
@@ -6718,9 +6712,10 @@ class WebappInternal(Base):
         """
         
         :param object:
-        :return: return the object if parent wa-tab-page is active
+        :return: return the object if parent wa-tab-page is active else []
         """
-
+        if not object:
+            return []
 
         if isinstance(object, list):
             filtered_object = list(
