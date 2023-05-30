@@ -6005,9 +6005,6 @@ class WebappInternal(Base):
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
                                     self.set_element_focus(selenium_column())
-                                self.click(selenium_column(),
-                                           click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
-                                    selenium_column())
                                 try:
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
                                         selenium_column(), Keys.ENTER).perform()
