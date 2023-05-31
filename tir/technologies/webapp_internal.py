@@ -6017,7 +6017,7 @@ class WebappInternal(Base):
                                         pass
                                 except:
                                     pass
-
+                                self.wait_blocker()
 
                                 if (field[1] == True):
                                     field_one = ''
