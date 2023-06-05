@@ -1038,7 +1038,10 @@ class WebappInternal(Base):
 
         element = self.change_environment_element_home_screen()
         if element:
-            self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
+            if self.webapp_shadowroot():
+                element.click()
+            else:
+                self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
         else:
             self.log_error("Change Environment method did not find the element to perform the click or the element was not visible on the screen.")
