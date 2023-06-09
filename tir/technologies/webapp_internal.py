@@ -10234,7 +10234,10 @@ class WebappInternal(Base):
         """
         logger().debug('Closing process')
         try:
-            os.system("taskkill /f /im firefox.exe")
+            if self.config.smart_test:
+                os.system("taskkill /f /im firefox.exe")
+            else:
+                self.driver.quit()
             os.system("taskkill /f /im geckodriver.exe")
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
