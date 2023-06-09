@@ -5885,6 +5885,8 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out + 300
             while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
+                current_value = self.remove_mask(current_value).strip().replace(',', '')
+                field_one = field_one.replace(',', '')
                 if self.remove_mask(current_value).strip().replace(',', '').isnumeric() and field_one.replace(',', '').isnumeric():
                    if float(current_value) == float(field_one):
                         break 
