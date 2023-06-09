@@ -5314,7 +5314,7 @@ class WebappInternal(Base):
 
                 return string
 
-    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3 ):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=True):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -5338,6 +5338,8 @@ class WebappInternal(Base):
         :type wait_show: str
         :param step: The amount of time each step should wait. - **Default:** 3
         :type step: float
+        :param wait_change: Bool when False it skips the wait for html changes.
+        :type wait_change: Bool
 
         Usage:
 
@@ -5396,7 +5398,7 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
-                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
+                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5407,13 +5409,13 @@ class WebappInternal(Base):
                             element = lambda: self.driver.find_element_by_id(Id)
                             self.set_element_focus(element())
                             success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(
-                                self.supported_keys(key)).perform)
+                                self.supported_keys(key)).perform, wait_change=wait_change)
                             tries += 1
                         else:
-                            success = self.send_action(ActionChains(self.driver).send_keys(self.supported_keys(key)).perform)
+                            success = self.send_action(action=ActionChains(self.driver).send_keys(self.supported_keys(key)).perform, wait_change=wait_change)
 
                 elif additional_key:
-                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
+                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform, wait_change=wait_change)
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = False)
@@ -9731,7 +9733,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
         """
 
         Sends an action to element and compare it object state change.
@@ -9801,6 +9803,8 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
+                if not wait_change:
+                    return True
                 time.sleep(1)
 
         except Exception as e:

@@ -638,7 +638,7 @@ class Webapp():
         """
         self.__webapp.SetFocus(field, grid_cell, row_number, position)
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3): 
+    def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3, wait_change=True):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -662,6 +662,8 @@ class Webapp():
         :type wait_show: str
         :param step: The amount of time each step should wait. - **Default:** 3
         :type step: float
+        :param wait_change: Bool when False it skips the wait for html changes.
+        :type wait_change: Bool
 
         Usage:
 
@@ -680,7 +682,7 @@ class Webapp():
         >>> # Calling the method with special keys (using parameter additional_key):
         >>> oHelper.SetKey(key="CTRL", additional_key="A")
         """
-        self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step, wait_change)
 
     def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
         """
