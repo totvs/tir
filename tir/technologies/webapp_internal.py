@@ -2932,7 +2932,7 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
         """
         Checks if a field has the value the user expects.
 
@@ -2978,7 +2978,7 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
         if grid:
-            self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
+            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position)
         elif isinstance(user_value, bool):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
@@ -5314,7 +5314,7 @@ class WebappInternal(Base):
 
                 return string
 
-    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3 ):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=True):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -5338,6 +5338,8 @@ class WebappInternal(Base):
         :type wait_show: str
         :param step: The amount of time each step should wait. - **Default:** 3
         :type step: float
+        :param wait_change: Bool when False it skips the wait for html changes.
+        :type wait_change: Bool
 
         Usage:
 
@@ -5396,7 +5398,7 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
-                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform)
+                        success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5407,13 +5409,13 @@ class WebappInternal(Base):
                             element = lambda: self.driver.find_element_by_id(Id)
                             self.set_element_focus(element())
                             success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(
-                                self.supported_keys(key)).perform)
+                                self.supported_keys(key)).perform, wait_change=wait_change)
                             tries += 1
                         else:
-                            success = self.send_action(ActionChains(self.driver).send_keys(self.supported_keys(key)).perform)
+                            success = self.send_action(action=ActionChains(self.driver).send_keys(self.supported_keys(key)).perform, wait_change=wait_change)
 
                 elif additional_key:
-                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform)
+                    success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).send_keys(additional_key.lower()).key_up(self.supported_keys(key)).perform, wait_change=wait_change)
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = False)
@@ -5720,7 +5722,7 @@ class WebappInternal(Base):
 
         self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position])
 
-    def check_grid_appender(self, line, column, value, grid_number=0):
+    def check_grid_appender(self, line, column, value, grid_number=0, position=1):
         """
         [Internal]
 
@@ -5740,7 +5742,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid_appender(0,"A1_COD", "000001", 0)
         """
-        self.grid_check.append([line, column, value, grid_number])
+        self.grid_check.append([line, column, value, grid_number, position])
 
     def LoadGrid(self):
         """
@@ -5795,7 +5797,7 @@ class WebappInternal(Base):
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
-            self.check_grid(field, x3_dictionaries)
+            self.check_grid(field, x3_dictionaries, position=field[4])
 
         self.clear_grid()
 
@@ -5882,8 +5884,10 @@ class WebappInternal(Base):
                                       optional_term='th label', main_container='body')
         try:
             endtime = time.time() + self.config.time_out + 300
-            while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
-                if self.remove_mask(current_value).strip().replace(',', '').isnumeric() and field_one.replace(',', '').isnumeric():
+            while (current_value != field_one and time.time() < endtime):
+                current_value = re.sub('[\,\.]', '', self.remove_mask(current_value).strip())
+                field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
+                if current_value.isnumeric() and field_one.isnumeric():
                    if float(current_value) == float(field_one):
                         break 
                 endtime_row = time.time() + self.config.time_out
@@ -9731,7 +9735,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
         """
 
         Sends an action to element and compare it object state change.
@@ -9801,6 +9805,8 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
+                if not wait_change:
+                    return True
                 time.sleep(1)
 
         except Exception as e:
@@ -10230,7 +10236,10 @@ class WebappInternal(Base):
         """
         logger().debug('Closing process')
         try:
-            os.system("taskkill /f /im firefox.exe")
+            if self.config.smart_test:
+                os.system("taskkill /f /im firefox.exe")
+            else:
+                self.driver.quit()
             os.system("taskkill /f /im geckodriver.exe")
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
