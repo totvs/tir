@@ -5884,10 +5884,10 @@ class WebappInternal(Base):
                                       optional_term='th label', main_container='body')
         try:
             endtime = time.time() + self.config.time_out + 300
-            while (self.remove_mask(current_value).strip().replace(',', '') != field_one.replace(',', '') and time.time() < endtime):
-                current_value = self.remove_mask(current_value).strip().replace(',', '')
-                field_one = field_one.replace(',', '')
-                if self.remove_mask(current_value).strip().replace(',', '').isnumeric() and field_one.replace(',', '').isnumeric():
+            while (current_value != field_one and time.time() < endtime):
+                current_value = re.sub('[\,\.]', '', self.remove_mask(current_value).strip())
+                field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
+                if current_value.isnumeric() and field_one.isnumeric():
                    if float(current_value) == float(field_one):
                         break 
                 endtime_row = time.time() + self.config.time_out
