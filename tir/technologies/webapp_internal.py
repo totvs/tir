@@ -2932,7 +2932,7 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
         """
         Checks if a field has the value the user expects.
 
@@ -2978,7 +2978,7 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
         if grid:
-            self.check_grid_appender(line - 1, field, user_value, grid_number - 1)
+            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position)
         elif isinstance(user_value, bool):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
@@ -5722,7 +5722,7 @@ class WebappInternal(Base):
 
         self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position])
 
-    def check_grid_appender(self, line, column, value, grid_number=0):
+    def check_grid_appender(self, line, column, value, grid_number=0, position=1):
         """
         [Internal]
 
@@ -5742,7 +5742,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid_appender(0,"A1_COD", "000001", 0)
         """
-        self.grid_check.append([line, column, value, grid_number])
+        self.grid_check.append([line, column, value, grid_number, position])
 
     def LoadGrid(self):
         """
@@ -5797,7 +5797,7 @@ class WebappInternal(Base):
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
-            self.check_grid(field, x3_dictionaries)
+            self.check_grid(field, x3_dictionaries, position=field[4])
 
         self.clear_grid()
 

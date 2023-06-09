@@ -117,7 +117,7 @@ class Webapp():
         """
         self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
         """
         Checks if a field has the value the user expects.
 
@@ -139,6 +139,8 @@ class Webapp():
         :type direction: str
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
@@ -158,7 +160,7 @@ class Webapp():
         >>> oHelper.LoadGrid()
 
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field, position)
 
     def CheckView(self, text, element_type="help"):
         """
