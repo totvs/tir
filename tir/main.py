@@ -139,6 +139,8 @@ class Webapp():
         :type direction: str
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
