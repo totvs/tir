@@ -75,7 +75,7 @@ class WebappInternal(Base):
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
             "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog",
+            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
             "ClickImage": "wa-dialog, .tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
             "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
