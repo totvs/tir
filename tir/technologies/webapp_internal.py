@@ -75,7 +75,7 @@ class WebappInternal(Base):
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
             "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog",
+            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
             "ClickImage": "wa-dialog, .tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
             "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
@@ -4138,9 +4138,9 @@ class WebappInternal(Base):
                             script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
                             buttons = self.driver.execute_script(script, self.soup_to_selenium(soup))
                             filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
-                            
+
                     if filtered_button and len(filtered_button) - 1 >= position:
-                        parents_actives =  list(filter(lambda x: x.parent and hasattr(x.parent, 'attrs') and 'active' in x.parent.attrs, filtered_button ))
+                        parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_button ))
                         if parents_actives:
                             filtered_button = parents_actives
                         next_button = filtered_button[position]
