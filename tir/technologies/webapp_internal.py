@@ -6609,15 +6609,13 @@ class WebappInternal(Base):
         while(not success and time.time() < endtime):
 
             if self.webapp_shadowroot():
-                self.wait_element_timeout(term=column_name,
-                                          scrap_type=enum.ScrapType.MIXED, timeout=self.config.time_out / 3,
-                                          optional_term=term,
-                                          main_container="body")
                 containers = self.get_current_container()
             else:
-                self.wait_element_timeout(term=column_name, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out,
+                self.wait_element_timeout(term=column_name, scrap_type=enum.ScrapType.TEXT,
+                                          timeout=self.config.time_out,
                                           optional_term='label')
-                containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            main_container="body")
 
             container = next(iter(self.zindex_sort(containers, True)), None) if isinstance(containers, list) else containers
             if container:
@@ -8485,7 +8483,7 @@ class WebappInternal(Base):
                         if not success:
                             if self.webapp_shadowroot():
                                 element_class = self.driver.execute_script(
-                                    f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data')",
+                                    f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data, label')",
                                     element)
                                 if not element_class:
                                     element_class = self.driver.execute_script(
@@ -8550,9 +8548,13 @@ class WebappInternal(Base):
                                                             'closed') == 'true' or element.get_attribute(
                                                             'closed') == '':
                                                         element_click().click()
-                                                    element_closed_click = self.driver.execute_script(
+                                                    try:
+                                                        element_closed_click = self.driver.execute_script(
                                                         f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')",
                                                         element_click())
+                                                    except:
+                                                        element_closed_click = None
+
                                                     if element_closed_click:
                                                         element_closed_click.click()
                                             else:
