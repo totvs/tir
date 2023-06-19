@@ -6608,10 +6608,14 @@ class WebappInternal(Base):
 
         while(not success and time.time() < endtime):
 
-            if not self.webapp_shadowroot():
-                self.wait_element_timeout(term=column_name, scrap_type=enum.ScrapType.TEXT, timeout=self.config.time_out,
+            if self.webapp_shadowroot():
+                containers = self.get_current_container()
+            else:
+                self.wait_element_timeout(term=column_name, scrap_type=enum.ScrapType.TEXT,
+                                          timeout=self.config.time_out,
                                           optional_term='label')
-                containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                containers = self.web_scrap(term=".tmodaldialog,.ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            main_container="body")
 
             container = next(iter(self.zindex_sort(containers, True)), None) if isinstance(containers, list) else containers
             if container:
