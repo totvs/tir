@@ -8900,6 +8900,7 @@ class WebappInternal(Base):
             down_count = 0
             if grid_lines():
                 self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
+                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
                 endtime = time.time() + self.config.time_out
                 while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
 
@@ -8913,8 +8914,8 @@ class WebappInternal(Base):
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
-                for i in range(down_count):
-                    ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+
+                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
                 return len(before_texts)
         else:
