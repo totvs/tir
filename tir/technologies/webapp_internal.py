@@ -7393,6 +7393,10 @@ class WebappInternal(Base):
 
         >>> # Calling the method.
         >>> oHelper.CheckView("Processing")
+        >>> #-----------------------------------------
+        >>> # Calling method to input value on a field that is on the second grid of the screen:
+        >>> oHelper.CheckView("Text",element_type=text-view)
+        >>> #-----------------------------------------
         """
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
@@ -7413,6 +7417,15 @@ class WebappInternal(Base):
             logger().info(f"Checking text on screen: {text}")
 
             term = 'wa-message-box'
+
+            self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
+            if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
+                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+
+        if element_type == "text-view":
+            logger().info(f"Checking text on screen: {text}")
+
+            term = 'wa-text-view'
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
