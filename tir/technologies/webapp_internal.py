@@ -6724,9 +6724,19 @@ class WebappInternal(Base):
         if isinstance(object, list):
             filtered_object = list(
                 filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, object))
-            
+
             if filtered_object:
-                return list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
+                activated_objects = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
+                activated_tabs = list(map(lambda x: x.find_parent('wa-tab-page'), activated_objects))
+                for i, j in enumerate(activated_tabs[:-1]):
+                    if j != activated_tabs[i+1]:
+                        parents_folders = list(filter(lambda x: 'data-advpl' and "caption" in x.attrs and x['caption'] and x['data-advpl'] == 'tfolderpage', j.find_parents('wa-tab-page')))
+                        prev_siblings = list(map(lambda x: x.find_previous_siblings("wa-tab-page"), parents_folders))
+                        next_siblings = list(map(lambda x: x.find_next_siblings("wa-tab-page"), parents_folders))
+                        is_same_layer = list(filter(lambda x: activated_tabs[i+1] in prev_siblings[x[0]] or activated_tabs[i+1] in next_siblings[x[0]], enumerate(parents_folders)))
+                        if is_same_layer:
+                            activated_objects.pop(i)
+                return activated_objects
             else:
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
