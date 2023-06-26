@@ -1,6 +1,6 @@
 ## Configuração
 
-Instalar o Docker seguindo as orientação da página do desenvolvedor.
+### Instalar o Docker seguindo as orientação da página do desenvolvedor.
 Baixar arquivo build_dashboard.zip nesta pasta.
 Descompactar o .zip para uma pasta e executar o comando "docker-compose up -d" dentro da pasta onde está o arquivo docker-compose.yml.
 Acessar no browser o endereço localhost:8066.
