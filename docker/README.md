@@ -21,7 +21,7 @@ Foi criado como tir, mas pode colocar o nome da imagem desejada.
 
 ## Exemplo de script python do TIR
 ```python3
-#Executar via TESTSUITE localmente 
+Executar via TESTSUITE localmente 
 ```
 
 ## Exemplo de execução do TIR com a interface
