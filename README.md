@@ -81,55 +81,8 @@ See the following **Protheus WebApp Class** example:
 ```python
 # Import from our package the class you're going to use
 
-TESTCASE
+[Usage](https://github.com/totvs/tir-script-samples/tree/master/basic_template)
 
-from tir import Webapp
-import unittest
-
-class ATFA036(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(inst):
-        inst.oHelper = Webapp()
-        inst.oHelper.Setup('SIGAATF', '01052016', 'T1', 'D MG 01 ')
-        inst.oHelper.Program('ATFA036')
-
-    @classmethod
-    def test_ATFA036_CT001(self):
-
-        self.oHelper.WaitShow('Baixa de Ativos')
-        self.oHelper.SetKey( key = "F12", wait_show="Parametros", step = 3)
-        self.oHelper.SetValue('Visualização ?','Tipos de Ativo')
-        self.oHelper.SetButton('OK')
-        self.oHelper.SetButton('X')
-
-        self.oHelper.Program("ATFA036")
-        self.oHelper.SearchBrowse('D MG 01 1000000002004 01')
-        self.oHelper.SetButton("Visualizar")
-        self.oHelper.CheckResult('N1_CBASE', '1000000002')
-        self.oHelper.CheckResult('N1_ITEM', '004 ')
-        self.oHelper.CheckResult('N1_AQUISIC', '01/12/2015')
-        self.oHelper.SetButton("Fechar")
-
-        self.oHelper.AssertTrue()
-
-    @classmethod
-    def tearDownClass(inst):
-        inst.oHelper.TearDown()  
-
-if __name__ == '__main__':
-    unittest.main()
-
-TESTSUITE
-
-from ATFA036TESTCASE import ATFA036
-import unittest
-
-suite = unittest.TestSuite()
-suite.addTest(ATFA036('test_ATFA036_CT001'))
-
-runner = unittest.TextTestRunner(verbosity=2)
-runner.run(suite)
 ```
 
 ## Samples
