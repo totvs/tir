@@ -14,6 +14,7 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 [Installation](#installation)<br>
 [Config](#config)<br>
 [Usage](#usage)<br>
+[Docker](#docker)<br>
 [Samples](#samples)<br>
 [Contact Us](#contact)<br>
 [Contributing](#contributing)
@@ -79,16 +80,56 @@ After the module is installed, you could just import it into your Test Case.
 See the following **Protheus WebApp Class** example:
 ```python
 # Import from our package the class you're going to use
+
+TESTCASE
+
 from tir import Webapp
+import unittest
 
-test_helper = Webapp()
-test_helper.Setup('SIGAGCT','10/08/2017','T1','D MG 01 ','05')
-test_helper.Program('CNTA010')
+class ATFA036(unittest.TestCase):
 
-test_helper.SetButton('Cancelar')
-test_helper.AssertTrue()
+    @classmethod
+    def setUpClass(inst):
+        inst.oHelper = Webapp()
+        inst.oHelper.Setup('SIGAATF', '01052016', 'T1', 'D MG 01 ')
+        inst.oHelper.Program('ATFA036')
 
-test_helper.TearDown()
+    @classmethod
+    def test_ATFA036_CT001(self):
+
+        self.oHelper.WaitShow('Baixa de Ativos')
+        self.oHelper.SetKey( key = "F12", wait_show="Parametros", step = 3)
+        self.oHelper.SetValue('Visualização ?','Tipos de Ativo')
+        self.oHelper.SetButton('OK')
+        self.oHelper.SetButton('X')
+
+        self.oHelper.Program("ATFA036")
+        self.oHelper.SearchBrowse('D MG 01 1000000002004 01')
+        self.oHelper.SetButton("Visualizar")
+        self.oHelper.CheckResult('N1_CBASE', '1000000002')
+        self.oHelper.CheckResult('N1_ITEM', '004 ')
+        self.oHelper.CheckResult('N1_AQUISIC', '01/12/2015')
+        self.oHelper.SetButton("Fechar")
+
+        self.oHelper.AssertTrue()
+
+    @classmethod
+    def tearDownClass(inst):
+        inst.oHelper.TearDown()  
+
+if __name__ == '__main__':
+    unittest.main()
+
+TESTSUITE
+
+from ATFA036TESTCASE import ATFA036
+import unittest
+
+suite = unittest.TestSuite()
+suite.addTest(ATFA036('test_ATFA036_CT001'))
+
+runner = unittest.TextTestRunner(verbosity=2)
+runner.run(suite)
 ```
 
 ## Samples
