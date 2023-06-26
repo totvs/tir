@@ -78,12 +78,9 @@ test_helper = Webapp("C:\PATH_HERE\config.json")
 
 After the module is installed, you could just import it into your Test Case.
 See the following **Protheus WebApp Class** example:
-```python
-# Import from our package the class you're going to use
 
 [Usage](https://github.com/totvs/tir-script-samples/tree/master/basic_template)
 
-```
 
 ## Samples
 
