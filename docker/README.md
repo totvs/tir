@@ -16,7 +16,7 @@
 ## Build local
 ```
 docker build -t tir . 
-Foi criado como tir( mas pode colocar o nome da imagem desejada)
+Foi criado como tir, mas pode colocar o nome da imagem desejada.
 ```
 
 ## Exemplo de script python do TIR
