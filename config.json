@@ -7,5 +7,7 @@
     "Password": "PASSWORD",
     "DebugLog": false,
     "TimeOut": 90,
-    "Headless": false
+    "Headless": true,
+    "DebugLog": true,
+    "ScreenShot": false
 }
