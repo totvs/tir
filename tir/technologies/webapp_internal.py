@@ -10075,15 +10075,14 @@ class WebappInternal(Base):
     def set_multilanguage(self):
 
         if self.config.poui_login:
-            soup = self.get_current_DOM(twebview=True)
-            po_select = next(iter(soup.select(".po-select-container")), None)
-            if po_select:
-                span_label = next(iter(po_select.select('span')), None)
-                if span_label:
-                    language = self.return_select_language()
-                    if language:
-                        if not span_label.text.lower() in language:
-                            self.set_language_poui(language, po_select)
+
+            soup = lambda: self.get_current_DOM(twebview=True)
+            po_select = lambda: next(iter(soup().select(".po-select-container")), None)
+            span_label = lambda: next(iter(po_select().select('span')), None)
+            language = self.return_select_language()
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not span_label().text.lower() in language:
+                self.set_language_poui(language, po_select())
 
         elif self.webapp_shadowroot():
             if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
