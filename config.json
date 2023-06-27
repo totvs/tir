@@ -9,5 +9,9 @@
     "TimeOut": 90,
     "Headless": true,
     "DebugLog": true,
-    "ScreenShot": false
+    "ScreenShot": false,
+    "NewLog": true,
+    "MotExec": "HOMOLOGAÇÃO_TIR",
+    "ExecId": "20201007",
+    "LogUrl1": "http://localhost:8198/log/"
 }
