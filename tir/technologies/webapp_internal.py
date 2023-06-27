@@ -10059,8 +10059,7 @@ class WebappInternal(Base):
             language = self.return_select_language()
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not span_label().text.lower() in language:
-                if span_label():
-                    self.set_language_poui(language, po_select())
+                self.set_language_poui(language, po_select())
 
         elif self.webapp_shadowroot():
             if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
