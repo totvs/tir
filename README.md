@@ -28,7 +28,7 @@ Our documentation can be found here:
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
-Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
+Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on the doc_files/build/html folder.
 
 ## Installation
 
@@ -38,7 +38,7 @@ There are three ways of installing TIR:
 
 ### 1. Installing and Upgrade from PyPI
 
-TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
+TIR can be installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
 
 ```shell
 pip install tir_framework --upgrade
@@ -46,7 +46,7 @@ pip install tir_framework --upgrade
 
 ### 2. via Terminal(Deprecated For The Branch Master)
 
-You can install TIR via terminal. Make sure your Python and Git are installed and run this command:
+You can install TIR via the terminal. Make sure your Python and Git are installed and run this command:
 
 ```shell
 pip install git+https://github.com/totvs/tir.git --upgrade
@@ -77,9 +77,9 @@ test_helper = Webapp("C:\PATH_HERE\config.json")
 ## Usage
 
 After the module is installed, you could just import it into your Test Case.
-See the following **Protheus WebApp Class** example:
+See the following example:
 
-Baixar arquivos da pasta no  link: https://github.com/totvs/tir-script-samples/tree/master/basic_template
+[**Protheus WebApp Class**](https://github.com/totvs/tir-script-samples/tree/master/basic_template)
 
 
 ## Samples
