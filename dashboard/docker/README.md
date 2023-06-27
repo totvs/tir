@@ -1,4 +1,4 @@
 Vide documentação em:
 
-https://totvs.github.io/tir-docs/dashboard/
+https://totvs.github.io/tir-docs/dashboard/docker/
 
