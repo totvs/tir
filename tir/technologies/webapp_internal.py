@@ -7004,6 +7004,7 @@ class WebappInternal(Base):
                     for header in headers:
                         if duplicated_key in header:
                             header[duplicated_key] = duplicated_value if duplicate_fields else index[duplicated_value]
+                index = []
 
         return headers
 
