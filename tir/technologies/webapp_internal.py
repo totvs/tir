@@ -1039,6 +1039,8 @@ class WebappInternal(Base):
         element = self.change_environment_element_home_screen()
         if element:
             if self.webapp_shadowroot():
+                if type(element) == Tag:
+                    element = self.soup_to_selenium(element)
                 element.click()
             else:
                 self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
