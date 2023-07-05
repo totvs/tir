@@ -1041,6 +1041,8 @@ class WebappInternal(Base):
         element = self.change_environment_element_home_screen()
         if element:
             if self.webapp_shadowroot():
+                if type(element) == Tag:
+                    element = self.soup_to_selenium(element)
                 element.click()
             else:
                 self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
@@ -10083,11 +10085,32 @@ class WebappInternal(Base):
 
             soup = lambda: self.get_current_DOM(twebview=True)
             po_select = lambda: next(iter(soup().select(".po-select-container")), None)
-            span_label = lambda: next(iter(po_select().select('span')), None)
-            language = self.return_select_language()
-            endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not span_label().text.lower() in language:
-                self.set_language_poui(language, po_select())
+
+            if po_select():
+                span_label = lambda: next(iter(po_select().select('span')), None)
+                language = self.return_select_language()
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not span_label().text.lower() in language:
+                    self.set_language_poui(language, po_select())
+
+            else:
+                po_select = lambda: next(iter(soup().select("po-select")), None)
+                po_select_object = po_select().select('select')[0]
+
+                success = False
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+
+                    languages = self.return_select_language()
+
+                    for language in languages:
+                        self.select_combo(po_select_object, language, index=True, shadow_root=False)
+                        combo = self.return_combo_object(po_select_object, shadow_root=False)
+                        text = combo.all_selected_options[0].text.lower()
+
+                        if text == language:
+                            success = True
+                            break
 
         elif self.webapp_shadowroot():
             if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",

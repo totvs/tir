@@ -753,7 +753,7 @@ class Base(unittest.TestCase):
 
         return zindex
 
-    def select_combo(self, element, option, index=False):
+    def select_combo(self, element, option, index=False, shadow_root=True):
         """
         Selects the option on the combobox.
 
@@ -768,12 +768,13 @@ class Base(unittest.TestCase):
         >>> self.select_combo(element, "Chosen option")
         """
 
-        combo = self.return_combo_object(element)
+        combo = self.return_combo_object(element, shadow_root=shadow_root)
 
         if index:
             index_number = self.return_combo_index(combo, option)
-            time.sleep(1)
-            combo.select_by_index(str(index_number))
+            if index_number:
+                time.sleep(1)
+                combo.select_by_index(str(index_number))
         else:
             value = next(iter(filter(lambda x: x.text[0:len(option)].lower() == option.lower(), combo.options)), None)
             if value:
@@ -782,13 +783,13 @@ class Base(unittest.TestCase):
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
 
-    def return_combo_object(self, element):
+    def return_combo_object(self, element, shadow_root=True):
         """
 
         :param element:
         :return:
         """
-        if self.webapp_shadowroot():
+        if self.webapp_shadowroot(shadow_root=shadow_root):
             combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
                                                       self.soup_to_selenium(element)))
         else:
