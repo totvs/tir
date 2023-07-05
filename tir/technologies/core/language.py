@@ -70,7 +70,7 @@ class LanguagePack:
         self.open = languagepack["Open"]
         self.warning = languagepack["Warning"]
         self.news = languagepack["News"]
-        self.continue_string = LanguagePack["Continue"]
+        self.continue_string = languagepack["Continue"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
