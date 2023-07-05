@@ -70,6 +70,7 @@ class LanguagePack:
         self.open = languagepack["Open"]
         self.warning = languagepack["Warning"]
         self.news = languagepack["News"]
+        self.continue_string = LanguagePack["Continue"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -147,7 +148,8 @@ class LanguagePack:
             "File Name": "File Name",
 			"Open": "Open",
             "Warning": "Warning",
-            "News": "News" 
+            "News": "News",
+            "Continue": "Continue"
         }
 
         brazilian_portuguese = {
@@ -223,7 +225,8 @@ class LanguagePack:
             "File Name": "Nome do Arquivo",
 			"Open": "Abrir",
             "Warning": "Atenção",
-            "News": "Novidades do"
+            "News": "Novidades do",
+            "Continue": "Continuar"
         }
         spanish = {
             "User": "Usuário",
@@ -298,7 +301,8 @@ class LanguagePack:
             "File Name": "Nombre del archivo:",
 			"Open": "Abierto",
             "Warning": "Atención",
-            "News": "Noticias"
+            "News": "Noticias",
+            "Continue": "Continuar"
         }
         russian = {
             "User": "Пользователь",
@@ -376,7 +380,8 @@ class LanguagePack:
             "File Name": "имя файла",
 			"Open": "открыто",
             "Warning": "Берегись",
-            "News": "Новости"
+            "News": "Новости",
+            "Continue": "Continuar"
         }
 
         if language.lower() == "en-us":
@@ -389,6 +394,7 @@ class LanguagePack:
             return spanish
         else:
             return brazilian_portuguese
+
 class Messages():
 
     def __init__(self, languagepack):
