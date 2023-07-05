@@ -218,6 +218,8 @@ class WebappInternal(Base):
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
+        self.config = ConfigLoader(self.config_path)
+
         try:
             self.service_process_bat_file()
 
@@ -8065,6 +8067,8 @@ class WebappInternal(Base):
             self.SetValue("X6_CONTSPA", parameter[4]) if parameter[4] else None
 
             self.SetButton(self.language.save)
+            if self.WaitShow(self.language.warning, timeout=self.config.time_out, throw_error=False):
+                self.SetButton(self.language.continue_string)
 
     def filter_by_tooltip_value(self, element_list, expected_text):
         """
