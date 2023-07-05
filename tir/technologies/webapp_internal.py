@@ -3449,7 +3449,8 @@ class WebappInternal(Base):
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
-                self.scroll_to_container(container, term)
+                if self.webapp_shadowroot():
+                    self.scroll_to_container(container, term)
                 return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot() and not twebview:
@@ -4333,6 +4334,10 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
 
         close_list = soup.select(term_button)
+        if not close_list:
+            soup = self.get_current_DOM()
+            close_list = soup.select(term_button)
+
         if not close_list:
             self.log_error(f"Element not found")
         if len(close_list) < position + 1:
@@ -6551,8 +6556,7 @@ class WebappInternal(Base):
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
                     endtime = time.time() + self.config.time_out
                     while (time.time() < endtime and not (
-                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                        position=len(rows) + 1) or len(shadowroot_tr()) > 1)):
+                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows) + 1, main_container=self.containers_selectors["GetCurrentContainer"]) or len(shadowroot_tr()) > 1)):
                         if self.config.debug_log:
                             logger().debug("Waiting for the new line to show")
                         time.sleep(1)
@@ -7151,7 +7155,8 @@ class WebappInternal(Base):
             if element is not None:
 
                 sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
-                self.scroll_to_element(sel_element())
+                if self.webapp_shadowroot():
+                    self.scroll_to_element(sel_element())
                 sel_element_isdisplayed = False
 
                 while(not sel_element_isdisplayed and time.time() < presence_endtime):
