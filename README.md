@@ -14,6 +14,7 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 [Installation](#installation)<br>
 [Config](#config)<br>
 [Usage](#usage)<br>
+[Docker](#docker)<br>
 [Samples](#samples)<br>
 [Contact Us](#contact)<br>
 [Contributing](#contributing)
@@ -27,7 +28,7 @@ Our documentation can be found here:
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
-Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
+Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on the doc_files/build/html folder.
 
 ## Installation
 
@@ -37,7 +38,7 @@ There are three ways of installing TIR:
 
 ### 1. Installing and Upgrade from PyPI
 
-TIR can ben installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
+TIR can be installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
 
 ```shell
 pip install tir_framework --upgrade
@@ -45,7 +46,7 @@ pip install tir_framework --upgrade
 
 ### 2. via Terminal(Deprecated For The Branch Master)
 
-You can install TIR via terminal. Make sure your Python and Git are installed and run this command:
+You can install TIR via the terminal. Make sure your Python and Git are installed and run this command:
 
 ```shell
 pip install git+https://github.com/totvs/tir.git --upgrade
@@ -76,20 +77,10 @@ test_helper = Webapp("C:\PATH_HERE\config.json")
 ## Usage
 
 After the module is installed, you could just import it into your Test Case.
-See the following **Protheus WebApp Class** example:
-```python
-# Import from our package the class you're going to use
-from tir import Webapp
+See the following example:
 
-test_helper = Webapp()
-test_helper.Setup('SIGAGCT','10/08/2017','T1','D MG 01 ','05')
-test_helper.Program('CNTA010')
+[**Protheus WebApp Class**](https://totvs.github.io/tir-docs/TIR/first/)
 
-test_helper.SetButton('Cancelar')
-test_helper.AssertTrue()
-
-test_helper.TearDown()
-```
 
 ## Samples
 
