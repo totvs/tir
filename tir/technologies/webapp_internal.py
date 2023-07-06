@@ -8067,7 +8067,7 @@ class WebappInternal(Base):
             self.SetValue("X6_CONTSPA", parameter[4]) if parameter[4] else None
 
             self.SetButton(self.language.save)
-            if self.WaitShow(self.language.warning, timeout=10, throw_error=False):
+            if self.WaitShow(self.language.warning, timeout=5, throw_error=False):
                 self.SetButton(self.language.continue_string)
 
     def filter_by_tooltip_value(self, element_list, expected_text):
