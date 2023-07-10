@@ -24,6 +24,16 @@ class Webapp():
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
+    def GiveMeAccess (self):
+        """
+        Call of the function give to your instance (ex. inst_1) which is copy of WebApp class instance (__webapp),
+        private methods from WebappInternal class.
+        :param self: Instance of Webapp class
+        :type self: instance
+        """
+        x = self.__webapp                       # object model here, x is link to instance
+        return x
+        
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
         Adds a parameter to the queue of parameters to be set by SetParameters method.

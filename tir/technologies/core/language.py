@@ -2,6 +2,7 @@ class LanguagePack:
     '''
     This class is instantiated to contain the translation of terms of each supported language.
     '''
+
     def __init__(self, language="pt-BR"):
 
         languagepack = self.get_language_pack(language)
@@ -12,27 +13,41 @@ class LanguagePack:
         self.group = languagepack["Group"]
         self.branch = languagepack["Branch"]
         self.environment = languagepack["Environment"]
+        self.create = languagepack["Create"]
         self.add = languagepack["Add"]
-        self.delete= languagepack["Delete"]
-        self.no_actions = {languagepack["Confirm"],languagepack["Save"],languagepack["Cancel"],languagepack["Close"],languagepack["Finish"]}
+        self.delete = languagepack["Delete"]
+        self.print = languagepack["Print"]
+        self.no_actions = {languagepack["Confirm"], languagepack["Save"], languagepack["Cancel"], languagepack["Close"], languagepack["Finish"]}
         self.edit = languagepack["Edit"]
+        self.contin = languagepack["Continue"]
+        self.search = languagepack["Search"]
         self.editar = languagepack["Editar"]
         self.cancel = languagepack["Cancel"]
+        self.Set = languagepack["Set"]
         self.view = languagepack["View"]
         self.visualizar = languagepack["Visualizar"]
         self.other_actions = languagepack["Other Actions"]
         self.confirm = languagepack["Confirm"]
+        self.shortconfirm = languagepack["shortConfirm"]
         self.save = languagepack["Save"]
         self.close = languagepack["Close"]
+        self.end = languagepack["End"]
         self.exit = languagepack["Exit"]
         self.leave_page = languagepack["Leave Page"]
         self.enter = languagepack["Enter"]
+        self.enter_2 = languagepack["Enter_2"]
         self.finish = languagepack["Finish"]
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
         self.Ok = languagepack["Ok"]
+        self.yes_L = languagepack["YES"]
+        self.yes_U = languagepack["Yes"]
+        self.no = languagepack["No"]
+        self.OkeyWordU = languagepack["OkeyWordU"]
+        self.OkeyWordL = languagepack["OkeyWordL"]
         self.copy = languagepack["Copy"]
         self.cut = languagepack["Cut"]
+        self.params = languagepack["Parameters"]
         self.paste = languagepack["Paste"]
         self.calculator = languagepack["Calculator"]
         self.spool = languagepack['Spool']
@@ -42,7 +57,7 @@ class LanguagePack:
         self.include = languagepack['Include']
         self.filter = languagepack['Filter']
         self.menu_about = languagepack["Menu About"]
-        self.branches =  languagepack["Branches"]
+        self.branches = languagepack["Branches"]
         self.help = languagepack["Help"]
         self.problem = languagepack["Problem"]
         self.solution = languagepack["Solution"]
@@ -73,6 +88,7 @@ class LanguagePack:
         self.continue_string = languagepack["Continue"]
 
         self.messages = Messages(languagepack)
+
     def get_language_pack(self, language):
 
         english = {
@@ -85,10 +101,10 @@ class LanguagePack:
             "Add": "Add",
             "Delete": "Delete",
             "Edit": "Edit",
-            "Editar": "Edit", #usado num elemento especifico por conta do ambiente russo
+            "Editar": "Edit",  # usado num elemento especifico por conta do ambiente russo
             "Cancel": "Cancel",
             "View": "View",
-            "Visualizar": "View", #usado num elemento especifico por conta do ambiente russo
+            "Visualizar": "View",  # usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Other Actions",
             "Confirm": "Confirm",
             "Save": "Save",
@@ -100,6 +116,9 @@ class LanguagePack:
             "Details": "Details",
             "Search": "Search",
             "Ok": "Ok",
+            "OK": "OK",
+            "OkeyWordU": "OK",
+            "OkeyWordL": "Ok",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",
@@ -109,7 +128,7 @@ class LanguagePack:
             "Generate Differential File": "Generate Differential File",
             "Include": "Insert",
             "Filter": "Filter",
-			"Menu About": "Help > About",
+                        "Menu About": "Help > About",
             "Error Log": "SMARTCLIENT a problem has been found while running it and this one will be concluded. For further information click on details.",
             "Error Log Print": "Error Log Print",
             "Error Msg Required": "This action could not be completed. There are mandatory fields not field.",
@@ -144,12 +163,20 @@ class LanguagePack:
             "NewPassword": "Reserved",
             "ConfirmNewPassword": "Reserved",
             "Yes": "Sim",
+            "YES": "ДА",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "File Name": "File Name",
-			"Open": "Open",
+                        "Open": "Open",
             "Warning": "Warning",
-            "News": "News",
-            "Continue": "Continue"
+            "Continue": "Continue",
+            "Print": "Печать",
+            "Set": "Вставить",
+            "shortConfirm": "Подтв.",
+            "End": "Завершить",
+            "Enter_2": "Войти",
+            "No": "Нет",
+            "Parameters": "Параметры",
+            "Create": "Создать"
         }
 
         brazilian_portuguese = {
@@ -162,10 +189,10 @@ class LanguagePack:
             "Add": "Incluir",
             "Delete": "Excluir",
             "Edit": "Editar",
-            "Editar": "Editar", #usado num elemento especifico por conta do ambiente russo
+            "Editar": "Editar",  # usado num elemento especifico por conta do ambiente russo
             "Cancel": "Cancelar",
             "View": "Visualizar",
-            "Visualizar": "Visualizar", #usado num elemento especifico por conta do ambiente russo
+            "Visualizar": "Visualizar",  # usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Outras Ações",
             "Confirm": "Confirmar",
             "Save": "Salvar",
@@ -177,6 +204,9 @@ class LanguagePack:
             "Details": "Detalhes",
             "Search": "Pesquisar",
             "Ok": "Ok",
+            "OK": "OK",
+            "OkeyWordU": "OK",
+            "OkeyWordL": "Ok",
             "Copy": "Copiar",
             "Cut": "Recortar",
             "Paste": "Colar",
@@ -186,7 +216,7 @@ class LanguagePack:
             "Generate Differential File": "Gerar Arquivo Diferencial",
             "Include": "Incluir",
             "Filter": "Filtrar",
-			"Menu About": "Ajuda > Sobre",
+            "Menu About": "Ajuda > Sobre",
             "Error Log": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais clique em detalhes",
             "Error Log Print": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais verifique print efetuado da tela",
             "Error Msg Required": "Não é possível completar a ação. Existem campos obrigatórios não preenchidos.",
@@ -221,12 +251,21 @@ class LanguagePack:
             "NewPassword": "Nova senha",
             "ConfirmNewPassword": "Confirmar nova senha",
             "Yes": "Sim",
+            "YES": "ДА",
             "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
             "File Name": "Nome do Arquivo",
-			"Open": "Abrir",
+                        "Open": "Abrir",
             "Warning": "Atenção",
-            "News": "Novidades do",
-            "Continue": "Continuar"
+            "Continue": "Continuar",
+            "Print": "Печать",
+            "Set": "Вставить",
+            "shortConfirm": "Подтв.",
+            "End": "Завершить",
+            "Enter_2": "Войти",
+            "No": "Нет",
+            "Parameters": "Параметры",
+            "Create": "Создать",
+            "News": "Novidades do"
         }
         spanish = {
             "User": "Usuário",
@@ -238,10 +277,10 @@ class LanguagePack:
             "Add": "Incluir",
             "Delete": "Excluir",
             "Edit": "Editar",
-            "Editar": "Editar", #usado num elemento especifico por conta do ambiente russo
+            "Editar": "Editar",  # usado num elemento especifico por conta do ambiente russo
             "Cancel": "Anular",
             "View": "Visualizar",
-            "Visualizar": "Visualizar", #usado num elemento especifico por conta do ambiente russo
+            "Visualizar": "Visualizar",  # usado num elemento especifico por conta do ambiente russo
             "Other Actions": "Otras Acciones",
             "Confirm": "Confirmar",
             "Save": "Grabar",
@@ -253,6 +292,8 @@ class LanguagePack:
             "Details": "Detalles",
             "Search": "Buscar",
             "Ok": "Ok",
+            "OkeyWordU": "OK",
+            "OkeyWordL": "Ok",
             "Copy": "Copiar",
             "Cut": "Recortar",
             "Paste": "Colar",
@@ -262,7 +303,7 @@ class LanguagePack:
             "Generate Differential File": "Gerar Arquivo Diferencial",
             "Include": "Incluir",
             "Filter": "Filtrar",
-			"Menu About": "Ayuda > Sobre",
+            "Menu About": "Ayuda > Sobre",
             "Error Log": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais clique em detalhes",
             "Error Log Print": "SMARTCLIENT encontrou um problema durante a execucao e sera finalizado. Para informacoes adicionais verifique print efetuado da tela",
             "Error Msg Required": "Não é possível completar a ação. Existem campos obrigatórios não preenchidos.",
@@ -296,13 +337,22 @@ class LanguagePack:
             "CurrentPassword": "Contrasena actual*",
             "NewPassword": "Nueva contrasena*",
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
-            "Yes":"Reserved",
+            "Yes": "Reserved",
+            "YES": "ДА",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
             "File Name": "Nome do Arquivo",
-			"Open": "Abierto",
+            "Open": "Abierto",
             "Warning": "Atención",
             "News": "Noticias",
             "Continue": "Continuar"
+            "Set": "Вставить",
+            "Print": "Печать",
+            "shortConfirm": "Подтв.",
+            "End": "Завершить",
+            "Enter_2": "Войти",
+            "No": "Нет",
+            "Parameters": "Параметры",
+            "Create": "Создать"
         }
         russian = {
             "User": "Пользователь",
@@ -311,31 +361,45 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Create": "Создать",
+            "Add": "Добавить",
+            "Search": "Поиск",
+            "Set": "Вставить",
             "Delete": "Удалить",
-            "Edit": "редактировать",
-            "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
+            "Edit": "Изменить",
+            "Editar": "Изменить",  # usado num elemento especifico por conta do ambiente russo
             "Cancel": "Отмена",
             "View": "Просмотр",
-            "Visualizar": "Вид...", #usado num elemento especifico por conta do ambiente russo
-            #"Other Actions": "Другие Действия",
+            "Visualizar": "Вид...",  # usado num elemento especifico por conta do ambiente russo
+            # "Other Actions": "Другие Действия",
             "Other Actions": "Др. действия",
             "Confirm": "Подтвердить",
+            "shortConfirm": "Подтв.",
             "Save": "Сохранить",
             "Close": "Закрыть",
+            "Print": "Печать",
+            "End": "Завершить",
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
-            "Enter": "Ввод",
+            "Enter": "Войти", # ВХОД В МА3 ТРЕТЬЕ ОКНО
+            #"Enter": "Ввод",
+            "Enter_2": "Войти",
             "Finish": "Завершить",
-            #"Finish": "3акрыть",
-            #"Details": "ДЕТАЛИ",
+            # "Finish": "3акрыть",
+            # "Details": "ДЕТАЛИ",
             "Details": "Подробнее",
-            #"Search": "Поиск",
+            # "Search": "Поиск",
             "Search": "Search",
             "Ok": "Да",
+            "Yes": "Да",
+            "YES": "ДА",
+            "No": "Нет",
+            "OkeyWordU": "OK",
+            "OkeyWordL": "Ok",
             "Copy": "Copy",
             "Cut": "Cut",
             "Paste": "Paste",
+            "Parameters": "Параметры",
             "Calculator": "Calculator",
             "Spool": "Spool",
             "Help": "Help",
@@ -347,7 +411,7 @@ class LanguagePack:
             "Error Log": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта. Д/др. инфор-и нажать «Подробности»",
             "Error Log Print": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта.Для получения дополнительной информации проверьте распечатку экрана",
             "Error Msg Required": "Не удалось завершить это действие. Не заполнены обязательные поля.",
-            #"Help": "Помощь:",
+            # "Help": "Помощь:",
             "Problem": "Проблема:",
             "Solution": "Решение:",
             "Branches": "",
@@ -361,9 +425,9 @@ class LanguagePack:
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
             "Invert Selection": "Invert Selection",
-            "Parameter Menu": "Environment > Registers > Parameters",
-            "Search 2": "Search",
-            "Search By": "Search by:",
+            "Parameter Menu": "Среда > НСИ > Параметры",
+            "Search 2": "оиск",
+            "Search By": "Поиск по:",
             "From": "De",
             "To": "Ate",
             "Coins": "Валюта",
@@ -378,10 +442,11 @@ class LanguagePack:
             "NewPassword": "Нов. пароль*",
             "ConfirmNewPassword": "Подтв. новый пароль*",
             "File Name": "имя файла",
-			"Open": "открыто",
+                        "Open": "открыто",
             "Warning": "Берегись",
             "News": "Новости",
-            "Continue": "Continuar"
+            "Continue": "Продолжить",
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
         }
 
         if language.lower() == "en-us":
@@ -394,6 +459,7 @@ class LanguagePack:
             return spanish
         else:
             return brazilian_portuguese
+
 
 class Messages():
 
