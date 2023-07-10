@@ -21,4 +21,4 @@ These are the accepted config keys, and whether they are required or not:
 - **ExecId**: Execution id. Example: "ExecId":"20201119"
 - **LogUrl1**: service url. Example: "LogUrl1":"http://127.0.0.1:3333/log/"
 - **CheckValue**: Indicates if TIR must check each value after fill. Example: "CheckValue": true
-- **POUILogin**: For POUILogin mult protocol. Example: "POUILogin": true
+- **POUILogin**: For new POUI login interface. Example: "POUILogin": true
