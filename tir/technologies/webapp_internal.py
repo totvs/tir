@@ -95,6 +95,7 @@ class WebappInternal(Base):
         self.tss = False
         self.restart_coverage = True
 
+        self.blocker = None
         self.parameters = []
         self.backup_parameters = []
         self.tree_base_element = ()
@@ -805,38 +806,42 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
+                    base_date = next(iter(base_dates), None)
+                    if base_date:
+                        date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
                 else:
                     base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input",
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-            if len(base_dates) > 1:
-                base_date = base_dates.pop()
-            else:
-                base_date = next(iter(base_dates), None)
+                    if len(base_dates) > 1:
+                        base_date = base_dates.pop()
+                    else:
+                        base_date = next(iter(base_dates), None)
 
-            if base_date:
-                date = lambda: self.soup_to_selenium(base_date)
+                    if base_date:
+                        date = lambda: self.soup_to_selenium(base_date)
 
                 if self.config.poui_login:
                     self.switch_to_iframe()
 
-                logger().info(f'Filling Date: "{self.config.date}"')
+                if date():
+                    logger().info(f'Filling Date: "{self.config.date}"')
 
-                self.wait_blocker()
-                self.click(date(), click_type=enum.ClickType(click_type))
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(date(), self.config.date)
-                base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
-                if self.config.poui_login:
-                    ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
+                    self.wait_blocker()
+                    self.click(date(), click_type=enum.ClickType(click_type))
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                    self.send_keys(date(), self.config.date)
+                    base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
+                    if self.config.poui_login:
+                        ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
 
-                time.sleep(1)
-                click_type += 1
-                if click_type > 3:
-                    click_type = 1
+                    time.sleep(1)
+                    click_type += 1
+                    if click_type > 3:
+                        click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
@@ -2270,6 +2275,8 @@ class WebappInternal(Base):
 
                 logger().debug(
                     f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
+                if blocked:
+                    self.blocker = blocked
         except:
             pass
 
@@ -6697,7 +6704,9 @@ class WebappInternal(Base):
                                 success = True
 
         if not success:
-            self.log_error(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            logger().debug(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            self.log_error(f"Couldn't Click on \n Column: '{column}' Grid number: {grid_number+1}")
+
 
     def filter_non_obscured(self, elements, grid_number):
 
@@ -7606,6 +7615,10 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
 
+        if self.blocker:
+            message += f' Blocker: {self.blocker}'
+            self.blocker = None
+
         if self.config.smart_test:
             self.log.log_exec_file()
 
@@ -7631,7 +7644,7 @@ class WebappInternal(Base):
 
         proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
 
-        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log and self.driver:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
             time.sleep(1)
 
@@ -7645,7 +7658,8 @@ class WebappInternal(Base):
             self.restart()
         else:
             try:
-                self.driver.close()
+                if self.driver:
+                    self.driver.close()
             except Exception as e:
                 logger().exception(f"Warning Log Error Close {str(e)}")
 
@@ -7661,7 +7675,8 @@ class WebappInternal(Base):
 
             if (stack_item == "setUpClass") :
                 try:
-                    self.driver.close()
+                    if self.driver:
+                        self.driver.close()
                 except Exception as e:
                     logger().exception(f"Warning Log Error Close {str(e)}")
 

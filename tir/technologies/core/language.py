@@ -298,7 +298,7 @@ class LanguagePack:
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
             "Yes":"Reserved",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
-            "File Name": "Nombre del archivo:",
+            "File Name": "Nome do Arquivo",
 			"Open": "Abierto",
             "Warning": "Atención",
             "News": "Noticias",
