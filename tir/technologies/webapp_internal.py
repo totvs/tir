@@ -7635,7 +7635,7 @@ class WebappInternal(Base):
 
         proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
 
-        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log and self.driver:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
             time.sleep(1)
 
@@ -7649,7 +7649,8 @@ class WebappInternal(Base):
             self.restart()
         else:
             try:
-                self.driver.close()
+                if self.driver:
+                    self.driver.close()
             except Exception as e:
                 logger().exception(f"Warning Log Error Close {str(e)}")
 
@@ -7665,7 +7666,8 @@ class WebappInternal(Base):
 
             if (stack_item == "setUpClass") :
                 try:
-                    self.driver.close()
+                    if self.driver:
+                        self.driver.close()
                 except Exception as e:
                     logger().exception(f"Warning Log Error Close {str(e)}")
 
