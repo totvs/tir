@@ -95,6 +95,7 @@ class WebappInternal(Base):
         self.tss = False
         self.restart_coverage = True
 
+        self.blocker = None
         self.parameters = []
         self.backup_parameters = []
         self.tree_base_element = ()
@@ -2270,6 +2271,8 @@ class WebappInternal(Base):
 
                 logger().debug(
                     f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
+                if blocked:
+                    self.blocker = blocked
         except:
             pass
 
@@ -7605,6 +7608,10 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        if self.blocker:
+            message += f' Blocker: {self.blocker}'
+            self.blocker = None
 
         if self.config.smart_test:
             self.log.log_exec_file()
