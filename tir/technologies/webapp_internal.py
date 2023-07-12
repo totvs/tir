@@ -6700,7 +6700,9 @@ class WebappInternal(Base):
                                 success = True
 
         if not success:
-            self.log_error(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            logger().debug(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            self.log_error(f"Couldn't Click on \n Column: '{column}' Grid number: {grid_number+1}")
+
 
     def filter_non_obscured(self, elements, grid_number):
 
