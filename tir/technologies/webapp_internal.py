@@ -2212,6 +2212,7 @@ class WebappInternal(Base):
             if blocker:
                 result = True
             else:
+                self.blocker = None
                 return False
 
         if time.time() > endtime:
