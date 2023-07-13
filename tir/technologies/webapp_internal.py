@@ -10193,12 +10193,20 @@ class WebappInternal(Base):
         """
 
         grid_number -= 1
+        grid_list = []
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
+        self.wait_element(self.grid_selectors['new_web_app']+f', {grid_element}',
                           scrap_type=enum.ScrapType.CSS_SELECTOR)
         grid = self.get_grid(grid_number, grid_element)
 
-        return grid.select('tbody tr')
+        if grid:
+            tr = grid.select('tbody tr')
+            if tr:
+                grid_list.append(grid.select('tbody tr'))
+            else:
+                grid_list.append(grid)
+
+        return grid_list
 
     def LengthGridLines(self, grid):
         """

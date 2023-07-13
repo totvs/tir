@@ -1317,15 +1317,19 @@ class Webapp():
 
         :param grid_number: The number of the grid on the screen.
         :type: int
-        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :param grid_element: Grid class name in HTML ex: ".tgrid" Default:If None return all webapp classes.
         :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
+
+        Class css selector sintaxe:
+        .class	.intro	Selects all elements with class="intro"
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> my_grid = self.get_grid(grid_element='.dict-msbrgetdbase')
         """
         
         return self.__webapp.get_grid_content(grid_number, grid_element)
