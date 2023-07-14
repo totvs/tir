@@ -10184,7 +10184,7 @@ class WebappInternal(Base):
 
         return language
 
-    def get_grid_content(self, grid_element):
+    def get_grid_content(self, grid_number, grid_element):
         """
 
         :param grid_number:
@@ -10192,12 +10192,19 @@ class WebappInternal(Base):
         :return:
         """
 
+        grid_number -= 1
+        grid_list = []
+
         self.wait_element(self.grid_selectors['new_web_app']+f', {grid_element}',
                           scrap_type=enum.ScrapType.CSS_SELECTOR)
-        grid = self.get_grid(grid_element, grid_list=True)
+        grid = self.get_grid(grid_number, grid_element)
 
         if grid:
-            return grid
+            if self.webapp_shadowroot():
+                return self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            else:
+                return grid.select('tbody tr')
+
 
     def LengthGridLines(self, grid):
         """
