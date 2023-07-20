@@ -122,6 +122,8 @@ class Webapp():
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         If the field is a colored status (without name) you must set it empty
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
