@@ -5331,7 +5331,7 @@ class WebappInternal(Base):
 
                 return string
 
-    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=True):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=False):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -6007,13 +6007,14 @@ class WebappInternal(Base):
                                                                                                                     field_to_label)
                             click_valid = False
                             endtime_selected_cell = time.time() + self.config.time_out / 3
-                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) or not click_valid:
+                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) and not click_valid:
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
                                 click_valid = True
+                                time.sleep(1)
 
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
@@ -6706,7 +6707,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
-                                self.send_action(action=self.click, element=column_element, click_type=3) if self.webapp_shadowroot() else self.click(column_element())
+                                self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
