@@ -6405,6 +6405,10 @@ class WebappInternal(Base):
                             self.grid_memo_field = False
                         else:
                             text = columns[column_number].text.strip()
+                        if column_name == '' and text == '':
+                            icon = next(iter(columns[column_number].find_elements_by_tag_name('div')),None)
+                            if icon:
+                                text = self.get_status_color(icon)
                         success = True
 
                     if success and get_value and text:
@@ -6418,6 +6422,20 @@ class WebappInternal(Base):
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
+
+
+    def get_status_color(self, sl_object):
+        colors = {
+            "branco":   "White",
+            "verde":    "Green",
+            "amarelo":  "Yellow",
+            "vermelho": "Red",
+            "azul":     "Blue"
+        }
+        style = sl_object.get_attribute('style')
+        status = next(iter(list(filter(lambda x: x in style, colors))), None)
+        if status:
+            return colors[status]
 
 
     def get_obscure_gridline(self, grid, row_num=0):
@@ -7006,7 +7024,7 @@ class WebappInternal(Base):
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
 
-        if column_name:
+        if column_name or column_name == '':
             if duplicate_fields:
                 duplicated_key = str(duplicate_fields[0]).lower()
                 duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
