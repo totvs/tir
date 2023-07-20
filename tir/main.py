@@ -323,7 +323,8 @@ class Webapp():
         """
         Gets the current value or text of element.
 
-        :param field: The field or label of a field that must be checked.
+        :param field: The field or label of a field that must be checked. If the column is a colored status,
+         you must set the field as "" , ex: GetValue("", grid=True, position= 1)
         :type field: str
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
