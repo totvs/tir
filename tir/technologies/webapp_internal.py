@@ -2212,6 +2212,7 @@ class WebappInternal(Base):
             if blocker:
                 result = True
             else:
+                self.blocker = None
                 return False
 
         if time.time() > endtime:
@@ -5330,7 +5331,7 @@ class WebappInternal(Base):
 
                 return string
 
-    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=True):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=False):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -6006,13 +6007,14 @@ class WebappInternal(Base):
                                                                                                                     field_to_label)
                             click_valid = False
                             endtime_selected_cell = time.time() + self.config.time_out / 3
-                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) or not click_valid:
+                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) and not click_valid:
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
                                 click_valid = True
+                                time.sleep(1)
 
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
@@ -6404,6 +6406,10 @@ class WebappInternal(Base):
                             self.grid_memo_field = False
                         else:
                             text = columns[column_number].text.strip()
+                        if column_name == '' and text == '':
+                            icon = next(iter(columns[column_number].find_elements_by_tag_name('div')),None)
+                            if icon:
+                                text = self.get_status_color(icon)
                         success = True
 
                     if success and get_value and text:
@@ -6417,6 +6423,20 @@ class WebappInternal(Base):
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
+
+
+    def get_status_color(self, sl_object):
+        colors = {
+            "branco":   "White",
+            "verde":    "Green",
+            "amarelo":  "Yellow",
+            "vermelho": "Red",
+            "azul":     "Blue"
+        }
+        style = sl_object.get_attribute('style')
+        status = next(iter(list(filter(lambda x: x in style, colors))), None)
+        if status:
+            return colors[status]
 
 
     def get_obscure_gridline(self, grid, row_num=0):
@@ -6687,7 +6707,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
-                                self.send_action(action=self.click, element=column_element, click_type=3) if self.webapp_shadowroot() else self.click(column_element())
+                                self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
@@ -7005,7 +7025,7 @@ class WebappInternal(Base):
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
 
-        if column_name:
+        if column_name or column_name == '':
             if duplicate_fields:
                 duplicated_key = str(duplicate_fields[0]).lower()
                 duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
@@ -10192,12 +10212,18 @@ class WebappInternal(Base):
         """
 
         grid_number -= 1
+        grid_list = []
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
+        self.wait_element(self.grid_selectors['new_web_app']+f', {grid_element}',
                           scrap_type=enum.ScrapType.CSS_SELECTOR)
         grid = self.get_grid(grid_number, grid_element)
 
-        return grid.select('tbody tr')
+        if grid:
+            if self.webapp_shadowroot():
+                return self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            else:
+                return grid.select('tbody tr')
+
 
     def LengthGridLines(self, grid):
         """

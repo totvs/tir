@@ -122,6 +122,8 @@ class Webapp():
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         If the field is a colored status (without name) you must set it empty
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
@@ -323,7 +325,8 @@ class Webapp():
         """
         Gets the current value or text of element.
 
-        :param field: The field or label of a field that must be checked.
+        :param field: The field or label of a field that must be checked. If the column is a colored status,
+         you must set the field as "" , ex: GetValue("", grid=True, position= 1)
         :type field: str
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
@@ -1317,15 +1320,19 @@ class Webapp():
 
         :param grid_number: The number of the grid on the screen.
         :type: int
-        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :param grid_element: Grid class name in HTML ex: ".tgrid" Default:If None return all webapp classes.
         :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
+
+        Class css selector sintaxe:
+        .class	.intro	Selects all elements with class="intro"
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> my_grid = self.get_grid(grid_element='.dict-msbrgetdbase')
         """
         
         return self.__webapp.get_grid_content(grid_number, grid_element)
