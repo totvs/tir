@@ -314,18 +314,19 @@ class WebappInternal(Base):
         pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
         pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
 
-        formatted_date = re.sub(pattern_1, r'\1/\2/\3', date)
+
+        formatted_date = re.sub(pattern_1, r'\1.\2.\3', date)
 
         if not re.match(pattern_1, formatted_date):
-            formatted_date = re.sub(pattern_2, r'\1/\2/\3', date)
+            formatted_date = re.sub(pattern_2, r'\1.\2.\3', date)
 
         return formatted_date
 
     def merge_date_mask(self, base_date, date):
 
 
-        pattern_1 = r"\d{2}/\d{2}/\d{4}"
-        pattern_2 = r"\d{2}/\d{2}/\d{2}"
+        pattern_1 = r"\d{2}.\d{2}.\d{4}"
+        pattern_2 = r"\d{2}.\d{2}.\d{2}"
 
         match1 = re.match(pattern_1, base_date)
         match2 = re.match(pattern_2, base_date)
@@ -333,8 +334,8 @@ class WebappInternal(Base):
         if match1:
             return date
         elif match2:
-            split_date = date.split('/')
-            return f"{split_date[0]}/{split_date[1]}/{split_date[-1][-2:]}"
+            split_date = date.split('.')
+            return f"{split_date[0]}.{split_date[1]}.{split_date[-1][-2:]}"
 
     def close_screen_before_menu(self):
 
@@ -790,7 +791,7 @@ class WebappInternal(Base):
         """
 
         if not self.config.date:
-            self.config.date = datetime.today().strftime('%d/%m/%Y')
+            self.config.date = datetime.today().strftime('%d.%m.%Y')
 
         click_type = 1
         base_date_value = ''
