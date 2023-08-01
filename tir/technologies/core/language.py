@@ -344,7 +344,7 @@ class LanguagePack:
             "Open": "Abierto",
             "Warning": "Atención",
             "News": "Noticias",
-            "Continue": "Continuar"
+            "Continue": "Continuar",
             "Set": "Вставить",
             "Print": "Печать",
             "shortConfirm": "Подтв.",
