@@ -1562,7 +1562,7 @@ class Poui():
         """
         self.__poui.TearDown()
         
-    def POSearch(self, content=''):
+    def POSearch(self, content='', placeholder=''):
         """
         Fill the POUI Search component.
         https://po-ui.io/documentation/po-page-dynamic-search
@@ -1575,7 +1575,7 @@ class Poui():
         >>> oHelper.POSearch(content='Content to be Search')
         :return: None
         """
-        self.__poui.POSearch(content)
+        self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
         """
@@ -1624,3 +1624,11 @@ class Poui():
 
         """
         self.__poui.CheckResult(field, user_value, po_component, position)
+
+    def GetUrl(self, url):
+        """
+        Loads a web page in the current browser session.
+        :param url:
+        :type url: str
+        """
+        self.__poui.get_url(url)
