@@ -3174,11 +3174,15 @@ class PouiInternal(Base):
         while(not input_field and time.time() < endtime):
             po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
-                po_input_span = list(filter(lambda x: field.lower() in x.text.lower(), list(map(lambda x: x.find_parent('po-field-container').select('span')[0], po_input))))
-                if po_input_span:
-                    if len(po_input_span) >= position:
-                        po_input_span = po_input_span[position]
-                        input_field = next(iter(po_input_span.find_parent('po-field-container').select('input')), None)
+                po_input_filtered = list(
+                    filter(lambda x: x.find_parent('po-field-container').select('span, label') != [], po_input))
+                po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
+                    map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
+                        po_input_filtered))))
+                if po_input_text:
+                    if len(po_input_text) >= position:
+                        po_input_text = po_input_text[position]
+                        input_field = next(iter(po_input_text.find_parent('po-field-container').select('input')), None)
             
         if not input_field:
             self.log_error("Couldn't find any labels.")
@@ -3406,7 +3410,7 @@ class PouiInternal(Base):
             project_folder,
             os.path.join(project_folder, "node_modules", ".bin", "nyc")))
             
-    def POSearch(self, content):
+    def POSearch(self, content, placeholder):
         """
         Fill the POUI Search component.
         https://po-ui.io/documentation/po-page-dynamic-search
@@ -3437,7 +3441,12 @@ class PouiInternal(Base):
                 page_list = next(iter(po_page.find_all_next('div', 'po-page-list-filter-wrapper')), None)
 
                 if page_list:
-                    input = next(iter(page_list.select('input')), None)
+                    input = page_list.select('input')
+
+                    if placeholder:
+                        input = next(iter(list(filter(lambda x: x.attrs['placeholder'].lower() == placeholder.lower(), input))))
+                    else:
+                        input = next(iter(page_list.select('input')), None)
 
                     if input:
                         element = lambda: self.soup_to_selenium(input)
