@@ -3298,7 +3298,7 @@ class PouiInternal(Base):
             self.twebview_context = True
 
         logger().info(f"Clicking on {button}")
-        self.wait_element(term=selector)
+        self.wait_element(term=button, optional_term=selector, scrap_type=enum.ScrapType.MIXED)
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
             element = self.return_main_element(button, position, selector=selector, container=container)
