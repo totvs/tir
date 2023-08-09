@@ -37,8 +37,8 @@ setup(
     ],
     install_requires=[
         'beautifulsoup4==4.12.2',
-        'numpy==1.21.6',
-        'pandas==1.0.1',
+        'numpy==1.24.1',
+        'pandas==1.5.3',
         'python-dateutil==2.8.2',
         'pytz==2023.3',
         'selenium==3.8.0',
@@ -47,7 +47,7 @@ setup(
         'requests==2.29.0',
         'pyodbc==4.0.39',
         'psutil==5.9.5',
-        'lxml==4.6.5',
+        'lxml==4.9.3',
         'opencv-python==4.6.0.66',
         'chromedriver-autoinstaller==0.4.0'
     ],
