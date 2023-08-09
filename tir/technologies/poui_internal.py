@@ -3159,7 +3159,7 @@ class PouiInternal(Base):
         self.click(input_field_element())
         input_field_element().clear()
         input_field_element().send_keys(value)
-    
+
     def return_input_element(self, field=None, position=1, term=None):
         """
         [Internal]
@@ -3174,8 +3174,9 @@ class PouiInternal(Base):
         while(not input_field and time.time() < endtime):
             po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
+                po_input_filtered = list(filter(lambda x: x.find_parent('po-field-container') is not None, po_input))
                 po_input_filtered = list(
-                    filter(lambda x: x.find_parent('po-field-container').select('span, label') != [], po_input))
+                    filter(lambda x: x.find_parent('po-field-container').select('span, label'), po_input_filtered))
                 po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
                     map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
                         po_input_filtered))))
@@ -3183,7 +3184,7 @@ class PouiInternal(Base):
                     if len(po_input_text) >= position:
                         po_input_text = po_input_text[position]
                         input_field = next(iter(po_input_text.find_parent('po-field-container').select('input')), None)
-            
+
         if not input_field:
             self.log_error("Couldn't find any labels.")
 
