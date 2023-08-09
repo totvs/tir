@@ -806,42 +806,41 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
-                    base_date = next(iter(base_dates), None)
-                    if base_date:
-                        date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
                 else:
                     base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input",
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-                    if len(base_dates) > 1:
-                        base_date = base_dates.pop()
-                    else:
-                        base_date = next(iter(base_dates), None)
+            if len(base_dates) > 1:
+                base_date = base_dates.pop()
+            else:
+                base_date = next(iter(base_dates), None)
 
-                    if base_date:
-                        date = lambda: self.soup_to_selenium(base_date)
+            if base_date:
+                if self.webapp_shadowroot() and not self.config.poui_login:
+                    date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
+                else:
+                    date = lambda: self.soup_to_selenium(base_date)
 
                 if self.config.poui_login:
                     self.switch_to_iframe()
 
-                if date():
-                    logger().info(f'Filling Date: "{self.config.date}"')
+                logger().info(f'Filling Date: "{self.config.date}"')
 
-                    self.wait_blocker()
-                    self.click(date(), click_type=enum.ClickType(click_type))
-                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.send_keys(date(), self.config.date)
-                    base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
-                    if self.config.poui_login:
-                        ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
+                self.wait_blocker()
+                self.click(date(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(date(), self.config.date)
+                base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
 
-                    time.sleep(1)
-                    click_type += 1
-                    if click_type > 3:
-                        click_type = 1
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
