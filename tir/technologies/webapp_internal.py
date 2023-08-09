@@ -794,6 +794,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
+        date = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
@@ -801,7 +802,8 @@ class WebappInternal(Base):
                 base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                             scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
 
-                date = self.base_date(base_dates)
+                if base_dates:
+                    date = self.base_date(base_dates)
 
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -817,12 +819,14 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-                    date = self.base_date(base_dates)
+                    if base_dates:
+                        date = self.base_date(base_dates)
 
             if self.config.poui_login:
                 self.switch_to_iframe()
 
-            if date():
+            if date:
+                date = lambda: self.soup_to_selenium(base_date) if not self.webapp_shadowroot() else date
                 logger().info(f'Filling Date: "{self.config.date}"')
 
                 self.wait_blocker()
@@ -847,8 +851,7 @@ class WebappInternal(Base):
         else:
             base_date = next(iter(base_dates), None)
 
-        if base_date:
-            return lambda: self.soup_to_selenium(base_date)
+        return base_date
 
     def filling_date(self, shadow_root=None, container=None):
         """
@@ -867,7 +870,8 @@ class WebappInternal(Base):
                 base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                             scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
 
-                date = self.base_date(base_dates)
+                if base_dates:
+                    date = self.base_date(base_dates)
 
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -883,7 +887,8 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-                    date = self.base_date(base_dates)
+                    if base_dates:
+                        date = self.base_date(base_dates)
 
             if self.config.poui_login:
                 self.switch_to_iframe()
@@ -915,6 +920,60 @@ class WebappInternal(Base):
 
         if base_date:
             return lambda: self.soup_to_selenium(base_date)
+
+    def filling_group(self, shadow_root=None, container=None):
+        """
+
+        """
+
+        click_type = 1
+        group_value = ''
+        endtime = time.time() + self.config.time_out / 5
+        while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
+
+            if self.config.poui_login:
+                group_elements = self.web_scrap(term=self.language.group, main_container='body',
+                                                scrap_type=enum.ScrapType.TEXT, twebview=True)
+                group_element = next(iter(group_elements))
+                group_element = group_element.find_parent('pro-company-lookup')
+                group_element = next(iter(group_element.select('input')), None)
+            else:
+                if self.webapp_shadowroot(shadow_root=shadow_root):
+                    group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
+                                                    scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    main_container='body',
+                                                    optional_term='wa-text-input')
+                else:
+                    group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input",
+                                                    scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
+                                                    main_container=container)
+
+                if len(group_elements) > 1:
+                    group_element = group_elements.pop()
+                else:
+                    group_element = next(iter(group_elements), None)
+
+            if group_element:
+                group = lambda: self.soup_to_selenium(group_element)
+
+                if self.config.poui_login:
+                    self.switch_to_iframe()
+
+                logger().info(f'Filling Group: "{self.config.group}"')
+                self.wait_blocker()
+                self.click(group(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(group(), self.config.group)
+                group_value = self.get_web_value(group())
+                if self.config.poui_login:
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filling_branch(self, shadow_root=None, container=None):
         """
