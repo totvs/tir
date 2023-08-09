@@ -869,31 +869,31 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
                                             scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
-
-                if base_dates:
-                    date = self.base_date(base_dates)
-
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     base_dates = self.web_scrap(term="[name='dDataBase'], [name='__dInfoData']",
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
-                    base_date = next(iter(base_dates), None)
-                    if base_date:
-                        date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
                 else:
                     base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input",
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-                    if base_dates:
-                        date = self.base_date(base_dates)
+            if len(base_dates) > 1:
+                base_date = base_dates.pop()
+            else:
+                base_date = next(iter(base_dates), None)
 
-            if self.config.poui_login:
-                self.switch_to_iframe()
+            if base_date:
+                if self.webapp_shadowroot() and not self.config.poui_login:
+                    date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
+                else:
+                    date = lambda: self.soup_to_selenium(base_date)
 
-            if date():
+                if self.config.poui_login:
+                    self.switch_to_iframe()
+
                 logger().info(f'Filling Date: "{self.config.date}"')
 
                 self.wait_blocker()
@@ -910,16 +910,6 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
-
-    def base_date(self, base_dates):
-
-        if len(base_dates) > 1:
-            base_date = base_dates.pop()
-        else:
-            base_date = next(iter(base_dates), None)
-
-        if base_date:
-            return lambda: self.soup_to_selenium(base_date)
 
     def filling_group(self, shadow_root=None, container=None):
         """
