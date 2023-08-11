@@ -2617,7 +2617,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
 
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position, ignore_case=ignore_case)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -2943,7 +2943,7 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
@@ -2989,7 +2989,7 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
         if grid:
-            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position)
+            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position, ignore_case)
         elif isinstance(user_value, bool):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
@@ -5708,7 +5708,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0, ignore_case=True):
         """
         [Internal]
 
@@ -5736,9 +5736,9 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
 
-    def check_grid_appender(self, line, column, value, grid_number=0, position=1):
+    def check_grid_appender(self, line, column, value, grid_number=0, position=1, ignore_case=True):
         """
         [Internal]
 
@@ -5758,7 +5758,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid_appender(0,"A1_COD", "000001", 0)
         """
-        self.grid_check.append([line, column, value, grid_number, position])
+        self.grid_check.append([line, column, value, grid_number, position, ignore_case])
 
     def LoadGrid(self):
         """
@@ -5905,7 +5905,9 @@ class WebappInternal(Base):
                 field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
                 if current_value.isnumeric() and field_one.isnumeric():
                    if float(current_value) == float(field_one):
-                        break 
+                        break
+                if field[8] and current_value.lower() == field_one.lower():
+                    break
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
 
@@ -6004,15 +6006,20 @@ class WebappInternal(Base):
                                                                                                                     row,
                                                                                                                     headers,
                                                                                                                     field_to_label)
-                            click_valid = False
+
+                            self.scroll_to_element(selenium_column())
+                            self.click(selenium_column(),
+                                    click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                selenium_column())
+                            self.set_element_focus(selenium_column())
+
                             endtime_selected_cell = time.time() + self.config.time_out / 3
-                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) and not click_valid:
+                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
-                                click_valid = True
                                 time.sleep(1)
 
                             if self.webapp_shadowroot():
@@ -6418,7 +6425,10 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
 
         field_name = f"({field[0]}, {column_name})"
-        self.log_result(field_name, field[2], text)
+        if field[5]:
+            self.log_result(field_name, field[2].lower(), text.lower())
+        else:
+            self.log_result(field_name, field[2], text)
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
