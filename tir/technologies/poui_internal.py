@@ -3200,8 +3200,10 @@ class PouiInternal(Base):
         if po_component:
             po_component = list(filter(lambda x: self.element_is_displayed(x), po_component))
             if container:
+                po_component_filtered = list(
+                    filter(lambda x: x.find('po-field-container').select('span, label') != [], po_component))
                 po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), list(
-                    map(lambda x: x.findChild('po-field-container').select('span')[0], po_component))))
+                    map(lambda x: x.find('po-field-container').select('span, label')[0], po_component_filtered))))
             else:
                 po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), po_component))
                 if len(po_component_span) > 1:
@@ -3239,6 +3241,7 @@ class PouiInternal(Base):
 
         position -= 1
         element = None
+        main_element = None
 
         if not self.config.poui:
             self.twebview_context = True
@@ -3246,7 +3249,7 @@ class PouiInternal(Base):
         logger().info(f"Clicking on {field}")
         self.wait_element(term=selector)
         endtime = time.time() + self.config.time_out
-        while (not element and time.time() < endtime):
+        while (not main_element and time.time() < endtime):
             main_element = self.return_main_element(field, position, selector=selector, container=container)
 
             if main_element:
@@ -3255,23 +3258,25 @@ class PouiInternal(Base):
                     self.switch_to_iframe()
                     self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
                     self.po_loading(selector)
-                    main_element = None
 
-            main_element = self.return_main_element(field, position, selector=selector, container=container)
+                    ul = next(iter(main_element.select('ul')), None)
+                    if ul:
+                        li = ul.select('li')
+                        element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))),
+                                       None)
+                    else:
+                        self.log_error("Couldn't find table element.")
 
-            if main_element:
-                ul = next(iter(main_element.select('ul')), None)
-                if ul:
-                    li = ul.select('li')
-                    element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))),
-                                   None)
+                    if not element:
+                        self.log_error("Couldn't find element")
+
+                    self.poui_click(element)
+
                 else:
-                    self.log_error("Couldn't find table element.")
-
-        if not element:
-            self.log_error("Couldn't find element")
-
-        self.poui_click(element)
+                    select_element = main_element.select('select') if hasattr(main_element, 'select') else None
+                    if select_element:
+                        select_element = next(iter(select_element))
+                        self.select_combo(select_element, value, index=True, shadow_root=False)
 
     def poui_click(self, element):
 
@@ -3575,3 +3580,27 @@ class PouiInternal(Base):
         if not df.empty:
             df = df.fillna('Not Value')
             return (df, po_table)
+
+    def POTabs(self, label):
+        """
+        Clicks on a Label in po-tab.
+        https://po-ui.io/documentation/po-tabs
+
+        :param label: The label tab name
+        :type label: str
+
+        >>> # Call the method:
+        >>> oHelper.POTabs(label='Test')
+        :return: None
+        """
+
+        self.wait_element(term="[class='po-tabs-container']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        po_tab_button = self.web_scrap(term="[class='po-tab-button']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                           main_container='body')
+
+        label_element = next(iter(list(filter(lambda x: x.text.lower().strip() == label.lower().strip(), po_tab_button))))
+
+        element = next(iter(label_element.select('div')))
+
+        self.poui_click(element)
