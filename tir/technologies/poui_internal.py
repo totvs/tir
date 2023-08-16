@@ -3586,7 +3586,7 @@ class PouiInternal(Base):
         Clicks on a Label in po-tab.
         https://po-ui.io/documentation/po-tabs
 
-        :param label: The label tab name
+        :param label: The tab label name
         :type label: str
 
         >>> # Call the method:
