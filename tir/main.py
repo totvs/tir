@@ -1494,7 +1494,7 @@ class Poui():
         >>> oHelper.ClickSelect('Espécie', 'Compra')
         :return:
         """
-        self.__poui.click_poui_component(field, value, position, selector="div > po-select", container=True)
+        self.__poui.click_poui_component(field, value, position, selector="po-select", container=True)
 
     def ClickButton(self, button='', position=1):
         """
@@ -1634,3 +1634,17 @@ class Poui():
         :type url: str
         """
         self.__poui.get_url(url)
+
+    def POtabs(self, label=''):
+        """
+        Clicks on a Label in po-tab.
+        https://po-ui.io/documentation/po-tabs
+
+        :param label: The tab label name
+        :type label: str
+
+        >>> # Call the method:
+        >>> oHelper.POTabs(label='Test')
+        :return: None
+        """
+        self.__poui.POTabs(label)
