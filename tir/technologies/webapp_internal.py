@@ -10166,9 +10166,11 @@ class WebappInternal(Base):
                                  check_error=False):
                 tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
                 selects = tcombobox
-                language = self.return_select_language()
-                if language:
-                    self.select_combo(selects, language, index=True)
+                languages = self.return_select_language()
+
+                if languages:
+                    for language in languages:
+                        self.select_combo(selects, language, index=True)
         
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
                                  check_error=False):
