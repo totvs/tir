@@ -722,7 +722,7 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except Exception as e:
-            logger().exception(f"********Warining scroll_to_element exception: {str(e)}*********")
+            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
             pass
 
     def search_zindex(self,element):
@@ -1218,7 +1218,7 @@ class Base(unittest.TestCase):
         """
 
         for i, j in enumerate(combo.options):
-            if not j.get_attribute('disabled') and j.text.lower() in option:
+            if not j.get_attribute('disabled') and j.text.lower().strip() == option.lower().strip():
                 return i
 
     def return_iframe(self, selector):

@@ -95,6 +95,7 @@ class WebappInternal(Base):
         self.tss = False
         self.restart_coverage = True
 
+        self.blocker = None
         self.parameters = []
         self.backup_parameters = []
         self.tree_base_element = ()
@@ -816,7 +817,10 @@ class WebappInternal(Base):
                 base_date = next(iter(base_dates), None)
 
             if base_date:
-                date = lambda: self.soup_to_selenium(base_date)
+                if self.webapp_shadowroot() and not self.config.poui_login:
+                    date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
+                else:
+                    date = lambda: self.soup_to_selenium(base_date)
 
                 if self.config.poui_login:
                     self.switch_to_iframe()
@@ -2207,6 +2211,7 @@ class WebappInternal(Base):
             if blocker:
                 result = True
             else:
+                self.blocker = None
                 return False
 
         if time.time() > endtime:
@@ -2270,6 +2275,8 @@ class WebappInternal(Base):
 
                 logger().debug(
                     f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
+                if blocked:
+                    self.blocker = blocked
         except:
             pass
 
@@ -2610,7 +2617,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
 
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position, ignore_case=ignore_case)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position)
         else:
@@ -2936,7 +2943,7 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
@@ -2982,7 +2989,7 @@ class WebappInternal(Base):
         if grid_memo_field:
             self.grid_memo_field = True
         if grid:
-            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position)
+            self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position, ignore_case)
         elif isinstance(user_value, bool):
             current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
@@ -5323,7 +5330,7 @@ class WebappInternal(Base):
 
                 return string
 
-    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=True):
+    def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=False):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -5701,7 +5708,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0, ignore_case=True):
         """
         [Internal]
 
@@ -5729,9 +5736,9 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
 
-    def check_grid_appender(self, line, column, value, grid_number=0, position=1):
+    def check_grid_appender(self, line, column, value, grid_number=0, position=1, ignore_case=True):
         """
         [Internal]
 
@@ -5751,7 +5758,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.check_grid_appender(0,"A1_COD", "000001", 0)
         """
-        self.grid_check.append([line, column, value, grid_number, position])
+        self.grid_check.append([line, column, value, grid_number, position, ignore_case])
 
     def LoadGrid(self):
         """
@@ -5898,7 +5905,9 @@ class WebappInternal(Base):
                 field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
                 if current_value.isnumeric() and field_one.isnumeric():
                    if float(current_value) == float(field_one):
-                        break 
+                        break
+                if field[8] and current_value.lower() == field_one.lower():
+                    break
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
 
@@ -5997,15 +6006,21 @@ class WebappInternal(Base):
                                                                                                                     row,
                                                                                                                     headers,
                                                                                                                     field_to_label)
-                            click_valid = False
+
+                            self.scroll_to_element(selenium_column())
+                            self.click(selenium_column(),
+                                    click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
+                                selenium_column())
+                            self.set_element_focus(selenium_column())
+
                             endtime_selected_cell = time.time() + self.config.time_out / 3
-                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()) or not click_valid:
+                            while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
-                                click_valid = True
+                                time.sleep(1)
 
                             if self.webapp_shadowroot():
                                 term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
@@ -6397,6 +6412,10 @@ class WebappInternal(Base):
                             self.grid_memo_field = False
                         else:
                             text = columns[column_number].text.strip()
+                        if column_name == '' and text == '':
+                            icon = next(iter(columns[column_number].find_elements_by_tag_name('div')),None)
+                            if icon:
+                                text = self.get_status_color(icon)
                         success = True
 
                     if success and get_value and text:
@@ -6406,10 +6425,27 @@ class WebappInternal(Base):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
 
         field_name = f"({field[0]}, {column_name})"
-        self.log_result(field_name, field[2], text)
+        if field[5]:
+            self.log_result(field_name, field[2].lower(), text.lower())
+        else:
+            self.log_result(field_name, field[2], text)
         logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
+
+
+    def get_status_color(self, sl_object):
+        colors = {
+            "branco":   "White",
+            "verde":    "Green",
+            "amarelo":  "Yellow",
+            "vermelho": "Red",
+            "azul":     "Blue"
+        }
+        style = sl_object.get_attribute('style')
+        status = next(iter(list(filter(lambda x: x in style, colors))), None)
+        if status:
+            return colors[status]
 
 
     def get_obscure_gridline(self, grid, row_num=0):
@@ -6680,7 +6716,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
-                                self.send_action(action=self.click, element=column_element, click_type=3) if self.webapp_shadowroot() else self.click(column_element())
+                                self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
@@ -6697,7 +6733,9 @@ class WebappInternal(Base):
                                 success = True
 
         if not success:
-            self.log_error(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            logger().debug(f"Couldn't Click on grid cell \ngrids:{grids}\nrows: {rows} ")
+            self.log_error(f"Couldn't Click on \n Column: '{column}' Grid number: {grid_number+1}")
+
 
     def filter_non_obscured(self, elements, grid_number):
 
@@ -6996,7 +7034,7 @@ class WebappInternal(Base):
                 values = list(map(lambda x: x[0], enumerate(labels)))
                 headers.append(dict(zip(keys, values)))
 
-        if column_name:
+        if column_name or column_name == '':
             if duplicate_fields:
                 duplicated_key = str(duplicate_fields[0]).lower()
                 duplicated_value = duplicate_fields[1]-1 if duplicate_fields[1] > 0 else 0
@@ -7606,6 +7644,10 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
 
+        if self.blocker:
+            message += f' Blocker: {self.blocker}'
+            self.blocker = None
+
         if self.config.smart_test:
             self.log.log_exec_file()
 
@@ -7631,7 +7673,7 @@ class WebappInternal(Base):
 
         proceed_action = lambda: ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
 
-        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log:
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log and self.driver:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
             time.sleep(1)
 
@@ -7645,7 +7687,8 @@ class WebappInternal(Base):
             self.restart()
         else:
             try:
-                self.driver.close()
+                if self.driver:
+                    self.driver.close()
             except Exception as e:
                 logger().exception(f"Warning Log Error Close {str(e)}")
 
@@ -7661,7 +7704,8 @@ class WebappInternal(Base):
 
             if (stack_item == "setUpClass") :
                 try:
-                    self.driver.close()
+                    if self.driver:
+                        self.driver.close()
                 except Exception as e:
                     logger().exception(f"Warning Log Error Close {str(e)}")
 
@@ -9489,12 +9533,12 @@ class WebappInternal(Base):
 
         Usage:
 
-        >>> # Calling the method:
-        >>> oHelper.get_release()
+        >>> # Calling the method: 
+        >>> self.get_release()
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
-        >>> if self.oHelper.get_release() >= '12.1.023':
-        >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigoCT001')
+        >>> if self.get_release() >= '12.1.023':
+        >>>     self.click(element)
         """
 
         return self.log.release
@@ -10122,9 +10166,11 @@ class WebappInternal(Base):
                                  check_error=False):
                 tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
                 selects = tcombobox
-                language = self.return_select_language()
-                if language:
-                    self.select_combo(selects, language, index=True)
+                languages = self.return_select_language()
+
+                if languages:
+                    for language in languages:
+                        self.select_combo(selects, language, index=True)
         
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
                                  check_error=False):
@@ -10177,12 +10223,18 @@ class WebappInternal(Base):
         """
 
         grid_number -= 1
+        grid_list = []
 
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
+        self.wait_element(self.grid_selectors['new_web_app']+f', {grid_element}',
                           scrap_type=enum.ScrapType.CSS_SELECTOR)
         grid = self.get_grid(grid_number, grid_element)
 
-        return grid.select('tbody tr')
+        if grid:
+            if self.webapp_shadowroot():
+                return self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            else:
+                return grid.select('tbody tr')
+
 
     def LengthGridLines(self, grid):
         """

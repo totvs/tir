@@ -117,11 +117,13 @@ class Webapp():
         """
         self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         If the field is a colored status (without name) you must set it empty
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
@@ -141,6 +143,8 @@ class Webapp():
         :type grid_memo_field: bool
         :param position: Position which duplicated element is located. - **Default:** 1
         :type position: int
+        :param ignore_case: Boolean if case should be ignored or not - **Default:** True
+        :type ignore_case: Boolean
 
         Usage:
 
@@ -160,7 +164,7 @@ class Webapp():
         >>> oHelper.LoadGrid()
 
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field, position)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field, position, ignore_case)
 
     def CheckView(self, text, element_type="help"):
         """
@@ -323,7 +327,8 @@ class Webapp():
         """
         Gets the current value or text of element.
 
-        :param field: The field or label of a field that must be checked.
+        :param field: The field or label of a field that must be checked. If the column is a colored status,
+         you must set the field as "" , ex: GetValue("", grid=True, position= 1)
         :type field: str
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
@@ -1083,10 +1088,10 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.get_release()
+        >>> oHelper.GetRelease()
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.027
-        >>> if self.oHelper.get_release() >= '12.1.027':
+        >>> if self.oHelper.GetRelease() >= '12.1.027':
         >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigo_CT001')
         """
 
@@ -1317,15 +1322,19 @@ class Webapp():
 
         :param grid_number: The number of the grid on the screen.
         :type: int
-        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :param grid_element: Grid class name in HTML ex: ".tgrid" Default:If None return all webapp classes.
         :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
+
+        Class css selector sintaxe:
+        .class	.intro	Selects all elements with class="intro"
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> my_grid = self.get_grid(grid_element='.dict-msbrgetdbase')
         """
         
         return self.__webapp.get_grid_content(grid_number, grid_element)
@@ -1485,7 +1494,7 @@ class Poui():
         >>> oHelper.ClickSelect('Espécie', 'Compra')
         :return:
         """
-        self.__poui.click_poui_component(field, value, position, selector="div > po-select", container=True)
+        self.__poui.click_poui_component(field, value, position, selector="po-select", container=True)
 
     def ClickButton(self, button='', position=1):
         """
@@ -1555,7 +1564,7 @@ class Poui():
         """
         self.__poui.TearDown()
         
-    def POSearch(self, content=''):
+    def POSearch(self, content='', placeholder=''):
         """
         Fill the POUI Search component.
         https://po-ui.io/documentation/po-page-dynamic-search
@@ -1568,7 +1577,7 @@ class Poui():
         >>> oHelper.POSearch(content='Content to be Search')
         :return: None
         """
-        self.__poui.POSearch(content)
+        self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
         """
@@ -1617,3 +1626,25 @@ class Poui():
 
         """
         self.__poui.CheckResult(field, user_value, po_component, position)
+
+    def GetUrl(self, url):
+        """
+        Loads a web page in the current browser session.
+        :param url:
+        :type url: str
+        """
+        self.__poui.get_url(url)
+
+    def POtabs(self, label=''):
+        """
+        Clicks on a Label in po-tab.
+        https://po-ui.io/documentation/po-tabs
+
+        :param label: The tab label name
+        :type label: str
+
+        >>> # Call the method:
+        >>> oHelper.POTabs(label='Test')
+        :return: None
+        """
+        self.__poui.POTabs(label)
