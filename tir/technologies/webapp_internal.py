@@ -6788,8 +6788,6 @@ class WebappInternal(Base):
                 if filtered_object.name == 'wa-tgrid':
                     return [filtered_object] 
 
-        elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
-            return object if 'active' in object.find_parent('wa-tab-page').attrs else None
         elif isinstance(object, Tag):
             if hasattr(object, 'opened') and 'opened' in object.attrs:
                 panels_object = object.select('.dict-tscrollarea')
@@ -6797,6 +6795,8 @@ class WebappInternal(Base):
                     filtered_object = next(iter(panels_object))
                     if filtered_object.contents:
                         return next(iter(filtered_object.contents))
+            elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
+                return object if 'active' in object.find_parent('wa-tab-page').attrs else None
            
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
