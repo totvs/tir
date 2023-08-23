@@ -6007,6 +6007,15 @@ class WebappInternal(Base):
                                                                                                                     headers,
                                                                                                                     field_to_label)
 
+                            if self.webapp_shadowroot():
+                                term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
+                            else:
+                                term = ".tmodaldialog"
+
+                            soup = self.get_current_DOM()
+                            tmodal_list = soup.select(term)
+                            tmodal_layer = len(tmodal_list) if tmodal_list else 0
+
                             self.scroll_to_element(selenium_column())
                             self.click(selenium_column(),
                                     click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
@@ -6021,15 +6030,6 @@ class WebappInternal(Base):
                                     selenium_column())
                                 self.set_element_focus(selenium_column())
                                 time.sleep(1)
-
-                            if self.webapp_shadowroot():
-                                term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
-                            else:
-                                term = ".tmodaldialog"
-
-                            soup = self.get_current_DOM()
-                            tmodal_list = soup.select(term)
-                            tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
                             while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
@@ -6788,8 +6788,6 @@ class WebappInternal(Base):
                 if filtered_object.name == 'wa-tgrid':
                     return [filtered_object] 
 
-        elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
-            return object if 'active' in object.find_parent('wa-tab-page').attrs else None
         elif isinstance(object, Tag):
             if hasattr(object, 'opened') and 'opened' in object.attrs:
                 panels_object = object.select('.dict-tscrollarea')
@@ -6797,6 +6795,8 @@ class WebappInternal(Base):
                     filtered_object = next(iter(panels_object))
                     if filtered_object.contents:
                         return next(iter(filtered_object.contents))
+            elif hasattr(object.find_parent('wa-tab-page'), 'attrs'):
+                return object if 'active' in object.find_parent('wa-tab-page').attrs else None
            
 
     def ClickGridHeader( self, column = 1, column_name = '', grid_number = 1):
