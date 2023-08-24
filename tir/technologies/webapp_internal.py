@@ -6791,7 +6791,7 @@ class WebappInternal(Base):
         elif isinstance(object, Tag):
             if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
                 return object if 'active' in object.find_parent('wa-tab-page').attrs else None
-            if hasattr(object, 'opened') and 'opened' in object.attrs:
+            elif hasattr(object, 'opened') and 'opened' in object.attrs:
                 panels_object = object.select('.dict-tscrollarea')
                 if panels_object:
                     filtered_object = next(iter(panels_object))
