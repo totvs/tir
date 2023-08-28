@@ -1189,7 +1189,8 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
-            self.SetButton(self.language.confirm)
+            # self.SetButton(self.language.confirm)
+            self.SetButton(self.language.shortconfirm) # tag: ru
 
 
     def close_coin_screen_after_routine(self):
