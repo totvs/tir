@@ -1,9 +1,9 @@
-Config
+Poui
 ======
 .. automodule:: tir
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. autoclass:: tir.technologies.core.config.ConfigLoader
+.. autoclass:: tir.main.Poui
     :members:

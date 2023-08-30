@@ -66,6 +66,11 @@ class LanguagePack:
         self.confirm_new_password = languagepack["ConfirmNewPassword"]
         self.yes = languagepack["Yes"]
         self.assert_false_message = languagepack["AssertFalseMessage"]
+        self.file_name = languagepack["File Name"]
+        self.open = languagepack["Open"]
+        self.warning = languagepack["Warning"]
+        self.news = languagepack["News"]
+        self.continue_string = languagepack["Continue"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -139,8 +144,12 @@ class LanguagePack:
             "NewPassword": "Reserved",
             "ConfirmNewPassword": "Reserved",
             "Yes": "Sim",
-            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script."
-            
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
+            "File Name": "File Name",
+			"Open": "Open",
+            "Warning": "Warning",
+            "News": "News",
+            "Continue": "Continue"
         }
 
         brazilian_portuguese = {
@@ -212,8 +221,12 @@ class LanguagePack:
             "NewPassword": "Nova senha",
             "ConfirmNewPassword": "Confirmar nova senha",
             "Yes": "Sim",
-            "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script."
-            
+            "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
+            "File Name": "Nome do Arquivo",
+			"Open": "Abrir",
+            "Warning": "Atenção",
+            "News": "Novidades do",
+            "Continue": "Continuar"
         }
         spanish = {
             "User": "Usuário",
@@ -284,7 +297,12 @@ class LanguagePack:
             "NewPassword": "Nueva contrasena*",
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
             "Yes":"Reserved",
-            "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script."
+            "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
+            "File Name": "Nome do Arquivo",
+			"Open": "Abierto",
+            "Warning": "Atención",
+            "News": "Noticias",
+            "Continue": "Continuar"
         }
         russian = {
             "User": "Пользователь",
@@ -308,8 +326,8 @@ class LanguagePack:
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
             "Enter": "Ввод",
-            #"Finish": "Завершить",
-            "Finish": "3акрыть",
+            "Finish": "Завершить",
+            #"Finish": "3акрыть",
             #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
             #"Search": "Поиск",
@@ -348,10 +366,22 @@ class LanguagePack:
             "Search By": "Search by:",
             "From": "De",
             "To": "Ate",
-            "Coins": "Monedas",
-            "Next": "Avançar >>",
-            "LogOff": "Log Off",
-            "Yes":"Reserved"
+            "Coins": "Валюта",
+            "Next": "Далее >>",
+            "LogOff": "Завершить",
+            "Checkhelp": "Помощь:",
+            "Checkproblem": "Проблема:",
+            "Checksolution": "Решение:",
+            "ChangePassword": "Смена пароля",
+            "UserLogin": "Пользователь (логин)",
+            "CurrentPassword": "Текущий пароль*",
+            "NewPassword": "Нов. пароль*",
+            "ConfirmNewPassword": "Подтв. новый пароль*",
+            "File Name": "имя файла",
+			"Open": "открыто",
+            "Warning": "Берегись",
+            "News": "Новости",
+            "Continue": "Continuar"
         }
 
         if language.lower() == "en-us":

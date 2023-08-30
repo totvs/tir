@@ -1,6 +1,7 @@
-# TIR - Totvs Interface Robot
+# TIR - Test Interface Robot
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/totvs/tir)
 
-TIR is a Python module used to create test scripts for web interfaces. With it, you are able to easily create and execute test suites and test cases for any supported Totvs' web interface systems, such as Protheus Webapp.
+TIR is a Python module used to create test scripts for web interfaces. With it, you can easily create and execute test suites and test cases for any supported web interface systems, such as Protheus Webapp.
 
 ### Current Supported Technologies
 
@@ -13,6 +14,7 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 [Installation](#installation)<br>
 [Config](#config)<br>
 [Usage](#usage)<br>
+[Docker](#docker)<br>
 [Samples](#samples)<br>
 [Contact Us](#contact)<br>
 [Contributing](#contributing)
@@ -20,31 +22,31 @@ TIR is a Python module used to create test scripts for web interfaces. With it, 
 ## Documentation
 Our documentation can be found here:
 
-- [TIR Documentation](https://totvs.github.io/tir/)
+- [TIR Documentation](https://totvs.github.io/tir-docs/)
+
+- [TIR Technical Documentation](https://totvs.github.io/tir/)
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
-Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on doc_files/build/html folder.
+Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on the doc_files/build/html folder.
 
 ## Installation
 
-The installation is pretty simple. All you need as a requirement is Python 3.6 or greater and a browser (Mozilla Firefox/Google Chrome) installed in your system.
+The installation is pretty simple. All you need as a requirement is Python 3.7.9 (Mozilla Firefox) installed in your system.
 
-There are two ways of installing TIR:
+There are three ways of installing TIR:
 
-### 1. via Installation Wizard
+### 1. Installing and Upgrade from PyPI
 
-Our installation wizard handles the environment setup, the package installation and also it can update your package.
+TIR can be installed via pip from [Pypi](https://pypi.org/project/tir-framework/)
 
-Download [TIR Installer](https://github.com/totvs/tir-installer/blob/master/tir-installer%201.0.0.exe?raw=true)
+```shell
+pip install tir_framework --upgrade
+```
 
-It is also an open-source project, you can see the repository [here](https://github.com/totvs/tir-installer/)
+### 2. via Terminal(Deprecated For The Branch Master)
 
-OBS: Our installation wizard will install our package in the current active Python instance. If you're willing to use Python's virtual environment in your machine, please be sure that the virtual environment is active before installing our package.
-
-### 2. via Terminal
-
-You can install TIR via terminal. Make sure your Python and Git is installed and run this command:
+You can install TIR via the terminal. Make sure your Python and Git are installed and run this command:
 
 ```shell
 pip install git+https://github.com/totvs/tir.git --upgrade
@@ -74,21 +76,11 @@ test_helper = Webapp("C:\PATH_HERE\config.json")
 
 ## Usage
 
-After the module is installed, you could just import it on your Test Case.
-See the following **Protheus WebApp Class** example:
-```python
-# Import from our package the class you're going to use
-from tir import Webapp
+After the module is installed, you could just import it into your Test Case.
+See the following example:
 
-test_helper = Webapp()
-test_helper.Setup('SIGAGCT','10/08/2017','T1','D MG 01 ','05')
-test_helper.Program('CNTA010')
+[**Protheus WebApp Class**](https://totvs.github.io/tir-docs/TIR/first/)
 
-test_helper.SetButton('Cancelar')
-test_helper.AssertTrue()
-
-test_helper.TearDown()
-```
 
 ## Samples
 
@@ -102,6 +94,6 @@ We have a repository with different samples of TIR scripts:
 
 ## Contributing
 
-In order to contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
+To contribute be sure to follow the [Contribution](CONTRIBUTING.md) guidelines.
 
-Also, it's import to understand the chosen [architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md).
+Also, it's important to understand the chosen [architecture](https://github.com/totvs/tir/blob/master/doc_files/ARCHITECTURE.md).

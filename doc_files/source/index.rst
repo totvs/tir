@@ -3,34 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-TOTVS Interface Robot
+Test Interface Robot
 =====================
+.. image:: img/completoCor.png
+   :width: 800
 
 .. toctree::
    :maxdepth: 5
+   :caption: User Documentation:
 
+   webapp
+   poui
    configjson
 
 .. toctree::
    :maxdepth: 5
-   :caption: User Classes:
+   :caption: TIR internal classes:
 
-   apw
-   webapp
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Internal Classes:
-
-   apw_internal
    webapp_internal
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Core Classes:
-
+   poui_internal
    base
-   config
    enumerations
    log
 

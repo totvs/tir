@@ -1,9 +1,9 @@
-APW Internal
-============
+Poui Internal
+===============
 .. automodule:: tir
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. autoclass:: tir.technologies.apw_internal.ApwInternal
+.. autoclass:: tir.technologies.poui_internal.PouiInternal
     :members:

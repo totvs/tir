@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 class ConfigLoader:
     """
@@ -14,13 +15,16 @@ class ConfigLoader:
         else:
             data = {}
 
+        today = datetime.today()
+
+        self.json_data = data
         self.autostart = True
         self.ipExec = str(data["ipExec"]) if "ipExec" in data else ""
         self.url_set_start_exec = str(data["UrlSetStartExec"]) if "UrlSetStartExec" in data else ""
         self.url_set_end_exec = str(data["UrlSetEndExec"]) if "UrlSetEndExec" in data else ""
         self.screenshot = bool(data["ScreenShot"]) if "ScreenShot" in data else True
         self.country = str(data["Country"]) if "Country" in data else "BRA"
-        self.execution_id = str(data["ExecId"]) if "ExecId" in data else ""
+        self.execution_id = str(data["ExecId"]) if "ExecId" in data else today.strftime('%Y%m%d')
         self.num_exec = str(data["NumExec"]) if "NumExec" in data else ""
         self.issue = str(data["MotExec"]) if "MotExec" in data else ""
         self.url = str(data["Url"]) if "Url" in data else ""
@@ -52,3 +56,30 @@ class ConfigLoader:
         self.password_cfg = str(data["PasswordCfg"]) if "PasswordCfg" in data else ""
         self.electron_binary_path = (str(data["BinPath"]) if "BinPath" in data else "")
         self.csv_path = (str(data["CSVPath"]) if "CSVPath" in data else "")
+        self.database_driver = str(data["DBDriver"]) if "DBDriver" in data else ""
+        self.database_server = str(data["DBServer"]) if "DBServer" in data else ""
+        self.database_port = str(data["DBPort"]) if "DBPort" in data else ""
+        self.database_name = str(data["DBName"]) if "DBName" in data else ""
+        self.database_user = str(data["DBUser"]) if "DBUser" in data else ""
+        self.database_password = str(data["DBPassword"]) if "DBPassword" in data else ""
+        self.dbq_oracle_server = str(data["DBQOracleServer"]) if "DBQOracleServer" in data else ""
+        self.url_tss = str(data["URL_TSS"]) if "URL_TSS" in data else ""
+        self.start_program = str(data["StartProgram"]) if "StartProgram" in data else ""
+        self.new_log = ("NewLog" in data  and bool(data["NewLog"]))
+        self.logurl1 = str(data["LogUrl1"]) if "LogUrl1" in data else ""
+        self.logurl2 = str(data["LogUrl2"]) if "LogUrl2" in data else ""
+        self.parameter_url = bool(data["ParameterUrl"]) if "ParameterUrl" in data else False
+        self.log_http = str(data["LogHttp"]) if "LogHttp" in data else ""
+        self.baseline_spool = str(data["BaseLine_Spool"]) if "BaseLine_Spool" in data else ""
+        self.check_value = (bool(data["CheckValue"]) if "CheckValue" in data else None)
+        self.poui_login = bool(data["POUILogin"]) if "POUILogin" in data else False
+        self.poui = bool(data["POUI"]) if "POUI" in data else False
+        self.log_info_config = bool(data["LogInfoConfig"]) if "LogInfoConfig" in data else False
+        self.release = str(data["Release"]) if "Release" in data else "12.1.2210"
+        self.top_database = str(data["TopDataBase"]) if "TopDataBase" in data else "MSSQL"
+        self.lib_version = str(data["Lib"]) if "Lib" in data else "lib_version"
+        self.build_version = str(data["Build"]) if "Build" in data else "build_version"
+        self.appserver_folder = str(data["AppServerFolder"]) if "AppServerFolder" in data else ""
+        self.destination_folder = str(data["DestinationFolder"]) if "DestinationFolder" in data else ""
+        self.appserver_service = str(data["AppServerService"]) if "AppServerService" in data else ""
+        self.check_dump = ("CheckDump" in data and bool(data["CheckDump"]))
