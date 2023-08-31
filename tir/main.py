@@ -1353,9 +1353,17 @@ class Webapp():
         .. note::
             Necessary import "By" class in the script: from tir.technologies.core.base import By
 
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
         :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
         :type selector: str
-        :param locator: The locator expression to identify the element.
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
         :type locator: str
         :param value: The value to be used (e.g., for input or interaction).
         :type value: str
@@ -1374,9 +1382,17 @@ class Webapp():
         .. note::
             Necessary import "By" class in the script: from tir.technologies.core.base import By
 
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
         :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
         :type selector: str
-        :param locator: The locator expression to identify the element.
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
         :type locator: str
         :param right_click: Perform a right-click action if True (default is False).
         :type right_click: bool
@@ -1696,9 +1712,17 @@ class Poui():
         .. note::
             Necessary import "By" class in the script: from tir.technologies.core.base import By
 
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
         :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
         :type selector: str
-        :param locator: The locator expression to identify the element.
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
         :type locator: str
         :param value: The value to be used (e.g., for input or interaction).
         :type value: str
@@ -1717,9 +1741,17 @@ class Poui():
         .. note::
             Necessary import "By" class in the script: from tir.technologies.core.base import By
 
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
         :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
         :type selector: str
-        :param locator: The locator expression to identify the element.
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
         :type locator: str
         :param right_click: Perform a right-click action if True (default is False).
         :type right_click: bool
