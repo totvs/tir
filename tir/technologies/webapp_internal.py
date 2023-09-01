@@ -2787,11 +2787,8 @@ class WebappInternal(Base):
                                 tries+=1
                                 try_counter+=1
 
-                        if user_value_size < interface_value_size:
-                            self.send_keys(input_field(), Keys.ENTER)
 
-                        if not check_value:
-                            return
+
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
@@ -2802,6 +2799,12 @@ class WebappInternal(Base):
 
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             logger().info(f"Current field value: {current_value}")
+
+                        if user_value_size < interface_value_size:
+                            self.send_keys(input_field(), Keys.ENTER)
+
+                        if not check_value:
+                            return
 
                     if self.check_combobox(element):
                         current_value = current_value[0:len(str(value))]
