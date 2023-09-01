@@ -9027,6 +9027,7 @@ class WebappInternal(Base):
         timeout = 1500
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
         term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+        self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
         if self.config.coverage:
             try:
@@ -9040,7 +9041,6 @@ class WebappInternal(Base):
                 logger().debug(message)
 
             if not webdriver_exception and not self.tss:
-                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                 self.user_screen()
                 self.environment_screen()
                 endtime = time.time() + self.config.time_out
