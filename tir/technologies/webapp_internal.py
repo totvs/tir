@@ -2789,7 +2789,6 @@ class WebappInternal(Base):
 
 
 
-
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
                             if re.findall(r"\s", current_value):
