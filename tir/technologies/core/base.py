@@ -753,7 +753,7 @@ class Base(unittest.TestCase):
 
         return zindex
 
-    def select_combo(self, element, option, index=False, shadow_root=True):
+    def select_combo(self, element, option, index=False, shadow_root=True, locator=False):
         """
         Selects the option on the combobox.
 
@@ -761,6 +761,12 @@ class Base(unittest.TestCase):
         :type element: Beautiful Soup object
         :param option: Option to be selected
         :type option: str
+        :param index: True if option is an integer value
+        :type index: bool
+        :param shadow_root: Internal control for shadow root objects
+        :type shadow_root: bool
+        :param locator: bool value for locator True or False
+        :type locator: bool
 
         Usage:
 
@@ -768,7 +774,7 @@ class Base(unittest.TestCase):
         >>> self.select_combo(element, "Chosen option")
         """
 
-        combo = self.return_combo_object(element, shadow_root=shadow_root)
+        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if index:
             index_number = self.return_combo_index(combo, option)
@@ -783,13 +789,14 @@ class Base(unittest.TestCase):
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
 
-    def return_combo_object(self, element, shadow_root=True):
+    def return_combo_object(self, element, shadow_root=True, locator=False):
+        """
+        [Internal]
         """
 
-        :param element:
-        :return:
-        """
-        if self.webapp_shadowroot(shadow_root=shadow_root):
+        if locator:
+            combo = Select(element)
+        elif self.webapp_shadowroot(shadow_root=shadow_root):
             combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
                                                       self.soup_to_selenium(element)))
         else:
@@ -798,6 +805,9 @@ class Base(unittest.TestCase):
         return combo
 
     def return_selected_combo_value(self, element):
+        """"
+        [Internal]
+        """
 
         combo = self.return_combo_object(element)
 
@@ -1292,3 +1302,60 @@ class Base(unittest.TestCase):
             os.makedirs(path)
         except OSError:
             pass
+
+    def filling_input_by_locator(self, selector, locator, value, shadow_root):
+
+        tag_name = None
+
+        element = self.find_by_locator(locator, selector, shadow_root=shadow_root)
+
+        if element:
+            try:
+                if element.find_element('css selector', 'select'):
+                    element = element.find_element('css selector', 'select')
+            except:
+                pass
+
+            tag_name = element.tag_name
+
+            self.set_element_focus(element)
+
+            if tag_name == 'select':
+                self.filling_select(element, value, locator=True)
+            else:
+                ActionChains(self.driver).send_keys(Keys.HOME).perform()
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, value).perform()
+
+    def filling_select(self, element, value, locator):
+
+        self.select_combo(element, value, locator=locator)
+
+    def click_by_locator(self, selector, locator, right_click, shadow_root):
+
+        element = self.find_by_locator(locator, selector, shadow_root=shadow_root)
+
+        self.set_element_focus(element)
+
+        self.click(element, right_click=right_click)
+
+    def find_by_locator(self, locator, selector, shadow_root):
+
+        element = None
+
+        self.wait.until(EC.element_to_be_clickable((locator, selector)))
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+            logger().info(f"Looking for element: '{selector}'")
+
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                element = next(iter(
+                    self.find_shadow_element('input, select, button', self.driver.find_element(locator, selector))))
+            else:
+                element = self.driver.find_element(locator, selector)
+
+        if not element:
+            self.log_error(f"Element {element} doesn't found")
+
+        return element
