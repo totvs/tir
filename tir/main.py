@@ -1648,3 +1648,26 @@ class Poui():
         :return: None
         """
         self.__poui.POTabs(label)
+
+    def ClickIcon(self, label='', class_name='', position=1):
+        """
+
+        Click on the POUI Icon by label, class_name or both.
+        https://po-ui.io/guides/icons
+
+        :param label: The tooltip name for icon
+        :type label: str
+        :param class_name: The POUI class name for icon
+        :type class_name: str
+        :param position:
+        :type position: int
+        :return: None
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickIcon(label='Delete')
+        >>> oHelper.ClickIcon(class_name='po-icon po-icon-delete')
+        >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
+        """
+        self.__poui.click_icon(label, class_name, position)
