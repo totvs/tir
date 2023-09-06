@@ -5411,6 +5411,7 @@ class WebappInternal(Base):
                 return
 
             while(time.time() < endtime and not success):
+                logger().debug(f"Trying press key")
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
                         if key != "DOWN":
@@ -6638,6 +6639,8 @@ class WebappInternal(Base):
         rows = None
         same_location = False
         term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
+
+        logger().info(f"Clicking on grid cell: {column}")
 
         self.wait_blocker()
         self.wait_element(
@@ -9858,6 +9861,7 @@ class WebappInternal(Base):
         half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
+                logger().debug(f"Trying to send action")
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
