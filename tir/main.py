@@ -1649,6 +1649,64 @@ class Poui():
         """
         self.__poui.POTabs(label)
 
+    def InputByLocator(self, selector='', locator=None, value=''):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param value: The value to be used (e.g., for input or interaction).
+        :type value: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper_Poui.InputByLocator(selector='[p-label="PO Select"] [class="po-field-container-content"] > select', locator=By.CSS_SELECTOR, value='Option 2')
+        :return: None
+        """
+        return self.__poui.filling_input_by_locator(selector, locator, value, shadow_root=False)
+
+    def ClickByLocator(self, selector='', locator=None, right_click=False):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param right_click: Perform a right-click action if True (default is False).
+        :type right_click: bool
+
+        Usage:
+
+        >>>  # Call the method:
+        >>> oHelper_Poui.ClickByLocator(selector='.po-page-header-actions > po-button:nth-child(1) > button:nth-child(1)', locator=By.CSS_SELECTOR)
+        :return: None
+        """
+        return self.__poui.click_by_locator(selector, locator, right_click, shadow_root=False)
+
     def ClickIcon(self, label='', class_name='', position=1):
         """
 
