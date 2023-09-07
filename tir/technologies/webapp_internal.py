@@ -10231,7 +10231,7 @@ class WebappInternal(Base):
         elif config_language == 'en-us':
             language = ['inglês', 'inglés', 'english']
         elif config_language == 'ru-ru':             # tag :ru
-            language = ['Русс.', 'Русс.', 'русс.'] # tag :ru
+            language = ['русс.', 'русс.', 'русский'] # tag :ru
 
         return language
 
