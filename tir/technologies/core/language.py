@@ -36,6 +36,7 @@ class LanguagePack:
         self.leave_page = languagepack["Leave Page"]
         self.enter = languagepack["Enter"]
         self.enter_2 = languagepack["Enter_2"]
+        self.enter_3 = languagepack["Enter_3"]
         self.finish = languagepack["Finish"]
         self.details = languagepack["Details"]
         self.search = languagepack["Search"]
@@ -263,6 +264,8 @@ class LanguagePack:
             "shortConfirm": "Подтв.",
             "End": "Завершить",
             "Enter_2": "Войти",
+            "Enter_3": "Ввод", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
+
             "No": "Нет",
             "Parameters": "Параметры",
             "Create": "Создать",
@@ -351,6 +354,8 @@ class LanguagePack:
             "shortConfirm": "Подтв.",
             "End": "Завершить",
             "Enter_2": "Войти",
+            "Enter_3": "Ввод", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
+
             "No": "Нет",
             "Parameters": "Параметры",
             "Create": "Создать"
@@ -382,8 +387,8 @@ class LanguagePack:
             "End": "Завершить",
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
-            "Enter": "Войти", # ВХОД В МА3 ТРЕТЬЕ ОКНО
-            #"Enter": "Ввод",
+            "Enter": "Войти", # ВХОД В МА3 ВТОРОЕ ОКНО
+            "Enter_3": "Ввод", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
             "Enter_2": "Войти",
             "Finish": "Завершить",
             # "Finish": "3акрыть",
