@@ -791,7 +791,7 @@ class WebappInternal(Base):
         """
 
         if not self.config.date:
-            self.config.date = datetime.today().strftime('%d.%m.%Y')
+            self.config.date = datetime.today().strftime('%d.%m.%Y') # tag: ru
 
         click_type = 1
         base_date_value = ''
