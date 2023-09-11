@@ -4107,6 +4107,11 @@ class WebappInternal(Base):
 
         logger().info(f"Clicking on {button}")
 
+        if button.lower() == 'ok':
+            stack_item = self.log.get_testcase_stack() + ' before ok'
+            test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+            self.log.take_screenshot_log(self.driver, stack_item, test_number)
+
         try:
             restore_zoom = False
             soup_element  = ""
@@ -4315,6 +4320,11 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term="", scrap_type=enum.ScrapType.MIXED, presence=False, optional_term="[style*='fwskin_seekbar_ico']", timeout=10, step=0.1, check_error=False, main_container="body")
             elif not self.webapp_shadowroot() and button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
+
+            if button.lower() == 'ok':
+                stack_item = self.log.get_testcase_stack() + ' after ok'
+                test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+                self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
         except ValueError as error:
             logger().exception(str(error))
@@ -5402,6 +5412,11 @@ class WebappInternal(Base):
         success = False
 
         try:
+            if key == 'ENTER':
+                stack_item = self.log.get_testcase_stack() + ' before Enter'
+                test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+                self.log.take_screenshot_log(self.driver, stack_item, test_number)
+
             if key in hotkey and not additional_key:
                 self.log_error("Additional key is empty")
 
@@ -5437,6 +5452,11 @@ class WebappInternal(Base):
 
                 if wait_show:
                     success = self.WaitShow(wait_show, timeout=step, throw_error = False)
+
+            if key == 'ENTER':
+                stack_item = self.log.get_testcase_stack() + ' after Enter'
+                test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
+                self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
 
         except WebDriverException as e:
