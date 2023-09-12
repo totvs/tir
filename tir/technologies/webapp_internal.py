@@ -791,7 +791,7 @@ class WebappInternal(Base):
         """
 
         if not self.config.date:
-            self.config.date = datetime.today().strftime('%d.%m.%Y') # tag: ru
+            self.config.date = datetime.today().strftime('%d.%m.%Y') #tag:ru
 
         click_type = 1
         base_date_value = ''
@@ -1401,10 +1401,15 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         if self.webapp_shadowroot():
             labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
-            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
-            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
-            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
-            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
+            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Сброс RPO"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("БД Top"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Версия библиотеки"), labels)), None)
+            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Верс."), labels)), None)
+            # labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+            # release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
+            # database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
+            # lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
+            # build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
 
         else:
             labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
@@ -1418,8 +1423,10 @@ class WebappInternal(Base):
             self.log.release = release
             self.log.version = release.split(".")[0]
 
+        # if database_element:  # not correct
+        #     self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
         if database_element:
-            self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
+            self.log.database = database_element.text.split("p")[1].strip() if database_element.text else database_element.attrs['caption'].split("p")[1].strip()
 
         if build_element:
             self.log.build_version = build_element.text.split(":")[1].strip() if build_element.text else build_element.attrs['caption'].split(":")[1].strip()
