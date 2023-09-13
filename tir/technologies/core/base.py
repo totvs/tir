@@ -28,7 +28,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
-import chromedriver_autoinstaller
+from webdriver_manager.chrome import ChromeDriverManager
 
 class Base(unittest.TestCase):
     """
@@ -1110,15 +1110,13 @@ class Base(unittest.TestCase):
             firefox_options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            chromedriver_path = chromedriver_autoinstaller.install()
-            driver_path = chromedriver_path
             chrome_options = ChromeOpt()
             chrome_options.set_headless(self.config.headless)
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
 
-            self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
+            self.driver = webdriver.Chrome(options=chrome_options, executable_path=ChromeDriverManager().install())
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
             chrome_options = ChromeOpt()
