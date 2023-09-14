@@ -1336,7 +1336,7 @@ class Webapp():
         >>> my_grid = self.get_grid()
         >>> my_grid = self.get_grid(grid_element='.dict-msbrgetdbase')
         """
-        
+
         return self.__webapp.get_grid_content(grid_number, grid_element)
 
     def LengthGridLines(self, grid):
@@ -1346,6 +1346,64 @@ class Webapp():
         """
 
         return self.__webapp.LengthGridLines(grid)
+
+    def InputByLocator(self, selector='', locator='', value=''):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param value: The value to be used (e.g., for input or interaction).
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.InputByLocator(selector='COMP7526', locator=By.ID, value='teste')
+        :return: None
+        """
+        return self.__webapp.filling_input_by_locator(selector, locator, value)
+
+    def ClickByLocator(self, selector='', locator='', right_click=False):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param right_click: Perform a right-click action if True (default is False).
+        :type right_click: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickByLocator(selector='COMP7536', locator=By.ID)
+        :return: None
+        """
+        return self.__webapp.click_by_locator(selector, locator, right_click)
 
 class Apw():
 
@@ -1648,3 +1706,84 @@ class Poui():
         :return: None
         """
         self.__poui.POTabs(label)
+
+    def InputByLocator(self, selector='', locator=None, value=''):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param value: The value to be used (e.g., for input or interaction).
+        :type value: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper_Poui.InputByLocator(selector='[p-label="PO Select"] [class="po-field-container-content"] > select', locator=By.CSS_SELECTOR, value='Option 2')
+        :return: None
+        """
+        return self.__poui.filling_input_by_locator(selector, locator, value, shadow_root=False)
+
+    def ClickByLocator(self, selector='', locator=None, right_click=False):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param right_click: Perform a right-click action if True (default is False).
+        :type right_click: bool
+
+        Usage:
+
+        >>>  # Call the method:
+        >>> oHelper_Poui.ClickByLocator(selector='.po-page-header-actions > po-button:nth-child(1) > button:nth-child(1)', locator=By.CSS_SELECTOR)
+        :return: None
+        """
+        return self.__poui.click_by_locator(selector, locator, right_click, shadow_root=False)
+
+    def ClickIcon(self, label='', class_name='', position=1):
+        """
+
+        Click on the POUI Icon by label, class_name or both.
+        https://po-ui.io/guides/icons
+
+        :param label: The tooltip name for icon
+        :type label: str
+        :param class_name: The POUI class name for icon
+        :type class_name: str
+        :param position:
+        :type position: int
+        :return: None
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickIcon(label='Delete')
+        >>> oHelper.ClickIcon(class_name='po-icon po-icon-delete')
+        >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
+        """
+        self.__poui.click_icon(label, class_name, position)

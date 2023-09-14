@@ -2787,11 +2787,6 @@ class WebappInternal(Base):
                                 tries+=1
                                 try_counter+=1
 
-                        if user_value_size < interface_value_size:
-                            self.send_keys(input_field(), Keys.ENTER)
-
-                        if not check_value:
-                            return
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
@@ -2802,6 +2797,12 @@ class WebappInternal(Base):
 
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             logger().info(f"Current field value: {current_value}")
+
+                        if user_value_size < interface_value_size:
+                            self.send_keys(input_field(), Keys.ENTER)
+
+                        if not check_value:
+                            return
 
                     if self.check_combobox(element):
                         current_value = current_value[0:len(str(value))]
@@ -5410,6 +5411,7 @@ class WebappInternal(Base):
                 return
 
             while(time.time() < endtime and not success):
+                logger().debug(f"Trying press key")
                 if key not in hotkey and self.supported_keys(key):
                     if grid:
                         if key != "DOWN":
@@ -6637,6 +6639,9 @@ class WebappInternal(Base):
         rows = None
         same_location = False
         term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
+        click_attempts = 0
+
+        logger().info(f"Clicking on grid cell: {column}")
 
         self.wait_blocker()
         self.wait_element(
@@ -6717,6 +6722,9 @@ class WebappInternal(Base):
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
+                                click_attempts += 1
+                                if column_number == 0 and click_attempts > 3:
+                                    break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
 
@@ -9857,6 +9865,7 @@ class WebappInternal(Base):
         half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
+                logger().debug(f"Trying to send action")
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
