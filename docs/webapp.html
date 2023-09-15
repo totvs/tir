@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.CheckResult"><code class="docutils literal notranslate"><span class="pre">Webapp.CheckResult()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.CheckView"><code class="docutils literal notranslate"><span class="pre">Webapp.CheckView()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickBox"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickBox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickByLocator"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickCheckBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickFolder"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickFolder()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.ClickGridCell"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickGridCell()</span></code></a></li>
@@ -76,6 +77,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GetValue"><code class="docutils literal notranslate"><span class="pre">Webapp.GetValue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GridTree"><code class="docutils literal notranslate"><span class="pre">Webapp.GridTree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.IfExists"><code class="docutils literal notranslate"><span class="pre">Webapp.IfExists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.InputByLocator"><code class="docutils literal notranslate"><span class="pre">Webapp.InputByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LengthGridLines"><code class="docutils literal notranslate"><span class="pre">Webapp.LengthGridLines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LoadGrid"><code class="docutils literal notranslate"><span class="pre">Webapp.LoadGrid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LogOff"><code class="docutils literal notranslate"><span class="pre">Webapp.LogOff()</span></code></a></li>
@@ -384,6 +386,40 @@ ex: CheckResult(field=””, user_value=”Red”, grid=True, position=1)</p></
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click in all itens with this reference:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">test_helper</span><span class="o">.</span><span class="n">ClickBox</span><span class="p">(</span><span class="s1">&#39;Numero da SC&#39;</span><span class="p">,</span> <span class="s1">&#39;COM068&#39;</span><span class="p">,</span> <span class="n">itens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Webapp.ClickByLocator">
+<span class="sig-name descname"><span class="pre">ClickByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickByLocator" title="Permalink to this definition"></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information check this out: <a class="reference external" href="https://selenium-python.readthedocs.io/locating-elements.html">https://selenium-python.readthedocs.io/locating-elements.html</a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use only in cases where it is not possible to use a label or name attribute.
+Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+before using these methods in the script.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>right_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Perform a right-click action if True (default is False).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;COMP7536&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+<span class="go">:return: None</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -795,6 +831,40 @@ you must set the field as “” , ex: GetValue(“”, grid=True, position= 1)<
 <span class="gp">&gt;&gt;&gt; </span><span class="n">exist</span> <span class="o">=</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">IfExists</span><span class="p">(</span><span class="s2">&quot;Aviso&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">oHelper</span><span class="o">.</span><span class="n">IfExists</span><span class="p">(</span><span class="s2">&quot;Aviso&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Webapp.InputByLocator">
+<span class="sig-name descname"><span class="pre">InputByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.InputByLocator" title="Permalink to this definition"></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information check this out: <a class="reference external" href="https://selenium-python.readthedocs.io/locating-elements.html">https://selenium-python.readthedocs.io/locating-elements.html</a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use only in cases where it is not possible to use a label or name attribute.
+Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+before using these methods in the script.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The value to be used (e.g., for input or interaction).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">InputByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;COMP7526&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;teste&#39;</span><span class="p">)</span>
+<span class="go">:return: None</span>
 </pre></div>
 </div>
 </dd></dl>

@@ -82,6 +82,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen_after_routine()</span></code></a></li>
@@ -130,6 +131,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.report_comparison"><code class="docutils literal notranslate"><span class="pre">PouiInternal.report_comparison()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.restart"><code class="docutils literal notranslate"><span class="pre">PouiInternal.restart()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.return_data"><code class="docutils literal notranslate"><span class="pre">PouiInternal.return_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.return_icon_class"><code class="docutils literal notranslate"><span class="pre">PouiInternal.return_icon_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.return_input_element"><code class="docutils literal notranslate"><span class="pre">PouiInternal.return_input_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.return_main_element"><code class="docutils literal notranslate"><span class="pre">PouiInternal.return_main_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.returns_printable_string"><code class="docutils literal notranslate"><span class="pre">PouiInternal.returns_printable_string()</span></code></a></li>
@@ -720,6 +722,32 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <span class="sig-name descname"><span class="pre">click_button_logoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff" title="Permalink to this definition"></a></dt>
 <dd><p>[internal]</p>
 <p>This method is reponsible to click on button finish</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_icon">
+<span class="sig-name descname"><span class="pre">click_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_icon" title="Permalink to this definition"></a></dt>
+<dd><p>Click on the POUI Icon by label, class_name or both.
+<a class="reference external" href="https://po-ui.io/guides/icons">https://po-ui.io/guides/icons</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The tooltip name for icon</p></li>
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The POUI class name for icon</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Delete&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;po-icon po-icon-delete&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;po-icon po-icon-delete&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1441,6 +1469,22 @@ Usage:
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_data">
 <span class="sig-name descname"><span class="pre">return_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_data" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_icon_class">
+<span class="sig-name descname"><span class="pre">return_icon_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_icon_class" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The POUI class name for icon</p></li>
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><em>object</em></a>) – bs4 element</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>filtered bs4 object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
