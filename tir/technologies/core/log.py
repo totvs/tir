@@ -78,8 +78,8 @@ class Log:
         >>> # Calling the method:
         >>> self.log.generate_header()
         """
-        # return ['Data',  'Usuário',     'Estação', 'Programa','Data Programa', 'Total CTs','Passou','Falhou',       'Segundos','Versão','Release', 'CTs Falhou', 'Banco de dados','Chamado','ID Execução',              'Pais',   "Tipo de Teste"]
-        return ['Данные','Пользователь','Станция','Программа','Дата программы','Всего CT', 'Пройдено','Не удалось', 'Секунды', 'Версия','Выпуск',  'CTs Ошибка', 'База данных',   'Вызов',  'Идентификатор выполнения', 'Страна', 'Тип теста']
+        return ['Data',  'Usuário',     'Estação', 'Programa','Data Programa', 'Total CTs','Passou','Falhou',       'Segundos','Versão','Release', 'CTs Falhou', 'Banco de dados','Chamado','ID Execução',              'Pais',   "Tipo de Teste"]
+        # return ['Данные','Пользователь','Станция','Программа','Дата программы','Всего CT', 'Пройдено','Не удалось', 'Секунды', 'Версия','Выпуск',  'CTs Ошибка', 'База данных',   'Вызов',  'Идентификатор выполнения', 'Страна', 'Тип теста']
     def new_line(self, result, message):
         """
         Appends a new line with data on log file.
