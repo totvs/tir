@@ -311,22 +311,32 @@ class WebappInternal(Base):
         :param date:
         :return:
         """
+
         pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
         pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
 
+        if self.config.language == "ru-ru":
+            formatted_date = re.sub(pattern_1, r'\1.\2.\3', date)
+        else:
+            formatted_date = re.sub(pattern_1, r'\1/\2/\3', date)
 
-        formatted_date = re.sub(pattern_1, r'\1.\2.\3', date)
 
         if not re.match(pattern_1, formatted_date):
-            formatted_date = re.sub(pattern_2, r'\1.\2.\3', date)
+            if self.config.language == "ru-ru":
+                formatted_date = re.sub(pattern_2, r'\1.\2.\3', date)
+            else:
+                formatted_date = re.sub(pattern_2, r'\1/\2/\3', date)
 
         return formatted_date
 
     def merge_date_mask(self, base_date, date):
 
-
-        pattern_1 = r"\d{2}.\d{2}.\d{4}" # tag :ru
-        pattern_2 = r"\d{2}.\d{2}.\d{2}" # tag :ru
+        if self.config.language == "ru-ru":
+            pattern_1 = r"\d{2}.\d{2}.\d{4}" # tag :ru
+            pattern_2 = r"\d{2}.\d{2}.\d{2}" # tag :ru
+        else:
+            pattern_1 = r"\d{2}/\d{2}/\d{4}"
+            pattern_2 = r"\d{2}/\d{2}/\d{2}"
 
         match1 = re.match(pattern_1, base_date)
         match2 = re.match(pattern_2, base_date)
@@ -334,8 +344,13 @@ class WebappInternal(Base):
         if match1:
             return date
         elif match2:
-            split_date = date.split('.') # tag :ru
-            return f"{split_date[0]}.{split_date[1]}.{split_date[-1][-2:]}" # tag :ru
+            if self.config.language == "ru-ru":
+                split_date = date.split('.') # tag :ru
+                return f"{split_date[0]}.{split_date[1]}.{split_date[-1][-2:]}" # tag :ru
+            else:
+                split_date = date.split('/')
+                return f"{split_date[0]}/{split_date[1]}/{split_date[-1][-2:]}"
+
 
     def close_screen_before_menu(self):
 
@@ -717,7 +732,10 @@ class WebappInternal(Base):
             label = self.language.confirm
             container = "body"
         else:
-            label = self.language.enter_3 #tag: ru
+            if self.config.language == "ru-ru":
+                label = self.language.enter_3 #tag: ru
+            else:
+                label = self.language.enter
             container = ".twindow"
 
         shadow_root = not self.config.poui_login
@@ -791,7 +809,10 @@ class WebappInternal(Base):
         """
 
         if not self.config.date:
-            self.config.date = datetime.today().strftime('%d.%m.%Y') #tag:ru
+            if self.config.language == "ru-ru":
+                self.config.date = datetime.today().strftime('%d.%m.%Y') #tag:ru
+            else:
+                self.config.date = datetime.today().strftime('%d/%m/%Y')
 
         click_type = 1
         base_date_value = ''
@@ -1189,8 +1210,10 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
-            # self.SetButton(self.language.confirm)
-            self.SetButton(self.language.shortconfirm) # tag: ru
+            if self.config.language == "ru-ru":
+                self.SetButton(self.language.shortconfirm) # tag: ru
+            else:
+                self.SetButton(self.language.confirm)
 
 
     def close_coin_screen_after_routine(self):
@@ -1400,16 +1423,18 @@ class WebappInternal(Base):
 
         soup = self.get_current_DOM()
         if self.webapp_shadowroot():
-            labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
-            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Сброс RPO"), labels)), None)
-            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("БД Top"), labels)), None)
-            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Версия библиотеки"), labels)), None)
-            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Верс."), labels)), None)
-            # labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
-            # release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
-            # database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
-            # lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
-            # build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
+            if self.config.language == "ru-ru":
+                labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+                release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Сброс RPO"), labels)), None)
+                database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("БД Top"), labels)), None)
+                lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Версия библиотеки"), labels)), None)
+                build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Верс."), labels)), None)
+            else:
+                labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+                release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
+                database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
+                lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
+                build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
 
         else:
             labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
@@ -1423,10 +1448,11 @@ class WebappInternal(Base):
             self.log.release = release
             self.log.version = release.split(".")[0]
 
-        # if database_element:  # not correct
-        #     self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
         if database_element:
-            self.log.database = database_element.text.split("p")[1].strip() if database_element.text else database_element.attrs['caption'].split("p")[1].strip()
+            if self.config.language == "ru-ru":
+                self.log.database = database_element.text.split("p")[1].strip() if database_element.text else database_element.attrs['caption'].split("p")[1].strip()
+            else:
+                self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
 
         if build_element:
             self.log.build_version = build_element.text.split(":")[1].strip() if build_element.text else build_element.attrs['caption'].split(":")[1].strip()

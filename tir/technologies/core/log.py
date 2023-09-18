@@ -285,45 +285,81 @@ class Log:
         Returns a dictionary with the log information
         """
         log_version = "20200814"
-
-        dict_key = {
-            "APPVERSION": self.build_version,
-            "CLIVERSION": self.webapp_version,
-            "COUNTRY": self.country,
-            "CTMETHOD": self.ct_method,
-            "CTNUMBER": self.ct_number,
-            "DBACCESS": "",
-            "DBTYPE": self.database,
-            "DBVERSION": "",
-            "EXECDATE": self.date,
-            "EXECTIME": self.hour,
-            "FAIL": 0 if result else 1,
-            "FAILMSG": message,
-            "IDENTI": self.issue,
-            "IDEXEC": self.config.execution_id,
-            "LASTEXEC": self.last_exec,
-            "LIBVERSION": self.lib_version,
-            "OBSERV": "",
-            "PASS": 1 if result else 0,
-            "PROGDATE": self.program_date,
-            "PROGRAM": self.program,
-            "PROGTIME": "00:00:00",
-            "RELEASE": self.release,
-            "SECONDSCT": self.testcase_seconds,
-            "SOTYPE": self.so_type,
-            "SOVERSION": self.so_version,
-            "STATION": self.station,
-            "STATUS": "", # ???
-            # "TESTCASE": self.get_file_name('testcase'),
-            # "TESTSUITE": self.get_file_name('testsuite'),
-            "TESTCASE": self.get_file_name('test_'),
-            "TESTSUITE": self.get_file_name('test_'),
-            "TESTTYPE": "1",
-            "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
-            "TOOL": self.test_type,
-            "USRNAME": self.user,
-            "VERSION": self.version
-        }
+        if self.config.language == "ru-ru":
+            dict_key = {
+                "APPVERSION": self.build_version,
+                "CLIVERSION": self.webapp_version,
+                "COUNTRY": self.country,
+                "CTMETHOD": self.ct_method,
+                "CTNUMBER": self.ct_number,
+                "DBACCESS": "",
+                "DBTYPE": self.database,
+                "DBVERSION": "",
+                "EXECDATE": self.date,
+                "EXECTIME": self.hour,
+                "FAIL": 0 if result else 1,
+                "FAILMSG": message,
+                "IDENTI": self.issue,
+                "IDEXEC": self.config.execution_id,
+                "LASTEXEC": self.last_exec,
+                "LIBVERSION": self.lib_version,
+                "OBSERV": "",
+                "PASS": 1 if result else 0,
+                "PROGDATE": self.program_date,
+                "PROGRAM": self.program,
+                "PROGTIME": "00:00:00",
+                "RELEASE": self.release,
+                "SECONDSCT": self.testcase_seconds,
+                "SOTYPE": self.so_type,
+                "SOVERSION": self.so_version,
+                "STATION": self.station,
+                "STATUS": "", # ???
+                "TESTCASE": self.get_file_name('test_'),
+                "TESTSUITE": self.get_file_name('test_'),
+                "TESTTYPE": "1",
+                "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
+                "TOOL": self.test_type,
+                "USRNAME": self.user,
+                "VERSION": self.version
+            }
+            print(dict_key)
+        else:
+            dict_key = {
+                "APPVERSION": self.build_version,
+                "CLIVERSION": self.webapp_version,
+                "COUNTRY": self.country,
+                "CTMETHOD": self.ct_method,
+                "CTNUMBER": self.ct_number,
+                "DBACCESS": "",
+                "DBTYPE": self.database,
+                "DBVERSION": "",
+                "EXECDATE": self.date,
+                "EXECTIME": self.hour,
+                "FAIL": 0 if result else 1,
+                "FAILMSG": message,
+                "IDENTI": self.issue,
+                "IDEXEC": self.config.execution_id,
+                "LASTEXEC": self.last_exec,
+                "LIBVERSION": self.lib_version,
+                "OBSERV": "",
+                "PASS": 1 if result else 0,
+                "PROGDATE": self.program_date,
+                "PROGRAM": self.program,
+                "PROGTIME": "00:00:00",
+                "RELEASE": self.release,
+                "SECONDSCT": self.testcase_seconds,
+                "SOTYPE": self.so_type,
+                "SOVERSION": self.so_version,
+                "STATION": self.station,
+                "STATUS": "", # ???
+                "TESTCASE": self.get_file_name('testcase'),
+                "TESTSUITE": self.get_file_name('testsuite'),
+                "TESTTYPE": "1",
+                "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
+                "TOOL": self.test_type,
+                "USRNAME": self.user,
+                "VERSION": self.version
+            }
 
         return dict_key
 
@@ -466,15 +502,20 @@ class Log:
             stack_item = self.get_testcase_stack()
 
         if stack_item == "setUpClass":
-            stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("test_")}'
-
+            if self.config.language == "ru-ru":
+                stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("test_")}'
+            else:
+                stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("testsuite")}'
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
 
         if not self.release:
             self.release = self.config.release
 
-        testsuite = self.get_file_name("test_")
+        if self.config.language == "ru-ru":
+            testsuite = self.get_file_name("test_")
+        else:
+            testsuite = self.get_file_name("testsuite")
 
         today = datetime.today()
 
