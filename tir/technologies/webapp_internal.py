@@ -119,7 +119,7 @@ class WebappInternal(Base):
             self.check_mot_exec()
 
         if webdriver_exception:
-            message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+            message = f"Wasn't possible execute Start() method: {webdriver_exception}"
             self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)

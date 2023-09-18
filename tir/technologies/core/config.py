@@ -83,3 +83,6 @@ class ConfigLoader:
         self.destination_folder = str(data["DestinationFolder"]) if "DestinationFolder" in data else ""
         self.appserver_service = str(data["AppServerService"]) if "AppServerService" in data else ""
         self.check_dump = ("CheckDump" in data and bool(data["CheckDump"]))
+        self.chromedriver_auto_install = ("ChromeDriverAutoInstall" in data and bool(data["ChromeDriverAutoInstall"]))
+        self.ssl_chrome_auto_install_disable = (
+                    "SSLChromeInstallDisable" in data and bool(data["SSLChromeInstallDisable"]))
