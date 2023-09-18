@@ -164,21 +164,21 @@ class LanguagePack:
             "NewPassword": "Reserved",
             "ConfirmNewPassword": "Reserved",
             "Yes": "Sim",
-            "YES": "ДА",
+            "YES": "YES",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "File Name": "File Name",
                         "Open": "Open",
             "Warning": "Warning",
-            "Continue": "Продолжить",
+            "Continue": "Continue",
             "News": "News",
-            "Print": "Печать",
-            "Set": "Вставить",
-            "shortConfirm": "Подтв.",
-            "End": "Завершить",
-            "Enter_2": "Войти",
-            "No": "Нет",
-            "Parameters": "Параметры",
-            "Create": "Создать"
+            "Print": "Print",
+            "Set": "Set",
+            "shortConfirm": "confirm.",
+            "End": "End",
+            "Enter_2": "Enter",
+            "No": "No",
+            "Parameters": "Parameters",
+            "Create": "Create"
         }
 
         brazilian_portuguese = {
@@ -259,16 +259,16 @@ class LanguagePack:
                         "Open": "Abrir",
             "Warning": "Atenção",
             "Continue": "Continuar",
-            "Print": "Печать",
-            "Set": "Вставить",
-            "shortConfirm": "Подтв.",
-            "End": "Завершить",
-            "Enter_2": "Войти",
-            "Enter_3": "Ввод", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
+            "Print": "Print",
+            "Set": "Set",
+            "shortConfirm": "shortConfirm.",
+            "End": "End",
+            "Enter_2": "Enter",
+            "Enter_3": "Enter", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
 
             "No": "Нет",
-            "Parameters": "Параметры",
-            "Create": "Создать",
+            "Parameters": "Parameters",
+            "Create": "Create",
             "News": "Novidades do"
         }
         spanish = {
@@ -342,23 +342,23 @@ class LanguagePack:
             "NewPassword": "Nueva contrasena*",
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
             "Yes": "Reserved",
-            "YES": "ДА",
+            "YES": "YES",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
             "File Name": "Nome do Arquivo",
             "Open": "Abierto",
             "Warning": "Atención",
             "News": "Noticias",
             "Continue": "Continuar",
-            "Set": "Вставить",
-            "Print": "Печать",
-            "shortConfirm": "Подтв.",
-            "End": "Завершить",
-            "Enter_2": "Войти",
-            "Enter_3": "Ввод", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
+            "Set": "Set",
+            "Print": "Print",
+            "shortConfirm": "shortConfirm.",
+            "End": "End",
+            "Enter_2": "Enter",
+            "Enter_3": "Enter", # ВХОД В МА3 ТРЕТЬЕ ОКНО АНГУЛЯР
 
-            "No": "Нет",
-            "Parameters": "Параметры",
-            "Create": "Создать"
+            "No": "No",
+            "Parameters": "Parameters",
+            "Create": "Create"
         }
         russian = {
             "User": "Пользователь",
@@ -395,7 +395,7 @@ class LanguagePack:
             # "Details": "ДЕТАЛИ",
             "Details": "Подробнее",
             # "Search": "Поиск",
-            "Search": "Search",
+            # "Search": "Search",
             "Ok": "Да",
             "Yes": "Да",
             "YES": "ДА",
