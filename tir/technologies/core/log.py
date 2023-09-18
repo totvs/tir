@@ -324,7 +324,7 @@ class Log:
             "USRNAME": self.user,
             "VERSION": self.version
         }
-        print(dict_key)
+
         return dict_key
 
     def generate_json(self, dictionary):
