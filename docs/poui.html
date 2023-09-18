@@ -52,12 +52,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.AssertTrue"><code class="docutils literal notranslate"><span class="pre">Poui.AssertTrue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.CheckResult"><code class="docutils literal notranslate"><span class="pre">Poui.CheckResult()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickButton"><code class="docutils literal notranslate"><span class="pre">Poui.ClickButton()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.ClickByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSelect"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSelect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickWidget"><code class="docutils literal notranslate"><span class="pre">Poui.ClickWidget()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.GetUrl"><code class="docutils literal notranslate"><span class="pre">Poui.GetUrl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.InputByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.InputByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.InputValue"><code class="docutils literal notranslate"><span class="pre">Poui.InputValue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.POSearch"><code class="docutils literal notranslate"><span class="pre">Poui.POSearch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.POtabs"><code class="docutils literal notranslate"><span class="pre">Poui.POtabs()</span></code></a></li>
@@ -173,6 +176,40 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickByLocator">
+<span class="sig-name descname"><span class="pre">ClickByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickByLocator" title="Permalink to this definition"></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information check this out: <a class="reference external" href="https://selenium-python.readthedocs.io/locating-elements.html">https://selenium-python.readthedocs.io/locating-elements.html</a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use only in cases where it is not possible to use a label or name attribute.
+Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+before using these methods in the script.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>right_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Perform a right-click action if True (default is False).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper_Poui</span><span class="o">.</span><span class="n">ClickByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;.po-page-header-actions &gt; po-button:nth-child(1) &gt; button:nth-child(1)&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
+<span class="go">:return: None</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickCombo">
 <span class="sig-name descname"><span class="pre">ClickCombo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickCombo" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on the Combo of POUI component.
@@ -190,6 +227,32 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickCombo</span><span class="p">(</span><span class="s1">&#39;Visão&#39;</span><span class="p">,</span> <span class="s1">&#39;Compras&#39;</span><span class="p">)</span>
 <span class="go">:return:</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickIcon">
+<span class="sig-name descname"><span class="pre">ClickIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickIcon" title="Permalink to this definition"></a></dt>
+<dd><p>Click on the POUI Icon by label, class_name or both.
+<a class="reference external" href="https://po-ui.io/guides/icons">https://po-ui.io/guides/icons</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The tooltip name for icon</p></li>
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The POUI class name for icon</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Delete&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;po-icon po-icon-delete&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;po-icon po-icon-delete&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -283,6 +346,40 @@
 <dd><p>Loads a web page in the current browser session.
 :param url:
 :type url: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.InputByLocator">
+<span class="sig-name descname"><span class="pre">InputByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.InputByLocator" title="Permalink to this definition"></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information check this out: <a class="reference external" href="https://selenium-python.readthedocs.io/locating-elements.html">https://selenium-python.readthedocs.io/locating-elements.html</a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use only in cases where it is not possible to use a label or name attribute.
+Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+before using these methods in the script.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The value to be used (e.g., for input or interaction).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper_Poui</span><span class="o">.</span><span class="n">InputByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;[p-label=&quot;PO Select&quot;] [class=&quot;po-field-container-content&quot;] &gt; select&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;Option 2&#39;</span><span class="p">)</span>
+<span class="go">:return: None</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

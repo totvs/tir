@@ -81,6 +81,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_index"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_object"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_object()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_iframe"><code class="docutils literal notranslate"><span class="pre">Base.return_iframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_selected_combo_value"><code class="docutils literal notranslate"><span class="pre">Base.return_selected_combo_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_to_element"><code class="docutils literal notranslate"><span class="pre">Base.scroll_to_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.search_stack"><code class="docutils literal notranslate"><span class="pre">Base.search_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.search_zindex"><code class="docutils literal notranslate"><span class="pre">Base.search_zindex()</span></code></a></li>
@@ -625,21 +626,21 @@ naming convention.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_combo_object">
-<span class="sig-name descname"><span class="pre">return_combo_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_combo_object" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>element</strong> – </p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">return_combo_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_combo_object" title="Permalink to this definition"></a></dt>
+<dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_iframe">
 <span class="sig-name descname"><span class="pre">return_iframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_iframe" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_selected_combo_value">
+<span class="sig-name descname"><span class="pre">return_selected_combo_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_selected_combo_value" title="Permalink to this definition"></a></dt>
+<dd><p>”
+[Internal]</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.scroll_to_element">
@@ -709,13 +710,16 @@ naming convention.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.select_combo">
-<span class="sig-name descname"><span class="pre">select_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.select_combo" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.select_combo" title="Permalink to this definition"></a></dt>
 <dd><p>Selects the option on the combobox.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Beautiful Soup object</em>) – Combobox element</p></li>
 <li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Option to be selected</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – True if option is an integer value</p></li>
+<li><p><strong>shadow_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Internal control for shadow root objects</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – bool value for locator True or False</p></li>
 </ul>
 </dd>
 </dl>
