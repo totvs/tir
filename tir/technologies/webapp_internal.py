@@ -119,7 +119,7 @@ class WebappInternal(Base):
             self.check_mot_exec()
 
         if webdriver_exception:
-            message = f"Wasn't possible execute Start() method: {next(iter(webdriver_exception.msg.split(':')), None)}"
+            message = f"Wasn't possible execute Start() method: {webdriver_exception}"
             self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)
@@ -1885,19 +1885,19 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not tradiobuttonitens:
                 soup = self.get_current_DOM()
-                tradiobuttonitens = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
+                radio_menu = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
 
-                if tradiobuttonitens:
+                if radio_menu:
                     if self.webapp_shadowroot():
-                        tradiobuttonitens = self.find_child_element('div', tradiobuttonitens)
+                        tradiobuttonitens = self.find_child_element('div', radio_menu)
                         tradiobuttonitens_ends_dots = list(filter(lambda x: re.search(r"\.\.$", x.text), tradiobuttonitens))
                         tradiobuttonitens_not_ends_dots = list(
                             filter(lambda x: not re.search(r"\.\.$", x.text), tradiobuttonitens))
                     else:
                         tradiobuttonitens_ends_dots = list(
-                            filter(lambda x: re.search(r"\.\.$", x.next.text), tradiobuttonitens))
+                            filter(lambda x: re.search(r"\.\.$", x.next.text), radio_menu))
                         tradiobuttonitens_not_ends_dots = list(
-                            filter(lambda x: not re.search(r"(\.\.)$", x.next.text), tradiobuttonitens))
+                            filter(lambda x: not re.search(r"(\.\.)$", x.next.text), radio_menu))
 
                     if tradiobuttonitens_not_ends_dots:
                         if self.webapp_shadowroot():
@@ -1914,7 +1914,6 @@ class WebappInternal(Base):
 
                     if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                         for element in tradiobuttonitens_ends_dots:
-
                             if self.webapp_shadowroot():
                                 selenium_input = element.find_element_by_tag_name('input')
                                 self.click(selenium_input)
@@ -1925,9 +1924,12 @@ class WebappInternal(Base):
                             time.sleep(1)
 
                             try_get_tooltip = 0
-
                             while (not success and try_get_tooltip < 3):
-                                success = self.check_element_tooltip(element, search_key, contains=True)
+                                soup = self.get_current_DOM()
+                                radio_menu = next(iter(soup.select(radio_term)),None) if self.webapp_shadowroot() else soup.select(radio_term)
+                                success = "title" in radio_menu.attrs and  search_key in re.sub(' ', '',  radio_menu['title']).lower()
+                                if not success:
+                                    success = self.check_element_tooltip(element, search_key, contains=True)
                                 try_get_tooltip += 1
 
                             if success:
@@ -7789,7 +7791,9 @@ class WebappInternal(Base):
 
                 logger().info("Searching for Icon")
                 if buttons:
-                    filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
+                    filtered_buttons = list(filter(lambda x: "title" in x.attrs and icon_text.lower().strip() in x['title'].lower().strip(), buttons))
+                    if not filtered_buttons:
+                        filtered_buttons = self.filter_by_tooltip_value(buttons, icon_text)
                     if filtered_buttons and len(filtered_buttons) -1 >= position:
                         icon = next(iter(filtered_buttons), None)
 
