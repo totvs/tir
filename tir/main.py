@@ -24,16 +24,8 @@ class Webapp():
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
-    def GiveMeAccess (self):
-        """
-        Call of the function give to your instance (ex. inst_1) which is copy of WebApp class instance (__webapp),
-        private methods from WebappInternal class.
-        :param self: Instance of Webapp class
-        :type self: instance
-        """
-        x = self.__webapp                       # object model here, x is link to instance
-        return x
-        
+
+
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
         Adds a parameter to the queue of parameters to be set by SetParameters method.
@@ -381,7 +373,7 @@ class Webapp():
     def LogOff(self):
         """
         Logs out of the Protheus Webapp.
-        
+
         .. note::
             Do not use this method in any routine. Use on home screen.
 
@@ -485,7 +477,7 @@ class Webapp():
     def F3(self, field, name_attr=False,send_key=False):
         """
         Do the standard query(F3)
-        
+
         this method:
 
             1.Search the field
@@ -511,7 +503,7 @@ class Webapp():
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
         self.__webapp.standard_search_field( field, name_attr, send_key )
-    
+
     def SetupTSS(self, initial_program="", environment=""):
         """
         Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
@@ -617,8 +609,8 @@ class Webapp():
 
     def SetFilePath(self, value, button = ""):
         """
-        Fills the path screen with the desired path 
-        
+        Fills the path screen with the desired path
+
         .. warning::
             Necessary informed the button name or the program will select the current button name.
 
@@ -662,7 +654,7 @@ class Webapp():
         .. warning::
             If this methods is the first to be called, we strongly recommend using some wait methods like WaitShow().
 
-        .. warning::           
+        .. warning::
             Before using this method, set focus on any element.
 
         Supported keys: F1 to F12, CTRL+Key, ALT+Key, Up, Down, Left, Right, ESC, Enter and Delete ...
@@ -973,7 +965,7 @@ class Webapp():
         """
         Clicks on TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" . 
+        :param treepath: String that contains the access path for the item separate by ">" .
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
@@ -988,7 +980,7 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         >>> # tree_number example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", position=2)
-        """ 
+        """
         self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position, tree_number=tree_number)
 
     def GridTree(self, column, treepath,  right_click=False):
@@ -1006,10 +998,10 @@ class Webapp():
         >>> oHelper.GridTree("element 1 > element 2 > element 3")
         >>> # Right GridTree example:
         >>> oHelper.GridTree("element 1 > element 2 > element 3", right_click=True)
-        
-        """ 
+
+        """
         self.__webapp.GridTree(column, treepath, right_click)
-        
+
     def GetText(self, string_left="", string_right=""):
         """
         This method returns a string from modal based on the string in the left or right position that you send on parameter.
@@ -1034,7 +1026,7 @@ class Webapp():
         """
 
         return self.__webapp.GetText(string_left, string_right)
-    
+
     def CheckHelp(self, text="", button="", text_help="", text_problem="", text_solution="", verbosity=False):
         """
         Checks if some help screen is present in the screen at the time and takes an action.
@@ -1053,7 +1045,7 @@ class Webapp():
         :type verbosity: bool
 
         Usage:
-        
+
         >>> # Calling method to check all window text.
         >>> oHelper.CheckHelp("TK250CADRE Problema: Essa reclamação já foi informada anteriormente. Solução: Informe uma reclamação que ainda não tenha sido cadastrada nessa tabela.", "Fechar")
         >>> # Calling method to check help text only.
@@ -1094,7 +1086,7 @@ class Webapp():
 
         :return: The current release from Protheus.
         :type: str
-        
+
         Usage:
 
         >>> # Calling the method:
@@ -1106,7 +1098,7 @@ class Webapp():
         """
 
         return self.__webapp.get_release()
-    
+
     def ClickListBox(self, text):
         """
         Clicks on Item based in a text in a window tlistbox
@@ -1119,23 +1111,23 @@ class Webapp():
         >>> # Calling the method.
         >>> oHelper.ClickListBox("text")
         """
-        
+
         return self.__webapp.ClickListBox(text)
 
     def ClickImage(self, img_name, double_click=False):
         """
-        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support. 
+        Clicks in an Image button. They must be used only in case that 'ClickIcon' doesn't  support.
         :param img_name: Image to be clicked.
         :type img_name: src
 
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickImage("img_name")  
+        >>> oHelper.ClickImage("img_name")
         >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.__webapp.ClickImage(img_name,double_click)
-    
+
     def ClickMenuFunctional(self,menu_name,menu_option):
         """Click on the functional menu.
         :param menu_option: Item to be clicked.
@@ -1144,7 +1136,7 @@ class Webapp():
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.ClickMenuFunctional("label","button") 
+        >>> oHelper.ClickMenuFunctional("label","button")
         """
         self.__webapp.ClickMenuFunctional(menu_name,menu_option)
 
@@ -1158,7 +1150,7 @@ class Webapp():
         >>> self.ProgramScreen("SIGAADV")
         """
         self.__webapp.program_screen(initial_program, coverage=self.coverage)
-    
+
     def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
         """
         Returns a dictionary when the file has a header in another way returns a list
@@ -1174,7 +1166,7 @@ class Webapp():
         :type csv_file: str
         :param delimiter: Delimiter option such like ';' or ',' or '|'
         :type delimiter: str
-        :param column: To files with Header is possible return only a column by header name or Int value for no header files 
+        :param column: To files with Header is possible return only a column by header name or Int value for no header files
         :type column: str
         :param header: Indicate with the file contains a Header or not default is Header None
         :type header: bool
@@ -1231,10 +1223,10 @@ class Webapp():
 
     def QueryExecute(self, query, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
         """
-        Return a dictionary if the query statement is a SELECT otherwise print a number of row 
+        Return a dictionary if the query statement is a SELECT otherwise print a number of row
         affected in case of INSERT|UPDATE|DELETE statement.
 
-        .. note::  
+        .. note::
             Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
             Parameters:
             "DBDriver": "",
@@ -1243,12 +1235,12 @@ class Webapp():
             "DBUser": "",
             "DBPassword": ""
 
-        .. note::        
+        .. note::
             Must be used an ANSI default SQL statement.
 
-        .. note::        
+        .. note::
             dbq_oracle_server parameter is necessary only for Oracle connection.
-        
+
         :param query: ANSI SQL estatement query
         :type query: str
         :param database_driver: ODBC Driver database name
@@ -1508,7 +1500,7 @@ class Poui():
         >>> oHelper.ClickMenu("Contracts")
         """
         self.__poui.ClickMenu(menu_item)
-        
+
     def InputValue(self, field='', value='', position=1):
         """
         Fill the POUI input component.
@@ -1630,7 +1622,7 @@ class Poui():
         >>> inst.oHelper.TearDown()
         """
         self.__poui.TearDown()
-        
+
     def POSearch(self, content='', placeholder=''):
         """
         Fill the POUI Search component.
@@ -1672,7 +1664,7 @@ class Poui():
         """
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
-        
+
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
         Checks if a field has the value the user expects.
