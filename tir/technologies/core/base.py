@@ -1119,7 +1119,7 @@ class Base(unittest.TestCase):
                 chrome_options.add_argument('force-device-scale-factor=0.77')
 
             try:
-                if self.chromedriver_auto_install:
+                if self.config.chromedriver_auto_install:
                     if self.config.ssl_chrome_auto_install_disable:
                         os.environ['WDM_SSL_VERIFY'] = '0'
                     self.driver = webdriver.Chrome(options=chrome_options,
