@@ -22,3 +22,5 @@ These are the accepted config keys, and whether they are required or not:
 - **LogUrl1**: service url. Example: "LogUrl1":"http://127.0.0.1:3333/log/"
 - **CheckValue**: Indicates if TIR must check each value after fill. Example: "CheckValue": true
 - **POUILogin**: For new POUI login interface. Example: "POUILogin": true
+- **ChromeDriverAutoInstall**: For chromedriver auto install. Example: "ChromeDriverAutoInstall": true
+- **SSLChromeInstallDisable**: In some cases will be necessary deactivate ssl to download chromedriver automatically. Example: "SSLChromeInstallDisable": true
