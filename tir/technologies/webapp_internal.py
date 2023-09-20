@@ -786,7 +786,7 @@ class WebappInternal(Base):
 
     def filling_date(self, shadow_root=None, container=None):
         """
-
+        [Internal]
         """
 
         if not self.config.date:
@@ -811,40 +811,42 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-            if len(base_dates) > 1:
-                base_date = base_dates.pop()
-            else:
-                base_date = next(iter(base_dates), None)
-
-            if base_date:
-                if self.webapp_shadowroot() and not self.config.poui_login:
-                    date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))), None)
+            if base_dates:
+                if len(base_dates) > 1:
+                    base_date = base_dates.pop()
                 else:
-                    date = lambda: self.soup_to_selenium(base_date)
+                    base_date = next(iter(base_dates), None)
 
-                if self.config.poui_login:
-                    self.switch_to_iframe()
+                if base_date:
+                    if self.webapp_shadowroot() and not self.config.poui_login:
+                        date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))),
+                                            None)
+                    else:
+                        date = lambda: self.soup_to_selenium(base_date)
 
-                logger().info(f'Filling Date: "{self.config.date}"')
+                    if self.config.poui_login:
+                        self.switch_to_iframe()
 
-                self.wait_blocker()
-                self.click(date(), click_type=enum.ClickType(click_type))
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(date(), self.config.date)
-                base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
-                if self.config.poui_login:
-                    ActionChains(self.driver).send_keys(Keys.TAB*2).perform()
+                    logger().info(f'Filling Date: "{self.config.date}"')
 
-                time.sleep(1)
-                click_type += 1
-                if click_type > 3:
-                    click_type = 1
+                    self.wait_blocker()
+                    self.click(date(), click_type=enum.ClickType(click_type))
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                    self.send_keys(date(), self.config.date)
+                    base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
+                    if self.config.poui_login:
+                        ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
+
+                    time.sleep(1)
+                    click_type += 1
+                    if click_type > 3:
+                        click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
-
+        [Internal]
         """
 
         click_type = 1
@@ -855,9 +857,11 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 group_elements = self.web_scrap(term=self.language.group, main_container='body',
                                                 scrap_type=enum.ScrapType.TEXT, twebview=True)
-                group_element = next(iter(group_elements))
-                group_element = group_element.find_parent('pro-company-lookup')
-                group_element = next(iter(group_element.select('input')), None)
+
+                if group_elements:
+                    group_element = next(iter(group_elements))
+                    group_element = group_element.find_parent('pro-company-lookup')
+                    group_element = next(iter(group_element.select('input')), None)
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
@@ -869,10 +873,11 @@ class WebappInternal(Base):
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                     main_container=container)
 
-                if len(group_elements) > 1:
-                    group_element = group_elements.pop()
-                else:
-                    group_element = next(iter(group_elements), None)
+                if group_elements:
+                    if len(group_elements) > 1:
+                        group_element = group_elements.pop()
+                    else:
+                        group_element = next(iter(group_elements), None)
 
             if group_element:
                 group = lambda: self.soup_to_selenium(group_element)
@@ -898,7 +903,7 @@ class WebappInternal(Base):
 
     def filling_branch(self, shadow_root=None, container=None):
         """
-
+        [Internal]
         """
 
         click_type = 1
@@ -909,9 +914,11 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 branch_elements = self.web_scrap(term=self.language.branch, main_container='body',
                                                  scrap_type=enum.ScrapType.TEXT, twebview=True)
-                branch_element = next(iter(branch_elements))
-                branch_element = branch_element.find_parent('pro-branch-lookup')
-                branch_element = next(iter(branch_element.select('input')), None)
+
+                if branch_elements:
+                    branch_element = next(iter(branch_elements))
+                    branch_element = branch_element.find_parent('pro-branch-lookup')
+                    branch_element = next(iter(branch_element.select('input')), None)
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     branch_elements = self.web_scrap(term="[name='cFil'], [name='__cFil']",
@@ -923,10 +930,11 @@ class WebappInternal(Base):
                                                      scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                      main_container=container)
 
-                if len(branch_elements) > 1:
-                    branch_element = branch_elements.pop()
-                else:
-                    branch_element = next(iter(branch_elements), None)
+                if branch_elements:
+                    if len(branch_elements) > 1:
+                        branch_element = branch_elements.pop()
+                    else:
+                        branch_element = next(iter(branch_elements), None)
 
             if branch_element:
                 branch = lambda: self.soup_to_selenium(branch_element)
@@ -952,7 +960,7 @@ class WebappInternal(Base):
 
     def filling_environment(self, shadow_root=None, container=None):
         """
-
+        [Internal]
         """
 
         click_type = 1
@@ -964,9 +972,11 @@ class WebappInternal(Base):
             if self.config.poui_login:
                 environment_elements = self.web_scrap(term=self.language.environment, main_container='body',
                                                       scrap_type=enum.ScrapType.TEXT, twebview=True)
-                environment_element = next(iter(environment_elements))
-                environment_element = environment_element.find_parent('pro-system-module-lookup')
-                environment_element = next(iter(environment_element.select('input')), None)
+
+                if environment_elements:
+                    environment_element = next(iter(environment_elements))
+                    environment_element = environment_element.find_parent('pro-system-module-lookup')
+                    environment_element = next(iter(environment_element.select('input')), None)
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     environment_elements = self.web_scrap(term="[name='cAmb']", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -977,10 +987,11 @@ class WebappInternal(Base):
                                                           scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                           main_container=container)
 
-                if len(environment_elements) > 1:
-                    environment_element = environment_elements.pop()
-                else:
-                    environment_element = next(iter(environment_elements), None)
+                if environment_elements:
+                    if len(environment_elements) > 1:
+                        environment_element = environment_elements.pop()
+                    else:
+                        environment_element = next(iter(environment_elements), None)
 
             if environment_element:
                 env = lambda: self.soup_to_selenium(environment_element)
@@ -999,7 +1010,8 @@ class WebappInternal(Base):
                     logger().info(f'Filling Environment: "{self.config.module}"')
                     self.wait_blocker()
                     self.click(env(), click_type=enum.ClickType(click_type))
-                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(
+                        Keys.CONTROL).perform()
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                     self.send_keys(env(), self.config.module)
@@ -10145,46 +10157,55 @@ class WebappInternal(Base):
 
         if self.config.poui_login:
 
-            soup = lambda: self.get_current_DOM(twebview=True)
-            po_select = lambda: next(iter(soup().select(".po-select-container")), None)
+            po_select = None
 
-            if po_select():
-                span_label = lambda: next(iter(po_select().select('span')), None)
-                language = self.return_select_language()
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not span_label().text.lower() in language:
-                    self.set_language_poui(language, po_select())
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not po_select:
 
-            else:
-                po_select = lambda: next(iter(soup().select("po-select")), None)
-                po_select_object = po_select().select('select')[0]
+                soup = lambda: self.get_current_DOM(twebview=True)
+                po_select = next(iter(soup().select(".po-select-container")), None)
 
-                success = False
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not success:
+                if po_select:
+                    span_label = lambda: next(iter(po_select.select('span')), None)
+                    language = self.return_select_language()
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and not span_label().text.lower() in language:
+                        self.set_language_poui(language, po_select)
 
-                    languages = self.return_select_language()
+                else:
+                    po_select = next(iter(soup().select("po-select")), None)
 
-                    for language in languages:
-                        self.select_combo(po_select_object, language, index=True, shadow_root=False)
-                        combo = self.return_combo_object(po_select_object, shadow_root=False)
-                        text = combo.all_selected_options[0].text.lower()
+                    if po_select:
+                        po_select_object = po_select.select('select')[0]
 
-                        if text == language:
-                            success = True
-                            break
+                        success = False
+                        endtime = time.time() + self.config.time_out
+                        while time.time() < endtime and not success:
+
+                            languages = self.return_select_language()
+
+                            for language in languages:
+                                self.select_combo(po_select_object, language, index=True, shadow_root=False)
+                                combo = self.return_combo_object(po_select_object, shadow_root=False)
+                                text = combo.all_selected_options[0].text.lower()
+
+                                if text == language:
+                                    success = True
+                                    break
 
         elif self.webapp_shadowroot():
-            if  self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
-                                 check_error=False):
-                tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')))
+            if self.element_exists(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                   main_container="body",
+                                   check_error=False):
+                tcombobox = next(iter(self.web_scrap(term='.dict-tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                     main_container='body')))
                 selects = tcombobox
                 languages = self.return_select_language()
 
                 if languages:
                     for language in languages:
                         self.select_combo(selects, language, index=True)
-        
+
         elif self.element_exists(term='.tcombobox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body",
                                  check_error=False):
 
