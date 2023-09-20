@@ -811,11 +811,11 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                 main_container=container)
 
-            if base_dates:
-                if len(base_dates) > 1:
-                    base_date = base_dates.pop()
-                else:
-                    base_date = next(iter(base_dates), None)
+                if base_dates:
+                    if len(base_dates) > 1:
+                        base_date = base_dates.pop()
+                    else:
+                        base_date = next(iter(base_dates), None)
 
                 if base_date:
                     if self.webapp_shadowroot() and not self.config.poui_login:
@@ -873,11 +873,11 @@ class WebappInternal(Base):
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                     main_container=container)
 
-            if group_elements:
-                if len(group_elements) > 1:
-                    group_element = group_elements.pop()
-                else:
-                    group_element = next(iter(group_elements), None)
+                if group_elements:
+                    if len(group_elements) > 1:
+                        group_element = group_elements.pop()
+                    else:
+                        group_element = next(iter(group_elements), None)
 
                 if group_element:
                     group = lambda: self.soup_to_selenium(group_element)
@@ -930,11 +930,11 @@ class WebappInternal(Base):
                                                      scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                      main_container=container)
 
-            if branch_elements:
-                if len(branch_elements) > 1:
-                    branch_element = branch_elements.pop()
-                else:
-                    branch_element = next(iter(branch_elements), None)
+                if branch_elements:
+                    if len(branch_elements) > 1:
+                        branch_element = branch_elements.pop()
+                    else:
+                        branch_element = next(iter(branch_elements), None)
 
                 if branch_element:
                     branch = lambda: self.soup_to_selenium(branch_element)
@@ -987,11 +987,11 @@ class WebappInternal(Base):
                                                           scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
                                                           main_container=container)
 
-            if environment_elements:
-                if len(environment_elements) > 1:
-                    environment_element = environment_elements.pop()
-                else:
-                    environment_element = next(iter(environment_elements), None)
+                if environment_elements:
+                    if len(environment_elements) > 1:
+                        environment_element = environment_elements.pop()
+                    else:
+                        environment_element = next(iter(environment_elements), None)
 
                 if environment_element:
                     env = lambda: self.soup_to_selenium(environment_element)
