@@ -28,7 +28,9 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
-import chromedriver_autoinstaller
+from webdriver_manager.chrome import ChromeDriverManager
+from pathlib import Path
+
 
 class Base(unittest.TestCase):
     """
@@ -1110,15 +1112,28 @@ class Base(unittest.TestCase):
             firefox_options.set_headless(self.config.headless)
             self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
         elif self.config.browser.lower() == "chrome":
-            chromedriver_path = chromedriver_autoinstaller.install()
-            driver_path = chromedriver_path
             chrome_options = ChromeOpt()
             chrome_options.set_headless(self.config.headless)
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
 
-            self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
+            try:
+                if self.config.chromedriver_auto_install:
+                    if self.config.ssl_chrome_auto_install_disable:
+                        os.environ['WDM_SSL_VERIFY'] = '0'
+                    self.driver = webdriver.Chrome(options=chrome_options,
+                                                   executable_path=ChromeDriverManager().install())
+                else:
+                    if sys.platform == 'linux':
+                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux', 'chromedriver.exe')
+                    elif sys.platform == 'win32':
+                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows', 'chromedriver.exe')
+
+                    self.driver = webdriver.Chrome(options=chrome_options, executable_path=str(driver_path))
+            except Exception as e:
+                raise e
+
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
             chrome_options = ChromeOpt()
