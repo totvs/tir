@@ -5926,7 +5926,7 @@ class WebappInternal(Base):
                     break
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
-
+                    logger().debug('Grid loading...')
                     if not field[4]:
                         grid_reload = False
 
@@ -6008,6 +6008,7 @@ class WebappInternal(Base):
                         columns = row.select("td")
                     if columns:
                         if column_name in headers[field[2]]:
+                            logger().debug('Column found!')
                             column_number = headers[field[2]][column_name]
 
                             current_value = columns[column_number].text.strip()
@@ -6040,6 +6041,7 @@ class WebappInternal(Base):
 
                             endtime_selected_cell = time.time() + self.config.time_out / 3
                             while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
+                                logger().debug('Trying to select cell in grid!')
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
