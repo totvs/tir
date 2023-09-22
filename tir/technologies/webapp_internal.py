@@ -6573,7 +6573,7 @@ class WebappInternal(Base):
         grids = ''
         endtime = time.time() + self.config.time_out
         self.down_loop_grid = True
-
+        logger().debug('New grid line')
         while(not grids and time.time() < endtime):
             soup = self.get_current_DOM()
 
@@ -8332,6 +8332,7 @@ class WebappInternal(Base):
 
         success = False
 
+        logger().info(f"ClickCheckBox - Clicking on {label_box_name}")
         if position > 0:
 
             self.wait_element(label_box_name)
