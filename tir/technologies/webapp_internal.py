@@ -1202,7 +1202,7 @@ class WebappInternal(Base):
         optional_term=selector, main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
         else:
-            if config_language == 'ru-ru':
+            if self.config_language == 'ru-ru':
                 self.SetButton(self.language.shortconfirm)
 
 
