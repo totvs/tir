@@ -1201,6 +1201,9 @@ class WebappInternal(Base):
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
             self.SetButton(self.language.confirm)
+        else:
+            if config_language == 'ru-ru':
+                self.SetButton(self.language.shortconfirm)
 
 
     def close_coin_screen_after_routine(self):
@@ -10248,6 +10251,8 @@ class WebappInternal(Base):
             language = ['espanhol', 'español', 'spanish']
         elif config_language == 'en-us':
             language = ['inglês', 'inglés', 'english']
+        elif config_language == 'ru-ru':
+            language = ['русс.', 'русс.', 'русский']
 
         return language
 

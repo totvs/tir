@@ -71,6 +71,7 @@ class LanguagePack:
         self.warning = languagepack["Warning"]
         self.news = languagepack["News"]
         self.continue_string = languagepack["Continue"]
+        self.shortconfirm = languagepack["Short Confirm"]
 
         self.messages = Messages(languagepack)
     def get_language_pack(self, language):
@@ -149,7 +150,8 @@ class LanguagePack:
 			"Open": "Open",
             "Warning": "Warning",
             "News": "News",
-            "Continue": "Continue"
+            "Continue": "Continue",
+            "Short Confirm": "Short Confirm"
         }
 
         brazilian_portuguese = {
@@ -226,7 +228,8 @@ class LanguagePack:
 			"Open": "Abrir",
             "Warning": "Atenção",
             "News": "Novidades do",
-            "Continue": "Continuar"
+            "Continue": "Continuar",
+            "Short Confirm": "Abreviação Confirmar"
         }
         spanish = {
             "User": "Usuário",
@@ -302,7 +305,8 @@ class LanguagePack:
 			"Open": "Abierto",
             "Warning": "Atención",
             "News": "Noticias",
-            "Continue": "Continuar"
+            "Continue": "Continuar",
+            "Short Confirm": "Confirmación corta"
         }
         russian = {
             "User": "Пользователь",
@@ -381,7 +385,8 @@ class LanguagePack:
 			"Open": "открыто",
             "Warning": "Берегись",
             "News": "Новости",
-            "Continue": "Continuar"
+            "Continue": "Continuar",
+            "Short Confirm": "Подтв."
         }
 
         if language.lower() == "en-us":
