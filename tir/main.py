@@ -898,19 +898,21 @@ class Webapp():
         """
         self.__webapp.WaitFieldValue(field, expected_value)
 
-    def WaitHide(self, string):
+    def WaitHide(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait hide the elements.
 
         :param itens: String that will hold the wait.
         :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        self.__webapp.WaitHide(string)
+        self.__webapp.WaitHide(string, timeout, throw_error=True)
 
     def WaitProcessing(self, string):
         """
