@@ -926,19 +926,21 @@ class Webapp():
         """
         self.__webapp.WaitProcessing(string)
 
-    def WaitShow(self, string):
+    def WaitShow(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait show the elements.
 
         :param itens: String that will hold the wait.
         :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitShow(string)
+        self.__webapp.WaitShow(string, timeout, throw_error=True)
 
     def IfExists(self, string='', timeout=5):
         """
