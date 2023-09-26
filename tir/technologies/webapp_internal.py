@@ -1200,7 +1200,7 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
-            if self.config_language == 'ru-ru':
+            if self.config.language == 'ru-ru':
                 self.SetButton(self.language.shortconfirm)
             else:
                 self.SetButton(self.language.confirm)
