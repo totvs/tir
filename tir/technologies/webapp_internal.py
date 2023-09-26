@@ -1200,7 +1200,7 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
-            if self.config_language == 'ru-ru':
+            if self.config.language == 'ru-ru':
                 self.SetButton(self.language.shortconfirm)
             else:
                 self.SetButton(self.language.confirm)
@@ -6148,7 +6148,9 @@ class WebappInternal(Base):
                                     bsoup_element = self.get_current_container().next
                                     self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
                                                     locator=By.XPATH, timeout=True)
+                                    logger().debug(f"Sending keys: {user_value}")
                                     self.try_send_keys(selenium_input, user_value, try_counter)
+                                    self.wait_blocker()
                                     if self.grid_memo_field:
                                         self.SetButton('Ok')
                                         check_value = False
