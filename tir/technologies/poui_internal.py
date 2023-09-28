@@ -2274,7 +2274,8 @@ class PouiInternal(Base):
         """
         logger().warning(f"Warning log_error {message}")
 
-        self.coverage()
+        if self.config.coverage:
+            self.coverage()
 
         if self.config.smart_test:
             logger().debug(f"***System Info*** in log_error():")
@@ -3391,7 +3392,8 @@ class PouiInternal(Base):
         if self.config.new_log:
             self.execution_flow()
 
-        self.coverage()
+        if self.config.coverage:
+            self.coverage()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
