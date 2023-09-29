@@ -2520,7 +2520,7 @@ class WebappInternal(Base):
 
         return (y_element['y'] - y_label['y'])
 
-    def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction):
+    def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction=None):
         """
         [Internal]
 
@@ -2548,7 +2548,7 @@ class WebappInternal(Base):
 
 
 
-    def get_distance_by_direction(self, xy_label, position_list, direction):
+    def get_distance_by_direction(self, xy_label, position_list, direction=None):
 
         if not direction:
             get_distance = self.get_distance
@@ -2636,7 +2636,7 @@ class WebappInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position, ignore_case=ignore_case)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position)
+            self.click_check_radio_button(field, value, name_attr, position, direction)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
@@ -5620,7 +5620,7 @@ class WebappInternal(Base):
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
 
-    def click_check_radio_button(self, field, value, name_attr = False, position = 1):
+    def click_check_radio_button(self, field, value, name_attr = False, position = 1, direction=None):
         """
         [Internal]
         Identify and click on check or radio button.
@@ -5641,7 +5641,7 @@ class WebappInternal(Base):
         logger().info(f'Clicking in "{self.returns_printable_string(field)}"')
 
         position -= 1
-
+        field = field.strip()
         element_list = []
 
         endtime = time.time() + self.config.time_out
@@ -5668,7 +5668,36 @@ class WebappInternal(Base):
             if isinstance(element, list):
                 element = next(iter(element), None)
 
-            if element:
+            if re.match(r"\w+(_)", field) and element.name == 'wa-text-input':
+                container = self.get_current_container()
+                active_tab = self.filter_active_tabs(container)
+
+                box_elements = self.web_scrap(term="wa-radio, wa-checkbox", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                box_elements = list(filter(lambda x: self.element_is_displayed(x), box_elements))
+
+                container_size = self.get_element_size(container['id'])
+
+                # The safe values add to postion of element
+                width_safe, height_safe = self.width_height(container_size)
+                label_s = lambda: self.soup_to_selenium(element)
+                if self.webapp_shadowroot():
+                    xy_label = label_s().location
+                else:
+                    xy_label = self.driver.execute_script('return arguments[0].getPosition()', label_s())
+
+                position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(box_elements)))
+                position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
+                distance      = self.get_distance_by_direction(xy_label, position_list, direction)
+                if distance:
+                    elem = min(distance, key = lambda x: abs(x[1]))
+                    element = box_elements[elem[0]]
+
+                    element = self.soup_to_selenium(element)
+                    elem_value = lambda: element.get_attribute('checked')
+                    chck = lambda: False if not elem_value() else True
+                    while time.time() < endtime and chck() != value:
+                        self.send_action(action=self.click, element=lambda: element)
+            elif element:
                 self.scroll_to_element(element)
 
                 self.double_click(element)  # TODO verificar a utilização de um unico click
