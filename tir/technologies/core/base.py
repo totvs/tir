@@ -784,7 +784,9 @@ class Base(unittest.TestCase):
                 time.sleep(1)
                 combo.select_by_index(str(index_number))
         else:
-            value = next(iter(filter(lambda x: x.text[0:len(option)].lower() == option.lower(), combo.options)), None)
+            value = next(iter(filter(lambda x: x.text.lower().strip() == option.lower().strip() , combo.options)), None)
+            if not value:
+                value = next(iter(filter(lambda x: x.text[0:len(option)].lower().strip()  == option.lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
                 text_value = value.text
