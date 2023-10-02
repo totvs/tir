@@ -1414,17 +1414,17 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         if self.webapp_shadowroot():
             labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
-            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Release"), labels)), None)
-            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top DataBase"), labels)), None)
-            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Versão da lib"), labels)), None)
-            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Build"), labels)), None)
+            release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.release), labels)), None)
+            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top Database"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.libversion), labels)), None)
+            build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.build), labels)), None)
 
         else:
             labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
-            release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
-            database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
-            lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
-            build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
+            release_element = next(iter(filter(lambda x: x.text.startswith(self.language.release), labels)), None)
+            database_element = next(iter(filter(lambda x: x.text.startswith("Top Database"), labels)), None)
+            lib_element = next(iter(filter(lambda x: x.text.startswith(self.language.libversion), labels)), None)
+            build_element = next(iter(filter(lambda x: x.text.startswith(self.language.build), labels)), None)
 
         if release_element:
             release = release_element.text.split(":")[1].strip() if release_element.text else release_element.attrs['caption'].split(":")[1].strip()
