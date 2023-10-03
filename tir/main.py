@@ -1641,7 +1641,7 @@ class Poui():
         """
         self.__poui.POSearch(content, placeholder)
 
-    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None, checkbox=False):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table
@@ -1660,13 +1660,15 @@ class Poui():
         :type itens: bool
         :param click_cell: Content to click based on a column position to close the axis
         :type click_cell: str
+        :param checkbox: If you want to click on the checkbox component in the table
+        :type checkbox: bool
 
         >>> # Call the method:
         >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
         :return: None
         """
 
-        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox)
         
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
