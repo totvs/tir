@@ -74,7 +74,7 @@ class LanguagePack:
         self.shortconfirm = languagepack["Short Confirm"]
         self.codecoverage = languagepack["Code Coverage"] #"Aguarde... Coletando informacoes de cobertura de codigo."
         self.release = languagepack["Release"]
-        #self.topdatabase = languagepack["Top DataBase"] #avaliando
+        self.topdatabase = languagepack["Top DataBase"] 
         self.libversion = languagepack["Lib Version"]
         self.build = languagepack["Build"]
 

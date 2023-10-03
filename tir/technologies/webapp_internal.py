@@ -1415,14 +1415,14 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
             release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.release), labels)), None)
-            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith("Top Database"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.topdatabase), labels)), None)
             lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.libversion), labels)), None)
             build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.build), labels)), None)
 
         else:
             labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
             release_element = next(iter(filter(lambda x: x.text.startswith(self.language.release), labels)), None)
-            database_element = next(iter(filter(lambda x: x.text.startswith("Top Database"), labels)), None)
+            database_element = next(iter(filter(lambda x: x.text.startswith(self.language.topdatabase), labels)), None)
             lib_element = next(iter(filter(lambda x: x.text.startswith(self.language.libversion), labels)), None)
             build_element = next(iter(filter(lambda x: x.text.startswith(self.language.build), labels)), None)
 
@@ -3245,7 +3245,7 @@ class WebappInternal(Base):
         """
         element = None
         text_cover = None
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
         optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
 
@@ -3320,7 +3320,7 @@ class WebappInternal(Base):
         """
         element = None
         text_cover = None
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
         click_counter = 1
 
@@ -9083,7 +9083,7 @@ class WebappInternal(Base):
 
         webdriver_exception = None
         timeout = 1500
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
+        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
         self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
