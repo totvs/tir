@@ -72,8 +72,14 @@ class LanguagePack:
         self.news = languagepack["News"]
         self.continue_string = languagepack["Continue"]
         self.shortconfirm = languagepack["Short Confirm"]
+        self.codecoverage = languagepack["Code Coverage"] #"Aguarde... Coletando informacoes de cobertura de codigo."
+        self.release = languagepack["Release"]
+        self.topdatabase = languagepack["Top DataBase"] 
+        self.libversion = languagepack["Lib Version"]
+        self.build = languagepack["Build"]
 
         self.messages = Messages(languagepack)
+
     def get_language_pack(self, language):
 
         english = {
@@ -147,11 +153,16 @@ class LanguagePack:
             "Yes": "Sim",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "File Name": "File Name",
-			"Open": "Open",
+            "Open": "Open",
             "Warning": "Warning",
             "News": "News",
             "Continue": "Continue",
-            "Short Confirm": "Short Confirm"
+            "Short Confirm": "Short Confirm",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Lib Version",
+            "Build": "Build"
         }
 
         brazilian_portuguese = {
@@ -229,7 +240,12 @@ class LanguagePack:
             "Warning": "Atenção",
             "News": "Novidades do",
             "Continue": "Continuar",
-            "Short Confirm": "Abreviação Confirmar"
+            "Short Confirm": "Abreviação Confirmar",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Versão da lib",
+            "Build": "Build"
         }
         spanish = {
             "User": "Usuário",
@@ -306,7 +322,12 @@ class LanguagePack:
             "Warning": "Atención",
             "News": "Noticias",
             "Continue": "Continuar",
-            "Short Confirm": "Confirmación corta"
+            "Short Confirm": "Confirmación corta",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Versão da lib",
+            "Build": "Build"
         }
         russian = {
             "User": "Пользователь",
@@ -315,7 +336,7 @@ class LanguagePack:
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Add": "Добавить",
             "Delete": "Удалить",
             "Edit": "редактировать",
             "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
@@ -365,9 +386,9 @@ class LanguagePack:
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
             "Invert Selection": "Invert Selection",
-            "Parameter Menu": "Environment > Registers > Parameters",
-            "Search 2": "Search",
-            "Search By": "Search by:",
+            "Parameter Menu": "Среда > НСИ > Параметры",
+            "Search 2": "оиск",
+            "Search By": "Поиск по:",
             "From": "De",
             "To": "Ate",
             "Coins": "Валюта",
@@ -385,8 +406,13 @@ class LanguagePack:
 			"Open": "открыто",
             "Warning": "Берегись",
             "News": "Новости",
-            "Continue": "Continuar",
-            "Short Confirm": "Подтв."
+            "Continue": "Продолжить",
+            "Short Confirm": "Подтв.",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.", 
+            "Release": "Сброс RPO",
+            "Top DataBase": "БД Top",
+            "Lib Version": "Версия библиотеки",
+            "Build": "Верс."
         }
 
         if language.lower() == "en-us":
