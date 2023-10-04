@@ -2453,61 +2453,6 @@ class PouiInternal(Base):
             self.assertTrue(False, self.message)
 
         self.message = ""
-                
-    def TearDown(self):
-        """
-        Closes the webdriver and ends the test case.
-
-        Usage:
-
-        >>> #Calling the method
-        >>> self.TearDown()
-        """
-
-        if self.config.new_log:
-            self.execution_flow()
-
-        webdriver_exception = None
-        timeout = 1500
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
-
-        if self.config.coverage:
-            try:
-                self.driver_refresh()
-            except WebDriverException as e:
-                logger().exception(str(e))
-                webdriver_exception = e
-
-            if webdriver_exception:
-                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                logger().debug(message)
-
-            if not webdriver_exception and not self.tss:
-                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-                self.user_screen()
-                self.environment_screen()
-                endtime = time.time() + self.config.time_out
-                while (time.time() < endtime and (
-                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                    self.close_warning_screen()
-                self.Finish()
-            elif not webdriver_exception:
-                self.SetupTSS(self.config.initial_program, self.config.environment )
-                self.SetButton(self.language.exit)
-                self.SetButton(self.language.yes)
-
-            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
-                self.WaitProcessing(string, timeout)
-
-        if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
-                self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
-
-        try:
-            self.driver.close()
-        except Exception as e:
-            logger().exception(f"Warning tearDown Close {str(e)}")
             
     def containers_filter(self, containers):
         """
