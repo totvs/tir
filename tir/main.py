@@ -1641,7 +1641,7 @@ class Poui():
         """
         self.__poui.POSearch(content, placeholder)
 
-    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None, checkbox=False):
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1, itens=False, click_cell=None, checkbox=False):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table

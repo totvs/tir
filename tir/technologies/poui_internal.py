@@ -3524,7 +3524,7 @@ class PouiInternal(Base):
         while time.time() < endtime and len(index_number) < 1 and count <= 3:
 
             try:
-                table = self.return_table(selector=term)
+                table = self.return_table(selector=term, table_number=table_number)
 
                 df = self.data_frame(object=table)
 
@@ -3553,14 +3553,16 @@ class PouiInternal(Base):
                         index_number.append(0)
 
                     if len(index_number) < 1 and count <= 3:
-                        first_element_focus = next(iter(table.select('tbody > tr > td')), None)
+                        first_element_focus = table.select('th')[column_index_number]
                         if first_element_focus:
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                            self.wait_until_to(expected_condition="element_to_be_clickable",
+                                               element=first_element_focus, locator=By.XPATH)
+                            self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                         table = self.return_table(selector=term)
                         df = self.data_frame(object=table)
                         if df.equals(last_df):
-                            count +=1
+                            count += 1
 
             except Exception as e:
                 self.log_error(f"Content doesn't found on the screen! {str(e)}")
@@ -3574,11 +3576,12 @@ class PouiInternal(Base):
             for index in index_number:
                 if checkbox:
                     self.click_checkbox(selector=term, index=index)
-                elif column_index_number:
-                    element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
                 else:
-                    element_bs4 = next(iter(tr[index].select('td')))
-                self.poui_click(element_bs4)
+                    if column_index_number:
+                        element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+                    else:
+                        element_bs4 = next(iter(tr[index].select('td')))
+                    self.poui_click(element_bs4)
         else:
             index = index_number
             element_bs4 = next(iter(tr[index].select('td')))
@@ -3606,14 +3609,17 @@ class PouiInternal(Base):
             if not checked:
                 self.poui_click(element)
 
-    def return_table(self, selector):
+    def return_table(self, selector, table_number):
+
+        table_number -= 1
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        return next(iter(
-                self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                               main_container='body')),
-                None)
+        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')
+        if tables:
+            if len(tables) - 1 >= table_number:
+                return tables[table_number]
 
     def data_frame(self, object):
 
