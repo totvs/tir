@@ -3559,7 +3559,7 @@ class PouiInternal(Base):
                                                element=first_element_focus, locator=By.XPATH)
                             self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                        table = self.return_table(selector=term)
+                        table = self.return_table(selector=term, table_number=table_number)
                         df = self.data_frame(object=table)
                         if df.equals(last_df):
                             count += 1
@@ -3575,7 +3575,7 @@ class PouiInternal(Base):
         if hasattr(index_number, '__iter__'):
             for index in index_number:
                 if checkbox:
-                    self.click_checkbox(selector=term, index=index)
+                    self.click_checkbox(selector=term, index=index, table_number=table_number)
                 else:
                     if column_index_number:
                         element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
@@ -3587,14 +3587,14 @@ class PouiInternal(Base):
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
 
-    def click_checkbox(self, selector, index):
+    def click_checkbox(self, selector, index, table_number):
 
         checked = False
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not checked:
 
-            table = self.return_table(selector=selector)
+            table = self.return_table(selector=selector, table_number=table_number)
 
             tr = table.select('tbody > tr')
 
