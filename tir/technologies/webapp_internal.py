@@ -716,7 +716,7 @@ class WebappInternal(Base):
         """
 
         if change_env:
-            label = self.self.language.confirm
+            label = self.language.confirm
             container = "body"
         else:
             label = self.language.confirm_in_environment_screen
