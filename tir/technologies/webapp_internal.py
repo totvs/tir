@@ -326,8 +326,8 @@ class WebappInternal(Base):
     def merge_date_mask(self, base_date, date):
 
         d = self.config.data_delimiter
-        pattern_1 = rf"\d{2}{d}\d{2}{d}\d{4}"
-        pattern_2 = rf"\d{2}{d}\d{2}{d}\d{2}"
+        pattern_1 = (r"\d{2}*\d{2}*\d{4}").replace("*", d)
+        pattern_2 = (r"\d{2}*\d{2}*\d{2}").replace("*", d)
 
         match1 = re.match(pattern_1, base_date)
         match2 = re.match(pattern_2, base_date)
@@ -716,10 +716,10 @@ class WebappInternal(Base):
         """
 
         if change_env:
-            label = self.language.confirm_in_environment_screen
+            label = self.self.language.confirm
             container = "body"
         else:
-            label = self.language.enter
+            label = self.language.confirm_in_environment_screen
             container = ".twindow"
 
         shadow_root = not self.config.poui_login
@@ -1204,7 +1204,7 @@ class WebappInternal(Base):
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
 
-        self.SetButton(self.language.shortconfirm)
+            self.SetButton(self.language.shortconfirm)
 
 
 
