@@ -304,7 +304,7 @@ class WebappInternal(Base):
                 "setUpClass") and self.restart_coverage:
             self.restart()
             self.restart_coverage = False
-            
+
     def date_format(self, date):
         """
 
@@ -713,7 +713,7 @@ class WebappInternal(Base):
         """
 
         if change_env:
-            label = self.language.confirm
+            label = self.language.confirm_in_environment_screen
             container = "body"
         else:
             label = self.language.enter
@@ -1200,10 +1200,9 @@ class WebappInternal(Base):
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
         optional_term=selector, main_container="body", check_error = False):
-            if self.config.language == 'ru-ru':
-                self.SetButton(self.language.shortconfirm)
-            else:
-                self.SetButton(self.language.confirm)
+
+        self.SetButton(self.language.shortconfirm)
+
 
 
     def close_coin_screen_after_routine(self):
@@ -1460,7 +1459,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not label_element):
             soup = self.get_current_DOM()
-            if self.webapp_shadowroot(): 
+            if self.webapp_shadowroot():
                 container = self.get_current_shadow_root_container()
                 if container.has_attr('title') and "Sobre o TSS..." in container.get('title'):
                     element_header = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('wa-dialog-header')",self.soup_to_selenium(container))
@@ -1472,7 +1471,7 @@ class WebappInternal(Base):
         if not label_element:
             raise ValueError("SetupTss fail about screen not found")
 
-        if self.webapp_shadowroot(): 
+        if self.webapp_shadowroot():
             shadowroot_labels = self.driver.execute_script("return arguments[0].querySelectorAll('wa-text-view')",self.soup_to_selenium(container))
             labels = list(map(lambda x: x.text, shadowroot_labels))
         else:
@@ -1480,7 +1479,7 @@ class WebappInternal(Base):
         label = labels[labels.index("Versão do TSS:")+1]
         self.log.release = next(iter(re.findall(r"[\d.]*\d+", label)), None)
 
-        if self.webapp_shadowroot(): 
+        if self.webapp_shadowroot():
             self.driver.execute_script("return arguments[0].shadowRoot.querySelector('button').click()",element_header)
         else:
             self.SetButton('x')
@@ -2379,7 +2378,7 @@ class WebappInternal(Base):
                 xy_label = label_s().location
             else:
                 xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            
+
             if input_field:
                 active_tab = self.filter_active_tabs(container)
 
@@ -2584,7 +2583,7 @@ class WebappInternal(Base):
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
-        :param position: Position should be used to select an especific element when there is more than one of same  
+        :param position: Position should be used to select an especific element when there is more than one of same
         :type name_attr: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
@@ -2764,7 +2763,7 @@ class WebappInternal(Base):
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
                         if main_value == '':
-                           self.select_combo(element, main_value, index=True) 
+                           self.select_combo(element, main_value, index=True)
                         else:
                             self.select_combo(element, main_value)
                         current_value = self.return_selected_combo_value(element).strip()
@@ -3017,14 +3016,14 @@ class WebappInternal(Base):
                 self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 self.wait_element(field)
-                
+
             element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
             if not element:
                 self.log_error(f"Couldn't find element: {field}")
 
             if self.webapp_shadowroot():
                 field_element = lambda : self.soup_to_selenium(element)
-            else:    
+            else:
                 field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
             self.set_element_focus(field_element())
@@ -3888,7 +3887,7 @@ class WebappInternal(Base):
                     submenu().click()
 
                 subMenuElements = self.get_current_DOM().select(menu_itens_term)
-                
+
 
                 while not subMenuElements or len(subMenuElements) < self.children_element_count(f"#{child.attrs['id']}",
                                                                                                 menu_itens_term):
@@ -3914,7 +3913,7 @@ class WebappInternal(Base):
 
                 if hasattr(child, 'attrs'):
                     used_ids.append(child.attrs['id'])
-                
+
                 self.scroll_to_element(self.soup_to_selenium(child))
 
                 if not child or not self.element_is_displayed(child):
@@ -3941,7 +3940,7 @@ class WebappInternal(Base):
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
-                    
+
                     clicked_menu = False
 
                     while time.time() < endtime and (index != last_index and not expanded()) or (
@@ -4006,7 +4005,7 @@ class WebappInternal(Base):
                 self.close_warning_screen_after_routine()
                 self.close_coin_screen_after_routine()
                 self.close_news_screen_after_routine()
-            
+
             self.wait_blocker()
             if self.element_exists(term=term, scrap_type=scrap_type,
                                    main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
@@ -4901,7 +4900,7 @@ class WebappInternal(Base):
                         if first_element_focus:
                             if self.webapp_shadowroot():
                                 first_element_focus.click()
-                            else:    
+                            else:
                                 self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
                                 self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
@@ -4993,7 +4992,7 @@ class WebappInternal(Base):
                     logger().debug(f"Couldn't check box element td: {str(td)}")
         except Exception as error:
             self.log_error(f"Couldn't check box element: {str(error)}")
-    
+
     def set_grid_focus(self, grid_number=0):
         """
         [Internal]
@@ -5007,7 +5006,7 @@ class WebappInternal(Base):
             sel_grid.click()
             count += 1
 
-        
+
     def grid_dataframe(self, grid_number=0):
         """
         [Internal]
@@ -5087,10 +5086,10 @@ class WebappInternal(Base):
         grid_number -= 1
         td_element = None
         actions = ActionChains(self.driver)
-        
+
         self.wait_element_timeout(term = column, scrap_type = enum.ScrapType.TEXT, timeout = self.config.time_out , optional_term = 'label')
         endtime = time.time() + self.config.time_out
-        
+
         grid = self.get_grid(grid_number)
         if self.webapp_shadowroot():
             rows = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('tbody tr')", self.soup_to_selenium(grid))
@@ -5107,7 +5106,7 @@ class WebappInternal(Base):
             column_enumeration = list(enumerate(grid.select("thead label")))
             chosen_column = next(iter(list(filter(lambda x: column in x[1].text, column_enumeration))), None)
             column_index = chosen_column[0] if chosen_column else self.log_error("Couldn't find chosen column.")
-            
+
             current = get_current()
             td = lambda: next(iter(current.select(f"td[id='{column_index}']")), None)
 
@@ -5116,7 +5115,7 @@ class WebappInternal(Base):
                 self.log_error(" Couldn't click on column, td class or tr is not selected ")
 
         while( time.time() < endtime and  not td_element ):
-            
+
             grid = self.get_grid(grid_number)
             if self.webapp_shadowroot():
                 current = get_current
@@ -5146,7 +5145,7 @@ class WebappInternal(Base):
 
         if not self.webapp_shadowroot() and frozen_table:
             self.soup_to_selenium(td_element.next_sibling).click()
-            
+
             self.click(self.soup_to_selenium(td_element))
 
     def click_grid_td(self, td_soup):
@@ -6818,7 +6817,7 @@ class WebappInternal(Base):
 
     def filter_active_tabs(self, object):
         """
-        
+
         :param object:
         :return: return the object if parent wa-tab-page is active else []
         """
@@ -6844,7 +6843,7 @@ class WebappInternal(Base):
             else:
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
-                    return [filtered_object] 
+                    return [filtered_object]
 
         elif isinstance(object, Tag):
             if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
@@ -7380,7 +7379,7 @@ class WebappInternal(Base):
                 filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
                 if filtered_rows:
                     return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
-        return next(reversed(rows), None)   
+        return next(reversed(rows), None)
 
 
     def SetFilePath(self, value, button = ""):
@@ -7462,10 +7461,10 @@ class WebappInternal(Base):
         soup = BeautifulSoup(content,"html.parser")
         container = soup.select(box_term)
         if container:
-            buttons = self.find_shadow_element('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button") 
+            buttons = self.find_shadow_element('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button")
             button = list(filter(lambda x: re.sub(regx_sub,'', x.text).lower() == button_text.lower(), buttons))
             if button:
-                selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element_by_xpath(xpath_soup(button[0])) 
+                selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element_by_xpath(xpath_soup(button[0]))
                 self.click(selenium_button)
 
 
@@ -7985,7 +7984,7 @@ class WebappInternal(Base):
                 self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                         self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
                 try_counter = True
-                
+
 
         time.sleep(3)
         logger().info(f"Finish parameter_url while")
@@ -8840,7 +8839,7 @@ class WebappInternal(Base):
 
         ttreenode = self.treenode(tree_number)
 
-        if self.webapp_shadowroot(): 
+        if self.webapp_shadowroot():
             treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class') or x.get_attribute('selected'), ttreenode))
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
@@ -9594,7 +9593,7 @@ class WebappInternal(Base):
 
         Usage:
 
-        >>> # Calling the method: 
+        >>> # Calling the method:
         >>> self.get_release()
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.023
@@ -9678,7 +9677,7 @@ class WebappInternal(Base):
             term=".dict-tbtnbmp2"
         else:
             term="div.tbtnbmp > img, div.tbitmap > img"
-        
+
         self.wait_element(term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container =  self.containers_selectors["ClickImage"])
 
         success = None
@@ -9715,16 +9714,16 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         soup = self.get_current_DOM()
         class_menu_itens = soup.select(class_selector)
-        
+
         if self.webapp_shadowroot():
-            name_title = next(iter(list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == menu_name.lower().strip(), class_menu_itens))), None)      
+            name_title = next(iter(list(filter(lambda x: x.get('caption') and x['caption'].lower().strip() == menu_name.lower().strip(), class_menu_itens))), None)
             text_name_title = name_title.get('caption')
         else:
             menu_titles = list(filter(lambda x: 'font-size: 16px' in x.attrs['style'], class_menu_itens))
             name_title = next(iter(list(filter(lambda x: menu_name == x.text, menu_titles))), None)
             text_name_title = name_title.string
-        
-        
+
+
         while ((time.time() < endtime) and re.sub(regex, '',text_name_title) != menu_option):
             name_title = name_title.nextSibling
             if self.webapp_shadowroot():
@@ -9733,7 +9732,7 @@ class WebappInternal(Base):
                 text_name_title = name_title.string
 
         self.click(self.soup_to_selenium(name_title))
-                  
+
         return
 
     def img_src_filtered(self, img_soup):

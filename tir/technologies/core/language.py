@@ -72,9 +72,10 @@ class LanguagePack:
         self.news = languagepack["News"]
         self.continue_string = languagepack["Continue"]
         self.shortconfirm = languagepack["Short Confirm"]
+        self.confirm_in_environment_screen = languagepack["Enter in environment screen"]
         self.codecoverage = languagepack["Code Coverage"] #"Aguarde... Coletando informacoes de cobertura de codigo."
         self.release = languagepack["Release"]
-        self.topdatabase = languagepack["Top DataBase"] 
+        self.topdatabase = languagepack["Top DataBase"]
         self.libversion = languagepack["Lib Version"]
         self.build = languagepack["Build"]
 
@@ -157,7 +158,8 @@ class LanguagePack:
             "Warning": "Warning",
             "News": "News",
             "Continue": "Continue",
-            "Short Confirm": "Short Confirm",
+            "Short Confirm": "Confirm",
+            "Enter in environment screen": "Confirm",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
@@ -240,7 +242,8 @@ class LanguagePack:
             "Warning": "Atenção",
             "News": "Novidades do",
             "Continue": "Continuar",
-            "Short Confirm": "Abreviação Confirmar",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Confirmar",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
@@ -322,7 +325,8 @@ class LanguagePack:
             "Warning": "Atención",
             "News": "Noticias",
             "Continue": "Continuar",
-            "Short Confirm": "Confirmación corta",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Confirmar",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
@@ -408,7 +412,8 @@ class LanguagePack:
             "News": "Новости",
             "Continue": "Продолжить",
             "Short Confirm": "Подтв.",
-            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.", 
+            "Enter in environment screen": "Ввод",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Сброс RPO",
             "Top DataBase": "БД Top",
             "Lib Version": "Версия библиотеки",
