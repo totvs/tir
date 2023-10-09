@@ -1147,9 +1147,11 @@ class Webapp():
         Fills the first screen of Protheus with the first program to run.
         :param initial_program: The initial program to load
         :type initial_program: str
+
         Usage:
+
         >>> # Calling the method:
-        >>> self.ProgramScreen("SIGAADV")
+        >>> self.oHelper.ProgramScreen("SIGAADV")
         """
         self.__webapp.program_screen(initial_program, coverage=self.coverage)
     
