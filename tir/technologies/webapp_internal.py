@@ -140,6 +140,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
         """
+
+        self.config.poui_login = False
+
         try:
 
             logger().info("Starting Setup TSS")
