@@ -249,7 +249,7 @@ class WebappInternal(Base):
                 self.language = LanguagePack(self.config.language)
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, coverage=False)
+                self.program_screen(initial_program=initial_program, coverage=False, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
@@ -358,7 +358,7 @@ class WebappInternal(Base):
             with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
                 firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
-    def program_screen(self, initial_program="", environment="", coverage=False):
+    def program_screen(self, initial_program="", environment="", coverage=False, poui=False):
         """
         [Internal]
 
@@ -374,6 +374,9 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
+
+
+        self.config.poui_login = poui
 
         if coverage:
             self.open_url_coverage(url=self.config.url, initial_program=initial_program,
@@ -3738,7 +3741,7 @@ class WebappInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview=twebview)
 
                 if not soup:
                     return False
@@ -9098,7 +9101,6 @@ class WebappInternal(Base):
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
-        self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
         if self.config.coverage:
             try:
@@ -9106,6 +9108,8 @@ class WebappInternal(Base):
             except WebDriverException as e:
                 logger().exception(str(e))
                 webdriver_exception = e
+
+            self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
             if webdriver_exception:
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
