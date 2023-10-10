@@ -140,6 +140,9 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetupTSS("TSSMANAGER", "SPED")
         """
+
+        self.config.poui_login = False
+
         try:
 
             logger().info("Starting Setup TSS")
@@ -249,7 +252,7 @@ class WebappInternal(Base):
                 self.language = LanguagePack(self.config.language)
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, coverage=False)
+                self.program_screen(initial_program=initial_program, coverage=False, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
@@ -358,7 +361,7 @@ class WebappInternal(Base):
             with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
                 firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
-    def program_screen(self, initial_program="", environment="", coverage=False):
+    def program_screen(self, initial_program="", environment="", coverage=False, poui=False):
         """
         [Internal]
 
@@ -374,6 +377,9 @@ class WebappInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
+
+
+        self.config.poui_login = poui
 
         if coverage:
             self.open_url_coverage(url=self.config.url, initial_program=initial_program,
@@ -3738,7 +3744,7 @@ class WebappInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview=twebview)
 
                 if not soup:
                     return False
@@ -4664,13 +4670,26 @@ class WebappInternal(Base):
         >>> oHelper.SetTabEDAPP("AAB")
         """
         try:
-            field = self.get_field("cPesq", name_attr=True)
+            logger().debug('Filling EDAPP...')
+            table       = table.lower().strip()
+            column_item = None
+
+            self.wait_element(term=f"[name$='cPesq']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            field   = self.get_field("cPesq", name_attr=True)
             element = lambda: self.driver.find_element_by_xpath(xpath_soup(field))
-            self.click(element())
-            self.send_keys(element(), table)
-            time.sleep(0.5)
-            self.send_keys(element(), Keys.ENTER)
-            self.send_keys(element(), Keys.ENTER)
+            endtime = time.time() + self.config.time_out / 2
+            while time.time() < endtime and not column_item:
+                self.click(element(), click_type=enum.ClickType.ACTIONCHAINS)
+                self.send_keys(element(), table)
+                self.send_keys(element(), Keys.ENTER)
+                self.wait_blocker()
+                rows = self.get_grid_content(0, '.dict-twbrowse')
+                for row in rows:
+                    columns     = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
+                    column_item = next(iter(filter(lambda x: x.text.lower().strip() == table, columns)),None)
+                    if column_item:
+                        self.send_action(action=self.click, element=lambda: row)
+                        break
             self.SetButton("Ok")
         except:
             logger().exception("Search field could not be located.")
@@ -9085,7 +9104,6 @@ class WebappInternal(Base):
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
-        self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
         if self.config.coverage:
             try:
@@ -9093,6 +9111,8 @@ class WebappInternal(Base):
             except WebDriverException as e:
                 logger().exception(str(e))
                 webdriver_exception = e
+
+            self.config.poui_login = ConfigLoader(self.config_path).poui_login
 
             if webdriver_exception:
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
@@ -9183,7 +9203,7 @@ class WebappInternal(Base):
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
 
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label, span')
@@ -10295,7 +10315,7 @@ class WebappInternal(Base):
         :return:
         """
 
-        grid_number -= 1
+        grid_number -= 1 if grid_number > 0 else 0
         grid_list = []
 
         self.wait_element(self.grid_selectors['new_web_app']+f', {grid_element}',
