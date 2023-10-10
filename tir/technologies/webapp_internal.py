@@ -3741,7 +3741,7 @@ class WebappInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM()
+                soup = self.get_current_DOM(twebview=twebview)
 
                 if not soup:
                     return False
