@@ -9196,7 +9196,7 @@ class WebappInternal(Base):
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
-                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
+                wa_text_view_filtered = list(filter(lambda x:  hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (label_text.lower().strip()), wa_text_view))
 
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label, span')
