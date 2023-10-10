@@ -376,7 +376,7 @@ class WebappInternal(Base):
         """
 
 
-        self.config.poui = poui
+        self.config.poui_login = poui
 
         if coverage:
             self.open_url_coverage(url=self.config.url, initial_program=initial_program,
