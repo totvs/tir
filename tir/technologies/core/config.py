@@ -86,3 +86,4 @@ class ConfigLoader:
         self.chromedriver_auto_install = ("ChromeDriverAutoInstall" in data and bool(data["ChromeDriverAutoInstall"]))
         self.ssl_chrome_auto_install_disable = (
                     "SSLChromeInstallDisable" in data and bool(data["SSLChromeInstallDisable"]))
+        self.data_delimiter = str(data["DataDelimiter"]) if "DataDelimiter" in data else "/"
