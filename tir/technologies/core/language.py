@@ -72,11 +72,17 @@ class LanguagePack:
         self.news = languagepack["News"]
         self.continue_string = languagepack["Continue"]
         self.shortconfirm = languagepack["Short Confirm"]
+        self.confirm_in_environment_screen = languagepack["Enter in environment screen"]
         self.codecoverage = languagepack["Code Coverage"] #"Aguarde... Coletando informacoes de cobertura de codigo."
         self.release = languagepack["Release"]
-        self.topdatabase = languagepack["Top DataBase"] 
+        self.topdatabase = languagepack["Top DataBase"]
         self.libversion = languagepack["Lib Version"]
         self.build = languagepack["Build"]
+        self.issued = languagepack["Issued"]
+        self.ref_dt = languagepack["Ref.Dt"]
+        self.time = languagepack["Time"]
+        self.end_time = languagepack["End Time"]
+
 
         self.messages = Messages(languagepack)
 
@@ -157,12 +163,17 @@ class LanguagePack:
             "Warning": "Warning",
             "News": "News",
             "Continue": "Continue",
-            "Short Confirm": "Short Confirm",
+            "Short Confirm": "Confirm",
+            "Enter in environment screen": "Enter",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Lib Version",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time"
         }
 
         brazilian_portuguese = {
@@ -240,12 +251,17 @@ class LanguagePack:
             "Warning": "Atenção",
             "News": "Novidades do",
             "Continue": "Continuar",
-            "Short Confirm": "Abreviação Confirmar",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Entrar",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Versão da lib",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Emissão",
+            "Ref.Dt": "DT.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término"
         }
         spanish = {
             "User": "Usuário",
@@ -322,12 +338,17 @@ class LanguagePack:
             "Warning": "Atención",
             "News": "Noticias",
             "Continue": "Continuar",
-            "Short Confirm": "Confirmación corta",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Entrar",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Versão da lib",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Emision",
+            "Ref.Dt": "Fc.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término"
         }
         russian = {
             "User": "Пользователь",
@@ -350,13 +371,10 @@ class LanguagePack:
             "Close": "Закрыть",
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
-            "Enter": "Ввод",
+            "Enter": "Войти",
             "Finish": "Завершить",
-            #"Finish": "3акрыть",
-            #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
-            #"Search": "Поиск",
-            "Search": "Search",
+            "Search": "Поиск",
             "Ok": "Да",
             "Copy": "Copy",
             "Cut": "Cut",
@@ -364,6 +382,7 @@ class LanguagePack:
             "Calculator": "Calculator",
             "Spool": "Spool",
             "Help": "Help",
+            #"Help": "Помощь:",
             "Folders": "Folders",
             "Generate Differential File": "Создать файл изменений",
             "Include": "Bставить",
@@ -372,7 +391,6 @@ class LanguagePack:
             "Error Log": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта. Д/др. инфор-и нажать «Подробности»",
             "Error Log Print": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта.Для получения дополнительной информации проверьте распечатку экрана",
             "Error Msg Required": "Не удалось завершить это действие. Не заполнены обязательные поля.",
-            #"Help": "Помощь:",
             "Problem": "Проблема:",
             "Solution": "Решение:",
             "Branches": "",
@@ -404,15 +422,22 @@ class LanguagePack:
             "ConfirmNewPassword": "Подтв. новый пароль*",
             "File Name": "имя файла",
 			"Open": "открыто",
+            "Yes": "Да",
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "Warning": "Берегись",
             "News": "Новости",
             "Continue": "Продолжить",
             "Short Confirm": "Подтв.",
-            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.", 
+            "Enter in environment screen": "Ввод",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Сброс RPO",
             "Top DataBase": "БД Top",
             "Lib Version": "Версия библиотеки",
-            "Build": "Верс."
+            "Build": "Верс.",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time"
         }
 
         if language.lower() == "en-us":
