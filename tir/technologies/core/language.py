@@ -77,6 +77,11 @@ class LanguagePack:
         self.topdatabase = languagepack["Top DataBase"] 
         self.libversion = languagepack["Lib Version"]
         self.build = languagepack["Build"]
+        self.issued = languagepack["Issued"]
+        self.ref_dt = languagepack["Ref.Dt"]
+        self.time = languagepack["Time"]
+        self.end_time = languagepack["End Time"]
+
 
         self.messages = Messages(languagepack)
 
@@ -162,7 +167,11 @@ class LanguagePack:
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Lib Version",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time"
         }
 
         brazilian_portuguese = {
@@ -245,7 +254,11 @@ class LanguagePack:
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Versão da lib",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Emissão",
+            "Ref.Dt": "DT.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término"
         }
         spanish = {
             "User": "Usuário",
@@ -327,7 +340,11 @@ class LanguagePack:
             "Release": "Release",
             "Top DataBase": "Top DataBase",
             "Lib Version": "Versão da lib",
-            "Build": "Build"
+            "Build": "Build",
+            "Issued": "Emision",
+            "Ref.Dt": "Fc.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término"
         }
         russian = {
             "User": "Пользователь",
@@ -412,7 +429,11 @@ class LanguagePack:
             "Release": "Сброс RPO",
             "Top DataBase": "БД Top",
             "Lib Version": "Версия библиотеки",
-            "Build": "Верс."
+            "Build": "Верс.",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time"
         }
 
         if language.lower() == "en-us":

@@ -10147,34 +10147,26 @@ class WebappInternal(Base):
 
         if not file_extension == '.xml':
 
-            emissao = re.search(r'(Emissão: )(?:(\d{2}-\d{2}-\d{4}))', line)
+            emissao = re.search(r'('+self.language.issued+': )(?:(\d{2}-\d{2}-\d{4}))', line)
 
-            emision = re.search(r'(Emision: )(?:(\d{2}-\d{2}-\d{4}))', line)
+            dtref = re.search(r'('+self.language.ref_dt+': )(?:(\d{2}-\d{2}-\d{4}))', line)
 
-            dtref = re.search(r'(DT\.Ref\.: )(?:(\d{2}-\d{2}-\d{4}))', line)
+            hora = re.search(r'('+self.language.time+'\.\.\.: )(?:(\d{2}:\d{2}:\d{2}))', line)
 
-            fcref = re.search(r'(Fc\.Ref\.: )(?:(\d{2}-\d{2}-\d{4}))', line)
-
-            hora = re.search(r'(Hora\.\.\.: )(?:(\d{2}:\d{2}:\d{2}))', line)
-
-            hora_termino = re.search(r'(Hora Término: )(?:(\d{2}:\d{2}:\d{2}))', line)
+            hora_termino = re.search(r'('+self.language.end_time+': )(?:(\d{2}:\d{2}:\d{2}))', line)
 
             slash = re.search(r'(/)', line)
 
             if emissao:
-                line = re.sub(emissao.group(0), 'Emissão: 01-01-2015', line)
-            if emision:
-                line = re.sub(emision.group(0), 'Emision: 01-01-2015', line)
+                line = re.sub(emissao.group(0), self.language.issued+': 01-01-2015', line)
             if dtref:
-                line = re.sub(dtref.group(0), 'DT.Ref.: 01-01-2015', line)
-            if fcref:
-                line = re.sub(fcref.group(0), 'Fc.Ref.: 01-01-2015', line)
+                line = re.sub(dtref.group(0), self.language.ref_dt+': 01-01-2015', line)
             if hora:
-                line = re.sub(hora.group(0), 'Hora...: 00:00:00', line)
+                line = re.sub(hora.group(0), self.language.time+'...: 00:00:00', line)
             if hora_termino:
-                line = re.sub(hora_termino.group(0), 'Hora Término: 00:00:00', line)
+                line = re.sub(hora_termino.group(0), self.language.end_time+': 00:00:00', line)
             if slash:
-                line = re.sub(slash.group(0), '@', line)
+                line = re.sub(slash.group(0), '@', line) 
 
         else:
 
