@@ -3911,8 +3911,8 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?"
                 if self.webapp_shadowroot():
                     child = list(filter(
-                        lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower()).startswith(
-                            menuitem.lower()), subMenuElements))
+                        lambda x: hasattr(x, 'caption') and re.sub(regex, '', x['caption'].lower().strip()).startswith(
+                            menuitem.lower().strip()), subMenuElements))
                 else:
                     child = list(filter(lambda x: x.text.startswith(menuitem), subMenuElements))
 
