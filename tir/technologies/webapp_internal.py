@@ -4877,6 +4877,8 @@ class WebappInternal(Base):
                 element().click()
                 ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                     element(), Keys.ENTER).perform()
+            elif click_type == 4:
+                self.send_action(action=self.double_click, element=element)
         except:
             pass
 
