@@ -3565,6 +3565,12 @@ class WebappInternal(Base):
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
                             return [element]
+            if not element:
+                header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
+                if header:
+                    element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
+                    if element:
+                        return [element]
         except:
             return None
 
@@ -4629,6 +4635,7 @@ class WebappInternal(Base):
                                      main_container=self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
+                logger().info(f"Text found! ")
                 return True
 
             if endtime - time.time() < 1180:
