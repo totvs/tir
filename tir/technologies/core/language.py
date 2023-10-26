@@ -431,7 +431,7 @@ class LanguagePack:
             "Enter in environment screen": "Ввод",
             "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
             "Release": "Сброс RPO",
-            "Top DataBase": "БД Top",
+            "Top DataBase": "БД",
             "Lib Version": "Версия библиотеки",
             "Build": "Верс.",
             "Issued": "Issued",
