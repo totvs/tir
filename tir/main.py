@@ -1380,7 +1380,7 @@ class Webapp():
         >>> oHelper.InputByLocator(selector='COMP7526', locator=By.ID, value='teste')
         :return: None
         """
-        return self.__webapp.filling_input_by_locator(selector, locator, value)
+        return self.__webapp.filling_input_by_locator(selector, locator, value, shadow_root=True)
 
     def ClickByLocator(self, selector='', locator='', right_click=False):
         """
@@ -1409,7 +1409,7 @@ class Webapp():
         >>> oHelper.ClickByLocator(selector='COMP7536', locator=By.ID)
         :return: None
         """
-        return self.__webapp.click_by_locator(selector, locator, right_click)
+        return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
 
 class Apw():
 
