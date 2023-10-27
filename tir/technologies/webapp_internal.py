@@ -5017,7 +5017,7 @@ class WebappInternal(Base):
                             new_box_state = td.attrs['style']
                         success = last_box_state != new_box_state
                         click_type += 1
-                        if click_type > 3:
+                        if click_type > 4:
                             click_type = 1
                 else:
                     logger().debug(f"Couldn't check box element td: {str(td)}")
