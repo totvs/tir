@@ -1161,7 +1161,8 @@ class PouiInternal(Base):
         """
 
         if po_component == 'po-input':
-            input_field = self.return_input_element(field, position)
+            po_component = "[class*='po-input']"
+            input_field = self.return_input_element(field, position, term=po_component)
             input_field_element = lambda: self.soup_to_selenium(input_field, twebview=True)
             if input_field_element():
                 current_value = self.get_web_value(input_field_element())
@@ -3104,20 +3105,34 @@ class PouiInternal(Base):
         """
 
         logger().info(f"Input Value in:'{field}'")
-        
-        input_field = self.return_input_element(field, position, term="[class*='po-input']")
 
-        self.switch_to_iframe()
+        success = False
 
-        input_field_element = lambda: self.soup_to_selenium(input_field)
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
 
-        self.scroll_to_element(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-        self.set_element_focus(input_field_element())
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-        self.click(input_field_element())
-        input_field_element().clear()
-        input_field_element().send_keys(value)
+            input_field = self.return_input_element(field, position, term="[class*='po-input']")
+
+            self.switch_to_iframe()
+
+            input_field_element = lambda: self.soup_to_selenium(input_field)
+
+            self.scroll_to_element(input_field_element())
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+            self.set_element_focus(input_field_element())
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
+            self.click(input_field_element())
+            input_field_element().clear()
+            input_field_element().send_keys(value)
+
+            if self.driver.switch_to_active_element() == input_field_element():
+                time.sleep(1)
+                ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                time.sleep(1)
+                ActionChains(self.driver).key_down(Keys.TAB).perform()
+
+            time.sleep(2)
+            success = self.get_web_value(input_field_element()).strip() != ''
 
     def return_input_element(self, field=None, position=1, term=None):
         """
@@ -3166,15 +3181,17 @@ class PouiInternal(Base):
             else:
                 po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), po_component))
                 if len(po_component_span) > 1:
-                    po_component_span = list(filter(lambda x: self.return_index_element(x), po_component_span))
+                    has_index = list(filter(lambda x: self.return_index_element(x), po_component_span))
+                    if has_index:
+                        po_component_span = has_index
 
             if len(po_component_span) >= position:
                 po_component_span = po_component_span[position]
                 return next(iter(po_component_span.find_parent('po-field-container')), None) if container else po_component_span
 
     def return_index_element(self, element):
-        if hasattr(element.find_parent('div', class_='po-modal-content'), 'attrs'):
-            return element if element.find_parent('div', class_='po-modal-content').attrs['tabindex'] == '-1' else None
+        if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
+            return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
     def po_loading(self, selector):
         """
