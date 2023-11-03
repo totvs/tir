@@ -2453,61 +2453,6 @@ class PouiInternal(Base):
             self.assertTrue(False, self.message)
 
         self.message = ""
-                
-    def TearDown(self):
-        """
-        Closes the webdriver and ends the test case.
-
-        Usage:
-
-        >>> #Calling the method
-        >>> self.TearDown()
-        """
-
-        if self.config.new_log:
-            self.execution_flow()
-
-        webdriver_exception = None
-        timeout = 1500
-        string = "Aguarde... Coletando informacoes de cobertura de codigo."
-
-        if self.config.coverage:
-            try:
-                self.driver_refresh()
-            except WebDriverException as e:
-                logger().exception(str(e))
-                webdriver_exception = e
-
-            if webdriver_exception:
-                message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
-                logger().debug(message)
-
-            if not webdriver_exception and not self.tss:
-                self.wait_element(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-                self.user_screen()
-                self.environment_screen()
-                endtime = time.time() + self.config.time_out
-                while (time.time() < endtime and (
-                not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                    self.close_warning_screen()
-                self.Finish()
-            elif not webdriver_exception:
-                self.SetupTSS(self.config.initial_program, self.config.environment )
-                self.SetButton(self.language.exit)
-                self.SetButton(self.language.yes)
-
-            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
-                self.WaitProcessing(string, timeout)
-
-        if self.config.num_exec:
-            if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
-                self.restart_counter = 3
-                self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
-
-        try:
-            self.driver.close()
-        except Exception as e:
-            logger().exception(f"Warning tearDown Close {str(e)}")
             
     def containers_filter(self, containers):
         """
@@ -2689,6 +2634,8 @@ class PouiInternal(Base):
         
         This method is responsible for encapsulating "wait.until".
         """
+
+        self.switch_to_iframe()
 
         expected_conditions_dictionary = {
 
@@ -3480,7 +3427,7 @@ class PouiInternal(Base):
         action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
 
-    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell):
+    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table
@@ -3499,6 +3446,8 @@ class PouiInternal(Base):
         :type itens: bool
         :param click_cell: Content to click based on a column position to close the axis
         :type click_cell: str
+        :param checkbox: If you want to click on the checkbox component in the table
+        :type checkbox: bool
 
         >>> # Call the method:
         >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
@@ -3512,14 +3461,17 @@ class PouiInternal(Base):
         index_number = []
         count = 0
         column_index_number = None
+        term = "[class='po-table'], po-table"
         logger().info(f"Clicking on Table")
-        self.wait_element(term="[class='po-table']")
+        self.wait_element(term=term)
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and len(index_number) < 1 and count <= 3:
 
             try:
-                df, table = self.table_dataframe(table_number=table_number)
+                table = self.return_table(selector=term, table_number=table_number)
+
+                df = self.data_frame(object=table)
 
                 last_df = df
 
@@ -3546,14 +3498,16 @@ class PouiInternal(Base):
                         index_number.append(0)
 
                     if len(index_number) < 1 and count <= 3:
-                        first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
+                        first_element_focus = table.select('th')[column_index_number]
                         if first_element_focus:
-                            self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
+                            self.wait_until_to(expected_condition="element_to_be_clickable",
+                                               element=first_element_focus, locator=By.XPATH)
                             self.soup_to_selenium(first_element_focus).click()
                         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                        df, grid = self.table_dataframe(table_number=table_number)
+                        table = self.return_table(selector=term, table_number=table_number)
+                        df = self.data_frame(object=table)
                         if df.equals(last_df):
-                            count +=1
+                            count += 1
 
             except Exception as e:
                 self.log_error(f"Content doesn't found on the screen! {str(e)}")
@@ -3565,34 +3519,63 @@ class PouiInternal(Base):
 
         if hasattr(index_number, '__iter__'):
             for index in index_number:
-                if column_index_number:
-                    element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+                if checkbox:
+                    self.click_checkbox(selector=term, index=index, table_number=table_number)
                 else:
-                    element_bs4 = next(iter(tr[index].select('td')))
-                self.poui_click(element_bs4)
+                    if column_index_number:
+                        element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+                    else:
+                        element_bs4 = next(iter(tr[index].select('td')))
+                    self.poui_click(element_bs4)
         else:
             index = index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
 
-    def table_dataframe(self, table_number=0):
+    def click_checkbox(self, selector, index, table_number):
 
-        self.wait_element(term="[class='po-table']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        checked = False
 
-        po_table = next(iter(
-                self.web_scrap(term="[class='po-table']", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                               main_container='body')),
-                None)
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not checked:
 
-        df = (next(iter(pd.read_html(str(po_table)))))
+            table = self.return_table(selector=selector, table_number=table_number)
+
+            tr = table.select('tbody > tr')
+
+            checkbox = next(iter(tr[index].select("[name='checkbox']")), None)
+
+            if checkbox:
+                element = checkbox.select('span')[0]
+
+                if 'checked' in checkbox.contents[0].attrs:
+                    checked = 'true' in checkbox.contents[0].attrs['checked']
+
+            if not checked:
+                self.poui_click(element)
+
+    def return_table(self, selector, table_number):
+
+        table_number -= 1
+
+        self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')
+        if tables:
+            if len(tables) - 1 >= table_number:
+                return tables[table_number]
+
+    def data_frame(self, object):
+
+        df = (next(iter(pd.read_html(str(object)))))
 
         converters = {c: lambda x: str(x) for c in df.columns}
 
-        df = (next(iter(pd.read_html(str(po_table), converters=converters)), None))
+        df = (next(iter(pd.read_html(str(object), converters=converters)), None))
 
         if not df.empty:
-            df = df.fillna('Not Value')
-            return (df, po_table)
+            return df.fillna('Not Value')
 
     def POTabs(self, label):
         """

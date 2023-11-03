@@ -1147,9 +1147,11 @@ class Webapp():
         Fills the first screen of Protheus with the first program to run.
         :param initial_program: The initial program to load
         :type initial_program: str
+
         Usage:
+
         >>> # Calling the method:
-        >>> self.ProgramScreen("SIGAADV")
+        >>> self.oHelper.ProgramScreen("SIGAADV")
         """
         self.__webapp.program_screen(initial_program, coverage=self.coverage)
     
@@ -1378,7 +1380,7 @@ class Webapp():
         >>> oHelper.InputByLocator(selector='COMP7526', locator=By.ID, value='teste')
         :return: None
         """
-        return self.__webapp.filling_input_by_locator(selector, locator, value)
+        return self.__webapp.filling_input_by_locator(selector, locator, value, shadow_root=True)
 
     def ClickByLocator(self, selector='', locator='', right_click=False):
         """
@@ -1407,7 +1409,7 @@ class Webapp():
         >>> oHelper.ClickByLocator(selector='COMP7536', locator=By.ID)
         :return: None
         """
-        return self.__webapp.click_by_locator(selector, locator, right_click)
+        return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
 
 class Apw():
 
@@ -1641,7 +1643,7 @@ class Poui():
         """
         self.__poui.POSearch(content, placeholder)
 
-    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=0, itens=False, click_cell=None):
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1, itens=False, click_cell=None, checkbox=False):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table
@@ -1660,13 +1662,15 @@ class Poui():
         :type itens: bool
         :param click_cell: Content to click based on a column position to close the axis
         :type click_cell: str
+        :param checkbox: If you want to click on the checkbox component in the table
+        :type checkbox: bool
 
         >>> # Call the method:
         >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
         :return: None
         """
 
-        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell)
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox)
         
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
