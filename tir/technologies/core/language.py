@@ -353,7 +353,7 @@ class LanguagePack:
         russian = {
             "User": "Пользователь",
             "Password": "Пароль",
-            "Database": "Дата",
+            "Database": "Базовая дата",
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
