@@ -3555,6 +3555,9 @@ class WebappInternal(Base):
                 labels_not_none = list(filter(lambda x: x is not None and x, labels))
                 if len(labels_not_none) > 0:
                     labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                    if '.dict-tfolder' in optional_term:
+                        if container.select('.dict-tfolder') and self.search_navigation_bar(container.select('.dict-tfolder')):
+                            labels_displayed = labels_not_none
                     if labels_displayed:
                         element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
@@ -3573,6 +3576,27 @@ class WebappInternal(Base):
                         return [element]
         except:
             return None
+
+
+    def search_navigation_bar(self, container):
+        """
+        [Internal]
+        Searches for navigation buttons into bs4 object.
+
+        :return: selenium object or None
+        :rtype: navigation selenium object
+
+        Usage:
+        >>> # Calling the method:
+        >>> self.search_navigation_bar(container)
+        """
+        if container and isinstance(container, list):
+            container = next(iter(container), None)
+            container = self.soup_to_selenium(container)
+        if container:
+            tab_bar = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('wa-tab-bar').shadowRoot.querySelector('.navigation')", container)
+        return tab_bar
+
 
     def search_for_errors(self, check_help=True):
         """
