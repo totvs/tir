@@ -30,6 +30,7 @@ from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 import pathlib
+import sys
 
 class WebappInternal(Base):
     """
@@ -361,8 +362,9 @@ class WebappInternal(Base):
         This method creates a batfile in the root path to kill the process and its children.
         """
         if self.config.smart_test:
-            with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
-                firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
+            if sys.platform == 'win32':
+                with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
+                    firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
     def program_screen(self, initial_program="", environment="", coverage=False, poui=False):
         """
@@ -10445,7 +10447,7 @@ class WebappInternal(Base):
 
         logger().info("Closing the Browser")
         self.driver.close()
-        self.close_process()
+        # self.close_process()
         logger().info("Starting the Browser")
         self.Start()
 
