@@ -6246,8 +6246,10 @@ class WebappInternal(Base):
                                     else:
                                         try_counter = 0
 
+                                    modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
+
                                     if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
-                                            field[1])) or lenfield > len(field[1])):
+                                            field[1])) or lenfield > len(field[1])) and modal_open:
                                         if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
                                             field[0]] != "N") or valtype != "N"):
                                             self.send_keys(selenium_input(), Keys.ENTER)
