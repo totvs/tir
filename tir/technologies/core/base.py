@@ -1170,15 +1170,17 @@ class Base(unittest.TestCase):
 
         url = self.config.url if not url else url
 
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not get_url):
-
-            logger().debug('Get URL')
+        num_of_trying = 1
+        while not get_url and num_of_trying <= 5:
+            self.driver.get(url)
             try:
-                self.driver.get(url)
+                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.ID, 'fieldsetStartProg')))
+                logger().info("Page is ready!")
                 get_url = True
+                break
             except:
-                get_url = False
+                num_of_trying += 1
+                logger().info(f"Loading took too much time! num_of_trying: {str(num_of_trying)}")
 
     def TearDown(self):
         """
