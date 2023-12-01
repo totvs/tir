@@ -103,6 +103,10 @@ class Base(unittest.TestCase):
             import getpass
             self.log.user = getpass.getuser()
 
+        if self.config.smart_test:
+            if self.log.user == 'root':
+                self.log.user = 'advpr.sp'
+
         self.base_container = "body"
         self.config.log_file = False
         self.tmenu_out_iframe = False
