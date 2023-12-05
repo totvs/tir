@@ -279,11 +279,12 @@ class WebappInternal(Base):
             if initial_program.lower() != 'sigacfg':
                 cget_term = '[name=cGet]'
                 endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
-                    logger().debug('Waiting menu screen after environment screen')
-                    time.sleep(10)
+
+                logger().debug('Waiting menu screen after environment screen')
+                self.wait_element_timeout(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out, main_container="body", step=1)
 
                 if time.time() > endtime:
+                    self.log.take_screenshot_log(self.driver, description='no_load_screen', stack_item=self.log.get_testcase_stack())
                     self.restart_counter + 1
                     self.log_error(f"'Unable to load screen '{cget_term}' content.")
 
@@ -10206,7 +10207,7 @@ class WebappInternal(Base):
             if hora_termino:
                 line = re.sub(hora_termino.group(0), self.language.end_time+': 00:00:00', line)
             if slash:
-                line = re.sub(slash.group(0), '@', line) 
+                line = re.sub(slash.group(0), '@', line)
 
         else:
 
