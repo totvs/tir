@@ -438,7 +438,8 @@ class WebappInternal(Base):
 
             if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
-                message = "Couldn't fill Program input element."
+                message = "Cant_fill_program"
+                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
                 self.log_error(message)
                 raise ValueError(message)
 
@@ -477,7 +478,8 @@ class WebappInternal(Base):
 
             if (env_value().strip() != self.config.environment.strip()):
                 self.restart_counter += 1
-                message = "Couldn't fill Environment input element."
+                message = "Cant_fill_environment"
+                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
                 self.log_error(message)
                 raise ValueError(message)
 
@@ -591,7 +593,8 @@ class WebappInternal(Base):
 
         if (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
-            message = "Couldn't fill User input element."
+            message = "Cant_fill_user_name"
+            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
             self.log_error(message)
             raise ValueError(message)
 
@@ -647,7 +650,8 @@ class WebappInternal(Base):
 
         if not password_value.strip() and self.config.password != '':
             self.restart_counter += 1
-            message = "Couldn't fill User input element."
+            message = "Cant_fill_user_password"
+            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
             self.log_error(message)
             raise ValueError(message)
 
@@ -820,7 +824,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
             if self.config.poui_login:
@@ -870,6 +874,12 @@ class WebappInternal(Base):
                     if click_type > 3:
                         click_type = 1
 
+        if base_date_value.strip() != self.config.date.strip():
+                message = "Cant_fill_date"
+                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+                self.log_error(message)
+                raise ValueError(message)
+
     def filling_group(self, shadow_root=None, container=None):
         """
         [Internal]
@@ -877,7 +887,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
             if self.config.poui_login:
@@ -927,6 +937,12 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
+        if group_value.strip() != self.config.group.strip():
+            message = "Cant_fill_group"
+            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+            self.log_error(message)
+            raise ValueError(message)
+
     def filling_branch(self, shadow_root=None, container=None):
         """
         [Internal]
@@ -934,7 +950,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
             if self.config.poui_login:
@@ -984,6 +1000,12 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
+        if branch_value.strip() != self.config.branch.strip():
+            message = "Cant_fill_branch"
+            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+            self.log_error(message)
+            raise ValueError(message)
+
     def filling_environment(self, shadow_root=None, container=None):
         """
         [Internal]
@@ -992,7 +1014,7 @@ class WebappInternal(Base):
         click_type = 1
         env_value = ''
         enable = True
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
 
             if self.config.poui_login:
@@ -1051,6 +1073,12 @@ class WebappInternal(Base):
                     click_type += 1
                     if click_type > 3:
                         click_type = 1
+
+        if env_value.strip() != self.config.module.strip() and enable:
+            message = "Cant_fill_program"
+            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+            self.log_error(message)
+            raise ValueError(message)
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
