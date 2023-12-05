@@ -773,18 +773,32 @@ class WebappInternal(Base):
             self.switch_to_iframe()
 
         click = 1
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and self.element_is_displayed(button()):
-            logger().info('Clicking on Button')
-            self.wait_blocker()
-            self.click(button(), enum.ClickType(click))
-            if self.config.poui_login:
-                break
+        if self.config.poui_login:
+            num_of_trying = 0
+            max_num_of_trying = 5
 
-            click += 1
-            time.sleep(2)
-            if click == 4:
-                click = 1
+            self.switch_to_iframe()
+            logger().info('Clicking on Button')
+
+            self.wait_blocker()
+            while max_num_of_trying >= num_of_trying:
+                try:
+                    self.click(button(), enum.ClickType(click))
+                    time.sleep(1)
+                except:
+                    logger().info('Button click completed')
+                    break
+                num_of_trying += 1
+        else:
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and self.element_is_displayed(button()):
+                logger().info('Clicking on Button')
+                self.wait_blocker()
+                self.click(button(), enum.ClickType(click))
+                time.sleep(2)
+                click += 1
+                if click == 4:
+                    click = 1
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
