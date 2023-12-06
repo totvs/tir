@@ -105,7 +105,7 @@ class WebappInternal(Base):
         self.range_multiplier = None
         self.routine = None
         self.test_suite = []
-        self.current_test_suite = self.log.get_file_name('testsuite')
+        self.current_test_suite = self.log.get_file_name(self.config.suite_prefix)
 
         if not Base.driver:
             Base.driver = self.driver
