@@ -4267,10 +4267,10 @@ class WebappInternal(Base):
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
                     logger().info(f'Screenshot before click Button: {button}')
-                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click.png")
+                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{button}.png")
                     self.send_action(action=self.click, element=lambda: soup_element)
                     logger().info(f'Screenshot after click Button: {button}')
-                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click.png")
+                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{button}.png")
                     if button.lower() == self.language.other_actions.lower():
                         popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                         while time.time() < endtime and not popup_item():
@@ -4319,11 +4319,11 @@ class WebappInternal(Base):
                                            element=soup_objects_filtered[0],
                                            locator=By.XPATH)
 
-                    logger().info(f'Screenshot before click Button: {button}')
-                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click.png")
+                    logger().info(f'Screenshot before click Button: {sub_item}')
+                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{sub_item}.png")
                     self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
-                    logger().info(f'Screenshot after click Button: {button}')
-                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click.png")
+                    logger().info(f'Screenshot after click Button: {sub_item}')
+                    self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{sub_item}.png")
                     self.tmenu_out_iframe = False
                 else:
 
