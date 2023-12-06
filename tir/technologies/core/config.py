@@ -1,12 +1,17 @@
 import json
 import os
 from datetime import datetime
+import sys
 
 class ConfigLoader:
     """
     This class is instantiated to contain all config information used throughout the execution of the methods.
     """
-    def __init__(self, path="config.json"):
+    def __init__(self, path=""):
+
+        if not path:
+            path = os.path.join(sys.path[0], r"config.json")
+
         valid = os.path.isfile(path)
 
         if valid:

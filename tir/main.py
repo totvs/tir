@@ -21,7 +21,7 @@ class Webapp():
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
         self.__database = BaseDatabase(config_path, autostart=False)
-        self.config = ConfigLoader()
+        self.config = ConfigLoader(config_path)
         self.coverage = self.config.coverage
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
