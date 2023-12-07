@@ -1160,6 +1160,11 @@ class Base(unittest.TestCase):
 
             self.get_url()
 
+        if self.driver:
+            window_size = self.driver.get_window_size()
+            logger().info(f"Browser maximized to {window_size['width']}x{window_size['height']}")
+            if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
+                logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
         if not self.config.poui:
