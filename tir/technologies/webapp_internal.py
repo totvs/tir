@@ -4247,6 +4247,7 @@ class WebappInternal(Base):
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
 
             if not soup_element:
+                logger().info(f"Button: '{button}' doens't found, trying search in button: {self.language.other_actions}")
                 other_action = self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, check_error=check_error)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
@@ -4269,6 +4270,7 @@ class WebappInternal(Base):
                     logger().info(f'Screenshot before click Button: {button}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{button}.png")
                     self.send_action(action=self.click, element=lambda: soup_element)
+                    time.sleep(5)
                     logger().info(f'Screenshot after click Button: {button}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{button}.png")
                     if button.lower() == self.language.other_actions.lower():
@@ -4322,6 +4324,7 @@ class WebappInternal(Base):
                     logger().info(f'Screenshot before click Button: {sub_item}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{sub_item}.png")
                     self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
+                    time.sleep(5)
                     logger().info(f'Screenshot after click Button: {sub_item}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{sub_item}.png")
                     self.tmenu_out_iframe = False
