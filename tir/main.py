@@ -1410,6 +1410,30 @@ class Webapp():
         :return: None
         """
         return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
+    
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+        return self.__webapp.AddProcedure(procedure, group)
+    
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures()
+        """
+        return self.__webapp.SetProcedures(is_procedure_install)
 
 class Apw():
 

@@ -82,8 +82,12 @@ class LanguagePack:
         self.ref_dt = languagepack["Ref.Dt"]
         self.time = languagepack["Time"]
         self.end_time = languagepack["End Time"]
-
-
+        self.procedure_menu = languagepack["Procedure Menu"]
+        self.code = languagepack["Code"]
+        self.success = languagepack["Success"]
+        self.procedure_install = languagepack["Procedure Install"]
+        self.procedure_uninstall = languagepack["Procedure Uninstall"]
+        
         self.messages = Messages(languagepack)
 
     def get_language_pack(self, language):
@@ -173,7 +177,13 @@ class LanguagePack:
             "Issued": "Issued",
             "Ref.Dt": "Ref.Dt",
             "Time": "Time",
-            "End Time": "End Time"
+            "End Time": "End Time",
+            "Procedure Menu": "Procedure Menu",
+            "Code": "Code",
+            "Success": "Success",
+            "Procedure Install": "Install selected processes",
+            "Procedure Uninstall": "Remove selected processes"
+            
         }
 
         brazilian_portuguese = {
@@ -261,7 +271,12 @@ class LanguagePack:
             "Issued": "Emissão",
             "Ref.Dt": "DT.Ref.",
             "Time": "Hora",
-            "End Time": "Hora Término"
+            "End Time": "Hora Término",
+            "Procedure Menu": "Procedure Menu",
+            "Code": "Código",
+            "Success": "Sucessos",
+            "Procedure Install": "Instalar processos selecionados",
+            "Procedure Uninstall": "Remover processos selecionados"
         }
         spanish = {
             "User": "Usuário",
@@ -348,7 +363,12 @@ class LanguagePack:
             "Issued": "Emision",
             "Ref.Dt": "Fc.Ref.",
             "Time": "Hora",
-            "End Time": "Hora Término"
+            "End Time": "Hora Término",
+            "Procedure Menu": "Procedure Menu",
+            "Code": "Código",
+            "Success": "Sucessos",
+            "Procedure Install": "Instalar processos selecionados",
+            "Procedure Uninstall": "Remover processos selecionados"
         }
         russian = {
             "User": "Пользователь",
@@ -437,7 +457,12 @@ class LanguagePack:
             "Issued": "Issued",
             "Ref.Dt": "Ref.Dt",
             "Time": "Time",
-            "End Time": "End Time"
+            "End Time": "End Time",
+            "Procedure Menu": "Меню процедур",
+            "Code": "Код",
+            "Success": "успех",
+            "Procedure Install": "Установить выбранные процессы",
+            "Procedure Uninstall": "Удалить выбранные процессы"
         }
 
         if language.lower() == "en-us":
