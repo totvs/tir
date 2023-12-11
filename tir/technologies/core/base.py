@@ -1113,10 +1113,13 @@ class Base(unittest.TestCase):
             else:
                 driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\geckodriver.exe')
             log_path = os.devnull
+            logger().info(f"Driver Path: {driver_path}")
 
             firefox_options = FirefoxOpt()
             firefox_options.set_headless(self.config.headless)
+            logger().info("Before self.driver")
             self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
+            logger().info("After self.driver")
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
             chrome_options.set_headless(self.config.headless)
