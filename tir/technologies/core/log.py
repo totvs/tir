@@ -116,9 +116,9 @@ class Log:
         >>> # Calling the method:
         >>> self.log.save_file()
         """
-        
+
         log_file = f"{self.user}_{uuid.uuid4().hex}_auto.csv"
-                
+
         if len(self.table_rows) > 0:
             try:
                 if self.folder:
@@ -139,7 +139,7 @@ class Log:
 
             logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
 
-                            
+
             self.csv_log.append(self.get_testcase_stack())
 
     def log_exec_file(self):
@@ -189,7 +189,7 @@ class Log:
 
     def list_of_testcases(self):
         """
-        Returns a list of test cases from suite 
+        Returns a list of test cases from suite
         """
         runner = next(iter(list(filter(lambda x: "runner.py" in x.filename, inspect.stack()))), None)
 
@@ -211,7 +211,7 @@ class Log:
     def checks_empty_line(self):
         """
         Checks if the log file is not empty.
-        03 - 'Programa'  10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
+        03 - 'Programa'  10 - 'Release' 14 - 'ID Execução' 15 - 'Pais'
         [Internal]
         """
         table_rows_has_line = False
@@ -314,8 +314,8 @@ class Log:
             "SOVERSION": self.so_version,
             "STATION": self.station,
             "STATUS": "", # ???
-            "TESTCASE": self.get_file_name('testcase'),
-            "TESTSUITE": self.get_file_name('testsuite'),
+            "TESTCASE": self.get_file_name(self.config.test_prefix),
+            "TESTSUITE": self.get_file_name(self.config.suite_prefix),
             "TESTTYPE": "1",
             "TOKEN": "TIR4541c86d1158400092A6c7089cd9e9ae-2020", # ???
             "TOOL": self.test_type,
@@ -384,7 +384,7 @@ class Log:
         """
 
         today = datetime.today()
-        
+
         try:
             path = Path(self.folder, "new_log", self.station)
             os.makedirs(path)
@@ -464,7 +464,7 @@ class Log:
             stack_item = self.get_testcase_stack()
 
         if stack_item == "setUpClass":
-            stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("testsuite")}'
+            stack_item = f'{self.get_testcase_stack()}_{self.get_file_name(self.config.suite_prefix)}'
 
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
@@ -472,7 +472,7 @@ class Log:
         if not self.release:
             self.release = self.config.release
 
-        testsuite = self.get_file_name("testsuite")
+        testsuite = self.get_file_name(self.config.suite_prefix)
 
         today = datetime.today()
 
@@ -485,7 +485,7 @@ class Log:
 
         if self.config.debug_log:
             logger().debug(f"take_screenshot_log in:{datetime.now()}\n")
-            
+
         try:
             if self.config.log_http:
                 folder_path = Path(self.config.log_http, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)

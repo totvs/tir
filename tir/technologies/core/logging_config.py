@@ -33,7 +33,7 @@ def logger(logger='root'):
         file_handler = True if logger == 'root' else False
 
         if not file_path and file_handler:
-            filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
+            filename = f"TIR_{get_file_name(config.suite_prefix)}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
 
             folder = create_folder()
 
@@ -129,7 +129,7 @@ def create_folder():
     try:
         if config.log_http:
             folder_path = Path(config.log_http, config.country, config.release, config.issue,
-                               config.execution_id, get_file_name('testsuite'))
+                               config.execution_id, get_file_name(config.suite_prefix))
             path = Path(folder_path)
             os.makedirs(Path(folder_path))
         else:
