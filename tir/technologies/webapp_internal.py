@@ -4272,7 +4272,7 @@ class WebappInternal(Base):
 
                     if button.lower().strip() == self.language.other_actions.lower().strip():
                         endtime = time.time() + self.config.time_out
-                        while endtime < time.time() and not self.is_next_element_displayed(term='wa-menu-popup'):
+                        while time.time() < endtime and not self.is_next_element_displayed(term='wa-menu-popup'):
                             logger().debug(f"Clicking on: '{self.language.other_actions}'")
                             self.send_action(action=self.click, element=lambda: soup_element)
                             self.wait_blocker()
