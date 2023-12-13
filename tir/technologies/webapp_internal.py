@@ -4269,8 +4269,16 @@ class WebappInternal(Base):
                     self.set_element_focus(soup_element)
                     logger().info(f'Screenshot before click Button: {button}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{button}.png")
-                    self.send_action(action=self.click, element=lambda: soup_element)
-                    time.sleep(5)
+
+                    if button.lower().strip() == self.language.other_actions.lower().strip():
+                        endtime = time.time() + self.config.time_out
+                        while endtime < time.time() and not self.is_next_element_displayed(term='wa-menu-popup'):
+                            logger().debug(f"Clicking on: '{self.language.other_actions}'")
+                            self.send_action(action=self.click, element=lambda: soup_element)
+                            self.wait_blocker()
+                    else:
+                        self.send_action(action=self.click, element=lambda: soup_element)
+
                     logger().info(f'Screenshot after click Button: {button}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{button}.png")
                     if button.lower() == self.language.other_actions.lower():
@@ -4323,7 +4331,13 @@ class WebappInternal(Base):
 
                     logger().info(f'Screenshot before click Button: {sub_item}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{sub_item}.png")
-                    self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
+
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and self.is_next_element_displayed(term='wa-menu-popup'):
+                        logger().debug(f"Clicking on: '{sub_item}'")
+                        self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
+                        self.wait_blocker()
+
                     time.sleep(5)
                     logger().info(f'Screenshot after click Button: {sub_item}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_after_click_button_{sub_item}.png")
@@ -4395,6 +4409,12 @@ class WebappInternal(Base):
         if self.config.smart_test:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
+
+    def is_next_element_displayed(self, term):
+
+        soup = self.get_current_container()
+
+        return True if soup.find_next(term) else False
 
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
