@@ -4271,7 +4271,8 @@ class WebappInternal(Base):
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{button}.png")
 
                     if button.lower().strip() == self.language.other_actions.lower().strip():
-                        while not self.is_next_element_displayed(term='wa-menu-popup'):
+                        endtime = time.time() + self.config.time_out
+                        while endtime < time.time() and not self.is_next_element_displayed(term='wa-menu-popup'):
                             logger().debug(f"Clicking on: '{self.language.other_actions}'")
                             self.send_action(action=self.click, element=lambda: soup_element)
                             self.wait_blocker()
@@ -4331,7 +4332,8 @@ class WebappInternal(Base):
                     logger().info(f'Screenshot before click Button: {sub_item}')
                     self.take_screenshot(f"{time.strftime('%Y%m%d-%H%M%S')}print_before_click_button_{sub_item}.png")
 
-                    while self.is_next_element_displayed(term='wa-menu-popup'):
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and self.is_next_element_displayed(term='wa-menu-popup'):
                         logger().debug(f"Clicking on: '{sub_item}'")
                         self.click(soup_element()) if not self.webapp_shadowroot() else self.click(soup_objects_filtered[0])
                         self.wait_blocker()
