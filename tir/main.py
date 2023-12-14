@@ -1411,6 +1411,18 @@ class Webapp():
         """
         return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
 
+
+    def GetLineNumber(self, values, columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+        return self.__webapp.GetLineNumber(values,columns,  grid_number)
+
+
 class Apw():
 
     def __init__(self, config_path=""):
