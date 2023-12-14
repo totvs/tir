@@ -1415,6 +1415,11 @@ class Webapp():
         """
         Install/Desinstall a procedure in CFG to be set by SetProcedures method.
 
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
         Usage:
 
         >>> # Calling the method:
@@ -1423,15 +1428,18 @@ class Webapp():
         return self.__webapp.AddProcedure(procedure, group)
     
     def SetProcedures(self, is_procedure_install=True):
-        """
+          """
         Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
 
         Usage:
 
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
         >>> # Adding procedures:
         >>> oHelper.AddProcedure("19", "T1")
         >>> # Calling the method:
-        >>> oHelper.SetProcedures()
+        >>> oHelper.SetProcedures(is_procedure_install=True)
         """
         return self.__webapp.SetProcedures(is_procedure_install)
 
