@@ -10592,7 +10592,6 @@ class WebappInternal(Base):
 
         self.procedure_screen(is_procedure_install)
 
-
     def procedure_screen(self, is_procedure_install):
         """
         [Internal]
