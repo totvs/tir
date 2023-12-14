@@ -10480,6 +10480,78 @@ class WebappInternal(Base):
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
 
+
+    def GetLineNumber(self, values=[], columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+
+        grid_number = grid_number-1 if grid_number > 0 else 0
+
+        self.wait_blocker()
+
+        if columns and len(columns) != len(values):
+            self.log_error('Number of Values divergent from columns!')
+            return
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
+
+            containers = self.web_scrap(term=".tmodaldialog, wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
+
+            if container:
+                grid_term = self.grid_selectors['new_web_app']
+
+                grids = container.select(grid_term)
+
+                if grids:
+                    grids = self.filter_active_tabs(grids)
+                    grids = self.filter_displayed_elements(grids)
+
+            if grids:
+                headers = self.get_headers_from_grids(grids)
+                values = list(map(lambda x: x.lower().strip() , values))
+                columns_numbers = []
+
+                if columns:
+                    columns = list(map(lambda x: x.lower().strip(), columns))
+                    difference = list(filter(lambda x: x not in list(headers[grid_number].keys()), columns))
+                    columns_numbers = list(map(lambda x: headers[grid_number][x], columns))
+
+                    if difference:
+                        self.log_error(f"There's no have {difference} in the grid")
+                        return
+
+                if grid_number > len(grids):
+                    self.log_error(self.language.messages.grid_number_error)
+
+                grid = self.soup_to_selenium(grids[grid_number])
+                rows = self.find_shadow_element('tbody tr', grid)
+
+            if rows:
+                for row in rows:
+                    row_columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row )
+
+                    if len(row_columns) < len(columns) or not row_columns:
+                        self.log_error(f"There are not number of columns present in the grid")
+                        return
+
+                    filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
+                    if filtered_columns:
+                        if columns:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() == values[x[0]], enumerate(filtered_columns)))
+                        else:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() in values, enumerate(filtered_columns)))
+                        if len(filtered_cells) == len(values):
+                            return rows.index(row)
+
+
     def AddProcedure(self, procedure, group):
         """
         Install/Desinstall a procedure in CFG to be set by SetProcedures method.
