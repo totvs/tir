@@ -10483,12 +10483,12 @@ class WebappInternal(Base):
     def GetLineNumber(self, values=[], columns=[], grid_number=0):
         """
 
-        :param values: reference columns used to get line
-        :param columns: values composition expected in respective columns
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
         :param grid_number:
         :return:
         """
-        
+
         grid_number = grid_number-1 if grid_number > 0 else 0
 
         self.wait_blocker()
