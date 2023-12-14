@@ -10484,6 +10484,11 @@ class WebappInternal(Base):
         """
         Install/Desinstall a procedure in CFG to be set by SetProcedures method.
 
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
         Usage:
 
         >>> # Calling the method:
@@ -10504,10 +10509,13 @@ class WebappInternal(Base):
 
         Usage:
 
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
         >>> # Adding procedures:
         >>> oHelper.AddProcedure("19", "T1")
         >>> # Calling the method:
-        >>> oHelper.SetProcedures()
+        >>> oHelper.SetProcedures(is_procedure_install=True)
         """
 
         self.procedure_screen(is_procedure_install)
