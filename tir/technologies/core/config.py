@@ -87,3 +87,4 @@ class ConfigLoader:
         self.ssl_chrome_auto_install_disable = (
                     "SSLChromeInstallDisable" in data and bool(data["SSLChromeInstallDisable"]))
         self.data_delimiter = str(data["DataDelimiter"]) if "DataDelimiter" in data else "/"
+        self.procedure_menu = str(data["ProcedureMenu"]) if "ProcedureMenu" in data else ""
