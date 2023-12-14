@@ -1428,7 +1428,7 @@ class Webapp():
         return self.__webapp.AddProcedure(procedure, group)
     
     def SetProcedures(self, is_procedure_install=True):
-          """
+        """
         Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
 
         Usage:
