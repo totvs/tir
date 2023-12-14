@@ -98,6 +98,7 @@ class WebappInternal(Base):
 
         self.blocker = None
         self.parameters = []
+        self.procedures = []
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
@@ -10550,3 +10551,148 @@ class WebappInternal(Base):
                         if len(filtered_cells) == len(values):
                             return rows.index(row)
 
+
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+
+        logger().info(f"AddProcedure: {procedure}")
+
+        endtime = time.time() + self.config.time_out
+        halftime = ((endtime - time.time()) / 2)
+
+        self.procedures.append([procedure.strip(), group])
+
+
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures(is_procedure_install=True)
+        """
+
+        self.procedure_screen(is_procedure_install)
+
+
+    def procedure_screen(self, is_procedure_install):
+        """
+        [Internal]
+
+        Internal method of SetProcedures.
+
+        :type restore_backup: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.parameter_screen(restore_backup=False)
+        """
+        procedure_codes = []
+        procedure_groups = []
+        exception = None
+        stack = None
+        success = False
+
+        procedure_install = self.language.procedure_install 
+        procedure_uninstall = self.language.procedure_uninstall 
+
+        self.tmenu_screen = self.check_tmenu_screen()
+
+        try:
+            self.driver_refresh()
+        except Exception as error:
+            exception = error
+
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait_until_to( expected_condition = "alert_is_present" )
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
+
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
+
+            self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            
+            endtime = time.time() + self.config.time_out
+
+            while(time.time() < endtime and not success):
+
+                for procedure in self.procedures:
+                    container = self.get_current_container()
+                    procedure_codes.append(procedure[0])
+                    procedure_groups.append(procedure[1])
+
+                procedure_codes = list(set(procedure_codes))
+                procedure_groups = list(set(procedure_groups))
+
+                for group in procedure_groups:
+                    self.ClickBox(self.language.code, group)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
+
+                for code in procedure_codes:
+                    self.ClickBox(self.language.code, code, grid_number=2)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
+                    
+                procedure_buttons = container.select('wa-button')
+
+                if is_procedure_install:
+                    procedure_install_button = list(filter(lambda x: x.get("title") == procedure_install, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_install_button))         
+                else:
+                    procedure_uninstall_button = list(filter(lambda x: x.get("title") == procedure_uninstall, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_uninstall_button))
+
+                self.SetButton(self.language.yes)            
+
+                container = self.get_current_container()
+                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))                            
+                if procedure_success:
+                    number_proc_success = procedure_success[0].get("caption").split(":")[1].strip()
+                    if int(number_proc_success) == len(procedure_codes):
+                        success = True
+                        self.SetButton(self.language.close)
+                            
+            self.procedures = []
+            time.sleep(1)
+
+            if self.config.coverage:
+                self.driver_refresh()
+            else:
+                self.Finish()
+
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
+        else:
+            stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
+            if(stack and not stack.lower()  == "teardownclass"):
+                self.restart_counter += 1
+                self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
