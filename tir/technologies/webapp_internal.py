@@ -5967,7 +5967,7 @@ class WebappInternal(Base):
         field_to_valtype = {}
         field_to_len = {}
 
-        current_value = ""
+        current_value = None
         column_name = ""
         rows = ""
         headers = ""
@@ -6006,13 +6006,17 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out + 300
             while (current_value != field_one and time.time() < endtime):
-                current_value = re.sub('[\,\.]', '', self.remove_mask(current_value).strip())
-                field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
-                if current_value.isnumeric() and field_one.isnumeric():
-                   if float(current_value) == float(field_one):
+
+                if field_one != "":
+                    current_value = ""
+                    current_value = re.sub('[\,\.]', '', self.remove_mask(current_value).strip())
+                    field_one = re.sub('[\,\.]', '', self.remove_mask(field_one).strip())
+                    if current_value.isnumeric() and field_one.isnumeric():
+                       if float(current_value) == float(field_one):
+                            break
+                    if field[8] and current_value.lower() == field_one.lower():
                         break
-                if field[8] and current_value.lower() == field_one.lower():
-                    break
+
                 endtime_row = time.time() + self.config.time_out
                 while (time.time() < endtime_row and grid_reload):
                     logger().debug('Grid loading...')
@@ -6235,7 +6239,12 @@ class WebappInternal(Base):
                                     self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
                                                     locator=By.XPATH, timeout=True)
                                     logger().debug(f"Sending keys: {user_value}")
-                                    self.try_send_keys(selenium_input, user_value, try_counter)
+                                    if user_value == "":
+                                        ActionChains(self.driver).move_to_element(
+                                            selenium_input()).send_keys_to_element(selenium_input(), " ").perform()
+                                    else:
+                                        self.try_send_keys(selenium_input, user_value, try_counter)
+
                                     self.wait_blocker()
                                     if self.grid_memo_field:
                                         self.SetButton('Ok')
