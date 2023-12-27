@@ -994,7 +994,7 @@ class Base(unittest.TestCase):
         except Exception as e:
             self.log_error(str(e))
 
-    def zindex_sort (self, elements, reverse=False):
+    def zindex_sort (self, elements, reverse=False, active_tab=True):
         """
         [Internal]
 
@@ -1018,7 +1018,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        if isinstance(elements, list):
+        if active_tab:
+            elements = self.return_active_element(elements)
+        else:
+            isinstance(elements, list)
             elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
 
         return elements
@@ -1387,3 +1390,19 @@ class Base(unittest.TestCase):
             self.log_error(f"Element {element} doesn't found")
 
         return element
+
+    def return_active_element(self, elements):
+
+        if isinstance(elements, list):
+            filtered_element = list(
+                filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, elements))
+
+            if filtered_element:
+                non_blocked_element = list(filter(lambda x: 'blocked' not in x.attrs, filtered_element))
+                active_element = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, non_blocked_element))
+                if active_element:
+                    return active_element
+                else:
+                    return elements
+            else:
+                return elements
