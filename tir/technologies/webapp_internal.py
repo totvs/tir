@@ -30,6 +30,7 @@ from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 import pathlib
+import sys
 
 class WebappInternal(Base):
     """
@@ -97,6 +98,7 @@ class WebappInternal(Base):
 
         self.blocker = None
         self.parameters = []
+        self.procedures = []
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
@@ -361,8 +363,9 @@ class WebappInternal(Base):
         This method creates a batfile in the root path to kill the process and its children.
         """
         if self.config.smart_test:
-            with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
-                firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
+            if sys.platform == 'win32':
+                with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
+                    firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
     def program_screen(self, initial_program="", environment="", coverage=False, poui=False):
         """
@@ -3555,6 +3558,9 @@ class WebappInternal(Base):
                 labels_not_none = list(filter(lambda x: x is not None and x, labels))
                 if len(labels_not_none) > 0:
                     labels_displayed = list(filter(lambda x: x.is_displayed(), labels_not_none))
+                    if '.dict-tfolder' in optional_term:
+                        if container.select('.dict-tfolder') and self.search_navigation_bar(container.select('.dict-tfolder')):
+                            labels_displayed = labels_not_none
                     if labels_displayed:
                         element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
                                        None)
@@ -3573,6 +3579,27 @@ class WebappInternal(Base):
                         return [element]
         except:
             return None
+
+
+    def search_navigation_bar(self, container):
+        """
+        [Internal]
+        Searches for navigation buttons into bs4 object.
+
+        :return: selenium object or None
+        :rtype: navigation selenium object
+
+        Usage:
+        >>> # Calling the method:
+        >>> self.search_navigation_bar(container)
+        """
+        if container and isinstance(container, list):
+            container = next(iter(container), None)
+            container = self.soup_to_selenium(container)
+        if container:
+            tab_bar = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('wa-tab-bar').shadowRoot.querySelector('.navigation')", container)
+        return tab_bar
+
 
     def search_for_errors(self, check_help=True):
         """
@@ -6220,8 +6247,10 @@ class WebappInternal(Base):
                                     else:
                                         try_counter = 0
 
+                                    modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
+
                                     if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
-                                            field[1])) or lenfield > len(field[1])):
+                                            field[1])) or lenfield > len(field[1])) and modal_open:
                                         if (("_" in field[0] and field_to_valtype != {} and field_to_valtype[
                                             field[0]] != "N") or valtype != "N"):
                                             self.send_keys(selenium_input(), Keys.ENTER)
@@ -10421,7 +10450,7 @@ class WebappInternal(Base):
 
         logger().info("Closing the Browser")
         self.driver.close()
-        self.close_process()
+        # self.close_process()
         logger().info("Starting the Browser")
         self.Start()
 
@@ -10450,3 +10479,219 @@ class WebappInternal(Base):
             os.system("taskkill /f /im geckodriver.exe")
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
+
+
+    def GetLineNumber(self, values=[], columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+
+        grid_number = grid_number-1 if grid_number > 0 else 0
+
+        self.wait_blocker()
+
+        if columns and len(columns) != len(values):
+            self.log_error('Number of Values divergent from columns!')
+            return
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
+
+            containers = self.web_scrap(term=".tmodaldialog, wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
+
+            if container:
+                grid_term = self.grid_selectors['new_web_app']
+
+                grids = container.select(grid_term)
+
+                if grids:
+                    grids = self.filter_active_tabs(grids)
+                    grids = self.filter_displayed_elements(grids)
+
+            if grids:
+                headers = self.get_headers_from_grids(grids)
+                values = list(map(lambda x: x.lower().strip() , values))
+                columns_numbers = []
+
+                if columns:
+                    columns = list(map(lambda x: x.lower().strip(), columns))
+                    difference = list(filter(lambda x: x not in list(headers[grid_number].keys()), columns))
+                    columns_numbers = list(map(lambda x: headers[grid_number][x], columns))
+
+                    if difference:
+                        self.log_error(f"There's no have {difference} in the grid")
+                        return
+
+                if grid_number > len(grids):
+                    self.log_error(self.language.messages.grid_number_error)
+
+                grid = self.soup_to_selenium(grids[grid_number])
+                rows = self.find_shadow_element('tbody tr', grid)
+
+            if rows:
+                for row in rows:
+                    row_columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row )
+
+                    if len(row_columns) < len(columns) or not row_columns:
+                        self.log_error(f"There are not number of columns present in the grid")
+                        return
+
+                    filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
+                    if filtered_columns:
+                        if columns:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() == values[x[0]], enumerate(filtered_columns)))
+                        else:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() in values, enumerate(filtered_columns)))
+                        if len(filtered_cells) == len(values):
+                            return rows.index(row)
+
+
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+
+        logger().info(f"AddProcedure: {procedure}")
+
+        endtime = time.time() + self.config.time_out
+        halftime = ((endtime - time.time()) / 2)
+
+        self.procedures.append([procedure.strip(), group])
+
+
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures(is_procedure_install=True)
+        """
+
+        self.procedure_screen(is_procedure_install)
+
+    def procedure_screen(self, is_procedure_install):
+        """
+        [Internal]
+
+        Internal method of SetProcedures.
+
+        :type restore_backup: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.parameter_screen(restore_backup=False)
+        """
+        procedure_codes = []
+        procedure_groups = []
+        exception = None
+        stack = None
+        success = False
+
+        procedure_install = self.language.procedure_install 
+        procedure_uninstall = self.language.procedure_uninstall 
+
+        self.tmenu_screen = self.check_tmenu_screen()
+
+        try:
+            self.driver_refresh()
+        except Exception as error:
+            exception = error
+
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait_until_to( expected_condition = "alert_is_present" )
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
+
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
+
+            self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            
+            endtime = time.time() + self.config.time_out
+
+            while(time.time() < endtime and not success):
+
+                for procedure in self.procedures:
+                    container = self.get_current_container()
+                    procedure_codes.append(procedure[0])
+                    procedure_groups.append(procedure[1])
+
+                procedure_codes = list(set(procedure_codes))
+                procedure_groups = list(set(procedure_groups))
+
+                for group in procedure_groups:
+                    self.ClickBox(self.language.code, group)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
+
+                for code in procedure_codes:
+                    self.ClickBox(self.language.code, code, grid_number=2)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
+                    
+                procedure_buttons = container.select('wa-button')
+
+                if is_procedure_install:
+                    procedure_install_button = list(filter(lambda x: x.get("title") == procedure_install, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_install_button))         
+                else:
+                    procedure_uninstall_button = list(filter(lambda x: x.get("title") == procedure_uninstall, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_uninstall_button))
+
+                self.SetButton(self.language.yes)            
+
+                container = self.get_current_container()
+                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))                            
+                if procedure_success:
+                    number_proc_success = procedure_success[0].get("caption").split(":")[1].strip()
+                    if int(number_proc_success) == len(procedure_codes):
+                        success = True
+                        self.SetButton(self.language.close)
+                            
+            self.procedures = []
+            time.sleep(1)
+
+            if self.config.coverage:
+                self.driver_refresh()
+            else:
+                self.Finish()
+
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
+        else:
+            stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
+            if(stack and not stack.lower()  == "teardownclass"):
+                self.restart_counter += 1
+                self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")

@@ -103,6 +103,10 @@ class Base(unittest.TestCase):
             import getpass
             self.log.user = getpass.getuser()
 
+        if self.config.smart_test:
+            if self.log.user == 'root':
+                self.log.user = 'advpr.sp'
+
         self.base_container = "body"
         self.config.log_file = False
         self.tmenu_out_iframe = False
@@ -1156,6 +1160,11 @@ class Base(unittest.TestCase):
 
             self.get_url()
 
+        if self.driver:
+            window_size = self.driver.get_window_size()
+            logger().info(f"Browser maximized to {window_size['width']}x{window_size['height']}")
+            if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
+                logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
         if not self.config.poui:
@@ -1170,15 +1179,17 @@ class Base(unittest.TestCase):
 
         url = self.config.url if not url else url
 
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not get_url):
-
-            logger().debug('Get URL')
+        num_of_trying = 1
+        while not get_url and num_of_trying <= 5:
+            self.driver.get(url)
             try:
-                self.driver.get(url)
+                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.ID, 'fieldsetStartProg')))
+                logger().info("Page is ready!")
                 get_url = True
+                break
             except:
-                get_url = False
+                num_of_trying += 1
+                logger().info(f"Loading took too much time! num_of_trying: {str(num_of_trying)}")
 
     def TearDown(self):
         """
