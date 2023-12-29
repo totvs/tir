@@ -1019,6 +1019,7 @@ class Base(unittest.TestCase):
         >>> self.zindex_sort(elements, True)
         """
         if active_tab:
+            logger().info("Z-index sort - Return active elements.")
             elements = self.return_active_element(elements)
         else:
             isinstance(elements, list)
