@@ -1460,13 +1460,13 @@ class Webapp():
         Set date on Calendar without input field
 
         :param day: day disered
-        :type branch: str
+        :type day: str
 
         :param month: month disered
-        :type branch: str
+        :type month: str
 
         :param year: year disered
-        :type branch: str
+        :type year: str
 
         """
         return self.__webapp.SetCalendar(day, month, year)

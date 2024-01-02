@@ -10699,15 +10699,15 @@ class WebappInternal(Base):
 
     def SetCalendar(self, day='', month='', year='', position=0):
         """
-        
+
         :param day: day disered
-        :type branch: str
+        :type day: str
 
         :param month: month disered
-        :type branch: str
+        :type month: str
 
         :param year: year disered
-        :type branch: str
+        :type year: str
 
         :return:
         """
