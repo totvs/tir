@@ -54,3 +54,5 @@ These are the accepted config keys, and whether they are required or not:
 - **TopDataBase:** Get the current Data Base.
 - **Lib:** Get the current Lib.
 - **Build:** Get the current Lib.
+- **Data Delimiter:** Used when you have a dot in the date instead of a slash.
+
