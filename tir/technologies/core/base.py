@@ -1414,5 +1414,6 @@ class Base(unittest.TestCase):
         if isinstance(non_blocked_elements, list):
             if len(non_blocked_elements) > 1:
                 return non_blocked_elements[::-1]
+            return non_blocked_elements
         else:
             return non_blocked_elements
