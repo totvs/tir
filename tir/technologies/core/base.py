@@ -1398,11 +1398,21 @@ class Base(unittest.TestCase):
                 filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, elements))
 
             if filtered_element:
-                non_blocked_element = list(filter(lambda x: 'blocked' not in x.attrs, filtered_element))
+                non_blocked_element = self.return_non_blocked_elements(filtered_element)
                 active_element = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, non_blocked_element))
                 if active_element:
                     return active_element
                 else:
-                    return elements
+                    return self.return_non_blocked_elements(elements)
             else:
-                return elements
+                return self.return_non_blocked_elements(elements)
+
+    def return_non_blocked_elements(self, elements):
+
+        non_blocked_elements =  list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+
+        if isinstance(non_blocked_elements, list):
+            if len(non_blocked_elements) > 1:
+                return non_blocked_elements[::-1]
+        else:
+            return non_blocked_elements
