@@ -3460,6 +3460,9 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
+                if container_selector == 'wa-text-view':
+                    return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
+
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
