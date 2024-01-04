@@ -1409,7 +1409,7 @@ class Base(unittest.TestCase):
 
     def return_non_blocked_elements(self, elements, reverse):
 
-        non_blocked_elements =  list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
             if len(non_blocked_elements) > 1:
