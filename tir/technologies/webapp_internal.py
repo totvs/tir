@@ -7469,7 +7469,7 @@ class WebappInternal(Base):
             if element:
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
                 elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
@@ -7479,7 +7479,7 @@ class WebappInternal(Base):
 
             if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
 
         if elements:
@@ -7497,6 +7497,14 @@ class WebappInternal(Base):
 
                 self.log_error(f"Button: {button} not found")
 
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
 
     def MessageBoxClick(self, button_text):
         """
@@ -10695,3 +10703,63 @@ class WebappInternal(Base):
             if(stack and not stack.lower()  == "teardownclass"):
                 self.restart_counter += 1
                 self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
+
+    def SetCalendar(self, day='', month='', year='', position=0):
+        """
+
+        :param day: day disered
+        :type day: str
+
+        :param month: month disered
+        :type month: str
+
+        :param year: year disered
+        :type year: str
+
+        :return:
+        """
+
+        logger().info('Setting date on calendar')
+
+        self.wait_blocker()
+        success = False
+
+        self.wait_element(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out/2
+        while time.time() < endtime and not success:
+            calendar = self.web_scrap(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if calendar:
+                calendar = calendar[position]
+                elem_calendar = self.soup_to_selenium(calendar)
+                # setting year proccess
+                if year:
+                    year_header = next(iter(self.find_shadow_element('wa-datepicker-year', elem_calendar)))
+                    year_select = next(iter(self.find_shadow_element('select', year_header)))
+                    year_interface = lambda: self.return_selected_combo_value(year_select, locator=True)
+                    self.select_combo(year_select, year, index=True, locator=True)
+                # setting month proccess
+                if month:
+                    if int(month) >= 1 and int(month) <= 12:
+                        month = int(month) - 1
+                        month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
+                        month_select = next(iter(self.find_shadow_element('select', month_header)))
+                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
+                        month_combo = self.return_combo_object(month_select, locator=True)
+                        month_combo.select_by_index(str(month))
+                    else:
+                        return self.log_error(f"Month {month} doesn't exist")
+                # setting day proccess
+                if day:
+                    days_body = next(iter(self.find_shadow_element('wa-datepicker-body', elem_calendar)))
+                    days_elements = self.find_shadow_element('wa-datepicker-day', days_body)
+                    filtered_day = next(iter(list(filter(lambda x: x.get_attribute('day') == day, days_elements))),None)
+                    if filtered_day:
+                        click_try = time.time() + 20
+                        day_selected = lambda: True if filtered_day.get_attribute(
+                            'selected') else False
+                        while not day_selected() and time.time() < click_try:
+                            self.click(filtered_day)
+                        if filtered_day and month_combo and year_interface():
+                            success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year
