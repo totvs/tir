@@ -7469,7 +7469,7 @@ class WebappInternal(Base):
             if element:
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
                 elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
@@ -7479,7 +7479,7 @@ class WebappInternal(Base):
 
             if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
 
         if elements:
@@ -7497,6 +7497,14 @@ class WebappInternal(Base):
 
                 self.log_error(f"Button: {button} not found")
 
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
 
     def MessageBoxClick(self, button_text):
         """
