@@ -1406,6 +1406,8 @@ class Base(unittest.TestCase):
                     return self.return_non_blocked_elements(elements, reverse)
             else:
                 return self.return_non_blocked_elements(elements, reverse)
+        else:
+            return elements
 
     def return_non_blocked_elements(self, elements, reverse):
 
