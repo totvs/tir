@@ -8490,7 +8490,7 @@ class WebappInternal(Base):
             if not success:
                 self.log_error("Checkbox index is invalid.")
 
-    def ClickLabel(self, label_name):
+    def ClickLabel(self, label_name, position=0):
         """
         Clicks on a Label on the screen.
 
@@ -8504,6 +8504,8 @@ class WebappInternal(Base):
         """
         bs_label = ''
         label = ''
+        filtered_labels = []
+        self.wait_blocker()
         self.wait_element(label_name)
         logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
@@ -8513,12 +8515,32 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             if self.webapp_shadowroot():
-                labels = container.select("wa-text-view, wa-checkbox")
-                filtered_labels = next(iter(list(filter(lambda x: x.get('caption') and label_name.lower() == x.get('caption').lower(), labels))),None)
+
+                labels = container.select("wa-text-view, wa-checkbox, .dict-tradmenu")
+                for element in labels:
+                    if "class" in element.attrs and 'dict-tradmenu' in element['class']:
+                        radio_labels = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('label')",
+                                                   self.soup_to_selenium(element))
+                        filtered_radio = list(
+                            filter(lambda x: label_name.lower().strip() == x.text.lower().strip(),
+                                   radio_labels))
+                        if filtered_radio:
+                            [filtered_labels.append(i) for i in filtered_radio]
+
+                    elif element.get('caption') and label_name.lower() == element.get('caption').lower():
+                        filtered_labels.append(element)
+
                 if filtered_labels:
-                    label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+                    if len(filtered_labels) > position:
+                        label = filtered_labels[position]
+
+                    if type(label) == Tag:
+                        label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(label))
                 else:
                     label = next(iter(self.web_scrap(term=label_name)))
+
+                if position > len(filtered_labels):
+                    return self.log_error(f"Element position not found")
 
             else:
                 labels = container.select("label")
@@ -8527,7 +8549,7 @@ class WebappInternal(Base):
                 label = next(iter(filtered_labels), None)
 
         if not label:
-            self.log_error("Couldn't find any labels.")
+            return self.log_error("Couldn't find any labels.")
 
         if type(label) == Tag:
             bs_label = self.soup_to_selenium(label)
