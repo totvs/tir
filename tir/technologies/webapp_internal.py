@@ -806,6 +806,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
+        base_dates = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
@@ -863,6 +864,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
+        group_element = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
@@ -920,6 +922,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
+        branch_element = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
@@ -977,6 +980,7 @@ class WebappInternal(Base):
 
         click_type = 1
         env_value = ''
+        environment_element = None
         enable = True
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
@@ -6228,6 +6232,10 @@ class WebappInternal(Base):
                                     self.set_element_focus(selenium_input())
                                     self.click(selenium_input())
 
+                                endtime_container = time.time() + self.config.time_out
+                                while time.time() < endtime_container and 'class' not in self.get_current_container().next.attrs:
+                                    logger().info('Waiting container attributes')
+
                                 if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
                                         self.get_current_container().next.attrs['class'] \
                                         or 'dict-tget' in self.get_current_container().next.attrs['class']:
@@ -6248,6 +6256,10 @@ class WebappInternal(Base):
                                         try_counter = 0
 
                                     modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
+
+                                    endtime_container = time.time() + self.config.time_out
+                                    while time.time() < endtime_container and 'id' not in self.get_current_container().attrs:
+                                        logger().info('Waiting container attributes')
 
                                     if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
                                             field[1])) or lenfield > len(field[1])) and modal_open:
