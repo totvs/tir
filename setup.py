@@ -37,7 +37,7 @@ setup(
     ],
     install_requires=[
         'beautifulsoup4==4.12.2',
-        'numpy==1.21.6',
+        'numpy==1.22.0',
         'pandas==1.0.1',
         'python-dateutil==2.8.2',
         'pytz==2023.3',
