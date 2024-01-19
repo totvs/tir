@@ -994,7 +994,7 @@ class Base(unittest.TestCase):
         except Exception as e:
             self.log_error(str(e))
 
-    def zindex_sort (self, elements, reverse=False):
+    def zindex_sort (self, elements, reverse=False, active_tab=True):
         """
         [Internal]
 
@@ -1018,7 +1018,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        if isinstance(elements, list):
+        if active_tab:
+            elements = self.return_active_element(elements, reverse)
+        else:
+            isinstance(elements, list)
             elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
 
         return elements
@@ -1387,3 +1390,33 @@ class Base(unittest.TestCase):
             self.log_error(f"Element {element} doesn't found")
 
         return element
+
+    def return_active_element(self, elements, reverse):
+
+        if isinstance(elements, list):
+            filtered_element = list(
+                filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, elements))
+
+            if filtered_element:
+                non_blocked_element = self.return_non_blocked_elements(filtered_element, reverse)
+                active_element = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, non_blocked_element))
+                if active_element:
+                    return active_element
+                else:
+                    return self.return_non_blocked_elements(elements, reverse)
+            else:
+                return self.return_non_blocked_elements(elements, reverse)
+        else:
+            return elements
+
+    def return_non_blocked_elements(self, elements, reverse):
+
+        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+
+        if isinstance(non_blocked_elements, list):
+            if len(non_blocked_elements) > 1:
+                if reverse:
+                    return non_blocked_elements[::-1]
+            return non_blocked_elements
+        else:
+            return non_blocked_elements
