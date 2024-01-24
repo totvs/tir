@@ -806,6 +806,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
+        base_dates = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
@@ -863,6 +864,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
+        group_element = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
@@ -920,6 +922,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
+        branch_element = None
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
@@ -977,6 +980,7 @@ class WebappInternal(Base):
 
         click_type = 1
         env_value = ''
+        environment_element = None
         enable = True
         endtime = time.time() + self.config.time_out / 5
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
@@ -3459,6 +3463,9 @@ class WebappInternal(Base):
                     container_selector = main_container
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+
+                if container_selector == 'wa-text-view':
+                    return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
@@ -6228,6 +6235,10 @@ class WebappInternal(Base):
                                     self.set_element_focus(selenium_input())
                                     self.click(selenium_input())
 
+                                endtime_container = time.time() + self.config.time_out
+                                while time.time() < endtime_container and 'class' not in self.get_current_container().next.attrs:
+                                    logger().info('Waiting container attributes')
+
                                 if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
                                         self.get_current_container().next.attrs['class'] \
                                         or 'dict-tget' in self.get_current_container().next.attrs['class']:
@@ -6248,6 +6259,10 @@ class WebappInternal(Base):
                                         try_counter = 0
 
                                     modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
+
+                                    endtime_container = time.time() + self.config.time_out
+                                    while time.time() < endtime_container and 'id' not in self.get_current_container().attrs:
+                                        logger().info('Waiting container attributes')
 
                                     if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
                                             field[1])) or lenfield > len(field[1])) and modal_open:
@@ -7469,7 +7484,7 @@ class WebappInternal(Base):
             if element:
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
                 elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
@@ -7479,7 +7494,7 @@ class WebappInternal(Base):
 
             if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
 
         if elements:
@@ -7497,6 +7512,14 @@ class WebappInternal(Base):
 
                 self.log_error(f"Button: {button} not found")
 
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
 
     def MessageBoxClick(self, button_text):
         """
@@ -8479,7 +8502,7 @@ class WebappInternal(Base):
             if not success:
                 self.log_error("Checkbox index is invalid.")
 
-    def ClickLabel(self, label_name):
+    def ClickLabel(self, label_name, position=0):
         """
         Clicks on a Label on the screen.
 
@@ -8493,6 +8516,8 @@ class WebappInternal(Base):
         """
         bs_label = ''
         label = ''
+        filtered_labels = []
+        self.wait_blocker()
         self.wait_element(label_name)
         logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
@@ -8502,12 +8527,32 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             if self.webapp_shadowroot():
-                labels = container.select("wa-text-view, wa-checkbox")
-                filtered_labels = next(iter(list(filter(lambda x: x.get('caption') and label_name.lower() == x.get('caption').lower(), labels))),None)
+
+                labels = container.select("wa-text-view, wa-checkbox, .dict-tradmenu")
+                for element in labels:
+                    if "class" in element.attrs and 'dict-tradmenu' in element['class']:
+                        radio_labels = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('label')",
+                                                   self.soup_to_selenium(element))
+                        filtered_radio = list(
+                            filter(lambda x: label_name.lower().strip() == x.text.lower().strip(),
+                                   radio_labels))
+                        if filtered_radio:
+                            [filtered_labels.append(i) for i in filtered_radio]
+
+                    elif element.get('caption') and label_name.lower() == element.get('caption').lower():
+                        filtered_labels.append(element)
+
                 if filtered_labels:
-                    label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+                    if len(filtered_labels) > position:
+                        label = filtered_labels[position]
+
+                    if type(label) == Tag:
+                        label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(label))
                 else:
                     label = next(iter(self.web_scrap(term=label_name)))
+
+                if position > len(filtered_labels):
+                    return self.log_error(f"Element position not found")
 
             else:
                 labels = container.select("label")
@@ -8516,7 +8561,7 @@ class WebappInternal(Base):
                 label = next(iter(filtered_labels), None)
 
         if not label:
-            self.log_error("Couldn't find any labels.")
+            return self.log_error("Couldn't find any labels.")
 
         if type(label) == Tag:
             bs_label = self.soup_to_selenium(label)
@@ -10695,3 +10740,63 @@ class WebappInternal(Base):
             if(stack and not stack.lower()  == "teardownclass"):
                 self.restart_counter += 1
                 self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
+
+    def SetCalendar(self, day='', month='', year='', position=0):
+        """
+
+        :param day: day disered
+        :type day: str
+
+        :param month: month disered
+        :type month: str
+
+        :param year: year disered
+        :type year: str
+
+        :return:
+        """
+
+        logger().info('Setting date on calendar')
+
+        self.wait_blocker()
+        success = False
+
+        self.wait_element(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out/2
+        while time.time() < endtime and not success:
+            calendar = self.web_scrap(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if calendar:
+                calendar = calendar[position]
+                elem_calendar = self.soup_to_selenium(calendar)
+                # setting year proccess
+                if year:
+                    year_header = next(iter(self.find_shadow_element('wa-datepicker-year', elem_calendar)))
+                    year_select = next(iter(self.find_shadow_element('select', year_header)))
+                    year_interface = lambda: self.return_selected_combo_value(year_select, locator=True)
+                    self.select_combo(year_select, year, index=True, locator=True)
+                # setting month proccess
+                if month:
+                    if int(month) >= 1 and int(month) <= 12:
+                        month = int(month) - 1
+                        month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
+                        month_select = next(iter(self.find_shadow_element('select', month_header)))
+                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
+                        month_combo = self.return_combo_object(month_select, locator=True)
+                        month_combo.select_by_index(str(month))
+                    else:
+                        return self.log_error(f"Month {month} doesn't exist")
+                # setting day proccess
+                if day:
+                    days_body = next(iter(self.find_shadow_element('wa-datepicker-body', elem_calendar)))
+                    days_elements = self.find_shadow_element('wa-datepicker-day', days_body)
+                    filtered_day = next(iter(list(filter(lambda x: x.get_attribute('day') == day, days_elements))),None)
+                    if filtered_day:
+                        click_try = time.time() + 20
+                        day_selected = lambda: True if filtered_day.get_attribute(
+                            'selected') else False
+                        while not day_selected() and time.time() < click_try:
+                            self.click(filtered_day)
+                        if filtered_day and month_combo and year_interface():
+                            success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year

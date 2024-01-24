@@ -1455,6 +1455,23 @@ class Webapp():
         return self.__webapp.GetLineNumber(values,columns,  grid_number)
 
 
+    def SetCalendar(self, day='', month='', year=''):
+        """
+        Set date on Calendar without input field
+
+        :param day: day disered
+        :type day: str
+
+        :param month: month disered
+        :type month: str
+
+        :param year: year disered
+        :type year: str
+
+        """
+        return self.__webapp.SetCalendar(day, month, year)
+
+
 class Apw():
 
     def __init__(self, config_path=""):
