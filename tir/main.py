@@ -1461,13 +1461,10 @@ class Webapp():
 
         :param day: day disered
         :type day: str
-
         :param month: month disered
         :type month: str
-
         :param year: year disered
         :type year: str
-
         """
         return self.__webapp.SetCalendar(day, month, year)
 

@@ -10744,17 +10744,14 @@ class WebappInternal(Base):
 
     def SetCalendar(self, day='', month='', year='', position=0):
         """
+        Set date on Calendar without input field
 
         :param day: day disered
         :type day: str
-
         :param month: month disered
         :type month: str
-
         :param year: year disered
         :type year: str
-
-        :return:
         """
 
         logger().info('Setting date on calendar')
