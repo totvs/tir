@@ -130,6 +130,8 @@ class Log:
             except OSError:
                 pass
 
+            self.checks_empty_line()
+
             with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
                 csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
                 csv_writer_header.writerow(self.table_rows[0])
