@@ -1179,6 +1179,7 @@ class Base(unittest.TestCase):
     def get_url(self, url=None):
 
         get_url = False
+        start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser]"
 
         url = self.config.url if not url else url
 
@@ -1186,7 +1187,12 @@ class Base(unittest.TestCase):
         while not get_url and num_of_trying <= 5:
             self.driver.get(url)
             try:
-                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.ID, 'fieldsetStartProg')))
+                if self.config.json_data['POUILogin'] and 'StartProg' in url:
+                    time.sleep(3)
+                    self.switch_to_iframe()
+
+                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.CSS_SELECTOR, start_selector)))
+                self.driver.switch_to.default_content()
                 logger().info("Page is ready!")
                 get_url = True
                 break
