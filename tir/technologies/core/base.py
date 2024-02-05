@@ -1179,7 +1179,7 @@ class Base(unittest.TestCase):
     def get_url(self, url=None):
 
         get_url = False
-        start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser]"
+        start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser], [name=cUser]"
 
         url = self.config.url if not url else url
 
