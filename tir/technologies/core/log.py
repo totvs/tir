@@ -52,7 +52,7 @@ class Log:
         self.test_type = test_type
         self.issue = self.config.issue
         self.execution_id = self.config.execution_id
-        self.country = country
+        self.country = self.config.country
         self.start_time = None
         self.end_time = None
         self.ct_method = ""
@@ -137,6 +137,7 @@ class Log:
                 csv_writer_header.writerow(self.table_rows[0])
                 csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
                 for line in self.table_rows[1:]:
+                    logger().debug(f'CSV Line: {line}')
                     csv_writer.writerow(line)
 
             logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
@@ -216,31 +217,35 @@ class Log:
         03 - 'Programa'  10 - 'Release' 14 - 'ID Execução' 15 - 'Pais' 
         [Internal]
         """
+
+        logger().debug('Checking empty default log info')
+
         table_rows_has_line = False
 
-        if self.table_rows[1][3] == '':
-            self.table_rows[1][3] = 'NO PROGRAM'
+        for row in range(0, len(self.table_rows[1:])):
+            if self.table_rows[row][3] == '':
+                self.table_rows[row][3] = 'NO PROGRAM'
 
-        if self.table_rows[1][10] == '':
-            self.table_rows[1][10] = '12.1.27'
+            if self.table_rows[row][10] == '':
+                self.table_rows[row][10] = '12.1.27'
 
-        if self.table_rows[1][15] == '':
-            self.table_rows[1][15] = 'BRA'
+            if self.table_rows[row][15] == '':
+                self.table_rows[row][15] = 'BRA'
 
-        if self.table_rows[1][11] == '':
-            self.table_rows[1][11] = 'TIMEOUT'
+            if self.table_rows[row][11] == '':
+                self.table_rows[row][11] = 'TIMEOUT'
 
-        if len(self.table_rows) > 1:
-            for x in [ 3, 10, 15 ]:
-                if (self.table_rows[1][x]):
+            if len(self.table_rows) > 1:
+                for x in [ 3, 10, 15 ]:
+                    if (self.table_rows[row][x]):
+                        table_rows_has_line = True
+                    else:
+                        table_rows_has_line = False
+                        break
+                if self.config.smart_test and self.table_rows[row][14] and table_rows_has_line:
                     table_rows_has_line = True
-                else:
+                elif self.config.smart_test:
                     table_rows_has_line = False
-                    break
-            if self.config.smart_test and self.table_rows[1][14] and table_rows_has_line:
-                table_rows_has_line = True
-            elif self.config.smart_test:
-                table_rows_has_line = False
 
         return table_rows_has_line
 

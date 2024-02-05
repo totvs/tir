@@ -107,6 +107,7 @@ class WebappInternal(Base):
         self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
+        self.restart_tss = False
 
         if not Base.driver:
             Base.driver = self.driver
@@ -144,6 +145,8 @@ class WebappInternal(Base):
         """
 
         self.config.poui_login = False
+
+        self.restart_tss = True
 
         try:
 
@@ -3182,6 +3185,11 @@ class WebappInternal(Base):
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 self.config.poui_login = True
 
+            if self.restart_tss:
+                self.user_screen_tss()
+                self.restart_tss = False
+                return
+
             self.user_screen()
             self.environment_screen()
 
@@ -3205,7 +3213,7 @@ class WebappInternal(Base):
 
     def wait_user_screen(self):
 
-        term = "[name=cGetUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input"
+        term = "[name=cGetUser], [name=cUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input, [name=cUser]"
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
