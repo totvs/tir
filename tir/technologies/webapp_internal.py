@@ -7829,7 +7829,11 @@ class WebappInternal(Base):
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
+            logger().debug(f"SAVE_FILE VALOR DO HAS_CSV_CONDITION {self.log.has_csv_condition()}")
+            logger().debug(f"SAVE_FILE VALOR DO PROCEED_ACTION {proceed_action()}")
             self.log.save_file()
+        else:
+            logger().debug(f"NÃO PASSOU NO SAVE_FILE DO LOG_ERROR")
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -8422,7 +8426,10 @@ class WebappInternal(Base):
             self.log.new_line(False, self.message)
 
         if self.log.has_csv_condition():
+            logger().debug(f"SAVE_FILE VALOR DO HAS_CSV_CONDITION {self.log.has_csv_condition()}")
             self.log.save_file()
+        else:  
+            logger().debug(f"NÃO PASSOU NO ASSERT_RESULT()")
 
         self.errors = []
 
@@ -9229,7 +9236,11 @@ class WebappInternal(Base):
                 self.WaitProcessing(string, timeout)
 
         if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
+            logger().debug(f"SAVE_FILE VALOR DO LOG.TABLE_ROWS {len(self.log.table_rows[1:])}")
+            logger().debug(f"SAVE_FILE VALOR DO HAS_CSV_CONDITION {self.log.has_csv_condition()}")
             self.log.save_file()
+        else:
+            logger().debug(f"NÃO PASSOU NO TEARDOWN()")
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
