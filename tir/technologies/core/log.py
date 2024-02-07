@@ -227,13 +227,17 @@ class Log:
                 self.table_rows[row][3] = 'NO PROGRAM'
 
             if self.table_rows[row][10] == '':
-                self.table_rows[row][10] = '12.1.27'
+                self.table_rows[row][10] = '12.1.2310'
 
             if self.table_rows[row][15] == '':
                 self.table_rows[row][15] = 'BRA'
 
-            if self.table_rows[row][11] == '':
-                self.table_rows[row][11] = 'TIMEOUT'
+            if self.table_rows[row][7] == 1:
+                if self.table_rows[row][11] == '':
+                    self.table_rows[row][11] = 'NO DATA'
+
+            if self.table_rows[row][12] == '':
+                self.table_rows[row][12] = 'MSSQL'
 
             if len(self.table_rows) > 1:
                 for x in [ 3, 10, 15 ]:
