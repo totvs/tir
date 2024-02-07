@@ -3543,6 +3543,7 @@ class WebappInternal(Base):
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
+        elements = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3585,7 +3586,9 @@ class WebappInternal(Base):
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
-                            return [element]
+                            elements.append(element)
+            return elements
+
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
