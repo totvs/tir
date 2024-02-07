@@ -3587,7 +3587,8 @@ class WebappInternal(Base):
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
                             elements.append(element)
-            return elements
+            if elements:
+                return elements
 
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
