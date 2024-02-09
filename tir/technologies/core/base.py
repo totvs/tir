@@ -1400,12 +1400,15 @@ class Base(unittest.TestCase):
     def return_active_element(self, elements, reverse):
 
         if isinstance(elements, list):
-            filtered_element = list(
-                filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, elements))
+            filtered_element = list(filter(
+                lambda x: self.return_wa_tab_page(x) or self.return_file_picker(x) if x else None,
+                elements))
 
             if filtered_element:
                 non_blocked_element = self.return_non_blocked_elements(filtered_element, reverse)
-                active_element = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, non_blocked_element))
+                active_element = list(filter(
+                    lambda x: self.return_wa_tab_page(x) and 'active' in x.find_parent(
+                        'wa-tab-page').attrs or self.return_file_picker(x), non_blocked_element))
                 if active_element:
                     return active_element
                 else:
@@ -1414,6 +1417,16 @@ class Base(unittest.TestCase):
                 return self.return_non_blocked_elements(elements, reverse)
         else:
             return elements
+
+    def return_wa_tab_page(self, element):
+
+        if hasattr(element.find_parent('wa-tab-page'), 'attrs'):
+            return element
+
+    def return_file_picker(self, element):
+
+        if element.find('wa-file-picker'):
+            return element
 
     def return_non_blocked_elements(self, elements, reverse):
 
