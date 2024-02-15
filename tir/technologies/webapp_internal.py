@@ -9586,8 +9586,20 @@ class WebappInternal(Base):
                     container_text += container_filtered[x].text + ' '
 
             try:
-                text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-                text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+                if self.language.checkproblem in container_text:
+                    text_help_extracted = container_text[
+                                          container_text.index(self.language.checkhelp):container_text.index(
+                                              self.language.checkproblem)]
+                else:
+                    text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
+
+                if self.language.checksolution in container_text:
+                    text_problem_extracted = container_text[
+                                             container_text.index(self.language.checkproblem):container_text.index(
+                                                 self.language.checksolution)]
+                else:
+                    text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
+
                 text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
             except:
                 pass
