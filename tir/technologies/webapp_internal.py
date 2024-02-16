@@ -4817,8 +4817,8 @@ class WebappInternal(Base):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: Comma divided string with values that must be checked, combine with content_list.
-        :type field: str
+        :param fields: Comma divided string with values that must be checked, combine with content_list.
+        :type fields: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
         :param select_all: Boolean if all options should be selected. - **Default:** False
