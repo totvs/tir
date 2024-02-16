@@ -1439,3 +1439,12 @@ class Base(unittest.TestCase):
             return non_blocked_elements
         else:
             return non_blocked_elements
+
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
