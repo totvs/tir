@@ -1293,6 +1293,7 @@ class Base(unittest.TestCase):
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
                     if current_ver:
+                        logger().debug(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
                         return self.webapp_version
@@ -1439,3 +1440,12 @@ class Base(unittest.TestCase):
             return non_blocked_elements
         else:
             return non_blocked_elements
+
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
