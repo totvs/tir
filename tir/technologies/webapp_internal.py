@@ -4012,7 +4012,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+                        if not self.webapp_shadowroot():  
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4022,7 +4022,6 @@ class WebappInternal(Base):
                 count += 1
 
             used_ids = []
-            # TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
                 if not re.search("\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
@@ -4168,6 +4167,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03")
         """
+        logger().info(f"Clicking on {button}")
 
         initial_program = ['sigaadv', 'sigamdi']
 
@@ -4181,8 +4181,6 @@ class WebappInternal(Base):
 
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
-
-        logger().info(f"Clicking on {button}")
 
         try:
             restore_zoom = False
@@ -4203,7 +4201,7 @@ class WebappInternal(Base):
             starttime = time.time()
 
             if self.config.smart_test:
-                logger().debug(f"***System Info*** Before Clicking on button:")
+                logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
             regex = r"(<[^>]*>)?"
@@ -4819,8 +4817,8 @@ class WebappInternal(Base):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: Comma divided string with values that must be checked, combine with content_list.
-        :type field: str
+        :param fields: Comma divided string with values that must be checked, combine with content_list.
+        :type fields: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
         :param select_all: Boolean if all options should be selected. - **Default:** False
@@ -5024,6 +5022,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
+                    logger().debug(f'{last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -10045,7 +10044,6 @@ class WebappInternal(Base):
         click_type = 1 if not main_click_type else click_type
 
         endtime = time.time() + self.config.time_out
-        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
