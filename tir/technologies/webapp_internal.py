@@ -5022,7 +5022,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
-                    logger().debug(f'{last_box_state}')
+                    logger().debug(f'Before: {last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -5060,7 +5060,7 @@ class WebappInternal(Base):
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
-                        logger().debug(f'{new_box_state}')
+                        logger().debug(f'After: {new_box_state}')
                         success = last_box_state != new_box_state
                         click_type += 1
                         if click_type > 4:
