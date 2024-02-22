@@ -2552,7 +2552,7 @@ class PouiInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split(self.replace_slash("\\")), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
             get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
@@ -2745,7 +2745,7 @@ class PouiInternal(Base):
         has_header = 'infer' if header else None
         
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -2874,10 +2874,10 @@ class PouiInternal(Base):
         else:
             auto_file = self.create_auto_file(current_file)
             logger().warning(
-                f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.')
+                self.replace_slash(f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.'f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.'))
             self.check_file(base_file, current_file)
 
-            with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
+            with open(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')) as base_file:
                 with open(auto_file) as auto_file:
                     for line_base_file, line_auto_file in zip(base_file, auto_file):
                         if line_base_file != line_auto_file:
@@ -2895,9 +2895,9 @@ class PouiInternal(Base):
 
         file_extension = file[-4:].lower()
 
-        full_path = f'{self.config.baseline_spool}\\{file}'
+        full_path = self.replace_slash(f'{self.config.baseline_spool}\\{file}')
 
-        auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+        auto_file_path = self.replace_slash(f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}')
 
         if pathlib.Path(f'{auto_file_path}').exists():
             pathlib.Path(f'{auto_file_path}').unlink()
@@ -2909,7 +2909,7 @@ class PouiInternal(Base):
                 content = self.sub_string(line, file_extension)
 
                 with open(
-                            rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}',
+                            self.replace_slash(rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'),
                             "a") as write_file:
                         write_file.write(content)
 
@@ -2985,10 +2985,10 @@ class PouiInternal(Base):
         if not base_file:
             base_file = None
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')).exists():
             self.log_error("Base file doesn't exist! Please confirm the file name and path. Now you can use auto file to rename to base.")
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{current_file}')).exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
 
     def set_multilanguage(self):

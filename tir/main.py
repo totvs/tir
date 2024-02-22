@@ -1,3 +1,5 @@
+import os
+
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
@@ -1468,6 +1470,23 @@ class Webapp():
         """
         return self.__webapp.SetCalendar(day, month, year)
 
+    def ReplaceSlash(self, path):
+        """
+
+        :param path: Path that will be normalized depending on operating system(Windows, Linux).
+        :type path: str
+        :return: Returns the path with the correct slash according to the OS
+        """
+        return self.__webapp.replace_slash(path)
+
+    def CurrentWorkDirectory(self):
+
+        """
+
+        :return: Returns the current working directory
+        """
+
+        return os.chmod()
 
 class Apw():
 

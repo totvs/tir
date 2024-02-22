@@ -107,6 +107,7 @@ class WebappInternal(Base):
         self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
+        self.restart_tss = False
 
         if not Base.driver:
             Base.driver = self.driver
@@ -144,6 +145,8 @@ class WebappInternal(Base):
         """
 
         self.config.poui_login = False
+
+        self.restart_tss = True
 
         try:
 
@@ -3182,6 +3185,11 @@ class WebappInternal(Base):
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 self.config.poui_login = True
 
+            if self.restart_tss:
+                self.user_screen_tss()
+                self.restart_tss = False
+                return
+
             self.user_screen()
             self.environment_screen()
 
@@ -3205,7 +3213,7 @@ class WebappInternal(Base):
 
     def wait_user_screen(self):
 
-        term = "[name=cGetUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input"
+        term = "[name=cGetUser], [name=cUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input, [name=cUser]"
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
@@ -3535,6 +3543,7 @@ class WebappInternal(Base):
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
+        elements = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3577,7 +3586,10 @@ class WebappInternal(Base):
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
-                            return [element]
+                            elements.append(element)
+            if elements:
+                return elements
+
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
@@ -4000,7 +4012,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+                        if not self.webapp_shadowroot():  
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4010,7 +4022,6 @@ class WebappInternal(Base):
                 count += 1
 
             used_ids = []
-            # TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
                 if not re.search("\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
@@ -4156,6 +4167,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03")
         """
+        logger().info(f"Clicking on {button}")
 
         initial_program = ['sigaadv', 'sigamdi']
 
@@ -4169,8 +4181,6 @@ class WebappInternal(Base):
 
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
-
-        logger().info(f"Clicking on {button}")
 
         try:
             restore_zoom = False
@@ -4191,7 +4201,7 @@ class WebappInternal(Base):
             starttime = time.time()
 
             if self.config.smart_test:
-                logger().debug(f"***System Info*** Before Clicking on button:")
+                logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
             regex = r"(<[^>]*>)?"
@@ -4807,8 +4817,8 @@ class WebappInternal(Base):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: Comma divided string with values that must be checked, combine with content_list.
-        :type field: str
+        :param fields: Comma divided string with values that must be checked, combine with content_list.
+        :type fields: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
         :param select_all: Boolean if all options should be selected. - **Default:** False
@@ -5012,6 +5022,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
+                    logger().debug(f'{last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -7075,7 +7086,7 @@ class WebappInternal(Base):
         regex = self.generate_regex_by_prefixes(prefixes)
 
         #caminho do arquivo csv(SX3)
-        path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
+        path = os.path.join(os.path.dirname(__file__), self.replace_slash(r'core\\data\\sx3.csv'))
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
@@ -7511,15 +7522,6 @@ class WebappInternal(Base):
                     break
 
                 self.log_error(f"Button: {button} not found")
-
-    def replace_slash(self, path):
-
-        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
-
-        pattern = re.compile(r'[\/\\]')
-
-        if pattern.findall(path):
-            return pattern.sub(slash, path)
 
     def MessageBoxClick(self, button_text):
         """
@@ -9332,7 +9334,7 @@ class WebappInternal(Base):
             element_selenium = element
 
         if isinstance(element, list):
-            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))
+            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
             for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
@@ -9378,7 +9380,7 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split(self.replace_slash("\\")), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
             get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
@@ -9574,8 +9576,20 @@ class WebappInternal(Base):
                     container_text += container_filtered[x].text + ' '
 
             try:
-                text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-                text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+                if self.language.checkproblem in container_text:
+                    text_help_extracted = container_text[
+                                          container_text.index(self.language.checkhelp):container_text.index(
+                                              self.language.checkproblem)]
+                else:
+                    text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
+
+                if self.language.checksolution in container_text:
+                    text_problem_extracted = container_text[
+                                             container_text.index(self.language.checkproblem):container_text.index(
+                                                 self.language.checksolution)]
+                else:
+                    text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
+
                 text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
             except:
                 pass
@@ -9911,7 +9925,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -10021,7 +10035,6 @@ class WebappInternal(Base):
         click_type = 1 if not main_click_type else click_type
 
         endtime = time.time() + self.config.time_out
-        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
@@ -10177,10 +10190,10 @@ class WebappInternal(Base):
         else:
             auto_file = self.create_auto_file(current_file)
             logger().warning(
-                f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.')
+                self.replace_slash(f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.'))
             self.check_file(base_file, current_file)
 
-            with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
+            with open(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')) as base_file:
                 with open(auto_file) as auto_file:
                     for line_base_file, line_auto_file in zip(base_file, auto_file):
                         if line_base_file != line_auto_file:
@@ -10200,9 +10213,9 @@ class WebappInternal(Base):
 
         file_extension = file[-4:].lower()
 
-        full_path = f'{self.config.baseline_spool}\\{file}'
+        full_path = self.replace_slash(f'{self.config.baseline_spool}\\{file}')
 
-        auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+        auto_file_path = self.replace_slash(f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}')
 
         if pathlib.Path(f'{auto_file_path}').exists():
             return auto_file_path
@@ -10214,7 +10227,7 @@ class WebappInternal(Base):
                 content = self.sub_string(line, file_extension)
 
                 with open(
-                            rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}',
+                            self.replace_slash(rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'),
                             "a") as write_file:
                         write_file.write(content)
 
@@ -10282,10 +10295,10 @@ class WebappInternal(Base):
         if not base_file:
             base_file = None
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')).exists():
             self.log_error("Base file doesn't exist! Please confirm the file name and path. Now you can use auto file to rename to base.")
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{current_file}')).exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
 
     def set_multilanguage(self):
