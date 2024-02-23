@@ -4846,8 +4846,8 @@ class WebappInternal(Base):
         >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
 
-        self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
+        self.wait_blocker()
         grid_number -= 1
         if not select_all:
             fields = list(map(lambda x: x.strip(), fields.split(',')))
@@ -4929,7 +4929,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                     element(), Keys.ENTER).perform()
             elif click_type == 4:
-                self.send_action(action=self.double_click, element=element)
+                self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
 
@@ -5022,7 +5022,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
-                    logger().debug(f'{last_box_state}')
+                    logger().debug(f'Before: {last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -5060,6 +5060,7 @@ class WebappInternal(Base):
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
+                        logger().debug(f'After: {new_box_state}')
                         success = last_box_state != new_box_state
                         click_type += 1
                         if click_type > 4:
