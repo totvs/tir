@@ -7963,7 +7963,7 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -7978,8 +7978,8 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8045,6 +8045,7 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -8055,8 +8056,8 @@ class WebappInternal(Base):
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
-            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
+            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
             logger().info("Start while timeout: parameter_url")
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,

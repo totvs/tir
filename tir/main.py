@@ -1872,3 +1872,21 @@ class Poui():
         >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
         """
         self.__poui.click_icon(label, class_name, position)
+
+    def ClickAvatar(self, position=1):
+        """
+
+        Click on the POUI Profile Avatar icon.
+        https://po-ui.io/guides/Avatar
+
+        :param position: - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickAvatar(position=1)
+        >>> oHelper.ClickAvatar()
+        """
+        self.__poui.click_avatar(position)
+
