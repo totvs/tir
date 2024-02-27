@@ -3689,3 +3689,42 @@ class PouiInternal(Base):
         return next(iter(list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
                                      elements))))
+
+    def click_avatar(self, position):
+        """
+        Click on the POUI Profile Avatar icon.
+        https://po-ui.io/guides/Avatar
+
+        :param position: - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickAvatar(position=1)
+        >>> oHelper.ClickAvatar()
+        """
+
+        logger().info("Clicking on Avatar profile")
+        position = position-1 if position > 0 else 0
+        element = None
+        term = 'po-avatar'
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+            po_avatar = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                     main_container='body')
+
+            if po_avatar:
+                po_avatar_filtered = list(filter(lambda x: self.element_is_displayed(x), po_avatar))
+
+                if po_avatar_filtered:
+                    if len(po_avatar_filtered) > position:
+                        element = po_avatar_filtered[position]
+
+                        self.poui_click(element)
+
+        if not element:
+            self.log_error(f"Element '{element}' doesn't found!")
