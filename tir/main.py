@@ -1877,7 +1877,7 @@ class Poui():
         """
 
         Click on the POUI Profile Avatar icon.
-        https://po-ui.io/guides/Avatar
+        https://po-ui.io/documentation/po-avatar
 
         :param position: - **Default:** 1
         :type position: int
@@ -1889,4 +1889,19 @@ class Poui():
         >>> oHelper.ClickAvatar()
         """
         self.__poui.click_avatar(position)
+
+    def ClickPopup(self, label):
+        """Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-popup
+
+        :param label:
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickPopup(label="Popup Item")
+        >>> oHelper.ClickPopup()
+        """
+        self.__poui.click_popup(label)
 
