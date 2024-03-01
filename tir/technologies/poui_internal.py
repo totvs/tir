@@ -3728,3 +3728,34 @@ class PouiInternal(Base):
 
         if not element:
             self.log_error(f"Element '{element}' doesn't found!")
+
+    def click_popup(self, label):
+        """Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-popup
+
+        :param label:
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickPopup(label="Popup Item")
+        >>> oHelper.ClickPopup()
+        """
+        logger().info(f"Clicking on Popup: {label}")
+
+        element = None
+        term = 'po-item-list'
+        label = label.lower().strip()
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+            po_list_item = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            if po_list_item:
+                po_item = list(filter(lambda x: x.text.lower().strip() == label, po_list_item))
+                element = next(iter(po_item), None)
+
+                if element:
+                    self.poui_click(element)
