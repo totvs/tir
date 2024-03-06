@@ -4284,7 +4284,13 @@ class WebappInternal(Base):
                 if self.webapp_shadowroot():
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
+                    if button == 'Confirmar' and 'JURA100' in self.log.get_testcase_stack():
+                        self.log.take_screenshot_log(driver=self.driver, description='before send_action',
+                                                     stack_item=self.log.get_testcase_stack()) #TODO linha inserida para analise Jura100
                     self.send_action(action=self.click, element=lambda: soup_element)
+                    if button == 'Confirmar' and 'JURA100' in self.log.get_testcase_stack():
+                        self.log.take_screenshot_log(driver=self.driver, description='after send_action',
+                                                     stack_item=self.log.get_testcase_stack()) #TODO linha inserida para analise Jura100
                     if button.lower() == self.language.other_actions.lower():
                         popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                         while time.time() < endtime and not popup_item():
