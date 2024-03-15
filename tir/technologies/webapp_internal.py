@@ -4284,13 +4284,7 @@ class WebappInternal(Base):
                 if self.webapp_shadowroot():
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
-                    if button == 'Confirmar' and 'JURA100' in self.log.get_testcase_stack():
-                        self.log.take_screenshot_log(driver=self.driver, description='before send_action',
-                                                     stack_item=self.log.get_testcase_stack()) #TODO linha inserida para analise Jura100
                     self.send_action(action=self.click, element=lambda: soup_element)
-                    if button == 'Confirmar' and 'JURA100' in self.log.get_testcase_stack():
-                        self.log.take_screenshot_log(driver=self.driver, description='after send_action',
-                                                     stack_item=self.log.get_testcase_stack()) #TODO linha inserida para analise Jura100
                     if button.lower() == self.language.other_actions.lower():
                         popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
                         while time.time() < endtime and not popup_item():
@@ -5515,7 +5509,20 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
+                        grids = self.get_grid(grid_list=True)
+                        if grids and key == "DELETE":
+                            rows = list(map(lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(x)), grids))
+                            rows = self.flatten_list(rows)
+                            rows_before = list(map(lambda x: x.get_attribute('style'), rows))
                         success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
+                        if key == "DELETE" and grids and rows_before:
+                            rows_after = list(map(lambda x: x.get_attribute('style'), rows))
+                            if rows_after == rows_before:
+                                self.send_action(
+                                    action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform,
+                                    wait_change=False)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5542,6 +5549,15 @@ class WebappInternal(Base):
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             logger().exception(str(error))
+
+    def flatten_list(self, matrix):
+        flattened_list = []
+        for element in matrix:
+            if isinstance(element, list):
+                flattened_list.extend(self.flatten_list(element))
+            else:
+                flattened_list.append(element)
+        return flattened_list
 
     def supported_keys(self, key = ""):
         """
