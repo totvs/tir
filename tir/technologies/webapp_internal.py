@@ -284,7 +284,6 @@ class WebappInternal(Base):
                 self.wait_element_timeout(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out, main_container="body", step=1)
 
                 if time.time() > endtime:
-                    self.log.take_screenshot_log(self.driver, description='no_load_screen', stack_item=self.log.get_testcase_stack())
                     self.restart_counter + 1
                     self.log_error(f"'Unable to load screen '{cget_term}' content.")
 
@@ -438,8 +437,7 @@ class WebappInternal(Base):
 
             if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
-                message = "Cant_fill_program"
-                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+                message = "Couldn't fill Program input element."
                 self.log_error(message)
                 raise ValueError(message)
 
@@ -478,8 +476,7 @@ class WebappInternal(Base):
 
             if (env_value().strip() != self.config.environment.strip()):
                 self.restart_counter += 1
-                message = "Cant_fill_environment"
-                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+                message = "Couldn't fill Environment input element."
                 self.log_error(message)
                 raise ValueError(message)
 
@@ -593,8 +590,7 @@ class WebappInternal(Base):
 
         if (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
-            message = "Cant_fill_user_name"
-            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+            message = "Couldn't fill User input element."
             self.log_error(message)
             raise ValueError(message)
 
@@ -650,8 +646,7 @@ class WebappInternal(Base):
 
         if not password_value.strip() and self.config.password != '':
             self.restart_counter += 1
-            message = "Cant_fill_user_password"
-            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
+            message = "Couldn't fill User input element."
             self.log_error(message)
             raise ValueError(message)
 
@@ -874,12 +869,6 @@ class WebappInternal(Base):
                     if click_type > 3:
                         click_type = 1
 
-        if base_date_value.strip() != self.config.date.strip():
-                message = "Cant_fill_date"
-                self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
-                self.log_error(message)
-                raise ValueError(message)
-
     def filling_group(self, shadow_root=None, container=None):
         """
         [Internal]
@@ -937,12 +926,6 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
-        if group_value.strip() != self.config.group.strip():
-            message = "Cant_fill_group"
-            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
-            self.log_error(message)
-            raise ValueError(message)
-
     def filling_branch(self, shadow_root=None, container=None):
         """
         [Internal]
@@ -999,12 +982,6 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
-
-        if branch_value.strip() != self.config.branch.strip():
-            message = "Cant_fill_branch"
-            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
-            self.log_error(message)
-            raise ValueError(message)
 
     def filling_environment(self, shadow_root=None, container=None):
         """
@@ -1073,12 +1050,6 @@ class WebappInternal(Base):
                     click_type += 1
                     if click_type > 3:
                         click_type = 1
-
-        if env_value.strip() != self.config.module.strip() and enable:
-            message = "Cant_fill_program"
-            self.log.take_screenshot_log(self.driver, description=message, stack_item=self.log.get_testcase_stack())
-            self.log_error(message)
-            raise ValueError(message)
 
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
