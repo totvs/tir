@@ -6882,7 +6882,8 @@ class WebappInternal(Base):
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
-                                if column_number == 0 and click_attempts > 3:
+                                if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
+                                        "class") and click_attempts > 3:
                                     break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
