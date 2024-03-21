@@ -6180,8 +6180,12 @@ class WebappInternal(Base):
                                 time.sleep(1)
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
-                            while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                grid_class= grids[field[2]].attrs['class']
+                            while (time.time() < endtime_open_cell and not self.wait_element_timeout(term='wa-dialog',
+                                                                                                     scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                                                     position=tmodal_layer + 1,
+                                                                                                     timeout=10,
+                                                                                                     main_container='body')):
+                                grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
@@ -6882,7 +6886,8 @@ class WebappInternal(Base):
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
-                                if column_number == 0 and click_attempts > 3:
+                                if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
+                                        "class") and click_attempts > 3:
                                     break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
