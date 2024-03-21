@@ -6180,8 +6180,12 @@ class WebappInternal(Base):
                                 time.sleep(1)
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
-                            while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                grid_class= grids[field[2]].attrs['class']
+                            while (time.time() < endtime_open_cell and not self.wait_element_timeout(term='wa-dialog',
+                                                                                                     scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                                                     position=tmodal_layer + 1,
+                                                                                                     timeout=10,
+                                                                                                     main_container='body')):
+                                grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
