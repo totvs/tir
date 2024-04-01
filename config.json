@@ -7,5 +7,6 @@
     "Password": "PASSWORD",
     "DebugLog": false,
     "TimeOut": 90,
-    "Headless": false
+    "Headless": false,
+    "POUILogin": false
 }

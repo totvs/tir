@@ -1,4 +1,5 @@
 import logging
+import time
 from logging.config import dictConfig
 from tir.technologies.core.config import ConfigLoader
 from datetime import datetime
@@ -12,6 +13,7 @@ config = ConfigLoader()
 
 filename = None
 folder = None
+file_path = None
 
 def logger(logger='root'):
     """
@@ -20,15 +22,23 @@ def logger(logger='root'):
 
     global filename
     global folder
-
-    today = datetime.today()
-
-    if not filename:
-        filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
-
-        folder = create_folder()
+    global file_path
 
     if config.smart_test or config.debug_log:
+
+        logger = 'console'  # TODO configuração temporaria para o server.
+
+        today = datetime.today()
+
+        file_handler = True if logger == 'root' else False
+
+        if not file_path and file_handler:
+            filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
+
+            folder = create_folder()
+
+            file_path = create_file(folder, filename)
+
         logging_config = {
             'version': 1,
             'loggers': {
@@ -36,6 +46,10 @@ def logger(logger='root'):
                     'level': 'DEBUG',
                     'handlers': ['debug_console_handler', 'debug_file_handler']
                 },
+                'console': {  # console logger
+                    'level': 'DEBUG',
+                    'handlers': ['debug_console_handler']
+                }
             },
             'handlers': {
                 'debug_console_handler': {
@@ -47,7 +61,7 @@ def logger(logger='root'):
                 'debug_file_handler': {
                     'level': 'DEBUG',
                     'formatter': 'info',
-                    'filename': Path(folder, filename),
+                    'filename': Path(folder, filename) if file_handler else 'none.log',
                     'class': 'logging.FileHandler',
                     'mode': 'a'
                 },
@@ -85,6 +99,7 @@ def logger(logger='root'):
         }
 
     dictConfig(logging_config)
+    logging.getLogger(logger).propagate = False
     return logging.getLogger(logger)
 
 def get_file_name(file_name):
@@ -125,3 +140,23 @@ def create_folder():
         pass
 
     return path
+
+def create_file(folder, filename):
+    """
+    Creates an empty file before logger
+    [Internal]
+
+    """
+
+    success = False
+
+    endtime = time.time() + config.time_out
+
+    while (time.time() < endtime and not success):
+        try:
+            with open(Path(folder, filename), "w", ):
+                return True
+        except Exception as error:
+            time.sleep(30)
+            logger().debug(str(error))
+

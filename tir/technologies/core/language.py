@@ -70,8 +70,26 @@ class LanguagePack:
         self.open = languagepack["Open"]
         self.warning = languagepack["Warning"]
         self.news = languagepack["News"]
-
+        self.continue_string = languagepack["Continue"]
+        self.shortconfirm = languagepack["Short Confirm"]
+        self.confirm_in_environment_screen = languagepack["Enter in environment screen"]
+        self.codecoverage = languagepack["Code Coverage"] #"Aguarde... Coletando informacoes de cobertura de codigo."
+        self.release = languagepack["Release"]
+        self.topdatabase = languagepack["Top DataBase"]
+        self.libversion = languagepack["Lib Version"]
+        self.build = languagepack["Build"]
+        self.issued = languagepack["Issued"]
+        self.ref_dt = languagepack["Ref.Dt"]
+        self.time = languagepack["Time"]
+        self.end_time = languagepack["End Time"]
+        self.procedure_menu = languagepack["Procedure Menu"]
+        self.code = languagepack["Code"]
+        self.success = languagepack["Success"]
+        self.procedure_install = languagepack["Procedure Install"]
+        self.procedure_uninstall = languagepack["Procedure Uninstall"]
+        
         self.messages = Messages(languagepack)
+
     def get_language_pack(self, language):
 
         english = {
@@ -145,9 +163,27 @@ class LanguagePack:
             "Yes": "Sim",
             "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "File Name": "File Name",
-			"Open": "Open",
+            "Open": "Open",
             "Warning": "Warning",
-            "News": "News" 
+            "News": "News",
+            "Continue": "Continue",
+            "Short Confirm": "Confirm",
+            "Enter in environment screen": "Enter",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Lib Version",
+            "Build": "Build",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time",
+            "Procedure Menu": "Database > Dictionary > Stored Procedure",
+            "Code": "Code",
+            "Success": "Success",
+            "Procedure Install": "Install selected processes",
+            "Procedure Uninstall": "Remove selected processes"
+            
         }
 
         brazilian_portuguese = {
@@ -220,10 +256,27 @@ class LanguagePack:
             "ConfirmNewPassword": "Confirmar nova senha",
             "Yes": "Sim",
             "AssertFalseMessage": "Método AssertFalse utilizado sem um ponto de verificação, verifique o script.",
-            "File Name": "Nome do Arquivo:",
+            "File Name": "Nome do Arquivo",
 			"Open": "Abrir",
             "Warning": "Atenção",
-            "News": "Novidades do programa"
+            "News": "Novidades do",
+            "Continue": "Continuar",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Entrar",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Versão da lib",
+            "Build": "Build",
+            "Issued": "Emissão",
+            "Ref.Dt": "DT.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término",
+            "Procedure Menu": "Base de Dados > Dicionário > Stored Procedure",
+            "Code": "Código",
+            "Success": "Sucessos",
+            "Procedure Install": "Instalar processos selecionados",
+            "Procedure Uninstall": "Remover processos selecionados"
         }
         spanish = {
             "User": "Usuário",
@@ -295,19 +348,36 @@ class LanguagePack:
             "ConfirmNewPassword": "Confirmar nueva contrasena*",
             "Yes":"Reserved",
             "AssertFalseMessage": "Método AssertFalse utilizado sin un punto de control, verifique el script.",
-            "File Name": "Nombre del archivo:",
+            "File Name": "Nome do Arquivo",
 			"Open": "Abierto",
             "Warning": "Atención",
-            "News": "Noticias"
+            "News": "Noticias",
+            "Continue": "Continuar",
+            "Short Confirm": "Confirmar",
+            "Enter in environment screen": "Entrar",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Release",
+            "Top DataBase": "Top DataBase",
+            "Lib Version": "Versão da lib",
+            "Build": "Build",
+            "Issued": "Emision",
+            "Ref.Dt": "Fc.Ref.",
+            "Time": "Hora",
+            "End Time": "Hora Término",
+            "Procedure Menu": "Base de Dados > Dicionário > Stored Procedure",
+            "Code": "Código",
+            "Success": "Sucessos",
+            "Procedure Install": "Instalar processos selecionados",
+            "Procedure Uninstall": "Remover processos selecionados"
         }
         russian = {
             "User": "Пользователь",
             "Password": "Пароль",
-            "Database": "Дата",
+            "Database": "Базовая дата",
             "Group": "Группа",
             "Branch": "Филиал",
             "Environment": "Среда",
-            "Add": "Добавлять",
+            "Add": "Добавить",
             "Delete": "Удалить",
             "Edit": "редактировать",
             "Editar": "Изменить", #usado num elemento especifico por conta do ambiente russo
@@ -321,13 +391,10 @@ class LanguagePack:
             "Close": "Закрыть",
             "Exit": "Выход",
             "Leave Page": "Выйти без сохранения",
-            "Enter": "Ввод",
+            "Enter": "Войти",
             "Finish": "Завершить",
-            #"Finish": "3акрыть",
-            #"Details": "ДЕТАЛИ",
             "Details": "Подробнее",
-            #"Search": "Поиск",
-            "Search": "Search",
+            "Search": "Поиск",
             "Ok": "Да",
             "Copy": "Copy",
             "Cut": "Cut",
@@ -335,6 +402,7 @@ class LanguagePack:
             "Calculator": "Calculator",
             "Spool": "Spool",
             "Help": "Help",
+            #"Help": "Помощь:",
             "Folders": "Folders",
             "Generate Differential File": "Создать файл изменений",
             "Include": "Bставить",
@@ -343,7 +411,6 @@ class LanguagePack:
             "Error Log": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта. Д/др. инфор-и нажать «Подробности»",
             "Error Log Print": "SMARTCLIENT проблема обнаружена при работе системы, и она будет закрыта.Для получения дополнительной информации проверьте распечатку экрана",
             "Error Msg Required": "Не удалось завершить это действие. Не заполнены обязательные поля.",
-            #"Help": "Помощь:",
             "Problem": "Проблема:",
             "Solution": "Решение:",
             "Branches": "",
@@ -357,9 +424,9 @@ class LanguagePack:
             "User Not Authenticated": "User Not Authenticated",
             "Change Environment": "Change environment",
             "Invert Selection": "Invert Selection",
-            "Parameter Menu": "Environment > Registers > Parameters",
-            "Search 2": "Search",
-            "Search By": "Search by:",
+            "Parameter Menu": "Среда > НСИ > Параметры",
+            "Search 2": "оиск",
+            "Search By": "Поиск по:",
             "From": "De",
             "To": "Ate",
             "Coins": "Валюта",
@@ -375,8 +442,27 @@ class LanguagePack:
             "ConfirmNewPassword": "Подтв. новый пароль*",
             "File Name": "имя файла",
 			"Open": "открыто",
+            "Yes": "Да",
+            "AssertFalseMessage": "AssertFalse method used without a checkpoint, check the script.",
             "Warning": "Берегись",
-            "News": "Новости"
+            "News": "Новости",
+            "Continue": "Продолжить",
+            "Short Confirm": "Подтв.",
+            "Enter in environment screen": "Ввод",
+            "Code Coverage": "Aguarde... Coletando informacoes de cobertura de codigo.",
+            "Release": "Сброс RPO",
+            "Top DataBase": "БД",
+            "Lib Version": "Версия библиотеки",
+            "Build": "Верс.",
+            "Issued": "Issued",
+            "Ref.Dt": "Ref.Dt",
+            "Time": "Time",
+            "End Time": "End Time",
+            "Procedure Menu": "Database > Dictionary > Stored Procedure",
+            "Code": "Код",
+            "Success": "успех",
+            "Procedure Install": "Установить выбранные процессы",
+            "Procedure Uninstall": "Удалить выбранные процессы"
         }
 
         if language.lower() == "en-us":
@@ -389,6 +475,7 @@ class LanguagePack:
             return spanish
         else:
             return brazilian_portuguese
+
 class Messages():
 
     def __init__(self, languagepack):

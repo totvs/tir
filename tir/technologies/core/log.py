@@ -130,21 +130,50 @@ class Log:
             except OSError:
                 pass
 
-            if self.config.smart_test:
-                open("log_exec_file.txt", "w")
+            with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
+                csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
+                csv_writer_header.writerow(self.table_rows[0])
+                csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+                for line in self.table_rows[1:]:
+                    csv_writer.writerow(line)
 
-            if ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()) :
-                with open( Path(path, log_file), mode="w", newline="", encoding="windows-1252") as csv_file:
-                    csv_writer_header = csv.writer(csv_file, delimiter=';', quoting=csv.QUOTE_NONE)
-                    csv_writer_header.writerow(self.table_rows[0])
-                    csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-                    for line in self.table_rows[1:]:
-                        csv_writer.writerow(line)
-
-                logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
+            logger().debug(f"Log file created successfully: {os.path.join(path, log_file)}")
 
                             
-                self.csv_log.append(self.get_testcase_stack())
+            self.csv_log.append(self.get_testcase_stack())
+
+    def log_exec_file(self):
+        """
+        [Internal]
+        """
+
+        before_modification = None
+
+        log_exec_file = "log_exec_file.txt"
+
+        logger().debug(f"Writing {log_exec_file}")
+
+        logger().debug(f"Script folder source: {os.getcwd()}")
+
+        if os.path.exists(log_exec_file):
+            before_modification = os.path.getmtime(log_exec_file)
+            logger().debug(f"Before modification: {datetime.fromtimestamp(os.path.getmtime(log_exec_file)).strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            logger().debug(f"{log_exec_file} file doesn't exist.")
+
+        logger().debug(f"Creating {log_exec_file} file")
+        open("log_exec_file.txt", "w")
+
+        after_modification = os.path.getmtime(log_exec_file)
+        logger().debug(f"After modification: {datetime.fromtimestamp(os.path.getmtime(log_exec_file)).strftime('%Y-%m-%d %H:%M:%S')}")
+
+        if before_modification != after_modification:
+            logger().debug(f"{log_exec_file} file update successfully")
+
+    def has_csv_condition(self):
+
+        return ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (
+                    self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
 
     def set_seconds(self, initial_time):
         """
@@ -177,7 +206,7 @@ class Log:
         Returns a string with the current testcase name
         [Internal]
         """
-        return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass', x.function) or re.search('test_', x.function), inspect.stack())))), None)
+        return next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('setUpClass|test_|tearDownClass', x.function), inspect.stack())))), None)
 
     def checks_empty_line(self):
         """
@@ -308,7 +337,7 @@ class Log:
 
         json_data = json.dumps(data)
 
-        endtime = time.time() + 120
+        endtime = time.time() + 30
 
         while (time.time() < endtime and not success):
 
@@ -381,10 +410,10 @@ class Log:
 
         try:
             if self.folder:
-                path = Path(self.folder, "new_log", self.station)
+                path = Path(self.folder, "new_log")
                 os.makedirs(path)
             else:
-                path = Path("Log", self.station)
+                path = Path("Log")
                 os.makedirs(path)
         except OSError:
             pass
@@ -392,12 +421,15 @@ class Log:
         log_file = f"{self.user}_{uuid.uuid4().hex}.json"
 
         if self.config.smart_test:
-            open("log_exec_file.txt", "w")
+            self.log_exec_file()
 
-        with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
-            json_file.write(json_data)
-
-        logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        try:
+            with open( Path(path, log_file), mode="w", encoding="utf-8") as json_file:
+                json_file.write(json_data)
+            logger().debug(f"Log file created successfully: {Path(path, log_file)}")
+        except Exception as error:
+            logger().debug(f"Fail in create json file in: {Path(path, log_file)}: Error: {str(error)}")
+            pass
 
     def ident_test(self):
         """
@@ -409,7 +441,7 @@ class Log:
 
         return (ct_method, ct_number)
 
-    def take_screenshot_log(self, driver, stack_item="", test_number=""):
+    def take_screenshot_log(self, driver, description="", stack_item="", test_number=""):
         """
         [Internal]
 
@@ -432,7 +464,7 @@ class Log:
             stack_item = self.get_testcase_stack()
 
         if stack_item == "setUpClass":
-            stack_item = self.get_file_name("testsuite")
+            stack_item = f'{self.get_testcase_stack()}_{self.get_file_name("testsuite")}'
 
         if not test_number:
             test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
@@ -444,12 +476,12 @@ class Log:
 
         today = datetime.today()
 
-        if self.search_stack("log_error"):
+        if self.search_stack("log_error") and not description:
             screenshot_file = self.screenshot_file_name("error", stack_item)
         elif self.search_stack("CheckResult"):
-            screenshot_file = self.screenshot_file_name("CheckResult_result_divergence", stack_item)
+            screenshot_file = self.screenshot_file_name("CheckResult", stack_item)
         else:
-            screenshot_file = self.screenshot_file_name(stack_item)
+            screenshot_file = self.screenshot_file_name(description=description, stack_item=stack_item)
 
         if self.config.debug_log:
             logger().debug(f"take_screenshot_log in:{datetime.now()}\n")

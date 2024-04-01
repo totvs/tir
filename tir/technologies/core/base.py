@@ -7,6 +7,7 @@ import sys
 import os
 import random
 import string
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -29,6 +30,9 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+from pathlib import Path
+
 
 class Base(unittest.TestCase):
     """
@@ -53,6 +57,11 @@ class Base(unittest.TestCase):
     >>> def WebappInternal(Base):
     >>> def APWInternal(Base):
     """
+
+    driver = None
+    wait = None
+    errors = []
+    
     def __init__(self, config_path="", autostart=True):
         """
         Definition of each global variable:
@@ -88,6 +97,7 @@ class Base(unittest.TestCase):
         self.last_test_case = None
         self.message = ""
         self.expected = True
+        self.webapp_version= ''
 
         try:
             self.log.user = os.getlogin()
@@ -95,8 +105,11 @@ class Base(unittest.TestCase):
             import getpass
             self.log.user = getpass.getuser()
 
+        if self.config.smart_test:
+            if self.log.user == 'root':
+                self.log.user = 'advpr.sp'
+
         self.base_container = "body"
-        self.errors = []
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False
@@ -172,6 +185,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if right_click:
                 ActionChains(self.driver).context_click(element).perform()
@@ -236,6 +252,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.double_click(element())
         """
+
+        logger().debug(f'Click Type: {click_type}')
+
         try:
             if click_type == enum.ClickType.SELENIUM:
                 self.scroll_to_element(element)
@@ -334,7 +353,7 @@ class Base(unittest.TestCase):
         else:
             return len(element_list) >= position
 
-    def filter_displayed_elements(self, elements, reverse=False):
+    def filter_displayed_elements(self, elements, reverse=False, twebview=False):
         """
         [Internal]
 
@@ -356,6 +375,9 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.filter_displayed_elements(elements, True)
         """
+
+        if twebview:
+            self.switch_to_iframe()
         #0 - elements filtered
         elements = list(filter(lambda x: self.soup_to_selenium(x) is not None ,elements ))
         if not elements:
@@ -393,6 +415,29 @@ class Base(unittest.TestCase):
         """
         current = element
         while(hasattr(current, "name") and self.element_name(current) != "div"):
+            current = current.find_parent()
+        return current
+
+    def find_first_wa_panel_parent(self, element):
+        """
+        [Internal]
+
+        Finds first div parent element of another BeautifulSoup element.
+
+        If element is already a div, it will return the element.
+
+        :param element: BeautifulSoup element
+        :type element: BeautifulSoup object
+
+        :return: The first div parent of the element
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> parent_element = self.find_first_div_parent(my_element)
+        """
+        current = element
+        while(hasattr(current, "name") and self.element_name(current) != "wa-panel"):
             current = current.find_parent()
         return current
 
@@ -434,7 +479,7 @@ class Base(unittest.TestCase):
         else:
             return []
 
-    def get_current_DOM(self):
+    def get_current_DOM(self, twebview=False):
         """
         [Internal]
 
@@ -448,18 +493,17 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> soup = self.get_current_DOM()
         """
-
-        if self.config.new_log:
-            self.execution_flow()
-
         try:
 
-            if self.twebview_context:
-                self.wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="COMP3010"]')))
-                self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '//*[@id="COMP3010"]'))
+            self.driver.switch_to.default_content()
+
+            if self.config.new_log:
+                self.execution_flow()
+
+            if twebview:
+                self.switch_to_iframe()
                 self.twebview_context = False
                 return BeautifulSoup(self.driver.page_source, "html.parser")
-
 
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
 
@@ -491,6 +535,27 @@ class Base(unittest.TestCase):
             self.driver.switch_to.default_content()
             soup = BeautifulSoup(self.driver.page_source,"html.parser")
             return soup
+
+    def switch_to_iframe(self):
+        """
+        [Internal]
+        :return:
+        """
+
+        if not self.config.poui:
+            iframes = None
+            iframe_displayed = None
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not iframes:
+                iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
+
+                if iframes:
+                    iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+                else:
+                    self.driver.switch_to.default_content()
+
+                if iframe_displayed:
+                    self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
 
     def get_element_text(self, element):
         """
@@ -664,8 +729,8 @@ class Base(unittest.TestCase):
         """
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
-        except StaleElementReferenceException:
-            logger().exception("********Element Stale scroll_to_element*********")
+        except Exception as e:
+            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
             pass
 
     def search_zindex(self,element):
@@ -696,7 +761,7 @@ class Base(unittest.TestCase):
 
         return zindex
 
-    def select_combo(self, element, option, index=False):
+    def select_combo(self, element, option, index=False, shadow_root=True, locator=False):
         """
         Selects the option on the combobox.
 
@@ -704,25 +769,62 @@ class Base(unittest.TestCase):
         :type element: Beautiful Soup object
         :param option: Option to be selected
         :type option: str
+        :param index: True if option is an integer value
+        :type index: bool
+        :param shadow_root: Internal control for shadow root objects
+        :type shadow_root: bool
+        :param locator: bool value for locator True or False
+        :type locator: bool
 
         Usage:
 
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
-        combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if index:
             index_number = self.return_combo_index(combo, option)
-            time.sleep(1)
-            combo.select_by_index(str(index_number))
+            if index_number:
+                time.sleep(1)
+                combo.select_by_index(str(index_number))
         else:
-            value = next(iter(filter(lambda x: x.text[0:len(option)].lower() == option.lower(), combo.options)), None)
+            value = next(iter(filter(lambda x: x.text.lower().strip() == option.lower().strip() , combo.options)), None)
+            if not value:
+                value = next(iter(filter(lambda x: x.text[0:len(option)].lower().strip()  == option.lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
                 text_value = value.text
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+
+    def return_combo_object(self, element, shadow_root=True, locator=False):
+        """
+        [Internal]
+        """
+
+        if locator:
+            combo = Select(element)
+        elif self.webapp_shadowroot(shadow_root=shadow_root):
+            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                      self.soup_to_selenium(element)))
+        else:
+            combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+
+        return combo
+
+    def return_selected_combo_value(self, element):
+        """"
+        [Internal]
+        """
+
+        combo = self.return_combo_object(element)
+
+        if combo.all_selected_options:
+            return combo.all_selected_options[0].text
+        else:
+            return ''
 
     def send_keys(self, element, arg):
         """
@@ -799,7 +901,7 @@ class Base(unittest.TestCase):
             pass
     
 
-    def soup_to_selenium(self, soup_object):
+    def soup_to_selenium(self, soup_object=None, twebview=False):
         """
         [Internal]
 
@@ -816,6 +918,9 @@ class Base(unittest.TestCase):
         >>> # Calling the method:
         >>> selenium_obj = lambda: self.soup_to_selenium(bs_obj)
         """
+        if twebview:
+            self.switch_to_iframe()
+
         if soup_object is None:
             raise AttributeError
         return next(iter(self.driver.find_elements(by=By.XPATH, value=xpath_soup(soup_object))), None)
@@ -891,7 +996,7 @@ class Base(unittest.TestCase):
         except Exception as e:
             self.log_error(str(e))
 
-    def zindex_sort (self, elements, reverse=False):
+    def zindex_sort (self, elements, reverse=False, active_tab=True):
         """
         [Internal]
 
@@ -915,7 +1020,12 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+        if active_tab:
+            elements = self.return_active_element(elements, reverse)
+        else:
+            isinstance(elements, list)
+            elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
+
         return elements
 
 # User Methods
@@ -992,6 +1102,14 @@ class Base(unittest.TestCase):
         >>> oHelper.Start()
         """
 
+        start_program = '#inputStartProg, #selectStartProg'
+
+        if self.config.appserver_service:
+            try:
+                self.sc_query(self.config.appserver_service)
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
+
         logger().info(f'TIR Version: {__version__}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
@@ -1006,14 +1124,28 @@ class Base(unittest.TestCase):
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
         elif self.config.browser.lower() == "chrome":
-            driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\chromedriver.exe')
             chrome_options = ChromeOpt()
             chrome_options.headless = self.config.headless
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
-                
-            self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
+
+            try:
+                if self.config.chromedriver_auto_install:
+                    if self.config.ssl_chrome_auto_install_disable:
+                        os.environ['WDM_SSL_VERIFY'] = '0'
+                    self.driver = webdriver.Chrome(options=chrome_options,
+                                                   executable_path=ChromeDriverManager().install())
+                else:
+                    if sys.platform == 'linux':
+                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux', 'chromedriver.exe')
+                    elif sys.platform == 'win32':
+                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows', 'chromedriver.exe')
+
+                    self.driver = webdriver.Chrome(options=chrome_options, executable_path=str(driver_path))
+            except Exception as e:
+                raise e
+
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
             chrome_options = ChromeOpt()
@@ -1031,12 +1163,39 @@ class Base(unittest.TestCase):
                 self.driver.set_window_size(1366, 768)
             else:
                 self.driver.maximize_window()
-                   
-            self.driver.get(self.config.url)
 
+            self.get_url()
+
+        if self.driver:
+            window_size = self.driver.get_window_size()
+            logger().info(f"Browser maximized to {window_size['width']}x{window_size['height']}")
+            if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
+                logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
-        self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+        if not self.config.poui:
+            if not self.config.skip_environment:
+                self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
+
+            self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+
+    def get_url(self, url=None):
+
+        get_url = False
+
+        url = self.config.url if not url else url
+
+        num_of_trying = 1
+        while not get_url and num_of_trying <= 5:
+            self.driver.get(url)
+            try:
+                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.ID, 'fieldsetStartProg')))
+                logger().info("Page is ready!")
+                get_url = True
+                break
+            except:
+                num_of_trying += 1
+                logger().info(f"Loading took too much time! num_of_trying: {str(num_of_trying)}")
 
     def TearDown(self):
         """
@@ -1103,5 +1262,164 @@ class Base(unittest.TestCase):
         """
 
         for i, j in enumerate(combo.options):
-            if j.text.lower() in option:
+            if not j.get_attribute('disabled') and j.text.lower().strip() == option.lower().strip():
                 return i
+
+    def return_iframe(self, selector):
+        """
+        """
+        self.driver.switch_to_default_content()
+        return self.driver.find_elements_by_css_selector(selector)
+
+    def webapp_shadowroot(self, shadow_root=True):
+        """
+        [Internal]
+        """
+
+        if not shadow_root:
+            return False
+
+        if self.webapp_version:
+            return self.webapp_version
+
+        current_ver = ''
+
+        for i in range(3):
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not current_ver:
+                try:
+                    current_ver = self.driver.execute_script("return app.VERSION")
+                    if current_ver:
+                        current_ver = re.sub(r'\.(.*)', '', current_ver)
+                        self.webapp_version = int(current_ver) >= 8
+                        return self.webapp_version
+                except:
+                    current_ver = None
+
+            if not current_ver:
+                self.driver.close()
+                self.Start()
+
+        if not current_ver:
+            self.log_error('Can\'t find WebApp Version' )
+
+    def find_shadow_element(self, term, objects):
+
+        elements = None
+
+        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        try:
+            elements = self.driver.execute_script(script, objects)
+        except:
+            pass
+        return elements if elements else None
+
+    def sc_query(self, service):
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            try:
+                logger().debug(f'Trying start: {service} service.')
+                os.system(f'SC QUERY {service} | FIND "RUNNING"')
+                stdout = subprocess.check_output(f'SC QUERY {service} | FIND "RUNNING"', shell=True, text=True).split(':')
+                success = True if list(filter(lambda x: 'RUNNING' in x, stdout)) else False
+                if success:
+                    logger().debug(f'{service} is running')
+            except:
+                logger().debug(f'{service} is being started')
+                os.system(f'net start {service}')
+
+    def create_folder(self, path):
+
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
+
+    def filling_input_by_locator(self, selector, locator, value, shadow_root):
+
+        tag_name = None
+
+        element = self.find_by_locator(locator, selector, shadow_root=shadow_root)
+
+        if element:
+            try:
+                if element.find_element('css selector', 'select'):
+                    element = element.find_element('css selector', 'select')
+            except:
+                pass
+
+            tag_name = element.tag_name
+
+            self.set_element_focus(element)
+
+            if tag_name == 'select':
+                self.filling_select(element, value, locator=True)
+            else:
+                ActionChains(self.driver).send_keys(Keys.HOME).perform()
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, value).perform()
+
+    def filling_select(self, element, value, locator):
+
+        self.select_combo(element, value, locator=locator)
+
+    def click_by_locator(self, selector, locator, right_click, shadow_root):
+
+        element = self.find_by_locator(locator, selector, shadow_root=shadow_root)
+
+        self.set_element_focus(element)
+
+        self.click(element, right_click=right_click)
+
+    def find_by_locator(self, locator, selector, shadow_root):
+
+        element = None
+
+        self.wait.until(EC.element_to_be_clickable((locator, selector)))
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+            logger().info(f"Looking for element: '{selector}'")
+
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                element = next(iter(
+                    self.find_shadow_element('input, select, button', self.driver.find_element(locator, selector))))
+            else:
+                element = self.driver.find_element(locator, selector)
+
+        if not element:
+            self.log_error(f"Element {element} doesn't found")
+
+        return element
+
+    def return_active_element(self, elements, reverse):
+
+        if isinstance(elements, list):
+            filtered_element = list(
+                filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, elements))
+
+            if filtered_element:
+                non_blocked_element = self.return_non_blocked_elements(filtered_element, reverse)
+                active_element = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, non_blocked_element))
+                if active_element:
+                    return active_element
+                else:
+                    return self.return_non_blocked_elements(elements, reverse)
+            else:
+                return self.return_non_blocked_elements(elements, reverse)
+        else:
+            return elements
+
+    def return_non_blocked_elements(self, elements, reverse):
+
+        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+
+        if isinstance(non_blocked_elements, list):
+            if len(non_blocked_elements) > 1:
+                if reverse:
+                    return non_blocked_elements[::-1]
+            return non_blocked_elements
+        else:
+            return non_blocked_elements

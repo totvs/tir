@@ -12,7 +12,7 @@ with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
 setup(
-    description='TOTVS Interface Robot',
+    description='Test Interface Robot',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='tir_engpro',
@@ -36,18 +36,20 @@ setup(
         'Topic :: Software Development :: Testing'
     ],
     install_requires=[
-        'beautifulsoup4',
-        'numpy',
-        'pandas==1.0.1',
-        'python-dateutil',
-        'pytz',
-        'selenium==4.1.0',
-        'six',
-        'enum34',
-        'requests',
-        'pyodbc',
-        'psutil',
-        'lxml==4.6.3'
+        'beautifulsoup4==4.12.3',
+        'numpy==1.26.4',
+        'pandas==2.2.1',
+        'python-dateutil==2.9.0.post0',
+        'pytz==2024.1',
+        'selenium==3.8.0',
+        'six==1.16.0',
+        'enum34==1.1.10',
+        'requests==2.31.0',
+        'pyodbc==5.1.0',
+        'psutil==5.9.8',
+        'lxml==5.1.0',
+        'opencv-python==4.9.0.80',
+        'webdriver-manager==4.0.1'
     ],
     packages=find_packages(),
     scripts=[],

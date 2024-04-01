@@ -1,5 +1,6 @@
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
+from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
 """
@@ -116,11 +117,13 @@ class Webapp():
         """
         self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         If the field is a colored status (without name) you must set it empty
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
@@ -138,6 +141,10 @@ class Webapp():
         :type direction: str
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+        :param ignore_case: Boolean if case should be ignored or not - **Default:** True
+        :type ignore_case: Boolean
 
         Usage:
 
@@ -157,7 +164,7 @@ class Webapp():
         >>> oHelper.LoadGrid()
 
         """
-        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field)
+        self.__webapp.CheckResult(field, user_value, grid, line, grid_number, name_attr, input_field, direction, grid_memo_field, position, ignore_case)
 
     def CheckView(self, text, element_type="help"):
         """
@@ -284,7 +291,7 @@ class Webapp():
         """
         self.__webapp.ClickIcon(icon_text, position)
 
-    def ClickCheckBox(self, label_box_name, position=1):
+    def ClickCheckBox(self, label_box_name, position=1, double_click=False):
         """
         Clicks on a Label in box on the screen.
 
@@ -292,13 +299,15 @@ class Webapp():
         :type label_box_name: str
         :param position: index label box on interface
         :type position: int
+        :param double_click: True if a double click in element is necessary.
+        :type double_click: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickCheckBox("Search",1)
         """
-        self.__webapp.ClickCheckBox(label_box_name,position)
+        self.__webapp.ClickCheckBox(label_box_name,position, double_click)
 
     def ClickLabel(self, label_name):
         """
@@ -314,11 +323,12 @@ class Webapp():
         """
         self.__webapp.ClickLabel(label_name)
 
-    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False):
+    def GetValue(self, field, grid=False, line=1, grid_number=1, grid_memo_field=False, position=0):
         """
         Gets the current value or text of element.
 
-        :param field: The field or label of a field that must be checked.
+        :param field: The field or label of a field that must be checked. If the column is a colored status,
+         you must set the field as "" , ex: GetValue("", grid=True, position= 1)
         :type field: str
         :param grid: Boolean if this is a grid field or not. - **Default:** False
         :type grid: bool
@@ -328,13 +338,15 @@ class Webapp():
         :type grid_number: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
 
         Usage:
 
         >>> # Calling the method:
         >>> current_value = oHelper.GetValue("A1_COD")
         """
-        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field)
+        return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field, position)
 
     def LoadGrid(self):
         """
@@ -633,7 +645,7 @@ class Webapp():
         """
         self.__webapp.SetFocus(field, grid_cell, row_number, position)
 
-    def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3): 
+    def SetKey(self, key, grid=False, grid_number=1,additional_key="", wait_show = "", step = 3, wait_change=True):
         """
         Press the desired key on the keyboard on the focused element.
 
@@ -657,6 +669,8 @@ class Webapp():
         :type wait_show: str
         :param step: The amount of time each step should wait. - **Default:** 3
         :type step: float
+        :param wait_change: Bool when False it skips the wait for html changes.
+        :type wait_change: Bool
 
         Usage:
 
@@ -675,9 +689,9 @@ class Webapp():
         >>> # Calling the method with special keys (using parameter additional_key):
         >>> oHelper.SetKey(key="CTRL", additional_key="A")
         """
-        self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step)
+        self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step, wait_change)
 
-    def SetLateralMenu(self, menuitens):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
@@ -690,7 +704,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__webapp.SetLateralMenu(menuitens)
+        self.__webapp.SetLateralMenu(menuitens, save_input, click_menu_functional)
 
     def SetParameters(self):
         """
@@ -884,19 +898,21 @@ class Webapp():
         """
         self.__webapp.WaitFieldValue(field, expected_value)
 
-    def WaitHide(self, string):
+    def WaitHide(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait hide the elements.
 
         :param itens: String that will hold the wait.
         :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        self.__webapp.WaitHide(string)
+        self.__webapp.WaitHide(string, timeout, throw_error=True)
 
     def WaitProcessing(self, string):
         """
@@ -912,21 +928,42 @@ class Webapp():
         """
         self.__webapp.WaitProcessing(string)
 
-    def WaitShow(self, string):
+    def WaitShow(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait show the elements.
 
         :param itens: String that will hold the wait.
         :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitShow(string)
+        self.__webapp.WaitShow(string, timeout, throw_error=True)
 
-    def ClickTree(self, treepath, right_click=False, position=1):
+    def IfExists(self, string='', timeout=5):
+        """
+        Returns True if element exists in timeout or return False if not exist.
+
+        :param string: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
+        """
+
+        return self.__webapp.WaitShow(string, timeout, throw_error=False)
+
+    def ClickTree(self, treepath, right_click=False, position=1, tree_number=1):
         """
         Clicks on TreeView component.
 
@@ -934,6 +971,8 @@ class Webapp():
         :type string: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
         :type string: bool
+        :param tree_number: Tree position for cases where there is more than one tree on exibits.
+        :type string: int
 
         Usage:
 
@@ -941,8 +980,10 @@ class Webapp():
         >>> oHelper.ClickTree("element 1 > element 2 > element 3")
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
+        >>> # tree_number example:
+        >>> oHelper.ClickTree("element 1 > element 2 > element 3", position=2)
         """ 
-        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position)
+        self.__webapp.ClickTree(treepath=treepath, right_click=right_click, position=position, tree_number=tree_number)
 
     def GridTree(self, column, treepath,  right_click=False):
         """
@@ -1051,10 +1092,10 @@ class Webapp():
         Usage:
 
         >>> # Calling the method:
-        >>> oHelper.get_release()
+        >>> oHelper.GetRelease()
         >>> # Conditional with method:
         >>> # Situation: Have a input that only appears in release greater than or equal to 12.1.027
-        >>> if self.oHelper.get_release() >= '12.1.027':
+        >>> if self.oHelper.GetRelease() >= '12.1.027':
         >>>     self.oHelper.SetValue('AK1_CODIGO', 'codigo_CT001')
         """
 
@@ -1088,15 +1129,29 @@ class Webapp():
         >>> oHelper.ClickImage("img_name",double_click=True)
         """
         self.__webapp.ClickImage(img_name,double_click)
+    
+    def ClickMenuFunctional(self,menu_name,menu_option):
+        """Click on the functional menu.
+        :param menu_option: Item to be clicked.
+        :type menu_option: src
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickMenuFunctional("label","button") 
+        """
+        self.__webapp.ClickMenuFunctional(menu_name,menu_option)
 
     def ProgramScreen(self, initial_program=""):
         """
         Fills the first screen of Protheus with the first program to run.
         :param initial_program: The initial program to load
         :type initial_program: str
+
         Usage:
+
         >>> # Calling the method:
-        >>> self.ProgramScreen("SIGAADV")
+        >>> self.oHelper.ProgramScreen("SIGAADV")
         """
         self.__webapp.program_screen(initial_program, coverage=self.coverage)
     
@@ -1109,7 +1164,7 @@ class Webapp():
             This method return data as a string if necessary use some method to convert data like int().
 
         >>> config.json
-        >>> "CSVPath" : "C:\\temp"
+        >>> '"CSVPath": "C:\\temp"'
 
         :param csv_file: .csv file name
         :type csv_file: str
@@ -1273,17 +1328,21 @@ class Webapp():
 
         :param grid_number: The number of the grid on the screen.
         :type: int
-        :param grid_element: Grid class name in HTML ex: ".tgrid".
+        :param grid_element: Grid class name in HTML ex: ".tgrid" Default:If None return all webapp classes.
         :type: str
         :return: Grid BeautifulSoup object
         :rtype: BeautifulSoup object
+
+        Class css selector sintaxe:
+        .class	.intro	Selects all elements with class="intro"
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> my_grid = self.get_grid(grid_element='.dict-msbrgetdbase')
         """
-        
+
         return self.__webapp.get_grid_content(grid_number, grid_element)
 
     def LengthGridLines(self, grid):
@@ -1293,6 +1352,122 @@ class Webapp():
         """
 
         return self.__webapp.LengthGridLines(grid)
+
+    def InputByLocator(self, selector='', locator='', value=''):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param value: The value to be used (e.g., for input or interaction).
+        :type value: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.InputByLocator(selector='COMP7526', locator=By.ID, value='teste')
+        :return: None
+        """
+        return self.__webapp.filling_input_by_locator(selector, locator, value, shadow_root=True)
+
+    def ClickByLocator(self, selector='', locator='', right_click=False):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param right_click: Perform a right-click action if True (default is False).
+        :type right_click: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickByLocator(selector='COMP7536', locator=By.ID)
+        :return: None
+        """
+        return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
+    
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+        return self.__webapp.AddProcedure(procedure, group)
+    
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures(is_procedure_install=True)
+        """
+        return self.__webapp.SetProcedures(is_procedure_install)
+
+
+    def GetLineNumber(self, values, columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+        return self.__webapp.GetLineNumber(values,columns,  grid_number)
+
+
+    def SetCalendar(self, day='', month='', year=''):
+        """
+        Set date on Calendar without input field
+
+        :param day: day disered
+        :type day: str
+        :param month: month disered
+        :type month: str
+        :param year: year disered
+        :type year: str
+        """
+        return self.__webapp.SetCalendar(day, month, year)
+
 
 class Apw():
 
@@ -1365,3 +1540,316 @@ class Apw():
 
     def WaitModal(self, text, opcao="title"):
         self.__Apw.WaitModal(text, opcao)
+
+class Poui():
+
+    def __init__(self, config_path="", autostart=True):
+        self.__poui = PouiInternal(config_path, autostart)
+        self.__database = BaseDatabase(config_path, autostart=False)
+        self.config = ConfigLoader()
+        self.coverage = self.config.coverage
+
+    def ClickMenu(self, menu_item):
+        """
+        Clicks on the menu-item of the POUI component.
+        https://po-ui.io/documentation/po-menu
+
+        :param menu_item:Menu item name
+        :type menu_item: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickMenu("Contracts")
+        """
+        self.__poui.ClickMenu(menu_item)
+        
+    def InputValue(self, field='', value='', position=1):
+        """
+        Fill the POUI input component.
+        https://po-ui.io/documentation/po-input
+
+        :param field: Input text title that you want to fill
+        :type field: str
+        :param value: Value that fill in input
+        :type value: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.InputValue('Name', 'Test')
+        :return: None
+        """
+        self.__poui.InputValue(field, value, position)
+
+    def ClickCombo(self, field='', value='', position=1):
+        """
+        Clicks on the Combo of POUI component.
+        https://po-ui.io/documentation/po-combo
+
+        :param field: Combo text title that you want to click.
+        :param value: Value that you want to select in Combo.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCombo('Visão', 'Compras')
+        :return:
+        """
+        self.__poui.click_poui_component(field, value, position, selector="div > po-combo", container=True)
+
+    def ClickSelect(self, field='', value='', position=1):
+        """
+        Clicks on the Select of POUI component.
+        https://po-ui.io/documentation/po-select
+
+        :param field: Select text title that you want to click.
+        :param value: Value that you want to select in Select.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickSelect('Espécie', 'Compra')
+        :return:
+        """
+        self.__poui.click_poui_component(field, value, position, selector="po-select", container=True)
+
+    def ClickButton(self, button='', position=1):
+        """
+        Clicks on the Button of POUI component.
+        https://po-ui.io/documentation/po-button
+
+        :param field: Button to be clicked.
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickButton('Cancelar')
+        :return:
+        """
+        self.__poui.click_button(button, position, selector="po-button", container=False)
+
+    def AssertFalse(self, expected=False, script_message=''):
+        """
+        Defines that the test case expects a False response to pass
+
+        Usage:
+
+        >>> #Instantiating the class
+        >>> inst.oHelper = Webapp()
+        >>> #Calling the method
+        >>> inst.oHelper.AssertFalse()
+        """
+        self.__poui.AssertFalse(expected, script_message)
+
+    def AssertTrue(self, expected=True, script_message=''):
+        """
+        Defines that the test case expects a True response to pass
+
+        Usage:
+
+        >>> #Calling the method
+        >>> inst.oHelper.AssertTrue()
+        """
+        self.__poui.AssertTrue(expected, script_message)
+
+    def ClickWidget(self, title='', action='', position=1):
+        """
+        Clicks on the Widget or Widget action of POUI component.
+        https://po-ui.io/documentation/po-widget
+
+        :param tittle: Widget text title that you want to click.
+        :param action: The name of action to be clicked
+        :param position: Position which element is located. - **Default:** 1
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        :return:
+        """
+        self.__poui.ClickWidget(title, action, position)
+
+    def TearDown(self):
+        """
+        Closes the webdriver and ends the test case.
+
+        Usage:
+
+        >>> #Calling the method
+        >>> inst.oHelper.TearDown()
+        """
+        self.__poui.TearDown()
+        
+    def POSearch(self, content='', placeholder=''):
+        """
+        Fill the POUI Search component.
+        https://po-ui.io/documentation/po-page-dynamic-search
+
+        :param content: Content to be Search.
+        :type content: str
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.POSearch(content='Content to be Search')
+        :return: None
+        """
+        self.__poui.POSearch(content, placeholder)
+
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1, itens=False, click_cell=None, checkbox=False):
+        """
+        Clicks on the Table of POUI component.
+        https://po-ui.io/documentation/po-table
+
+        :param first_column: Column name to be used as reference.
+        :type first_column: str
+        :param second_column: Column name to be used as reference.
+        :type second_column: str
+        :param first_content: Content of the column to be searched.
+        :type first_content: str
+        :param second_content: Content of the column to be searched.
+        :type second_content: str
+        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :type table_number: int
+        :param itens: Bool parameter that click in all itens based in the field and content reference.
+        :type itens: bool
+        :param click_cell: Content to click based on a column position to close the axis
+        :type click_cell: str
+        :param checkbox: If you want to click on the checkbox component in the table
+        :type checkbox: bool
+
+        >>> # Call the method:
+        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
+        :return: None
+        """
+
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox)
+        
+    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
+        """
+        Checks if a field has the value the user expects.
+
+        :param field: The field or label of a field that must be checked.
+        :type field: str
+        :param user_value: The value that the field is expected to contain.
+        :type user_value: str
+        :param po_component:  POUI component name that you want to check content on screen
+        :type po_component: str
+        :param position: Position which element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Calling method to check a value of a field:
+        >>> oHelper.CheckResult("Código", "000001", 'po-input')
+
+        """
+        self.__poui.CheckResult(field, user_value, po_component, position)
+
+    def GetUrl(self, url):
+        """
+        Loads a web page in the current browser session.
+        :param url:
+        :type url: str
+        """
+        self.__poui.get_url(url)
+
+    def POtabs(self, label=''):
+        """
+        Clicks on a Label in po-tab.
+        https://po-ui.io/documentation/po-tabs
+
+        :param label: The tab label name
+        :type label: str
+
+        >>> # Call the method:
+        >>> oHelper.POTabs(label='Test')
+        :return: None
+        """
+        self.__poui.POTabs(label)
+
+    def InputByLocator(self, selector='', locator=None, value=''):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param value: The value to be used (e.g., for input or interaction).
+        :type value: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper_Poui.InputByLocator(selector='[p-label="PO Select"] [class="po-field-container-content"] > select', locator=By.CSS_SELECTOR, value='Option 2')
+        :return: None
+        """
+        return self.__poui.filling_input_by_locator(selector, locator, value, shadow_root=False)
+
+    def ClickByLocator(self, selector='', locator=None, right_click=False):
+        """
+
+        .. note::
+            Necessary import "By" class in the script: from tir.technologies.core.base import By
+
+        .. note::
+            For more information check this out: https://selenium-python.readthedocs.io/locating-elements.html
+
+        .. warning::
+            Use only in cases where it is not possible to use a label or name attribute.
+            Any interface change can directly impact the script. Evaluate the possibility of changing the interface
+            before using these methods in the script.
+
+        :param selector: The type of selector to use (e.g., 'css', 'xpath', 'id').
+        :type selector: str
+        :param locator: The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)
+        :type locator: str
+        :param right_click: Perform a right-click action if True (default is False).
+        :type right_click: bool
+
+        Usage:
+
+        >>>  # Call the method:
+        >>> oHelper_Poui.ClickByLocator(selector='.po-page-header-actions > po-button:nth-child(1) > button:nth-child(1)', locator=By.CSS_SELECTOR)
+        :return: None
+        """
+        return self.__poui.click_by_locator(selector, locator, right_click, shadow_root=False)
+
+    def ClickIcon(self, label='', class_name='', position=1):
+        """
+
+        Click on the POUI Icon by label, class_name or both.
+        https://po-ui.io/guides/icons
+
+        :param label: The tooltip name for icon
+        :type label: str
+        :param class_name: The POUI class name for icon
+        :type class_name: str
+        :param position:
+        :type position: int
+        :return: None
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickIcon(label='Delete')
+        >>> oHelper.ClickIcon(class_name='po-icon po-icon-delete')
+        >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
+        """
+        self.__poui.click_icon(label, class_name, position)
