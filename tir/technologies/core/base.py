@@ -547,7 +547,7 @@ class Base(unittest.TestCase):
             iframe_displayed = None
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not iframes:
-                iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
+                iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
 
                 if iframes:
                     iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)

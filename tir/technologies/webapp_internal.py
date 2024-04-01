@@ -3817,7 +3817,7 @@ class WebappInternal(Base):
                     return False
 
                 try:
-                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                    container_element = self.driver.find_element(By.XPATH, container)
                 except:
                     return False
             else:
