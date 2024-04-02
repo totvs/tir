@@ -324,7 +324,7 @@ class PouiInternal(Base):
             self.log_error(message)
             raise ValueError(message)
 
-        button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+        button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
         self.click(button())
 
     def reload_user_screen(self):
@@ -478,7 +478,7 @@ class PouiInternal(Base):
         button_element = next(iter(buttons), None) if buttons else None
 
         if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
-            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
+            button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
             self.click(button())
         elif not change_env:
             self.restart_counter += 1
@@ -518,7 +518,7 @@ class PouiInternal(Base):
 
         element = self.change_environment_element_home_screen()
         if element:
-            self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
+            self.click(self.driver.find_element(By.XPATH, xpath_soup(element)))
             self.environment_screen(True)
         else:
             self.log_error("Change Envirioment method did not find the element to perform the click or the element was not visible on the screen.")
@@ -606,7 +606,7 @@ class PouiInternal(Base):
             if buttons:
                 close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
                 time.sleep(0.5)
-                selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
+                selenium_close_button = lambda: self.driver.find_element(By.XPATH, xpath_soup(close_button))
                 if close_button:
                     try:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = close_button , locator = By.XPATH)
@@ -1225,7 +1225,7 @@ class PouiInternal(Base):
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):           
                 element = self.get_field(field)
                 if ( hasattr(element, "name") and hasattr(element, "parent") ):
-                    selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                    selenium_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                     value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
@@ -1601,14 +1601,14 @@ class PouiInternal(Base):
         elif icon_error_log:
             label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
             textarea = next(iter(top_layer.select("textarea")), None)
-            textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
+            textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element(By.XPATH, xpath_soup(textarea)))
 
             error_paragraphs = textarea_value.split("\n\n")
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
             button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
-            self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
+            self.click(self.driver.find_element(By.XPATH, xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
         self.log_error(message)
@@ -1741,7 +1741,7 @@ class PouiInternal(Base):
                     return False
 
                 try:
-                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                    container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
                     return False
             else:
@@ -2091,7 +2091,7 @@ class PouiInternal(Base):
                 logger().debug("Element found! Waiting for element to be displayed.")
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error)), None)
             if element is not None:
-                sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+                sel_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                 endtime = time.time() + timeout
                 while(time.time() < endtime and not self.element_is_displayed(element)):
                     try:
@@ -2382,7 +2382,7 @@ class PouiInternal(Base):
 
         has_text = False
 
-        element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+        element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
         self.switch_to_iframe()
         ActionChains(self.driver).move_to_element(element_function()).perform()
         tooltips = self.driver.find_elements(By.CSS_SELECTOR, "[class*=po-tooltip]")
@@ -3232,7 +3232,7 @@ class PouiInternal(Base):
                 span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
                 if span_icon:
                     self.switch_to_iframe()
-                    self.driver.find_element_by_xpath(xpath_soup(span_icon)).click()
+                    self.driver.find_element(By.XPATH, xpath_soup(span_icon)).click()
                     self.po_loading(selector)
 
                     ul = next(iter(main_element.select('ul')), None)
