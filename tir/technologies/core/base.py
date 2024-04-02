@@ -181,7 +181,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
@@ -248,7 +248,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.double_click(element())
         """
@@ -334,7 +334,7 @@ class Base(unittest.TestCase):
                     return False
 
                 try:
-                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                    container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
                     return False
             else:
@@ -527,7 +527,7 @@ class Base(unittest.TestCase):
                 return getIframe()
                 """
                 soup = BeautifulSoup(self.driver.execute_script(script),'html.parser')
-                self.driver.switch_to.frame(self.driver.find_element_by_css_selector("iframe[class=session]"))
+                self.driver.switch_to.frame(self.driver.find_element(By.CSS_SELECTOR, "iframe[class=session]"))
 
             return soup
             
@@ -572,7 +572,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.get_element_text(element())
         """
@@ -597,7 +597,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.get_element_value(element())
         """
@@ -645,7 +645,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining an element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
@@ -723,7 +723,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining an element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
@@ -810,7 +810,7 @@ class Base(unittest.TestCase):
             combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
                                                       self.soup_to_selenium(element)))
         else:
-            combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+            combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
 
         return combo
 
@@ -840,7 +840,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method with a string
         >>> self.send_keys(element(), "Text")
         >>> #Calling the method with a Key
@@ -890,7 +890,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.set_element_focus(element())
         """   
@@ -1269,7 +1269,7 @@ class Base(unittest.TestCase):
         """
         """
         self.driver.switch_to_default_content()
-        return self.driver.find_elements_by_css_selector(selector)
+        return self.driver.find_elements(By.CSS_SELECTOR, selector)
 
     def webapp_shadowroot(self, shadow_root=True):
         """
@@ -1345,8 +1345,8 @@ class Base(unittest.TestCase):
 
         if element:
             try:
-                if element.find_element('css selector', 'select'):
-                    element = element.find_element('css selector', 'select')
+                if element.find_element(By.CSS_SELECTOR, 'select'):
+                    element = element.find_element(By.CSS_SELECTOR, 'select')
             except:
                 pass
 
