@@ -279,9 +279,9 @@ class WebappInternal(Base):
             if initial_program.lower() != 'sigacfg':
                 cget_term = '[name=cGet]'
                 endtime = time.time() + self.config.time_out
-
-                logger().debug('Waiting menu screen after environment screen')
-                self.wait_element_timeout(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out, main_container="body", step=1)
+                while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
+                    logger().debug('Waiting menu screen after environment screen')
+                    time.sleep(10)
 
                 if time.time() > endtime:
                     self.restart_counter + 1
