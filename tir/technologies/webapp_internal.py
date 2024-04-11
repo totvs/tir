@@ -7076,7 +7076,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
+        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, on_bad_lines='error',
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -7955,6 +7955,11 @@ class WebappInternal(Base):
 
         logger().info(f"AddParameter: {parameter}")
 
+        twebview = True if self.config.json_data['POUILogin'] else False
+
+        term = ".po-page-login-info-field .po-input" if self.config.json_data[
+            'POUILogin'] else "[name='cGetUser'] > input, [name='cGetUser']"
+
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -7969,8 +7974,8 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+            while ( time.time() < endtime and not self.wait_element_timeout(term=term,
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -7985,7 +7990,6 @@ class WebappInternal(Base):
                         branch}&a={value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
-
 
     def SetParameters(self):
         """
@@ -9905,7 +9909,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', on_bad_lines='error', header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
