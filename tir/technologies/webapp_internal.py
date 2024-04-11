@@ -776,18 +776,32 @@ class WebappInternal(Base):
             self.switch_to_iframe()
 
         click = 1
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and self.element_is_displayed(button()):
-            logger().info('Clicking on Button')
-            self.wait_blocker()
-            self.click(button(), enum.ClickType(click))
-            if self.config.poui_login:
-                break
+        if self.config.poui_login:
+            num_of_trying = 0
+            max_num_of_trying = 5
 
-            click += 1
-            time.sleep(2)
-            if click == 4:
-                click = 1
+            self.switch_to_iframe()
+            logger().info('Clicking on Button')
+
+            self.wait_blocker()
+            while max_num_of_trying >= num_of_trying:
+                try:
+                    self.click(button(), enum.ClickType(click))
+                    time.sleep(1)
+                except:
+                    logger().info('Button click completed')
+                    break
+                num_of_trying += 1
+        else:
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and self.element_is_displayed(button()):
+                logger().info('Clicking on Button')
+                self.wait_blocker()
+                self.click(button(), enum.ClickType(click))
+                time.sleep(2)
+                click += 1
+                if click == 4:
+                    click = 1
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -809,8 +823,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
-        base_dates = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
             if self.config.poui_login:
@@ -867,8 +880,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
-        group_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
             if self.config.poui_login:
@@ -925,8 +937,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
-        branch_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
             if self.config.poui_login:
@@ -985,7 +996,7 @@ class WebappInternal(Base):
         env_value = ''
         environment_element = None
         enable = True
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
 
             if self.config.poui_login:
@@ -10294,7 +10305,7 @@ class WebappInternal(Base):
             if hora_termino:
                 line = re.sub(hora_termino.group(0), self.language.end_time+': 00:00:00', line)
             if slash:
-                line = re.sub(slash.group(0), '@', line) 
+                line = re.sub(slash.group(0), '@', line)
 
         else:
 
