@@ -98,6 +98,7 @@ class WebappInternal(Base):
 
         self.blocker = None
         self.parameters = []
+        self.procedures = []
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
@@ -106,6 +107,7 @@ class WebappInternal(Base):
         self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
+        self.restart_tss = False
 
         if not Base.driver:
             Base.driver = self.driver
@@ -143,6 +145,8 @@ class WebappInternal(Base):
         """
 
         self.config.poui_login = False
+
+        self.restart_tss = True
 
         try:
 
@@ -990,6 +994,7 @@ class WebappInternal(Base):
 
         click_type = 1
         env_value = ''
+        environment_element = None
         enable = True
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
@@ -3191,6 +3196,11 @@ class WebappInternal(Base):
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 self.config.poui_login = True
 
+            if self.restart_tss:
+                self.user_screen_tss()
+                self.restart_tss = False
+                return
+
             self.user_screen()
             self.environment_screen()
 
@@ -3214,7 +3224,7 @@ class WebappInternal(Base):
 
     def wait_user_screen(self):
 
-        term = "[name=cGetUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input"
+        term = "[name=cGetUser], [name=cUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input, [name=cUser]"
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
@@ -3473,6 +3483,9 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
+                if container_selector == 'wa-text-view':
+                    return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
+
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
@@ -3541,6 +3554,7 @@ class WebappInternal(Base):
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
+        elements = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3583,7 +3597,10 @@ class WebappInternal(Base):
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
-                            return [element]
+                            elements.append(element)
+            if elements:
+                return elements
+
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
@@ -4006,7 +4023,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+                        if not self.webapp_shadowroot():  
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4016,7 +4033,6 @@ class WebappInternal(Base):
                 count += 1
 
             used_ids = []
-            # TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
                 if not re.search("\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
@@ -4162,6 +4178,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03")
         """
+        logger().info(f"Clicking on {button}")
 
         initial_program = ['sigaadv', 'sigamdi']
 
@@ -4175,8 +4192,6 @@ class WebappInternal(Base):
 
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
-
-        logger().info(f"Clicking on {button}")
 
         try:
             restore_zoom = False
@@ -4197,7 +4212,7 @@ class WebappInternal(Base):
             starttime = time.time()
 
             if self.config.smart_test:
-                logger().debug(f"***System Info*** Before Clicking on button:")
+                logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
             regex = r"(<[^>]*>)?"
@@ -4813,8 +4828,8 @@ class WebappInternal(Base):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: Comma divided string with values that must be checked, combine with content_list.
-        :type field: str
+        :param fields: Comma divided string with values that must be checked, combine with content_list.
+        :type fields: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
         :param select_all: Boolean if all options should be selected. - **Default:** False
@@ -4842,8 +4857,8 @@ class WebappInternal(Base):
         >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
 
-        self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
+        self.wait_blocker()
         grid_number -= 1
         if not select_all:
             fields = list(map(lambda x: x.strip(), fields.split(',')))
@@ -4925,7 +4940,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                     element(), Keys.ENTER).perform()
             elif click_type == 4:
-                self.send_action(action=self.double_click, element=element)
+                self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
 
@@ -5018,6 +5033,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
+                    logger().debug(f'Before: {last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -5055,6 +5071,7 @@ class WebappInternal(Base):
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
+                        logger().debug(f'After: {new_box_state}')
                         success = last_box_state != new_box_state
                         click_type += 1
                         if click_type > 4:
@@ -5503,7 +5520,20 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
+                        grids = self.get_grid(grid_list=True)
+                        if grids and key == "DELETE":
+                            rows = list(map(lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(x)), grids))
+                            rows = self.flatten_list(rows)
+                            rows_before = list(map(lambda x: x.get_attribute('style'), rows))
                         success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
+                        if key == "DELETE" and grids and rows_before:
+                            rows_after = list(map(lambda x: x.get_attribute('style'), rows))
+                            if rows_after == rows_before:
+                                self.send_action(
+                                    action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform,
+                                    wait_change=False)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5530,6 +5560,15 @@ class WebappInternal(Base):
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             logger().exception(str(error))
+
+    def flatten_list(self, matrix):
+        flattened_list = []
+        for element in matrix:
+            if isinstance(element, list):
+                flattened_list.extend(self.flatten_list(element))
+            else:
+                flattened_list.append(element)
+        return flattened_list
 
     def supported_keys(self, key = ""):
         """
@@ -6152,8 +6191,12 @@ class WebappInternal(Base):
                                 time.sleep(1)
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
-                            while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                grid_class= grids[field[2]].attrs['class']
+                            while (time.time() < endtime_open_cell and not self.wait_element_timeout(term='wa-dialog',
+                                                                                                     scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                                                     position=tmodal_layer + 1,
+                                                                                                     timeout=10,
+                                                                                                     main_container='body')):
+                                grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
@@ -6241,6 +6284,10 @@ class WebappInternal(Base):
                                     self.set_element_focus(selenium_input())
                                     self.click(selenium_input())
 
+                                endtime_container = time.time() + self.config.time_out
+                                while time.time() < endtime_container and 'class' not in self.get_current_container().next.attrs:
+                                    logger().info('Waiting container attributes')
+
                                 if 'tget' in self.get_current_container().next.attrs['class'] or 'tmultiget' in \
                                         self.get_current_container().next.attrs['class'] \
                                         or 'dict-tget' in self.get_current_container().next.attrs['class']:
@@ -6261,6 +6308,10 @@ class WebappInternal(Base):
                                         try_counter = 0
 
                                     modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
+
+                                    endtime_container = time.time() + self.config.time_out
+                                    while time.time() < endtime_container and 'id' not in self.get_current_container().attrs:
+                                        logger().info('Waiting container attributes')
 
                                     if (("_" in field[0] and field_to_len != {} and int(field_to_len[field[0]]) > len(
                                             field[1])) or lenfield > len(field[1])) and modal_open:
@@ -6846,7 +6897,8 @@ class WebappInternal(Base):
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
-                                if column_number == 0 and click_attempts > 3:
+                                if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
+                                        "class") and click_attempts > 3:
                                     break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
@@ -7073,7 +7125,7 @@ class WebappInternal(Base):
         regex = self.generate_regex_by_prefixes(prefixes)
 
         #caminho do arquivo csv(SX3)
-        path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
+        path = os.path.join(os.path.dirname(__file__), self.replace_slash(r'core\\data\\sx3.csv'))
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
@@ -7482,7 +7534,7 @@ class WebappInternal(Base):
             if element:
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
                 elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
@@ -7492,7 +7544,7 @@ class WebappInternal(Base):
 
             if element:
                 self.driver.execute_script("document.querySelector('#{}').value='';".format(element.get_attribute("id")))
-                self.send_keys(element, value)
+                self.send_keys(element, self.replace_slash(value))
                 elements = self.driver.find_elements(By.CSS_SELECTOR, ".tremoteopensave button")
 
         if elements:
@@ -7509,7 +7561,6 @@ class WebappInternal(Base):
                     break
 
                 self.log_error(f"Button: {button} not found")
-
 
     def MessageBoxClick(self, button_text):
         """
@@ -7950,7 +8001,7 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -7965,8 +8016,8 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8032,6 +8083,7 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -8042,8 +8094,8 @@ class WebappInternal(Base):
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
-            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
+            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
             logger().info("Start while timeout: parameter_url")
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8492,7 +8544,7 @@ class WebappInternal(Base):
             if not success:
                 self.log_error("Checkbox index is invalid.")
 
-    def ClickLabel(self, label_name):
+    def ClickLabel(self, label_name, position=0):
         """
         Clicks on a Label on the screen.
 
@@ -8506,6 +8558,8 @@ class WebappInternal(Base):
         """
         bs_label = ''
         label = ''
+        filtered_labels = []
+        self.wait_blocker()
         self.wait_element(label_name)
         logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
@@ -8515,12 +8569,32 @@ class WebappInternal(Base):
                 self.log_error("Couldn't locate container.")
 
             if self.webapp_shadowroot():
-                labels = container.select("wa-text-view, wa-checkbox")
-                filtered_labels = next(iter(list(filter(lambda x: x.get('caption') and label_name.lower() == x.get('caption').lower(), labels))),None)
+
+                labels = container.select("wa-text-view, wa-checkbox, .dict-tradmenu")
+                for element in labels:
+                    if "class" in element.attrs and 'dict-tradmenu' in element['class']:
+                        radio_labels = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('label')",
+                                                   self.soup_to_selenium(element))
+                        filtered_radio = list(
+                            filter(lambda x: label_name.lower().strip() == x.text.lower().strip(),
+                                   radio_labels))
+                        if filtered_radio:
+                            [filtered_labels.append(i) for i in filtered_radio]
+
+                    elif element.get('caption') and label_name.lower() == element.get('caption').lower():
+                        filtered_labels.append(element)
+
                 if filtered_labels:
-                    label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(filtered_labels))
+                    if len(filtered_labels) > position:
+                        label = filtered_labels[position]
+
+                    if type(label) == Tag:
+                        label = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelector('label')", self.soup_to_selenium(label))
                 else:
                     label = next(iter(self.web_scrap(term=label_name)))
+
+                if position > len(filtered_labels):
+                    return self.log_error(f"Element position not found")
 
             else:
                 labels = container.select("label")
@@ -8529,7 +8603,7 @@ class WebappInternal(Base):
                 label = next(iter(filtered_labels), None)
 
         if not label:
-            self.log_error("Couldn't find any labels.")
+            return self.log_error("Couldn't find any labels.")
 
         if type(label) == Tag:
             bs_label = self.soup_to_selenium(label)
@@ -9300,7 +9374,7 @@ class WebappInternal(Base):
             element_selenium = element
 
         if isinstance(element, list):
-            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))
+            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
             for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
@@ -9346,7 +9420,7 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split(self.replace_slash("\\")), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
             get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
@@ -9542,8 +9616,20 @@ class WebappInternal(Base):
                     container_text += container_filtered[x].text + ' '
 
             try:
-                text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-                text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+                if self.language.checkproblem in container_text:
+                    text_help_extracted = container_text[
+                                          container_text.index(self.language.checkhelp):container_text.index(
+                                              self.language.checkproblem)]
+                else:
+                    text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
+
+                if self.language.checksolution in container_text:
+                    text_problem_extracted = container_text[
+                                             container_text.index(self.language.checkproblem):container_text.index(
+                                                 self.language.checksolution)]
+                else:
+                    text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
+
                 text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
             except:
                 pass
@@ -9879,7 +9965,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -9989,7 +10075,6 @@ class WebappInternal(Base):
         click_type = 1 if not main_click_type else click_type
 
         endtime = time.time() + self.config.time_out
-        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
@@ -10145,10 +10230,10 @@ class WebappInternal(Base):
         else:
             auto_file = self.create_auto_file(current_file)
             logger().warning(
-                f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.')
+                self.replace_slash(f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.'))
             self.check_file(base_file, current_file)
 
-            with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
+            with open(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')) as base_file:
                 with open(auto_file) as auto_file:
                     for line_base_file, line_auto_file in zip(base_file, auto_file):
                         if line_base_file != line_auto_file:
@@ -10168,9 +10253,9 @@ class WebappInternal(Base):
 
         file_extension = file[-4:].lower()
 
-        full_path = f'{self.config.baseline_spool}\\{file}'
+        full_path = self.replace_slash(f'{self.config.baseline_spool}\\{file}')
 
-        auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+        auto_file_path = self.replace_slash(f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}')
 
         if pathlib.Path(f'{auto_file_path}').exists():
             return auto_file_path
@@ -10182,7 +10267,7 @@ class WebappInternal(Base):
                 content = self.sub_string(line, file_extension)
 
                 with open(
-                            rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}',
+                            self.replace_slash(rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'),
                             "a") as write_file:
                         write_file.write(content)
 
@@ -10250,10 +10335,10 @@ class WebappInternal(Base):
         if not base_file:
             base_file = None
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')).exists():
             self.log_error("Base file doesn't exist! Please confirm the file name and path. Now you can use auto file to rename to base.")
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{current_file}')).exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
 
     def set_multilanguage(self):
@@ -10492,3 +10577,276 @@ class WebappInternal(Base):
             os.system("taskkill /f /im geckodriver.exe")
         except Exception as e:
             logger().debug(f'Close process error: {str(e)}')
+
+
+    def GetLineNumber(self, values=[], columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+
+        grid_number = grid_number-1 if grid_number > 0 else 0
+
+        self.wait_blocker()
+
+        if columns and len(columns) != len(values):
+            self.log_error('Number of Values divergent from columns!')
+            return
+
+        success = False
+        endtime = time.time() + self.config.time_out
+        while(time.time() < endtime):
+
+            containers = self.web_scrap(term=".tmodaldialog, wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            container = next(iter(self.zindex_sort(containers, True)), None)
+
+            if container:
+                grid_term = self.grid_selectors['new_web_app']
+
+                grids = container.select(grid_term)
+
+                if grids:
+                    grids = self.filter_active_tabs(grids)
+                    grids = self.filter_displayed_elements(grids)
+
+            if grids:
+                headers = self.get_headers_from_grids(grids)
+                values = list(map(lambda x: x.lower().strip() , values))
+                columns_numbers = []
+
+                if columns:
+                    columns = list(map(lambda x: x.lower().strip(), columns))
+                    difference = list(filter(lambda x: x not in list(headers[grid_number].keys()), columns))
+                    columns_numbers = list(map(lambda x: headers[grid_number][x], columns))
+
+                    if difference:
+                        self.log_error(f"There's no have {difference} in the grid")
+                        return
+
+                if grid_number > len(grids):
+                    self.log_error(self.language.messages.grid_number_error)
+
+                grid = self.soup_to_selenium(grids[grid_number])
+                rows = self.find_shadow_element('tbody tr', grid)
+
+            if rows:
+                for row in rows:
+                    row_columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row )
+
+                    if len(row_columns) < len(columns) or not row_columns:
+                        self.log_error(f"There are not number of columns present in the grid")
+                        return
+
+                    filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
+                    if filtered_columns:
+                        if columns:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() == values[x[0]], enumerate(filtered_columns)))
+                        else:
+                            filtered_cells = list(filter(lambda x: x[1].text.lower().strip() in values, enumerate(filtered_columns)))
+                        if len(filtered_cells) == len(values):
+                            return rows.index(row)
+
+
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+
+        logger().info(f"AddProcedure: {procedure}")
+
+        endtime = time.time() + self.config.time_out
+        halftime = ((endtime - time.time()) / 2)
+
+        self.procedures.append([procedure.strip(), group])
+
+
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures(is_procedure_install=True)
+        """
+
+        self.procedure_screen(is_procedure_install)
+
+    def procedure_screen(self, is_procedure_install):
+        """
+        [Internal]
+
+        Internal method of SetProcedures.
+
+        :type restore_backup: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.parameter_screen(restore_backup=False)
+        """
+        procedure_codes = []
+        procedure_groups = []
+        exception = None
+        stack = None
+        success = False
+
+        procedure_install = self.language.procedure_install 
+        procedure_uninstall = self.language.procedure_uninstall 
+
+        self.tmenu_screen = self.check_tmenu_screen()
+
+        try:
+            self.driver_refresh()
+        except Exception as error:
+            exception = error
+
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait_until_to( expected_condition = "alert_is_present" )
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
+
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
+
+            self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            
+            endtime = time.time() + self.config.time_out
+
+            while(time.time() < endtime and not success):
+
+                for procedure in self.procedures:
+                    container = self.get_current_container()
+                    procedure_codes.append(procedure[0])
+                    procedure_groups.append(procedure[1])
+
+                procedure_codes = list(set(procedure_codes))
+                procedure_groups = list(set(procedure_groups))
+
+                for group in procedure_groups:
+                    self.ClickBox(self.language.code, group)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
+
+                for code in procedure_codes:
+                    self.ClickBox(self.language.code, code, grid_number=2)
+                    time.sleep(2)
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
+                    
+                procedure_buttons = container.select('wa-button')
+
+                if is_procedure_install:
+                    procedure_install_button = list(filter(lambda x: x.get("title") == procedure_install, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_install_button))         
+                else:
+                    procedure_uninstall_button = list(filter(lambda x: x.get("title") == procedure_uninstall, procedure_buttons))[0]
+                    self.click(self.soup_to_selenium(procedure_uninstall_button))
+
+                self.SetButton(self.language.yes)            
+
+                container = self.get_current_container()
+                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))                            
+                if procedure_success:
+                    number_proc_success = procedure_success[0].get("caption").split(":")[1].strip()
+                    if int(number_proc_success) == len(procedure_codes):
+                        success = True
+                        self.SetButton(self.language.close)
+                            
+            self.procedures = []
+            time.sleep(1)
+
+            if self.config.coverage:
+                self.driver_refresh()
+            else:
+                self.Finish()
+
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
+        else:
+            stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
+            if(stack and not stack.lower()  == "teardownclass"):
+                self.restart_counter += 1
+                self.log_error(f"Wasn't possible execute parameter_screen() method Exception: {exception}")
+
+
+    def SetCalendar(self, day='', month='', year='', position=0):
+        """
+        Set date on Calendar without input field
+
+        :param day: day disered
+        :type day: str
+        :param month: month disered
+        :type month: str
+        :param year: year disered
+        :type year: str
+        """
+
+        logger().info('Setting date on calendar')
+
+        self.wait_blocker()
+        success = False
+
+        self.wait_element(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out/2
+        while time.time() < endtime and not success:
+            calendar = self.web_scrap(term=".dict-mscalend", scrap_type=enum.ScrapType.CSS_SELECTOR)
+            if calendar:
+                calendar = calendar[position]
+                elem_calendar = self.soup_to_selenium(calendar)
+                # setting year proccess
+                if year:
+                    year_header = next(iter(self.find_shadow_element('wa-datepicker-year', elem_calendar)))
+                    year_select = next(iter(self.find_shadow_element('select', year_header)))
+                    year_interface = lambda: self.return_selected_combo_value(year_select, locator=True)
+                    self.select_combo(year_select, year, index=True, locator=True)
+                # setting month proccess
+                if month:
+                    if int(month) >= 1 and int(month) <= 12:
+                        month = int(month) - 1
+                        month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
+                        month_select = next(iter(self.find_shadow_element('select', month_header)))
+                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
+                        month_combo = self.return_combo_object(month_select, locator=True)
+                        month_combo.select_by_index(str(month))
+                    else:
+                        return self.log_error(f"Month {month} doesn't exist")
+                # setting day proccess
+                if day:
+                    days_body = next(iter(self.find_shadow_element('wa-datepicker-body', elem_calendar)))
+                    days_elements = self.find_shadow_element('wa-datepicker-day', days_body)
+                    filtered_day = next(iter(list(filter(lambda x: x.get_attribute('day') == day, days_elements))),None)
+                    if filtered_day:
+                        click_try = time.time() + 20
+                        day_selected = lambda: True if filtered_day.get_attribute(
+                            'selected') else False
+                        while not day_selected() and time.time() < click_try:
+                            self.click(filtered_day)
+                        if filtered_day and month_combo and year_interface():
+                            success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year

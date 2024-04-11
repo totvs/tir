@@ -1,3 +1,5 @@
+import os
+
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
@@ -1410,6 +1412,81 @@ class Webapp():
         :return: None
         """
         return self.__webapp.click_by_locator(selector, locator, right_click, shadow_root=True)
+    
+    def AddProcedure(self, procedure, group):
+        """
+        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+
+        :param procedure: The procedure to be clicked in edit screen.
+        :type branch: str
+        :param group: The group name.
+        :type parameter: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.AddProcedure("01", "T1")
+        """
+        return self.__webapp.AddProcedure(procedure, group)
+    
+    def SetProcedures(self, is_procedure_install=True):
+        """
+        Sets the procedures in CFG screen. The procedures must be passed with calls for **AddProcedure** method.
+
+        Usage:
+
+        :param is_procedure_install: If True will install the procedure.
+        :type branch: str
+
+        >>> # Adding procedures:
+        >>> oHelper.AddProcedure("19", "T1")
+        >>> # Calling the method:
+        >>> oHelper.SetProcedures(is_procedure_install=True)
+        """
+        return self.__webapp.SetProcedures(is_procedure_install)
+
+
+    def GetLineNumber(self, values, columns=[], grid_number=0):
+        """
+
+        :param values: values composition expected in respective columns
+        :param columns: reference columns used to get line
+        :param grid_number:
+        :return:
+        """
+        return self.__webapp.GetLineNumber(values,columns,  grid_number)
+
+
+    def SetCalendar(self, day='', month='', year=''):
+        """
+        Set date on Calendar without input field
+
+        :param day: day disered
+        :type day: str
+        :param month: month disered
+        :type month: str
+        :param year: year disered
+        :type year: str
+        """
+        return self.__webapp.SetCalendar(day, month, year)
+
+    def ReplaceSlash(self, path):
+        """
+
+        :param path: Path that will be normalized depending on operating system(Windows, Linux).
+        :type path: str
+        :return: Returns the path with the correct slash according to the OS
+        """
+        return self.__webapp.replace_slash(path)
+
+    def CurrentWorkDirectory(self):
+
+        """
+
+        :return: Returns the current working directory
+        """
+
+        return os.chmod()
 
 class Apw():
 
@@ -1795,3 +1872,36 @@ class Poui():
         >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
         """
         self.__poui.click_icon(label, class_name, position)
+
+    def ClickAvatar(self, position=1):
+        """
+
+        Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-avatar
+
+        :param position: - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickAvatar(position=1)
+        >>> oHelper.ClickAvatar()
+        """
+        self.__poui.click_avatar(position)
+
+    def ClickPopup(self, label):
+        """Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-popup
+
+        :param label:
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickPopup(label="Popup Item")
+        >>> oHelper.ClickPopup()
+        """
+        self.__poui.click_popup(label)
+

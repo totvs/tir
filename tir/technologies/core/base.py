@@ -994,7 +994,7 @@ class Base(unittest.TestCase):
         except Exception as e:
             self.log_error(str(e))
 
-    def zindex_sort (self, elements, reverse=False):
+    def zindex_sort (self, elements, reverse=False, active_tab=True):
         """
         [Internal]
 
@@ -1018,7 +1018,10 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.zindex_sort(elements, True)
         """
-        if isinstance(elements, list):
+        if active_tab:
+            elements = self.return_active_element(elements, reverse)
+        else:
+            isinstance(elements, list)
             elements.sort(key=lambda x: self.search_zindex(x), reverse=reverse)
 
         return elements
@@ -1160,6 +1163,11 @@ class Base(unittest.TestCase):
 
             self.get_url()
 
+        if self.driver:
+            window_size = self.driver.get_window_size()
+            logger().info(f"Browser maximized to {window_size['width']}x{window_size['height']}")
+            if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
+                logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
 
         if not self.config.poui:
@@ -1171,6 +1179,7 @@ class Base(unittest.TestCase):
     def get_url(self, url=None):
 
         get_url = False
+        start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser], [name=cUser]"
 
         url = self.config.url if not url else url
 
@@ -1178,7 +1187,12 @@ class Base(unittest.TestCase):
         while not get_url and num_of_trying <= 5:
             self.driver.get(url)
             try:
-                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.ID, 'fieldsetStartProg')))
+                if self.config.json_data['POUILogin'] and 'StartProg' in url:
+                    time.sleep(3)
+                    self.switch_to_iframe()
+
+                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.CSS_SELECTOR, start_selector)))
+                self.driver.switch_to.default_content()
                 logger().info("Page is ready!")
                 get_url = True
                 break
@@ -1279,6 +1293,7 @@ class Base(unittest.TestCase):
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
                     if current_ver:
+                        logger().debug(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
                         return self.webapp_version
@@ -1382,3 +1397,55 @@ class Base(unittest.TestCase):
             self.log_error(f"Element {element} doesn't found")
 
         return element
+
+    def return_active_element(self, elements, reverse):
+
+        if isinstance(elements, list):
+            filtered_element = list(filter(
+                lambda x: self.return_wa_tab_page(x) or self.return_file_picker(x) if x else None,
+                elements))
+
+            if filtered_element:
+                non_blocked_element = self.return_non_blocked_elements(filtered_element, reverse)
+                active_element = list(filter(
+                    lambda x: self.return_wa_tab_page(x) and 'active' in x.find_parent(
+                        'wa-tab-page').attrs or self.return_file_picker(x), non_blocked_element))
+                if active_element:
+                    return active_element
+                else:
+                    return self.return_non_blocked_elements(elements, reverse)
+            else:
+                return self.return_non_blocked_elements(elements, reverse)
+        else:
+            return elements
+
+    def return_wa_tab_page(self, element):
+
+        if hasattr(element.find_parent('wa-tab-page'), 'attrs'):
+            return element
+
+    def return_file_picker(self, element):
+
+        if element.find('wa-file-picker'):
+            return element
+
+    def return_non_blocked_elements(self, elements, reverse):
+
+        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+
+        if isinstance(non_blocked_elements, list):
+            if len(non_blocked_elements) > 1:
+                if reverse:
+                    return non_blocked_elements[::-1]
+            return non_blocked_elements
+        else:
+            return non_blocked_elements
+
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
