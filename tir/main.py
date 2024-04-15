@@ -1,3 +1,5 @@
+import os
+
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
@@ -1468,6 +1470,23 @@ class Webapp():
         """
         return self.__webapp.SetCalendar(day, month, year)
 
+    def ReplaceSlash(self, path):
+        """
+
+        :param path: Path that will be normalized depending on operating system(Windows, Linux).
+        :type path: str
+        :return: Returns the path with the correct slash according to the OS
+        """
+        return self.__webapp.replace_slash(path)
+
+    def CurrentWorkDirectory(self):
+
+        """
+
+        :return: Returns the current working directory
+        """
+
+        return os.chmod()
 
 class Apw():
 
@@ -1853,3 +1872,36 @@ class Poui():
         >>> oHelper.ClickIcon(label='Delete', class_name='po-icon po-icon-delete')
         """
         self.__poui.click_icon(label, class_name, position)
+
+    def ClickAvatar(self, position=1):
+        """
+
+        Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-avatar
+
+        :param position: - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickAvatar(position=1)
+        >>> oHelper.ClickAvatar()
+        """
+        self.__poui.click_avatar(position)
+
+    def ClickPopup(self, label):
+        """Click on the POUI Profile Avatar icon.
+        https://po-ui.io/documentation/po-popup
+
+        :param label:
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickPopup(label="Popup Item")
+        >>> oHelper.ClickPopup()
+        """
+        self.__poui.click_popup(label)
+
