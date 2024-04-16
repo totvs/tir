@@ -776,18 +776,32 @@ class WebappInternal(Base):
             self.switch_to_iframe()
 
         click = 1
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and self.element_is_displayed(button()):
-            logger().info('Clicking on Button')
-            self.wait_blocker()
-            self.click(button(), enum.ClickType(click))
-            if self.config.poui_login:
-                break
+        if self.config.poui_login:
+            num_of_trying = 0
+            max_num_of_trying = 5
 
-            click += 1
-            time.sleep(2)
-            if click == 4:
-                click = 1
+            self.switch_to_iframe()
+            logger().info('Clicking on Button')
+
+            self.wait_blocker()
+            while max_num_of_trying >= num_of_trying:
+                try:
+                    self.click(button(), enum.ClickType(click))
+                    time.sleep(1)
+                except:
+                    logger().info('Button click completed')
+                    break
+                num_of_trying += 1
+        else:
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and self.element_is_displayed(button()):
+                logger().info('Clicking on Button')
+                self.wait_blocker()
+                self.click(button(), enum.ClickType(click))
+                time.sleep(2)
+                click += 1
+                if click == 4:
+                    click = 1
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -809,8 +823,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
-        base_dates = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
             if self.config.poui_login:
@@ -867,8 +880,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
-        group_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
             if self.config.poui_login:
@@ -925,8 +937,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
-        branch_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
             if self.config.poui_login:
@@ -985,7 +996,7 @@ class WebappInternal(Base):
         env_value = ''
         environment_element = None
         enable = True
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
 
             if self.config.poui_login:
@@ -4846,8 +4857,8 @@ class WebappInternal(Base):
         >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
 
-        self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
+        self.wait_blocker()
         grid_number -= 1
         if not select_all:
             fields = list(map(lambda x: x.strip(), fields.split(',')))
@@ -4929,7 +4940,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                     element(), Keys.ENTER).perform()
             elif click_type == 4:
-                self.send_action(action=self.double_click, element=element)
+                self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
 
@@ -5022,7 +5033,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
-                    logger().debug(f'{last_box_state}')
+                    logger().debug(f'Before: {last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -5060,6 +5071,7 @@ class WebappInternal(Base):
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
+                        logger().debug(f'After: {new_box_state}')
                         success = last_box_state != new_box_state
                         click_type += 1
                         if click_type > 4:
@@ -5508,7 +5520,20 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
+                        grids = self.get_grid(grid_list=True)
+                        if grids and key == "DELETE":
+                            rows = list(map(lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(x)), grids))
+                            rows = self.flatten_list(rows)
+                            rows_before = list(map(lambda x: x.get_attribute('style'), rows))
                         success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
+                        if key == "DELETE" and grids and rows_before:
+                            rows_after = list(map(lambda x: x.get_attribute('style'), rows))
+                            if rows_after == rows_before:
+                                self.send_action(
+                                    action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform,
+                                    wait_change=False)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5535,6 +5560,15 @@ class WebappInternal(Base):
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             logger().exception(str(error))
+
+    def flatten_list(self, matrix):
+        flattened_list = []
+        for element in matrix:
+            if isinstance(element, list):
+                flattened_list.extend(self.flatten_list(element))
+            else:
+                flattened_list.append(element)
+        return flattened_list
 
     def supported_keys(self, key = ""):
         """
@@ -6157,8 +6191,12 @@ class WebappInternal(Base):
                                 time.sleep(1)
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
-                            while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                grid_class= grids[field[2]].attrs['class']
+                            while (time.time() < endtime_open_cell and not self.wait_element_timeout(term='wa-dialog',
+                                                                                                     scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                                                     position=tmodal_layer + 1,
+                                                                                                     timeout=10,
+                                                                                                     main_container='body')):
+                                grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
@@ -6859,7 +6897,8 @@ class WebappInternal(Base):
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
-                                if column_number == 0 and click_attempts > 3:
+                                if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
+                                        "class") and click_attempts > 3:
                                     break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
@@ -7962,7 +8001,7 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -7977,8 +8016,8 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
+                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8044,6 +8083,7 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -8054,8 +8094,8 @@ class WebappInternal(Base):
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
-            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
+            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
             logger().info("Start while timeout: parameter_url")
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -10265,7 +10305,7 @@ class WebappInternal(Base):
             if hora_termino:
                 line = re.sub(hora_termino.group(0), self.language.end_time+': 00:00:00', line)
             if slash:
-                line = re.sub(slash.group(0), '@', line) 
+                line = re.sub(slash.group(0), '@', line)
 
         else:
 
