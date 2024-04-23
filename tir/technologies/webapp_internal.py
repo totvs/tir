@@ -5667,7 +5667,7 @@ class WebappInternal(Base):
                     self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
-                if self.driver.switch_to_active_element() != element:
+                if self.switch_to_active_element() != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
@@ -6234,17 +6234,16 @@ class WebappInternal(Base):
                                     self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
                                                     locator=By.XPATH, timeout=True)
                                     logger().debug(f"Sending keys: {user_value}")
-                                    self.try_send_keys(selenium_input, user_value, try_counter)
+
+                                    selenium_input().send_keys(Keys.HOME)
+                                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                                    ActionChains(self.driver).move_to_element(selenium_input()).send_keys(user_value).perform()
+
                                     self.wait_blocker()
                                     if self.grid_memo_field:
                                         self.SetButton('Ok')
                                         check_value = False
                                         self.grid_memo_field = False
-
-                                    if try_counter < 2:
-                                        try_counter += 1
-                                    else:
-                                        try_counter = 0
 
                                     modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
 
@@ -7245,11 +7244,11 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            self.driver.switch_to.active_element
         except NoSuchElementException:
             return None
         except Exception as e:
-            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
+            logger().debug(f"Warning switch_to.active_element exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False, second_term=None):
@@ -7639,6 +7638,11 @@ class WebappInternal(Base):
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
+
+        ActionChains(self.driver).send_keys(Keys.HOME).perform()
+        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+        ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(),
+                                                                                           key).perform()
         
         if try_counter == 0:
             element_function().send_keys(Keys.HOME)

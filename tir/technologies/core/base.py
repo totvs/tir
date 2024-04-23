@@ -1120,12 +1120,14 @@ class Base(unittest.TestCase):
             log_path = os.devnull
 
             firefox_options = FirefoxOpt()
-            firefox_options.headless = self.config.headless
+            if self.config.headless:
+                firefox_options.add_argument('-headless')
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
-            chrome_options.headless = self.config.headless
+            if self.config.headless:
+                chrome_options.add_argument('--headless=new')
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
