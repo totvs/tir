@@ -1,3 +1,4 @@
+import platform
 import re
 import time
 import unittest
@@ -1111,6 +1112,7 @@ class Base(unittest.TestCase):
                 logger().debug(f'sc_query exception: {err}')
 
         logger().info(f'TIR Version: {__version__}')
+        logger().info(f'Python Version: {platform.python_version()}')
         logger().info("Starting the browser")
         if self.config.browser.lower() == "firefox":
             if sys.platform == 'linux':
