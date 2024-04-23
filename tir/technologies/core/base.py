@@ -21,7 +21,9 @@ from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOpt
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
 from datetime import datetime
@@ -179,7 +181,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.click(element(), click_type=enum.ClickType.JS)
         """
@@ -246,7 +248,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.double_click(element())
         """
@@ -332,7 +334,7 @@ class Base(unittest.TestCase):
                     return False
 
                 try:
-                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
+                    container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
                     return False
             else:
@@ -525,7 +527,7 @@ class Base(unittest.TestCase):
                 return getIframe()
                 """
                 soup = BeautifulSoup(self.driver.execute_script(script),'html.parser')
-                self.driver.switch_to.frame(self.driver.find_element_by_css_selector("iframe[class=session]"))
+                self.driver.switch_to.frame(self.driver.find_element(By.CSS_SELECTOR, "iframe[class=session]"))
 
             return soup
             
@@ -545,7 +547,7 @@ class Base(unittest.TestCase):
             iframe_displayed = None
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not iframes:
-                iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
+                iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
 
                 if iframes:
                     iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
@@ -570,7 +572,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.get_element_text(element())
         """
@@ -595,7 +597,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.get_element_value(element())
         """
@@ -643,7 +645,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining an element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
@@ -721,7 +723,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining an element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
@@ -808,7 +810,7 @@ class Base(unittest.TestCase):
             combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
                                                       self.soup_to_selenium(element)))
         else:
-            combo = Select(self.driver.find_element_by_xpath(xpath_soup(element)))
+            combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
 
         return combo
 
@@ -838,7 +840,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method with a string
         >>> self.send_keys(element(), "Text")
         >>> #Calling the method with a Key
@@ -888,7 +890,7 @@ class Base(unittest.TestCase):
         Usage:
 
         >>> #Defining the element:
-        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
         >>> #Calling the method
         >>> text = self.set_element_focus(element())
         """   
@@ -921,7 +923,7 @@ class Base(unittest.TestCase):
 
         if soup_object is None:
             raise AttributeError
-        return next(iter(self.driver.find_elements_by_xpath(xpath_soup(soup_object))), None)
+        return next(iter(self.driver.find_elements(by=By.XPATH, value=xpath_soup(soup_object))), None)
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None):
         """
@@ -1118,11 +1120,14 @@ class Base(unittest.TestCase):
             log_path = os.devnull
 
             firefox_options = FirefoxOpt()
-            firefox_options.set_headless(self.config.headless)
-            self.driver = webdriver.Firefox(options=firefox_options, executable_path=driver_path, log_path=log_path)
+            if self.config.headless:
+                firefox_options.add_argument('-headless')
+            service = FirefoxService(executable_path=driver_path, log_path=log_path)
+            self.driver = webdriver.Firefox(options=firefox_options, service=service)
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
-            chrome_options.set_headless(self.config.headless)
+            if self.config.headless:
+                chrome_options.add_argument('--headless=new')
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
@@ -1272,7 +1277,7 @@ class Base(unittest.TestCase):
         """
         """
         self.driver.switch_to_default_content()
-        return self.driver.find_elements_by_css_selector(selector)
+        return self.driver.find_elements(By.CSS_SELECTOR, selector)
 
     def webapp_shadowroot(self, shadow_root=True):
         """
@@ -1349,8 +1354,8 @@ class Base(unittest.TestCase):
 
         if element:
             try:
-                if element.find_element('css selector', 'select'):
-                    element = element.find_element('css selector', 'select')
+                if element.find_element(By.CSS_SELECTOR, 'select'):
+                    element = element.find_element(By.CSS_SELECTOR, 'select')
             except:
                 pass
 
