@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Test Interface Robot &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -84,7 +83,7 @@
            <div itemprop="articleBody">
              
   <section id="test-interface-robot">
-<h1>Test Interface Robot<a class="headerlink" href="#test-interface-robot" title="Permalink to this heading"></a></h1>
+<h1>Test Interface Robot<a class="headerlink" href="#test-interface-robot" title="Link to this heading"></a></h1>
 <a class="reference internal image-reference" href="_images/completoCor.png"><img alt="_images/completoCor.png" src="_images/completoCor.png" style="width: 800px;" /></a>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">User Documentation:</span></p>
@@ -113,6 +112,7 @@
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ClickMenuFunctional"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickMenuFunctional()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ClickMenuPopUpItem"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickMenuPopUpItem()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ClickTree"><code class="docutils literal notranslate"><span class="pre">Webapp.ClickTree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.CurrentWorkDirectory"><code class="docutils literal notranslate"><span class="pre">Webapp.CurrentWorkDirectory()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.F3"><code class="docutils literal notranslate"><span class="pre">Webapp.F3()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.Finish"><code class="docutils literal notranslate"><span class="pre">Webapp.Finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.GetConfigValue"><code class="docutils literal notranslate"><span class="pre">Webapp.GetConfigValue()</span></code></a></li>
@@ -132,6 +132,7 @@
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.Program"><code class="docutils literal notranslate"><span class="pre">Webapp.Program()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ProgramScreen"><code class="docutils literal notranslate"><span class="pre">Webapp.ProgramScreen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.QueryExecute"><code class="docutils literal notranslate"><span class="pre">Webapp.QueryExecute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ReplaceSlash"><code class="docutils literal notranslate"><span class="pre">Webapp.ReplaceSlash()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.ReportComparison"><code class="docutils literal notranslate"><span class="pre">Webapp.ReportComparison()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.RestoreParameters"><code class="docutils literal notranslate"><span class="pre">Webapp.RestoreParameters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="webapp.html#tir.main.Webapp.Screenshot"><code class="docutils literal notranslate"><span class="pre">Webapp.Screenshot()</span></code></a></li>
@@ -168,11 +169,13 @@
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.AssertFalse"><code class="docutils literal notranslate"><span class="pre">Poui.AssertFalse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.AssertTrue"><code class="docutils literal notranslate"><span class="pre">Poui.AssertTrue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.CheckResult"><code class="docutils literal notranslate"><span class="pre">Poui.CheckResult()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickAvatar"><code class="docutils literal notranslate"><span class="pre">Poui.ClickAvatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickButton"><code class="docutils literal notranslate"><span class="pre">Poui.ClickButton()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.ClickByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickPopup"><code class="docutils literal notranslate"><span class="pre">Poui.ClickPopup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickSelect"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSelect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui.html#tir.main.Poui.ClickWidget"><code class="docutils literal notranslate"><span class="pre">Poui.ClickWidget()</span></code></a></li>
@@ -447,10 +450,12 @@
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.check_file"><code class="docutils literal notranslate"><span class="pre">PouiInternal.check_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.check_mot_exec"><code class="docutils literal notranslate"><span class="pre">PouiInternal.check_mot_exec()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.children_element_count"><code class="docutils literal notranslate"><span class="pre">PouiInternal.children_element_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_avatar"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_avatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_button"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_popup"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_popup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="poui_internal.html#tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen_after_routine()</span></code></a></li>
@@ -607,7 +612,7 @@
 </div>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
