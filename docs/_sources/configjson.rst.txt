@@ -21,7 +21,6 @@ These are the accepted config keys, and whether they are required or not:
 - **ExecId**: Execution id. Example: "ExecId":"20201119"
 - **LogUrl1**: service url. Example: "LogUrl1":"http://127.0.0.1:3333/log/"
 - **CheckValue**: Indicates if TIR must check each value after fill. Example: "CheckValue": true
-- **POUILogin**: For new POUI login interface. Example: "POUILogin": true
 - **ChromeDriverAutoInstall**: For chromedriver auto install. Example: "ChromeDriverAutoInstall": true
 - **SSLChromeInstallDisable**: In some cases will be necessary deactivate ssl to download chromedriver automatically. Example: "SSLChromeInstallDisable": true
 - **ScreenShot:** If applicable, add screenshots to help explain your problem.
@@ -48,7 +47,8 @@ These are the accepted config keys, and whether they are required or not:
 - **ParameterUrl:** Filter the correct value to fill
 - **LogHttp:** Add folder to save log by loghttp structure
 - **BaseLine_Spool:** Baseline_Spool is the path of report spool in your environment
-- **POUI:** For new POUI login interface
+- **POUI:** For POUI interfaces.
+- **POUILogin**: For new POUI login protheus interface. Example: "POUILogin": true
 - **LogInfoConfig:** Add set_log_info alternative
 - **Release:** Get the current Release.
 - **TopDataBase:** Get the current Data Base.
