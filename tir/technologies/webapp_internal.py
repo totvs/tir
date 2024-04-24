@@ -107,6 +107,7 @@ class WebappInternal(Base):
         self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
+        self.restart_tss = False
 
         if not Base.driver:
             Base.driver = self.driver
@@ -144,6 +145,8 @@ class WebappInternal(Base):
         """
 
         self.config.poui_login = False
+
+        self.restart_tss = True
 
         try:
 
@@ -773,18 +776,32 @@ class WebappInternal(Base):
             self.switch_to_iframe()
 
         click = 1
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and self.element_is_displayed(button()):
-            logger().info('Clicking on Button')
-            self.wait_blocker()
-            self.click(button(), enum.ClickType(click))
-            if self.config.poui_login:
-                break
+        if self.config.poui_login:
+            num_of_trying = 0
+            max_num_of_trying = 5
 
-            click += 1
-            time.sleep(2)
-            if click == 4:
-                click = 1
+            self.switch_to_iframe()
+            logger().info('Clicking on Button')
+
+            self.wait_blocker()
+            while max_num_of_trying >= num_of_trying:
+                try:
+                    self.click(button(), enum.ClickType(click))
+                    time.sleep(1)
+                except:
+                    logger().info('Button click completed')
+                    break
+                num_of_trying += 1
+        else:
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and self.element_is_displayed(button()):
+                logger().info('Clicking on Button')
+                self.wait_blocker()
+                self.click(button(), enum.ClickType(click))
+                time.sleep(2)
+                click += 1
+                if click == 4:
+                    click = 1
 
         if not self.config.poui_login:
             if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -806,8 +823,7 @@ class WebappInternal(Base):
 
         click_type = 1
         base_date_value = ''
-        base_dates = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
             if self.config.poui_login:
@@ -864,8 +880,7 @@ class WebappInternal(Base):
 
         click_type = 1
         group_value = ''
-        group_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
             if self.config.poui_login:
@@ -922,8 +937,7 @@ class WebappInternal(Base):
 
         click_type = 1
         branch_value = ''
-        branch_element = None
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
 
             if self.config.poui_login:
@@ -982,7 +996,7 @@ class WebappInternal(Base):
         env_value = ''
         environment_element = None
         enable = True
-        endtime = time.time() + self.config.time_out / 5
+        endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
 
             if self.config.poui_login:
@@ -2761,6 +2775,7 @@ class WebappInternal(Base):
                 user_value_size = len(value)
 
                 if valtype == 'D' and user_value_size > interface_value_size:
+                    main_value_bkp = main_value
                     main_value = value[0:6] + value[8:10]
 
                 if self.element_name(element) == "input":
@@ -3170,6 +3185,11 @@ class WebappInternal(Base):
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
                 self.config.poui_login = True
 
+            if self.restart_tss:
+                self.user_screen_tss()
+                self.restart_tss = False
+                return
+
             self.user_screen()
             self.environment_screen()
 
@@ -3193,7 +3213,7 @@ class WebappInternal(Base):
 
     def wait_user_screen(self):
 
-        term = "[name=cGetUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input"
+        term = "[name=cGetUser], [name=cUser]" if self.webapp_shadowroot() else "[name='cGetUser'] > input, [name=cUser]"
         element = None
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
@@ -3523,6 +3543,7 @@ class WebappInternal(Base):
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
+        elements = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3565,7 +3586,10 @@ class WebappInternal(Base):
                         if not element and len(labels_not_none) >= 1:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
-                            return [element]
+                            elements.append(element)
+            if elements:
+                return elements
+
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
@@ -3988,7 +4012,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():  # TODO shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
+                        if not self.webapp_shadowroot():
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -3998,7 +4022,6 @@ class WebappInternal(Base):
                 count += 1
 
             used_ids = []
-            # TODO Desviado shadowRoot, Entender o motivo do codigo abaixo pelo webApp antigo
             if not self.webapp_shadowroot():
                 if not re.search("\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
@@ -4144,6 +4167,7 @@ class WebappInternal(Base):
         >>> # Calling the method to click on a sub item inside a button, this form is an alternative.
         >>> oHelper.SetButton("Other Actions", "Process, Process_02, Process_03")
         """
+        logger().info(f"Clicking on {button}")
 
         initial_program = ['sigaadv', 'sigamdi']
 
@@ -4157,8 +4181,6 @@ class WebappInternal(Base):
 
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
-
-        logger().info(f"Clicking on {button}")
 
         try:
             restore_zoom = False
@@ -4179,7 +4201,7 @@ class WebappInternal(Base):
             starttime = time.time()
 
             if self.config.smart_test:
-                logger().debug(f"***System Info*** Before Clicking on button:")
+                logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
             regex = r"(<[^>]*>)?"
@@ -4795,8 +4817,8 @@ class WebappInternal(Base):
         """
         Clicks on Checkbox elements of a grid.
 
-        :param field: Comma divided string with values that must be checked, combine with content_list.
-        :type field: str
+        :param fields: Comma divided string with values that must be checked, combine with content_list.
+        :type fields: str
         :param content_list: Comma divided string with values that must be checked. - **Default:** "" (empty string)
         :type content_list: str
         :param select_all: Boolean if all options should be selected. - **Default:** False
@@ -4824,8 +4846,8 @@ class WebappInternal(Base):
         >>> test_helper.ClickBox('Numero da SC', 'COM068', itens=True)
         """
 
-        self.wait_blocker()
         logger().info(f"ClickBox - Clicking on {content_list}")
+        self.wait_blocker()
         grid_number -= 1
         if not select_all:
             fields = list(map(lambda x: x.strip(), fields.split(',')))
@@ -4907,7 +4929,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
                     element(), Keys.ENTER).perform()
             elif click_type == 4:
-                self.send_action(action=self.double_click, element=element)
+                self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
 
@@ -5000,6 +5022,7 @@ class WebappInternal(Base):
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
                     last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
+                    logger().debug(f'Before: {last_box_state}')
                     click_type = 1
                     endtime = time.time() + self.config.time_out
                     while time.time() < endtime and not success:
@@ -5037,6 +5060,7 @@ class WebappInternal(Base):
                             tr = grid.select('tbody > tr')
                             td = next(iter(tr[index].select('td')))
                             new_box_state = td.attrs['style']
+                        logger().debug(f'After: {new_box_state}')
                         success = last_box_state != new_box_state
                         click_type += 1
                         if click_type > 4:
@@ -5485,7 +5509,20 @@ class WebappInternal(Base):
                     if grid:
                         if key != "DOWN":
                             self.LoadGrid()
+                        grids = self.get_grid(grid_list=True)
+                        if grids and key == "DELETE":
+                            rows = list(map(lambda x: self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(x)), grids))
+                            rows = self.flatten_list(rows)
+                            rows_before = list(map(lambda x: x.get_attribute('style'), rows))
                         success = self.send_action(action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform, wait_change=wait_change)
+                        if key == "DELETE" and grids and rows_before:
+                            rows_after = list(map(lambda x: x.get_attribute('style'), rows))
+                            if rows_after == rows_before:
+                                self.send_action(
+                                    action=ActionChains(self.driver).key_down(self.supported_keys(key)).perform,
+                                    wait_change=False)
                     elif tries > 0:
                         ActionChains(self.driver).key_down(self.supported_keys(key)).perform()
                         tries = 0
@@ -5512,6 +5549,15 @@ class WebappInternal(Base):
             self.log_error(f"SetKey - Screen is not load: {e}")
         except Exception as error:
             logger().exception(str(error))
+
+    def flatten_list(self, matrix):
+        flattened_list = []
+        for element in matrix:
+            if isinstance(element, list):
+                flattened_list.extend(self.flatten_list(element))
+            else:
+                flattened_list.append(element)
+        return flattened_list
 
     def supported_keys(self, key = ""):
         """
@@ -6134,8 +6180,12 @@ class WebappInternal(Base):
                                 time.sleep(1)
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
-                            while (time.time() < endtime_open_cell and not self.element_exists(term=term,scrap_type=enum.ScrapType.CSS_SELECTOR,position=tmodal_layer + 1, main_container='body')):
-                                grid_class= grids[field[2]].attrs['class']
+                            while (time.time() < endtime_open_cell and not self.wait_element_timeout(term='wa-dialog',
+                                                                                                     scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                                                                     position=tmodal_layer + 1,
+                                                                                                     timeout=10,
+                                                                                                     main_container='body')):
+                                grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
                                     self.scroll_to_element(selenium_column())
@@ -6835,7 +6885,8 @@ class WebappInternal(Base):
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
-                                if column_number == 0 and click_attempts > 3:
+                                if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
+                                        "class") and click_attempts > 3:
                                     break
 
                             self.wait_element_is_focused(element_selenium = column_element, time_out = 2)
@@ -7062,7 +7113,7 @@ class WebappInternal(Base):
         regex = self.generate_regex_by_prefixes(prefixes)
 
         #caminho do arquivo csv(SX3)
-        path = os.path.join(os.path.dirname(__file__), r'core\\data\\sx3.csv')
+        path = os.path.join(os.path.dirname(__file__), self.replace_slash(r'core\\data\\sx3.csv'))
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, on_bad_lines='error',
@@ -7244,7 +7295,7 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to.active_element
+            self.driver.switch_to_active_element()
         except NoSuchElementException:
             return None
         except Exception as e:
@@ -7499,15 +7550,6 @@ class WebappInternal(Base):
 
                 self.log_error(f"Button: {button} not found")
 
-    def replace_slash(self, path):
-
-        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
-
-        pattern = re.compile(r'[\/\\]')
-
-        if pattern.findall(path):
-            return pattern.sub(slash, path)
-
     def MessageBoxClick(self, button_text):
         """
         Clicks on desired button inside a Messagebox element.
@@ -7639,12 +7681,11 @@ class WebappInternal(Base):
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        ActionChains(self.driver).send_keys(Keys.HOME).perform()
-        ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-        ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(),
-                                                                                           key).perform()
-        
-        if try_counter == 0:
+        if self.webapp_shadowroot():
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+        elif try_counter == 0:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
@@ -7948,12 +7989,7 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-
-        twebview = True if self.config.json_data['POUILogin'] else False
-
-        term = ".po-page-login-info-field .po-input" if self.config.json_data[
-            'POUILogin'] else "[name='cGetUser'] > input, [name='cGetUser']"
-
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -7968,7 +8004,7 @@ class WebappInternal(Base):
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term=term,
+            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
                 scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
@@ -7984,6 +8020,7 @@ class WebappInternal(Base):
                         branch}&a={value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
+
 
     def SetParameters(self):
         """
@@ -8034,6 +8071,7 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
+        twebview = True if ConfigLoader(self.config_path).poui_login else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -8044,8 +8082,8 @@ class WebappInternal(Base):
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
-        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser']", timeout = 1,
-            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')):
+        while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
+            scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
             logger().info("Start while timeout: parameter_url")
             tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -9324,7 +9362,7 @@ class WebappInternal(Base):
             element_selenium = element
 
         if isinstance(element, list):
-            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split('\\')[-1], inspect.stack()))
+            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
             for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
             element_selenium = next(iter(element),None)
 
@@ -9370,7 +9408,7 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        stack_item_splited = next(iter(map(lambda x: x.filename.split("\\"), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
+        stack_item_splited = next(iter(map(lambda x: x.filename.split(self.replace_slash("\\")), filter(lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))), None)
 
         if stack_item_splited:
             get_file_name = next(iter(list(map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
@@ -9566,8 +9604,20 @@ class WebappInternal(Base):
                     container_text += container_filtered[x].text + ' '
 
             try:
-                text_help_extracted     = container_text[container_text.index(self.language.checkhelp):container_text.index(self.language.checkproblem)]
-                text_problem_extracted  = container_text[container_text.index(self.language.checkproblem):container_text.index(self.language.checksolution)]
+                if self.language.checkproblem in container_text:
+                    text_help_extracted = container_text[
+                                          container_text.index(self.language.checkhelp):container_text.index(
+                                              self.language.checkproblem)]
+                else:
+                    text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
+
+                if self.language.checksolution in container_text:
+                    text_problem_extracted = container_text[
+                                             container_text.index(self.language.checkproblem):container_text.index(
+                                                 self.language.checksolution)]
+                else:
+                    text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
+
                 text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
             except:
                 pass
@@ -9903,7 +9953,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(f"{self.config.csv_path}\\{csv_file}", sep=delimiter, encoding='latin-1', on_bad_lines='error', header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -10013,7 +10063,6 @@ class WebappInternal(Base):
         click_type = 1 if not main_click_type else click_type
 
         endtime = time.time() + self.config.time_out
-        half_endtime = time.time() + self.config.time_out / 2
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
@@ -10169,10 +10218,10 @@ class WebappInternal(Base):
         else:
             auto_file = self.create_auto_file(current_file)
             logger().warning(
-                f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.')
+                self.replace_slash(f'We created a "auto" based in current file in "{self.config.baseline_spool}\\{current_file}". please, if you dont have a base file, make a copy of auto and rename to base then run again.'))
             self.check_file(base_file, current_file)
 
-            with open(f'{self.config.baseline_spool}\\{base_file}') as base_file:
+            with open(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')) as base_file:
                 with open(auto_file) as auto_file:
                     for line_base_file, line_auto_file in zip(base_file, auto_file):
                         if line_base_file != line_auto_file:
@@ -10192,9 +10241,9 @@ class WebappInternal(Base):
 
         file_extension = file[-4:].lower()
 
-        full_path = f'{self.config.baseline_spool}\\{file}'
+        full_path = self.replace_slash(f'{self.config.baseline_spool}\\{file}')
 
-        auto_file_path = f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'
+        auto_file_path = self.replace_slash(f'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}')
 
         if pathlib.Path(f'{auto_file_path}').exists():
             return auto_file_path
@@ -10206,7 +10255,7 @@ class WebappInternal(Base):
                 content = self.sub_string(line, file_extension)
 
                 with open(
-                            rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}',
+                            self.replace_slash(rf'{self.config.baseline_spool}\\{next(iter(file.split(".")))}auto{file_extension}'),
                             "a") as write_file:
                         write_file.write(content)
 
@@ -10274,10 +10323,10 @@ class WebappInternal(Base):
         if not base_file:
             base_file = None
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{base_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{base_file}')).exists():
             self.log_error("Base file doesn't exist! Please confirm the file name and path. Now you can use auto file to rename to base.")
 
-        if not pathlib.Path(f'{self.config.baseline_spool}\\{current_file}').exists():
+        if not pathlib.Path(self.replace_slash(f'{self.config.baseline_spool}\\{current_file}')).exists():
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
 
     def set_multilanguage(self):
