@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Poui Internal &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -81,10 +80,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.check_file"><code class="docutils literal notranslate"><span class="pre">PouiInternal.check_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.check_mot_exec"><code class="docutils literal notranslate"><span class="pre">PouiInternal.check_mot_exec()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.children_element_count"><code class="docutils literal notranslate"><span class="pre">PouiInternal.children_element_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_avatar"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_avatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_popup"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_popup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen_after_routine()</span></code></a></li>
@@ -189,10 +190,10 @@
            <div itemprop="articleBody">
              
   <section id="module-tir">
-<span id="poui-internal"></span><h1>Poui Internal<a class="headerlink" href="#module-tir" title="Permalink to this heading"></a></h1>
+<span id="poui-internal"></span><h1>Poui Internal<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.poui_internal.</span></span><span class="sig-name descname"><span class="pre">PouiInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.poui_internal.</span></span><span class="sig-name descname"><span class="pre">PouiInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal" title="Link to this definition"></a></dt>
 <dd><p>Internal implementation of POUI class.</p>
 <p>This class contains all the methods defined to run Selenium Interface Tests on POUI.</p>
 <p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
@@ -215,7 +216,7 @@
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.ChangeEnvironment">
-<span class="sig-name descname"><span class="pre">ChangeEnvironment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ChangeEnvironment" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ChangeEnvironment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ChangeEnvironment" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the change environment area of Protheus Webapp and
 fills the environment screen.</p>
 <dl class="field-list simple">
@@ -237,7 +238,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.ChangeUser">
-<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ChangeUser" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ChangeUser" title="Link to this definition"></a></dt>
 <dd><p>Change the user then init protheus on home page.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -262,7 +263,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.CheckResult">
-<span class="sig-name descname"><span class="pre">CheckResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">po_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.CheckResult" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CheckResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">po_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.CheckResult" title="Link to this definition"></a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -282,7 +283,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.ClickMenu">
-<span class="sig-name descname"><span class="pre">ClickMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickMenu" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickMenu" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the menuitem of POUI component.
 <a class="reference external" href="https://po-ui.io/documentation/po-menu?view=doc">https://po-ui.io/documentation/po-menu?view=doc</a></p>
 <dl class="field-list simple">
@@ -299,7 +300,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.ClickTable">
-<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickTable" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickTable" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the Table of POUI component.
 <a class="reference external" href="https://po-ui.io/documentation/po-table">https://po-ui.io/documentation/po-table</a></p>
 <dl class="field-list simple">
@@ -325,7 +326,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.ClickWidget">
-<span class="sig-name descname"><span class="pre">ClickWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickWidget" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.ClickWidget" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the Widget or Widget action of POUI component.
 <a class="reference external" href="https://po-ui.io/documentation/po-widget">https://po-ui.io/documentation/po-widget</a></p>
 <dl class="field-list simple">
@@ -347,7 +348,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.Finish">
-<span class="sig-name descname"><span class="pre">Finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.Finish" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.Finish" title="Link to this definition"></a></dt>
 <dd><p>Exit the protheus Webapp.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
@@ -358,7 +359,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.GetText">
-<span class="sig-name descname"><span class="pre">GetText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.GetText" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.GetText" title="Link to this definition"></a></dt>
 <dd><p>This method returns a string from modal based on the string in the left or right position that you send on parameter.</p>
 <p>If the string_left was filled then the right side content is return.</p>
 <p>If the string_right was filled then the left side content is return.</p>
@@ -382,7 +383,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.GetValue">
-<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.GetValue" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.GetValue" title="Link to this definition"></a></dt>
 <dd><p>Gets the current value or text of element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -404,7 +405,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.InputValue">
-<span class="sig-name descname"><span class="pre">InputValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.InputValue" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">InputValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.InputValue" title="Link to this definition"></a></dt>
 <dd><p>Filling input component of POUI
 <a class="reference external" href="https://po-ui.io/documentation/po-input">https://po-ui.io/documentation/po-input</a></p>
 <dl class="field-list simple">
@@ -426,14 +427,14 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.LengthGridLines">
-<span class="sig-name descname"><span class="pre">LengthGridLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.LengthGridLines" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LengthGridLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.LengthGridLines" title="Link to this definition"></a></dt>
 <dd><p>Returns the length of the grid.
 :return:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.LogOff">
-<span class="sig-name descname"><span class="pre">LogOff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.LogOff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LogOff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.LogOff" title="Link to this definition"></a></dt>
 <dd><p>Logs out of the Protheus Webapp.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
@@ -444,7 +445,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.POSearch">
-<span class="sig-name descname"><span class="pre">POSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.POSearch" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">POSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">placeholder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.POSearch" title="Link to this definition"></a></dt>
 <dd><p>Fill the POUI Search component.
 <a class="reference external" href="https://po-ui.io/documentation/po-page-dynamic-search">https://po-ui.io/documentation/po-page-dynamic-search</a></p>
 <dl class="field-list simple">
@@ -462,7 +463,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.POTabs">
-<span class="sig-name descname"><span class="pre">POTabs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.POTabs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">POTabs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.POTabs" title="Link to this definition"></a></dt>
 <dd><p>Clicks on a Label in po-tab.
 <a class="reference external" href="https://po-ui.io/documentation/po-tabs">https://po-ui.io/documentation/po-tabs</a></p>
 <dl class="field-list simple">
@@ -479,7 +480,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.SetValue">
-<span class="sig-name descname"><span class="pre">SetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.SetValue" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.SetValue" title="Link to this definition"></a></dt>
 <dd><p>Sets value of an input element.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -533,7 +534,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.TearDown">
-<span class="sig-name descname"><span class="pre">TearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.TearDown" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">TearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.TearDown" title="Link to this definition"></a></dt>
 <dd><p>Closes the webdriver and ends the test case.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method</span>
@@ -544,7 +545,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.WaitHide">
-<span class="sig-name descname"><span class="pre">WaitHide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitHide" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitHide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitHide" title="Link to this definition"></a></dt>
 <dd><p>Search string that was sent and wait hide the element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -560,7 +561,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.WaitProcessing">
-<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitProcessing" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitProcessing" title="Link to this definition"></a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -576,7 +577,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.WaitShow">
-<span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitShow" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.WaitShow" title="Link to this definition"></a></dt>
 <dd><p>Search string that was sent and wait show the elements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -592,7 +593,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.assert_result">
-<span class="sig-name descname"><span class="pre">assert_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.assert_result" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">assert_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.assert_result" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Asserts the result based on the expected value.</p>
 <dl class="field-list simple">
@@ -609,7 +610,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.change_environment_element_home_screen">
-<span class="sig-name descname"><span class="pre">change_environment_element_home_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.change_environment_element_home_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">change_environment_element_home_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.change_environment_element_home_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>This method wait the element to perform ChangeEnvirionmentm return a soup element.</p>
 <p>Usage:</p>
@@ -621,7 +622,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.check_element_tooltip">
-<span class="sig-name descname"><span class="pre">check_element_tooltip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_element_tooltip" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_element_tooltip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_element_tooltip" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Internal method of ClickIcon.</p>
 <p>Fires the MouseOver event of an element, checks tooltip text, fires the MouseOut event and
@@ -649,12 +650,12 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.check_file">
-<span class="sig-name descname"><span class="pre">check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_file" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>base_file</strong> – </p></li>
-<li><p><strong>current_file</strong> – </p></li>
+<li><p><strong>base_file</strong></p></li>
+<li><p><strong>current_file</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -665,7 +666,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.check_mot_exec">
-<span class="sig-name descname"><span class="pre">check_mot_exec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_mot_exec" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_mot_exec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.check_mot_exec" title="Link to this definition"></a></dt>
 <dd><p>Check MotExec key content</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -676,7 +677,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.children_element_count">
-<span class="sig-name descname"><span class="pre">children_element_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.children_element_count" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">children_element_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.children_element_count" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Returns the count of elements of a certain CSS Selector that exists within a certain element located also via CSS Selector.</p>
 <dl class="field-list simple">
@@ -701,8 +702,29 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_avatar">
+<span class="sig-name descname"><span class="pre">click_avatar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_avatar" title="Link to this definition"></a></dt>
+<dd><p>Click on the POUI Profile Avatar icon.
+<a class="reference external" href="https://po-ui.io/guides/Avatar">https://po-ui.io/guides/Avatar</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – <ul class="simple">
+<li><p><strong>Default:</strong> 1</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickAvatar</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickAvatar</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_button">
-<span class="sig-name descname"><span class="pre">click_button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -715,21 +737,21 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_button_finish">
-<span class="sig-name descname"><span class="pre">click_button_finish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_button_finish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish" title="Link to this definition"></a></dt>
 <dd><p>[internal]</p>
 <p>This method is reponsible to click on button finish</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_button_logoff">
-<span class="sig-name descname"><span class="pre">click_button_logoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_button_logoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff" title="Link to this definition"></a></dt>
 <dd><p>[internal]</p>
 <p>This method is reponsible to click on button finish</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_icon">
-<span class="sig-name descname"><span class="pre">click_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_icon" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_icon" title="Link to this definition"></a></dt>
 <dd><p>Click on the POUI Icon by label, class_name or both.
 <a class="reference external" href="https://po-ui.io/guides/icons">https://po-ui.io/guides/icons</a></p>
 <dl class="field-list simple">
@@ -737,7 +759,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The tooltip name for icon</p></li>
 <li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The POUI class name for icon</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -754,8 +776,26 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_popup">
+<span class="sig-name descname"><span class="pre">click_popup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_popup" title="Link to this definition"></a></dt>
+<dd><p>Click on the POUI Profile Avatar icon.
+<a class="reference external" href="https://po-ui.io/documentation/po-popup">https://po-ui.io/documentation/po-popup</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickPopup</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Popup Item&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickPopup</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_poui_component">
-<span class="sig-name descname"><span class="pre">click_poui_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_poui_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -769,7 +809,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_coin_screen">
-<span class="sig-name descname"><span class="pre">close_coin_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_coin_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Closes the coin screen.</p>
 <p>Usage:</p>
@@ -781,14 +821,14 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine">
-<span class="sig-name descname"><span class="pre">close_coin_screen_after_routine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_coin_screen_after_routine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen_after_routine" title="Link to this definition"></a></dt>
 <dd><p>[internal]
 This method is responsible for closing the “coin screen” that opens after searching for the routine</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_modal">
-<span class="sig-name descname"><span class="pre">close_modal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_modal" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_modal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_modal" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>This method closes the modal in the opening screen.</p>
 <p>Usage:</p>
@@ -800,7 +840,7 @@ This method is responsible for closing the “coin screen” that opens after se
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_resolution_screen">
-<span class="sig-name descname"><span class="pre">close_resolution_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_resolution_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_resolution_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_resolution_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Closes the Alert of resolution screen.</p>
 <p>Usage:</p>
@@ -812,7 +852,7 @@ This method is responsible for closing the “coin screen” that opens after se
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_warning_screen">
-<span class="sig-name descname"><span class="pre">close_warning_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_warning_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_warning_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_warning_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Closes the warning screen.</p>
 <p>Usage:
@@ -822,14 +862,14 @@ Closes the warning screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.close_warning_screen_after_routine">
-<span class="sig-name descname"><span class="pre">close_warning_screen_after_routine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_warning_screen_after_routine" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close_warning_screen_after_routine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.close_warning_screen_after_routine" title="Link to this definition"></a></dt>
 <dd><p>[internal]
 This method is responsible for closing the “warning screen” that opens after searching for the routine</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.containers_filter">
-<span class="sig-name descname"><span class="pre">containers_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">containers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.containers_filter" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">containers_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">containers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.containers_filter" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Filter and remove tsvg class an return a container_filtered</p>
 <p>Usage:</p>
@@ -841,16 +881,16 @@ Filter and remove tsvg class an return a container_filtered</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.coverage">
-<span class="sig-name descname"><span class="pre">coverage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.coverage" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">coverage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.coverage" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.create_auto_file">
-<span class="sig-name descname"><span class="pre">create_auto_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.create_auto_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_auto_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.create_auto_file" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file</strong> – </p>
+<dd class="field-odd"><p><strong>file</strong></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -860,7 +900,7 @@ Filter and remove tsvg class an return a container_filtered</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.create_message">
-<span class="sig-name descname"><span class="pre">create_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MessageType.CORRECT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.create_message" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MessageType.CORRECT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.create_message" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Returns default messages used all throughout the class based on input parameters.</p>
 <p>Each message type has a different number of placeholders to be passed as a list through args parameter:</p>
@@ -885,7 +925,7 @@ Filter and remove tsvg class an return a container_filtered</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.driver_refresh">
-<span class="sig-name descname"><span class="pre">driver_refresh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.driver_refresh" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">driver_refresh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.driver_refresh" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Refresh the driver.</p>
 <p>Usage:</p>
@@ -897,7 +937,7 @@ Filter and remove tsvg class an return a container_filtered</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.element_exists">
-<span class="sig-name descname"><span class="pre">element_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.element_exists" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">element_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.element_exists" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Returns a boolean if element exists on the screen.</p>
 <dl class="field-list simple">
@@ -926,13 +966,13 @@ Filter and remove tsvg class an return a container_filtered</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.element_is_displayed">
-<span class="sig-name descname"><span class="pre">element_is_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.element_is_displayed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">element_is_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.element_is_displayed" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.environment_screen">
-<span class="sig-name descname"><span class="pre">environment_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change_env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.environment_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">environment_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change_env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.environment_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Fills the environment screen of Protheus with the values passed on the Setup method.
 Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
@@ -950,13 +990,13 @@ Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.filter_by_direction">
-<span class="sig-name descname"><span class="pre">filter_by_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_by_direction" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_by_direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_by_direction" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.filter_by_tooltip_value">
-<span class="sig-name descname"><span class="pre">filter_by_tooltip_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_by_tooltip_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_by_tooltip_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_by_tooltip_value" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Filters elements by finding the tooltip value that is shown when mouseover event
 is triggered.</p>
@@ -983,13 +1023,13 @@ is triggered.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.filter_dataframe">
-<span class="sig-name descname"><span class="pre">filter_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_dataframe" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_dataframe" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.filter_is_displayed">
-<span class="sig-name descname"><span class="pre">filter_is_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_is_displayed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_is_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_is_displayed" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Returns only displayed elements.</p>
 <p>Usage:</p>
@@ -1001,7 +1041,7 @@ Returns only displayed elements.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.filter_label_element">
-<span class="sig-name descname"><span class="pre">filter_label_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_label_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_label_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.filter_label_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Filter and remove a specified character with regex, return only displayed elements if &gt; 1.</p>
 <p>Usage:</p>
@@ -1013,7 +1053,7 @@ Filter and remove a specified character with regex, return only displayed elemen
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.find_label_element">
-<span class="sig-name descname"><span class="pre">find_label_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.find_label_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_label_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.find_label_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Find input element next to label containing the label_text parameter.</p>
 <dl class="field-list simple">
@@ -1038,7 +1078,7 @@ Filter and remove a specified character with regex, return only displayed elemen
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_config_value">
-<span class="sig-name descname"><span class="pre">get_config_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_config_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_config_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_config_value" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Json Key in config.json</p>
@@ -1051,32 +1091,32 @@ Filter and remove a specified character with regex, return only displayed elemen
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_distance">
-<span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance" title="Link to this definition"></a></dt>
 <dd><p>[internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_distance_x">
-<span class="sig-name descname"><span class="pre">get_distance_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance_x" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_distance_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance_x" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_distance_y">
-<span class="sig-name descname"><span class="pre">get_distance_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance_y" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_distance_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_distance_y" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_element_size">
-<span class="sig-name descname"><span class="pre">get_element_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_element_size" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_element_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_element_size" title="Link to this definition"></a></dt>
 <dd><p>Internal
 Return Height/Width</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_field">
-<span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_field" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_field" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>This method decides if field would be found by either it’s name or by it’s label.
 Internal method of input_value and CheckResult.</p>
@@ -1104,7 +1144,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_function_from_stack">
-<span class="sig-name descname"><span class="pre">get_function_from_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_function_from_stack" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_function_from_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_function_from_stack" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Gets the function name that called the Webapp class from the call stack.</p>
 <p>Usage:</p>
@@ -1116,12 +1156,12 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_grid_content">
-<span class="sig-name descname"><span class="pre">get_grid_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_grid_content" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_grid_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_grid_content" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_number</strong> – </p></li>
-<li><p><strong>grid_element</strong> – </p></li>
+<li><p><strong>grid_number</strong></p></li>
+<li><p><strong>grid_element</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1132,7 +1172,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_language">
-<span class="sig-name descname"><span class="pre">get_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_language" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_language" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Gets the current language of the html.</p>
 <dl class="field-list simple">
@@ -1152,19 +1192,19 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_position_from_bs_element">
-<span class="sig-name descname"><span class="pre">get_position_from_bs_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_position_from_bs_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_position_from_bs_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_position_from_bs_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_program_name">
-<span class="sig-name descname"><span class="pre">get_program_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_program_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_program_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_program_name" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_release">
-<span class="sig-name descname"><span class="pre">get_release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_release" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_release" title="Link to this definition"></a></dt>
 <dd><p>Gets the current release of the Protheus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1187,7 +1227,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_selected_row">
-<span class="sig-name descname"><span class="pre">get_selected_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_selected_row" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_selected_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_selected_row" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>From a list of rows, filter the selected one.</p>
 <dl class="field-list simple">
@@ -1210,10 +1250,10 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_text">
-<span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_text" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_text" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>string</strong> – </p>
+<dd class="field-odd"><p><strong>string</strong></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -1223,12 +1263,12 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_text_position">
-<span class="sig-name descname"><span class="pre">get_text_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_text_position" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_text_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_text_position" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>string_left</strong> – </p></li>
-<li><p><strong>srting_right</strong> – </p></li>
+<li><p><strong>string_left</strong></p></li>
+<li><p><strong>srting_right</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1239,7 +1279,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_web_value">
-<span class="sig-name descname"><span class="pre">get_web_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_web_value" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_web_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_web_value" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Gets the current value or text of element.</p>
 <dl class="field-list simple">
@@ -1262,7 +1302,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.log_error">
-<span class="sig-name descname"><span class="pre">log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_log_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.log_error" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_log_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.log_error" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Finishes execution of test case with an error and creates the log information for that test.</p>
 <dl class="field-list simple">
@@ -1282,7 +1322,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.log_result">
-<span class="sig-name descname"><span class="pre">log_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">captured_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.log_result" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">captured_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.log_result" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Logs the result of comparison between user value and captured value.</p>
 <dl class="field-list simple">
@@ -1303,7 +1343,7 @@ Internal method of input_value and CheckResult.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.open_csv">
-<span class="sig-name descname"><span class="pre">open_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_csv" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">open_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_csv" title="Link to this definition"></a></dt>
 <dd><p>Returns a dictionary when the file has a header in another way returns a list
 The folder must be entered in the CSVPath parameter in the config.json. Ex:</p>
 <div class="admonition note">
@@ -1358,7 +1398,7 @@ The folder must be entered in the CSVPath parameter in the config.json. Ex:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.open_url_coverage">
-<span class="sig-name descname"><span class="pre">open_url_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">open_url_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Open a webapp url with line parameters
 :param url: server url.
@@ -1374,7 +1414,7 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.po_loading">
-<span class="sig-name descname"><span class="pre">po_loading</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.po_loading" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">po_loading</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.po_loading" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
@@ -1384,13 +1424,13 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.pop_dict_itens">
-<span class="sig-name descname"><span class="pre">pop_dict_itens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.pop_dict_itens" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pop_dict_itens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.pop_dict_itens" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.program_screen">
-<span class="sig-name descname"><span class="pre">program_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.program_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">program_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.program_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Fills the first screen of Protheus with the first program to run and the environment to connect.</p>
 <dl class="field-list simple">
@@ -1410,14 +1450,14 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.reload_user_screen">
-<span class="sig-name descname"><span class="pre">reload_user_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.reload_user_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reload_user_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.reload_user_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Refresh the page - retry load user_screen</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.report_comparison">
-<span class="sig-name descname"><span class="pre">report_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.report_comparison" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">report_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.report_comparison" title="Link to this definition"></a></dt>
 <dd><p>Compare two reports files and if exists show the difference between then if exists.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1458,7 +1498,7 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.restart">
-<span class="sig-name descname"><span class="pre">restart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.restart" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">restart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.restart" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Restarts the Protheus Webapp and fills the initial screens.</p>
 <p>Usage:</p>
@@ -1470,13 +1510,13 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_data">
-<span class="sig-name descname"><span class="pre">return_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_data" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_icon_class">
-<span class="sig-name descname"><span class="pre">return_icon_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_icon_class" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_icon_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_icon_class" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1492,14 +1532,14 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_input_element">
-<span class="sig-name descname"><span class="pre">return_input_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_input_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_input_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_input_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Returns input element based on field</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.return_main_element">
-<span class="sig-name descname"><span class="pre">return_main_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_main_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_main_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.return_main_element" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
@@ -1509,7 +1549,7 @@ Returns input element based on field</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.returns_printable_string">
-<span class="sig-name descname"><span class="pre">returns_printable_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.returns_printable_string" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">returns_printable_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.returns_printable_string" title="Link to this definition"></a></dt>
 <dd><p>Returns a string only is printable characters
 [Internal]
 :param string: string value
@@ -1518,7 +1558,7 @@ Returns input element based on field</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.search_element_position">
-<span class="sig-name descname"><span class="pre">search_element_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_element_position" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">search_element_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_element_position" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Usage:
 &gt;&gt;&gt; # Calling the method
@@ -1527,7 +1567,7 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.search_for_errors">
-<span class="sig-name descname"><span class="pre">search_for_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_for_errors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">search_for_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_for_errors" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Searches for errors and alerts in the screen.
 Usage:
@@ -1537,7 +1577,7 @@ Usage:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.search_text">
-<span class="sig-name descname"><span class="pre">search_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_text" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">search_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.search_text" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Return a element based on text and selector.</p>
 <p>Usage:</p>
@@ -1549,14 +1589,14 @@ Return a element based on text and selector.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.service_process_bat_file">
-<span class="sig-name descname"><span class="pre">service_process_bat_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.service_process_bat_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">service_process_bat_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.service_process_bat_file" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 This method creates a batfile in the root path to kill the process and its children.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.set_log_info">
-<span class="sig-name descname"><span class="pre">set_log_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.set_log_info" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_log_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.set_log_info" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Fills the log information needed by opening the About page.</p>
 <p>Usage:</p>
@@ -1568,12 +1608,12 @@ Fills the log information needed by opening the About page.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.sub_string">
-<span class="sig-name descname"><span class="pre">sub_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_extension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.sub_string" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sub_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_extension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.sub_string" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>line</strong> – </p></li>
-<li><p><strong>file_extension</strong> – </p></li>
+<li><p><strong>line</strong></p></li>
+<li><p><strong>file_extension</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1584,20 +1624,20 @@ Fills the log information needed by opening the About page.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.switch_to_active_element">
-<span class="sig-name descname"><span class="pre">switch_to_active_element</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.switch_to_active_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">switch_to_active_element</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.switch_to_active_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Call switch_to_active_element method</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.try_click">
-<span class="sig-name descname"><span class="pre">try_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.try_click" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">try_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.try_click" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.try_send_keys">
-<span class="sig-name descname"><span class="pre">try_send_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.try_send_keys" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">try_send_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.try_send_keys" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Tries to send value to element using different techniques.
 Meant to be used inside of a loop.</p>
@@ -1619,7 +1659,7 @@ Meant to be used inside of a loop.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.user_screen">
-<span class="sig-name descname"><span class="pre">user_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">admin_user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.user_screen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">admin_user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.user_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Fills the user login screen of Protheus with the user and password located on config.json.</p>
 <p>Usage:</p>
@@ -1631,7 +1671,7 @@ Meant to be used inside of a loop.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element">
-<span class="sig-name descname"><span class="pre">wait_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.CSS_SELECTOR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">presence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.CSS_SELECTOR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">presence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Waits until the desired element is located on the screen.</p>
 <dl class="field-list simple">
@@ -1655,10 +1695,10 @@ Meant to be used inside of a loop.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element_is_blocked">
-<span class="sig-name descname"><span class="pre">wait_element_is_blocked</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_blocked" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element_is_blocked</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_blocked" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parent_id</strong> – </p>
+<dd class="field-odd"><p><strong>parent_id</strong></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -1668,14 +1708,14 @@ Meant to be used inside of a loop.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element_is_focused">
-<span class="sig-name descname"><span class="pre">wait_element_is_focused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selenium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_focused" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element_is_focused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selenium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_focused" title="Link to this definition"></a></dt>
 <dd><p>[ Internal ]
 Wait element Lose focus</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element_is_not_displayed">
-<span class="sig-name descname"><span class="pre">wait_element_is_not_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_soup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_not_displayed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element_is_not_displayed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_soup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_not_displayed" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Wait element.is_displayed() return false
 :param element_soup: The element soup.
@@ -1693,14 +1733,14 @@ Wait element Lose focus</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element_is_not_focused">
-<span class="sig-name descname"><span class="pre">wait_element_is_not_focused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selenium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_not_focused" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element_is_not_focused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selenium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_is_not_focused" title="Link to this definition"></a></dt>
 <dd><p>[ Internal ]
 Wait element Lose focus</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_element_timeout">
-<span class="sig-name descname"><span class="pre">wait_element_timeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">presence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.tmodaldialog,.ui-dialog,</span> <span class="pre">body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_timeout" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_element_timeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">presence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.tmodaldialog,.ui-dialog,</span> <span class="pre">body'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_element_timeout" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Waits until the desired element is located on the screen or until the timeout is met.</p>
 <dl class="field-list simple">
@@ -1726,14 +1766,14 @@ Wait element Lose focus</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.wait_until_to">
-<span class="sig-name descname"><span class="pre">wait_until_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'element_to_be_clickable'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_until_to" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">wait_until_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'element_to_be_clickable'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.wait_until_to" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>This method is responsible for encapsulating “wait.until”.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.web_scrap">
-<span class="sig-name descname"><span class="pre">web_scrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.web_scrap" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">web_scrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scrap_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ScrapType.TEXT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional_term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.web_scrap" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Returns a BeautifulSoup object list based on the search parameters.</p>
 <p>Does not support ScrapType.XPATH as scrap_type parameter value.</p>
