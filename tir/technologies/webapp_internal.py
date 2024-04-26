@@ -2821,6 +2821,8 @@ class WebappInternal(Base):
                             #if Number input
                             self.set_element_focus(input_field())
                             self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
+                            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
                             input_field().send_keys(main_value)
 
                         if self.check_mask(input_field()):
