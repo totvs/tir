@@ -6193,8 +6193,7 @@ class WebappInternal(Base):
                                     self.scroll_to_element(selenium_column())
                                     self.set_element_focus(selenium_column())
                                 try:
-                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
-                                        selenium_column(), Keys.ENTER).perform()
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys(Keys.ENTER).perform()
                                 except WebDriverException:
                                     try:
                                         self.send_keys(selenium_column(), Keys.ENTER)
