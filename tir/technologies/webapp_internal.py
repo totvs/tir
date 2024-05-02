@@ -4919,17 +4919,16 @@ class WebappInternal(Base):
         time.sleep(1)
         try:
             if click_type == 1:
+                element().click()
+                ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+            if click_type == 2:
                 ActionChains(self.driver).move_to_element(element()).click(element()).perform()
                 event = "var evt = document.createEvent('MouseEvents');\
                     evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
                     arguments[0].dispatchEvent(evt);"
                 self.driver.execute_script(event, element())
-            elif click_type == 2:
-                self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 3:
-                element().click()
-                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                    element(), Keys.ENTER).perform()
+                self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
