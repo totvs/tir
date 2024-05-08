@@ -6753,7 +6753,7 @@ class WebappInternal(Base):
                     self.set_element_focus(second_column())
 
                     try:
-                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
+                        ActionChains(self.driver).move_to_element(second_column()).send_keys(Keys.DOWN).perform()
                     except MoveTargetOutOfBoundsException:
                         ActionChains(self.driver).send_keys(Keys.DOWN).perform()
 
