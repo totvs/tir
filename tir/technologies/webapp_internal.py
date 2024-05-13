@@ -2990,7 +2990,8 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True,
+                    direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
@@ -3038,39 +3039,42 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position, ignore_case)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field, user_value)
+            current_value = self.result_checkbox(field, user_value, position)
             self.log_result(field, user_value, current_value)
         else:
-            field = re.sub(r"(\:*)(\?*)", "", field).strip()
-            if name_attr:
-                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                self.wait_element(field)
-
-            element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
-            if not element:
-                self.log_error(f"Couldn't find element: {field}")
-
-            if self.webapp_shadowroot():
-                field_element = lambda : self.soup_to_selenium(element)
-            else:
-                field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
-
-            self.set_element_focus(field_element())
-            self.scroll_to_element(field_element())
             endtime = time.time() + self.config.time_out
-            current_value =  ''
-            while(time.time() < endtime and not current_value):
+            current_value = ''
+            while (time.time() < endtime and not current_value):
+                field = re.sub(r"(\:*)(\?*)", "", field).strip()
+                if name_attr:
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      position=position - 1)
+                else:
+                    self.wait_element(field, position=position - 1)
+
+                element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction,
+                                         position=position)
+                if not element:
+                    self.log_error(f"Couldn't find element: {field}")
+
+                if self.webapp_shadowroot():
+                    field_element = lambda: self.soup_to_selenium(element)
+                else:
+                    field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
+
+                self.set_element_focus(field_element())
+                self.scroll_to_element(field_element())
+
                 if self.get_web_value(field_element()):
                     current_value = self.get_web_value(field_element()).strip()
 
             logger().info(f"Value for Field {field} is: {current_value}")
 
-            #Remove mask if present.
+            # Remove mask if present.
             if self.check_mask(field_element()):
-                current_value = self.remove_mask(current_value).replace(',','')
-                user_value = self.remove_mask(user_value).replace(',','')
-            #If user value is string, Slice string to match user_value's length
+                current_value = self.remove_mask(current_value).replace(',', '')
+                user_value = self.remove_mask(user_value).replace(',', '')
+            # If user value is string, Slice string to match user_value's length
             if type(current_value) is str:
                 current_value = current_value[0:len(str(user_value))]
 
