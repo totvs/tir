@@ -222,7 +222,7 @@ class Log:
 
         table_rows_has_line = False
 
-        for row in range(0, len(self.table_rows[1:])):
+        for row in range(0, len(self.table_rows)):
             if self.table_rows[row][3] == '':
                 self.table_rows[row][3] = 'NO PROGRAM'
 
