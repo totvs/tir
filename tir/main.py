@@ -1905,3 +1905,32 @@ class Poui():
         """
         self.__poui.click_popup(label)
 
+    def WaitShow(self, string, timeout=None, throw_error = True):
+        """
+        Search string that was sent and wait show the elements.
+
+        :param itens: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitShow("Processing")
+        """
+        self.__poui.WaitShow(string, timeout, throw_error)
+
+    def WaitProcessing(self, itens, timeout=None):
+        """
+        Uses WaitShow and WaitHide to Wait a Processing screen
+
+        :param itens: List of itens that will hold the wait.
+        :type itens: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.WaitProcessing("Processing")
+        """
+        self.__poui.WaitProcessing(itens, timeout)

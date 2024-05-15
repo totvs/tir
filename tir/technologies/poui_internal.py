@@ -1814,7 +1814,10 @@ class PouiInternal(Base):
 
             element = None
             
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = next(iter(element), None)
+            if hasattr(element, "attrs") and "hidden" in element.attrs:
+                element = []
 
             if not element:
                 return
@@ -1848,7 +1851,7 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay, .tgroupbox", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
@@ -3334,7 +3337,8 @@ class PouiInternal(Base):
                         element = po_widget[position]
 
                         if action:
-                            element = next(iter(element.select("[class*='po-widget-action']")), None)
+                            element = next(iter(list(filter(lambda x: action.lower() in x.text.lower(),
+                                                            element.select("[class*='po-widget-action']")))), None)
                     else:
                         self.log_error("Couldn't find element")
 
