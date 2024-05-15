@@ -3137,6 +3137,7 @@ class WebappInternal(Base):
                     selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     value = self.get_web_value(selenium_element())
         else:
+            self.check_grid_appender(line=line - 1, column=field, grid_number=grid_number - 1, position=position)
             field_array = [line-1, field, "", grid_number-1]
             x3_dictionaries = self.create_x3_tuple()
             value = self.check_grid(field_array, x3_dictionaries, get_value=True, position=position)
@@ -5895,7 +5896,7 @@ class WebappInternal(Base):
 
         self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
 
-    def check_grid_appender(self, line, column, value, grid_number=0, position=1, ignore_case=True):
+    def check_grid_appender(self, line, column, value=None, grid_number=0, position=1, ignore_case=True):
         """
         [Internal]
 
