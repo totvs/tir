@@ -2812,7 +2812,7 @@ class WebappInternal(Base):
                                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys(" ").perform()
                             else:
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
