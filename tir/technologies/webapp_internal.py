@@ -3142,7 +3142,8 @@ class WebappInternal(Base):
                     value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
-            x3_dictionaries = self.create_x3_tuple()
+            if re.match(r"\w+(_)", field_array[1]):
+                x3_dictionaries = self.get_x3_dictionaries([field_array[1].strip()])
             value = self.check_grid(field_array, x3_dictionaries, get_value=True, position=position)
 
         logger().info(f"Current value: {value}")
@@ -5899,7 +5900,7 @@ class WebappInternal(Base):
 
         self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
 
-    def check_grid_appender(self, line, column, value, grid_number=0, position=1, ignore_case=True):
+    def check_grid_appender(self, line, column, value=None, grid_number=0, position=1, ignore_case=True):
         """
         [Internal]
 
