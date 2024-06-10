@@ -223,7 +223,7 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
@@ -2405,9 +2405,9 @@ class WebappInternal(Base):
 
             label_s  = lambda:self.soup_to_selenium(label)
             if self.webapp_shadowroot():
-                xy_label = label_s().location
+                xy_label = lambda: label_s().location
             else:
-                xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+                xy_label = lambda: self.driver.execute_script('return arguments[0].getPosition()', label_s())
 
             if input_field:
                 active_tab = self.filter_active_tabs(container)
@@ -2453,8 +2453,8 @@ class WebappInternal(Base):
                     list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
-            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
+            position_list = self.filter_by_direction(xy_label(), width_safe, height_safe, position_list, direction)
+            distance      = self.get_distance_by_direction(xy_label(), position_list, direction)
             if distance:
                 elem          = min(distance, key = lambda x: abs(x[1]))
                 elem          = list_in_range[elem[0]]
@@ -4216,7 +4216,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             starttime = time.time()
 
-            if self.config.smart_test:
+            if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
@@ -4415,7 +4415,7 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
@@ -7841,7 +7841,7 @@ class WebappInternal(Base):
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 
