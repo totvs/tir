@@ -2278,7 +2278,7 @@ class PouiInternal(Base):
         if self.config.coverage:
             self.coverage()
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 

@@ -223,7 +223,7 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
@@ -4211,7 +4211,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             starttime = time.time()
 
-            if self.config.smart_test:
+            if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
@@ -4410,7 +4410,7 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
@@ -7836,7 +7836,7 @@ class WebappInternal(Base):
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 
