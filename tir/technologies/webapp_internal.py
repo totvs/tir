@@ -223,7 +223,7 @@ class WebappInternal(Base):
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
@@ -2405,9 +2405,9 @@ class WebappInternal(Base):
 
             label_s  = lambda:self.soup_to_selenium(label)
             if self.webapp_shadowroot():
-                xy_label = label_s().location
+                xy_label = lambda: label_s().location
             else:
-                xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
+                xy_label = lambda: self.driver.execute_script('return arguments[0].getPosition()', label_s())
 
             if input_field:
                 active_tab = self.filter_active_tabs(container)
@@ -2453,8 +2453,8 @@ class WebappInternal(Base):
                     list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
-            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
+            position_list = self.filter_by_direction(xy_label(), width_safe, height_safe, position_list, direction)
+            distance      = self.get_distance_by_direction(xy_label(), position_list, direction)
             if distance:
                 elem          = min(distance, key = lambda x: abs(x[1]))
                 elem          = list_in_range[elem[0]]
@@ -2981,7 +2981,8 @@ class WebappInternal(Base):
         logger().debug(f"Current value: {web_value}")
         return web_value
 
-    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
+    def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True,
+                    direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
         Checks if a field has the value the user expects.
 
@@ -3029,39 +3030,41 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position, ignore_case)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field, user_value)
+            current_value = self.result_checkbox(field, user_value, position)
             self.log_result(field, user_value, current_value)
         else:
-            field = re.sub(r"(\:*)(\?*)", "", field).strip()
-            if name_attr:
-                self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                self.wait_element(field)
+            endtime = time.time() + self.config.time_out
+            current_value = ''
+            while (time.time() < endtime and not current_value):
+                field = re.sub(r"(\:*)(\?*)", "", field).strip()
+                if name_attr:
+                    self.wait_element(term=f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      position=position - 1)
+                else:
+                    self.wait_element(field, position=position - 1)
 
-            element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction)
-            if not element:
-                self.log_error(f"Couldn't find element: {field}")
+                element = self.get_field(field, name_attr=name_attr, input_field=input_field, direction=direction,
+                                         position=position)
+                if not element:
+                    self.log_error(f"Couldn't find element: {field}")
+
 
             if self.webapp_shadowroot():
                 field_element = lambda : self.soup_to_selenium(element)
             else:
                 field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
 
-            self.set_element_focus(field_element())
-            self.scroll_to_element(field_element())
-            endtime = time.time() + self.config.time_out
-            current_value =  ''
-            while(time.time() < endtime and not current_value):
+
                 if self.get_web_value(field_element()):
                     current_value = self.get_web_value(field_element()).strip()
 
             logger().info(f"Value for Field {field} is: {current_value}")
 
-            #Remove mask if present.
+            # Remove mask if present.
             if self.check_mask(field_element()):
-                current_value = self.remove_mask(current_value).replace(',','')
-                user_value = self.remove_mask(user_value).replace(',','')
-            #If user value is string, Slice string to match user_value's length
+                current_value = self.remove_mask(current_value).replace(',', '')
+                user_value = self.remove_mask(user_value).replace(',', '')
+            # If user value is string, Slice string to match user_value's length
             if type(current_value) is str:
                 current_value = current_value[0:len(str(user_value))]
 
@@ -3129,7 +3132,8 @@ class WebappInternal(Base):
                     value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
-            x3_dictionaries = self.create_x3_tuple()
+            if re.match(r"\w+(_)", field_array[1]):
+                x3_dictionaries = self.get_x3_dictionaries([field_array[1].strip()])
             value = self.check_grid(field_array, x3_dictionaries, get_value=True, position=position)
 
         logger().info(f"Current value: {value}")
@@ -4202,7 +4206,7 @@ class WebappInternal(Base):
             endtime = time.time() + self.config.time_out
             starttime = time.time()
 
-            if self.config.smart_test:
+            if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
@@ -4401,7 +4405,7 @@ class WebappInternal(Base):
         except Exception as error:
             logger().exception(str(error))
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
@@ -5885,7 +5889,7 @@ class WebappInternal(Base):
 
         self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
 
-    def check_grid_appender(self, line, column, value, grid_number=0, position=1, ignore_case=True):
+    def check_grid_appender(self, line, column, value=None, grid_number=0, position=1, ignore_case=True):
         """
         [Internal]
 
@@ -7824,7 +7828,7 @@ class WebappInternal(Base):
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")
 
-        if self.config.smart_test:
+        if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** in log_error():")
             system_info()
 
