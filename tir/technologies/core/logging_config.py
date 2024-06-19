@@ -99,7 +99,6 @@ def logger(logger='root'):
         }
 
     dictConfig(logging_config)
-    logging.getLogger(logger).propagate = False
     return logging.getLogger(logger)
 
 def get_file_name(file_name):

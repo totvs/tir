@@ -673,7 +673,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot(shadow_root=shadow_root):
             button = lambda: button_element
         else:
-            button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
+            button = lambda: self.driver.find_element_by_xpath(xpath_soup(button_element))
 
         if self.config.poui_login:
             self.switch_to_iframe()
@@ -1091,7 +1091,7 @@ class WebappInternal(Base):
                     element = self.soup_to_selenium(element)
                 element.click()
             else:
-                self.click(self.driver.find_element(By.XPATH, xpath_soup(element)))
+                self.click(self.driver.find_element_by_xpath(xpath_soup(element)))
             self.environment_screen(True)
         else:
             self.log_error("Change Environment method did not find the element to perform the click or the element was not visible on the screen.")
@@ -1198,7 +1198,7 @@ class WebappInternal(Base):
                     close_button = list(filter(lambda x: x.text == self.language.close, buttons))
                 close_button = next(iter(close_button),None)
                 time.sleep(0.5)
-                selenium_close_button = lambda: self.driver.find_element(By.XPATH, xpath_soup(close_button))
+                selenium_close_button = lambda: self.driver.find_element_by_xpath(xpath_soup(close_button))
                 if close_button:
                     try:
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = close_button , locator = By.XPATH)
@@ -1622,8 +1622,8 @@ class WebappInternal(Base):
                     tget_img = next(iter(tget.select("img")), None)
                     if tget_img is None or not self.element_is_displayed(tget_img):
                         self.log_error("Couldn't find Program field.")
-                    s_tget = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_input))
-                    s_tget_img = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_img))
+                    s_tget = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_input))
+                    s_tget_img = lambda : self.driver.find_element_by_xpath(xpath_soup(tget_img))
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
                 self.double_click(s_tget())
@@ -1725,7 +1725,7 @@ class WebappInternal(Base):
 
             logger().debug("Field successfully found")
             if(send_key):
-                input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.set_element_focus(input_field())
                 container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
@@ -1737,7 +1737,7 @@ class WebappInternal(Base):
 
             container_end = self.get_current_container()
             if (container['id']  == container_end['id']):
-                input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                input_field = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
 
@@ -1909,7 +1909,7 @@ class WebappInternal(Base):
         if index and not isinstance(search_key, int):
             self.log_error("If index parameter is True, key must be a number!")
 
-        sel_browse_key = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[0]))
+        sel_browse_key = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
 
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
@@ -1947,7 +1947,7 @@ class WebappInternal(Base):
                         if self.webapp_shadowroot():
                             radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
                             if radio:
-                                radio.find_element(By.TAG_NAME, 'input').click()
+                                radio.find_element_by_tag_name('input').click()
                                 success = True
                         else:
                             radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
@@ -1959,7 +1959,7 @@ class WebappInternal(Base):
                     if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                         for element in tradiobuttonitens_ends_dots:
                             if self.webapp_shadowroot():
-                                selenium_input = element.find_element(By.TAG_NAME, 'input')
+                                selenium_input = element.find_element_by_tag_name('input')
                                 self.click(selenium_input)
                             else:
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
@@ -1999,7 +1999,7 @@ class WebappInternal(Base):
                                     time.sleep(0.1)
                                 old_value = self.search_browse_key_input_value(search_elements[1])
 
-                                if not self.driver.find_elements(By.CSS_SELECTOR, ".tradiobuttonitem input"):
+                                if not self.driver.find_elements_by_css_selector(".tradiobuttonitem input"):
                                     self.get_current_DOM()
                                     self.set_element_focus(sel_browse_key())
                                     self.click(sel_browse_key())
@@ -2007,7 +2007,7 @@ class WebappInternal(Base):
 
 
                             if self.webapp_shadowroot():
-                                selenium_input = element.find_element(By.TAG_NAME, 'input')
+                                selenium_input = element.find_element_by_tag_name('input')
                                 self.click(selenium_input)
                             else:
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH )
@@ -2052,7 +2052,7 @@ class WebappInternal(Base):
                         if trb_input:
                             trb_input.click()
                     else:
-                        sel_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(trb_input))
+                        sel_input = lambda: self.driver.find_element_by_xpath(xpath_soup(trb_input))
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
                         self.click(sel_input())
 
@@ -2088,7 +2088,7 @@ class WebappInternal(Base):
 
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
-        sel_browse_column = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[0]))
+        sel_browse_column = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[0]))
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
         self.set_element_focus(sel_browse_column())
@@ -2161,8 +2161,8 @@ class WebappInternal(Base):
         """
         self.wait_blocker()
 
-        sel_browse_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[1]))
-        sel_browse_icon = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[2]))
+        sel_browse_input = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[1]))
+        sel_browse_icon = lambda: self.driver.find_element_by_xpath(xpath_soup(search_elements[2]))
 
         if self.webapp_shadowroot():
             input_lenght = ''
@@ -2812,18 +2812,27 @@ class WebappInternal(Base):
                                 Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                             time.sleep(0.1)
                             if main_value == '':
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys(" ").perform()
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), " ").perform()
                             else:
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                input_field().send_keys(main_value)
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                if valtype == 'D' and user_value_size > interface_value_size:
+                                    main_value = main_value_bkp
+                        #if Number input
                         else:
-                            #if Number input
-                            self.set_element_focus(input_field())
-                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                            ActionChains(self.driver).send_keys(Keys.HOME).perform()
-                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-                            input_field().send_keys(main_value)
+                            tries = 0
+                            try_counter = 1
+                            while(tries < 3):
+                                self.set_element_focus(input_field())
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
+                                self.try_send_keys(input_field, main_value, try_counter)
+                                current_number_value = self.get_web_value(input_field())
+                                if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
+                                    break
+                                tries+=1
+                                try_counter+=1
+
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
@@ -3048,12 +3057,13 @@ class WebappInternal(Base):
                 if not element:
                     self.log_error(f"Couldn't find element: {field}")
 
+                if self.webapp_shadowroot():
+                    field_element = lambda: self.soup_to_selenium(element)
+                else:
+                    field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
-            if self.webapp_shadowroot():
-                field_element = lambda : self.soup_to_selenium(element)
-            else:
-                field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-
+                self.set_element_focus(field_element())
+                self.scroll_to_element(field_element())
 
                 if self.get_web_value(field_element()):
                     current_value = self.get_web_value(field_element()).strip()
@@ -3128,7 +3138,7 @@ class WebappInternal(Base):
             while ( (time.time() < endtime) and (not element) and (not hasattr(element, "name")) and (not hasattr(element, "parent"))):
                 element = self.get_field(field)
                 if ( hasattr(element, "name") and hasattr(element, "parent") ):
-                    selenium_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                    selenium_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     value = self.get_web_value(selenium_element())
         else:
             field_array = [line-1, field, "", grid_number-1]
@@ -3690,7 +3700,7 @@ class WebappInternal(Base):
             else:
                 label = reduce(lambda x,y: f"{x} {y}", map(lambda x: x.text.strip(), top_layer.select(".tsay label")))
                 textarea = next(iter(top_layer.select("textarea")), None)
-                textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element(By.XPATH, xpath_soup(textarea)))
+                textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element_by_xpath(xpath_soup(textarea)))
 
             error_paragraphs = textarea_value.split("\n\n")
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
@@ -3701,7 +3711,7 @@ class WebappInternal(Base):
                 self.driver.execute_script(f"return arguments[0].click()", self.soup_to_selenium(button))
             else:
                 button = next(iter(filter(lambda x: self.language.details.lower() in x.text.lower(),top_layer.select("button"))), None)
-                self.click(self.driver.find_element(By.XPATH, xpath_soup(button)))
+                self.click(self.driver.find_element_by_xpath(xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
         self.log_error(message)
@@ -3837,7 +3847,7 @@ class WebappInternal(Base):
                     return False
 
                 try:
-                    container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
+                    container_element = self.driver.find_element_by_xpath(xpath_soup(container))
                 except:
                     return False
             else:
@@ -3989,11 +3999,11 @@ class WebappInternal(Base):
 
                 try:
                     self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath_soup(child))))
-                    submenu = lambda: self.driver.find_element(By.XPATH, xpath_soup(child))
+                    submenu = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                 except:
                     logger().info(f'not child xpath')
                     self.wait.until(EC.element_to_be_clickable((By.ID, child['id'])))
-                    submenu = lambda: self.driver.find_element(By.ID, child['id'])
+                    submenu = lambda: self.driver.find_element_by_id(child['id'])
 
                 if subMenuElements and submenu():
                     self.expanded_menu(child)
@@ -4018,7 +4028,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():
+                        if not self.webapp_shadowroot():  
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4100,7 +4110,7 @@ class WebappInternal(Base):
                 parent_menu = next(iter(span), None)
             else:
                 label_expanded = next(iter(element.select('label')), None)
-                parent_menu = self.driver.find_element(By.XPATH, xpath_soup(label_expanded))
+                parent_menu = self.driver.find_element_by_xpath(xpath_soup(label_expanded))
             self.scroll_to_element(parent_menu)
             self.wait_blocker()
             ActionChains(self.driver).move_to_element(parent_menu).click().perform()
@@ -4499,7 +4509,7 @@ class WebappInternal(Base):
             else:
                 menu_id = self.zindex_sort(soup.select(selector), True)[0].attrs["id"]
 
-        menu = self.driver.find_element(By.ID, menu_id)
+        menu = self.driver.find_element_by_id(menu_id)
 
         if self.webapp_shadowroot():
             class_selector = '.dict-tmenuitem'
@@ -4735,7 +4745,7 @@ class WebappInternal(Base):
 
             self.wait_element(term=f"[name$='cPesq']", scrap_type=enum.ScrapType.CSS_SELECTOR)
             field   = self.get_field("cPesq", name_attr=True)
-            element = lambda: self.driver.find_element(By.XPATH, xpath_soup(field))
+            element = lambda: self.driver.find_element_by_xpath(xpath_soup(field))
             endtime = time.time() + self.config.time_out / 2
             while time.time() < endtime and not column_item:
                 self.click(element(), click_type=enum.ClickType.ACTIONCHAINS)
@@ -4883,7 +4893,7 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
 
                 if element:
-                    box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                    box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
@@ -4923,16 +4933,17 @@ class WebappInternal(Base):
         time.sleep(1)
         try:
             if click_type == 1:
-                element().click()
-                ActionChains(self.driver).send_keys(Keys.ENTER).perform()
-            if click_type == 2:
                 ActionChains(self.driver).move_to_element(element()).click(element()).perform()
                 event = "var evt = document.createEvent('MouseEvents');\
                     evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
                     arguments[0].dispatchEvent(evt);"
                 self.driver.execute_script(event, element())
-            elif click_type == 3:
+            elif click_type == 2:
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
+            elif click_type == 3:
+                element().click()
+                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                    element(), Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
@@ -5008,7 +5019,7 @@ class WebappInternal(Base):
                 if len(tr) < index:
                     self.log_error(f"Couldn't check box element in line: {index+1}")
 
-                element_td = next(iter(tr[index].find_elements(By.CSS_SELECTOR, 'td'))) if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
+                element_td = next(iter(tr[index].find_elements_by_css_selector('td'))) if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
                 self.wait_blocker()
                 self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
         else:
@@ -5022,7 +5033,7 @@ class WebappInternal(Base):
             if element_bs4:
                 success = False
                 td = next(
-                    iter(tr[index].find_elements(By.CSS_SELECTOR, 'td > div'))) if self.webapp_shadowroot() else next(
+                    iter(tr[index].find_elements_by_css_selector('td > div'))) if self.webapp_shadowroot() else next(
                     iter(tr[index].select('td')))
 
                 if hasattr(td, 'style') or self.webapp_shadowroot():
@@ -5056,10 +5067,10 @@ class WebappInternal(Base):
                             tr = self.find_shadow_element('tbody > tr', sel_grid)
 
                             if len(tr) - 1 >= index:
-                                td = next(iter(tr[index].find_elements(By.CSS_SELECTOR, 'td > div')))
+                                td = next(iter(tr[index].find_elements_by_css_selector('td > div')))
                             else:
                                 tr = next(iter(tr))
-                                td = next(iter(tr.find_elements(By.CSS_SELECTOR, 'td > div')))
+                                td = next(iter(tr.find_elements_by_css_selector('td > div')))
                             new_box_state = td.get_attribute('style')
                         else:
                             tr = grid.select('tbody > tr')
@@ -5535,7 +5546,7 @@ class WebappInternal(Base):
                         time.sleep(2)
                         Id = self.driver.execute_script(script)
                         if Id:
-                            element = lambda: self.driver.find_element(By.ID, Id)
+                            element = lambda: self.driver.find_element_by_id(Id)
                             self.set_element_focus(element())
                             success = self.send_action(ActionChains(self.driver).move_to_element(element()).send_keys(
                                 self.supported_keys(key)).perform, wait_change=wait_change)
@@ -5718,7 +5729,7 @@ class WebappInternal(Base):
                     self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
-                if self.switch_to_active_element() != element:
+                if self.driver.switch_to_active_element() != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
@@ -5811,7 +5822,7 @@ class WebappInternal(Base):
             if not input_element:
                 self.log_error(f"Couldn't find {field} input element")
 
-            xpath_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(input_element))
+            xpath_input = lambda: self.driver.find_element_by_xpath(xpath_soup(input_element))
 
             self.scroll_to_element(xpath_input())
 
@@ -5943,7 +5954,7 @@ class WebappInternal(Base):
 
             soup = self.get_current_DOM()
             container_soup = next(iter(soup.select('body')))
-            container_element = self.driver.find_element(By.XPATH, xpath_soup(container_soup))
+            container_element = self.driver.find_element_by_xpath(xpath_soup(container_soup))
             if self.webapp_shadowroot():
                 dialog_selector = 'wa-dialog'
                 find_element_method = By.CSS_SELECTOR
@@ -6196,7 +6207,8 @@ class WebappInternal(Base):
                                     self.scroll_to_element(selenium_column())
                                     self.set_element_focus(selenium_column())
                                 try:
-                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys(Keys.ENTER).perform()
+                                    ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
+                                        selenium_column(), Keys.ENTER).perform()
                                 except WebDriverException:
                                     try:
                                         self.send_keys(selenium_column(), Keys.ENTER)
@@ -6255,7 +6267,7 @@ class WebappInternal(Base):
                                     selenium_input = lambda: child
                                     EC.visibility_of(child)
                                 else:
-                                    selenium_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(child))
+                                    selenium_input = lambda: self.driver.find_element_by_xpath(xpath_soup(child))
                                     self.wait_element(term=xpath_soup(child), scrap_type=enum.ScrapType.XPATH)
 
                                 if self.webapp_shadowroot():
@@ -6288,16 +6300,17 @@ class WebappInternal(Base):
                                     self.wait_until_to(expected_condition="element_to_be_clickable", element=bsoup_element,
                                                     locator=By.XPATH, timeout=True)
                                     logger().debug(f"Sending keys: {user_value}")
-
-                                    selenium_input().send_keys(Keys.HOME)
-                                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-                                    ActionChains(self.driver).move_to_element(selenium_input()).send_keys(user_value).perform()
-
+                                    self.try_send_keys(selenium_input, user_value, try_counter)
                                     self.wait_blocker()
                                     if self.grid_memo_field:
                                         self.SetButton('Ok')
                                         check_value = False
                                         self.grid_memo_field = False
+
+                                    if try_counter < 2:
+                                        try_counter += 1
+                                    else:
+                                        try_counter = 0
 
                                     modal_open = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=True, main_container='body', check_error=False)
 
@@ -6360,14 +6373,14 @@ class WebappInternal(Base):
                             else:
                                 if child:
                                     if self.webapp_shadowroot():
-                                        option_list = child.find_elements(By.TAG_NAME, 'option')
+                                        option_list = child.find_elements_by_tag_name('option')
                                         option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, option_list)))
                                         option_value_dict = dict(map(lambda x: (x.get_attribute('value'), x.text), option_list))
                                         option_value = self.get_element_value(child)
                                     else:
                                         option_text_list = list(filter(lambda x: field[1] == x[0:len(field[1])], map(lambda x: x.text, child.select('option'))))
                                         option_value_dict = dict(map(lambda x: (x.attrs["value"], x.text), child.select('option')))
-                                        option_value = self.get_element_value(self.driver.find_element(By.XPATH, xpath_soup(child)))
+                                        option_value = self.get_element_value(self.driver.find_element_by_xpath(xpath_soup(child)))
                                     option_text = next(iter(option_text_list), None)
                                     if not option_text:
                                         self.log_error("Couldn't find option")
@@ -6379,7 +6392,7 @@ class WebappInternal(Base):
                                         if self.webapp_shadowroot():
                                             self.send_keys(child, Keys.TAB)
                                         else:
-                                            self.send_keys(self.driver.find_element(By.XPATH, xpath_soup(child)), Keys.ENTER)
+                                            self.send_keys(self.driver.find_element_by_xpath(xpath_soup(child)), Keys.ENTER)
                                         current_value = field[1]
 
                 if not check_value:
@@ -6417,7 +6430,7 @@ class WebappInternal(Base):
         >>> self.get_selenium_column_element(xpath)
         """
         try:
-            return self.driver.find_element(By.XPATH, xpath)
+            return self.driver.find_element_by_xpath(xpath)
         except:
             return False
 
@@ -6560,9 +6573,9 @@ class WebappInternal(Base):
                     if field_element != None and len(rows) - 1 >= field_element or obscured_row:
                         if self.webapp_shadowroot():
                             if obscured_row:
-                                columns = obscured_row.find_elements(By.CSS_SELECTOR, 'td')
+                                columns = obscured_row.find_elements_by_css_selector('td')
                             else:
-                                columns = rows[field_element].find_elements(By.CSS_SELECTOR, 'td')
+                                columns = rows[field_element].find_elements_by_css_selector('td')
                         else:
                             columns = rows[field_element].select("td")
 
@@ -6581,7 +6594,7 @@ class WebappInternal(Base):
                         else:
                             text = columns[column_number].text.strip()
                         if column_name == '' and text == '':
-                            icon = next(iter(columns[column_number].find_elements(By.TAG_NAME, 'div')),None)
+                            icon = next(iter(columns[column_number].find_elements_by_tag_name('div')),None)
                             if icon:
                                 text = self.get_status_color(icon)
                         success = True
@@ -6673,7 +6686,7 @@ class WebappInternal(Base):
             textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(textarea))))
             content = self.driver.execute_script(f"return arguments[0].value",textarea).strip()
         else:
-            content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element(By.XPATH, xpath_soup(textarea))).strip()
+            content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element_by_xpath(xpath_soup(textarea))).strip()
 
         self.SetButton('Ok')
 
@@ -6751,13 +6764,13 @@ class WebappInternal(Base):
                 columns = self.find_shadow_element('td', self.soup_to_selenium(grids[field[2]])) if self.webapp_shadowroot() else row.select("td")
                 if columns:
                     second_column = lambda: (
-                    columns[1]) if self.webapp_shadowroot() else self.driver.find_element(By.XPATH,
+                    columns[1]) if self.webapp_shadowroot() else self.driver.find_element_by_xpath(
                         xpath_soup(columns[1]))
                     self.driver.execute_script("$('.horizontal-scroll').scrollLeft(-400000);")
                     self.set_element_focus(second_column())
 
                     try:
-                        ActionChains(self.driver).move_to_element(second_column()).send_keys(Keys.DOWN).perform()
+                        ActionChains(self.driver).move_to_element(second_column()).send_keys_to_element(second_column(), Keys.DOWN).perform()
                     except MoveTargetOutOfBoundsException:
                         ActionChains(self.driver).send_keys(Keys.DOWN).perform()
 
@@ -6875,7 +6888,7 @@ class WebappInternal(Base):
                             if self.webapp_shadowroot():
                                 column_element = lambda: columns[column_number]
                             else:
-                                column_element = lambda : self.driver.find_element(By.XPATH, xpath_soup(columns[column_number]))
+                                column_element = lambda : self.driver.find_element_by_xpath(xpath_soup(columns[column_number]))
 
                             if column_element_old_class == None:
                                 column_element_old_class = column_element().get_attribute("class")
@@ -7120,7 +7133,7 @@ class WebappInternal(Base):
         path = os.path.join(os.path.dirname(__file__), self.replace_slash(r'core\\data\\sx3.csv'))
 
         #DataFrame para filtrar somente os dados da tabela informada pelo usuário oriundo do csv.
-        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, on_bad_lines='error',
+        data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
         if not regex:
@@ -7303,7 +7316,7 @@ class WebappInternal(Base):
         except NoSuchElementException:
             return None
         except Exception as e:
-            logger().debug(f"Warning switch_to.active_element exception : {str(e)}")
+            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False, second_term=None):
@@ -7445,7 +7458,7 @@ class WebappInternal(Base):
             if element:
                 element = next(iter(element), None)
                 if type(element) == Tag:
-                    sel_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                    sel_element = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
 
 
                 while(time.time() < endtime and not self.element_is_displayed(element)):
@@ -7581,7 +7594,7 @@ class WebappInternal(Base):
             buttons = self.find_shadow_element('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button")
             button = list(filter(lambda x: re.sub(regx_sub,'', x.text).lower() == button_text.lower(), buttons))
             if button:
-                selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element(By.XPATH, xpath_soup(button[0]))
+                selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element_by_xpath(xpath_soup(button[0]))
                 self.click(selenium_button)
 
 
@@ -8348,12 +8361,12 @@ class WebappInternal(Base):
             elif element:
                 element_function = lambda: element
             try:
-                ActionChains(self.driver).move_to_element(element_function().find_element(By.TAG_NAME, "input")).perform()
+                ActionChains(self.driver).move_to_element(element_function().find_element_by_tag_name("input")).perform()
             except:
                 ActionChains(self.driver).move_to_element(element_function()).perform()
         else:
             tooltip_term = '.ttooltip'
-            element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+            element_function = lambda: self.driver.find_element_by_xpath(xpath_soup(element))
             self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
 
         time.sleep(2)
@@ -8390,7 +8403,7 @@ class WebappInternal(Base):
         if not field_soup:
             self.log_error(f"Couldn't find field {field}")
 
-        field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(field_soup))
+        field_element = lambda: self.driver.find_element_by_xpath(xpath_soup(field_soup))
 
         success = False
         endtime = time.time() + 60
@@ -9957,7 +9970,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -10701,8 +10714,8 @@ class WebappInternal(Base):
         stack = None
         success = False
 
-        procedure_install = self.language.procedure_install
-        procedure_uninstall = self.language.procedure_uninstall
+        procedure_install = self.language.procedure_install 
+        procedure_uninstall = self.language.procedure_uninstall 
 
         self.tmenu_screen = self.check_tmenu_screen()
 
@@ -10723,7 +10736,7 @@ class WebappInternal(Base):
             self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
-
+            
             endtime = time.time() + self.config.time_out
 
             while(time.time() < endtime and not success):
@@ -10739,32 +10752,32 @@ class WebappInternal(Base):
                 for group in procedure_groups:
                     self.ClickBox(self.language.code, group)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
 
                 for code in procedure_codes:
                     self.ClickBox(self.language.code, code, grid_number=2)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()
-
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
+                    
                 procedure_buttons = container.select('wa-button')
 
                 if is_procedure_install:
                     procedure_install_button = list(filter(lambda x: x.get("title") == procedure_install, procedure_buttons))[0]
-                    self.click(self.soup_to_selenium(procedure_install_button))
+                    self.click(self.soup_to_selenium(procedure_install_button))         
                 else:
                     procedure_uninstall_button = list(filter(lambda x: x.get("title") == procedure_uninstall, procedure_buttons))[0]
                     self.click(self.soup_to_selenium(procedure_uninstall_button))
 
-                self.SetButton(self.language.yes)
+                self.SetButton(self.language.yes)            
 
                 container = self.get_current_container()
-                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))
+                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))                            
                 if procedure_success:
                     number_proc_success = procedure_success[0].get("caption").split(":")[1].strip()
                     if int(number_proc_success) == len(procedure_codes):
                         success = True
                         self.SetButton(self.language.close)
-
+                            
             self.procedures = []
             time.sleep(1)
 
