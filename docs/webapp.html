@@ -1,23 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webapp &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=8d563738"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -159,10 +160,10 @@
            <div itemprop="articleBody">
              
   <section id="module-tir">
-<span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
+<span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.main.Webapp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Webapp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Webapp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Permalink to this definition"></a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -177,7 +178,7 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.AddParameter">
-<span class="sig-name descname"><span class="pre">AddParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">portuguese_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">english_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spanish_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AddParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">portuguese_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">english_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spanish_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddParameter" title="Permalink to this definition"></a></dt>
 <dd><p>Adds a parameter to the queue of parameters to be set by SetParameters method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -199,7 +200,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.AddProcedure">
-<span class="sig-name descname"><span class="pre">AddProcedure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procedure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddProcedure" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AddProcedure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procedure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AddProcedure" title="Permalink to this definition"></a></dt>
 <dd><p>Install/Desinstall a procedure in CFG to be set by SetProcedures method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -218,7 +219,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.AssertFalse">
-<span class="sig-name descname"><span class="pre">AssertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scritp_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AssertFalse" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AssertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scritp_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AssertFalse" title="Permalink to this definition"></a></dt>
 <dd><p>Defines that the test case expects a False response to pass</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Instantiating the class</span>
@@ -231,7 +232,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.AssertTrue">
-<span class="sig-name descname"><span class="pre">AssertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scritp_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AssertTrue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AssertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scritp_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.AssertTrue" title="Permalink to this definition"></a></dt>
 <dd><p>Defines that the test case expects a True response to pass</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Instantiating the class</span>
@@ -244,7 +245,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ChangeEnvironment">
-<span class="sig-name descname"><span class="pre">ChangeEnvironment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ChangeEnvironment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeEnvironment" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on the change environment area of Protheus Webapp and
 fills the environment screen.</p>
 <dl class="field-list simple">
@@ -266,7 +267,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ChangeUser">
-<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeUser" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ChangeUser" title="Permalink to this definition"></a></dt>
 <dd><p>Change the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -291,7 +292,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.CheckHelp">
-<span class="sig-name descname"><span class="pre">CheckHelp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_problem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_solution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CheckHelp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_problem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_solution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckHelp" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if some help screen is present in the screen at the time and takes an action.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -322,7 +323,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.CheckResult">
-<span class="sig-name descname"><span class="pre">CheckResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CheckResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckResult" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if a field has the value the user expects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -364,7 +365,7 @@ ex: CheckResult(field=””, user_value=”Red”, grid=True, position=1)</p></
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.CheckView">
-<span class="sig-name descname"><span class="pre">CheckView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'help'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckView" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CheckView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'help'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CheckView" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if a certain text is present in the screen at the time and takes an action.</p>
 <p>“help” - closes element.</p>
 <dl class="field-list simple">
@@ -384,7 +385,7 @@ ex: CheckResult(field=””, user_value=”Red”, grid=True, position=1)</p></
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickBox">
-<span class="sig-name descname"><span class="pre">ClickBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickBox" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Checkbox elements of a grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -418,7 +419,7 @@ ex: CheckResult(field=””, user_value=”Red”, grid=True, position=1)</p></
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickByLocator">
-<span class="sig-name descname"><span class="pre">ClickByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickByLocator" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickByLocator" title="Permalink to this definition"></a></dt>
 <dd><div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
@@ -452,7 +453,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickCheckBox">
-<span class="sig-name descname"><span class="pre">ClickCheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_box_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickCheckBox" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickCheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_box_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickCheckBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Label in box on the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -472,7 +473,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickFolder">
-<span class="sig-name descname"><span class="pre">ClickFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickFolder" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickFolder" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on folder elements on the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -493,7 +494,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickGridCell">
-<span class="sig-name descname"><span class="pre">ClickGridCell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridCell" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickGridCell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridCell" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Cell of a Grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -513,7 +514,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickGridHeader">
-<span class="sig-name descname"><span class="pre">ClickGridHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridHeader" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickGridHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickGridHeader" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Cell of a Grid Header.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -535,7 +536,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickIcon">
-<span class="sig-name descname"><span class="pre">ClickIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icon_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickIcon" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icon_text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickIcon" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on an Icon button based on its tooltip text.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -555,7 +556,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickImage">
-<span class="sig-name descname"><span class="pre">ClickImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickImage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickImage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickImage" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks in an Image button. They must be used only in case that ‘ClickIcon’ doesn’t  support. 
 :param img_name: Image to be clicked.
 :type img_name: src</p>
@@ -569,7 +570,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickLabel">
-<span class="sig-name descname"><span class="pre">ClickLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickLabel" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickLabel" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on a Label on the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -585,7 +586,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickListBox">
-<span class="sig-name descname"><span class="pre">ClickListBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickListBox" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickListBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickListBox" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Item based in a text in a window tlistbox</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -601,7 +602,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickMenuFunctional">
-<span class="sig-name descname"><span class="pre">ClickMenuFunctional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">menu_option</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuFunctional" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickMenuFunctional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">menu_option</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuFunctional" title="Permalink to this definition"></a></dt>
 <dd><p>Click on the functional menu.
 :param menu_option: Item to be clicked.
 :type menu_option: src</p>
@@ -614,7 +615,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickMenuPopUpItem">
-<span class="sig-name descname"><span class="pre">ClickMenuPopUpItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuPopUpItem" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickMenuPopUpItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickMenuPopUpItem" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on MenuPopUp Item based in a text</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -636,7 +637,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ClickTree">
-<span class="sig-name descname"><span class="pre">ClickTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ClickTree" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on TreeView component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -660,7 +661,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.CurrentWorkDirectory">
-<span class="sig-name descname"><span class="pre">CurrentWorkDirectory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CurrentWorkDirectory" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CurrentWorkDirectory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.CurrentWorkDirectory" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Returns the current working directory</p>
@@ -670,7 +671,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.F3">
-<span class="sig-name descname"><span class="pre">F3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.F3" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">F3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.F3" title="Permalink to this definition"></a></dt>
 <dd><p>Do the standard query(F3)</p>
 <p>this method:</p>
 <blockquote>
@@ -702,7 +703,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Finish">
-<span class="sig-name descname"><span class="pre">Finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Finish" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Finish" title="Permalink to this definition"></a></dt>
 <dd><p>Exit the Protheus Webapp.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method.</span>
@@ -713,7 +714,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetConfigValue">
-<span class="sig-name descname"><span class="pre">GetConfigValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetConfigValue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetConfigValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetConfigValue" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Json Key in config.json</p>
@@ -726,7 +727,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetGrid">
-<span class="sig-name descname"><span class="pre">GetGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetGrid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetGrid" title="Permalink to this definition"></a></dt>
 <dd><p>Gets a grid BeautifulSoup object from the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -760,13 +761,13 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetLineNumber">
-<span class="sig-name descname"><span class="pre">GetLineNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetLineNumber" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetLineNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetLineNumber" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> – values composition expected in respective columns</p></li>
 <li><p><strong>columns</strong> – reference columns used to get line</p></li>
-<li><p><strong>grid_number</strong></p></li>
+<li><p><strong>grid_number</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -777,7 +778,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetRelease">
-<span class="sig-name descname"><span class="pre">GetRelease</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetRelease" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetRelease</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetRelease" title="Permalink to this definition"></a></dt>
 <dd><p>Get the current release from Protheus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -800,7 +801,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetText">
-<span class="sig-name descname"><span class="pre">GetText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetText" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetText" title="Permalink to this definition"></a></dt>
 <dd><p>This method returns a string from modal based on the string in the left or right position that you send on parameter.</p>
 <p>If the string_left was filled then the right side content is return.</p>
 <p>If the string_right was filled then the left side content is return.</p>
@@ -824,7 +825,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GetValue">
-<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GetValue" title="Permalink to this definition"></a></dt>
 <dd><p>Gets the current value or text of element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -848,7 +849,7 @@ you must set the field as “” , ex: GetValue(“”, grid=True, position= 1)<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.GridTree">
-<span class="sig-name descname"><span class="pre">GridTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GridTree" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">GridTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.GridTree" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on Grid TreeView component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -869,7 +870,7 @@ you must set the field as “” , ex: GetValue(“”, grid=True, position= 1)<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.IfExists">
-<span class="sig-name descname"><span class="pre">IfExists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.IfExists" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">IfExists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.IfExists" title="Permalink to this definition"></a></dt>
 <dd><p>Returns True if element exists in timeout or return False if not exist.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -890,7 +891,7 @@ you must set the field as “” , ex: GetValue(“”, grid=True, position= 1)<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.InputByLocator">
-<span class="sig-name descname"><span class="pre">InputByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.InputByLocator" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">InputByLocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.InputByLocator" title="Permalink to this definition"></a></dt>
 <dd><div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Necessary import “By” class in the script: from tir.technologies.core.base import By</p>
@@ -924,14 +925,14 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.LengthGridLines">
-<span class="sig-name descname"><span class="pre">LengthGridLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LengthGridLines" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LengthGridLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LengthGridLines" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the length of the grid.
 :return:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.LoadGrid">
-<span class="sig-name descname"><span class="pre">LoadGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LoadGrid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LoadGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LoadGrid" title="Permalink to this definition"></a></dt>
 <dd><p>This method is responsible for running all actions of the input and check queues
 of a grid. After running, the queues would be empty.</p>
 <p>Must be called after SetValue and CheckResult calls that has the grid parameter set to True.</p>
@@ -949,7 +950,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.LogOff">
-<span class="sig-name descname"><span class="pre">LogOff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LogOff" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LogOff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LogOff" title="Permalink to this definition"></a></dt>
 <dd><p>Logs out of the Protheus Webapp.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -964,7 +965,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.MessageBoxClick">
-<span class="sig-name descname"><span class="pre">MessageBoxClick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button_text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.MessageBoxClick" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">MessageBoxClick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button_text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.MessageBoxClick" title="Permalink to this definition"></a></dt>
 <dd><p>Clicks on desired button inside a Messagebox element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -980,7 +981,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.OpenCSV">
-<span class="sig-name descname"><span class="pre">OpenCSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">';'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.OpenCSV" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">OpenCSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">';'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.OpenCSV" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a dictionary when the file has a header in another way returns a list
 The folder must be entered in the CSVPath parameter in the config.json.</p>
 <div class="admonition note">
@@ -1036,7 +1037,7 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Program">
-<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Program" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Program" title="Permalink to this definition"></a></dt>
 <dd><p>Method that sets the program in the initial menu search field.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1056,7 +1057,7 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ProgramScreen">
-<span class="sig-name descname"><span class="pre">ProgramScreen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ProgramScreen" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ProgramScreen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ProgramScreen" title="Permalink to this definition"></a></dt>
 <dd><p>Fills the first screen of Protheus with the first program to run.
 :param initial_program: The initial program to load
 :type initial_program: str</p>
@@ -1069,7 +1070,7 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.QueryExecute">
-<span class="sig-name descname"><span class="pre">QueryExecute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_driver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbq_oracle_server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1521</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.QueryExecute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">QueryExecute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_driver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbq_oracle_server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_server</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1521</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.QueryExecute" title="Permalink to this definition"></a></dt>
 <dd><p>Return a dictionary if the query statement is a SELECT otherwise print a number of row 
 affected in case of INSERT|UPDATE|DELETE statement.</p>
 <div class="admonition note">
@@ -1116,7 +1117,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ReplaceSlash">
-<span class="sig-name descname"><span class="pre">ReplaceSlash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ReplaceSlash" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ReplaceSlash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ReplaceSlash" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Path that will be normalized depending on operating system(Windows, Linux).</p>
@@ -1129,7 +1130,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ReportComparison">
-<span class="sig-name descname"><span class="pre">ReportComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ReportComparison" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ReportComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ReportComparison" title="Permalink to this definition"></a></dt>
 <dd><p>Compare two reports files and if exists show the difference between then if exists.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1170,7 +1171,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.RestoreParameters">
-<span class="sig-name descname"><span class="pre">RestoreParameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.RestoreParameters" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">RestoreParameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.RestoreParameters" title="Permalink to this definition"></a></dt>
 <dd><p>Restores parameters to previous value in CFG screen. Should be used after a <strong>SetParameters</strong> call.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
@@ -1183,7 +1184,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Screenshot">
-<span class="sig-name descname"><span class="pre">Screenshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Screenshot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Screenshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Screenshot" title="Permalink to this definition"></a></dt>
 <dd><p>Takes a screenshot and saves on the screenshot folder defined in config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1202,7 +1203,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.ScrollGrid">
-<span class="sig-name descname"><span class="pre">ScrollGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ScrollGrid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ScrollGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.ScrollGrid" title="Permalink to this definition"></a></dt>
 <dd><p>Scrolls Grid until a matching column is found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1225,7 +1226,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SearchBrowse">
-<span class="sig-name descname"><span class="pre">SearchBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SearchBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Permalink to this definition"></a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -1272,7 +1273,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetBranch">
-<span class="sig-name descname"><span class="pre">SetBranch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">branch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetBranch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetBranch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">branch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetBranch" title="Permalink to this definition"></a></dt>
 <dd><p>Chooses the branch on the branch selection screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1288,7 +1289,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetButton">
-<span class="sig-name descname"><span class="pre">SetButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Permalink to this definition"></a></dt>
 <dd><p>Method that clicks on a button on the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1311,7 +1312,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetCalendar">
-<span class="sig-name descname"><span class="pre">SetCalendar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetCalendar" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetCalendar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetCalendar" title="Permalink to this definition"></a></dt>
 <dd><p>Set date on Calendar without input field</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1326,7 +1327,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetFilePath">
-<span class="sig-name descname"><span class="pre">SetFilePath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFilePath" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetFilePath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFilePath" title="Permalink to this definition"></a></dt>
 <dd><p>Fills the path screen with the desired path</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1350,7 +1351,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetFocus">
-<span class="sig-name descname"><span class="pre">SetFocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFocus" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetFocus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetFocus" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the current focus on the desired field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1371,7 +1372,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetKey">
-<span class="sig-name descname"><span class="pre">SetKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetKey" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetKey" title="Permalink to this definition"></a></dt>
 <dd><p>Press the desired key on the keyboard on the focused element.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1416,7 +1417,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetLateralMenu">
-<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_menu_functional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_menu_functional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Permalink to this definition"></a></dt>
 <dd><p>Navigates through the lateral menu using provided menu path.
 e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <dl class="field-list simple">
@@ -1433,7 +1434,7 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetParameters">
-<span class="sig-name descname"><span class="pre">SetParameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetParameters" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetParameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetParameters" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the parameters in CFG screen. The parameters must be passed with calls for <strong>AddParameter</strong> method.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Adding Parameter:</span>
@@ -1446,7 +1447,7 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetProcedures">
-<span class="sig-name descname"><span class="pre">SetProcedures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_procedure_install</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetProcedures" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetProcedures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_procedure_install</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetProcedures" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the procedures in CFG screen. The procedures must be passed with calls for <strong>AddProcedure</strong> method.</p>
 <p>Usage:</p>
 <dl class="field-list simple">
@@ -1464,7 +1465,7 @@ e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetTIRConfig">
-<span class="sig-name descname"><span class="pre">SetTIRConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTIRConfig" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetTIRConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTIRConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Changes a value of a TIR internal config during runtime.</p>
 <p>This could be useful for TestCases that must use a different set of configs
 than the ones defined at <strong>config.json</strong></p>
@@ -1501,7 +1502,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetTabEDAPP">
-<span class="sig-name descname"><span class="pre">SetTabEDAPP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTabEDAPP" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetTabEDAPP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetTabEDAPP" title="Permalink to this definition"></a></dt>
 <dd><p>Chooses the table on the generic query (EDAPP).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1517,7 +1518,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetValue">
-<span class="sig-name descname"><span class="pre">SetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetValue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetValue" title="Permalink to this definition"></a></dt>
 <dd><p>Sets value of an input element.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1580,7 +1581,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Setup">
-<span class="sig-name descname"><span class="pre">Setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Setup" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'99'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Setup" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1602,7 +1603,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetupTSS">
-<span class="sig-name descname"><span class="pre">SetupTSS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetupTSS" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetupTSS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetupTSS" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1625,7 +1626,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Start">
-<span class="sig-name descname"><span class="pre">Start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Start" title="Permalink to this definition"></a></dt>
 <dd><p>Opens the browser maximized and goes to defined URL.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
@@ -1636,7 +1637,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.StartDB">
-<span class="sig-name descname"><span class="pre">StartDB</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StartDB" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">StartDB</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StartDB" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>connection object</p>
@@ -1651,7 +1652,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.StopDB">
-<span class="sig-name descname"><span class="pre">StopDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StopDB" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">StopDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.StopDB" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>connection</strong> – connection object</p>
@@ -1666,7 +1667,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.TearDown">
-<span class="sig-name descname"><span class="pre">TearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.TearDown" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">TearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.TearDown" title="Permalink to this definition"></a></dt>
 <dd><p>Closes the webdriver and ends the test case.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method</span>
@@ -1677,7 +1678,7 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.WaitFieldValue">
-<span class="sig-name descname"><span class="pre">WaitFieldValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitFieldValue" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitFieldValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitFieldValue" title="Permalink to this definition"></a></dt>
 <dd><p>Wait until field has expected value.
 Recommended for Trigger fields.</p>
 <dl class="field-list simple">
@@ -1697,7 +1698,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.WaitHide">
-<span class="sig-name descname"><span class="pre">WaitHide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitHide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitHide" title="Permalink to this definition"></a></dt>
 <dd><p>Search string that was sent and wait hide the elements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1716,7 +1717,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.WaitProcessing">
-<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitProcessing" title="Permalink to this definition"></a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1732,7 +1733,7 @@ Recommended for Trigger fields.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.WaitShow">
-<span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.WaitShow" title="Permalink to this definition"></a></dt>
 <dd><p>Search string that was sent and wait show the elements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
