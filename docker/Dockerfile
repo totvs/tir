@@ -2,8 +2,6 @@ FROM python:3.7
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-USER root
-
 RUN apt-get update && apt-get install -y \
 	unixodbc-dev \
 	libgtk-3-0 \
@@ -20,5 +18,3 @@ RUN curl -sL "https://download.mozilla.org/?product=firefox-latest&os=linux64" -
 
 RUN pip3 install tir_framework --upgrade && \
 	find /usr -name geckodriver | xargs chmod +x
-
-USER ${USERNAME}
