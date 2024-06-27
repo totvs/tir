@@ -9233,6 +9233,9 @@ class WebappInternal(Base):
         if self.config.smart_test:
             self.log.log_exec_file()
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
         webdriver_exception = None
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
