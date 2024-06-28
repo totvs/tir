@@ -4451,9 +4451,10 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning or ('fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image') and element_selenium.tag_name == 'wa-dialog') :
-                script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
-                element_selenium = self.driver.execute_script(script, element_selenium)
+            header = self.find_shadow_element('wa-dialog-header', element_selenium, get_all=False)
+            x_button = self.find_shadow_element("button[class~=button-close]", header, get_all=False)
+            if x_button:
+                element_selenium = x_button
 
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
@@ -10499,11 +10500,14 @@ class WebappInternal(Base):
             raise ValueError(message)
 
 
-    def find_shadow_element(self, term, objects):
+    def find_shadow_element(self, term, objects, get_all=True):
 
         elements = None
+        if get_all:
+            script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        else:
+            script = f"return arguments[0].shadowRoot.querySelector('{term}')"
 
-        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
         try:
             elements = self.driver.execute_script(script, objects)
         except:
