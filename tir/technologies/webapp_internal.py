@@ -1568,6 +1568,13 @@ class WebappInternal(Base):
         self.routine = 'Program'
         self.config.routine = program_name
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.log.release:
+                self.log_error_newlog()
+
         if not self.log.program:
             self.log.program = program_name
         self.set_program(program_name)
@@ -3901,6 +3908,13 @@ class WebappInternal(Base):
         wait_screen = True if menu_itens != self.language.menu_about else False
         used_ids = []
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.check_release_newlog() and wait_screen:
+                self.log_error_newlog()
+
         if save_input:
             self.routine = 'SetLateralMenu'
             self.config.routine = menu_itens
@@ -4451,9 +4465,10 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning or ('fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image') and element_selenium.tag_name == 'wa-dialog') :
-                script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
-                element_selenium = self.driver.execute_script(script, element_selenium)
+            header = self.find_shadow_element('wa-dialog-header', element_selenium, get_all=False)
+            x_button = self.find_shadow_element("button[class~=button-close]", header, get_all=False)
+            if x_button:
+                element_selenium = x_button
 
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
@@ -7899,7 +7914,7 @@ class WebappInternal(Base):
         if stack_item != "setUpClass":
             self.restart_counter = 0
 
-        if proceed_action():
+        if proceed_action() or not self.check_release_newlog():
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
@@ -9233,6 +9248,9 @@ class WebappInternal(Base):
         if self.config.smart_test:
             self.log.log_exec_file()
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
         webdriver_exception = None
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
@@ -10499,11 +10517,14 @@ class WebappInternal(Base):
             raise ValueError(message)
 
 
-    def find_shadow_element(self, term, objects):
+    def find_shadow_element(self, term, objects, get_all=True):
 
         elements = None
+        if get_all:
+            script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        else:
+            script = f"return arguments[0].shadowRoot.querySelector('{term}')"
 
-        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
         try:
             elements = self.driver.execute_script(script, objects)
         except:
@@ -10855,3 +10876,9 @@ class WebappInternal(Base):
                             self.click(filtered_day)
                         if filtered_day and month_combo and year_interface():
                             success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year
+
+    def check_release_newlog(self):
+        return self.log.release and self.config.new_log
+
+    def log_error_newlog(self):
+        self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
