@@ -1568,6 +1568,13 @@ class WebappInternal(Base):
         self.routine = 'Program'
         self.config.routine = program_name
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.log.release:
+                self.log_error_newlog()
+
         if not self.log.program:
             self.log.program = program_name
         self.set_program(program_name)
@@ -3900,6 +3907,13 @@ class WebappInternal(Base):
         submenu = ""
         wait_screen = True if menu_itens != self.language.menu_about else False
         used_ids = []
+
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.check_release_newlog() and wait_screen:
+                self.log_error_newlog()
 
         if save_input:
             self.routine = 'SetLateralMenu'
@@ -7900,7 +7914,7 @@ class WebappInternal(Base):
         if stack_item != "setUpClass":
             self.restart_counter = 0
 
-        if proceed_action():
+        if proceed_action() or not self.check_release_newlog():
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
@@ -9233,6 +9247,9 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             self.log.log_exec_file()
+
+        if self.config.log_info_config:
+            self.set_log_info_config()
 
         webdriver_exception = None
         timeout = 1500
@@ -10859,3 +10876,9 @@ class WebappInternal(Base):
                             self.click(filtered_day)
                         if filtered_day and month_combo and year_interface():
                             success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year
+
+    def check_release_newlog(self):
+        return self.log.release and self.config.new_log
+
+    def log_error_newlog(self):
+        self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
