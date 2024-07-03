@@ -10858,7 +10858,6 @@ class WebappInternal(Base):
                         month = int(month) - 1
                         month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
                         month_select = next(iter(self.find_shadow_element('select', month_header)))
-                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
                         month_combo = self.return_combo_object(month_select, locator=True)
                         month_combo.select_by_index(str(month))
                     else:
