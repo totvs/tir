@@ -4253,8 +4253,8 @@ class WebappInternal(Base):
 
                     if self.webapp_shadowroot():
                         if not soup_objects:
-                            script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
-                            buttons = self.driver.execute_script(script, self.soup_to_selenium(soup))
+                            footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
+                            buttons = self.find_shadow_element("wa-button", footer)
                             filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
                     if filtered_button and len(filtered_button) - 1 >= position:
