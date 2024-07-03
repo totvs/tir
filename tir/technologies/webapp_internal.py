@@ -3048,12 +3048,10 @@ class WebappInternal(Base):
                 if not element:
                     self.log_error(f"Couldn't find element: {field}")
 
-
-            if self.webapp_shadowroot():
-                field_element = lambda : self.soup_to_selenium(element)
-            else:
-                field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-
+                if self.webapp_shadowroot():
+                    field_element = lambda : self.soup_to_selenium(element)
+                else:
+                    field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
 
                 if self.get_web_value(field_element()):
                     current_value = self.get_web_value(field_element()).strip()
