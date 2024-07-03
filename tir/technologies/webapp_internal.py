@@ -4253,8 +4253,8 @@ class WebappInternal(Base):
 
                     if self.webapp_shadowroot():
                         if not soup_objects:
-                            script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
-                            buttons = self.driver.execute_script(script, self.soup_to_selenium(soup))
+                            footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
+                            buttons = self.find_shadow_element("wa-button", footer)
                             filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
                     if filtered_button and len(filtered_button) - 1 >= position:
@@ -10858,7 +10858,6 @@ class WebappInternal(Base):
                         month = int(month) - 1
                         month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
                         month_select = next(iter(self.find_shadow_element('select', month_header)))
-                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
                         month_combo = self.return_combo_object(month_select, locator=True)
                         month_combo.select_by_index(str(month))
                     else:
