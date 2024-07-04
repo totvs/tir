@@ -4253,9 +4253,10 @@ class WebappInternal(Base):
 
                     if self.webapp_shadowroot():
                         if not soup_objects:
-                            script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
-                            buttons = self.driver.execute_script(script, self.soup_to_selenium(soup))
-                            filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
+                            footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
+                            buttons = self.find_shadow_element("wa-button", footer)
+                            if buttons:
+                                filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_button ))
@@ -4436,7 +4437,7 @@ class WebappInternal(Base):
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
         if self.webapp_shadowroot():
-            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
@@ -10858,7 +10859,6 @@ class WebappInternal(Base):
                         month = int(month) - 1
                         month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
                         month_select = next(iter(self.find_shadow_element('select', month_header)))
-                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
                         month_combo = self.return_combo_object(month_select, locator=True)
                         month_combo.select_by_index(str(month))
                     else:
