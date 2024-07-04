@@ -3137,6 +3137,7 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element = None
+        x3_dictionaries = None
 
         if grid_memo_field:
             self.grid_memo_field = True
