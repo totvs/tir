@@ -7556,9 +7556,10 @@ class WebappInternal(Base):
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
                 self.send_keys(element, self.replace_slash(value))
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
+                elements = self.find_shadow_element('button, wa-button', self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
-                elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
+                if elements:
+                    elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements))
         else:
             self.wait_element(self.language.file_name)
             element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
