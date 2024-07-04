@@ -1128,6 +1128,7 @@ class Base(unittest.TestCase):
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
+            driver_path = None
             if self.config.headless:
                 chrome_options.add_argument('--headless=new')
             chrome_options.add_argument('--log-level=3')
@@ -1136,19 +1137,20 @@ class Base(unittest.TestCase):
 
             try:
                 if self.config.chromedriver_auto_install:
+                    driver_path = ChromeDriverManager().install()
                     if self.config.ssl_chrome_auto_install_disable:
                         os.environ['WDM_SSL_VERIFY'] = '0'
-                    self.driver = webdriver.Chrome(options=chrome_options,
-                                                   executable_path=ChromeDriverManager().install())
                 else:
                     if sys.platform == 'linux':
                         driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux', 'chromedriver.exe')
                     elif sys.platform == 'win32':
                         driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows', 'chromedriver.exe')
 
-                    self.driver = webdriver.Chrome(options=chrome_options, executable_path=str(driver_path))
             except Exception as e:
                 raise e
+
+            service = ChromeService(executable_path=driver_path)
+            self.driver = webdriver.Chrome(options=chrome_options, service=service)
 
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
