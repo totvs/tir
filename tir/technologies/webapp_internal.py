@@ -601,7 +601,7 @@ class WebappInternal(Base):
         try_counter = 0
         password_value = ''
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
+        while (time.time() < endtime and not password_value and self.config.password != ''):
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
@@ -648,7 +648,7 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if not password_value.strip() and self.config.password != '':
+        if not password_value and self.config.password != '':
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
