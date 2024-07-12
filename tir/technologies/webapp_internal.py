@@ -3602,8 +3602,11 @@ class WebappInternal(Base):
                         if container.select('.dict-tfolder') and self.search_navigation_bar(container.select('.dict-tfolder')):
                             labels_displayed = labels_not_none
                     if labels_displayed:
-                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
-                                       None)
+                        element = list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
+                        if len(element) > 1:
+                            element = next(iter(list(filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),None)
+                        else:
+                            element = next(iter(element), None)
                         if not element:
                             element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
                                        None)
