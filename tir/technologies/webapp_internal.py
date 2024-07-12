@@ -601,7 +601,7 @@ class WebappInternal(Base):
         try_counter = 0
         password_value = ''
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
+        while (time.time() < endtime and not password_value and self.config.password != ''):
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
@@ -648,7 +648,7 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if not password_value.strip() and self.config.password != '':
+        if not password_value and self.config.password != '':
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
@@ -3602,8 +3602,11 @@ class WebappInternal(Base):
                         if container.select('.dict-tfolder') and self.search_navigation_bar(container.select('.dict-tfolder')):
                             labels_displayed = labels_not_none
                     if labels_displayed:
-                        element = next(iter(list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))),
-                                       None)
+                        element = list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
+                        if len(element) > 1:
+                            element = next(iter(list(filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),None)
+                        else:
+                            element = next(iter(element), None)
                         if not element:
                             element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
                                        None)
@@ -7527,6 +7530,7 @@ class WebappInternal(Base):
                 filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
                 if filtered_rows:
                     return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
+        logger().debug(f'Get selected row- reversed rows {rows}')
         return next(reversed(rows), None)
 
 
