@@ -1186,6 +1186,10 @@ class Base(unittest.TestCase):
         num_of_trying = 1
         while not get_url and num_of_trying <= 5:
             self.driver.get(url)
+
+            if self.config.skip_environment:
+                return
+
             try:
                 if self.config.json_data['POUILogin'] and 'StartProg' in url:
                     time.sleep(3)
