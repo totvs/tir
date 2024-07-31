@@ -49,7 +49,7 @@ setup(
         'psutil==5.9.8',
         'lxml==5.1.0',
         'opencv-python==4.9.0.80',
-        'webdriver-manager==4.0.1'
+        'webdriver-manager==4.0.2'
     ],
     packages=find_packages(),
     scripts=[],
