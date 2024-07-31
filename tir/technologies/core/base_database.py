@@ -76,7 +76,9 @@ class BaseDatabase(Base):
             logger().info('DataBase connection already stopped')
 
     def check_pyodbc_drivers(self, driver_database):
-        if not next(iter(list(filter(lambda x: x == driver_database, pyodbc.drivers()))), None):
+        if not next(iter(list(
+                filter(lambda x: x == driver_database.lower(), list(map(lambda x: x.lower(), pyodbc.drivers()))))),
+                None):
             error_message = f"Driver: '{driver_database}' isn't a valid driver name!"
             self.webapp_internal.restart_counter = 3
             self.webapp_internal.log_error(error_message)

@@ -7501,8 +7501,6 @@ class WebappInternal(Base):
                 filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
                 if filtered_rows:
                     return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
-        return next(reversed(rows), None)
-
 
     def SetFilePath(self, value, button = ""):
         """
