@@ -1934,3 +1934,18 @@ class Poui():
         >>> oHelper.WaitProcessing("Processing")
         """
         self.__poui.WaitProcessing(itens, timeout)
+
+    def ClickCheckBox(self, label):
+        """
+        ClickChecKBox to check or uncheck box selectors
+        https://po-ui.io/documentation/po-checkbox
+
+        :param label: The CheckBox label
+        :type label: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.ClickCheckBox("Processing")
+        """
+        self.__poui.click_checkbox(label)
