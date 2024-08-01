@@ -6127,7 +6127,7 @@ class WebappInternal(Base):
                 else:
                     self.log_error("Grid element doesn't appear in DOM")
 
-                row = rows[field[4]] if field[4] else self.get_selected_row(rows) if self.get_selected_row(rows) else (
+                row = rows[field[4]] if field[4] is not None else self.get_selected_row(rows) if self.get_selected_row(rows) else (
                     next(iter(rows), None))
 
                 if row:
