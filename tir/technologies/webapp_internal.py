@@ -601,7 +601,7 @@ class WebappInternal(Base):
         try_counter = 0
         password_value = ''
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
+        while (time.time() < endtime and not password_value and self.config.password != ''):
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
@@ -648,7 +648,7 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if not password_value.strip() and self.config.password != '':
+        if not password_value and self.config.password != '':
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
@@ -1567,6 +1567,13 @@ class WebappInternal(Base):
         """
         self.routine = 'Program'
         self.config.routine = program_name
+
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.log.release:
+                self.log_error_newlog()
 
         if not self.log.program:
             self.log.program = program_name
@@ -3118,6 +3125,7 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element = None
+        x3_dictionaries = None
 
         if grid_memo_field:
             self.grid_memo_field = True
@@ -3582,12 +3590,9 @@ class WebappInternal(Base):
                         if container.select('.dict-tfolder') and self.search_navigation_bar(container.select('.dict-tfolder')):
                             labels_displayed = labels_not_none
                     if labels_displayed:
-                        element = list(
-                            filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
+                        element = list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
                         if len(element) > 1:
-                            element = next(iter(list(
-                                filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),
-                                           None)
+                            element = next(iter(list(filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),None)
                         else:
                             element = next(iter(element), None)
                         if not element:
@@ -3894,6 +3899,13 @@ class WebappInternal(Base):
         submenu = ""
         wait_screen = True if menu_itens != self.language.menu_about else False
         used_ids = []
+
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.check_release_newlog() and wait_screen:
+                self.log_error_newlog()
 
         if save_input:
             self.routine = 'SetLateralMenu'
@@ -4233,9 +4245,10 @@ class WebappInternal(Base):
 
                     if self.webapp_shadowroot():
                         if not soup_objects:
-                            script = "return arguments[0].shadowRoot.querySelector('footer').querySelectorAll('wa-button')"
-                            buttons = self.driver.execute_script(script, self.soup_to_selenium(soup))
-                            filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
+                            footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
+                            buttons = self.find_shadow_element("wa-button", footer)
+                            if buttons:
+                                filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_button ))
@@ -4416,7 +4429,7 @@ class WebappInternal(Base):
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
         if self.webapp_shadowroot():
-            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
+            term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
         else:
             term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
 
@@ -4445,9 +4458,10 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            if element_selenium.get_attribute('title') == self.language.warning or ('fundodlg_mdi.png' in element_selenium.value_of_css_property('--wa-dialog-background-image') and element_selenium.tag_name == 'wa-dialog') :
-                script = "return arguments[0].shadowRoot.querySelector('wa-dialog-header').shadowRoot.querySelector('button')"
-                element_selenium = self.driver.execute_script(script, element_selenium)
+            header = self.find_shadow_element('wa-dialog-header', element_selenium, get_all=False)
+            x_button = self.find_shadow_element("button[class~=button-close]", header, get_all=False)
+            if x_button:
+                element_selenium = x_button
 
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
@@ -7530,9 +7544,10 @@ class WebappInternal(Base):
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
                 self.send_keys(element, self.replace_slash(value))
-                elements = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('button')", self.soup_to_selenium(containers_soup))
+                elements = self.find_shadow_element('button, wa-button', self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
-                elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements ))
+                if elements:
+                    elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements))
         else:
             self.wait_element(self.language.file_name)
             element = self.driver.find_element(By.CSS_SELECTOR, ".filepath input")
@@ -7889,7 +7904,7 @@ class WebappInternal(Base):
         if stack_item != "setUpClass":
             self.restart_counter = 0
 
-        if proceed_action():
+        if proceed_action() or not self.check_release_newlog():
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
@@ -9223,6 +9238,9 @@ class WebappInternal(Base):
         if self.config.smart_test:
             self.log.log_exec_file()
 
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
         webdriver_exception = None
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
@@ -10489,11 +10507,14 @@ class WebappInternal(Base):
             raise ValueError(message)
 
 
-    def find_shadow_element(self, term, objects):
+    def find_shadow_element(self, term, objects, get_all=True):
 
         elements = None
+        if get_all:
+            script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+        else:
+            script = f"return arguments[0].shadowRoot.querySelector('{term}')"
 
-        script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
         try:
             elements = self.driver.execute_script(script, objects)
         except:
@@ -10827,7 +10848,6 @@ class WebappInternal(Base):
                         month = int(month) - 1
                         month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
                         month_select = next(iter(self.find_shadow_element('select', month_header)))
-                        month_interface = lambda: self.return_selected_combo_value(month_select, locator=True)
                         month_combo = self.return_combo_object(month_select, locator=True)
                         month_combo.select_by_index(str(month))
                     else:
@@ -10845,3 +10865,9 @@ class WebappInternal(Base):
                             self.click(filtered_day)
                         if filtered_day and month_combo and year_interface():
                             success = filtered_day.get_attribute('day') == day and month_combo.options.index(month_combo.first_selected_option) == month and year_interface() == year
+
+    def check_release_newlog(self):
+        return self.log.release and self.config.new_log
+
+    def log_error_newlog(self):
+        self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
