@@ -821,7 +821,7 @@ class WebappInternal(Base):
         if not self.config.date:
             self.config.date = datetime.today().strftime(f'%d{d}%m{d}%Y')
 
-        click_type = 1
+        try_send = 1
         base_date_value = ''
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -859,19 +859,19 @@ class WebappInternal(Base):
                     logger().info(f'Filling Date: "{self.config.date}"')
 
                     self.wait_blocker()
-                    self.click(date(), click_type=enum.ClickType(click_type))
+                    self.click(date(), click_type=enum.ClickType(try_send))
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.send_keys(date(), self.config.date)
+                    self.try_send_keys(element_function=date, key=self.config.date, try_counter=try_send)
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
                         ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
 
                     time.sleep(1)
-                    click_type += 1
-                    if click_type > 3:
-                        click_type = 1
+                    try_send += 1
+                    if try_send > 3:
+                        try_send = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
@@ -7687,26 +7687,18 @@ class WebappInternal(Base):
         """
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        if self.webapp_shadowroot():
-            ActionChains(self.driver).send_keys(Keys.HOME).perform()
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        elif try_counter == 0:
+        if try_counter == 1:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
-        elif try_counter == 1:
-            element_function().send_keys(Keys.HOME)
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
         elif try_counter == 2:
+            ActionChains(self.driver).send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
+        elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        else:
-            element_function().send_keys(Keys.HOME)
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
 
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
