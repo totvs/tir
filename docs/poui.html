@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickAvatar"><code class="docutils literal notranslate"><span class="pre">Poui.ClickAvatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickButton"><code class="docutils literal notranslate"><span class="pre">Poui.ClickButton()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.ClickByLocator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCheckBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
@@ -232,6 +233,23 @@ before using these methods in the script.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper_Poui</span><span class="o">.</span><span class="n">ClickByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;.po-page-header-actions &gt; po-button:nth-child(1) &gt; button:nth-child(1)&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
 <span class="go">:return: None</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickCheckBox">
+<span class="sig-name descname"><span class="pre">ClickCheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickCheckBox" title="Permalink to this definition"></a></dt>
+<dd><p>ClickChecKBox to check or uncheck box selectors
+<a class="reference external" href="https://po-ui.io/documentation/po-checkbox">https://po-ui.io/documentation/po-checkbox</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The CheckBox label</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickCheckBox</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
