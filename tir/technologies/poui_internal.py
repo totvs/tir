@@ -3541,7 +3541,7 @@ class PouiInternal(Base):
         if hasattr(index_number, '__iter__'):
             for index in index_number:
                 if checkbox:
-                    self.click_checkbox(selector=term, index=index, table_number=table_number)
+                    self.click_table_checkbox(selector=term, index=index, table_number=table_number)
                 else:
                     if column_index_number:
                         element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
@@ -3553,13 +3553,12 @@ class PouiInternal(Base):
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
 
-    def click_checkbox(self, selector, index, table_number):
+    def click_table_checkbox(self, selector, index, table_number):
 
         checked = False
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not checked:
-
             table = self.return_table(selector=selector, table_number=table_number)
 
             tr = table.select('tbody > tr')
@@ -3763,3 +3762,36 @@ class PouiInternal(Base):
 
                 if element:
                     self.poui_click(element)
+
+    def click_checkbox(self, label):
+        """Click on the POUI Checkbox.
+        https://po-ui.io/documentation/po-checkbox
+
+        :param label:
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickCheckBox(label="CheckBox label")
+        """
+
+        label = label.strip().lower()
+        term = 'po-checkbox'
+        container_element = None
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not container_element:
+            po_checkbox_itens = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            if po_checkbox_itens:
+                checkbox_filtered = list(filter(lambda x: x.text.lower().strip() == label, po_checkbox_itens))
+
+                if checkbox_filtered:
+                    po_element = next(iter(checkbox_filtered), None)
+                    container_element = next(iter(po_element.select('.container-po-checkbox')),None)
+                    if container_element:
+                        self.poui_click(container_element)
+
+        if not container_element:
+            self.log_error(f"CheckBox '{label}' doesn't found!")
