@@ -85,6 +85,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_checkbox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_popup"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_popup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
@@ -748,6 +749,23 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <span class="sig-name descname"><span class="pre">click_button_logoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">click_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff" title="Permalink to this definition"></a></dt>
 <dd><p>[internal]</p>
 <p>This method is reponsible to click on button finish</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_checkbox">
+<span class="sig-name descname"><span class="pre">click_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox" title="Permalink to this definition"></a></dt>
+<dd><p>Click on the POUI Checkbox.
+<a class="reference external" href="https://po-ui.io/documentation/po-checkbox">https://po-ui.io/documentation/po-checkbox</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickCheckBox</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CheckBox label&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
