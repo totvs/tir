@@ -9,6 +9,9 @@ import glob
 import shutil
 import cv2
 import socket
+import pathlib
+import sys
+import tir.technologies.core.enumerations as enum
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -16,7 +19,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
-import tir.technologies.core.enumerations as enum
 from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
@@ -29,8 +31,8 @@ from math import sqrt, pow
 from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
-import pathlib
-import sys
+from io import StringIO
+
 
 class WebappInternal(Base):
     """
@@ -5121,16 +5123,16 @@ class WebappInternal(Base):
             shadow_grid = self.soup_to_selenium(grid)
             shadow_table = next(iter(self.find_shadow_element('table', shadow_grid)),None)
             shadow_html = shadow_table.get_attribute('outerHTML')
-            df = (next(iter(pd.read_html(str(shadow_html)))))
+            df = (next(iter(pd.read_html(StringIO(shadow_html)))))
         else:
-            df = (next(iter(pd.read_html(str(grid)))))
+            df = (next(iter(pd.read_html(StringIO(grid)))))
 
         converters = {c: lambda x: str(x) for c in df.columns}
 
         if self.webapp_shadowroot():
-            df, grid = (next(iter(pd.read_html(str(shadow_html), converters=converters)), None), grid)
+            df, grid = (next(iter(pd.read_html(StringIO(shadow_html), converters=converters)), None), grid)
         else:
-            df, grid = (next(iter(pd.read_html(str(grid), converters=converters)), None), grid)
+            df, grid = (next(iter(pd.read_html(StringIO(grid), converters=converters)), None), grid)
 
         if not df.empty:
             df = df.fillna('Not Value')
