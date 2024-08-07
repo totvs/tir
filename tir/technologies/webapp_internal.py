@@ -2848,6 +2848,7 @@ class WebappInternal(Base):
                         if not check_value:
                             return
 
+                    self.wait_blocker()
                     if self.check_combobox(element):
                         current_value = current_value[0:len(str(value))]
 
