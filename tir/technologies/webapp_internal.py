@@ -7872,7 +7872,7 @@ class WebappInternal(Base):
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
-        self.initial_time = datetime.today()
+        self.log.initial_time = datetime.today()
         self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
 
@@ -8453,7 +8453,7 @@ class WebappInternal(Base):
         self.expected = expected
         log_message = f"{self.log.ident_test()[1]} - "
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
-        self.initial_time = datetime.today()
+        self.log.initial_time = datetime.today()
 
         if self.config.smart_test:
             self.log.log_exec_file()
