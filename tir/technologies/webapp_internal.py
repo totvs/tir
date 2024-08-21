@@ -8198,7 +8198,12 @@ class WebappInternal(Base):
 
                 container = self.get_current_container()
                 if self.webapp_shadowroot():
-                    label_serv1 = next(iter(self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))))
+                    bs_tree = container.select('wa-tree')
+                    if bs_tree:
+                        shadow_tree_node = self.find_shadow_element('wa-tree-node',
+                                                                    self.soup_to_selenium(next(iter(bs_tree))))
+                        if shadow_tree_node:
+                            label_serv1 = next(iter(shadow_tree_node), None)
                 else:
                     img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
                     label_serv1 = next(iter(img_serv1.parent.select('label')), None)
