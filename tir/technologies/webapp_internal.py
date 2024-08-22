@@ -6394,6 +6394,10 @@ class WebappInternal(Base):
                                         self.log_error("Couldn't find option")
                                     if (option_text != option_value_dict[option_value]):
                                         self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
+
+                                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                                            self.set_element_focus(self.soup_to_selenium(new_container))
+                                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
                                         if field[1] in option_text[0:len(field[1])]:
                                             current_value = field[1]
                                     else:
