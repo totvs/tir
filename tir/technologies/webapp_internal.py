@@ -2803,6 +2803,10 @@ class WebappInternal(Base):
                            self.select_combo(element, main_value, index=True)
                         else:
                             self.select_combo(element, main_value)
+                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                            self.set_element_focus(input_field())
+                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
                     else:
