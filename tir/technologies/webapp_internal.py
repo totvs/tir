@@ -2803,6 +2803,10 @@ class WebappInternal(Base):
                            self.select_combo(element, main_value, index=True)
                         else:
                             self.select_combo(element, main_value)
+                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                            self.set_element_focus(input_field())
+                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
                     else:
@@ -6406,6 +6410,10 @@ class WebappInternal(Base):
                                         self.log_error("Couldn't find option")
                                     if (option_text != option_value_dict[option_value]):
                                         self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
+
+                                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                                            self.set_element_focus(self.soup_to_selenium(new_container))
+                                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
                                         if field[1] in option_text[0:len(field[1])]:
                                             current_value = field[1]
                                     else:
@@ -8198,7 +8206,12 @@ class WebappInternal(Base):
 
                 container = self.get_current_container()
                 if self.webapp_shadowroot():
-                    label_serv1 = next(iter(self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))))
+                    bs_tree = container.select('wa-tree')
+                    if bs_tree:
+                        shadow_tree_node = self.find_shadow_element('wa-tree-node',
+                                                                    self.soup_to_selenium(next(iter(bs_tree))))
+                        if shadow_tree_node:
+                            label_serv1 = next(iter(shadow_tree_node), None)
                 else:
                     img_serv1 = next(iter(container.select("img[src*='bmpserv1']")), None )
                     label_serv1 = next(iter(img_serv1.parent.select('label')), None)
