@@ -227,7 +227,7 @@ class Log:
                 self.table_rows[row][3] = 'NO PROGRAM'
 
             if self.table_rows[row][10] == '':
-                self.table_rows[row][10] = '12.1.2310'
+                self.table_rows[row][10] = '12.1.2410'
 
             if self.table_rows[row][15] == '':
                 self.table_rows[row][15] = 'BRA'
