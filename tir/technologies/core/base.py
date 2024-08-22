@@ -1135,19 +1135,29 @@ class Base(unittest.TestCase):
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
 
-            try:
-                if self.config.chromedriver_auto_install:
-                    driver_path = ChromeDriverManager().install()
-                    if self.config.ssl_chrome_auto_install_disable:
-                        os.environ['WDM_SSL_VERIFY'] = '0'
-                else:
-                    if sys.platform == 'linux':
-                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux', 'chromedriver.exe')
-                    elif sys.platform == 'win32':
-                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows', 'chromedriver.exe')
+            if self.config.chromedriver_auto_install:
 
-            except Exception as e:
-                raise e
+                counter = 1
+                while counter < 3:
+                    try:
+                        if self.config.ssl_chrome_auto_install_disable:
+                            os.environ['WDM_SSL_VERIFY'] = '0'
+                        driver_path = ChromeDriverManager().install()
+                        break
+                    except Exception as e:
+                        logger().info("Trying get driver_path from ChromeDriverManager().Install")
+                        time.sleep(30)
+                        counter += 1
+                        if counter > 2:
+                            raise e
+
+            else:
+                if sys.platform == 'linux':
+                    driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux',
+                                                                           'chromedriver.exe')
+                elif sys.platform == 'win32':
+                    driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows',
+                                                                           'chromedriver.exe')
 
             service = ChromeService(executable_path=driver_path)
             self.driver = webdriver.Chrome(options=chrome_options, service=service)
