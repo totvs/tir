@@ -1599,19 +1599,7 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
 
-            if not self.webapp_shadowroot():
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            elif self.check_layers('wa-dialog') > 1:
-                logger().debug('Escape to menu')
-                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-
-            if self.check_layers('wa-dialog') > 1:
-                logger().debug('Found layers after Escape to menu')
-                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-                self.close_screen_before_menu()
+            self.escape_to_main_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1679,6 +1667,23 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             logger().exception(str(e))
+
+    def escape_to_main_menu(self):
+        """
+
+        """
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and self.check_layers('wa-dialog') > 1:
+            if not self.webapp_shadowroot():
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            elif self.check_layers('wa-dialog') > 1:
+                logger().info('Escape to menu')
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+
+            if self.check_layers('wa-dialog') > 1:
+                logger().info('Found layers after Escape to menu')
+                self.close_screen_before_menu()
 
     def check_layers(self, term):
         """
@@ -3945,19 +3950,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
-        if not self.webapp_shadowroot():
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        elif self.check_layers('wa-dialog') > 1:
-            logger().debug('Escape to menu')
-            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-
-        if self.check_layers('wa-dialog') > 1:
-            logger().debug('Found layers after Escape to menu')
-            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-            self.close_screen_before_menu()
+        self.escape_to_main_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
