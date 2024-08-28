@@ -1494,6 +1494,12 @@ class Webapp():
         """
         return self.__webapp.set_schedule(schedule_status=True)
 
+    def StopSchedule(self):
+        """Access de Schedule settings and Start all itens
+
+        """
+        return self.__webapp.set_schedule(schedule_status=False)
+
 class Apw():
 
     def __init__(self, config_path=""):

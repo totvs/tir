@@ -10902,6 +10902,8 @@ class WebappInternal(Base):
 
         exception = None
         service_status = False
+        schedule_run = 'Iniciar Todos Serviços' if schedule_status else 'Parar Todos Serviços'
+        service_curr_status = 'Iniciado' if schedule_status else 'Parado'
         self.tmenu_screen = self.check_tmenu_screen()
 
         try:
@@ -10930,15 +10932,15 @@ class WebappInternal(Base):
             while time.time() < endtime and not service_status:
                 grid_rows = self.get_grid_content(0, self.grid_selectors["new_web_app"])
                 if grid_rows:
-                    stoped_itens = list(filter(lambda x: 'Parado' in x.text, grid_rows))
-                    if stoped_itens and schedule_status:
-                        self.ClickIcon('Iniciar Todos Serviços')
-                    started_itens = list(filter(lambda x: 'Iniciado' in x.text, grid_rows))
+                    stoped_itens = list(filter(lambda x: not service_curr_status in x.text, grid_rows))
+                    if stoped_itens:
+                        self.ClickIcon(schedule_run)
                     self.ClickIcon('Atualizar')
-                    if started_itens:
+                    service_changed = list(filter(lambda x: service_curr_status in x.text, grid_rows))
+                    if service_changed:
                         service_status = True
 
-            logger().info(f"Finish Schedule Start")
+            logger().info(f"Schedule: {service_curr_status}")
             if not service_status:
                 self.log_error("Schedule culdn't start")
 
