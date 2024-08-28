@@ -885,30 +885,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
-            if self.config.poui_login:
-                group_elements = self.web_scrap(term=self.language.group, main_container='body',
-                                                scrap_type=enum.ScrapType.TEXT, twebview=True)
-
-                if group_elements:
-                    group_element = next(iter(group_elements))
-                    group_element = group_element.find_parent('pro-company-lookup')
-                    group_element = next(iter(group_element.select('input')), None)
-            else:
-                if self.webapp_shadowroot(shadow_root=shadow_root):
-                    group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
-                                                    scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                    main_container='body',
-                                                    optional_term='wa-text-input')
-                else:
-                    group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input",
-                                                    scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
-                                                    main_container=container)
-
-                if group_elements:
-                    if len(group_elements) > 1:
-                        group_element = group_elements.pop()
-                    else:
-                        group_element = next(iter(group_elements), None)
+            group_element = self.group_element(shadow_root, container)
 
             if group_element:
                 group = lambda: self.soup_to_selenium(group_element)
@@ -931,6 +908,40 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
+
+        if not self.config.group:
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container)))
+            if group_content:
+                self.config.group = group_content
+            else:
+                self.log_error(f'Please, fill group parameter in Setup() method')
+
+    def group_element(self, shadow_root, container):
+
+        if self.config.poui_login:
+            group_elements = self.web_scrap(term=self.language.group, main_container='body',
+                                            scrap_type=enum.ScrapType.TEXT, twebview=True)
+
+            if group_elements:
+                group_element = next(iter(group_elements))
+                group_element = group_element.find_parent('pro-company-lookup')
+                return next(iter(group_element.select('input')), None)
+        else:
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                main_container='body',
+                                                optional_term='wa-text-input')
+            else:
+                group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input",
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
+                                                main_container=container)
+
+            if group_elements:
+                if len(group_elements) > 1:
+                    return group_elements.pop()
+                else:
+                    return next(iter(group_elements), None)
 
     def filling_branch(self, shadow_root=None, container=None):
         """
