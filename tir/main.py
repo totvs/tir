@@ -1495,7 +1495,7 @@ class Webapp():
         return self.__webapp.set_schedule(schedule_status=True)
 
     def StopSchedule(self):
-        """Access de Schedule settings and Start all itens
+        """Access de Schedule settings and Stop all itens
 
         """
         return self.__webapp.set_schedule(schedule_status=False)
