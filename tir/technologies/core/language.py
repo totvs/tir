@@ -184,7 +184,7 @@ class LanguagePack:
             "Success": "Success",
             "Procedure Install": "Install selected processes",
             "Procedure Uninstall": "Remove selected processes",
-            "Schedule Menu": "Ambiente > Schedule > Schedule"
+            "Schedule Menu": "Settings > Schedule > Schedule"
             
         }
 
@@ -373,7 +373,7 @@ class LanguagePack:
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
-            "Schedule Menu": "Ambiente > Schedule > Schedule"
+            "Schedule Menu": "Entorno > Schedule > Schedule"
 
         }
         russian = {
@@ -469,7 +469,7 @@ class LanguagePack:
             "Success": "успех",
             "Procedure Install": "Установить выбранные процессы",
             "Procedure Uninstall": "Удалить выбранные процессы",
-            "Schedule Menu": "Ambiente > Schedule > Schedule"
+            "Schedule Menu": "Settings > Schedule > Schedule"
         }
 
         if language.lower() == "en-us":
