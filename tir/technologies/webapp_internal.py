@@ -10879,3 +10879,63 @@ class WebappInternal(Base):
 
     def log_error_newlog(self):
         self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
+
+    def set_schedule(self, schedule_status):
+        """Access de Schedule settings and Start run all itens
+        """
+
+        exception = None
+        service_status = False
+        schedule_run = 'Iniciar Todos Serviços' if schedule_status else 'Parar Todos Serviços'
+        service_curr_status = 'Iniciado' if schedule_status else 'Parado'
+        self.tmenu_screen = self.check_tmenu_screen()
+
+        try:
+            self.driver_refresh()
+        except Exception as error:
+            exception = error
+
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait_until_to( expected_condition = "alert_is_present" )
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
+
+            #Access Schedule environment
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.language.schedule_menu, save_input=False)
+
+            #Wait show grid
+            self.wait_element_timeout(term=self.grid_selectors["new_web_app"], scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      timeout= self.config.time_out/2,
+                                      main_container='body')
+
+            endtime = time.time() + self.config.time_out/2
+            while time.time() < endtime and not service_status:
+                grid_rows = self.get_grid_content(0, self.grid_selectors["new_web_app"])
+                if grid_rows:
+                    stoped_itens = list(filter(lambda x: not service_curr_status in x.text, grid_rows))
+                    if stoped_itens:
+                        self.ClickIcon(schedule_run)
+                    self.ClickIcon('Atualizar')
+                    service_changed = list(filter(lambda x: service_curr_status in x.text, grid_rows))
+                    if service_changed:
+                        service_status = True
+
+            logger().info(f"Schedule: {service_curr_status}")
+            if not service_status:
+                self.log_error("Schedule culdn't start")
+
+            self.driver.get(self.config.url)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group,
+                       self.config.branch, save_input=not self.config.autostart)
+
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
+
+            self.tmenu_screen = None
