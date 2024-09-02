@@ -8548,35 +8548,26 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not success:
-
-                container = self.get_current_container()
-                if not container:
-                    self.log_error("Couldn't locate container.")
-
-                labels_boxs = container.select("span, wa-checkbox")
-                label_box_name = label_box_name.lower().strip()
-                if self.webapp_shadowroot():
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
-                else:
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
-                if not filtered_labels_boxs:
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
-                if position <= len(filtered_labels_boxs):
-                    position -= 1
-                    label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[position]
-
+                label_box = self.get_checkbox_label(label_box_name, position)
+                if label_box:
+                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
-                        label_box_element = lambda: self.soup_to_selenium(label_box)
+                        label_box_element  = lambda: self.soup_to_selenium(label_box)
+                        check_before_click = checked_status()
+
                         if self.webapp_shadowroot():
                             label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
 
                         if double_click:
                             success = self.send_action(action=self.double_click, element=label_box_element)
                         else:
-                            success = self.send_action(action=self.click, element=label_box_element)
+                            self.send_action(action=self.click, element=label_box_element)
+                            check_after_click = checked_status()
+                            success = check_after_click != check_before_click
 
                     if not success:
-                        label_box = filtered_labels_boxs[position].parent
+                        label_box = label_box.parent
                         if label_box.find_next('img'):
                             if hasattr(label_box.find_next('img'), 'src'):
                                 img = label_box.find_next('img').attrs['src'].split('/')[-1] if \
@@ -8593,6 +8584,35 @@ class WebappInternal(Base):
 
             if not success:
                 self.log_error("Checkbox index is invalid.")
+
+    def get_checkbox_label(self, label_box_name, position):
+        '''Get checkbox from label name
+
+        :param label_box_name: String
+        :param position: int
+        :return: BS object
+        '''
+        label_box = None
+        container = self.get_current_container()
+        if not container:
+            self.log_error("Couldn't locate container.")
+
+        labels_boxs = container.select("span, wa-checkbox")
+        label_box_name = label_box_name.lower().strip()
+        if self.webapp_shadowroot():
+            filtered_labels_boxs = list(
+                filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
+        else:
+            filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
+        if not filtered_labels_boxs:
+            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+
+        if position <= len(filtered_labels_boxs):
+            position -= 1
+            label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[
+                position]
+
+        return label_box
 
     def ClickLabel(self, label_name, position=0):
         """
