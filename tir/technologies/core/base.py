@@ -1308,7 +1308,7 @@ class Base(unittest.TestCase):
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
                     if current_ver:
-                        logger().debug(f'Webapp: {current_ver}')
+                        logger().info(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
                         return self.webapp_version

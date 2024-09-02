@@ -597,6 +597,13 @@ class Webapp():
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
+        > ⚠️ **Warning:**
+        > If there are a sequence of similar buttons. Example:
+        `self.oHelper.SetButton("Salvar")`
+        `self.oHelper.SetButton("Salvar")`
+        We recomend insert some wait of elements method between them, like WaitShow, WaitHide... etc.
+        This way you ensure the correct element be selected in correct screen.
+
         Usage:
 
         >>> # Calling the method to click on a regular button:
@@ -1487,6 +1494,18 @@ class Webapp():
         """
 
         return os.chmod()
+
+    def StartSchedule(self):
+        """Access de Schedule settings and Start all itens
+
+        """
+        return self.__webapp.set_schedule(schedule_status=True)
+
+    def StopSchedule(self):
+        """Access de Schedule settings and Stop all itens
+
+        """
+        return self.__webapp.set_schedule(schedule_status=False)
 
 class Apw():
 
