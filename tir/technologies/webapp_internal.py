@@ -4185,6 +4185,13 @@ class WebappInternal(Base):
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
+        > ⚠️ **Warning:**
+        > If there are a sequence of similar buttons. Example:
+        `self.oHelper.SetButton("Salvar")`
+        `self.oHelper.SetButton("Salvar")`
+        We recomend insert some wait of elements method between them, like WaitShow, WaitHide... etc.
+        This way you ensure the correct element be selected in correct screen.
+
         Usage:
 
         >>> # Calling the method to click on a regular button:
