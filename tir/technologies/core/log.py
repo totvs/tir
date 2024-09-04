@@ -224,13 +224,13 @@ class Log:
 
         for row in range(0, len(self.table_rows)):
             if self.table_rows[row][3] == '':
-                self.table_rows[row][3] = 'NO PROGRAM'
+                self.table_rows[row][3] = self.get_program_name()
 
             if self.table_rows[row][10] == '':
-                self.table_rows[row][10] = '12.1.2410'
+                self.table_rows[row][10] = self.config.release if self.config.release else '12.1.2410'
 
             if self.table_rows[row][15] == '':
-                self.table_rows[row][15] = 'BRA'
+                self.table_rows[row][15] = self.config.country if self.config.country else 'BRA'
 
             if self.table_rows[row][7] == 1:
                 if self.table_rows[row][11] == '':
@@ -553,3 +553,35 @@ class Log:
         >>> is_present = self.search_stack("MATA020")
         """
         return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
+
+    def get_program_name(self):
+        """
+        [Internal]
+        """
+        stack_item_splited = next(iter(map(lambda x: x.filename.split(self.replace_slash("\\")), filter(
+            lambda x: "TESTSUITE.PY" in x.filename.upper() or "TESTCASE.PY" in x.filename.upper(), inspect.stack()))),
+                                  None)
+
+        if stack_item_splited:
+            get_file_name = next(iter(list(
+                map(lambda x: "TESTSUITE.PY" if "TESTSUITE.PY" in x.upper() else "TESTCASE.PY", stack_item_splited))))
+
+            if get_file_name:
+                program_name = next(iter(list(map(lambda x: re.findall(fr"(\w+)(?:{get_file_name})", x.upper()),
+                                                  filter(lambda x: ".PY" in x.upper(), stack_item_splited)))), None)
+
+                if program_name:
+                    return next(iter(program_name))
+                else:
+                    return None
+        else:
+            return None
+
+    def replace_slash(self, path):
+
+        slash = r"/" if (sys.platform.lower() == "linux") else r"\\"
+
+        pattern = re.compile(r'[\/\\]')
+
+        if pattern.findall(path):
+            return pattern.sub(slash, path)
