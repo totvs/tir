@@ -150,6 +150,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.element_exists"><code class="docutils literal notranslate"><span class="pre">WebappInternal.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.element_is_displayed"><code class="docutils literal notranslate"><span class="pre">WebappInternal.element_is_displayed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.environment_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.environment_screen()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu"><code class="docutils literal notranslate"><span class="pre">WebappInternal.escape_to_main_menu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.expand_treeGrid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.expand_treeGrid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.expand_tree_grid_line"><code class="docutils literal notranslate"><span class="pre">WebappInternal.expand_tree_grid_line()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.fill_grid()</span></code></a></li>
@@ -174,6 +175,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.generate_regex_by_prefixes"><code class="docutils literal notranslate"><span class="pre">WebappInternal.generate_regex_by_prefixes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_active_parent_class"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_active_parent_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_all_containers"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_all_containers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_checkbox_label"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_checkbox_label()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_config_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_config_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_shadow_root_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_shadow_root_container()</span></code></a></li>
@@ -250,6 +252,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.set_log_info"><code class="docutils literal notranslate"><span class="pre">WebappInternal.set_log_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.set_log_info_config"><code class="docutils literal notranslate"><span class="pre">WebappInternal.set_log_info_config()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.set_program"><code class="docutils literal notranslate"><span class="pre">WebappInternal.set_program()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.set_schedule"><code class="docutils literal notranslate"><span class="pre">WebappInternal.set_schedule()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.slm_click_last_item"><code class="docutils literal notranslate"><span class="pre">WebappInternal.slm_click_last_item()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.standard_search_field"><code class="docutils literal notranslate"><span class="pre">WebappInternal.standard_search_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.sub_string"><code class="docutils literal notranslate"><span class="pre">WebappInternal.sub_string()</span></code></a></li>
@@ -1018,6 +1021,12 @@ is provided, it will search on the chosen search box.</p>
 </ul>
 </dd>
 </dl>
+<p>&gt; ⚠️ <strong>Warning:</strong>
+&gt; If there are a sequence of similar buttons. Example:
+<cite>self.oHelper.SetButton(“Salvar”)</cite>
+<cite>self.oHelper.SetButton(“Salvar”)</cite>
+We recomend insert some wait of elements method between them, like WaitShow, WaitHide… etc.
+This way you ensure the correct element be selected in correct screen.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method to click on a regular button:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Add&quot;</span><span class="p">)</span>
@@ -2015,6 +2024,11 @@ Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu">
+<span class="sig-name descname"><span class="pre">escape_to_main_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.expand_treeGrid">
 <span class="sig-name descname"><span class="pre">expand_treeGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.expand_treeGrid" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -2336,6 +2350,23 @@ Returns the List of BeautifulSoup object that represents this containers or NONE
 <span class="gp">&gt;&gt;&gt; </span><span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_containers</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_checkbox_label">
+<span class="sig-name descname"><span class="pre">get_checkbox_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_box_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_checkbox_label" title="Permalink to this definition"></a></dt>
+<dd><p>Get checkbox from label name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label_box_name</strong> – String</p></li>
+<li><p><strong>position</strong> – int</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>BS object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -3515,6 +3546,12 @@ Fills the log information needed by opening the About page.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">set_program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.set_schedule">
+<span class="sig-name descname"><span class="pre">set_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schedule_status</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.set_schedule" title="Permalink to this definition"></a></dt>
+<dd><p>Access de Schedule settings and Start run all itens</p>
 </dd></dl>
 
 <dl class="py method">
