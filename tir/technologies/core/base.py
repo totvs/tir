@@ -725,11 +725,12 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
-        try:
-            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
-        except Exception as e:
-            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
-            pass
+        # try:
+        #     self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+        # except Exception as e:
+        #     logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
+        #     pass
+        pass
 
     def search_zindex(self,element):
         """
