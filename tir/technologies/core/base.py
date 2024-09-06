@@ -1101,6 +1101,7 @@ class Base(unittest.TestCase):
         """
 
         start_program = '#inputStartProg, #selectStartProg'
+        driver_path = None
 
         if self.config.appserver_service:
             try:
@@ -1127,21 +1128,31 @@ class Base(unittest.TestCase):
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
 
-            try:
-                if self.config.chromedriver_auto_install:
-                    if self.config.ssl_chrome_auto_install_disable:
-                        os.environ['WDM_SSL_VERIFY'] = '0'
-                    self.driver = webdriver.Chrome(options=chrome_options,
-                                                   executable_path=ChromeDriverManager().install())
-                else:
-                    if sys.platform == 'linux':
-                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux', 'chromedriver.exe')
-                    elif sys.platform == 'win32':
-                        driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows', 'chromedriver.exe')
+            if self.config.chromedriver_auto_install:
 
-                    self.driver = webdriver.Chrome(options=chrome_options, executable_path=str(driver_path))
-            except Exception as e:
-                raise e
+                counter = 1
+                while counter < 3:
+                    try:
+                        if self.config.ssl_chrome_auto_install_disable:
+                            os.environ['WDM_SSL_VERIFY'] = '0'
+                        driver_path = ChromeDriverManager().install()
+                        break
+                    except Exception as e:
+                        logger().info("Trying get driver_path from ChromeDriverManager().Install")
+                        time.sleep(30)
+                        counter += 1
+                        if counter > 2:
+                            raise e
+
+            else:
+                if sys.platform == 'linux':
+                    driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'linux',
+                                                                           'chromedriver.exe')
+                elif sys.platform == 'win32':
+                    driver_path = Path(__file__).parent.resolve().joinpath('drivers', 'windows',
+                                                                           'chromedriver.exe')
+
+            self.driver = webdriver.Chrome(options=chrome_options, executable_path=str(driver_path))
 
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
@@ -1297,7 +1308,7 @@ class Base(unittest.TestCase):
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
                     if current_ver:
-                        logger().debug(f'Webapp: {current_ver}')
+                        logger().info(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
                         return self.webapp_version
