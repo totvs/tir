@@ -4017,7 +4017,7 @@ class WebappInternal(Base):
                 if hasattr(child, 'attrs'):
                     used_ids.append(child.attrs['id'])
 
-                self.scroll_to_element(self.soup_to_selenium(child))
+                self.scroll_into_view(self.soup_to_selenium(child))
 
                 if not child or not self.element_is_displayed(child):
                     self.restart_counter += 1
