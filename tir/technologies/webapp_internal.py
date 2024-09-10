@@ -6214,7 +6214,7 @@ class WebappInternal(Base):
                             tmodal_list = soup.select(term)
                             tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                            self.scroll_to_element(selenium_column())
+                            self.scroll_into_view(selenium_column())
                             self.click(selenium_column(),
                                     click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                 selenium_column())
@@ -6223,7 +6223,7 @@ class WebappInternal(Base):
                             endtime_selected_cell = time.time() + self.config.time_out / 3
                             while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 logger().debug('Trying to select cell in grid!')
-                                self.scroll_to_element(selenium_column())
+                                self.scroll_into_view(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
@@ -6239,7 +6239,7 @@ class WebappInternal(Base):
                                 grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
-                                    self.scroll_to_element(selenium_column())
+                                    self.scroll_into_view(selenium_column())
                                     self.set_element_focus(selenium_column())
                                 try:
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys_to_element(
