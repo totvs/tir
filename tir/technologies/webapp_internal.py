@@ -426,18 +426,15 @@ class WebappInternal(Base):
 
                 logger().info(f'Filling Initial Program: "{initial_program}"')
 
-                if try_counter == 0:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element)
-                else:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+                start_prog = lambda: self.soup_to_selenium(start_prog_element)
 
                 self.set_element_focus(start_prog())
                 self.click(start_prog())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(start_prog(), initial_program)
-                try_counter += 1 if (try_counter < 1) else -1
+                self.try_send_keys(start_prog(), initial_program)
+                try_counter += 1
 
             if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
@@ -7717,7 +7714,7 @@ class WebappInternal(Base):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
 
-    def try_send_keys(self, element_function, key, try_counter=0):
+    def try_send_keys(self, element_function, key, try_counter=1):
         """
         [Internal]
 
@@ -7736,21 +7733,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
+
+        logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        if self.webapp_shadowroot():
+        if try_counter == 1:
             ActionChains(self.driver).send_keys(Keys.HOME).perform()
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        elif try_counter == 0:
+        elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
-        elif try_counter == 1:
-            element_function().send_keys(Keys.HOME)
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        elif try_counter == 2:
+        elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
@@ -7758,7 +7753,7 @@ class WebappInternal(Base):
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
-
+            
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
         [Internal]
