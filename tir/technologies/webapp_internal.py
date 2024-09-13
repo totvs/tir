@@ -433,7 +433,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.try_send_keys(start_prog, initial_program)
+                self.try_send_keys(start_prog, initial_program, try_counter)
                 try_counter += 1
 
             if (start_prog_value() != initial_program.strip()):
