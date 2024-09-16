@@ -8157,6 +8157,7 @@ class WebappInternal(Base):
         label_param = None
         exception = None
         stack = None
+        img_param = []
 
         self.tmenu_screen = self.check_tmenu_screen()
 
@@ -8199,8 +8200,13 @@ class WebappInternal(Base):
                     self.ClickTree(label_serv1.text.strip())
                     self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
                     container = self.get_current_container()
+
                     if self.webapp_shadowroot():
-                        img_param = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))[1]
+                        bs_tree_2 = container.select('wa-tree')
+                        if bs_tree_2:
+                            tree_nodes = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(next(iter(bs_tree_2))))
+                            if len(tree_nodes) > 1 :
+                                img_param = tree_nodes[1]
                     else:
                         img_param = next(iter(container.select("img[src*='bmpparam']")), None )
 
@@ -8815,11 +8821,13 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                if not element.get_attribute('selected') or element.get_attribute(
-                                                            'closed') == 'true' or element.get_attribute(
-                                                            'closed') == '':
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                click_try = 0
+
+                                                while click_try < 3 and element_is_closed():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
+                                                    click_try += 1
 
                                                 success = self.check_hierarchy(label_filtered, False)
                                                 if success and right_click:
