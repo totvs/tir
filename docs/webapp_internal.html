@@ -1595,7 +1595,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_hierarchy">
-<span class="sig-name descname"><span class="pre">check_hierarchy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_hierarchy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_hierarchy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_expanded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_hierarchy" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>label</strong> – </p>
@@ -3686,7 +3686,7 @@ Returns a tree node selected by label</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.try_send_keys">
-<span class="sig-name descname"><span class="pre">try_send_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_send_keys" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">try_send_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_counter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.try_send_keys" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Tries to send value to element using different techniques.
 Meant to be used inside of a loop.</p>
