@@ -426,18 +426,18 @@ class WebappInternal(Base):
 
                 logger().info(f'Filling Initial Program: "{initial_program}"')
 
-                if try_counter == 0:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element)
-                else:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+                start_prog = lambda: self.soup_to_selenium(start_prog_element)
 
                 self.set_element_focus(start_prog())
                 self.click(start_prog())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(start_prog(), initial_program)
-                try_counter += 1 if (try_counter < 1) else -1
+                self.try_send_keys(start_prog, initial_program, try_counter)
+                try_counter += 1
+
+                if try_counter > 4:
+                    try_counter = 0
 
             if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
@@ -7717,7 +7717,7 @@ class WebappInternal(Base):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
 
-    def try_send_keys(self, element_function, key, try_counter=0):
+    def try_send_keys(self, element_function, key, try_counter=1):
         """
         [Internal]
 
@@ -7736,21 +7736,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
+
+        logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
-        if self.webapp_shadowroot():
+        if try_counter == 1:
             ActionChains(self.driver).send_keys(Keys.HOME).perform()
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        elif try_counter == 0:
+        elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             element_function().send_keys(key)
-        elif try_counter == 1:
-            element_function().send_keys(Keys.HOME)
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
-        elif try_counter == 2:
+        elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
@@ -7758,7 +7756,7 @@ class WebappInternal(Base):
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
-
+            
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
         [Internal]
@@ -8189,6 +8187,7 @@ class WebappInternal(Base):
         label_param = None
         exception = None
         stack = None
+        img_param = []
 
         self.tmenu_screen = self.check_tmenu_screen()
 
@@ -8232,7 +8231,11 @@ class WebappInternal(Base):
                     self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
                     container = self.get_current_container()
                     if self.webapp_shadowroot():
-                        img_param = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))[1]
+                        bs_tree_2 = container.select('wa-tree')
+                        if bs_tree_2:
+                            tree_nodes = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(next(iter(bs_tree_2))))
+                            if len(tree_nodes) > 1 :
+                                img_param = tree_nodes[1]
                     else:
                         img_param = next(iter(container.select("img[src*='bmpparam']")), None )
 
@@ -8784,6 +8787,7 @@ class WebappInternal(Base):
         tree_number = tree_number-1 if tree_number > 0 else 0
 
         labels = list(map(str.strip, treepath.split(">")))
+        labels = list(filter(None, labels))
 
         for row, label in enumerate(labels):
 
@@ -8859,10 +8863,6 @@ class WebappInternal(Base):
                                     try:
                                         if self.webapp_shadowroot(): # exclusive shadow_root condition
                                             element_click = lambda: element_class_item
-                                            if not right_click:
-                                                element_click().click()
-                                                if 'selected' not in element_click().get_attribute("class"):
-                                                    element_click().click()
                                         else:
                                             element_click = lambda: self.soup_to_selenium(element_class_item)
 
@@ -8870,11 +8870,15 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                if not element.get_attribute('selected'):
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                click_try = 0
+
+                                                while click_try < 3 and element_is_closed():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
+                                                    click_try += 1
 
-                                                success = self.check_hierarchy(label_filtered)
+                                                success = self.check_hierarchy(label_filtered, False)
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
                                                         self.click(element_click(), enum.ClickType.SELENIUM,
@@ -8899,8 +8903,8 @@ class WebappInternal(Base):
                                                 element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
                                                 self.scroll_to_element(element_click())
 
-                                                endtime_click = time.time() + self.config.time_out
-                                                while time.time() < endtime_click and element_is_closed():
+                                                click_try = 0
+                                                while click_try < 3 and element_is_closed():
                                                     if element.get_attribute(
                                                             'closed') == 'true' or element.get_attribute(
                                                             'closed') == '':
@@ -8914,6 +8918,8 @@ class WebappInternal(Base):
 
                                                     if element_closed_click:
                                                         element_closed_click.click()
+
+                                                    click_try += 1
                                             else:
                                                 self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
                                                 self.scroll_to_element(element_click())
@@ -8981,40 +8987,20 @@ class WebappInternal(Base):
         """
         [Internal]
         """
+        success = None
 
-        treenode_selected = None
-
-        success = True
-
-        container_function = lambda: self.get_current_container() if success else self.get_current_DOM()
-
-        endtime = time.time() + self.config.time_out
-        while ((time.time() < endtime) and not treenode_selected):
-
-            container = container_function()
-
-            tr = container.select("tr")
-
-            tr_class = list(filter(lambda x: "class" in x.attrs, tr))
-
-            if self.webapp_shadowroot():
-                ttreenode = list(filter(lambda x: "wa-tree-node" in x.attrs['class'], tr_class))
-            else:
-                ttreenode = list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
-
-            treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
-
-            if not treenode_selected:
-                success = not success
+        treenode_selected = self.treenode_selected(label_filtered)
 
         if not check_expanded:
-            if list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected)):
+            if treenode_selected:
                 return True
             else:
                 return False
         else:
             if self.webapp_shadowroot():
-                tree_selected = next(iter(list(filter(lambda x: label_filtered == x.get('caption').lower().strip(), treenode_selected))), None)
+                tree_selected = self.find_shadow_element('span[class~=toggler]', treenode_selected, get_all=False)
+                if self.find_shadow_element('span[class~=toggler]', treenode_selected, get_all=False):
+                    return not treenode_selected.get_attribute('closed')
             else:
                 tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
                 if tree_selected.find_all_next("span"):
@@ -9080,7 +9066,7 @@ class WebappInternal(Base):
             tr_class = list(filter(lambda x: "class" in x.attrs, tr))
             return list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
 
-    def check_hierarchy(self, label):
+    def check_hierarchy(self, label, check_expanded=True):
         """
 
         :param label:
@@ -9092,7 +9078,14 @@ class WebappInternal(Base):
         node_check = None
 
         if self.webapp_shadowroot():
-            return True
+            while (counter <= 3 and not node_check):
+                treenode_parent_id = self.treenode_selected(label)
+                if treenode_parent_id:
+                    treenode_parent_id = treenode_parent_id.get_attribute('id')
+                    treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
+                    node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.get_attribute('parentid'),
+                                                       treenode))), None)
+                counter += 1
         else:
             while (counter <= 3 and not node_check):
 
@@ -9104,7 +9097,7 @@ class WebappInternal(Base):
 
                 counter += 1
 
-            return True if node_check else self.clicktree_status_selected(label, check_expanded=True)
+        return True if node_check else self.clicktree_status_selected(label, check_expanded)
 
     def GridTree(self, column, tree_path, right_click=False):
         """
