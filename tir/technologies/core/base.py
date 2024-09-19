@@ -725,6 +725,29 @@ class Base(unittest.TestCase):
         >>> #Calling the method
         >>> self.scroll_to_element(element())
         """
+        # try:
+        #     self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+        # except Exception as e:
+        #     logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
+        #     pass
+        pass
+
+    def scroll_into_view(self, element):
+        """
+        [Internal]
+
+        Scroll to element on the screen.
+
+        :param element: Selenium element
+        :type element: Selenium object
+
+        Usage:
+
+        >>> #Defining an element:
+        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> #Calling the method
+        >>> self.scroll_to_element(element())
+        """
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except Exception as e:
