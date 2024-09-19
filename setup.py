@@ -48,7 +48,7 @@ setup(
         'pyodbc==4.0.39',
         'psutil==5.9.5',
         'lxml==4.6.5',
-        'opencv-python==4.6.0.66',
+        'opencv-python==4.8.1.78',
         'webdriver-manager'
     ],
     packages=find_packages(),
