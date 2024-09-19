@@ -11,7 +11,12 @@ class ConfigLoader:
 
         if valid:
             with open(path) as json_data_file:
-                data = json.load(json_data_file)
+                try:
+                    data = json.load(json_data_file)
+                    if self.validar_chaves(data):
+                        raise Exception(self.validar_chaves(data))
+                except Exception as e:
+                    raise Exception(f"JSON file issue: {e}. \n* Please check your config.json *")
         else:
             data = {}
 
@@ -88,3 +93,74 @@ class ConfigLoader:
                     "SSLChromeInstallDisable" in data and bool(data["SSLChromeInstallDisable"]))
         self.data_delimiter = str(data["DataDelimiter"]) if "DataDelimiter" in data else "/"
         self.procedure_menu = str(data["ProcedureMenu"]) if "ProcedureMenu" in data else ""
+
+    def validar_chaves(self, json_data):
+        valid_keys = [
+    "ipExec",
+    "UrlSetStartExec",
+    "UrlSetEndExec",
+    "ScreenShot",
+    "Country",
+    "ExecId",
+    "NumExec",
+    "MotExec",
+    "Url",
+    "Browser",
+    "Environment",
+    "User",
+    "Password",
+    "Language",
+    "SkipEnvironment",
+    "Headless",
+    "LogFolder",
+    "LogFile",
+    "DebugLog",
+    "TimeOut",
+    "ParameterMenu",
+    "ScreenshotFolder",
+    "Coverage",
+    "SkipRestart",
+    "SmartTest",
+    "SmartERP",
+    "UserCfg",
+    "PasswordCfg",
+    "BinPath",
+    "CSVPath",
+    "DBDriver",
+    "DBServer",
+    "DBPort",
+    "DBName",
+    "DBUser",
+    "DBPassword",
+    "DBQOracleServer",
+    "URL_TSS",
+    "StartProgram",
+    "NewLog",
+    "LogUrl1",
+    "LogUrl2",
+    "ParameterUrl",
+    "LogHttp",
+    "BaseLine_Spool",
+    "CheckValue",
+    "POUILogin",
+    "POUI",
+    "LogInfoConfig",
+    "Release",
+    "TopDataBase",
+    "Lib",
+    "Build",
+    "AppServerFolder",
+    "DestinationFolder",
+    "AppServerService",
+    "CheckDump",
+    "ChromeDriverAutoInstall",
+    "SSLChromeInstallDisable",
+    "DataDelimiter",
+    "ProcedureMenu"
+]
+        keys_json = set(json_data.keys())
+        wrong_keys = keys_json - set(valid_keys)
+
+        if wrong_keys:
+            return str(f"The following keys are not expected or are incorrect on config.json: {wrong_keys}. Please Check! https://totvs.github.io/tir/configjson.html")
+
