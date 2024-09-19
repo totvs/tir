@@ -87,8 +87,6 @@ class Base(unittest.TestCase):
 
         if self.config_path == "":
             self.config_path = os.path.join(sys.path[0], r"config.json")
-            if not os.path.isfile(self.config_path):
-                raise Exception(f"config.json file not found!")
 
         self.config = ConfigLoader(self.config_path)
         self.config.autostart = autostart
