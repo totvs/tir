@@ -4004,7 +4004,7 @@ class WebappInternal(Base):
                 if hasattr(child, 'attrs'):
                     used_ids.append(child.attrs['id'])
 
-                self.scroll_to_element(self.soup_to_selenium(child))
+                self.scroll_into_view(self.soup_to_selenium(child))
 
                 if not child or not self.element_is_displayed(child):
                     self.restart_counter += 1
@@ -6193,7 +6193,7 @@ class WebappInternal(Base):
                             tmodal_list = soup.select(term)
                             tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
-                            self.scroll_to_element(selenium_column())
+                            self.scroll_into_view(selenium_column())
                             self.click(selenium_column(),
                                     click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                 selenium_column())
@@ -6202,7 +6202,7 @@ class WebappInternal(Base):
                             endtime_selected_cell = time.time() + self.config.time_out / 3
                             while time.time() < endtime_selected_cell and not self.selected_cell(selenium_column()):
                                 logger().debug('Trying to select cell in grid!')
-                                self.scroll_to_element(selenium_column())
+                                self.scroll_into_view(selenium_column())
                                 self.click(selenium_column(),
                                         click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(
                                     selenium_column())
@@ -6218,7 +6218,7 @@ class WebappInternal(Base):
                                 grid_class = grids[field[2]].attrs['class']
                                 logger().debug('Trying open cell in grid!')
                                 if not 'dict-msbrgetdbase' in grid_class:
-                                    self.scroll_to_element(selenium_column())
+                                    self.scroll_into_view(selenium_column())
                                     self.set_element_focus(selenium_column())
                                 try:
                                     ActionChains(self.driver).move_to_element(selenium_column()).send_keys(Keys.ENTER).perform()
@@ -6916,6 +6916,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
+                                self.scroll_into_view(column_element())
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
                                 if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
@@ -8157,6 +8158,7 @@ class WebappInternal(Base):
         label_param = None
         exception = None
         stack = None
+        img_param = []
 
         self.tmenu_screen = self.check_tmenu_screen()
 
@@ -8199,8 +8201,13 @@ class WebappInternal(Base):
                     self.ClickTree(label_serv1.text.strip())
                     self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
                     container = self.get_current_container()
+
                     if self.webapp_shadowroot():
-                        img_param = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(container.select('wa-tree')[0]))[1]
+                        bs_tree_2 = container.select('wa-tree')
+                        if bs_tree_2:
+                            tree_nodes = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(next(iter(bs_tree_2))))
+                            if len(tree_nodes) > 1 :
+                                img_param = tree_nodes[1]
                     else:
                         img_param = next(iter(container.select("img[src*='bmpparam']")), None )
 
@@ -8815,11 +8822,13 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                if not element.get_attribute('selected') or element.get_attribute(
-                                                            'closed') == 'true' or element.get_attribute(
-                                                            'closed') == '':
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                click_try = 0
+
+                                                while click_try < 3 and element_is_closed():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
+                                                    click_try += 1
 
                                                 success = self.check_hierarchy(label_filtered, False)
                                                 if success and right_click:
