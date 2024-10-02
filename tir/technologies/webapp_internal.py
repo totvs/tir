@@ -2039,13 +2039,6 @@ class WebappInternal(Base):
                             else:
                                 pass
 
-            while time.time() < endtime and menu_tab() and success:
-                bs_radio_menu = self.web_scrap(term=radio_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                             main_container='body')
-                bs_radio_menu = next(iter(bs_radio_menu))
-                self.send_keys(self.soup_to_selenium(bs_radio_menu), Keys.ESCAPE)
-                time.sleep(1)
-
             if not success:
                 self.log_error(f"Couldn't search the key: {search_key} on screen.")
 
@@ -2071,6 +2064,13 @@ class WebappInternal(Base):
                         sel_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(trb_input))
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
                         self.click(sel_input())
+
+        while time.time() < endtime and menu_tab():
+            bs_radio_menu = self.web_scrap(term=radio_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                           main_container='body')
+            bs_radio_menu = next(iter(bs_radio_menu))
+            self.send_keys(self.soup_to_selenium(bs_radio_menu), Keys.ESCAPE)
+            time.sleep(1)
 
     def search_browse_column(self, search_column, search_elements, index=False):
         """
