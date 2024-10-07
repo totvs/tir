@@ -4935,6 +4935,7 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
 
                 if element:
+                    logger().debug('ClickBox select condition')
                     box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
@@ -4958,6 +4959,7 @@ class WebappInternal(Base):
                                         th_element.click()
                                         success = current_box() != before_box
                                 else:
+                                    logger().debug('ClickBox not first_cell condition')
                                     th_element = next(iter(th))
                                     th_element.click()
                                     success = True # not maped yet
