@@ -4935,30 +4935,41 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
 
                 if element:
+                    logger().debug('ClickBox select condition')
                     box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
-                th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
-                    iter(grid.select('th')))
+                success = False
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+                    try:
+                        th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                            iter(grid.select('th')))
 
-                if th:
-                    if self.webapp_shadowroot():
-                        first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
-                        if first_cell:
-                            current_box = lambda: next(iter(first_cell)).get_attribute('style')
-                            before_box = current_box()
-                            endtime = time.time() + self.config.time_out
-                            while time.time() < endtime and current_box() == before_box:
-                                th_element = next(iter(th))
+                        if th:
+                            if self.webapp_shadowroot():
+                                first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                                if first_cell:
+                                    current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                                    before_box = current_box()
+                                    endtime = time.time() + self.config.time_out
+                                    while time.time() < endtime and current_box() == before_box:
+                                        th_element = next(iter(th))
+                                        th_element.click()
+                                        success = current_box() != before_box
+                                else:
+                                    logger().debug('ClickBox not first_cell condition')
+                                    th_element = next(iter(th))
+                                    th_element.click()
+                                    success = True # not maped yet
+                            else:
+                                th_element = self.soup_to_selenium(th)
                                 th_element.click()
-                        else:
-                            th_element = next(iter(th))
-                            th_element.click()
-                    else:
-                        th_element = self.soup_to_selenium(th)
-                        th_element.click()
-                else:
+                                success = True # not maped yet
+                    except:
+                        pass
+                if not success:
                     self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid, click_type=1):
