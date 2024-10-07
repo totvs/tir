@@ -4935,30 +4935,41 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
 
                 if element:
+                    logger().debug('ClickBox select condition')
                     box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
-                th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
-                    iter(grid.select('th')))
+                success = False
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+                    try:
+                        th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                            iter(grid.select('th')))
 
-                if th:
-                    if self.webapp_shadowroot():
-                        first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
-                        if first_cell:
-                            current_box = lambda: next(iter(first_cell)).get_attribute('style')
-                            before_box = current_box()
-                            endtime = time.time() + self.config.time_out
-                            while time.time() < endtime and current_box() == before_box:
-                                th_element = next(iter(th))
+                        if th:
+                            if self.webapp_shadowroot():
+                                first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                                if first_cell:
+                                    current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                                    before_box = current_box()
+                                    endtime = time.time() + self.config.time_out
+                                    while time.time() < endtime and current_box() == before_box:
+                                        th_element = next(iter(th))
+                                        th_element.click()
+                                        success = current_box() != before_box
+                                else:
+                                    logger().debug('ClickBox not first_cell condition')
+                                    th_element = next(iter(th))
+                                    th_element.click()
+                                    success = True # not maped yet
+                            else:
+                                th_element = self.soup_to_selenium(th)
                                 th_element.click()
-                        else:
-                            th_element = next(iter(th))
-                            th_element.click()
-                    else:
-                        th_element = self.soup_to_selenium(th)
-                        th_element.click()
-                else:
+                                success = True # not maped yet
+                    except:
+                        pass
+                if not success:
                     self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid, click_type=1):
@@ -8878,15 +8889,21 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == ''
+                                                treenode_selected = lambda: self.treenode_selected(label_filtered, tree_number)
                                                 click_try = 0
+                                                is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else treenode_selected()
 
-                                                while click_try < 3 and element_is_closed():
+                                                while click_try < 3 and not is_element_acessible():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
                                                     click_try += 1
 
                                                 success = self.check_hierarchy(label_filtered, False)
+                                                
+                                                if not success:
+                                                    success = True if is_element_acessible() else False
+
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
                                                         self.click(element_click(), enum.ClickType.SELENIUM,
@@ -9022,6 +9039,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
+        if self.webapp_shadowroot:
+            return self.check_toggler_shadow(element)
+
         element_id = element.get_attribute_list('id')
         tree_selected = self.treenode_selected(label_filtered)
 
@@ -9042,6 +9062,14 @@ class WebappInternal(Base):
                 return False
         else:
             return False
+        
+    def check_toggler_shadow(self, element):
+        """
+        [Internal]
+        """
+        
+        return True if self.find_shadow_element('span[class~=toggler]', element, get_all=False) else False
+
 
     def treenode_selected(self, label_filtered, tree_number=0):
         """
