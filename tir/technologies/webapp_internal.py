@@ -8821,15 +8821,21 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == ''
+                                                treenode_selected = lambda: self.treenode_selected(label_filtered, tree_number)
                                                 click_try = 0
+                                                is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else treenode_selected()
 
-                                                while click_try < 3 and element_is_closed():
+                                                while click_try < 3 and not is_element_acessible():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
                                                     click_try += 1
 
                                                 success = self.check_hierarchy(label_filtered, False)
+                                                
+                                                if not success:
+                                                    success = True if is_element_acessible() else False
+
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
                                                         self.click(element_click(), enum.ClickType.SELENIUM,
@@ -8965,6 +8971,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
+        if self.webapp_shadowroot:
+            return self.check_toggler_shadow(element)
+
         element_id = element.get_attribute_list('id')
         tree_selected = self.treenode_selected(label_filtered)
 
@@ -8985,6 +8994,14 @@ class WebappInternal(Base):
                 return False
         else:
             return False
+        
+    def check_toggler_shadow(self, element):
+        """
+        [Internal]
+        """
+        
+        return True if self.find_shadow_element('span[class~=toggler]', element, get_all=False) else False
+
 
     def treenode_selected(self, label_filtered, tree_number=0):
         """
