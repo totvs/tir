@@ -4298,7 +4298,7 @@ class WebappInternal(Base):
                     if next_button:
                         id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
-                        self.scroll_to_element(soup_element)
+                        self.scroll_into_view(soup_element)
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
                         if soup_element == None:
                             bodySoup = self.get_current_DOM().select('body')
@@ -4328,7 +4328,7 @@ class WebappInternal(Base):
 
                 other_action_element = lambda : self.soup_to_selenium(next(iter(other_action)))
 
-                self.scroll_to_element(other_action_element())
+                self.scroll_into_view(other_action_element())
                 self.click(other_action_element())
 
                 success = self.click_sub_menu(button if button.lower() != self.language.other_actions.lower() else sub_item)
@@ -4339,7 +4339,7 @@ class WebappInternal(Base):
 
             if soup_element:
                 if self.webapp_shadowroot():
-                    self.scroll_to_element(soup_element)
+                    self.scroll_into_view(soup_element)
                     self.set_element_focus(soup_element)
                     self.send_action(action=self.click, element=lambda: soup_element)
                     if button.lower() == self.language.other_actions.lower():
@@ -4352,7 +4352,7 @@ class WebappInternal(Base):
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
 
                 else:
-                    self.scroll_to_element(soup_element())
+                    self.scroll_into_view(soup_element())
                     self.set_element_focus(soup_element())
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
                     if button.lower() == self.language.other_actions.lower() and self.config.initial_program.lower() in initial_program:
@@ -4410,7 +4410,7 @@ class WebappInternal(Base):
                     else:
                         self.log_error(f"Couldn't find element {button}")
 
-                    self.scroll_to_element(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
+                    self.scroll_into_view(soup_element())#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(soup_element())
                     if not self.webapp_shadowroot():
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = soup_objects[position], locator = By.XPATH )
@@ -4497,7 +4497,7 @@ class WebappInternal(Base):
             if x_button:
                 element_selenium = x_button
 
-        self.scroll_to_element(element_selenium)
+        self.scroll_into_view(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
 
         self.send_action(action=self.click, element=lambda : element_selenium)
@@ -4821,6 +4821,9 @@ class WebappInternal(Base):
         >>> # Second folder named as Folder1 in the same screen
         >>> oHelper.ClickFolder("Folder1", position=2)
         """
+
+        logger().info(f"Clicking on folder: {folder_name}")
+
         self.wait_blocker()
 
         if self.webapp_shadowroot():
