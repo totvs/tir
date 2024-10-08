@@ -4821,6 +4821,9 @@ class WebappInternal(Base):
         >>> # Second folder named as Folder1 in the same screen
         >>> oHelper.ClickFolder("Folder1", position=2)
         """
+
+        logger().info(f"Clicking on {folder_name}")
+
         self.wait_blocker()
 
         if self.webapp_shadowroot():
@@ -4851,7 +4854,7 @@ class WebappInternal(Base):
 
             if panels_filtered:
                 if self.webapp_shadowroot():
-                    self.scroll_to_element(panels_filtered[position])
+                    self.scroll_into_view(panels_filtered[position])
 
                 if position > 0:
                     panel = panels_filtered[position] if position < len(panels_filtered) else None
@@ -4863,7 +4866,7 @@ class WebappInternal(Base):
                 element = self.soup_to_selenium(panel) if panel and not self.webapp_shadowroot() else panel
 
                 if element:
-                    self.scroll_to_element(element)#posiciona o scroll baseado na height do elemento a ser clicado.
+                    self.scroll_into_view(element)#posiciona o scroll baseado na height do elemento a ser clicado.
                     self.set_element_focus(element)
                     time.sleep(1)
                     self.driver.execute_script("arguments[0].click()", element)
