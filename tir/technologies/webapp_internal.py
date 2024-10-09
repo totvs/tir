@@ -4191,6 +4191,13 @@ class WebappInternal(Base):
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
+        > ⚠️ **Warning:**
+        > If there are a sequence of similar buttons. Example:
+        `self.oHelper.SetButton("Salvar")`
+        `self.oHelper.SetButton("Salvar")`
+        We recomend insert some wait of elements method between them, like WaitShow, WaitHide... etc.
+        This way you ensure the correct element be selected in correct screen.
+
         Usage:
 
         >>> # Calling the method to click on a regular button:
@@ -4799,6 +4806,9 @@ class WebappInternal(Base):
         >>> # Second folder named as Folder1 in the same screen
         >>> oHelper.ClickFolder("Folder1", position=2)
         """
+
+        logger().info(f"Clicking on folder: {folder_name}")
+
         self.wait_blocker()
 
         if self.webapp_shadowroot():
@@ -7347,7 +7357,7 @@ class WebappInternal(Base):
         except NoSuchElementException:
             return None
         except Exception as e:
-            logger().debug(f"Warning switch_to.active_element exception : {str(e)}")
+            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False, second_term=None):
@@ -8537,35 +8547,26 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not success:
-
-                container = self.get_current_container()
-                if not container:
-                    self.log_error("Couldn't locate container.")
-
-                labels_boxs = container.select("span, wa-checkbox")
-                label_box_name = label_box_name.lower().strip()
-                if self.webapp_shadowroot():
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
-                else:
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
-                if not filtered_labels_boxs:
-                    filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
-                if position <= len(filtered_labels_boxs):
-                    position -= 1
-                    label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[position]
-
+                label_box = self.get_checkbox_label(label_box_name, position)
+                if label_box:
+                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
-                        label_box_element = lambda: self.soup_to_selenium(label_box)
+                        label_box_element  = lambda: self.soup_to_selenium(label_box)
+                        check_before_click = checked_status()
+
                         if self.webapp_shadowroot():
                             label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
 
                         if double_click:
                             success = self.send_action(action=self.double_click, element=label_box_element)
                         else:
-                            success = self.send_action(action=self.click, element=label_box_element)
+                            self.send_action(action=self.click, element=label_box_element)
+                            check_after_click = checked_status()
+                            success = check_after_click != check_before_click
 
                     if not success:
-                        label_box = filtered_labels_boxs[position].parent
+                        label_box = label_box.parent
                         if label_box.find_next('img'):
                             if hasattr(label_box.find_next('img'), 'src'):
                                 img = label_box.find_next('img').attrs['src'].split('/')[-1] if \
@@ -8582,6 +8583,35 @@ class WebappInternal(Base):
 
             if not success:
                 self.log_error("Checkbox index is invalid.")
+
+    def get_checkbox_label(self, label_box_name, position):
+        '''Get checkbox from label name
+
+        :param label_box_name: String
+        :param position: int
+        :return: BS object
+        '''
+        label_box = None
+        container = self.get_current_container()
+        if not container:
+            self.log_error("Couldn't locate container.")
+
+        labels_boxs = container.select("span, wa-checkbox")
+        label_box_name = label_box_name.lower().strip()
+        if self.webapp_shadowroot():
+            filtered_labels_boxs = list(
+                filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
+        else:
+            filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
+        if not filtered_labels_boxs:
+            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+
+        if position <= len(filtered_labels_boxs):
+            position -= 1
+            label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[
+                position]
+
+        return label_box
 
     def ClickLabel(self, label_name, position=0):
         """
@@ -10014,7 +10044,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -10907,3 +10937,65 @@ class WebappInternal(Base):
 
     def log_error_newlog(self):
         self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
+
+
+    def set_schedule(self, schedule_status):
+        """Access de Schedule settings and Start run all itens
+
+        """
+
+        exception = None
+        service_status = False
+        schedule_run = 'Iniciar Todos Serviços' if schedule_status else 'Parar Todos Serviços'
+        service_curr_status = 'Iniciado' if schedule_status else 'Parado'
+        self.tmenu_screen = self.check_tmenu_screen()
+
+        try:
+            self.driver_refresh()
+        except Exception as error:
+            exception = error
+
+        if not exception:
+            if self.config.browser.lower() == "chrome":
+                try:
+                    self.wait_until_to( expected_condition = "alert_is_present" )
+                    self.driver.switch_to_alert().accept()
+                except:
+                    pass
+
+            #Access Schedule environment
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.SetLateralMenu(self.language.schedule_menu, save_input=False)
+
+            #Wait show grid
+            self.wait_element_timeout(term=self.grid_selectors["new_web_app"], scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      timeout= self.config.time_out/2,
+                                      main_container='body')
+
+            endtime = time.time() + self.config.time_out/2
+            while time.time() < endtime and not service_status:
+                grid_rows = self.get_grid_content(0, self.grid_selectors["new_web_app"])
+                if grid_rows:
+                    stoped_itens = list(filter(lambda x: not service_curr_status in x.text, grid_rows))
+                    if stoped_itens:
+                        self.ClickIcon(schedule_run)
+                    self.ClickIcon('Atualizar')
+                    service_changed = list(filter(lambda x: service_curr_status in x.text, grid_rows))
+                    if service_changed:
+                        service_status = True
+
+            logger().info(f"Schedule: {service_curr_status}")
+            if not service_status:
+                self.log_error("Schedule culdn't start")
+
+            self.driver.get(self.config.url)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group,
+                       self.config.branch, save_input=not self.config.autostart)
+
+            if not self.tmenu_screen:
+                if ">" in self.config.routine:
+                    self.SetLateralMenu(self.config.routine, save_input=False)
+                else:
+                    self.Program(self.config.routine)
+
+            self.tmenu_screen = None
