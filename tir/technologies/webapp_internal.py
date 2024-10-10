@@ -1651,7 +1651,7 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    if not self.webapp_shadowroot():#TODO revisar mecanismo de espera para objeto selenium
+                    if not self.webapp_shadowroot():
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
 
                     self.send_keys(s_tget(), program)
@@ -2460,7 +2460,6 @@ class WebappInternal(Base):
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
             if self.search_stack('SetValue') and list_in_range:
                 list_in_range = self.filter_not_read_only(list_in_range)
-            #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
                 if self.webapp_shadowroot():
@@ -2812,7 +2811,7 @@ class WebappInternal(Base):
                            self.select_combo(element, main_value, index=True)
                         else:
                             self.select_combo(element, main_value)
-                        if self.config.browser.lower() == 'chrome': # TODO to monitor ATFA005 behavior
+                        if self.config.browser.lower() == 'chrome':
                             self.set_element_focus(input_field())
                             ActionChains(self.driver).send_keys(Keys.ENTER).perform()
 
@@ -2987,7 +2986,7 @@ class WebappInternal(Base):
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
-        elif element.tag_name == "select" or element.tag_name == "wa-combobox":# TODO criar uma função para testar as duas condições.
+        elif element.tag_name == "select" or element.tag_name == "wa-combobox":
             if self.webapp_shadowroot():
                 is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.find_shadow_element('option', element)))), None)
                 if is_selected:
@@ -4104,7 +4103,7 @@ class WebappInternal(Base):
 
             self.wait_blocker()
             if self.element_exists(term=term, scrap_type=scrap_type,
-                                   main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
+                                   main_container="body", optional_term=optional_term_news):
                 self.close_news_screen()
 
         except AssertionError as error:
@@ -4249,7 +4248,6 @@ class WebappInternal(Base):
                     self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
-                    #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
 
                     if soup_objects and not filtered_button:
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()) and self.element_is_displayed(x), soup_objects ))
@@ -4826,7 +4824,7 @@ class WebappInternal(Base):
                 panels = self.web_scrap(term=bt_term, scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
                 panels_filtered = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
 
-                if time.time() >= half_config_timeout:#TODO entender o objetivo da condição
+                if time.time() >= half_config_timeout:
                     panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
 
             if panels_filtered:
@@ -5844,7 +5842,7 @@ class WebappInternal(Base):
             elif element:
                 self.scroll_to_element(element)
 
-                self.double_click(element)  # TODO verificar a utilização de um unico click
+                self.double_click(element)
         else:
             if 'input' not in element and element:
                 input_element = next(iter(element.find_parent().select("input")), None)
@@ -6415,7 +6413,7 @@ class WebappInternal(Base):
                                     if (option_text != option_value_dict[option_value]):
                                         self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
 
-                                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                                        if self.config.browser.lower() == 'chrome':
                                             self.set_element_focus(self.soup_to_selenium(new_container))
                                             ActionChains(self.driver).send_keys(Keys.ENTER).perform()
                                         if field[1] in option_text[0:len(field[1])]:
@@ -8119,7 +8117,7 @@ class WebappInternal(Base):
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
         if restore_backup == True and self.parameters:
             return
-        #TODO sleep
+
         time.sleep(3)
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
