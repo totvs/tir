@@ -1648,7 +1648,7 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while(time.time() < endtime and current_value != program):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    if not self.webapp_shadowroot():#TODO revisar mecanismo de espera para objeto selenium
+                    if not self.webapp_shadowroot():
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
 
                     self.send_keys(s_tget(), program)
@@ -2079,6 +2079,13 @@ class WebappInternal(Base):
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = trb_input, locator = By.XPATH )
                         self.click(sel_input())
 
+        while time.time() < endtime and menu_tab():
+            bs_radio_menu = self.web_scrap(term=radio_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                           main_container='body')
+            bs_radio_menu = next(iter(bs_radio_menu))
+            self.send_keys(self.soup_to_selenium(bs_radio_menu), Keys.ESCAPE)
+            time.sleep(1)
+
     def search_browse_column(self, search_column, search_elements, index=False):
         """
         [Internal]
@@ -2467,7 +2474,6 @@ class WebappInternal(Base):
             list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
             if self.search_stack('SetValue') and list_in_range:
                 list_in_range = self.filter_not_read_only(list_in_range)
-            #list_in_range = list(filter(lambda x: not self.soup_to_selenium(x).get_attribute("readonly"), list_in_range)) #TODO analisar impacto da retirada FATA150
 
             if not input_field:
                 if self.webapp_shadowroot():
@@ -2819,7 +2825,7 @@ class WebappInternal(Base):
                            self.select_combo(element, main_value, index=True)
                         else:
                             self.select_combo(element, main_value)
-                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                        if self.config.browser.lower() == 'chrome':
                             self.set_element_focus(input_field())
                             ActionChains(self.driver).send_keys(Keys.ENTER).perform()
 
@@ -3002,7 +3008,7 @@ class WebappInternal(Base):
             web_value = element.get_attribute("text")
             if not web_value:
                 web_value = element.text.strip()
-        elif element.tag_name == "select" or element.tag_name == "wa-combobox":# TODO criar uma função para testar as duas condições.
+        elif element.tag_name == "select" or element.tag_name == "wa-combobox":
             if self.webapp_shadowroot():
                 is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.find_shadow_element('option', element)))), None)
                 if is_selected:
@@ -4110,7 +4116,7 @@ class WebappInternal(Base):
 
             self.wait_blocker()
             if self.element_exists(term=term, scrap_type=scrap_type,
-                                   main_container="body", optional_term=optional_term_news):  # TODO avaliar outra forma de validar a presença
+                                   main_container="body", optional_term=optional_term_news):
                 self.close_news_screen()
 
         except AssertionError as error:
@@ -4262,7 +4268,6 @@ class WebappInternal(Base):
                     self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
                     soup = self.get_current_container()
                     soup_objects = soup.select(term_button)
-                    #soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects )) #TODO Analisar impacto da retirada (mata030)
 
                     if soup_objects and not filtered_button:
                         filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()) and self.element_is_displayed(x), soup_objects ))
@@ -4814,6 +4819,9 @@ class WebappInternal(Base):
         >>> # Second folder named as Folder1 in the same screen
         >>> oHelper.ClickFolder("Folder1", position=2)
         """
+
+        logger().info(f"Clicking on folder: {folder_name}")
+
         self.wait_blocker()
 
         if self.webapp_shadowroot():
@@ -4839,7 +4847,7 @@ class WebappInternal(Base):
                 panels = self.web_scrap(term=bt_term, scrap_type=enum.ScrapType.CSS_SELECTOR,main_container = self.containers_selectors["GetCurrentContainer"])
                 panels_filtered = self.filter_is_displayed(list(filter(lambda x: x.text == folder_name, panels)))
 
-                if time.time() >= half_config_timeout:#TODO entender o objetivo da condição
+                if time.time() >= half_config_timeout:
                     panels_filtered = list(filter(lambda x: x.text == folder_name, panels))
 
             if panels_filtered:
@@ -4928,30 +4936,41 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
 
                 if element:
+                    logger().debug('ClickBox select condition')
                     box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element_by_xpath(xpath_soup(element))
                     self.click(box())
 
             elif select_all and not is_select_all_button:
-                th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
-                    iter(grid.select('th')))
+                success = False
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+                    try:
+                        th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                            iter(grid.select('th')))
 
-                if th:
-                    if self.webapp_shadowroot():
-                        first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
-                        if first_cell:
-                            current_box = lambda: next(iter(first_cell)).get_attribute('style')
-                            before_box = current_box()
-                            endtime = time.time() + self.config.time_out
-                            while time.time() < endtime and current_box() == before_box:
-                                th_element = next(iter(th))
+                        if th:
+                            if self.webapp_shadowroot():
+                                first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                                if first_cell:
+                                    current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                                    before_box = current_box()
+                                    endtime = time.time() + self.config.time_out
+                                    while time.time() < endtime and current_box() == before_box:
+                                        th_element = next(iter(th))
+                                        th_element.click()
+                                        success = current_box() != before_box
+                                else:
+                                    logger().debug('ClickBox not first_cell condition')
+                                    th_element = next(iter(th))
+                                    th_element.click()
+                                    success = True # not maped yet
+                            else:
+                                th_element = self.soup_to_selenium(th)
                                 th_element.click()
-                        else:
-                            th_element = next(iter(th))
-                            th_element.click()
-                    else:
-                        th_element = self.soup_to_selenium(th)
-                        th_element.click()
-                else:
+                                success = True # not maped yet
+                    except:
+                        pass
+                if not success:
                     self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid, click_type=1):
@@ -5849,7 +5868,7 @@ class WebappInternal(Base):
             elif element:
                 self.scroll_to_element(element)
 
-                self.double_click(element)  # TODO verificar a utilização de um unico click
+                self.double_click(element)
         else:
             if 'input' not in element and element:
                 input_element = next(iter(element.find_parent().select("input")), None)
@@ -6422,7 +6441,7 @@ class WebappInternal(Base):
                                     if (option_text != option_value_dict[option_value]):
                                         self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
 
-                                        if self.config.browser.lower() == 'chrome':  # TODO to monitor ATFA005 behavior
+                                        if self.config.browser.lower() == 'chrome':
                                             self.set_element_focus(self.soup_to_selenium(new_container))
                                             ActionChains(self.driver).send_keys(Keys.ENTER).perform()
                                         if field[1] in option_text[0:len(field[1])]:
@@ -6939,6 +6958,7 @@ class WebappInternal(Base):
 
                             endtime_click = time.time() + self.config.time_out/2
                             while time.time() < endtime_click and column_element_old_class == column_element().get_attribute("class"):
+                                self.scroll_to_element(column_element())
                                 self.send_action(action=self.click, element=column_element, click_type=3, wait_change=False) if self.webapp_shadowroot() else self.click(column_element())
                                 click_attempts += 1
                                 if column_number == 0 and click_attempts > 3 or 'selected' in column_element().get_attribute(
@@ -8132,7 +8152,7 @@ class WebappInternal(Base):
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
         if restore_backup == True and self.parameters:
             return
-        #TODO sleep
+
         time.sleep(3)
         self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
@@ -8870,15 +8890,21 @@ class WebappInternal(Base):
                                             start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
+                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == ''
+                                                treenode_selected = lambda: self.treenode_selected(label_filtered, tree_number)
                                                 click_try = 0
+                                                is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else treenode_selected()
 
-                                                while click_try < 3 and element_is_closed():
+                                                while click_try < 3 and not is_element_acessible():
                                                     self.scroll_to_element(element_click())
                                                     element_click().click()
                                                     click_try += 1
 
                                                 success = self.check_hierarchy(label_filtered, False)
+                                                
+                                                if not success:
+                                                    success = True if is_element_acessible() else False
+
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
                                                         self.click(element_click(), enum.ClickType.SELENIUM,
@@ -9014,6 +9040,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
+        if self.webapp_shadowroot:
+            return self.check_toggler_shadow(element)
+
         element_id = element.get_attribute_list('id')
         tree_selected = self.treenode_selected(label_filtered)
 
@@ -9034,6 +9063,14 @@ class WebappInternal(Base):
                 return False
         else:
             return False
+        
+    def check_toggler_shadow(self, element):
+        """
+        [Internal]
+        """
+        
+        return True if self.find_shadow_element('span[class~=toggler]', element, get_all=False) else False
+
 
     def treenode_selected(self, label_filtered, tree_number=0):
         """

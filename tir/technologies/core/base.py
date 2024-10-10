@@ -84,6 +84,8 @@ class Base(unittest.TestCase):
 
         if self.config_path == "":
             self.config_path = os.path.join(sys.path[0], r"config.json")
+            if not os.path.isfile(self.config_path):
+                raise Exception(f"config.json file not found!")
 
         self.config = ConfigLoader(self.config_path)
         self.config.autostart = autostart
@@ -710,6 +712,28 @@ class Base(unittest.TestCase):
         self.driver.save_screenshot(fullpath)
 
     def scroll_to_element(self, element):
+        """
+        [Internal]
+
+        Scroll to element on the screen.
+
+        :param element: Selenium element
+        :type element: Selenium object
+
+        Usage:
+
+        >>> #Defining an element:
+        >>> element = lambda: self.driver.find_element_by_id("example_id")
+        >>> #Calling the method
+        >>> self.scroll_to_element(element())
+        """
+        try:
+            self.driver.execute_script("return arguments[0].scrollIntoView();", element)
+        except Exception as e:
+            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
+            pass
+
+    def scroll_into_view(self, element):
         """
         [Internal]
 
