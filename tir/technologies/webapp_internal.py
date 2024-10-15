@@ -4909,16 +4909,16 @@ class WebappInternal(Base):
 
     def displayed_label_on_screen(self, label, selector):
 
-        selectors = self.get_container_selector(selector)
+        selector_list = self.get_container_selector(selector)
         element_is_displayed = False
 
-        filtered_label = self.filter_label_by_selector(label=label, selector=selectors)
+        filtered_label = self.filter_label_by_selector(label=label, selector=selector_list)
 
         if filtered_label:
             element_is_displayed = self.element_is_displayed(filtered_label)
 
             if not element_is_displayed:
-                active_element = next(iter(filter(lambda x: 'active' in x.attrs, selector)), None)
+                active_element = next(iter(filter(lambda x: 'active' in x.attrs, selector_list)), None)
                 element = lambda: self.soup_to_selenium(active_element)
                 self.scroll_to_element(element=element())
             
