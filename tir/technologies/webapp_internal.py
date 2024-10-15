@@ -11079,3 +11079,9 @@ class WebappInternal(Base):
                     self.Program(self.config.routine)
 
             self.tmenu_screen = None
+
+    def get_container_selector(self, selector):
+
+        container = self.get_current_container()
+
+        return container.select(selector)
