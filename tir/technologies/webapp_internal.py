@@ -428,18 +428,18 @@ class WebappInternal(Base):
 
                 logger().info(f'Filling Initial Program: "{initial_program}"')
 
-                if try_counter == 0:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element)
-                else:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+                start_prog = lambda: self.soup_to_selenium(start_prog_element)
 
                 self.set_element_focus(start_prog())
                 self.click(start_prog())
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(start_prog(), initial_program)
-                try_counter += 1 if (try_counter < 1) else -1
+                self.try_send_keys(start_prog, initial_program, try_counter)
+                try_counter += 1
+
+                if try_counter > 4:
+                    try_counter = 0
 
             if (start_prog_value() != initial_program.strip()):
                 self.restart_counter += 1
@@ -823,7 +823,7 @@ class WebappInternal(Base):
         if not self.config.date:
             self.config.date = datetime.today().strftime(f'%d{d}%m{d}%Y')
 
-        try_send = 1
+        click_type = 1
         base_date_value = ''
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -861,19 +861,19 @@ class WebappInternal(Base):
                     logger().info(f'Filling Date: "{self.config.date}"')
 
                     self.wait_blocker()
-                    self.click(date(), click_type=enum.ClickType(try_send))
+                    self.click(date(), click_type=enum.ClickType(click_type))
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.try_send_keys(element_function=date, key=self.config.date, try_counter=try_send)
+                    self.send_keys(date(), self.config.date)
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
                         ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
 
                     time.sleep(1)
-                    try_send += 1
-                    if try_send > 3:
-                        try_send = 1
+                    click_type += 1
+                    if click_type > 3:
+                        click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
@@ -885,30 +885,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
 
-            if self.config.poui_login:
-                group_elements = self.web_scrap(term=self.language.group, main_container='body',
-                                                scrap_type=enum.ScrapType.TEXT, twebview=True)
-
-                if group_elements:
-                    group_element = next(iter(group_elements))
-                    group_element = group_element.find_parent('pro-company-lookup')
-                    group_element = next(iter(group_element.select('input')), None)
-            else:
-                if self.webapp_shadowroot(shadow_root=shadow_root):
-                    group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
-                                                    scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                    main_container='body',
-                                                    optional_term='wa-text-input')
-                else:
-                    group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input",
-                                                    scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
-                                                    main_container=container)
-
-                if group_elements:
-                    if len(group_elements) > 1:
-                        group_element = group_elements.pop()
-                    else:
-                        group_element = next(iter(group_elements), None)
+            group_element = self.group_element(shadow_root, container)
 
             if group_element:
                 group = lambda: self.soup_to_selenium(group_element)
@@ -931,6 +908,40 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
+
+        if not self.config.group:
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container)))
+            if group_content:
+                self.config.group = group_content
+            else:
+                self.log_error(f'Please, fill group parameter in Setup() method')
+
+    def group_element(self, shadow_root, container):
+
+        if self.config.poui_login:
+            group_elements = self.web_scrap(term=self.language.group, main_container='body',
+                                            scrap_type=enum.ScrapType.TEXT, twebview=True)
+
+            if group_elements:
+                group_element = next(iter(group_elements))
+                group_element = group_element.find_parent('pro-company-lookup')
+                return next(iter(group_element.select('input')), None)
+        else:
+            if self.webapp_shadowroot(shadow_root=shadow_root):
+                group_elements = self.web_scrap(term="[name='cGroup'], [name='__cGroup']",
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                main_container='body',
+                                                optional_term='wa-text-input')
+            else:
+                group_elements = self.web_scrap(term="[name='cGroup'] input, [name='__cGroup'] input",
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
+                                                main_container=container)
+
+            if group_elements:
+                if len(group_elements) > 1:
+                    return group_elements.pop()
+                else:
+                    return next(iter(group_elements), None)
 
     def filling_branch(self, shadow_root=None, container=None):
         """
@@ -1601,19 +1612,7 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program}")
 
-            if not self.webapp_shadowroot():
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            elif self.check_layers('wa-dialog') > 1:
-                logger().debug('Escape to menu')
-                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-
-            if self.check_layers('wa-dialog') > 1:
-                logger().debug('Found layers after Escape to menu')
-                # self.log.take_screenshot_log(driver=self.driver, description='set_program',
-                #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-                self.close_screen_before_menu()
+            self.escape_to_main_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1681,6 +1680,23 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             logger().exception(str(e))
+
+    def escape_to_main_menu(self):
+        """
+
+        """
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and self.check_layers('wa-dialog') > 1:
+            if not self.webapp_shadowroot():
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+            elif self.check_layers('wa-dialog') > 1:
+                logger().info('Escape to menu')
+                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+
+            if self.check_layers('wa-dialog') > 1:
+                logger().info('Found layers after Escape to menu')
+                self.close_screen_before_menu()
 
     def check_layers(self, term):
         """
@@ -2835,14 +2851,23 @@ class WebappInternal(Base):
                             else:
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                input_field().send_keys(main_value)
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                if valtype == 'D' and user_value_size > interface_value_size:
+                                    main_value = main_value_bkp
+                        #if Number input
                         else:
-                            #if Number input
-                            self.set_element_focus(input_field())
-                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                            ActionChains(self.driver).send_keys(Keys.HOME).perform()
-                            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-                            input_field().send_keys(main_value)
+                            tries = 0
+                            try_counter = 1
+                            while(tries < 3):
+                                self.set_element_focus(input_field())
+                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
+                                self.try_send_keys(input_field, main_value, try_counter)
+                                current_number_value = self.get_web_value(input_field())
+                                if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
+                                    break
+                                tries+=1
+                                try_counter+=1
+
 
                         if self.check_mask(input_field()):
                             current_value = self.remove_mask(self.get_web_value(input_field()).strip(), valtype)
@@ -3942,19 +3967,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
-        if not self.webapp_shadowroot():
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-        elif self.check_layers('wa-dialog') > 1:
-            logger().debug('Escape to menu')
-            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-            ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-
-        if self.check_layers('wa-dialog') > 1:
-            logger().debug('Found layers after Escape to menu')
-            # self.log.take_screenshot_log(driver=self.driver, description='SetLateralMenu',
-            #                              stack_item=self.log.get_testcase_stack())  # TODO trecho inserido para analise
-            self.close_screen_before_menu()
+        self.escape_to_main_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -4047,7 +4060,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():
+                        if not self.webapp_shadowroot():  
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4972,16 +4985,17 @@ class WebappInternal(Base):
         time.sleep(1)
         try:
             if click_type == 1:
-                element().click()
-                ActionChains(self.driver).send_keys(Keys.ENTER).perform()
-            if click_type == 2:
                 ActionChains(self.driver).move_to_element(element()).click(element()).perform()
                 event = "var evt = document.createEvent('MouseEvents');\
                     evt.initMouseEvent('dblclick',true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0,null);\
                     arguments[0].dispatchEvent(evt);"
                 self.driver.execute_script(event, element())
-            elif click_type == 3:
+            elif click_type == 2:
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
+            elif click_type == 3:
+                element().click()
+                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
+                    element(), Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
@@ -7353,11 +7367,11 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            self.driver.switch_to.active_element()
         except NoSuchElementException:
             return None
         except Exception as e:
-            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
+            logger().debug(f"Warning switch_to.active_element exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.TEXT, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog,wa-dialog", check_error=True, twebview=False, second_term=None):
@@ -7718,7 +7732,7 @@ class WebappInternal(Base):
                 self.errors.append(f"{self.language.messages.text_not_found}({text})")
 
 
-    def try_send_keys(self, element_function, key, try_counter=0):
+    def try_send_keys(self, element_function, key, try_counter=1):
         """
         [Internal]
 
@@ -7737,20 +7751,33 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
+
+        action_send_keys = None
+        is_active_element  = lambda : self.switch_to_active_element() == element_function()
+
+        logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
         if try_counter == 1:
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
+        elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            element_function().send_keys(key)
-        elif try_counter == 2:
-            ActionChains(self.driver).send_keys(Keys.HOME)
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
+            if is_active_element():
+                element_function().send_keys(key)
         elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
+        else:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
+
+        if action_send_keys and is_active_element():
+            action_send_keys.perform()
 
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
@@ -10044,7 +10071,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', error_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines=False, header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
@@ -10791,8 +10818,8 @@ class WebappInternal(Base):
         stack = None
         success = False
 
-        procedure_install = self.language.procedure_install
-        procedure_uninstall = self.language.procedure_uninstall
+        procedure_install = self.language.procedure_install 
+        procedure_uninstall = self.language.procedure_uninstall 
 
         self.tmenu_screen = self.check_tmenu_screen()
 
@@ -10813,7 +10840,7 @@ class WebappInternal(Base):
             self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
-
+            
             endtime = time.time() + self.config.time_out
 
             while(time.time() < endtime and not success):
@@ -10829,32 +10856,32 @@ class WebappInternal(Base):
                 for group in procedure_groups:
                     self.ClickBox(self.language.code, group)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
 
                 for code in procedure_codes:
                     self.ClickBox(self.language.code, code, grid_number=2)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()
-
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
+                    
                 procedure_buttons = container.select('wa-button')
 
                 if is_procedure_install:
                     procedure_install_button = list(filter(lambda x: x.get("title") == procedure_install, procedure_buttons))[0]
-                    self.click(self.soup_to_selenium(procedure_install_button))
+                    self.click(self.soup_to_selenium(procedure_install_button))         
                 else:
                     procedure_uninstall_button = list(filter(lambda x: x.get("title") == procedure_uninstall, procedure_buttons))[0]
                     self.click(self.soup_to_selenium(procedure_uninstall_button))
 
-                self.SetButton(self.language.yes)
+                self.SetButton(self.language.yes)            
 
                 container = self.get_current_container()
-                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))
+                procedure_success = list(filter(lambda x: self.language.success in x.get("caption"), container.select("wa-text-view")))                            
                 if procedure_success:
                     number_proc_success = procedure_success[0].get("caption").split(":")[1].strip()
                     if int(number_proc_success) == len(procedure_codes):
                         success = True
                         self.SetButton(self.language.close)
-
+                            
             self.procedures = []
             time.sleep(1)
 
