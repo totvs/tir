@@ -8869,7 +8869,7 @@ class WebappInternal(Base):
         position -= 1
         tree_number = tree_number-1 if tree_number > 0 else 0
 
-        labels = list(map(str.strip, treepath.split(">")))
+        labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
 
         for row, label in enumerate(labels):
