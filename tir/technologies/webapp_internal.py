@@ -7367,7 +7367,7 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to.active_element
+            return self.driver.switch_to.active_element
         except NoSuchElementException:
             return None
         except Exception as e:
