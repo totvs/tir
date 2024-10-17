@@ -7427,7 +7427,7 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            return self.driver.switch_to_active_element()
         except NoSuchElementException:
             return None
         except Exception as e:
@@ -7814,7 +7814,7 @@ class WebappInternal(Base):
         """
 
         action_send_keys = None
-        is_active_element  = lambda : self.driver.switch_to_active_element() == element_function()
+        is_active_element  = lambda : self.is_active_element(element_function())
 
         logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
@@ -7839,6 +7839,29 @@ class WebappInternal(Base):
 
         if action_send_keys and is_active_element():
             action_send_keys.perform()
+
+    def is_active_element(self, element):
+        """
+        [Internal]
+
+        Return true if an element is active status
+
+        :param element: Element to analyse
+        :type element: Selenium object
+
+        :return: A list containing a BeautifulSoup object next to the label
+        :rtype: List of BeautifulSoup objects
+        """
+
+        is_active = self.switch_to_active_element() == element
+
+        if is_active:
+            return is_active
+        else :
+            shadow_input = self.find_shadow_element('input, textarea', self.switch_to_active_element(), get_all=False)
+            return shadow_input == element
+
+
 
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
