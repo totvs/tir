@@ -2851,7 +2851,7 @@ class WebappInternal(Base):
                             else:
                                 self.wait_blocker()
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
-                                ActionChains(self.driver).move_to_element(input_field()).send_keys_to_element(input_field(), main_value).perform()
+                                ActionChains(self.driver).move_to_element(input_field()).send_keys(main_value).perform()
                                 if valtype == 'D' and user_value_size > interface_value_size:
                                     main_value = main_value_bkp
                         #if Number input
