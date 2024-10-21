@@ -108,6 +108,7 @@ class WebappInternal(Base):
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
         self.restart_tss = False
+        self.last_wa_tab_view_input_id = None
 
         if not Base.driver:
             Base.driver = self.driver
@@ -2756,6 +2757,9 @@ class WebappInternal(Base):
 
             element = self.get_field(field, name_attr, position, direction=direction)
 
+            if self.last_wa_tab_view_input_id != self.current_wa_tab_view_id() and self.check_element_tab_view(element=element):
+                self.last_wa_tab_view_input_id = self.current_wa_tab_view_id()
+
             if element:
                 input_field = lambda : self.soup_to_selenium(element)
                 self.scroll_to_element(input_field())
@@ -2903,6 +2907,34 @@ class WebappInternal(Base):
             self.log_error(f"Could not input value {value} in field {field}")
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
+
+    def check_element_tab_view(self, element):
+        """
+        [Internal]
+        """
+
+        element_tab_view = element.find_parent('wa-tab-view')
+        if element_tab_view:
+            if len(element_tab_view) == 1:
+                element_tab_view = next(iter(element_tab_view))
+            
+            if hasattr(element_tab_view, "attrs"):
+                element_tab_view_id = element_tab_view.attrs['id']
+                return element_tab_view_id == self.current_wa_tab_view_id()
+    
+    def current_wa_tab_view_id(self):
+        """
+        [Internal]
+        """
+
+        selector = "wa-tab-view"
+
+        wa_tab_view = self.get_container_selector(selector=selector)
+
+        if isinstance(wa_tab_view, list) and len(wa_tab_view) == 1:
+            wa_tab_view = next(iter(wa_tab_view))
+        
+        return wa_tab_view.attrs['id'] if hasattr(wa_tab_view, "attrs") else None
 
     def check_combobox(self, element):
         """
@@ -4834,6 +4866,9 @@ class WebappInternal(Base):
         element = ""
         position -= 1
 
+        if self.current_wa_tab_view_id() == self.last_wa_tab_view_input_id:
+            self.displayed_label_on_screen(label=folder_name, selector='wa-tab-button')
+
         self.wait_element(term=folder_name, scrap_type=enum.ScrapType.MIXED, optional_term=term, second_term='wa-tab-button')
 
         endtime  = time.time() + self.config.time_out
@@ -4871,6 +4906,27 @@ class WebappInternal(Base):
 
         if not element:
             self.log_error("Couldn't find panel item.")
+
+    def displayed_label_on_screen(self, label, selector):
+
+        selector_list = self.get_container_selector(selector)
+        element_is_displayed = False
+
+        filtered_label = self.filter_label_by_selector(label=label, selector=selector_list)
+
+        if filtered_label:
+            element_is_displayed = self.element_is_displayed(filtered_label)
+
+            if not element_is_displayed:
+                active_element = next(iter(filter(lambda x: 'active' in x.attrs, selector_list)), None)
+                element = lambda: self.soup_to_selenium(active_element)
+                self.scroll_to_element(element=element())
+            
+    def filter_label_by_selector(self, label, selector):
+
+        label = label.lower().strip()
+
+        return next(iter(list(filter(lambda x: x.text.lower().strip() == label or x.attrs.get('caption', '').lower().strip() == label, selector))), None)
 
     def ClickBox(self, fields="", content_list="", select_all=False, grid_number=1, itens=False):
         """
@@ -7371,7 +7427,7 @@ class WebappInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            return self.driver.switch_to_active_element()
         except NoSuchElementException:
             return None
         except Exception as e:
@@ -7757,26 +7813,56 @@ class WebappInternal(Base):
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
 
+        action_send_keys = None
+        is_active_element  = lambda : self.is_active_element(element_function())
+
         logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
         if try_counter == 1:
             ActionChains(self.driver).send_keys(Keys.HOME).perform()
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
         elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            element_function().send_keys(key)
+            if is_active_element():
+                element_function().send_keys(key)
         elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
         else:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
-            
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
+
+        if action_send_keys and is_active_element():
+            action_send_keys.perform()
+
+    def is_active_element(self, element):
+        """
+        [Internal]
+
+        Return true if an element is active status
+
+        :param element: Element to analyse
+        :type element: Selenium object
+
+        :return: A list containing a BeautifulSoup object next to the label
+        :rtype: List of BeautifulSoup objects
+        """
+
+        is_active = self.switch_to_active_element() == element
+
+        if is_active:
+            return is_active
+        else :
+            shadow_input = self.find_shadow_element('input, textarea', self.switch_to_active_element(), get_all=False)
+            return shadow_input == element
+
+
+
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
         [Internal]
@@ -8806,7 +8892,7 @@ class WebappInternal(Base):
         position -= 1
         tree_number = tree_number-1 if tree_number > 0 else 0
 
-        labels = list(map(str.strip, treepath.split(">")))
+        labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
 
         for row, label in enumerate(labels):
@@ -11023,3 +11109,9 @@ class WebappInternal(Base):
                     self.Program(self.config.routine)
 
             self.tmenu_screen = None
+
+    def get_container_selector(self, selector):
+
+        container = self.get_current_container()
+
+        return container.select(selector)
