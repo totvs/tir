@@ -4994,8 +4994,7 @@ class WebappInternal(Base):
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 3:
                 element().click()
-                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                    element(), Keys.ENTER).perform()
+                ActionChains(self.driver).move_to_element(element()).send_keys(Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
@@ -7759,18 +7758,18 @@ class WebappInternal(Base):
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
 
         if try_counter == 1:
-            ActionChains(self.driver).send_keys(Keys.HOME).perform()
-            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
-        elif try_counter == 2:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
             if is_active_element():
                 element_function().send_keys(key)
+        elif try_counter == 2:
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
         elif try_counter == 3:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
-            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key)
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
         else:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
