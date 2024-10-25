@@ -2881,7 +2881,7 @@ class WebappInternal(Base):
                         if current_value != "" and current_value.encode('latin-1', 'ignore'):
                             logger().info(f"Current field value: {current_value}")
 
-                        if user_value_size < interface_value_size:
+                        if user_value_size < interface_value_size and self.is_active_element(input_field()):
                             self.send_keys(input_field(), Keys.ENTER)
 
                         if not check_value:
