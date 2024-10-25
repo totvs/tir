@@ -4994,8 +4994,7 @@ class WebappInternal(Base):
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 3:
                 element().click()
-                ActionChains(self.driver).move_to_element(element()).send_keys_to_element(
-                    element(), Keys.ENTER).perform()
+                ActionChains(self.driver).move_to_element(element()).send_keys(Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
