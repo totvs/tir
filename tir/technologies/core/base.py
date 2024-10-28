@@ -1229,6 +1229,10 @@ class Base(unittest.TestCase):
         num_of_trying = 1
         while not get_url and num_of_trying <= 5:
             self.driver.get(url)
+
+            if self.config.skip_environment:
+                return
+
             try:
                 if self.config.json_data['POUILogin'] and 'StartProg' in url:
                     time.sleep(3)
@@ -1336,7 +1340,7 @@ class Base(unittest.TestCase):
                 try:
                     current_ver = self.driver.execute_script("return app.VERSION")
                     if current_ver:
-                        logger().debug(f'Webapp: {current_ver}')
+                        logger().info(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
                         self.webapp_version = int(current_ver) >= 8
                         return self.webapp_version
