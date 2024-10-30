@@ -8993,7 +8993,7 @@ class WebappInternal(Base):
 
                                                 if success and right_click:
                                                     if self.webapp_shadowroot():
-                                                        endtime_right_click = time.time() + self.config.time_out
+                                                        endtime_right_click = time.time() + self.config.time_out / 3
                                                         while ((time.time() < endtime_right_click) and not
                                                         self.element_exists(term='.tmenupopup, wa-menu-popup-item',
                                                                             scrap_type=enum.ScrapType.CSS_SELECTOR,
