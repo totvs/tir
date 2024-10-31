@@ -8992,16 +8992,8 @@ class WebappInternal(Base):
                                                     success = True if is_element_acessible() else False
 
                                                 if success and right_click:
-                                                    if self.webapp_shadowroot():
-                                                        endtime_right_click = time.time() + self.config.time_out / 3
-                                                        while ((time.time() < endtime_right_click) and not
-                                                        self.element_exists(term='.tmenupopup, wa-menu-popup-item',
-                                                                            scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                            main_container="body")):
-                                                        self.click(element_click(), enum.ClickType.SELENIUM,
-                                                                   right_click)
-                                                    else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    self.send_action(action=self.click, element=element_click,
+                                                                     right_click=right_click, timeout=20)
                                             else:
                                                 self.scroll_to_element(element_click())
                                                 element_click().click()
@@ -10232,7 +10224,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, timeout=None):
         """
 
         Sends an action to element and compare it object state change.
@@ -10268,7 +10260,10 @@ class WebappInternal(Base):
 
         click_type = 1 if not main_click_type else click_type
 
-        endtime = time.time() + self.config.time_out
+        if not timeout:
+            timeout = self.config.time_out
+
+        endtime = time.time() + timeout
         try:
             while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
