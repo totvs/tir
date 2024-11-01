@@ -66,20 +66,22 @@ def create_file():
 
     folder = create_folder()
 
-    file_path = str(Path(folder, filename))
-
     success = False
+
+    error = None
 
     endtime = time.time() + config.time_out
     while (time.time() < endtime and not success):
         try:
             with open(Path(folder, filename), "w", ):
-                success = True
-        except Exception as error:
-            time.sleep(30)
-            logger().debug(str(error))
+                return str(Path(folder, filename))
+        except Exception as e:
+            time.sleep(5)
+            error = str(e)
+            print(error)
     
-    return file_path
+    if error:
+        return error
 
 def configure_logger():
     """
@@ -124,13 +126,6 @@ def configure_logger():
                 'class': 'logging.StreamHandler',
                 'stream': 'ext://sys.stdout',
             },
-            'debug_file_handler': {
-                'level': 'DEBUG',
-                'formatter': 'debug',
-                'class': 'logging.FileHandler',
-                'filename': file_path,
-                'mode': 'a'
-            },
             'info_console_handler': {
                 'level': 'INFO',
                 'formatter': 'info',
@@ -154,7 +149,7 @@ def configure_logger():
         },
     }
 
-    if file_path:
+    if file_path and os.path.exists(file_path):
         logging_config['handlers']['memory_handler'] = {
             'level': 'DEBUG',
             'formatter': 'debug',
@@ -163,7 +158,15 @@ def configure_logger():
             'flushLevel': logging.CRITICAL,
             'target': 'debug_file_handler'
         }
+        logging_config['handlers']['debug_file_handler'] = {
+            'level': 'DEBUG',
+            'formatter': 'debug',
+            'class': 'logging.FileHandler',
+            'filename': file_path,
+            'mode': 'a'
+        }
         logging_config['loggers']['root']['handlers'].append('memory_handler')
+        logging_config['loggers']['root']['handlers'].append('debug_file_handler')
 
     dictConfig(logging_config)
     _logger = logging.getLogger(logger_profile)
@@ -172,4 +175,5 @@ def logger():
     global _logger
     if _logger is None:
         configure_logger()
+        _logger.debug(f"Log file created: '{file_path}'")
     return _logger
