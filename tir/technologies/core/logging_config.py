@@ -8,98 +8,11 @@ import os
 import socket
 import inspect
 
-
-config = ConfigLoader()
-
 filename = None
 folder = None
 file_path = None
-
-def logger(logger='root'):
-    """
-    :return:
-    """
-
-    global filename
-    global folder
-    global file_path
-
-    if config.smart_test or config.debug_log:
-
-        logger = 'console'  # TODO configuração temporaria para o server.
-
-        today = datetime.today()
-
-        file_handler = True if logger == 'root' else False
-
-        if not file_path and file_handler:
-            filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
-
-            folder = create_folder()
-
-            file_path = create_file(folder, filename)
-
-        logging_config = {
-            'version': 1,
-            'loggers': {
-                'root': {  # root logger
-                    'level': 'DEBUG',
-                    'handlers': ['debug_console_handler', 'debug_file_handler']
-                },
-                'console': {  # console logger
-                    'level': 'DEBUG',
-                    'handlers': ['debug_console_handler']
-                }
-            },
-            'handlers': {
-                'debug_console_handler': {
-                    'level': 'DEBUG',
-                    'formatter': 'info',
-                    'class': 'logging.StreamHandler',
-                    'stream': 'ext://sys.stdout',
-                },
-                'debug_file_handler': {
-                    'level': 'DEBUG',
-                    'formatter': 'info',
-                    'filename': Path(folder, filename) if file_handler else 'none.log',
-                    'class': 'logging.FileHandler',
-                    'mode': 'a'
-                },
-            },
-            'formatters': {
-                'info': {
-                    'format': '%(asctime)s-%(levelname)s-%(name)s-%(process)d::%(module)s::%(funcName)s|%(lineno)s:: %(message)s'
-                },
-            },
-        }
-
-    else:
-
-        logging_config = {
-            'version': 1,
-            'loggers': {
-                'root': {  # root logger
-                    'level': 'INFO',
-                    'handlers': ['debug_console_handler']
-                },
-            },
-            'handlers': {
-                'debug_console_handler': {
-                    'level': 'INFO',
-                    'formatter': 'info',
-                    'class': 'logging.StreamHandler',
-                    'stream': 'ext://sys.stdout',
-                },
-            },
-            'formatters': {
-                'info': {
-                    'format': '%(asctime)s-%(levelname)s:: %(message)s'
-                },
-            },
-        }
-
-    dictConfig(logging_config)
-    return logging.getLogger(logger)
+config = None
+_logger = None
 
 def get_file_name(file_name):
     """
@@ -140,21 +53,123 @@ def create_folder():
 
     return path
 
-def create_file(folder, filename):
+def create_file():
     """
     Creates an empty file before logger
     [Internal]
 
     """
 
+    today = datetime.today()
+
+    filename = f"TIR_{get_file_name('testsuite')}_{today.strftime('%Y%m%d%H%M%S%f')[:-3]}.log"
+
+    folder = create_folder()
+
+    file_path = str(Path(folder, filename))
+
     success = False
 
     endtime = time.time() + config.time_out
-
     while (time.time() < endtime and not success):
         try:
             with open(Path(folder, filename), "w", ):
-                return True
+                success = True
         except Exception as error:
             time.sleep(30)
             logger().debug(str(error))
+    
+    return file_path
+
+def configure_logger():
+    """
+    :return:
+    """
+
+    global _logger
+    global filename
+    global folder
+    global file_path
+    global config
+
+    config = ConfigLoader()
+
+    if not config._json_data:
+        return
+
+    logger_profile = 'user_console'
+
+    if config.debug_log:
+        logger_profile = 'root'
+    else:
+        logger_profile = 'debug_console' if config.smart_test else logger_profile
+
+    if logger_profile == 'root':
+        file_path = create_file()
+
+    logging_config = {
+        'version': 1,
+        'formatters': {
+            'debug': {
+                'format': '%(asctime)s-%(levelname)s-%(name)s-%(process)d::%(module)s::%(funcName)s|%(lineno)s:: %(message)s'
+            },
+            'info':{
+                'format': '%(asctime)s-%(levelname)s:: %(message)s'
+            }
+        },
+        'handlers': {
+            'debug_console_handler': {
+                'level': 'DEBUG',
+                'formatter': 'debug',
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+            },
+            'debug_file_handler': {
+                'level': 'DEBUG',
+                'formatter': 'debug',
+                'class': 'logging.FileHandler',
+                'filename': file_path,
+                'mode': 'a'
+            },
+            'info_console_handler': {
+                'level': 'INFO',
+                'formatter': 'info',
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+            }
+        },
+        'loggers': {
+            'root': {  # root logger
+                'level': 'DEBUG',
+                'handlers': ['debug_console_handler']
+            },
+            'debug_console': {  # console logger
+                'level': 'DEBUG',
+                'handlers': ['debug_console_handler']
+            },
+            'user_console': {  # user console logger
+                'level': 'INFO',
+                'handlers': ['info_console_handler']
+            },
+        },
+    }
+
+    if file_path:
+        logging_config['handlers']['memory_handler'] = {
+            'level': 'DEBUG',
+            'formatter': 'debug',
+            'class': 'logging.handlers.MemoryHandler',
+            'capacity': 5*1024*1024,
+            'flushLevel': logging.CRITICAL,
+            'target': 'debug_file_handler'
+        }
+        logging_config['loggers']['root']['handlers'].append('memory_handler')
+
+    dictConfig(logging_config)
+    _logger = logging.getLogger(logger_profile)
+
+def logger():
+    global _logger
+    if _logger is None:
+        configure_logger()
+    return _logger
