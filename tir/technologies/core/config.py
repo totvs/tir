@@ -12,9 +12,10 @@ class ConfigLoader:
 
     def __init__(self, path="config.json"):
         if ConfigLoader._json_data is None:
-            path = os.path.join(sys.path[0], r"config.json")
-            if not os.path.isfile(path):
-                raise Exception(f"config.json file not found!")
+
+            if not path:
+                path = os.path.join(sys.path[0], r"config.json")
+
             valid = os.path.isfile(path)
 
             if valid:
