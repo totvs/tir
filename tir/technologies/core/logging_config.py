@@ -45,6 +45,9 @@ def create_folder():
                                config.execution_id, get_file_name('testsuite'))
             path = Path(folder_path)
             os.makedirs(Path(folder_path))
+        elif config.log_folder:
+            folder_path = Path(config.log_folder)
+            os.makedirs(Path(folder_path))
         else:
             path = Path("Log", socket.gethostname())
             os.makedirs(Path("Log", socket.gethostname()))
