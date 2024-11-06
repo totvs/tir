@@ -22,8 +22,8 @@ class ConfigLoader:
                 with open(path) as json_data_file:
                     try:
                         data = json.load(json_data_file)
-                        if self.validar_chaves(data):
-                            raise Exception(self.validar_chaves(data))
+                        if self.check_keys(data):
+                            raise Exception(self.check_keys(data))
                         ConfigLoader._json_data = data
                     except Exception as e:
                         raise Exception(f"JSON file issue: {e}. \n* Please check your config.json *")
@@ -105,7 +105,7 @@ class ConfigLoader:
             self.data_delimiter = str(data["DataDelimiter"]) if "DataDelimiter" in data else "/"
             self.procedure_menu = str(data["ProcedureMenu"]) if "ProcedureMenu" in data else ""
 
-    def validar_chaves(self, json_data):
+    def check_keys(self, json_data):
         valid_keys = [
         "ipExec",
         "UrlSetStartExec",
