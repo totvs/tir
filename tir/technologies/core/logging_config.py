@@ -38,12 +38,12 @@ def create_folder():
     """
 
     path = None
+    folder_path = None
+    error = None
 
     try:
         if config.log_http:
-            folder_path = Path(config.log_http, config.country, config.release, config.issue,
-                               config.execution_id, get_file_name('testsuite'))
-            path = Path(folder_path)
+            folder_path = Path(config.log_http, config.country, config.release, config.issue,config.execution_id, get_file_name('testsuite'))
             os.makedirs(Path(folder_path))
         elif config.log_folder:
             folder_path = Path(config.log_folder)
@@ -51,10 +51,16 @@ def create_folder():
         else:
             path = Path("Log", socket.gethostname())
             os.makedirs(Path("Log", socket.gethostname()))
-    except OSError:
-        pass
+    except Exception as e:
+        error = e
 
-    return path
+    if folder_path:
+        path = str(Path(folder_path))
+
+    if os.path.isdir(path):
+        return str(path)
+    else:
+        raise Exception(f"Folder path not found: {path}: {str(error)}")	
 
 def create_file():
     """
