@@ -3130,6 +3130,9 @@ class WebappInternal(Base):
                 else:
                     field_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
 
+                self.set_element_focus(field_element())
+                self.scroll_to_element(field_element())
+
                 if self.get_web_value(field_element()):
                     current_value = self.get_web_value(field_element()).strip()
 
