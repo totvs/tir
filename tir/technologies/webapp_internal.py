@@ -8973,7 +8973,6 @@ class WebappInternal(Base):
                                             element_click = lambda: self.soup_to_selenium(element_class_item)
 
                                         if last_item:
-                                            start_time = time.time()
                                             self.wait_blocker()
                                             if self.webapp_shadowroot():
                                                 element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == ''
@@ -8992,11 +8991,17 @@ class WebappInternal(Base):
                                                     success = True if is_element_acessible() else False
 
                                                 if success and right_click:
-                                                    if self.webapp_shadowroot():
-                                                        self.click(element_click(), enum.ClickType.SELENIUM,
-                                                                   right_click)
-                                                    else:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
+                                                    last_zindex = self.return_last_zindex()
+                                                    current_zindex = last_zindex
+                                                    
+                                                    endtime_right_click = time.time() + self.config.time_out / 3
+                                                    while time.time() < endtime_right_click and last_zindex <= current_zindex:
+                                                        if self.webapp_shadowroot():
+                                                            self.click(element_click(), enum.ClickType.SELENIUM,
+                                                                    right_click)
+                                                            current_zindex = self.return_last_zindex()
+                                                        else:
+                                                            self.send_action(action=self.click, element=element_click, right_click=right_click)
                                             else:
                                                 self.scroll_to_element(element_click())
                                                 element_click().click()
