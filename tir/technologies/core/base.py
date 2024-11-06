@@ -782,6 +782,29 @@ class Base(unittest.TestCase):
             zindex = int(element.attrs['style'].split("z-index:")[1].split(";")[0].strip())
 
         return zindex
+    
+    def collect_zindex(self, reverse=True):
+        """
+        returns z-index list in decrescent order by default or in crescent order if reverse is False.
+        """       
+
+        soup = self.get_current_DOM()
+
+        style_elements = soup.find_all(style=True)
+
+        if style_elements:
+            zindex_list = list(filter(lambda x: 'z-index' in x['style'], style_elements))
+            if zindex_list:
+                zindex_list_filtered = list(map(lambda x: x.attrs['style'].split('z-index')[1].split(';')[0].split(':')[1].strip(), zindex_list))
+                return sorted(list(map(int, zindex_list_filtered)), reverse=reverse)
+            
+    def return_last_zindex(self):
+        """
+        returns the last z-index value in the page.
+        """
+        zindex_list = self.collect_zindex(reverse=True)
+        if zindex_list:
+            return next(iter(zindex_list), None)
 
     def select_combo(self, element, option, index=False, shadow_root=True, locator=False):
         """
