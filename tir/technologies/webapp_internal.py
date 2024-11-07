@@ -449,7 +449,7 @@ class WebappInternal(Base):
             soup_element = next(iter(soup.select(term)), None)
             if soup_element is None:
                 self.restart_counter += 1
-                message = "Couldn't find Initial Program input element."
+                message = f"Couldn't find '{term}' element."
                 self.log_error(message)
                 raise ValueError(message)
 
@@ -470,7 +470,7 @@ class WebappInternal(Base):
 
         if (element_value.strip() != user_value.strip()):
             self.restart_counter += 1
-            message = "Couldn't fill Program input element."
+            message = f"Couldn't fill '{term}' element."
             self.log_error(message)
             raise ValueError(message)
 
