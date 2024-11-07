@@ -260,7 +260,7 @@ class WebappInternal(Base):
                 self.language = LanguagePack(self.config.language)
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, poui=self.config.poui_login)
+                self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
