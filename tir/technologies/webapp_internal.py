@@ -9985,14 +9985,26 @@ class WebappInternal(Base):
         >>> oHelper.ClickListBox("text")
         """
 
-        self.wait_element(term='.tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog")
+        self.wait_element(term='.tlistbox, .dict-tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog, wa-dialog")
         container = self.get_current_container()
-        tlist = container.select(".tlistbox")
-        list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+        term = '.dict-tlistbox' if self.webapp_shadowroot() else '.tlistbox'
+
+        tlist = container.select(term)
+
+        if self.webapp_shadowroot():
+            list_option = next(iter(list(map(lambda x: self.find_shadow_element('option', self.soup_to_selenium(x)), tlist))))
+        else:
+            list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+
         list_option_filtered = list(filter(lambda x: self.element_is_displayed(x), list_option))
         element = next(iter(filter(lambda x: x.text.strip() == text.strip(), list_option_filtered)), None)
-        element_selenium = self.soup_to_selenium(element)
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
+        if self.webapp_shadowroot():
+            element_selenium = element
+        else:
+            element_selenium = self.soup_to_selenium(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
         element_selenium.click()
 
     def ClickImage(self, img_name, double_click=False):
