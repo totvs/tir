@@ -455,11 +455,6 @@ class WebappInternal(Base):
 
             element = lambda: self.soup_to_selenium(soup_element)
 
-            if self.webapp_shadowroot():
-                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
-            else:
-                element_value = self.get_web_value(element())
-
             self.set_element_focus(element())
             self.click(element())
             self.try_send_keys(element, user_value, try_counter)
@@ -467,6 +462,11 @@ class WebappInternal(Base):
 
             if try_counter > 4:
                 try_counter = 0
+            
+            if self.webapp_shadowroot():
+                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
+            else:
+                element_value = self.get_web_value(element())
 
         if (element_value.strip() != user_value.strip()):
             self.restart_counter += 1
