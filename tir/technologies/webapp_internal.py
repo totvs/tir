@@ -4251,8 +4251,11 @@ class WebappInternal(Base):
         try:
             restore_zoom = False
             soup_element  = ""
-            if (button.lower() == "x"):
+            if (button.lower().strip() == "x"):
                 self.set_button_x(position, check_error)
+                return
+            elif (button.strip() == "?"):
+                self.set_button_character(term=button, position=position, check_error=check_error)
                 return
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
@@ -4468,6 +4471,37 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
+    
+    def set_button_character(self, term, position=1, check_error=True):
+        """
+        [Internal]
+        """
+
+        position -= 1
+        button = None
+
+        self.wait_element(term=term, position=position, check_error=check_error, main_container=self.containers_selectors["AllContainers"])
+
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and not button:
+            
+            container = self.get_current_container()
+
+            buttons = container.select('button')
+
+            buttons_displayed = list(filter(lambda x: self.element_is_displayed(x), buttons))
+
+            filtered_button = list(filter(lambda x: x.text.strip().lower() == term.strip().lower(), buttons_displayed))
+
+            if filtered_button and len(filtered_button) - 1 >= position:
+                button = filtered_button[position]
+            
+            element = self.soup_to_selenium(button)
+
+            self.scroll_to_element(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=button, locator=By.XPATH)
+            self.click(element)
 
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
