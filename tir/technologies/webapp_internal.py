@@ -455,11 +455,6 @@ class WebappInternal(Base):
 
             element = lambda: self.soup_to_selenium(soup_element)
 
-            if self.webapp_shadowroot():
-                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
-            else:
-                element_value = self.get_web_value(element())
-
             self.set_element_focus(element())
             self.click(element())
             self.try_send_keys(element, user_value, try_counter)
@@ -467,6 +462,11 @@ class WebappInternal(Base):
 
             if try_counter > 4:
                 try_counter = 0
+            
+            if self.webapp_shadowroot():
+                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
+            else:
+                element_value = self.get_web_value(element())
 
         if (element_value.strip() != user_value.strip()):
             self.restart_counter += 1
@@ -4251,8 +4251,11 @@ class WebappInternal(Base):
         try:
             restore_zoom = False
             soup_element  = ""
-            if (button.lower() == "x"):
+            if (button.lower().strip() == "x"):
                 self.set_button_x(position, check_error)
+                return
+            elif (button.strip() == "?"):
+                self.set_button_character(term=button, position=position, check_error=check_error)
                 return
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
@@ -4468,6 +4471,37 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
+    
+    def set_button_character(self, term, position=1, check_error=True):
+        """
+        [Internal]
+        """
+
+        position -= 1
+        button = None
+
+        self.wait_element(term=term, position=position, check_error=check_error, main_container=self.containers_selectors["AllContainers"])
+
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and not button:
+            
+            container = self.get_current_container()
+
+            buttons = container.select('button')
+
+            buttons_displayed = list(filter(lambda x: self.element_is_displayed(x), buttons))
+
+            filtered_button = list(filter(lambda x: x.text.strip().lower() == term.strip().lower(), buttons_displayed))
+
+            if filtered_button and len(filtered_button) - 1 >= position:
+                button = filtered_button[position]
+            
+            element = self.soup_to_selenium(button)
+
+            self.scroll_to_element(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=button, locator=By.XPATH)
+            self.click(element)
 
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
@@ -9985,14 +10019,26 @@ class WebappInternal(Base):
         >>> oHelper.ClickListBox("text")
         """
 
-        self.wait_element(term='.tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog")
+        self.wait_element(term='.tlistbox, .dict-tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog, wa-dialog")
         container = self.get_current_container()
-        tlist = container.select(".tlistbox")
-        list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+        term = '.dict-tlistbox' if self.webapp_shadowroot() else '.tlistbox'
+
+        tlist = container.select(term)
+
+        if self.webapp_shadowroot():
+            list_option = next(iter(list(map(lambda x: self.find_shadow_element('option', self.soup_to_selenium(x)), tlist))))
+        else:
+            list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+
         list_option_filtered = list(filter(lambda x: self.element_is_displayed(x), list_option))
         element = next(iter(filter(lambda x: x.text.strip() == text.strip(), list_option_filtered)), None)
-        element_selenium = self.soup_to_selenium(element)
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
+        if self.webapp_shadowroot():
+            element_selenium = element
+        else:
+            element_selenium = self.soup_to_selenium(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
         element_selenium.click()
 
     def ClickImage(self, img_name, double_click=False):
