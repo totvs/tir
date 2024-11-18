@@ -390,6 +390,9 @@ class WebappInternal(Base):
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
 
+        if not environment:
+            environment = self.config.environment
+
 
         self.config.poui_login = poui
 
@@ -669,13 +672,15 @@ class WebappInternal(Base):
 
         logger().debug('Reloading user screen')
 
+        server_environment = self.config.environment
+
         self.restart_browser()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program)
+            self.program_screen(self.config.initial_program, environment=server_environment)
 
         self.wait_element_timeout(term="[name='cGetUser']",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
@@ -3212,6 +3217,8 @@ class WebappInternal(Base):
         """
         webdriver_exception = None
 
+        server_environment = self.config.environment
+
         if self.config.appserver_service:
             try:
                 self.sc_query(self.config.appserver_service)
@@ -3240,7 +3247,7 @@ class WebappInternal(Base):
         if self.config.initial_program != ''  and self.restart_counter < 3:
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(self.config.initial_program)
+                self.program_screen(self.config.initial_program, environment=server_environment)
 
             self.wait_user_screen()
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
