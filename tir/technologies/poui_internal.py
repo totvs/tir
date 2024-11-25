@@ -93,7 +93,6 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-        self.routine = None
         
         if not Base.driver:
             Base.driver = self.driver
@@ -1289,9 +1288,9 @@ class PouiInternal(Base):
 
             
             if self.config.routine:
-                if self.routine == 'SetLateralMenu':
+                if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                elif self.routine == 'Program':
+                elif self.config.routine_type.lower() == 'program':
                     self.set_program(self.config.routine)
 
     def driver_refresh(self):
