@@ -244,6 +244,8 @@ class WebappInternal(Base):
             if not self.log.program:
                 self.log.program = self.get_program_name()
 
+            server_environment = self.config.environment
+
             if save_input:
                 self.config.initial_program = initial_program
                 self.config.date = self.date_format(date)
@@ -253,14 +255,14 @@ class WebappInternal(Base):
 
             if self.config.coverage:
                 self.open_url_coverage(url=self.config.url, initial_program=initial_program,
-                                       environment=self.config.environment)
+                                       environment=server_environment)
 
             if not self.config.valid_language:
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, coverage=False, poui=self.config.poui_login)
+                self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
@@ -373,7 +375,7 @@ class WebappInternal(Base):
                 with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
                     firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
-    def program_screen(self, initial_program="", environment="", coverage=False, poui=False):
+    def program_screen(self, initial_program="", environment="", poui=False):
         """
         [Internal]
 
@@ -390,112 +392,92 @@ class WebappInternal(Base):
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
 
+        if not environment:
+            environment = self.config.environment
+
 
         self.config.poui_login = poui
 
-        if coverage:
-            self.open_url_coverage(url=self.config.url, initial_program=initial_program,
-                                   environment=self.config.environment)
-        else:
-            try_counter = 0
-            if self.webapp_shadowroot():
-                start_program = '#selectStartProg'
-                input_environment = '#selectEnv'
-            else:
-                start_program = '#inputStartProg'
-                input_environment = '#inputEnv'
+        self.filling_initial_program(initial_program)
+        self.filling_server_environment(environment)
 
-            self.wait_element(term=start_program, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            self.wait_element(term=input_environment, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        if self.webapp_shadowroot():
+            self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
+            parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
+            buttons = self.find_shadow_element('wa-button', parameters_screen)
+            button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
+        else:
+            button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
+
+        self.click(button)
+
+    def filling_initial_program(self, initial_program):
+        """
+        [Internal]
+        """
+
+        if self.webapp_shadowroot():
+            start_program = '#selectStartProg'
+        else:
+            start_program = '#inputStartProg'
+
+        logger().info(f'Filling Initial Program: "{initial_program}"')
+
+        self.fill_select_element(term=start_program, user_value=initial_program)
+        
+    def filling_server_environment(self, environment):
+        """
+        [Internal]
+        """
+
+        if self.webapp_shadowroot():
+            input_environment = '#selectEnv'
+        else:
+            input_environment = '#inputEnv'
+
+        logger().info(f'Filling Server Environment: "{environment}"')
+
+        self.fill_select_element(term=input_environment, user_value=environment)
+       
+    def fill_select_element(self, term, user_value):
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+      
+        element_value = ''
+        try_counter = 0	
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (element_value != user_value.strip())):
+
             soup = self.get_current_DOM()
 
-            start_prog_element = next(iter(soup.select(start_program)), None)
-            if start_prog_element is None:
+            soup_element = next(iter(soup.select(term)), None)
+            if soup_element is None:
                 self.restart_counter += 1
-                message = "Couldn't find Initial Program input element."
+                message = f"Couldn't find '{term}' element."
                 self.log_error(message)
                 raise ValueError(message)
 
-            start_prog = lambda: self.soup_to_selenium(start_prog_element)
+            element = lambda: self.soup_to_selenium(soup_element)
 
-            endtime = time.time() + self.config.time_out
+            self.set_element_focus(element())
+            self.click(element())
+            self.try_send_keys(element, user_value, try_counter)
+            try_counter += 1
+
+            if try_counter > 4:
+                try_counter = 0
+            
             if self.webapp_shadowroot():
-                start_prog_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', start_prog())))).strip() if self.find_shadow_element('input', start_prog()) else None
+                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
             else:
-                start_prog_value = lambda: self.get_web_value(start_prog())
+                element_value = self.get_web_value(element())
 
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (start_prog_value() != initial_program.strip())):
-
-                logger().info(f'Filling Initial Program: "{initial_program}"')
-
-                start_prog = lambda: self.soup_to_selenium(start_prog_element)
-
-                self.set_element_focus(start_prog())
-                self.click(start_prog())
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.try_send_keys(start_prog, initial_program, try_counter)
-                try_counter += 1
-
-                if try_counter > 4:
-                    try_counter = 0
-
-            if (start_prog_value() != initial_program.strip()):
-                self.restart_counter += 1
-                message = "Couldn't fill Program input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            env_element = next(iter(soup.select(input_environment)), None)
-            if env_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find Environment input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            env = lambda: self.soup_to_selenium(env_element)
-
-            if self.webapp_shadowroot():
-                env_value = lambda: self.get_web_value(next(iter(self.find_shadow_element('input', env())), None))
-            else:
-                env_value = lambda: self.get_web_value(env())
-
-            endtime = time.time() + self.config.time_out
-            try_counter = 0
-            while (time.time() < endtime and (env_value().strip() != self.config.environment.strip())):
-
-                logger().info(f'Filling Environment: "{self.config.environment}"')
-
-                if try_counter == 0:
-                    env = lambda: self.soup_to_selenium(env_element)
-                else:
-                    env = lambda: self.soup_to_selenium(env_element.parent)
-
-                self.set_element_focus(env())
-                self.click(env())
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(env(), self.config.environment)
-                try_counter += 1 if (try_counter < 1) else -1
-
-            if (env_value().strip() != self.config.environment.strip()):
-                self.restart_counter += 1
-                message = "Couldn't fill Environment input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            if self.webapp_shadowroot():
-                self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
-                parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
-                buttons = self.find_shadow_element('wa-button', parameters_screen)
-                button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
-            else:
-                button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
-
-            self.click(button)
+        if (element_value.strip() != user_value.strip()):
+            self.restart_counter += 1
+            message = f"Couldn't fill '{term}' element."
+            self.log_error(message)
+            raise ValueError(message)
 
     def user_screen(self, admin_user=False):
         """
@@ -692,13 +674,15 @@ class WebappInternal(Base):
 
         logger().debug('Reloading user screen')
 
+        server_environment = self.config.environment
+
         self.restart_browser()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program)
+            self.program_screen(self.config.initial_program, environment=server_environment)
 
         self.wait_element_timeout(term="[name='cGetUser']",
          scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
@@ -3236,6 +3220,8 @@ class WebappInternal(Base):
         """
         webdriver_exception = None
 
+        server_environment = self.config.environment
+
         if self.config.appserver_service:
             try:
                 self.sc_query(self.config.appserver_service)
@@ -3264,7 +3250,7 @@ class WebappInternal(Base):
         if self.config.initial_program != ''  and self.restart_counter < 3:
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(self.config.initial_program)
+                self.program_screen(self.config.initial_program, environment=server_environment)
 
             self.wait_user_screen()
             if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
@@ -4275,8 +4261,11 @@ class WebappInternal(Base):
         try:
             restore_zoom = False
             soup_element  = ""
-            if (button.lower() == "x"):
+            if (button.lower().strip() == "x"):
                 self.set_button_x(position, check_error)
+                return
+            elif (button.strip() == "?"):
+                self.set_button_character(term=button, position=position, check_error=check_error)
                 return
             else:
                 self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
@@ -4492,6 +4481,37 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
+    
+    def set_button_character(self, term, position=1, check_error=True):
+        """
+        [Internal]
+        """
+
+        position -= 1
+        button = None
+
+        self.wait_element(term=term, position=position, check_error=check_error, main_container=self.containers_selectors["AllContainers"])
+
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and not button:
+            
+            container = self.get_current_container()
+
+            buttons = container.select('button')
+
+            buttons_displayed = list(filter(lambda x: self.element_is_displayed(x), buttons))
+
+            filtered_button = list(filter(lambda x: x.text.strip().lower() == term.strip().lower(), buttons_displayed))
+
+            if filtered_button and len(filtered_button) - 1 >= position:
+                button = filtered_button[position]
+            
+            element = self.soup_to_selenium(button)
+
+            self.scroll_to_element(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=button, locator=By.XPATH)
+            self.click(element)
 
     def set_button_x(self, position=1, check_error=True):
         endtime = self.config.time_out/2
@@ -10005,14 +10025,26 @@ class WebappInternal(Base):
         >>> oHelper.ClickListBox("text")
         """
 
-        self.wait_element(term='.tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog")
+        self.wait_element(term='.tlistbox, .dict-tlistbox', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=".tmodaldialog, wa-dialog")
         container = self.get_current_container()
-        tlist = container.select(".tlistbox")
-        list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+        term = '.dict-tlistbox' if self.webapp_shadowroot() else '.tlistbox'
+
+        tlist = container.select(term)
+
+        if self.webapp_shadowroot():
+            list_option = next(iter(list(map(lambda x: self.find_shadow_element('option', self.soup_to_selenium(x)), tlist))))
+        else:
+            list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
+
         list_option_filtered = list(filter(lambda x: self.element_is_displayed(x), list_option))
         element = next(iter(filter(lambda x: x.text.strip() == text.strip(), list_option_filtered)), None)
-        element_selenium = self.soup_to_selenium(element)
-        self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
+        if self.webapp_shadowroot():
+            element_selenium = element
+        else:
+            element_selenium = self.soup_to_selenium(element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = element, locator = By.XPATH )
+
         element_selenium.click()
 
     def ClickImage(self, img_name, double_click=False):

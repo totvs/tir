@@ -3613,7 +3613,7 @@ class PouiInternal(Base):
 
         self.wait_element(term="[class='po-tabs-container']", scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        po_tab_button = self.web_scrap(term="[class='po-tab-button']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+        po_tab_button = self.web_scrap(term="po-tab-button", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        main_container='body')
 
         label_element = next(
