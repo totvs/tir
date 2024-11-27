@@ -105,7 +105,6 @@ class WebappInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-        self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
         self.restart_tss = False
@@ -1562,7 +1561,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.routine = 'Program'
+        self.config.routine_type = 'Program'
         self.config.routine = program_name
 
         if self.config.log_info_config:
@@ -3275,9 +3274,9 @@ class WebappInternal(Base):
 
 
             if self.config.routine:
-                if self.routine == 'SetLateralMenu':
+                if self.config.routine_type == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                elif self.routine == 'Program':
+                elif self.config.routine_type == 'Program':
                     self.set_program(self.config.routine)
 
     def wait_user_screen(self):
@@ -3965,7 +3964,7 @@ class WebappInternal(Base):
                 self.log_error_newlog()
 
         if save_input:
-            self.routine = 'SetLateralMenu'
+            self.config.routine_type = 'SetLateralMenu'
             self.config.routine = menu_itens
 
         if self.webapp_shadowroot():

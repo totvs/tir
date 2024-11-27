@@ -61,7 +61,7 @@ class BaseDatabase:
                 logger().info('DataBase connection stopped')
         else:
             logger().info('DataBase connection already stopped')
-
+            
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
         """
         Return a dictionary if the query statement is a SELECT otherwise print a number of row 

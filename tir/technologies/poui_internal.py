@@ -93,7 +93,6 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-        self.routine = None
         
         if not Base.driver:
             Base.driver = self.driver
@@ -1289,9 +1288,9 @@ class PouiInternal(Base):
 
             
             if self.config.routine:
-                if self.routine == 'SetLateralMenu':
+                if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                elif self.routine == 'Program':
+                elif self.config.routine_type.lower() == 'program':
                     self.set_program(self.config.routine)
 
     def driver_refresh(self):
@@ -3440,7 +3439,7 @@ class PouiInternal(Base):
         element().clear()
         element().send_keys(content)
 
-        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
+        action = lambda: self.soup_to_selenium(next(iter(po_page.select('po-icon'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
