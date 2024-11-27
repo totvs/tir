@@ -1637,7 +1637,7 @@ class Poui():
         >>> oHelper.ClickCombo('Visão', 'Compras')
         :return:
         """
-        self.__poui.click_poui_component(field, value, position, selector="div > po-combo", container=True)
+        self.__poui.click_combo(field, value, position)
 
     def ClickSelect(self, field='', value='', position=1):
         """
