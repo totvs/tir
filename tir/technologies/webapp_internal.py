@@ -9,6 +9,9 @@ import glob
 import shutil
 import cv2
 import socket
+import pathlib
+import sys
+import tir.technologies.core.enumerations as enum
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -16,7 +19,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
-import tir.technologies.core.enumerations as enum
 from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
@@ -29,8 +31,7 @@ from math import sqrt, pow
 from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
-import pathlib
-import sys
+from tir.technologies.core.base_database import BaseDatabase
 
 class WebappInternal(Base):
     """
@@ -104,7 +105,6 @@ class WebappInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-        self.routine = None
         self.test_suite = []
         self.current_test_suite = self.log.get_file_name('testsuite')
         self.restart_tss = False
@@ -1561,7 +1561,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.routine = 'Program'
+        self.config.routine_type = 'Program'
         self.config.routine = program_name
 
         if self.config.log_info_config:
@@ -3274,9 +3274,9 @@ class WebappInternal(Base):
 
 
             if self.config.routine:
-                if self.routine == 'SetLateralMenu':
+                if self.config.routine_type == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                elif self.routine == 'Program':
+                elif self.config.routine_type == 'Program':
                     self.set_program(self.config.routine)
 
     def wait_user_screen(self):
@@ -3964,7 +3964,7 @@ class WebappInternal(Base):
                 self.log_error_newlog()
 
         if save_input:
-            self.routine = 'SetLateralMenu'
+            self.config.routine_type = 'SetLateralMenu'
             self.config.routine = menu_itens
 
         if self.webapp_shadowroot():
@@ -11152,3 +11152,13 @@ class WebappInternal(Base):
         container = self.get_current_container()
 
         return container.select(selector)
+
+    def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
+        """
+        Execute a query in a database
+        """
+        base_database = BaseDatabase()
+        try:
+            return base_database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+        except Exception as e:
+            self.log_error(f"Error in query_execute: {str(e)}")
