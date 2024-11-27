@@ -22,7 +22,6 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
-        self.__database = BaseDatabase(config_path, autostart=False)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
@@ -1279,7 +1278,7 @@ class Webapp():
         >>> # Oracle Example:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server="Host:Port/oracle instance", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
         """
-        return self.__database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+        return self.__webapp.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
 
     def GetConfigValue(self, json_key):
         """
