@@ -9,6 +9,9 @@ import glob
 import shutil
 import cv2
 import socket
+import pathlib
+import sys
+import tir.technologies.core.enumerations as enum
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -16,7 +19,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
-import tir.technologies.core.enumerations as enum
 from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
@@ -29,8 +31,7 @@ from math import sqrt, pow
 from selenium.common.exceptions import *
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
-import pathlib
-import sys
+from tir.technologies.core.base_database import BaseDatabase
 
 class WebappInternal(Base):
     """
@@ -11151,3 +11152,13 @@ class WebappInternal(Base):
         container = self.get_current_container()
 
         return container.select(selector)
+
+    def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
+        """
+        Execute a query in a database
+        """
+        base_database = BaseDatabase()
+        try:
+            return base_database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+        except Exception as e:
+            self.log_error(f"Error in query_execute: {str(e)}")
