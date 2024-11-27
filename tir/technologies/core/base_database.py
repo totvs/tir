@@ -80,7 +80,7 @@ class BaseDatabase(Base):
                 filter(lambda x: x == driver_database.lower(), list(map(lambda x: x.lower(), pyodbc.drivers()))))),
                     None):
             error_message = f"Driver: '{driver_database}' isn't a valid driver name!"
-            self.webapp_internal.restart_counter = 3
+            self.webapp_internal.restart_counter += 1
             self.webapp_internal.log_error(error_message)
 
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):

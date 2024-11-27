@@ -8,9 +8,16 @@ class ConfigLoader:
     This class is instantiated to contain all config information used throughout the execution of the methods.
     """
 
+    _instance = None
     _json_data = None
 
-    def __init__(self, path="config.json"):
+    def __new__(cls, path="config.json"):
+        if cls._instance is None:
+            cls._instance = super(ConfigLoader, cls).__new__(cls)
+            cls._instance._initialize(path)
+        return cls._instance
+
+    def _initialize(self, path="config.json"):
         if ConfigLoader._json_data is None:
 
             if not path:
@@ -29,6 +36,8 @@ class ConfigLoader:
                         raise Exception(f"JSON file issue: {e}. \n* Please check your config.json *")
 
         if ConfigLoader._json_data:
+            for key, value in ConfigLoader._json_data.items():
+                setattr(self, key, value)
 
             data = ConfigLoader._json_data
 
@@ -61,13 +70,6 @@ class ConfigLoader:
             self.skip_restart = ("SkipRestart" in data and bool(data["SkipRestart"]))
             self.smart_test = ("SmartTest" in data and bool(data["SmartTest"]))
             self.smart_erp = ("SmartERP" in data and bool(data["SmartERP"]))
-            self.valid_language = self.language != ""
-            self.initial_program = ""
-            self.routine = ""
-            self.date = ""
-            self.group = ""
-            self.branch = ""
-            self.module = ""
             self.user_cfg = str(data["UserCfg"]) if "UserCfg" in data else ""
             self.password_cfg = str(data["PasswordCfg"]) if "PasswordCfg" in data else ""
             self.electron_binary_path = (str(data["BinPath"]) if "BinPath" in data else "")
@@ -104,6 +106,14 @@ class ConfigLoader:
                         "SSLChromeInstallDisable" in data and bool(data["SSLChromeInstallDisable"]))
             self.data_delimiter = str(data["DataDelimiter"]) if "DataDelimiter" in data else "/"
             self.procedure_menu = str(data["ProcedureMenu"]) if "ProcedureMenu" in data else ""
+            self.valid_language = self.language != ""
+            self.initial_program = ""
+            self.routine = ""
+            self.date = ""
+            self.group = ""
+            self.branch = ""
+            self.module = ""
+            self.routine_type = ""
 
     def check_keys(self, json_data):
         valid_keys = [
