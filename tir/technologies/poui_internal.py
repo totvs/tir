@@ -3440,7 +3440,7 @@ class PouiInternal(Base):
         element().clear()
         element().send_keys(content)
 
-        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
+        action = lambda: self.soup_to_selenium(next(iter(po_page.select('po-icon'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
