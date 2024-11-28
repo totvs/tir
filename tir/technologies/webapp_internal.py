@@ -3335,31 +3335,34 @@ class WebappInternal(Base):
         >>> oHelper.Finish()
         """
         element = None
-        text_cover = None
-        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
         timeout = 900
         optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
+        current_zindex = 0
+        coverage_finished = False
 
         if self.config.coverage:
             endtime = time.time() + timeout
 
-            while((time.time() < endtime) and (not element or not text_cover)):
+            logger().debug("Startin coverage.")
 
-                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down('q').perform()
-                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
+            while time.time() < endtime and not coverage_finished:
 
-                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=optional_term, timeout=5, step=1, main_container="body", check_error = False)
-
-                if element:
-                    self.SetButton(self.language.finish)
-                    text_cover = self.WaitShow(string, timeout=10, throw_error=False)
-                    if text_cover:
-                        logger().debug(string)
+                if not element:
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                    element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
+                                                        optional_term=optional_term, timeout=5, step=1, main_container="body", check_error=False)
+                    
+                    if element and current_zindex < self.return_last_zindex():
+                        current_zindex = self.return_last_zindex()
+                        self.SetButton(self.language.finish)
                         logger().debug("Waiting for coverage to finish.")
-                        self.WaitHide(string, throw_error=False)
-                        logger().debug("Finished coverage.")
+
+                coverage_finished = current_zindex >= self.return_last_zindex()
+                
+                if coverage_finished:
+                    logger().debug("Coverage finished.")
+                    
+                time.sleep(1)
 
         else:
             endtime = time.time() + self.config.time_out
@@ -9466,7 +9469,7 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
                 not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                    self.close_warning_screen()
+                    self.close_screen_before_menu()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
