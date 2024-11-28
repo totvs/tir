@@ -1582,7 +1582,6 @@ class Poui():
 
     def __init__(self, config_path="", autostart=True):
         self.__poui = PouiInternal(config_path, autostart)
-        self.__database = BaseDatabase(config_path, autostart=False)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
 
