@@ -33,6 +33,18 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.technologies.core.base_database import BaseDatabase
 
+def count_time(func):
+    """
+    Decorator to count the time spent in a function.
+    """
+    def wrapper(*args, **kwargs):
+        starttime = time.time()
+        result = func(*args, **kwargs)
+        endtime = time.time()
+        logger().debug(f"Time spent in {func.__name__}: {endtime - starttime}")
+        return result
+    return wrapper
+
 class WebappInternal(Base):
     """
     Internal implementation of Protheus Webapp class.
@@ -3335,32 +3347,9 @@ class WebappInternal(Base):
         >>> oHelper.Finish()
         """
         element = None
-        text_cover = None
-        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
-        timeout = 900
-        optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
 
         if self.config.coverage:
-            endtime = time.time() + timeout
-
-            while((time.time() < endtime) and (not element or not text_cover)):
-
-                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down('q').perform()
-                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
-
-                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=optional_term, timeout=5, step=1, main_container="body", check_error = False)
-
-                if element:
-                    self.SetButton(self.language.finish)
-                    text_cover = self.WaitShow(string, timeout=10, throw_error=False)
-                    if text_cover:
-                        logger().debug(string)
-                        logger().debug("Waiting for coverage to finish.")
-                        self.WaitHide(string, throw_error=False)
-                        logger().debug("Finished coverage.")
-
+           self.get_coverage()
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -3374,6 +3363,52 @@ class WebappInternal(Base):
 
             if not element:
                 logger().warning("Warning method finish use driver.refresh. element not found")
+
+    @count_time
+    def get_coverage(self):
+        
+        timeout = 1800
+        optional_term = "wa-button" if self.webapp_shadowroot() else "button, .thbutton"
+        current_layers = 0
+        coverage_finished = False
+        element = None
+        new_modal = False
+        coverage_exceed_timeout = False
+            
+        endtime = time.time() + timeout
+
+        logger().debug("Startin coverage.")
+
+        while not coverage_finished:
+
+            if time.time() > endtime:
+
+                if coverage_exceed_timeout:
+                    logger().debug("Coverage exceed timeout.")
+                    break
+                
+                logger().debug("Coverage exceed default timeout. adding more time.")
+                endtime = time.time() + timeout
+                coverage_exceed_timeout = True
+
+            if not element:
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
+                element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
+                                                    optional_term=optional_term, timeout=5, step=1, main_container="body", check_error=False)
+                
+            if element and not new_modal:
+                current_layers = self.check_layers('wa-dialog')
+                self.SetButton(self.language.finish)
+                new_modal = current_layers + 1 == self.check_layers('wa-dialog')
+                logger().debug("Waiting for coverage to finish.")
+
+            if new_modal:
+                coverage_finished = current_layers >= self.check_layers('wa-dialog')
+            
+            if coverage_finished:
+                logger().debug("Coverage finished.")
+                
+            time.sleep(1)
 
     def click_button_finish(self, click_counter=None):
         """
@@ -3410,35 +3445,9 @@ class WebappInternal(Base):
         >>> oHelper.LogOff()
         """
         element = None
-        text_cover = None
-        string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
-        timeout = 900
-        click_counter = 1
 
         if self.config.coverage:
-            endtime = time.time() + timeout
-
-            while((time.time() < endtime) and (not element or not text_cover)):
-
-                ActionChains(self.driver).key_down(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down('q').perform()
-                ActionChains(self.driver).key_up(Keys.CONTROL).perform()
-
-                element = self.wait_element_timeout(term=self.language.logOff, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=".tsay", timeout=5, step=1, main_container="body", check_error = False)
-
-                if element:
-                    if self.click_button_logoff(click_counter):
-                        text_cover = self.search_text(selector=".tsay", text=string)
-                        if text_cover:
-                            logger().info(string)
-                            timeout = endtime - time.time()
-                            if timeout > 0:
-                                self.wait_element_timeout(term=string, scrap_type=enum.ScrapType.MIXED,
-                                optional_term=".tsay", timeout=timeout, step=0.1, main_container="body", check_error = False)
-                    click_counter += 1
-                    if click_counter > 3:
-                        click_counter = 1
+            self.get_coverage()
         else:
             endtime = time.time() + self.config.time_out
             while( time.time() < endtime and not element ):
@@ -9466,15 +9475,12 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
                 not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
-                    self.close_warning_screen()
+                    self.close_screen_before_menu()
                 self.Finish()
             elif not webdriver_exception:
                 self.SetupTSS(self.config.initial_program, self.config.environment )
                 self.SetButton(self.language.exit)
                 self.SetButton(self.language.yes)
-
-            if (self.search_text(selector=".tsay", text=string) and not webdriver_exception):
-                self.WaitProcessing(string, timeout)
 
         if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
             self.log.save_file()
