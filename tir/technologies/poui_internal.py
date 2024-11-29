@@ -3413,14 +3413,11 @@ class PouiInternal(Base):
         self.wait_element(term='po-page')
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
-            po_page = next(iter(
-                self.web_scrap(term="[class='po-page']", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                               main_container='body')),
-                None)
-
+            po_page = next(iter(self.web_scrap(term="[class='po-page']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')),None)
             if po_page:
-                page_list = next(iter(po_page.find_all_next('div', 'po-page-list-filter-wrapper')), None)
-
+                page_list = po_page.find_all_next('div', 'po-page-list-filter-wrapper')
+                page_list = next(iter(list(filter(lambda x: self.element_is_displayed(x), page_list))),None)
                 if page_list:
                     input = page_list.select('input')
 
@@ -3434,13 +3431,14 @@ class PouiInternal(Base):
 
         if not element:
             self.log_error("Couldn't find element")
-
+        
         self.switch_to_iframe()
         element().clear()
         element().send_keys(content)
 
-        action = lambda: self.soup_to_selenium(next(iter(po_page.select('po-icon'))))
+        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('po-icon'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
+
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
         """
