@@ -1,17 +1,13 @@
-from tir.technologies.core.base import Base
-from tir.technologies.webapp_internal import WebappInternal
 import pandas as pd
 import pyodbc
 import re
 from tir.technologies.core.logging_config import logger
+from tir.technologies.core.config import ConfigLoader
 
+class BaseDatabase:
 
-class BaseDatabase(Base):
-
-    def __init__(self, config_path="", autostart=True):
-        super().__init__(config_path, autostart=False)
-        self.webapp_internal = WebappInternal(config_path, autostart=False)
-        self.restart_counter = self.webapp_internal.restart_counter
+    def __init__(self):
+        self.config = ConfigLoader()
 
     def odbc_connect(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
         """
@@ -27,16 +23,10 @@ class BaseDatabase(Base):
         database_password = self.config.database_password if not database_password else database_password
         dbq_oracle_server = self.config.dbq_oracle_server if not dbq_oracle_server else dbq_oracle_server
 
-        self.check_pyodbc_drivers(database_driver)
-
-        try:
-            if dbq_oracle_server:
-                connection = pyodbc.connect(f'DRIVER={database_driver};dbq={dbq_oracle_server};database={database_name};uid={database_user};pwd={database_password}')
-            else:
-                connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};port={database_port};database={database_name};uid={database_user};pwd={database_password}')
-        except Exception as error:
-            self.webapp_internal.restart_counter = 3
-            self.webapp_internal.log_error(str(error))
+        if dbq_oracle_server:
+            connection = pyodbc.connect(f'DRIVER={database_driver};dbq={dbq_oracle_server};database={database_name};uid={database_user};pwd={database_password}')
+        else:
+            connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};port={database_port};database={database_name};uid={database_user};pwd={database_password}')
 
         return connection
 
@@ -45,10 +35,7 @@ class BaseDatabase(Base):
         :param connection:
         :return: cursor attribute if connection ok else return False
         """
-        try:
-            return connection.cursor()
-        except:
-            return False
+        return connection.cursor()
 
     def connect_database(self, query="", database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
 
@@ -74,14 +61,6 @@ class BaseDatabase(Base):
                 logger().info('DataBase connection stopped')
         else:
             logger().info('DataBase connection already stopped')
-
-    def check_pyodbc_drivers(self, driver_database):
-        if not next(iter(list(
-                filter(lambda x: x == driver_database.lower(), list(map(lambda x: x.lower(), pyodbc.drivers()))))),
-                None):
-            error_message = f"Driver: '{driver_database}' isn't a valid driver name!"
-            self.webapp_internal.restart_counter = 3
-            self.webapp_internal.log_error(error_message)
 
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
         """
@@ -133,16 +112,11 @@ class BaseDatabase(Base):
         if re.findall(r'^(SELECT)', query.upper()):
             df = pd.read_sql(sql=query, con=connection)
             return (df.to_dict())
-        elif re.findall(r'^(UPDATE|DELETE|INSERT)', query.upper()):
-            self.cursor_execute(query, connection)
         else:
-            self.webapp_internal.log_error(f"Not a valid query in {query}")
+            self.cursor_execute(query, connection)
 
     def cursor_execute(self, query, connection):
         cursor = connection.cursor()
-        try:
-            rowcount = cursor.execute(query).rowcount
-        except Exception as error:
-            self.webapp_internal.log_error(str(error))
+        rowcount = cursor.execute(query).rowcount
         logger().info(f'{rowcount} row(s) affected')
         connection.commit()
