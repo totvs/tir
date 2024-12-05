@@ -93,7 +93,6 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-        self.routine = None
         
         if not Base.driver:
             Base.driver = self.driver
@@ -1289,9 +1288,9 @@ class PouiInternal(Base):
 
             
             if self.config.routine:
-                if self.routine == 'SetLateralMenu':
+                if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
-                elif self.routine == 'Program':
+                elif self.config.routine_type.lower() == 'program':
                     self.set_program(self.config.routine)
 
     def driver_refresh(self):
@@ -3251,11 +3250,6 @@ class PouiInternal(Base):
 
                     self.poui_click(element)
 
-                else:
-                    select_element = main_element.select('select') if hasattr(main_element, 'select') else None
-                    if select_element:
-                        select_element = next(iter(select_element))
-                        self.select_combo(select_element, value, index=True, shadow_root=False)
 
     def poui_click(self, element):
 
@@ -3419,14 +3413,11 @@ class PouiInternal(Base):
         self.wait_element(term='po-page')
         endtime = time.time() + self.config.time_out
         while (not element and time.time() < endtime):
-            po_page = next(iter(
-                self.web_scrap(term="[class='po-page']", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                               main_container='body')),
-                None)
-
+            po_page = next(iter(self.web_scrap(term="[class='po-page']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                               main_container='body')),None)
             if po_page:
-                page_list = next(iter(po_page.find_all_next('div', 'po-page-list-filter-wrapper')), None)
-
+                page_list = po_page.find_all_next('div', 'po-page-list-filter-wrapper')
+                page_list = next(iter(list(filter(lambda x: self.element_is_displayed(x), page_list))),None)
                 if page_list:
                     input = page_list.select('input')
 
@@ -3440,13 +3431,14 @@ class PouiInternal(Base):
 
         if not element:
             self.log_error("Couldn't find element")
-
+        
         self.switch_to_iframe()
         element().clear()
         element().send_keys(content)
 
-        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('span'))))
+        action = lambda: self.soup_to_selenium(next(iter(input.parent.select('po-icon'))))
         ActionChains(self.driver).move_to_element(action()).click().perform()
+
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
         """
@@ -3764,6 +3756,7 @@ class PouiInternal(Base):
                 if element:
                     self.poui_click(element)
 
+
     def click_checkbox(self, label):
         """Click on the POUI Checkbox.
         https://po-ui.io/documentation/po-checkbox
@@ -3793,3 +3786,78 @@ class PouiInternal(Base):
 
         if not container_element:
             self.log_error(f"CheckBox '{label}' doesn't found!")
+
+    def click_combo(self, field, value, position):
+        '''Select a value for list combo inputs.
+
+        :param field: label of field
+        :type : str
+        :param value: value to input on field
+        :type : str
+        :param position:
+        :type : int
+        :return:
+        '''
+
+        main_element = None
+        success = None
+        position -= 1
+        current_value = None
+        replace = r'[\s,\.:]'
+
+        logger().info(f"Clicking on {field}")
+        self.wait_element(term='po-combo')
+
+        endtime = time.time() + self.config.time_out
+        while (not success and time.time() < endtime):
+            po_combo = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, main_container='body')
+            if po_combo:
+                po_combo = next(iter(po_combo),None)
+                po_input = po_combo.find_next('input')
+                if po_input:
+                    self.open_input_combo(po_combo)
+                    self.click_po_list_box(value)
+                    current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
+                    success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
+        if not success:
+            self.log_error(f'Click on {value} of {field} Fail. Please Check')
+
+
+    def click_po_list_box(self, value):
+        '''
+        :param value: Value to select on po-list-box
+        :type str
+        :return:
+        '''
+        replace = r'[\s,\.:]'
+        value = value.strip().lower()
+        self.wait_element(term='po-listbox')
+
+        po_list_itens = self.web_scrap(term='.po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       main_container='body')
+
+        if po_list_itens:
+            item_filtered = next(iter(list(filter(lambda x: re.sub(replace, '', x.text.strip().lower()) ==
+                                                            re.sub(replace, '', value), po_list_itens))), None)
+            if item_filtered:
+                self.scroll_to_element(self.soup_to_selenium(item_filtered, twebview=True))
+                self.click(self.soup_to_selenium(item_filtered, twebview=True))
+            else:
+                self.log_error(f'{value} not found')
+
+
+    def open_input_combo(self, po_combo):
+        '''
+        :param po_combo: po-combo object
+        :type: Bs4 object
+        :return:
+        '''
+
+        combo_container = next(iter(po_combo.select('.po-combo-container')),None)
+        combo_input = next(iter(po_combo.select('input')), None)
+
+        if combo_container:
+            closed_combo = lambda: self.soup_to_selenium(combo_container, twebview=True).get_attribute('hidden')
+            endtime = time.time() + self.config.time_out
+            while (closed_combo() and time.time() < endtime):
+                self.click(self.soup_to_selenium(combo_input, twebview=True))
