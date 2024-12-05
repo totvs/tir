@@ -101,7 +101,7 @@ Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtuale
 2. Ainda no terminal, execute o comando `python -m virtualenv venv` para criação de um ambiente no diretório atual.
 >**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de instalação do executável e referencie ele no comando
 Exemplo: `C:/caminho/python/python -m virtualenv venv` 
->>Por padrao a pasta de instalaçao do pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
+>>Por padrao a pasta de instalaçao do Pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
 3. Será adicionada uma pasta (venv) no diretório atual , com isso o ambiente estará pronto para utilização.
 
 ### Configurando o Vscode 
@@ -112,7 +112,7 @@ Após a configuração do ambiente virtual iremos definir o interpretador do VSc
 
 3. Abra um novo terminal no Vscode indo em _"Terminal"_ e _"Novo terminal"_
 
-4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files/source/img/terminal_venv.png)
+4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files\source\img\terminal_venv.png)
 
 5. Agora rode o comando para instalação do TIR! `pip  install  tir_framework`
 
