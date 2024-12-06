@@ -64,6 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.TearDown"><code class="docutils literal notranslate"><span class="pre">Base.TearDown()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.assert_result"><code class="docutils literal notranslate"><span class="pre">Base.assert_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.click"><code class="docutils literal notranslate"><span class="pre">Base.click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.collect_zindex"><code class="docutils literal notranslate"><span class="pre">Base.collect_zindex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
@@ -83,6 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_index"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_object"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_object()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_iframe"><code class="docutils literal notranslate"><span class="pre">Base.return_iframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_last_zindex"><code class="docutils literal notranslate"><span class="pre">Base.return_last_zindex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_selected_combo_value"><code class="docutils literal notranslate"><span class="pre">Base.return_selected_combo_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_into_view"><code class="docutils literal notranslate"><span class="pre">Base.scroll_into_view()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_to_element"><code class="docutils literal notranslate"><span class="pre">Base.scroll_to_element()</span></code></a></li>
@@ -278,6 +280,12 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">element</span><span class="p">(),</span> <span class="n">click_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ClickType</span><span class="o">.</span><span class="n">JS</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.collect_zindex">
+<span class="sig-name descname"><span class="pre">collect_zindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.collect_zindex" title="Permalink to this definition"></a></dt>
+<dd><p>returns z-index list in decrescent order by default or in crescent order if reverse is False.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -637,6 +645,12 @@ naming convention.</p>
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_iframe">
 <span class="sig-name descname"><span class="pre">return_iframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_iframe" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_last_zindex">
+<span class="sig-name descname"><span class="pre">return_last_zindex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_last_zindex" title="Permalink to this definition"></a></dt>
+<dd><p>returns the last z-index value in the page.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_selected_combo_value">

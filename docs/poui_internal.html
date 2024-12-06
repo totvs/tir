@@ -86,7 +86,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_checkbox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_po_list_box()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_popup"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_popup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen()</span></code></a></li>
@@ -128,6 +130,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_error"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_result"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_csv"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_input_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_url_coverage()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.po_loading"><code class="docutils literal notranslate"><span class="pre">PouiInternal.po_loading()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.pop_dict_itens"><code class="docutils literal notranslate"><span class="pre">PouiInternal.pop_dict_itens()</span></code></a></li>
@@ -769,6 +772,23 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_combo">
+<span class="sig-name descname"><span class="pre">click_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_combo" title="Permalink to this definition"></a></dt>
+<dd><p>Select a value for list combo inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field</strong> – label of field</p>
+</dd>
+</dl>
+<p>:type : str
+:param value: value to input on field
+:type : str
+:param position:
+:type : int
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_icon">
 <span class="sig-name descname"><span class="pre">click_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_icon" title="Permalink to this definition"></a></dt>
 <dd><p>Click on the POUI Icon by label, class_name or both.
@@ -792,6 +812,18 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickIcon</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;po-icon po-icon-delete&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_po_list_box">
+<span class="sig-name descname"><span class="pre">click_po_list_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – Value to select on po-list-box</p>
+</dd>
+</dl>
+<p>:type str
+:return:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1413,6 +1445,22 @@ The folder must be entered in the CSVPath parameter in the config.json. Ex:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_csv</span> <span class="n">_no_header_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">OpenCSV</span><span class="p">(</span><span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="n">csv_file</span><span class="o">=</span><span class="s2">&quot;no_header.csv&quot;</span><span class="p">,</span> <span class="n">filter_column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">filter_value</span><span class="o">=</span><span class="s1">&#39;A00_FILIAL&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.open_input_combo">
+<span class="sig-name descname"><span class="pre">open_input_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">po_combo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>po_combo</strong> – po-combo object</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bs4 object</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
