@@ -112,7 +112,7 @@ Após a configuração do ambiente virtual iremos definir o interpretador do VSc
 
 3. Abra um novo terminal no Vscode indo em _"Terminal"_ e _"Novo terminal"_
 
-4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files\source\img\terminal_venv.png)
+4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files/source/img/terminal_venv.png)
 
 5. Agora rode o comando para instalação do TIR! `pip  install  tir_framework`
 
