@@ -7,10 +7,10 @@ from pathlib import Path
 import os
 
 
-class NumExec(ConfigLoader):
+class NumExec():
 
     def __init__(self):
-        super().__init__()
+        self.config = ConfigLoader()
 
     def post_exec(self, url, numexec_folder):
 
@@ -34,20 +34,20 @@ class NumExec(ConfigLoader):
             time.sleep(12)
 
         if error:
-            response = str(f"STATUS: {status} Url: {url} ID: {self.num_exec} Error: {error}")
+            response = str(f"STATUS: {status} Url: {url} ID: {self.config.num_exec} Error: {error}")
         else:
-            response = str(f"STATUS: {status} Url: {url} ID: {self.num_exec}")
+            response = str(f"STATUS: {status} Url: {url} ID: {self.config.num_exec}")
 
         logger().debug(response)
         if status not in success_response:
 
             try:
-                path = Path(self.log_folder, numexec_folder)
+                path = Path(self.config.log_folder, numexec_folder)
                 os.makedirs(path)
             except OSError:
                 pass
 
-            with open(Path(path, f"{self.num_exec}_TIR_{strftime}.txt"), "w") as json_log:
+            with open(Path(path, f"{self.config.num_exec}_TIR_{strftime}.txt"), "w") as json_log:
                 json_log.write(response)
 
         return status in success_response
@@ -63,7 +63,7 @@ class NumExec(ConfigLoader):
             "https": None,
         }
 
-        data = {'num_exec': self.num_exec, 'ip_exec': self.ipExec}
+        data = {'num_exec': self.config.num_exec, 'ip_exec': self.config.ipExec}
 
         response = requests.post(url.strip(), json=data, proxies=proxies)
 
