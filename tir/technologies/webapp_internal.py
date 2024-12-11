@@ -2767,19 +2767,8 @@ class WebappInternal(Base):
                 continue
 
             main_element = element
-            multiget = "dict-tmultiget" if self.webapp_shadowroot() else "tmultiget"
 
-            if multiget in element.attrs['class'] if element.get('class') else None:
-                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element)))) if self.webapp_shadowroot() else element.select("textarea")
-                if not textarea:
-                    input_field = lambda : self.soup_to_selenium(element)
-                else:
-                    if self.webapp_shadowroot():
-                        input_field = lambda : textarea
-                    else:
-                        input_field = lambda : self.soup_to_selenium(next(iter(textarea), None))
-            else:
-                input_field = lambda : self.soup_to_selenium(element)
+            input_field = self.get_input_area(element)
 
             if input_field:
                 valtype=''
@@ -2903,6 +2892,32 @@ class WebappInternal(Base):
             self.log_error(f"Could not input value {value} in field {field}")
         else:
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = main_element, locator = By.XPATH )
+
+
+    def get_input_area(self, element):
+        '''Get a input field area
+
+        :param element:
+        :return:
+        '''
+        input_field = None
+
+        multiget = "dict-tmultiget" if self.webapp_shadowroot() else "tmultiget"
+
+        if multiget in element.attrs['class'] if element.get('class') else None:
+            textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(
+                element)))) if self.webapp_shadowroot() else element.select("textarea")
+            if not textarea:
+                input_field = lambda: self.soup_to_selenium(element)
+            else:
+                if self.webapp_shadowroot():
+                    input_field = lambda: textarea
+                else:
+                    input_field = lambda: self.soup_to_selenium(next(iter(textarea), None))
+        else:
+            input_field = lambda: self.soup_to_selenium(element)
+
+        return input_field
 
     def check_element_tab_view(self, element):
         """
