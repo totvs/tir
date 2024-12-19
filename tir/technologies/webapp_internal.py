@@ -6285,7 +6285,7 @@ class WebappInternal(Base):
                                 logger().debug('Trying to select cell in grid!')
                                 self.scroll_to_element(selenium_column())
                                 self.click(selenium_column(),
-                                            click_type=enum.ClickType.ACTIONCHAINS)
+                                        click_type=enum.ClickType.ACTIONCHAINS)
                                 self.set_element_focus(selenium_column())
 
                             endtime_open_cell = time.time() + self.config.time_out / 3
