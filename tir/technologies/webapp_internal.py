@@ -240,7 +240,7 @@ class WebappInternal(Base):
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
-        self.config.poui_login = ConfigLoader(self.config_path).poui_login
+        self.config.poui_login = self.config.json_data['POUILogin']
 
         try:
             self.service_process_bat_file()
@@ -8179,7 +8179,7 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-        twebview = True if ConfigLoader(self.config_path).poui_login else False
+        twebview = True if self.config.json_data['POUILogin'] else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -8261,7 +8261,7 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
-        twebview = True if ConfigLoader(self.config_path).poui_login else False
+        twebview = True if self.config.json_data['POUILogin'] else False
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -9463,7 +9463,7 @@ class WebappInternal(Base):
                 logger().exception(str(e))
                 webdriver_exception = e
 
-            self.config.poui_login = ConfigLoader(self.config_path).poui_login
+            self.config.poui_login = self.config.json_data['POUILogin']
 
             if webdriver_exception:
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
