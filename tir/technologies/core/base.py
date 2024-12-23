@@ -544,18 +544,35 @@ class Base(unittest.TestCase):
 
         if not self.config.poui:
             iframes = None
-            iframe_displayed = None
+            filtered_iframe = None
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not iframes:
                 iframes = self.driver.find_elements_by_css_selector('[class*="twebview"], [class*="dict-twebengine"]')
-
                 if iframes:
-                    iframe_displayed = next(iter(list(filter(lambda x: x.is_displayed(), iframes))), None)
+                    filtered_iframe = self.filter_active_iframe(iframes)
                 else:
                     self.driver.switch_to.default_content()
 
-                if iframe_displayed:
-                    self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe_displayed)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(iframe_displayed)
+                if filtered_iframe:
+                    self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+
+
+    def filter_active_iframe(self, iframes):
+        '''
+
+        :param iframes:
+        :type List
+        :return:
+        '''
+        iframes_displayed = []
+
+        iframes_displayed = list(filter(lambda x: x.is_displayed(), iframes))
+        iframes_filtred_zindex = list(filter(lambda x: x.get_attribute('style').split("z-index:")[1].split(";")[0].strip(), iframes_displayed))
+        if iframes_displayed and len(iframes_filtred_zindex) == len(iframes_displayed):
+            return max(iframes_filtred_zindex, key=lambda x: int(x.get_attribute('style').split("z-index:")[1].split(";")[0].strip()))
+        if not iframes_displayed:
+            return None
+
 
     def get_element_text(self, element):
         """
