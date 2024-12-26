@@ -10738,6 +10738,11 @@ class WebappInternal(Base):
             elements = self.driver.execute_script(script, objects)
         except:
             pass
+
+        if not elements:
+            script = f"return arguments[0].querySelectorAll('{term}')"
+            elements = self.driver.execute_script(script, objects)
+            
         return elements if elements else None
 
     def return_soup_by_selenium(self, elements, term, selectors):
