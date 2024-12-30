@@ -4317,6 +4317,8 @@ class WebappInternal(Base):
                         if not soup_objects:
                             footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
                             buttons = self.find_shadow_element("wa-button", footer)
+                            if not buttons:
+                                buttons = self.driver.execute_script("return arguments[0].querySelectorAll('wa-button')", footer)
                             if buttons:
                                 filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
@@ -10759,10 +10761,6 @@ class WebappInternal(Base):
             elements = self.driver.execute_script(script, objects)
         except:
             pass
-
-        if not elements:
-            script = f"return arguments[0].querySelectorAll('{term}')"
-            elements = self.driver.execute_script(script, objects)
             
         return elements if elements else None
 
