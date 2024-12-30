@@ -863,7 +863,12 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.send_keys(date(), self.config.date)
+
+                    if self.config.browser.lower() == "chrome":
+                        self.send_keys(date(), self.config.date, send_type=2)
+                    else:
+                        self.send_keys(date(), self.config.date)
+
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
                         ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
