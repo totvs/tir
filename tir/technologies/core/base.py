@@ -894,8 +894,6 @@ class Base(unittest.TestCase):
 
         Clicks two times on the Selenium element.
 
-
-
         :param element: Selenium element
         :type element: Selenium object
         :param arg: Text or Keys to be sent to the element
