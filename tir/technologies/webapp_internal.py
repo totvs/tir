@@ -865,7 +865,7 @@ class WebappInternal(Base):
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
                     if self.config.browser.lower() == "chrome":
-                        self.send_keys(date(), self.config.date, send_type=2)
+                        self.try_send_keys(date, self.config.date)
                     else:
                         self.send_keys(date(), self.config.date)
 

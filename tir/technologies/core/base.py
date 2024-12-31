@@ -888,7 +888,7 @@ class Base(unittest.TestCase):
         else:
             return ''
 
-    def send_keys(self, element, arg, send_type=1):
+    def send_keys(self, element, arg):
         """
         [Internal]
 
@@ -898,8 +898,6 @@ class Base(unittest.TestCase):
         :type element: Selenium object
         :param arg: Text or Keys to be sent to the element
         :type arg: str or selenium.webdriver.common.keys
-        :param send_type: Send Keys type can be do it Selenium or ActionChains
-        :type send_type: Int
         Usage:
 
         >>> #Defining the element:
@@ -910,21 +908,10 @@ class Base(unittest.TestCase):
         >>> self.send_keys(element(), Keys.ENTER)
         """
         try:
-            if send_type == 1:
-                if arg.isprintable():
-                    element.clear()
-                    element.send_keys(Keys.CONTROL, 'a')
-                element.send_keys(arg)
-            elif send_type == 2:
-                actions = ActionChains(self.driver)
-                actions.move_to_element(element)
-                actions.click()
-                if arg.isprintable():
-                    actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
-                actions.send_keys(Keys.HOME)
-                actions.send_keys(arg)
-                actions.perform()
-
+            if arg.isprintable():
+                element.clear()
+                element.send_keys(Keys.CONTROL, 'a')
+            element.send_keys(arg)
         except Exception:
             actions = ActionChains(self.driver)
             actions.move_to_element(element)
