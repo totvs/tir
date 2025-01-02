@@ -87,6 +87,7 @@ class LanguagePack:
         self.success = languagepack["Success"]
         self.procedure_install = languagepack["Procedure Install"]
         self.procedure_uninstall = languagepack["Procedure Uninstall"]
+        self.schedule_menu = languagepack["Schedule Menu"]
         
         self.messages = Messages(languagepack)
 
@@ -182,7 +183,8 @@ class LanguagePack:
             "Code": "Code",
             "Success": "Success",
             "Procedure Install": "Install selected processes",
-            "Procedure Uninstall": "Remove selected processes"
+            "Procedure Uninstall": "Remove selected processes",
+            "Schedule Menu": "Settings > Schedule > Schedule"
             
         }
 
@@ -276,7 +278,9 @@ class LanguagePack:
             "Code": "Código",
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
-            "Procedure Uninstall": "Remover processos selecionados"
+            "Procedure Uninstall": "Remover processos selecionados",
+            "Schedule Menu": "Ambiente > Schedule > Schedule"
+
         }
         spanish = {
             "User": "Usuário",
@@ -368,7 +372,9 @@ class LanguagePack:
             "Code": "Código",
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
-            "Procedure Uninstall": "Remover processos selecionados"
+            "Procedure Uninstall": "Remover processos selecionados",
+            "Schedule Menu": "Entorno > Schedule > Schedule"
+
         }
         russian = {
             "User": "Пользователь",
@@ -462,7 +468,8 @@ class LanguagePack:
             "Code": "Код",
             "Success": "успех",
             "Procedure Install": "Установить выбранные процессы",
-            "Procedure Uninstall": "Удалить выбранные процессы"
+            "Procedure Uninstall": "Удалить выбранные процессы",
+            "Schedule Menu": "Settings > Schedule > Schedule"
         }
 
         if language.lower() == "en-us":
