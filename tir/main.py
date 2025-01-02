@@ -1161,7 +1161,7 @@ class Webapp():
         >>> # Calling the method:
         >>> self.oHelper.ProgramScreen("SIGAADV")
         """
-        self.__webapp.program_screen(initial_program, coverage=self.coverage)
+        self.__webapp.program_screen(initial_program)
     
     def OpenCSV(self, csv_file='', delimiter=';', column=None, header=None, filter_column=None, filter_value=''):
         """

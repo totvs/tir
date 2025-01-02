@@ -240,7 +240,10 @@ class WebappInternal(Base):
             logger().info(f"***System Info*** in Setup():")
             system_info()
 
-        self.config.poui_login = ConfigLoader(self.config_path).poui_login
+        if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
+            self.config.poui_login = True
+        else:
+            self.config.poui_login = False
 
         try:
             self.service_process_bat_file()
@@ -860,7 +863,12 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                    self.send_keys(date(), self.config.date)
+
+                    if self.config.browser.lower() == "chrome":
+                        self.try_send_keys(date, self.config.date)
+                    else:
+                        self.send_keys(date(), self.config.date)
+
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
                         ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
@@ -4309,6 +4317,8 @@ class WebappInternal(Base):
                         if not soup_objects:
                             footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
                             buttons = self.find_shadow_element("wa-button", footer)
+                            if not buttons:
+                                buttons = self.driver.execute_script("return arguments[0].querySelectorAll('wa-button')", footer)
                             if buttons:
                                 filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
@@ -8179,7 +8189,12 @@ class WebappInternal(Base):
         """
 
         logger().info(f"AddParameter: {parameter}")
-        twebview = True if ConfigLoader(self.config_path).poui_login else False
+
+        if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
+            twebview = True
+        else:
+            twebview = False
+
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
 
@@ -8261,7 +8276,12 @@ class WebappInternal(Base):
         >>> self.parameter_url(restore_backup=False)
         """
         try_counter = False
-        twebview = True if ConfigLoader(self.config_path).poui_login else False
+
+        if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
+            twebview = True
+        else:
+            twebview = False
+
         endtime = time.time() + self.config.time_out
         halftime = ((endtime - time.time()) / 2)
         function_to_call = "u_SetParam" if restore_backup is False else "u_RestorePar"
@@ -9463,7 +9483,10 @@ class WebappInternal(Base):
                 logger().exception(str(e))
                 webdriver_exception = e
 
-            self.config.poui_login = ConfigLoader(self.config_path).poui_login
+            if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
+                self.config.poui_login = True
+            else:
+                self.config.poui_login = False
 
             if webdriver_exception:
                 message = f"Wasn't possible execute self.driver.refresh() Exception: {next(iter(webdriver_exception.msg.split(':')), None)}"
@@ -10738,6 +10761,7 @@ class WebappInternal(Base):
             elements = self.driver.execute_script(script, objects)
         except:
             pass
+            
         return elements if elements else None
 
     def return_soup_by_selenium(self, elements, term, selectors):
