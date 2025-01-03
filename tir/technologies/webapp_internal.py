@@ -867,7 +867,7 @@ class WebappInternal(Base):
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
 
-                    self.try_send_keys(date, self.config.date, try_counter=click_type)
+                    self.try_send_keys(date, self.config.date, try_counter=send_type)
 
 
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
