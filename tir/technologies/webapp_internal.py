@@ -823,6 +823,7 @@ class WebappInternal(Base):
             self.config.date = datetime.today().strftime(f'%d{d}%m{d}%Y')
 
         click_type = 1
+        send_type = 1
         base_date_value = ''
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -865,10 +866,9 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
-                    if self.config.browser.lower() == "chrome":
-                        self.try_send_keys(date, self.config.date)
-                    else:
-                        self.send_keys(date(), self.config.date)
+
+                    self.try_send_keys(date, self.config.date, try_counter=send_type)
+
 
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
@@ -876,8 +876,11 @@ class WebappInternal(Base):
 
                     time.sleep(1)
                     click_type += 1
+                    send_type += 1
                     if click_type > 3:
                         click_type = 1
+                    if send_type > 3:
+                        send_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
