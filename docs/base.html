@@ -70,6 +70,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_name"><code class="docutils literal notranslate"><span class="pre">Base.element_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.filter_active_iframe"><code class="docutils literal notranslate"><span class="pre">Base.filter_active_iframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.filter_displayed_elements"><code class="docutils literal notranslate"><span class="pre">Base.filter_displayed_elements()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_div_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_div_parent()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_wa_panel_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_wa_panel_parent()</span></code></a></li>
@@ -144,12 +145,12 @@ folder as the file that would execute this module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>config_path</strong> (<em>str</em>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
 <li><p><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -206,8 +207,8 @@ than the ones defined at <strong>config.json</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The config to be changed.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The value that would be set.</p></li>
+<li><p><strong>config_name</strong> (<em>str</em>) – The config to be changed.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value that would be set.</p></li>
 </ul>
 </dd>
 </dl>
@@ -247,7 +248,7 @@ than the ones defined at <strong>config.json</strong></p>
 <p>Asserts the result based on the expected value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>expected</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Expected value</p>
+<dd class="field-odd"><p><strong>expected</strong> (<em>bool</em>) – Expected value</p>
 </dd>
 </dl>
 <p>Usage :</p>
@@ -296,10 +297,10 @@ than the ones defined at <strong>config.json</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Field name</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – User input value</p></li>
-<li><p><strong>captured_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Interface captured value</p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Error message if comparison fails</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Field name</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – User input value</p></li>
+<li><p><strong>captured_value</strong> (<em>str</em>) – Interface captured value</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Error message if comparison fails</p></li>
 </ul>
 </dd>
 </dl>
@@ -337,17 +338,17 @@ than the ones defined at <strong>config.json</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The first term to use on a search of element</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first term to use on a search of element</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType</em>) – Type of element search. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if element is present. False if element is not present.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -376,6 +377,18 @@ than the ones defined at <strong>config.json</strong></p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.filter_active_iframe">
+<span class="sig-name descname"><span class="pre">filter_active_iframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iframes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.filter_active_iframe" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>iframes</strong> – </p>
+</dd>
+</dl>
+<p>:type List
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.filter_displayed_elements">
 <span class="sig-name descname"><span class="pre">filter_displayed_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.filter_displayed_elements" title="Permalink to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -384,7 +397,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>elements</strong> (<em>List</em><em> of </em><em>BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
-<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -458,7 +471,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The label text to be searched</p></li>
+<li><p><strong>label_text</strong> (<em>str</em>) – The label text to be searched</p></li>
 <li><p><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</p></li>
 </ul>
 </dd>
@@ -519,7 +532,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dd class="field-even"><p>Element text</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -544,7 +557,7 @@ than the ones defined at <strong>config.json</strong></p>
 <dd class="field-even"><p>Element value</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -564,8 +577,8 @@ than the ones defined at <strong>config.json</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Message to be logged</p></li>
-<li><p><strong>new_log_line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Message to be logged</p></li>
+<li><p><strong>new_log_line</strong> (<em>bool</em>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
 </dl>
@@ -603,13 +616,13 @@ than the ones defined at <strong>config.json</strong></p>
 naming convention.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The config name string to be normalized.</p>
+<dd class="field-odd"><p><strong>config_name</strong> (<em>str</em>) – The config name string to be normalized.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The config name string normalized.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -703,13 +716,13 @@ naming convention.</p>
 <dd><p>Returns True if passed function is present in the call stack.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>function</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the function</p>
+<dd class="field-odd"><p><strong>function</strong> (<em>str</em>) – Name of the function</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean if passed function is present or not in the call stack.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -734,7 +747,7 @@ naming convention.</p>
 <dd class="field-even"><p>z-index value</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -752,10 +765,10 @@ naming convention.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Beautiful Soup object</em>) – Combobox element</p></li>
-<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Option to be selected</p></li>
-<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – True if option is an integer value</p></li>
-<li><p><strong>shadow_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Internal control for shadow root objects</p></li>
-<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – bool value for locator True or False</p></li>
+<li><p><strong>option</strong> (<em>str</em>) – Option to be selected</p></li>
+<li><p><strong>index</strong> (<em>bool</em>) – True if option is an integer value</p></li>
+<li><p><strong>shadow_root</strong> (<em>bool</em>) – Internal control for shadow root objects</p></li>
+<li><p><strong>locator</strong> (<em>bool</em>) – bool value for locator True or False</p></li>
 </ul>
 </dd>
 </dl>
@@ -775,7 +788,7 @@ naming convention.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>Selenium object</em>) – Selenium element</p></li>
-<li><p><strong>arg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</p></li>
+<li><p><strong>arg</strong> (<em>str</em><em> or </em><em>selenium.webdriver.common.keys</em>) – Text or Keys to be sent to the element</p></li>
 </ul>
 </dd>
 </dl>
@@ -860,7 +873,7 @@ naming convention.</p>
 <dd class="field-odd"><p><strong>filename</strong> – The name of the screenshot file.</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -879,11 +892,11 @@ naming convention.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The first search term. A text or a selector</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first search term. A text or a selector</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
-<li><p><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
+<li><p><strong>label</strong> (<em>bool</em>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
+<li><p><strong>main_container</strong> (<em>str</em>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -922,7 +935,7 @@ naming convention.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>elements</strong> (<em>List</em><em> of </em><em>BeautifulSoup objects</em>) – BeautifulSoup element list</p></li>
-<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>reverse</strong> (<em>bool</em>) – Boolean value if order should be reversed or not. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
