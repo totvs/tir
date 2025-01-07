@@ -4751,7 +4751,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, string, timeout=None, throw_error = True):
+    def WaitHide(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait hide the element.
 
@@ -4763,7 +4763,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        logger().info("Waiting processing...")
+        logger().info("Waiting Hide...")
 
         if not timeout:
             timeout = 1200
@@ -4774,7 +4774,8 @@ class WebappInternal(Base):
             element = None
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
                                      optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
+                                     main_container=self.containers_selectors["AllContainers"],
+                                     check_help=False, match_case=match_case)
 
             if not element:
                 return
@@ -4786,7 +4787,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string, timeout=None, throw_error = True, match_case = False):
+    def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait show the elements.
 
@@ -4825,7 +4826,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitProcessing(self, itens, timeout=None):
+    def WaitProcessing(self, itens, timeout=None, match_case=False):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -4840,9 +4841,9 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
-        self.WaitShow(itens, timeout, throw_error = False)
+        self.WaitShow(itens, timeout, throw_error = False, match_case=match_case)
 
-        self.WaitHide(itens, timeout, throw_error = False)
+        self.WaitHide(itens, timeout, throw_error = False, match_case=match_case)
 
 
     def SetTabEDAPP(self, table):
