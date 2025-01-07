@@ -936,7 +936,7 @@ class Webapp():
         """
         self.__webapp.WaitProcessing(string)
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait show the elements.
 
@@ -950,7 +950,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitShow(string, timeout, throw_error=True)
+        self.__webapp.WaitShow(string, timeout, throw_error, match_case)
 
     def IfExists(self, string='', timeout=5):
         """

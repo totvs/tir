@@ -3498,7 +3498,7 @@ class WebappInternal(Base):
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
                       check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False,
-                      second_term=None):
+                      second_term=None, match_case=False):
         """
         [Internal]
 
@@ -3594,7 +3594,7 @@ class WebappInternal(Base):
                 return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot() and not twebview:
-                    return self.selenium_web_scrap(term, container, optional_term, second_term)
+                    return self.selenium_web_scrap(term, container, optional_term, second_term, match_case)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3622,13 +3622,14 @@ class WebappInternal(Base):
             else:
                 self.scroll_to_element(self.soup_to_selenium(container.select(term)))
 
-    def selenium_web_scrap(self, term, container, optional_term, second_term=None):
+    def selenium_web_scrap(self, term, container, optional_term, second_term=None, match_case=False):
         """
         [Internal]
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
         elements = []
+        element = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3664,14 +3665,15 @@ class WebappInternal(Base):
                             labels_displayed = labels_not_none
                     if labels_displayed:
                         element = list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
-                        if len(element) > 1:
+
+                        if (len(element) > 1) or match_case and element:
                             element = next(iter(list(filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),None)
                         else:
                             element = next(iter(element), None)
-                        if not element:
+                        if not element and match_case == False:
                             element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
                                        None)
-                        if not element and len(labels_not_none) >= 1:
+                        if not element and len(labels_not_none) >= 1 and match_case == False:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
                             elements.append(element)
@@ -3681,7 +3683,12 @@ class WebappInternal(Base):
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
-                    element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
+                    if match_case:
+                        element = next(iter(list(filter(
+                            lambda x: term.lower() == x.get_attribute('textContent').lower().replace('\n', '').replace(
+                                '\t', ''), header))), None)
+                    else:
+                        element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
                     if element:
                         return [element]
         except:
@@ -4779,7 +4786,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string, timeout=None, throw_error = True, match_case = False):
         """
         Search string that was sent and wait show the elements.
 
@@ -4803,7 +4810,8 @@ class WebappInternal(Base):
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
                                      optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
+                                     main_container=self.containers_selectors["AllContainers"],
+                                     check_help=False, match_case=match_case)
 
             if element:
                 logger().info(f"Text found! ")
