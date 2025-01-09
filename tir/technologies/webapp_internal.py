@@ -1221,7 +1221,86 @@ class WebappInternal(Base):
                         self.click(selenium_close_button())
                     except:
                         pass
+    
+    def check_screen_element(self, term, selector=None):
+        """
+        [Internal]
 
+        This method checks if the screen element is displayed.
+        """
+
+        return self.element_exists(term=term, scrap_type=enum.ScrapType.MIXED, optional_term=selector, main_container="body", check_error = False)
+    
+    def coin_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the coin screen.
+        """
+        return self.get_screen_selectors("coin")
+
+    def warning_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the warning screen.
+        """
+        return self.get_screen_selectors("warning")
+
+    def news_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the news screen.
+        """
+        return self.get_screen_selectors("news")
+
+    def get_screen_selectors(self, screen_type):
+        """
+        [Internal]
+
+        This method returns the selectors for different screens based on the screen type.
+        """
+
+        selectors = {
+            "coin": {
+                "shadowroot": "wa-dialog > wa-panel > wa-text-view",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "warning": {
+                "shadowroot": "wa-dialog",
+                "default": ".ui-dialog > .ui-dialog-titlebar"
+            },
+            "news": {
+                "shadowroot": "wa-dialog> .dict-tpanel > .dict-tsay",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            }
+        }
+
+        if self.webapp_shadowroot():
+            return selectors[screen_type]["shadowroot"]
+        else:
+            return selectors[screen_type]["default"]
+
+    def check_coin_screen(self):
+        """
+        [Internal]
+
+        Checks if the coin screen is displayed.
+        """
+
+        selector = self.coin_screen_selectors()
+
+        return self.check_screen_element(term=self.language.coins, selector=selector)
+    
+    def check_screen(self):
+        """
+        [Internal]
+
+        Checks if any of the screens (warning, coin, news) are displayed.
+        """
+
+        return any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()])
 
     def close_coin_screen(self):
         """
@@ -1237,19 +1316,12 @@ class WebappInternal(Base):
 
         logger().debug('Closing coin screen!')
 
-        if self.webapp_shadowroot():
-            selector = "wa-dialog > wa-panel > wa-text-view"
-        else:
-            selector = ".tmodaldialog > .tpanel > .tsay"
+        selector = self.coin_screen_selectors()
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-        optional_term=selector, main_container="body", check_error = False):
-
+        if modals and self.check_coin_screen():
             self.SetButton(self.language.shortconfirm)
-
-
 
     def close_coin_screen_after_routine(self):
         """
@@ -1292,7 +1364,17 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(str(e))
+    
+    def check_warning_screen(self):
+        """
+        [Internal]
 
+        Checks if the warning screen is displayed.
+        """
+
+        selector = self.warning_screen_selectors()
+
+        return self.check_screen_element(term=self.language.warning, selector=selector)
 
     def close_warning_screen(self):
         """
@@ -1306,18 +1388,13 @@ class WebappInternal(Base):
 
         logger().debug('Closing warning screen!')
 
-        if self.webapp_shadowroot():
-            selector = "wa-dialog"
-        else:
-            selector = ".ui-dialog > .ui-dialog-titlebar"
+        selector = self.warning_screen_selectors()
 
         time.sleep(1)
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
-        if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-         optional_term=selector, main_container="body", check_error = False):
+        if modals and self.check_warning_screen():
             self.set_button_x()
-
 
     def close_warning_screen_after_routine(self):
         """
@@ -1359,8 +1436,21 @@ class WebappInternal(Base):
 
                 self.close_warning_screen()
 
+                if self.check_screen() or self.element_exists(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR):
+                    return
+
             except Exception as e:
                 logger().exception(str(e))
+    
+    def check_news_screen(self):
+        """
+        [Internal]
+
+        Checks if the news screen is displayed.
+        """
+        selector = self.news_screen_selectors()
+
+        return self.check_screen_element(term=self.language.news, selector=selector)
 
     def close_news_screen(self):
         """
@@ -1373,15 +1463,14 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_news_screen()
         """
-        if self.webapp_shadowroot():
-            term = 'wa-dialog> .dict-tpanel > .dict-tsay'
-        else:
-            term = '.tmodaldialog > .tpanel > .tsay'
+
+        logger().debug('Closing news screen!')
+
+        selector = self.news_screen_selectors()
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
-        if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
-                                          optional_term=term, main_container="body", check_error=False):
+        if modals and self.check_news_screen():
             self.SetButton(self.language.close)
 
     def close_news_screen_after_routine(self):
@@ -3842,7 +3931,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog,wa-text-input", check_error=True, twebview=False, second_term=None):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container="", check_error=True, twebview=False, second_term=None):
         """
         [Internal]
 
@@ -3866,6 +3955,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+
+        if not main_container:
+            main_container = ".tmodaldialog,.ui-dialog, wa-text-input, wa-dialog, body"
 
         element_list = []
         containers = None
