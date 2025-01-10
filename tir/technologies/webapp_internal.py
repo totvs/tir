@@ -822,6 +822,7 @@ class WebappInternal(Base):
             self.config.date = datetime.today().strftime(f'%d{d}%m{d}%Y')
 
         click_type = 1
+        send_type = 1
         base_date_value = ''
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -864,10 +865,9 @@ class WebappInternal(Base):
                     ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                         Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
-                    if self.config.browser.lower() == "chrome":
-                        self.try_send_keys(date, self.config.date)
-                    else:
-                        self.send_keys(date(), self.config.date)
+
+                    self.try_send_keys(date, self.config.date, try_counter=send_type)
+
 
                     base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                     if self.config.poui_login:
@@ -875,8 +875,11 @@ class WebappInternal(Base):
 
                     time.sleep(1)
                     click_type += 1
+                    send_type += 1
                     if click_type > 3:
                         click_type = 1
+                    if send_type > 3:
+                        send_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
@@ -1221,7 +1224,133 @@ class WebappInternal(Base):
                         self.click(selenium_close_button())
                     except:
                         pass
+    
+    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED):
+        """
+        [Internal]
 
+        This method checks if the screen element is displayed.
+        """
+
+        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body") else False
+        
+        logger().debug(f'Checking screen element: "{term}": {element_exists}')
+
+        return element_exists
+    
+    def coin_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the coin screen.
+        """
+        return self.get_screen_selectors("coin")
+
+    def warning_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the warning screen.
+        """
+        return self.get_screen_selectors("warning")
+
+    def news_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the news screen.
+        """
+        return self.get_screen_selectors("news")
+    
+    def browse_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the browse screen.
+        """
+        return self.get_screen_selectors("browse")
+
+    def get_screen_selectors(self, screen_type):
+        """
+        [Internal]
+
+        This method returns the selectors for different screens based on the screen type.
+        """
+
+        selectors = {
+            "coin": {
+                "shadowroot": "wa-dialog > wa-panel > wa-text-view",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "warning": {
+                "shadowroot": "wa-dialog",
+                "default": ".ui-dialog > .ui-dialog-titlebar"
+            },
+            "news": {
+                "shadowroot": "wa-dialog> .dict-tpanel > .dict-tsay",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "browse": {
+                "shadowroot": "[style*='fwskin_seekbar_ico']"
+            }
+        }
+
+        if self.webapp_shadowroot():
+            return selectors[screen_type]["shadowroot"]
+        else:
+            return selectors[screen_type]["default"]
+        
+    def check_browse_screen(self):
+        """
+        [Internal]
+
+        Checks if the browse screen is displayed.
+        """
+
+        selector = self.browse_screen_selectors()
+
+        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR)
+
+    def check_coin_screen(self):
+        """
+        [Internal]
+
+        Checks if the coin screen is displayed.
+        """
+
+        selector = self.coin_screen_selectors()
+
+        return self.check_screen_element(term=self.language.coins, selector=selector)
+    
+    def check_warning_screen(self):
+        """
+        [Internal]
+
+        Checks if the warning screen is displayed.
+        """
+
+        selector = self.warning_screen_selectors()
+
+        return self.check_screen_element(term=self.language.warning, selector=selector)
+    
+    def check_news_screen(self):
+        """
+        [Internal]
+
+        Checks if the news screen is displayed.
+        """
+        selector = self.news_screen_selectors()
+
+        return self.check_screen_element(term=self.language.news, selector=selector)
+    
+    def check_screen(self):
+        """
+        [Internal]
+
+        Checks if any of the screens (warning, coin, news) are displayed.
+        """
+
+        return any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen(), self.check_browse_screen()])
 
     def close_coin_screen(self):
         """
@@ -1237,19 +1366,12 @@ class WebappInternal(Base):
 
         logger().debug('Closing coin screen!')
 
-        if self.webapp_shadowroot():
-            selector = "wa-dialog > wa-panel > wa-text-view"
-        else:
-            selector = ".tmodaldialog > .tpanel > .tsay"
+        selector = self.coin_screen_selectors()
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
-        if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
-        optional_term=selector, main_container="body", check_error = False):
-
+        if modals and self.check_coin_screen():
             self.SetButton(self.language.shortconfirm)
-
-
 
     def close_coin_screen_after_routine(self):
         """
@@ -1290,9 +1412,11 @@ class WebappInternal(Base):
 
                 self.close_coin_screen()
 
+                if self.check_screen():
+                    return
+
             except Exception as e:
                 logger().exception(str(e))
-
 
     def close_warning_screen(self):
         """
@@ -1306,18 +1430,13 @@ class WebappInternal(Base):
 
         logger().debug('Closing warning screen!')
 
-        if self.webapp_shadowroot():
-            selector = "wa-dialog"
-        else:
-            selector = ".ui-dialog > .ui-dialog-titlebar"
+        selector = self.warning_screen_selectors()
 
         time.sleep(1)
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
-        if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-         optional_term=selector, main_container="body", check_error = False):
+        if modals and self.check_warning_screen():
             self.set_button_x()
-
 
     def close_warning_screen_after_routine(self):
         """
@@ -1327,15 +1446,10 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             dialog_term = f'wa-dialog [title={self.language.warning}]'
             title_term = f'wa-dialog [title={self.language.warning}]'
-            workspace_term = "wa-dialog > wa-text-view"
 
         else:
             dialog_term = '.ui-dialog'
             title_term = '.ui-dialog-titlebar'
-            workspace_term = ".workspace-container"
-
-        self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out / 2, main_container="body", check_error = False)
 
         uidialog_list = []
 
@@ -1344,9 +1458,6 @@ class WebappInternal(Base):
             try:
                 soup = self.get_current_DOM()
                 uidialog_list = soup.select(dialog_term)
-
-                self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=title_term, timeout=10, main_container = "body", check_error = False)
 
                 tmodal_warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
                     optional_term=title_term, main_container="body", check_error = False, check_help = False)
@@ -1358,6 +1469,9 @@ class WebappInternal(Base):
                     uidialog_list.remove(tmodal_warning_screen.parent.parent)
 
                 self.close_warning_screen()
+
+                if self.check_screen():
+                    return
 
             except Exception as e:
                 logger().exception(str(e))
@@ -1373,15 +1487,14 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.close_news_screen()
         """
-        if self.webapp_shadowroot():
-            term = 'wa-dialog> .dict-tpanel > .dict-tsay'
-        else:
-            term = '.tmodaldialog > .tpanel > .tsay'
+
+        logger().debug('Closing news screen!')
+
+        selector = self.news_screen_selectors()
 
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
-        if modals and self.element_exists(term=self.language.news, scrap_type=enum.ScrapType.MIXED,
-                                          optional_term=term, main_container="body", check_error=False):
+        if modals and self.check_news_screen():
             self.SetButton(self.language.close)
 
     def close_news_screen_after_routine(self):
@@ -1411,6 +1524,9 @@ class WebappInternal(Base):
                     tmodaldialog_list.remove(tmodal_news_screen.parent.parent)
 
                 self.close_news_screen()
+
+                if self.check_screen():
+                    return
 
             except Exception as e:
                 logger().exception(str(e))
@@ -3498,7 +3614,7 @@ class WebappInternal(Base):
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
                       check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False,
-                      second_term=None):
+                      second_term=None, match_case=False):
         """
         [Internal]
 
@@ -3594,7 +3710,7 @@ class WebappInternal(Base):
                 return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if self.webapp_shadowroot() and not twebview:
-                    return self.selenium_web_scrap(term, container, optional_term, second_term)
+                    return self.selenium_web_scrap(term, container, optional_term, second_term, match_case)
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select(optional_term)))
             elif (scrap_type == enum.ScrapType.SCRIPT):
@@ -3622,13 +3738,14 @@ class WebappInternal(Base):
             else:
                 self.scroll_to_element(self.soup_to_selenium(container.select(term)))
 
-    def selenium_web_scrap(self, term, container, optional_term, second_term=None):
+    def selenium_web_scrap(self, term, container, optional_term, second_term=None, match_case=False):
         """
         [Internal]
         Return selenium web element
         """
         regx_sub = r"[\n?\s?]"
         elements = []
+        element = []
         try:
             if second_term:
                 labels_list = list(map(
@@ -3664,14 +3781,15 @@ class WebappInternal(Base):
                             labels_displayed = labels_not_none
                     if labels_displayed:
                         element = list(filter(lambda x: term.lower() in x.text.lower().replace('\n', ''), labels_displayed))
-                        if len(element) > 1:
+
+                        if (len(element) > 1) or match_case and element:
                             element = next(iter(list(filter(lambda x: term.lower().strip() == x.text.lower().replace('\n', ''), element))),None)
                         else:
                             element = next(iter(element), None)
-                        if not element:
+                        if not element and match_case == False:
                             element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t', ''), labels_displayed))),
                                        None)
-                        if not element and len(labels_not_none) >= 1:
+                        if not element and len(labels_not_none) >= 1 and match_case == False:
                             element = list(filter(lambda x: re.sub(regx_sub,'', term).lower() in re.sub(regx_sub,'', x.text).lower(), labels_displayed))
                         if element:
                             elements.append(element)
@@ -3681,7 +3799,12 @@ class WebappInternal(Base):
             if not element:
                 header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
-                    element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
+                    if match_case:
+                        element = next(iter(list(filter(
+                            lambda x: term.lower() == x.get_attribute('textContent').lower().replace('\n', '').replace(
+                                '\t', ''), header))), None)
+                    else:
+                        element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
                     if element:
                         return [element]
         except:
@@ -3842,7 +3965,7 @@ class WebappInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".tmodaldialog,.ui-dialog,wa-text-input", check_error=True, twebview=False, second_term=None):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container="", check_error=True, twebview=False, second_term=None):
         """
         [Internal]
 
@@ -3866,6 +3989,9 @@ class WebappInternal(Base):
         >>> element_is_present = element_exists(term=".tmodaldialog.twidget", scrap_type=enum.ScrapType.CSS_SELECTOR, position=initial_layer+1)
         >>> element_is_present = element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay")
         """
+
+        if not main_container:
+            main_container = ".tmodaldialog,.ui-dialog, wa-text-input, wa-dialog, body"
 
         element_list = []
         containers = None
@@ -4744,7 +4870,7 @@ class WebappInternal(Base):
         if Ret:
             self.SetButton('OK')
 
-    def WaitHide(self, string, timeout=None, throw_error = True):
+    def WaitHide(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait hide the element.
 
@@ -4756,7 +4882,7 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        logger().info("Waiting processing...")
+        logger().info("Waiting Hide...")
 
         if not timeout:
             timeout = 1200
@@ -4767,7 +4893,8 @@ class WebappInternal(Base):
             element = None
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
                                      optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
+                                     main_container=self.containers_selectors["AllContainers"],
+                                     check_help=False, match_case=match_case)
 
             if not element:
                 return
@@ -4779,7 +4906,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait show the elements.
 
@@ -4803,7 +4930,8 @@ class WebappInternal(Base):
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
                                      optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"], check_help=False)
+                                     main_container=self.containers_selectors["AllContainers"],
+                                     check_help=False, match_case=match_case)
 
             if element:
                 logger().info(f"Text found! ")
@@ -4817,7 +4945,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitProcessing(self, itens, timeout=None):
+    def WaitProcessing(self, itens, timeout=None, match_case=False):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -4832,9 +4960,9 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
-        self.WaitShow(itens, timeout, throw_error = False)
+        self.WaitShow(itens, timeout, throw_error = False, match_case=match_case)
 
-        self.WaitHide(itens, timeout, throw_error = False)
+        self.WaitHide(itens, timeout, throw_error = False, match_case=match_case)
 
 
     def SetTabEDAPP(self, table):
