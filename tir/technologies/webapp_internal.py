@@ -1222,14 +1222,18 @@ class WebappInternal(Base):
                     except:
                         pass
     
-    def check_screen_element(self, term, selector=None):
+    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED):
         """
         [Internal]
 
         This method checks if the screen element is displayed.
         """
 
-        return self.element_exists(term=term, scrap_type=enum.ScrapType.MIXED, optional_term=selector, main_container="body", check_error = False)
+        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body") else False
+        
+        logger().debug(f'Checking screen element: "{term}": {element_exists}')
+
+        return element_exists
     
     def coin_screen_selectors(self):
         """
@@ -1254,6 +1258,14 @@ class WebappInternal(Base):
         This method returns the selectors for the news screen.
         """
         return self.get_screen_selectors("news")
+    
+    def browse_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the browse screen.
+        """
+        return self.get_screen_selectors("browse")
 
     def get_screen_selectors(self, screen_type):
         """
@@ -1274,6 +1286,9 @@ class WebappInternal(Base):
             "news": {
                 "shadowroot": "wa-dialog> .dict-tpanel > .dict-tsay",
                 "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "browse": {
+                "shadowroot": "[style*='fwskin_seekbar_ico']"
             }
         }
 
@@ -1281,6 +1296,17 @@ class WebappInternal(Base):
             return selectors[screen_type]["shadowroot"]
         else:
             return selectors[screen_type]["default"]
+        
+    def check_browse_screen(self):
+        """
+        [Internal]
+
+        Checks if the browse screen is displayed.
+        """
+
+        selector = self.browse_screen_selectors()
+
+        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR)
 
     def check_coin_screen(self):
         """
@@ -1293,6 +1319,27 @@ class WebappInternal(Base):
 
         return self.check_screen_element(term=self.language.coins, selector=selector)
     
+    def check_warning_screen(self):
+        """
+        [Internal]
+
+        Checks if the warning screen is displayed.
+        """
+
+        selector = self.warning_screen_selectors()
+
+        return self.check_screen_element(term=self.language.warning, selector=selector)
+    
+    def check_news_screen(self):
+        """
+        [Internal]
+
+        Checks if the news screen is displayed.
+        """
+        selector = self.news_screen_selectors()
+
+        return self.check_screen_element(term=self.language.news, selector=selector)
+    
     def check_screen(self):
         """
         [Internal]
@@ -1300,7 +1347,7 @@ class WebappInternal(Base):
         Checks if any of the screens (warning, coin, news) are displayed.
         """
 
-        return any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()])
+        return any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen(), self.check_browse_screen()])
 
     def close_coin_screen(self):
         """
@@ -1362,19 +1409,11 @@ class WebappInternal(Base):
 
                 self.close_coin_screen()
 
+                if self.check_screen():
+                    return
+
             except Exception as e:
                 logger().exception(str(e))
-    
-    def check_warning_screen(self):
-        """
-        [Internal]
-
-        Checks if the warning screen is displayed.
-        """
-
-        selector = self.warning_screen_selectors()
-
-        return self.check_screen_element(term=self.language.warning, selector=selector)
 
     def close_warning_screen(self):
         """
@@ -1404,15 +1443,10 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
             dialog_term = f'wa-dialog [title={self.language.warning}]'
             title_term = f'wa-dialog [title={self.language.warning}]'
-            workspace_term = "wa-dialog > wa-text-view"
 
         else:
             dialog_term = '.ui-dialog'
             title_term = '.ui-dialog-titlebar'
-            workspace_term = ".workspace-container"
-
-        self.wait_element_timeout(term=workspace_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout = self.config.time_out / 2, main_container="body", check_error = False)
 
         uidialog_list = []
 
@@ -1421,9 +1455,6 @@ class WebappInternal(Base):
             try:
                 soup = self.get_current_DOM()
                 uidialog_list = soup.select(dialog_term)
-
-                self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=title_term, timeout=10, main_container = "body", check_error = False)
 
                 tmodal_warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
                     optional_term=title_term, main_container="body", check_error = False, check_help = False)
@@ -1436,21 +1467,11 @@ class WebappInternal(Base):
 
                 self.close_warning_screen()
 
-                if self.check_screen() or self.element_exists(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR):
+                if self.check_screen():
                     return
 
             except Exception as e:
                 logger().exception(str(e))
-    
-    def check_news_screen(self):
-        """
-        [Internal]
-
-        Checks if the news screen is displayed.
-        """
-        selector = self.news_screen_selectors()
-
-        return self.check_screen_element(term=self.language.news, selector=selector)
 
     def close_news_screen(self):
         """
@@ -1500,6 +1521,9 @@ class WebappInternal(Base):
                     tmodaldialog_list.remove(tmodal_news_screen.parent.parent)
 
                 self.close_news_screen()
+
+                if self.check_screen():
+                    return
 
             except Exception as e:
                 logger().exception(str(e))
