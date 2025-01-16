@@ -1225,14 +1225,14 @@ class WebappInternal(Base):
                     except:
                         pass
     
-    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED):
+    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED, check_error=True):
         """
         [Internal]
 
         This method checks if the screen element is displayed.
         """
 
-        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body") else False
+        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body", check_error=check_error) else False
         
         logger().debug(f'Checking screen element: "{term}": {element_exists}')
 
@@ -1341,7 +1341,7 @@ class WebappInternal(Base):
         """
         selector = self.news_screen_selectors()
 
-        return self.check_screen_element(term=self.language.news, selector=selector)
+        return self.check_screen_element(term=self.language.news, selector=selector, check_error=False)
     
     def check_screen(self):
         """
