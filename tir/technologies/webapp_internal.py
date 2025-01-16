@@ -3807,7 +3807,7 @@ class WebappInternal(Base):
                             lambda x: term.lower() == x.get_attribute('textContent').lower().replace('\n', '').replace(
                                 '\t', ''), header))), None)
                     else:
-                    element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
+                        element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
                     if element:
                         return [element]
         except:
