@@ -3617,7 +3617,7 @@ class WebappInternal(Base):
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
                       check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=False,
-                      second_term=None):
+                      second_term=None, match_case=False):
         """
         [Internal]
 
