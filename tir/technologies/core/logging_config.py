@@ -179,6 +179,7 @@ def configure_logger():
 
     dictConfig(logging_config)
     _logger = logging.getLogger(logger_profile)
+    _logger.propagate = False
 
 def logger():
     global _logger
