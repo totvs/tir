@@ -862,13 +862,17 @@ class WebappInternal(Base):
 
                     self.wait_blocker()
                     for i in range(3):
+                        self.take_screenshot(f'fill_data_before_click{click_type}_{time.time()}')
                         self.click(date(), click_type=enum.ClickType(click_type))
+                        self.take_screenshot(f'fill_data_after_click{click_type}_{time.time()}')
 
                         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                         ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                             Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
+                        self.take_screenshot(f'fill_data_before_send{click_type}_{time.time()}')
                         self.try_send_keys(date, self.config.date, try_counter=send_type)
+                        self.take_screenshot(f'fill_data_after_send{click_type}_{time.time()}')
 
                         base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
                         if self.config.poui_login:
