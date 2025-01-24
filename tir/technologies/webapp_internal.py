@@ -863,7 +863,6 @@ class WebappInternal(Base):
 
                     self.wait_blocker()
                     for i in range(3):
-                        time.sleep(1)
                         self.click(date(), click_type=enum.ClickType(click_type))
                         ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                         ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
@@ -875,6 +874,7 @@ class WebappInternal(Base):
                         if self.config.poui_login:
                             ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
 
+                        time.sleep(1)
                         send_type += 1
                         if send_type > 3:
                             send_type = 1
