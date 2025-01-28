@@ -4442,11 +4442,12 @@ class WebappInternal(Base):
                     if self.webapp_shadowroot():
                         if not soup_objects:
                             footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
-                            buttons = self.find_shadow_element("wa-button", footer)
-                            if not buttons:
-                                buttons = self.driver.execute_script("return arguments[0].querySelectorAll('wa-button')", footer)
-                            if buttons:
-                                filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
+                            if footer:
+                                buttons = self.find_shadow_element("wa-button", footer)
+                                if not buttons:
+                                    buttons = footer.find_elements(By.CSS_SELECTOR, "wa-button")
+                                if buttons:
+                                    filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
 
                     if filtered_button and len(filtered_button) - 1 >= position:
                         parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_button ))
