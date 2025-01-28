@@ -860,26 +860,32 @@ class WebappInternal(Base):
                     logger().info(f'Filling Date: "{self.config.date}"')
 
                     self.wait_blocker()
-                    self.click(date(), click_type=enum.ClickType(click_type))
-                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                        Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                    for i in range(3):
+                        self.click(date(), click_type=enum.ClickType(click_type))
+                        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                        ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                            Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
+                        self.try_send_keys(date, self.config.date, try_counter=send_type)
 
-                    self.try_send_keys(date, self.config.date, try_counter=send_type)
+                        base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
+                        if self.config.poui_login:
+                            ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
 
+                        time.sleep(1)
+                        send_type += 1
+                        if send_type > 3:
+                            send_type = 1
 
-                    base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
-                    if self.config.poui_login:
-                        ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
+                        if base_date_value.strip() == self.config.date.strip():
+                            break
 
-                    time.sleep(1)
-                    click_type += 1
-                    send_type += 1
-                    if click_type > 3:
-                        click_type = 1
-                    if send_type > 3:
-                        send_type = 1
+                        if not self.is_active_element(date()) and click_type == 3:
+                            self.filling_group(shadow_root, container)
+
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
 
     def filling_group(self, shadow_root=None, container=None):
         """
