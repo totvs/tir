@@ -6228,6 +6228,8 @@ class WebappInternal(Base):
 
         duplicate_fields=[]
 
+        new_fill_grid = False
+
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
@@ -6255,7 +6257,11 @@ class WebappInternal(Base):
                 logger().info(f"Filling grid field: {field[0]}")
                 if len(field[6]) > 0:
                     duplicate_fields=field[6]
-                self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
+
+                if not new_fill_grid:
+                    self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
+                else:
+                    self.new_fill_grid(field, x3_dictionaries)
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
@@ -6284,6 +6290,203 @@ class WebappInternal(Base):
         if fields:
             x3_dictionaries = self.get_x3_dictionaries(fields)
         return x3_dictionaries
+
+    @count_time
+    def new_fill_grid(self, field, x3_dictionaries):
+        
+        field_to_label = {}
+        field_to_valtype = {}
+
+        current_value = ""
+        try_counter = 1
+        check_value = field[5]
+
+        if (field[1] == True):
+            field_one = 'is a boolean value'
+        elif (field[1] == False):
+            field_one = ''
+        elif (isinstance(field[1], str)):
+            field_one = self.remove_mask(field[1]).strip()
+
+        if x3_dictionaries:
+            field_to_label = x3_dictionaries[2]
+            field_to_valtype = x3_dictionaries[0]
+            field_to_len = x3_dictionaries[1]
+
+        user_value = field[1]
+        
+        if self.webapp_shadowroot():
+            layer_selector = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
+        else:
+            layer_selector = ".tmodaldialog"
+
+        try_counter = 1
+
+        endtime = time.time() + self.config.time_out
+        while (current_value != field_one and time.time() < endtime):
+
+            selenium_column = lambda : self.select_grid_cell(field, field_to_label=field_to_label) 
+
+            layer = lambda: self.check_layers(layer_selector)
+            self.check_cell_status(field, layer(), element=selenium_column())
+            selenium_input = lambda: self.get_input_element()
+            
+            logger().debug(f"Sending keys: {user_value}")
+            user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
+            current_layer = layer()
+            self.try_send_keys(selenium_input, user_value, try_counter)
+            self.wait_blocker()
+
+            time.sleep(1)
+            if current_layer == layer():
+                self.check_cell_status(field, layer(), element=selenium_input())
+            
+            current_value = selenium_column().text.strip()
+            current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
+
+            try_counter += 1
+            if try_counter > 3:
+                try_counter = 1
+            
+            if not check_value:
+                break
+
+    def select_grid_cell(self, field, field_to_label):
+        """
+        [Internal]
+
+        Selects the cell of the grid.
+
+        :param field: The field that must be selected.
+        """
+
+        grid_dataframe, grids = self.grid_dataframe(grid_number=field[2])
+        columns = [column.lower() for column in grid_dataframe.columns.tolist()]
+        
+        grid = grids[field[2]] if isinstance(grids, list) else grids
+
+        rows = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+                
+        row = rows[field[4]] if field[4] is not None else rows[-1]
+        columns_element = row.find_elements(By.CSS_SELECTOR, 'td')
+        column_index = self.get_column_index(field[0], columns, field_to_label)
+        selenium_column = lambda: columns_element[column_index]            
+
+        self.scroll_to_element(selenium_column())
+        self.click(selenium_column(),click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(selenium_column())
+        self.set_element_focus(selenium_column())
+
+        self.select_cell(selenium_column()) 
+
+        return selenium_column()
+
+    def check_value_type(self, value, valtype):
+        """
+        [Internal]
+
+        Checks the value type and returns the value formatted.
+
+        :param value: The value that must be checked.
+        :type value: str
+        :param valtype: The type of the value.
+        :type valtype: str
+
+        :return: The formatted value.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> formatted_value = self.check_value_type("000001", "N")
+        """
+       
+        return self.remove_mask(value, valtype)
+
+    def get_input_element(self):
+        """
+        [Internal]
+
+        Returns the input element of the grid.
+
+        :param element: The element that must be checked.
+        :type element: Selenium object
+
+        :return: The input element of the grid.
+        :rtype: Selenium object
+
+        Usage:
+        
+        >>> # Calling the method:
+        >>> input_element = self.get_input_element(my_element)
+        """
+
+        return self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input, textarea')",self.soup_to_selenium(self.get_current_container().select('wa-text-input')[0]))
+
+    def get_column_index(self, field, columns, field_to_label):
+        """
+        [Internal]
+
+        Returns the index of the column in the grid.
+        
+        :param field: The field that must be found.
+        :type field: str    
+        :param columns: The columns of the grid.
+        :type columns: list
+        :param field_to_label: A dictionary containing the field labels.
+        :type field_to_label: dict
+        :param duplicate_fields: A list of fields that have the same label.
+        :type duplicate_fields: list
+
+        :return: The index of the column in the grid.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> column = self.get_column_index("A1_COD", columns, field_to_label, duplicate_fields)
+        """
+
+        column_name = ""
+
+        if "_" in field:
+
+            try:
+                column_name = field_to_label[field].lower().strip()
+            except:
+                self.log_error("Couldn't find column '" + field + "' in sx3 file. Try with the field label.")
+        else:
+            column_name = field.lower().strip()
+
+        return columns.index(column_name)
+    
+    def check_cell_status(self, field, layer, element):
+
+        current_layer = layer
+
+        endtime = time.time() + self.config.time_out / 3
+        while (time.time() < endtime and current_layer == layer):
+            logger().debug('Trying open cell in grid!')
+            try:
+                ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+            except WebDriverException:
+                self.send_keys(element, Keys.ENTER)    
+                self.wait_blocker()
+            
+            if(field[1] == True):
+                break
+
+            current_layer = self.check_layers('wa-dialog')
+
+    def select_cell(self, element):
+
+        endtime = time.time() + self.config.time_out / 3
+        while time.time() < endtime and not self.selected_cell(element):
+            logger().debug('Trying to select cell in grid!')
+            self.scroll_to_element(element)
+            self.click(element,click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(element)
+            self.set_element_focus(element)
+            self.wait_blocker()
+            time.sleep(1)
 
     def fill_grid(self, field, x3_dictionaries, initial_layer, duplicate_fields=[]):
         """
