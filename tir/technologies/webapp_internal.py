@@ -6231,8 +6231,6 @@ class WebappInternal(Base):
 
         duplicate_fields=[]
 
-        new_fill_grid = False
-
         initial_layer = 0
         if self.grid_input:
             if self.webapp_shadowroot():
@@ -6260,10 +6258,6 @@ class WebappInternal(Base):
                 logger().info(f"Filling grid field: {field[0]}")
                 if len(field[6]) > 0:
                     duplicate_fields=field[6]
-
-                if not new_fill_grid:
-                    self.fill_grid(field, x3_dictionaries, initial_layer, duplicate_fields)
-                else:
                     self.new_fill_grid(field, x3_dictionaries)
 
         for field in self.grid_check:
@@ -6340,32 +6334,54 @@ class WebappInternal(Base):
         return ".tmodaldialog"
 
     def fill_grid_loop(self, field, field_to_label, field_to_valtype, field_one, user_value, layer_selector, check_value):
+        """
+        [Internal]
+
+        Loops through the grid fields and fills them with the desired values.
+
+        :param field: The field that must be filled.
+        :type field: list
+        :param field_to_label: A dictionary containing the field labels.
+        :type field_to_label: dict
+        :param field_to_valtype: A dictionary containing the field valtypes.
+        :type field_to_valtype: dict
+        :param field_one: The first field of the grid.
+        :type field_one: str
+        :param user_value: The value that must be filled.
+        :type user_value: str
+        :param layer_selector: The selector of the layer.
+        :type layer_selector: str
+        :param check_value: Boolean if the value must be checked.
+        :type check_value: bool
+
+        """
         current_value = ""
         try_counter = 1
         endtime = time.time() + self.config.time_out
         while current_value != field_one and time.time() < endtime:
-            selenium_column = lambda: self.select_grid_cell(field, field_to_label=field_to_label)
+            selenium_column = self.select_grid_cell(field, field_to_label=field_to_label)
             layer = lambda: self.check_layers(layer_selector)
-            self.check_cell_status(field, layer(), element=selenium_column())
+            self.check_cell_status(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
-            logger().debug(f"Sending keys: {user_value}")
-            user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
-            current_layer = layer()
-            self.try_send_keys(selenium_input, user_value, try_counter)
-            self.wait_blocker()
-            if field[9]:
-                self.SetButton('Ok')
-                check_value = False
-            time.sleep(1)
-            if current_layer == layer():
-                self.check_cell_status(field, layer(), element=selenium_input())
-            current_value = selenium_column().text.strip()
-            current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
-            try_counter += 1
-            if try_counter > 3:
-                try_counter = 1
-            if not check_value:
-                break
+            if selenium_input():
+                logger().info(f"Sending keys: {user_value}")
+                user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
+                current_layer = layer()
+                self.try_send_keys(selenium_input, user_value, try_counter)
+                self.wait_blocker()
+                if field[9]:
+                    self.SetButton('Ok')
+                    check_value = False
+                time.sleep(1)
+                if current_layer == layer():
+                    self.check_cell_status(field, layer(), element=selenium_input())
+                current_value = selenium_column.text.strip()
+                current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
+                try_counter += 1
+                if try_counter > 3:
+                    try_counter = 1
+                if not check_value:
+                    break
 
     def select_grid_cell(self, field, field_to_label):
         """
@@ -6375,7 +6391,7 @@ class WebappInternal(Base):
 
         :param field: The field that must be selected.
         """
-
+        
         grid_dataframe, grids = self.grid_dataframe(grid_number=field[2])
         columns = [column.lower() for column in grid_dataframe.columns.tolist()]
         
@@ -6392,7 +6408,9 @@ class WebappInternal(Base):
         self.click(selenium_column(),click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(selenium_column())
         self.set_element_focus(selenium_column())
 
-        self.select_cell(selenium_column()) 
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not self.selected_cell(selenium_column()):
+            self.select_cell(selenium_column()) 
 
         return selenium_column()
 
@@ -6429,14 +6447,11 @@ class WebappInternal(Base):
 
         :return: The input element of the grid.
         :rtype: Selenium object
-
-        Usage:
-        
-        >>> # Calling the method:
-        >>> input_element = self.get_input_element(my_element)
         """
-
-        return self.driver.execute_script("return arguments[0].shadowRoot.querySelector('input, textarea')",self.soup_to_selenium(self.get_current_container().select('wa-text-input')[0]))
+        container = self.get_current_container()
+        text_input = next(iter(container.select('wa-text-input')))
+        if text_input:
+            return self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))
 
     def get_column_index(self, field, columns, field_to_label):
         """
@@ -6482,14 +6497,15 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 3
         while (time.time() < endtime and current_layer == layer):
             logger().debug('Trying open cell in grid!')
-            try:
-                ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
-            except WebDriverException:
-                self.send_keys(element, Keys.ENTER)    
-                self.wait_blocker()
-            
-            if(field[1] == True):
-                break
+            if self.selected_cell(element):
+                try:
+                    ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+                except WebDriverException:
+                    self.send_keys(element, Keys.ENTER)    
+                    self.wait_blocker()
+                
+                if(field[1] == True):
+                    break
 
             current_layer = self.check_layers('wa-dialog')
 
