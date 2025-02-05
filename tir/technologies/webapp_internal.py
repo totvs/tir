@@ -6451,7 +6451,8 @@ class WebappInternal(Base):
         container = self.get_current_container()
         text_input = next(iter(container.select('wa-text-input')))
         if text_input:
-            return self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))
+            element = next(iter(self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))))
+            return element if element else None
 
     def get_column_index(self, field, columns, field_to_label):
         """
