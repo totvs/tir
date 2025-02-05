@@ -5710,19 +5710,22 @@ class WebappInternal(Base):
         """
         if type(string) is str:
             if valtype == 'N':
-                if element:
-                    pattern = (r'\,')
-                    if re.findall(pattern, element.get_attribute('picture')):
-                        string = re.sub('\.', '', string)
-                return string
+                return self.remove_numeric_mask(string, element)
             else:
-                caracter = (r'[.\/+-]')
-                if string[0:4] != 'http':
-                    match = re.findall(caracter, string)
-                    if match:
-                        string = re.sub(caracter, '', string)
+                return self.remove_non_numeric_mask(string)
+        return string
 
-                return string
+    def remove_numeric_mask(self, string, element):
+        if element:
+            return string.replace('\.', '')
+
+    def remove_non_numeric_mask(self, string):
+        caracter = (r'[.\/+-]')
+        if string[0:4] != 'http':
+            match = re.findall(caracter, string)
+            if match:
+                string = re.sub(caracter, '', string)
+        return string
 
     def SetKey(self, key, grid=False, grid_number=1, additional_key="", wait_show = "", step = 3, wait_change=False):
         """
