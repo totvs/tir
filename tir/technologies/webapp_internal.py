@@ -2819,7 +2819,7 @@ class WebappInternal(Base):
             self.range_multiplier = range_multiplier
 
         if grid:
-            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position, ignore_case=ignore_case)
+            self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value, duplicate_fields=duplicate_fields, position=position, ignore_case=ignore_case, grid_memo_field=grid_memo_field)
         elif isinstance(value, bool):
             self.click_check_radio_button(field, value, name_attr, position, direction)
         else:
@@ -6154,7 +6154,7 @@ class WebappInternal(Base):
         self.grid_input = []
         self.grid_check = []
 
-    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0, ignore_case=True):
+    def input_grid_appender(self, column, value, grid_number=0, new=False, row=None, check_value = True, duplicate_fields=[], position=0, ignore_case=True, grid_memo_field):
         """
         [Internal]
 
@@ -6182,7 +6182,7 @@ class WebappInternal(Base):
         if row is not None:
             row -= 1
 
-        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case])
+        self.grid_input.append([column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case, grid_memo_field])
 
     def check_grid_appender(self, line, column, value=None, grid_number=0, position=1, ignore_case=True):
         """
@@ -6293,61 +6293,74 @@ class WebappInternal(Base):
 
     @count_time
     def new_fill_grid(self, field, x3_dictionaries):
-        
-        field_to_label = {}
-        field_to_valtype = {}
+        """
+        [Internal]
 
-        current_value = ""
-        try_counter = 1
+        Fills a grid field with a new value.
+
+        :param field: The field that must be filled.
+            :column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case, grid_memo_field
+            : 0        1      2            3    4      5            6                7          8            9
+        :type field: list
+        :param x3_dictionaries: A tuple containing dictionaries of field information.
+        :type x3_dictionaries: Tuple of Dictionaries
+
+        """
+        field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
+        field_one = self.get_field_one(field)
+        user_value = field[1]
+        layer_selector = self.get_layer_selector(field)
         check_value = field[5]
 
-        if (field[1] == True):
-            field_one = 'is a boolean value'
-        elif (field[1] == False):
-            field_one = ''
-        elif (isinstance(field[1], str)):
-            field_one = self.remove_mask(field[1]).strip()
+        self.fill_grid_loop(field, field_to_label, field_to_valtype, field_one, user_value, layer_selector, check_value)
 
+    def extract_field_info(self, x3_dictionaries):
+        field_to_label = {}
+        field_to_valtype = {}
         if x3_dictionaries:
             field_to_label = x3_dictionaries[2]
             field_to_valtype = x3_dictionaries[0]
-            field_to_len = x3_dictionaries[1]
+        return field_to_label, field_to_valtype
 
-        user_value = field[1]
-        
+    def get_field_one(self, field):
+        if field[1] == True:
+            return 'is a boolean value'
+        elif field[1] == False:
+            return ''
+        elif isinstance(field[1], str):
+            return self.remove_mask(field[1]).strip()
+        return ""
+
+    def get_layer_selector(self, field):
         if self.webapp_shadowroot():
-            layer_selector = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
-        else:
-            layer_selector = ".tmodaldialog"
+            return "wa-multi-get" if field[9] else "wa-dialog"
+        return ".tmodaldialog"
 
+    def fill_grid_loop(self, field, field_to_label, field_to_valtype, field_one, user_value, layer_selector, check_value):
+        current_value = ""
         try_counter = 1
-
         endtime = time.time() + self.config.time_out
-        while (current_value != field_one and time.time() < endtime):
-
-            selenium_column = lambda : self.select_grid_cell(field, field_to_label=field_to_label) 
-
+        while current_value != field_one and time.time() < endtime:
+            selenium_column = lambda: self.select_grid_cell(field, field_to_label=field_to_label)
             layer = lambda: self.check_layers(layer_selector)
             self.check_cell_status(field, layer(), element=selenium_column())
             selenium_input = lambda: self.get_input_element()
-            
             logger().debug(f"Sending keys: {user_value}")
             user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
             current_layer = layer()
             self.try_send_keys(selenium_input, user_value, try_counter)
             self.wait_blocker()
-
+            if field[9]:
+                self.SetButton('Ok')
+                check_value = False
             time.sleep(1)
             if current_layer == layer():
                 self.check_cell_status(field, layer(), element=selenium_input())
-            
             current_value = selenium_column().text.strip()
             current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
-
             try_counter += 1
             if try_counter > 3:
                 try_counter = 1
-            
             if not check_value:
                 break
 
