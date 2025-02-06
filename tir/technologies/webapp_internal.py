@@ -6356,6 +6356,7 @@ class WebappInternal(Base):
         """
         current_value = ""
         try_counter = 1
+        check_value = False if field[9] else check_value
         endtime = time.time() + self.config.time_out
         while current_value != field_one and time.time() < endtime:
             selenium_column = self.select_grid_cell(column=field[0], grid_number=field[2], row=field[4], field_to_label=field_to_label)
@@ -6363,17 +6364,7 @@ class WebappInternal(Base):
             self.check_cell_status(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
             if selenium_input():
-                logger().info(f"Sending keys: {user_value}")
-                user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
-                current_layer = layer()
-                self.try_send_keys(selenium_input, user_value, try_counter)
-                self.wait_blocker()
-                if field[9]:
-                    self.SetButton('Ok')
-                    check_value = False
-                time.sleep(1)
-                if current_layer == layer():
-                    self.check_cell_status(field, layer(), element=selenium_input())
+                self.process_input_element(field, selenium_input, user_value, field_to_valtype, layer, try_counter)
                 current_value = selenium_column.text.strip()
                 current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
                 try_counter += 1
@@ -6381,6 +6372,20 @@ class WebappInternal(Base):
                     try_counter = 1
                 if not check_value:
                     break
+
+    def process_input_element(self, field, selenium_input, user_value, field_to_valtype, layer, try_counter):
+        logger().info(f"Sending keys: {user_value}")
+        user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
+        current_layer = layer()
+        self.try_send_keys(selenium_input, user_value, try_counter)
+        self.wait_blocker()
+
+        if field[9]:
+            self.SetButton('Ok')
+
+        time.sleep(1)
+        if current_layer == layer():
+            self.check_cell_status(field, layer(), element=selenium_input())
 
     def select_grid_cell(self, column, grid_number, row, field_to_label):
         """
