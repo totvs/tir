@@ -5690,7 +5690,7 @@ class WebappInternal(Base):
 
         return (mask != "" and mask is not None and (re.findall(reg, mask)))
 
-    def remove_mask(self, string, valtype=None, element=None):
+    def remove_mask(self, string, valtype=None):
         """
         [Internal]
 
@@ -5710,14 +5710,13 @@ class WebappInternal(Base):
         """
         if type(string) is str:
             if valtype == 'N':
-                return self.remove_numeric_mask(string, element)
+                return self.remove_numeric_mask(string)
             else:
                 return self.remove_non_numeric_mask(string)
         return string
 
-    def remove_numeric_mask(self, string, element):
-        if element:
-            return string.replace('\.', '')
+    def remove_numeric_mask(self, string):
+        return string.replace('.', '')
 
     def remove_non_numeric_mask(self, string):
         caracter = (r'[.\/+-]')
