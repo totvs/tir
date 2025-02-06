@@ -6358,7 +6358,7 @@ class WebappInternal(Base):
         try_counter = 1
         endtime = time.time() + self.config.time_out
         while current_value != field_one and time.time() < endtime:
-            selenium_column = self.select_grid_cell(field, field_to_label=field_to_label)
+            selenium_column = self.select_grid_cell(column=field[0], grid_number=field[2], row=field[4], field_to_label=field_to_label)
             layer = lambda: self.check_layers(layer_selector)
             self.check_cell_status(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
@@ -6382,7 +6382,7 @@ class WebappInternal(Base):
                 if not check_value:
                     break
 
-    def select_grid_cell(self, field, field_to_label):
+    def select_grid_cell(self, column, grid_number, row, field_to_label):
         """
         [Internal]
 
@@ -6391,16 +6391,16 @@ class WebappInternal(Base):
         :param field: The field that must be selected.
         """
         
-        grid_dataframe, grids = self.grid_dataframe(grid_number=field[2])
+        grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
         columns = [column.lower() for column in grid_dataframe.columns.tolist()]
         
-        grid = grids[field[2]] if isinstance(grids, list) else grids
+        grid = grids[grid_number] if isinstance(grids, list) else grids
 
         rows = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
                 
-        row = rows[field[4]] if field[4] is not None else rows[-1]
+        row = rows[row] if row is not None else rows[-1]
         columns_element = row.find_elements(By.CSS_SELECTOR, 'td')
-        column_index = self.get_column_index(field[0], columns, field_to_label)
+        column_index = self.get_column_index(column, columns, field_to_label)
         selenium_column = lambda: columns_element[column_index]            
 
         self.scroll_to_element(selenium_column())
