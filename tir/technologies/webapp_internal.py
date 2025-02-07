@@ -6395,28 +6395,45 @@ class WebappInternal(Base):
 
         :param field: The field that must be selected.
         """
-        
-        grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
-        columns = [column.lower() for column in grid_dataframe.columns.tolist()]
-        
-        grid = grids[grid_number] if isinstance(grids, list) else grids
+        try:
+            grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
 
-        rows = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
-                
-        row = rows[row] if row is not None else rows[-1]
-        columns_element = row.find_elements(By.CSS_SELECTOR, 'td')
-        column_index = self.get_column_index(column, columns, field_to_label)
-        selenium_column = lambda: columns_element[column_index]            
+            if not grid_dataframe or not grids:
+                self.log_error(f"Couldn't find grid")
+                return None
 
-        self.scroll_to_element(selenium_column())
-        self.click(selenium_column(),click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(selenium_column())
-        self.set_element_focus(selenium_column())
+            columns = [col.lower() for col in grid_dataframe.columns.tolist()]
+            grid = grids[grid_number] if isinstance(grids, list) else grids
 
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not self.selected_cell(selenium_column()):
-            self.select_cell(selenium_column()) 
+            rows = self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            if not rows:
+                self.log_error(f"Couldn't find rows in grid {grid_number}")
+                return None
 
-        return selenium_column()
+            row_element = rows[row] if row is not None else rows[-1]
+            columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
+            column_index = self.get_column_index(column, columns, field_to_label)
+            if column_index is None:
+                self.log_error(f"Couldn't find column '{column}' in grid {grid_number}")
+                return None
+
+            selenium_column = lambda: columns_element[column_index]
+
+            self.scroll_to_element(selenium_column())
+            if self.webapp_shadowroot():
+                self.click(selenium_column(), click_type=enum.ClickType.ACTIONCHAINS)
+            else:
+                self.click(selenium_column())
+            self.set_element_focus(selenium_column())
+
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not self.selected_cell(selenium_column()):
+                self.select_cell(selenium_column())
+
+            return selenium_column()
+        except Exception as e:
+            self.log_error(f"Couldn't find column '{column}' in grid {grid_number}. Error: {str(e)}")
+            return None
 
     def check_value_type(self, value, valtype):
         """
