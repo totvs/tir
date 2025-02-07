@@ -6399,7 +6399,7 @@ class WebappInternal(Base):
             grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
 
             if not grid_dataframe or not grids:
-                self.log_error(f"Couldn't find grid")
+                self.log_error("Couldn't find grid")
                 return None
 
             columns = [col.lower() for col in grid_dataframe.columns.tolist()]
