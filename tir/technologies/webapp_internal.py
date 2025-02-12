@@ -895,20 +895,20 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
-    def filling_group(self, shadow_root=None, container=None, branch=''):
+    def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
         [Internal]
         """
 
         click_type = 1
-        group_value = ''
-        if branch:
-            branch = branch
+        group_current_value = ''
+        if group_value:
+            group_value = group_value
         else:
-            branch = self.config.group
+            group_value = self.config.group
 
         endtime = time.time() + self.config.time_out / 2
-        while (time.time() < endtime and (group_value.strip() != branch.strip())):
+        while (time.time() < endtime and (group_current_value.strip() != group_value.strip())):
 
             group_element = self.group_element(shadow_root, container)
 
@@ -918,14 +918,14 @@ class WebappInternal(Base):
                 if self.config.poui_login:
                     self.switch_to_iframe()
 
-                logger().info(f'Filling Group: "{branch}"')
+                logger().info(f'Filling Group: "{group_value}"')
                 self.wait_blocker()
                 self.click(group(), click_type=enum.ClickType(click_type))
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(group(), branch)
-                group_value = self.get_web_value(group())
+                self.send_keys(group(), group_value)
+                group_current_value = self.get_web_value(group())
                 if self.config.poui_login:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
@@ -934,10 +934,10 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
-        if not branch:
+        if not self.config.group:
             group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container)))
             if group_content:
-                branch = group_content
+                self.config.group = group_content
             else:
                 self.log_error(f'Please, fill group parameter in Setup() method')
 
