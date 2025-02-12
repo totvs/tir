@@ -6255,9 +6255,7 @@ class WebappInternal(Base):
             else:
                 self.wait_blocker()
                 logger().info(f"Filling grid field: {field[0]}")
-                if len(field[6]) > 0:
-                    duplicate_fields=field[6]
-                    self.new_fill_grid(field, x3_dictionaries)
+                self.new_fill_grid(field, x3_dictionaries)
 
         for field in self.grid_check:
             logger().info(f"Checking grid field value: {field[1]}")
@@ -6295,20 +6293,18 @@ class WebappInternal(Base):
         Fills a grid field with a new value.
 
         :param field: The field that must be filled.
-            :column, value, grid_number, new, row, check_value, duplicate_fields, position, ignore_case, grid_memo_field
-            : 0        1      2            3    4      5            6                7          8            9
+
         :type field: list
         :param x3_dictionaries: A tuple containing dictionaries of field information.
+        :type x3_dictionaries: Tuple of dictionaries
         :type x3_dictionaries: Tuple of Dictionaries
 
         """
         field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
         field_one = self.get_field_one(field)
-        user_value = field[1]
         layer_selector = self.get_layer_selector(field)
-        check_value = field[5]
 
-        self.fill_grid_loop(field, field_to_label, field_to_valtype, field_one, user_value, layer_selector, check_value)
+        self.fill_grid_loop(field, field_to_label, field_to_valtype, field_one, layer_selector)
 
     def extract_field_info(self, x3_dictionaries):
         field_to_label = {}
@@ -6332,7 +6328,7 @@ class WebappInternal(Base):
             return "wa-multi-get" if field[9] else "wa-dialog"
         return ".tmodaldialog"
 
-    def fill_grid_loop(self, field, field_to_label, field_to_valtype, field_one, user_value, layer_selector, check_value):
+    def fill_grid_loop(self, field, field_to_label, field_to_valtype, field_one, layer_selector):
         """
         [Internal]
 
@@ -6354,19 +6350,30 @@ class WebappInternal(Base):
         :type check_value: bool
 
         """
+        column = field[0]
+        user_value = field[1]
+        grid_number = field[2]
+        new = field[3]
+        row = field[4]
+        check_value = field[5]
+        ignore_case = field[8]
+        grid_memo_field = field[9]
+        check_value = field[5]
+
         current_value = ""
         try_counter = 1
-        check_value = False if field[9] else check_value
+        check_value = False if grid_number else check_value
+
         endtime = time.time() + self.config.time_out
         while current_value != field_one and time.time() < endtime:
-            selenium_column = self.select_grid_cell(column=field[0], grid_number=field[2], row=field[4], field_to_label=field_to_label)
+            selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=field[7], duplicate_fields=field[6])
             layer = lambda: self.check_layers(layer_selector)
             self.check_cell_status(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
             if selenium_input():
                 self.process_input_element(field, selenium_input, user_value, field_to_valtype, layer, try_counter)
                 current_value = selenium_column.text.strip()
-                current_value = self.check_value_type(current_value, field_to_valtype[field[0]]).strip()
+                current_value = self.check_value_type(current_value, field_to_valtype[column]).strip()
                 try_counter += 1
                 if try_counter > 3:
                     try_counter = 1
@@ -6387,7 +6394,7 @@ class WebappInternal(Base):
         if current_layer == layer():
             self.check_cell_status(field, layer(), element=selenium_input())
 
-    def select_grid_cell(self, column, grid_number, row, field_to_label):
+    def select_grid_cell(self, column, grid_number, row, field_to_label, position, duplicate_fields=[]):
         """
         [Internal]
 
@@ -6412,7 +6419,7 @@ class WebappInternal(Base):
 
             row_element = rows[row] if row is not None else rows[-1]
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
-            column_index = self.get_column_index(column, columns, field_to_label)
+            column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
             if column_index is None:
                 self.log_error(f"Couldn't find column '{column}' in grid {grid_number}")
                 return None
@@ -6475,7 +6482,7 @@ class WebappInternal(Base):
             element = next(iter(self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))))
             return element if element else None
 
-    def get_column_index(self, field, columns, field_to_label):
+    def get_column_index(self, field, columns, field_to_label, position, duplicate_fields=[]):
         """
         [Internal]
 
@@ -6498,20 +6505,28 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> column = self.get_column_index("A1_COD", columns, field_to_label, duplicate_fields)
         """
+        position -= 1
+        columns_labels = None
 
         column_name = ""
 
-        if "_" in field:
+        try:
+            columns_labels = list(filter(lambda x: field_to_label[field].lower().strip() == x.lower().strip(), columns))
+        except KeyError:
+            self.log_error("Couldn't find column '" + field + "' in sx3 file. Try with the field label.")
 
-            try:
-                column_name = field_to_label[field].lower().strip()
-            except:
-                self.log_error("Couldn't find column '" + field + "' in sx3 file. Try with the field label.")
-        else:
-            column_name = field.lower().strip()
+        if columns_labels and len(columns_labels) > 1:
+            if len(duplicate_fields) > 1 and duplicate_fields[0] == field:
+                index = columns_labels[duplicate_fields[1]]
+            else:
+                index = columns_labels[position]
 
-        return columns.index(column_name)
-    
+        try:
+            return columns.index(index)
+        except ValueError:
+            self.log_error(f"Couldn't find column '{column_name}' in the provided columns list.")
+        return None
+        
     def check_cell_status(self, field, layer, element):
 
         current_layer = layer
