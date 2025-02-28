@@ -6361,16 +6361,14 @@ class WebappInternal(Base):
         column = field[0]
         user_value = field[1]
         grid_number = field[2]
-        new = field[3]
-        row = field[4]
+        row = field[4] if field[4] is not None else 1
+        row -= 1
         check_value = field[5]
-        ignore_case = field[8]
-        grid_memo_field = field[9]
-        check_value = field[5]
+        value_type = field_to_valtype[field[0]] if '_' in field[0] else None
 
         current_value = ""
         try_counter = 1
-        check_value = False if grid_number else check_value
+        # check_value = False if grid_number else check_value
 
         endtime = time.time() + self.config.time_out
         while current_value != field_one and time.time() < endtime:
@@ -6379,18 +6377,21 @@ class WebappInternal(Base):
             self.check_cell_status(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
             if selenium_input():
-                self.process_input_element(field, selenium_input, user_value, field_to_valtype, layer, try_counter)
+                if not value_type:
+                    container_input = self.get_input_container('wa-text-input')
+                    value_type = self.value_type(container_input.get('type'))
+                self.process_input_element(field, selenium_input, user_value, value_type, layer, try_counter)
                 current_value = selenium_column.text.strip()
-                current_value = self.check_value_type(current_value, field_to_valtype[column]).strip()
+                current_value = self.check_value_type(current_value, value_type).strip()
                 try_counter += 1
                 if try_counter > 3:
                     try_counter = 1
                 if not check_value:
                     break
 
-    def process_input_element(self, field, selenium_input, user_value, field_to_valtype, layer, try_counter):
+    def process_input_element(self, field, selenium_input, user_value, value_type, layer, try_counter):
         logger().info(f"Sending keys: {user_value}")
-        user_value = self.check_value_type(user_value, field_to_valtype[field[0]])
+        user_value = self.check_value_type(user_value, value_type)
         current_layer = layer()
         self.try_send_keys(selenium_input, user_value, try_counter)
         self.wait_blocker()
@@ -6410,6 +6411,7 @@ class WebappInternal(Base):
 
         :param field: The field that must be selected.
         """
+
         try:
             grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
 
@@ -6425,7 +6427,7 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find rows in grid {grid_number}")
                 return None
 
-            row_element = rows[row] if row is not None else rows[-1]
+            row_element = rows[row]
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
             column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
             if column_index is None:
@@ -6484,12 +6486,27 @@ class WebappInternal(Base):
         :return: The input element of the grid.
         :rtype: Selenium object
         """
-        container = self.get_current_container()
-        text_input = next(iter(container.select('wa-text-input')))
+        text_input = self.get_input_container(selector='wa-text-input')
         if text_input:
             element = next(iter(self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))))
             return element if element else None
 
+    def get_input_container(self, selector=None):
+        """
+        [Internal]
+
+        Returns the input container of the grid.
+
+        :param selector: The selector of the input container.
+        :type selector: str
+        
+        """
+
+        if selector:
+            container = self.get_current_container()
+            if container:
+                return next(iter(container.select(selector)))
+            
     def get_column_index(self, field=None, columns=None, field_to_label=None, position=1, duplicate_fields=[]):
         """
         [Internal]
@@ -6554,6 +6571,8 @@ class WebappInternal(Base):
                     break
 
             current_layer = self.check_layers('wa-dialog')
+
+            time.sleep(1)
 
     def select_cell(self, element):
 
@@ -6969,7 +6988,11 @@ class WebappInternal(Base):
         grid_number -= 1
         column = column.strip()
         x3_dictionaries = self.get_x3_dictionaries([column])
-        field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
+        field_to_label = None
+        field_to_valtype = None
+
+        if '_' in column:
+            field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
 
         logger().info(f"Clicking on grid cell: {column}")
 
