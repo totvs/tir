@@ -6361,8 +6361,7 @@ class WebappInternal(Base):
         column = field[0]
         user_value = field[1]
         grid_number = field[2]
-        row = field[4] if field[4] is not None else 1
-        row -= 1
+        row = field[4]
         check_value = field[5]
         value_type = field_to_valtype[field[0]] if '_' in field[0] else None
 
@@ -6412,6 +6411,8 @@ class WebappInternal(Base):
         :param field: The field that must be selected.
         """
 
+        row = row -1 if row else None
+
         try:
             grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
 
@@ -6427,7 +6428,8 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find rows in grid {grid_number}")
                 return None
 
-            row_element = rows[row]
+            selected_row = self.get_selected_row(rows)
+            row_element = rows[row] if row else selected_row if selected_row else (next(iter(rows), None))
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
             column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
             if column_index is None:
@@ -6984,7 +6986,6 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.ClickGridCell("Product", 1)
         """
-        row_number -= 1
         grid_number -= 1
         column = column.strip()
         x3_dictionaries = self.get_x3_dictionaries([column])
