@@ -906,7 +906,7 @@ class Webapp():
         """
         self.__webapp.WaitFieldValue(field, expected_value)
 
-    def WaitHide(self, string, timeout=None, throw_error = True):
+    def WaitHide(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait hide the elements.
 
@@ -920,9 +920,10 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.WaitHide("Processing")
         """
-        self.__webapp.WaitHide(string, timeout, throw_error=True)
+        self.__webapp.WaitHide(string, timeout, throw_error, match_case)
 
-    def WaitProcessing(self, string):
+
+    def WaitProcessing(self, string, match_case=False):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -934,9 +935,9 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
         """
-        self.__webapp.WaitProcessing(string)
+        self.__webapp.WaitProcessing(string, match_case)
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
         Search string that was sent and wait show the elements.
 
@@ -950,7 +951,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
         """
-        self.__webapp.WaitShow(string, timeout, throw_error=True)
+        self.__webapp.WaitShow(string, timeout, throw_error, match_case)
 
     def IfExists(self, string='', timeout=5):
         """
