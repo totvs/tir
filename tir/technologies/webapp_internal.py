@@ -5975,16 +5975,8 @@ class WebappInternal(Base):
         logger().debug(f"Setting focus on element {field}.")
 
         if grid_cell:
-            if self.webapp_shadowroot():
-                self.wait_element(term=field, scrap_type=enum.ScrapType.MIXED,
-                                  optional_term='.dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase,.dict-tgrid,.dict-brgetddb',
-                                  main_container="body")
-            else:
-                self.wait_element(field)
-
+        
             self.ClickGridCell(field, row_number)
-            time.sleep(1)
-            ActionChains(self.driver).key_down(Keys.ENTER).perform()
             time.sleep(1)
         else:
 
@@ -6373,7 +6365,7 @@ class WebappInternal(Base):
         while current_value != field_one and time.time() < endtime:
             selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=field[7], duplicate_fields=field[6])
             layer = lambda: self.check_layers(layer_selector)
-            self.check_cell_status(field, layer(), element=selenium_column)
+            self.open_cell(field, layer(), element=selenium_column)
             selenium_input = lambda: self.get_input_element()
             if selenium_input():
                 if not value_type:
@@ -6400,7 +6392,7 @@ class WebappInternal(Base):
 
         time.sleep(1)
         if current_layer == layer():
-            self.check_cell_status(field, layer(), element=selenium_input())
+            self.close_cell(field, layer(), element=selenium_input())
 
     def select_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -6410,8 +6402,6 @@ class WebappInternal(Base):
 
         :param field: The field that must be selected.
         """
-
-        row = row -1 if row else None
 
         try:
             grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
@@ -6429,7 +6419,13 @@ class WebappInternal(Base):
                 return None
 
             selected_row = self.get_selected_row(rows)
-            row_element = rows[row] if row else selected_row if selected_row else (next(iter(rows), None))
+            if row != None:
+                row_element = rows[row]
+            elif selected_row:
+                row_element = selected_row
+            else:
+                row_element = next(iter(rows), None)
+
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
             column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
             if column_index is None:
@@ -6555,7 +6551,7 @@ class WebappInternal(Base):
             self.log_error(f"Couldn't find column '{field}' in the provided columns list.")
         return None
         
-    def check_cell_status(self, field, layer, element):
+    def open_cell(self, field, layer, element):
 
         current_layer = layer
 
@@ -6563,11 +6559,8 @@ class WebappInternal(Base):
         while (time.time() < endtime and current_layer == layer):
             logger().debug('Trying open cell in grid!')
             if self.selected_cell(element):
-                try:
-                    ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
-                except WebDriverException:
-                    self.send_keys(element, Keys.ENTER)    
-                    self.wait_blocker()
+                
+                self.toggle_cell(element)
                 
                 if(field[1] == True):
                     break
@@ -6575,6 +6568,29 @@ class WebappInternal(Base):
             current_layer = self.check_layers('wa-dialog')
 
             time.sleep(1)
+
+    def close_cell(self, field, layer, element):
+
+        current_layer = layer
+
+        endtime = time.time() + self.config.time_out / 3
+        while (time.time() < endtime and current_layer == layer):
+            logger().debug('Trying close cell in grid!')
+            
+            self.toggle_cell(element)
+            
+            if(field[1] == True):
+                break
+
+            current_layer = self.check_layers('wa-dialog')
+
+            time.sleep(1)
+
+    def toggle_cell(self, element):
+        try:
+            ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+        except WebDriverException:
+            self.send_keys(element, Keys.ENTER)    
 
     def select_cell(self, element):
 
@@ -6591,7 +6607,7 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        return element.get_attribute('class') == 'selected-cell'
+        return element.get_attribute('class').lower().strip() == 'selected-cell'
 
     def get_selenium_column_element(self, xpath):
         """
@@ -6690,99 +6706,22 @@ class WebappInternal(Base):
 
         field_to_label = {}
 
+        column = field[0]
         grids = None
         columns = None
         headers = None
         rows = None
-        obscured_row = None
-        down_count = 0
+        grid_number = field[2]
+        row = field[4]
         success = False
 
-        endtime = time.time() + self.config.time_out
-        if x3_dictionaries:
-            field_to_label = x3_dictionaries[2]
+        if '_' in column:
+            x3_dictionaries = self.get_x3_dictionaries([column])
+            field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
 
-        while(self.element_exists(term=".tmodaldialog .ui-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=3, main_container="body") and time.time() < endtime):
-            if self.config.debug_log:
-                logger().debug("Waiting for container to be active")
-            time.sleep(1)
+        selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label)
 
-        while(time.time() < endtime and not success):
-
-            containers = self.web_scrap(term=".tmodaldialog, wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            container = next(iter(self.zindex_sort(containers, True)), None)
-
-            if container:
-                grid_term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados, .tgrid, .tcbrowse"
-
-                grids = container.select(grid_term)
-
-                if grids:
-                    if self.webapp_shadowroot():
-                        grids = self.filter_active_tabs(grids)
-
-                    grids = self.filter_displayed_elements(grids)
-
-            if grids:
-
-                headers = self.get_headers_from_grids(grids, column_name=field[1], position=position)
-                column_name = ""
-
-                if field[3] > len(grids):
-                    self.log_error(self.language.messages.grid_number_error)
-
-                if self.webapp_shadowroot():
-                    grid = self.soup_to_selenium(grids[field[3]])
-                    rows = self.find_shadow_element('tbody tr', grid)
-                else:
-                    rows = grids[field[3]].select("tbody tr")
-
-                if rows:
-                    if field[0] > len(rows) - 1:
-                        grid_lenght = self.lenght_grid_lines(grids[field[3]])
-                        if get_value:
-                            return ''
-                        elif grid_lenght > field[0]:
-                            obscured_row, down_count = self.get_obscure_gridline(grids[field[3]], field[0])
-                        else:
-                            self.log_error(self.language.messages.grid_line_error)
-
-                    field_element = next(iter(field), None)
-
-                    if field_element != None and len(rows) - 1 >= field_element or obscured_row:
-                        if self.webapp_shadowroot():
-                            if obscured_row:
-                                columns = obscured_row.find_elements_by_css_selector('td')
-                            else:
-                                columns = rows[field_element].find_elements_by_css_selector('td')
-                        else:
-                            columns = rows[field_element].select("td")
-
-                if columns and rows:
-
-                    if "_" in field[1]:
-                        column_name = field_to_label[field[1]].lower()
-                    else:
-                        column_name = field[1].lower()
-
-                    if column_name in headers[field[3]]:
-                        column_number = headers[field[3]][column_name]
-                        if self.grid_memo_field:
-                            text = self.check_grid_memo(columns[column_number])
-                            self.grid_memo_field = False
-                        else:
-                            text = columns[column_number].text.strip()
-                        if column_name == '' and text == '':
-                            icon = next(iter(columns[column_number].find_elements_by_tag_name('div')),None)
-                            if icon:
-                                text = self.get_status_color(icon)
-                        success = True
-
-                    if success and get_value and text:
-                        return text
-
-        for i in range(down_count):
-            ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+        column_name = selenium_column.text.strip()      
 
         field_name = f"({field[0]}, {column_name})"
         if field[5]:
@@ -6987,12 +6926,13 @@ class WebappInternal(Base):
         >>> oHelper.ClickGridCell("Product", 1)
         """
         grid_number -= 1
+        row_number -= 1
         column = column.strip()
-        x3_dictionaries = self.get_x3_dictionaries([column])
         field_to_label = None
         field_to_valtype = None
 
         if '_' in column:
+            x3_dictionaries = self.get_x3_dictionaries([column])
             field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
 
         logger().info(f"Clicking on grid cell: {column}")
