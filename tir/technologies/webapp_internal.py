@@ -6702,10 +6702,7 @@ class WebappInternal(Base):
         >>> self.check_grid([0, "A1_COD", "000001", 0], x3_dictionaries, False)
         """
         text = ""
-        column_name = ""
-
         field_to_label = {}
-
         column = field[0]
         grids = None
         columns = None
@@ -6721,16 +6718,16 @@ class WebappInternal(Base):
 
         selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label)
 
-        column_name = selenium_column.text.strip()      
+        text = selenium_column.text.strip()      
 
-        field_name = f"({field[0]}, {column_name})"
+        field_name = f"({field[0]}, {column})"
         if field[5]:
             self.log_result(field_name, field[2].lower(), text.lower())
         else:
             self.log_result(field_name, field[2], text)
         logger().info(f"Collected value: {text}")
         if not success:
-            self.check_grid_error(grids, headers, column_name, rows, columns, field)
+            self.check_grid_error(grids, headers, column, rows, columns, field)
 
 
     def get_status_color(self, sl_object):
