@@ -417,7 +417,7 @@ class WebappInternal(Base):
         self.config.poui_login = poui
         endtime = time.time() + 10
 
-        while time.time() - endtime and not wizard_screen:
+        while time.time() < endtime and not wizard_screen:
             wizard_screen = self.web_scrap(term=self.language.next, scrap_type=enum.ScrapType.TEXT,
                                      optional_term=".wa-button, wa-text-view",
                                      main_container=self.containers_selectors["AllContainers"],
