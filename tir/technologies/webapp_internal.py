@@ -121,6 +121,7 @@ class WebappInternal(Base):
         self.current_test_suite = self.log.get_file_name('testsuite')
         self.restart_tss = False
         self.last_wa_tab_view_input_id = None
+        self.mock_route = ''
 
         if not Base.driver:
             Base.driver = self.driver
@@ -11337,18 +11338,33 @@ class WebappInternal(Base):
 
             self.tmenu_screen = None
 
+
     def get_container_selector(self, selector):
 
         container = self.get_current_container()
 
         return container.select(selector)
 
+
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
-        """
-        Execute a query in a database
+        """Execute a query in a database
         """
         base_database = BaseDatabase()
         try:
             return base_database.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
         except Exception as e:
             self.log_error(f"Error in query_execute: {str(e)}")
+
+
+    def set_mock_route(self, c_route, c_sub_route, l_registry):
+        """Set up mock server ip on appserver.ini file
+        """
+        self.mock_route = c_route + c_sub_route
+        logger().info(f'"{self.mock_route}" route Was seted')
+
+
+    def get_route_mock(self):
+        """Set up mock server ip on appserver.ini file
+        """
+        url = self.config.server_mock + self.mock_route
+        return re.sub(r'(?<!:)//+', '/', url)
