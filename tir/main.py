@@ -1511,10 +1511,10 @@ class Webapp():
         return self.__webapp.set_schedule(schedule_status=False)
 
 
-    def SetRouteMock(self, c_route, c_sub_route="", l_registry=False):
+    def SetRouteMock(self, route, sub_route="", registry=False):
         """Set up mock server ip on appserver.ini file
         """
-        self.__webapp.set_mock_route(c_route, c_sub_route=c_sub_route, l_registry=l_registry)
+        self.__webapp.set_mock_route(route, sub_route=sub_route, registry=registry)
 
 
     def GetRouteMock(self):

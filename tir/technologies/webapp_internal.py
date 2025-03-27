@@ -11,6 +11,7 @@ import cv2
 import socket
 import pathlib
 import sys
+import configparser
 import tir.technologies.core.enumerations as enum
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
@@ -122,6 +123,9 @@ class WebappInternal(Base):
         self.restart_tss = False
         self.last_wa_tab_view_input_id = None
         self.mock_route = ''
+        self.registry_endpoint = ''
+        self.rac_endpoint = ''
+        self.platform_endpoint = ''
 
         if not Base.driver:
             Base.driver = self.driver
@@ -11356,11 +11360,48 @@ class WebappInternal(Base):
             self.log_error(f"Error in query_execute: {str(e)}")
 
 
-    def set_mock_route(self, c_route, c_sub_route, l_registry):
+    def set_mock_route(self, route, sub_route, registry):
         """Set up mock server ip on appserver.ini file
         """
-        self.mock_route = c_route + c_sub_route
+        self.mock_route = route + sub_route
         logger().info(f'"{self.mock_route}" route Was seted')
+
+        if  registry:
+
+            if self.config.appserver_folder:
+
+                config = configparser.ConfigParser()
+                appserver_file = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
+
+                config.read(appserver_file)
+
+                if config.has_section(self.config.environment):
+
+                    registry_endpoints = {
+                        "fw-tf-registry-endpoint": f"{self.get_route_mock()}/registry",
+                        "fw-tf-rac-endpoint": f"{self.get_route_mock()}",
+                        "fw-tf-platform-endpoint": f"{self.get_route_mock()}",
+                    }
+
+                    for key, value in registry_endpoints.items():
+                        if config.has_option(self.config.environment, key):
+                            if key == "fw-tf-registry-endpoint" and not self.registry_endpoint:
+                                self.registry_endpoint = value
+                            elif key == "fw-tf-rac-endpoint" and not self.rac_endpoint:
+                                self.rac_endpoint = value
+                            elif key == "fw-tf-platform-endpoint" and not self.platform_endpoint:
+                                self.platform_endpoint = value
+                        else:
+                            config.set(self.config.environment, key, value)
+
+                    with open(appserver_file, "w") as configfile:
+                        config.write(configfile)
+
+                    logger().info(f'Endpoints has been updated in .ini file!')
+
+
+            else:
+                logger().info(f"AppServerFolder key not defined. Please check config.json file")
 
 
     def get_route_mock(self):
