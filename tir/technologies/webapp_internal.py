@@ -11374,35 +11374,40 @@ class WebappInternal(Base):
                 config = configparser.ConfigParser()
                 appserver_file = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
 
-                config.read(appserver_file)
+                try:
+                    logger().info(f'Reading .ini file...')
+                    config.read(appserver_file)
 
-                if config.has_section(self.config.environment):
+                    if config.has_section(self.config.environment):
+                        registry_endpoints = {
+                            "fw-tf-registry-endpoint": f"{self.get_route_mock()}/registry",
+                            "fw-tf-rac-endpoint": f"{self.get_route_mock()}",
+                            "fw-tf-platform-endpoint": f"{self.get_route_mock()}",
+                        }
 
-                    registry_endpoints = {
-                        "fw-tf-registry-endpoint": f"{self.get_route_mock()}/registry",
-                        "fw-tf-rac-endpoint": f"{self.get_route_mock()}",
-                        "fw-tf-platform-endpoint": f"{self.get_route_mock()}",
-                    }
+                        for key, value in registry_endpoints.items():
+                            if config.has_option(self.config.environment, key):
+                                if not self.mock_counter:
+                                    if key == "fw-tf-registry-endpoint" and not self.registry_endpoint:
+                                        self.registry_endpoint = config.get(self.config.environment, key)
+                                    elif key == "fw-tf-rac-endpoint" and not self.rac_endpoint:
+                                        self.rac_endpoint = config.get(self.config.environment, key)
+                                    elif key == "fw-tf-platform-endpoint" and not self.platform_endpoint:
+                                        self.platform_endpoint = config.get(self.config.environment, key)
+                                config.set(self.config.environment, key, value)
+                            else:
+                                config.set(self.config.environment, key, value)
 
-                    for key, value in registry_endpoints.items():
-                        if config.has_option(self.config.environment, key):
-                            if not self.mock_counter:
-                                if key == "fw-tf-registry-endpoint" and not self.registry_endpoint:
-                                    self.registry_endpoint = config.get(self.config.environment, key)
-                                elif key == "fw-tf-rac-endpoint" and not self.rac_endpoint:
-                                    self.rac_endpoint = config.get(self.config.environment, key)
-                                elif key == "fw-tf-platform-endpoint" and not self.platform_endpoint:
-                                    self.platform_endpoint = config.get(self.config.environment, key)
-                            config.set(self.config.environment, key, value)
-                        else:
-                            config.set(self.config.environment, key, value)
+                        with open(appserver_file, "w", encoding="utf-8") as configfile:
+                            config.write(configfile)
+                            configfile.flush()
+                            configfile.close()
 
-                    with open(appserver_file, "w") as configfile:
-                        config.write(configfile)
+                        self.mock_counter += 1
 
-                    self.mock_counter += 1
-
-                    logger().info(f'Endpoints has been updated in .ini file!')
+                        logger().info(f'Endpoints has been updated in .ini file!')
+                except:
+                    logger().info(f"it wasn't possible to read .ini file. Please Check it")
 
 
             else:
@@ -11438,5 +11443,6 @@ class WebappInternal(Base):
 
             with open(appserver_file, "w") as configfile:
                 config.write(configfile)
+                configfile.close()
 
             logger().info(f'Endpoints has been restored in .ini file.')
