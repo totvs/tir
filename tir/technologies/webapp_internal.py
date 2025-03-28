@@ -11368,9 +11368,7 @@ class WebappInternal(Base):
         logger().info(f'"{self.mock_route}" route Was seted')
 
         if registry:
-
             if self.config.appserver_folder:
-
                 config = configparser.ConfigParser()
                 appserver_file = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
 
@@ -11427,7 +11425,7 @@ class WebappInternal(Base):
 
         if self.platform_endpoint:
             registry_endpoints = {
-                "fw-tf-registry-endpoint": f"{self.registry_endpoint}/registry",
+                "fw-tf-registry-endpoint": f"{self.registry_endpoint}",
                 "fw-tf-rac-endpoint": f"{self.rac_endpoint}",
                 "fw-tf-platform-endpoint": f"{self.platform_endpoint}",
             }
