@@ -122,6 +122,7 @@ class WebappInternal(Base):
         self.current_test_suite = self.log.get_file_name('testsuite')
         self.restart_tss = False
         self.last_wa_tab_view_input_id = None
+        self.mock_counter = 0
         self.mock_route = ''
         self.registry_endpoint = ''
         self.rac_endpoint = ''
@@ -11366,7 +11367,7 @@ class WebappInternal(Base):
         self.mock_route = route + sub_route
         logger().info(f'"{self.mock_route}" route Was seted')
 
-        if  registry:
+        if registry:
 
             if self.config.appserver_folder:
 
@@ -11385,17 +11386,21 @@ class WebappInternal(Base):
 
                     for key, value in registry_endpoints.items():
                         if config.has_option(self.config.environment, key):
-                            if key == "fw-tf-registry-endpoint" and not self.registry_endpoint:
-                                self.registry_endpoint = value
-                            elif key == "fw-tf-rac-endpoint" and not self.rac_endpoint:
-                                self.rac_endpoint = value
-                            elif key == "fw-tf-platform-endpoint" and not self.platform_endpoint:
-                                self.platform_endpoint = value
+                            if not self.mock_counter:
+                                if key == "fw-tf-registry-endpoint" and not self.registry_endpoint:
+                                    self.registry_endpoint = config.get(self.config.environment, key)
+                                elif key == "fw-tf-rac-endpoint" and not self.rac_endpoint:
+                                    self.rac_endpoint = config.get(self.config.environment, key)
+                                elif key == "fw-tf-platform-endpoint" and not self.platform_endpoint:
+                                    self.platform_endpoint = config.get(self.config.environment, key)
+                            config.set(self.config.environment, key, value)
                         else:
                             config.set(self.config.environment, key, value)
 
                     with open(appserver_file, "w") as configfile:
                         config.write(configfile)
+
+                    self.mock_counter += 1
 
                     logger().info(f'Endpoints has been updated in .ini file!')
 
@@ -11409,3 +11414,29 @@ class WebappInternal(Base):
         """
         url = self.config.server_mock + self.mock_route
         return re.sub(r'(?<!:)//+', '/', url)
+
+
+    def rest_resgistry(self):
+        """restore registry keys on appserver.ini file
+        """
+
+        if self.platform_endpoint:
+            registry_endpoints = {
+                "fw-tf-registry-endpoint": f"{self.registry_endpoint}/registry",
+                "fw-tf-rac-endpoint": f"{self.rac_endpoint}",
+                "fw-tf-platform-endpoint": f"{self.platform_endpoint}",
+            }
+
+            config = configparser.ConfigParser()
+            appserver_file = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
+
+            config.read(appserver_file)
+
+            for key, value in registry_endpoints.items():
+                if config.has_option(self.config.environment, key):
+                    config.set(self.config.environment, key, value)
+
+            with open(appserver_file, "w") as configfile:
+                config.write(configfile)
+
+            logger().info(f'Endpoints has been restored in .ini file.')

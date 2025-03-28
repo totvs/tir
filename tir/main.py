@@ -1524,6 +1524,13 @@ class Webapp():
         return self.__webapp.get_route_mock()
 
 
+    def RestRegistry(self):
+        """restore registry keys on appserver.ini file
+
+        """
+        return self.__webapp.rest_resgistry()
+
+
 class Apw():
 
     def __init__(self, config_path=""):
