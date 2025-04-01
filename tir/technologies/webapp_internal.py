@@ -5978,6 +5978,8 @@ class WebappInternal(Base):
         
             self.ClickGridCell(field, row_number)
             time.sleep(1)
+            ActionChains(self.driver).key_down(Keys.ENTER).perform()
+            time.sleep(1)
         else:
 
             label = False if re.match(r"\w+(_)", field) else True
@@ -6680,7 +6682,7 @@ class WebappInternal(Base):
 
         return ret
 
-    def check_grid(self, field, x3_dictionaries, get_value=False, position=0):
+    def check_grid(self, field, x3_dictionaries, position=0):
         """
         [Internal]
 
@@ -6690,9 +6692,7 @@ class WebappInternal(Base):
         :type field: List of values
         :param x3_dictionaries: Tuple of dictionaries containing information extracted from x3.
         :type x3_dictionaries: Tuple of dictionaries
-        :param get_value: Boolean value if check_grid should return its value.
-        :type get_value: bool
-
+        
         :return: If get_value flag is True, it will return the captured value.
         :return type: str
 
@@ -6703,32 +6703,25 @@ class WebappInternal(Base):
         """
         text = ""
         field_to_label = {}
-        column = field[0]
-        grids = None
-        columns = None
-        headers = None
-        rows = None
-        grid_number = field[2]
-        row = field[4]
-        success = False
+        column = field[1]
+        value = field[2]
+        grid_number = field[3]
+        row = field[0]
 
         if '_' in column:
             x3_dictionaries = self.get_x3_dictionaries([column])
-            field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
+            field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
-        selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label)
+        selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
 
         text = selenium_column.text.strip()      
 
         field_name = f"({field[0]}, {column})"
         if field[5]:
-            self.log_result(field_name, field[2].lower(), text.lower())
+            self.log_result(field_name, value.lower(), text.lower())
         else:
-            self.log_result(field_name, field[2], text)
+            self.log_result(field_name, value, text)
         logger().info(f"Collected value: {text}")
-        if not success:
-            self.check_grid_error(grids, headers, column, rows, columns, field)
-
 
     def get_status_color(self, sl_object):
         colors = {
@@ -6930,7 +6923,7 @@ class WebappInternal(Base):
 
         if '_' in column:
             x3_dictionaries = self.get_x3_dictionaries([column])
-            field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
+            field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
         logger().info(f"Clicking on grid cell: {column}")
 
@@ -7147,6 +7140,8 @@ class WebappInternal(Base):
         data = pd.read_csv(path, sep=';', encoding='latin-1', header=None, error_bad_lines=False,
                         index_col='Campo', names=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None], low_memory=False)
         df = pd.DataFrame(data, columns=['Campo', 'Tipo', 'Tamanho', 'Titulo', 'Titulo_Spa', 'Titulo_Eng', None])
+
+        df = df.copy()
         if not regex:
             df_filtered = df.query("Tipo=='C' or Tipo=='N' or Tipo=='D' ")
         else:
