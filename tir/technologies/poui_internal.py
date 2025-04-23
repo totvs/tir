@@ -3684,7 +3684,8 @@ class PouiInternal(Base):
         icon_classes = list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
                                      elements))
-        return icon_classes if icon_classes else None
+        if icon_classes:
+            return next(iter(icon_classes))
 
     def click_avatar(self, position):
         """
