@@ -3681,9 +3681,10 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        return next(iter(list(filter(lambda x: any(
+        icon_classes = list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
-                                     elements))))
+                                     elements))
+        return icon_classes if icon_classes else None
 
     def click_avatar(self, position):
         """
