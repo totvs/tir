@@ -2444,7 +2444,8 @@ class PouiInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
