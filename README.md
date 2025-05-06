@@ -88,6 +88,37 @@ We have a repository with different samples of TIR scripts:
 
 [TIR Script Samples](https://github.com/totvs/tir-script-samples)
 
+
+# Utilizando TIR com ambiente virtual 
+
+## Conhecendo o conceito
+Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtualenv**. Essa é uma ferramenta usada em Python para criar ambientes **isolados**. Cada ambiente virtual tem seus próprios diretórios de instalação de pacotes, separados do ambiente **global** do sistema. Isso é útil para gerenciar dependências de **diferentes** projetos/versões sem conflito.
+
+## Configurando com VScode
+### Instalando a biblioteca e Criando o ambiente
+1. No terminal, execute o comando `pip install virtualenv` para instalar a biblioteca de ambiente virtual.
+
+2. Ainda no terminal, execute o comando `python -m virtualenv venv` para criação de um ambiente no diretório atual.
+>**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de instalação do executável e referencie ele no comando
+Exemplo: `C:/caminho/python/python -m virtualenv venv` 
+>>Por padrao a pasta de instalaçao do Pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
+3. Será adicionada uma pasta (venv) no diretório atual , com isso o ambiente estará pronto para utilização.
+
+### Configurando o Vscode 
+Após a configuração do ambiente virtual iremos definir o interpretador do VScode para utiliza-lo
+1. Com o VScode aberto na pasta do projeto, pressione `Ctrl + Shift + P` e pesquise pela opção `>Python: Select Interpreter`
+
+2. Na lista de interpretadores reconhecidos no sistema, selecione o interpretador anteriormente criado, caminho padrão é:  **_./venv/Scripts/python.exe_** . Ao selecionar, o interpretador padrao utilizado se tornara esse, caso deseje utilizar outro é só seleciona-lo na lista.
+
+3. Abra um novo terminal no Vscode indo em _"Terminal"_ e _"Novo terminal"_
+
+4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files/source/img/terminal_venv.png)
+
+5. Agora rode o comando para instalação do TIR! `pip  install  tir_framework`
+
+7. Pronto! Agora seu tir esta pronto para executar em um ambiente isolado!.
+
+
 ## Contact
 
 [Gitter](https://gitter.im/totvs-tir/General)
