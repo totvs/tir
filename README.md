@@ -114,7 +114,7 @@ Após a configuração do ambiente virtual iremos definir o interpretador do VSc
 
 4. Ao abrir o terminal veja se está inicializada a venv na linha de comando. ![venv](doc_files/source/img/terminal_venv.png)
 
-5. Agora rode o comando para instalação do TIR! `pip  install  tir_framework`
+5. Agora rode o comando para instalação do TIR! `pip install tir_framework --no-cache-dir --force-reinstall --upgrade`
 
 7. Pronto! Agora seu tir esta pronto para executar em um ambiente isolado!.
 
