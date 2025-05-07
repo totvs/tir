@@ -103,7 +103,7 @@ Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtuale
 >**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de **instalação do executável** e referencie ele no comando
 Exemplo: 
 `"C:/caminho/python/pythonXY" -m pip install virtualenv` 
-Em seguida
+>Em seguida
 `"C:/caminho/python/pythonXY" -m virtualenv venv` 
 >>Por padrao a pasta de instalaçao do Pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
 3. Será adicionada uma pasta (venv) no diretório atual , com isso o ambiente estará pronto para utilização.
