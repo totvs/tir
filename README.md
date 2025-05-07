@@ -97,16 +97,30 @@ Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtuale
 
 ## Configurando com VScode
 ### Instalando a biblioteca e Criando o ambiente
-1. No terminal, execute o comando `pip install virtualenv` para instalar a biblioteca de ambiente virtual.
 
-2. Ainda no terminal, execute o comando `python -m virtualenv venv` para criação de um ambiente no diretório atual.
->**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de **instalação do executável** e referencie ele no comando
-Exemplo: 
-`"C:/caminho/python/pythonXY" -m pip install virtualenv` 
->Em seguida
-`"C:/caminho/python/pythonXY" -m virtualenv venv` 
->>Por padrao a pasta de instalaçao do Pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
-3. Será adicionada uma pasta (venv) no diretório atual , com isso o ambiente estará pronto para utilização.
+1. **Abra o terminal** (Prompt de Comando, PowerShell ou terminal do VS Code).
+2. **Instale o Virtualenv** com o seguinte comando:
+
+3.  **Crie o ambiente virtual** no diretório atual:
+```bash
+
+python -m virtualenv venv
+
+```
+>  **Observação:**
+> Se você tiver mais de uma versão do Python instalada, pode ser necessário especificar o caminho do executável desejado.
+> Exemplo:
+>
+> ```bash
+>  "C:/caminho/python/pythonXY" -m pip install virtualenv
+>  "C:/caminho/python/pythonXY" -m virtualenv venv
+> ```
+>
+> Por padrão, o Python costuma ser instalado em:
+>  `C:\Users\[seu_usuario]\AppData\Local\Programs\Python\Python[versão]`
+4. Após executar o comando, uma pasta chamada `venv` será criada no diretório atual.
+
+Esse é o seu ambiente virtual, pronto para uso!
 
 ### Configurando o Vscode 
 Após a configuração do ambiente virtual iremos definir o interpretador do VScode para utiliza-lo
