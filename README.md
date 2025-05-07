@@ -98,7 +98,7 @@ Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtuale
 ## Configurando com VScode
 ### Instalando a biblioteca e Criando o ambiente
 
-1. **Abra o terminal** (Prompt de Comando, PowerShell ou terminal do VS Code).
+1. **Abra o terminal** (Prompt de Comando ou terminal do VS Code).
 2. **Instale o Virtualenv** com o seguinte comando:
 
 3.  **Crie o ambiente virtual** no diretório atual:
