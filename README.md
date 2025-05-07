@@ -1,3 +1,4 @@
+
 # TIR - Test Interface Robot
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/totvs/tir)
 
@@ -99,7 +100,7 @@ Para execução do TIR em ambiente virtual, utilizaremos a biblioteca **Virtuale
 1. No terminal, execute o comando `pip install virtualenv` para instalar a biblioteca de ambiente virtual.
 
 2. Ainda no terminal, execute o comando `python -m virtualenv venv` para criação de um ambiente no diretório atual.
->**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de instalação do executável e referencie ele no comando
+>**Nota:** Caso você possua mais de uma versão de Python instalada pode ser necessário especificar a versão desejada. Verifique o caminho de **instalação do executável** e referencie ele no comando
 Exemplo: `"C:/caminho/python/python" -m virtualenv venv` 
 >>Por padrao a pasta de instalaçao do Pyhon fica em **C:\Users\[user]\AppData\Local\Programs\Python\Python[version]**.
 3. Será adicionada uma pasta (venv) no diretório atual , com isso o ambiente estará pronto para utilização.
