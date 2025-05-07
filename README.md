@@ -112,8 +112,8 @@ python -m virtualenv venv
 > Exemplo:
 >
 > ```bash
->  "C:/caminho/python/pythonXY" -m pip install virtualenv
->  "C:/caminho/python/pythonXY" -m virtualenv venv
+>  "C:/caminho/python/pythonXY/python.exe" -m pip install virtualenv
+>  "C:/caminho/python/pythonXY/python.exe" -m virtualenv venv
 > ```
 >
 > Por padrão, o Python costuma ser instalado em:
