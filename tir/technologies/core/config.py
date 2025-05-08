@@ -114,6 +114,7 @@ class ConfigLoader:
             self.branch = ""
             self.module = ""
             self.routine_type = ""
+            self.server_mock  = str(data["ServerMock"]) if "ServerMock" in data else ""
 
     def check_keys(self, json_data):
         valid_keys = [
@@ -177,7 +178,8 @@ class ConfigLoader:
         "ChromeDriverAutoInstall",
         "SSLChromeInstallDisable",
         "DataDelimiter",
-        "ProcedureMenu"
+        "ProcedureMenu",
+        "ServerMock"
     ]
         keys_json = set(json_data.keys())
         wrong_keys = keys_json - set(valid_keys)

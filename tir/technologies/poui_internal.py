@@ -3551,7 +3551,6 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not checked:
-
             table = self.return_table(selector=selector, table_number=table_number)
 
             tr = table.select('tbody > tr')
@@ -3760,9 +3759,12 @@ class PouiInternal(Base):
     def click_checkbox(self, label):
         """Click on the POUI Checkbox.
         https://po-ui.io/documentation/po-checkbox
+
         :param label:
         :type label: str
+
         Usage:
+
         >>> # Call the method:
         >>> oHelper.ClickCheckBox(label="CheckBox label")
         """
@@ -3786,6 +3788,7 @@ class PouiInternal(Base):
 
         if not container_element:
             self.log_error(f"CheckBox '{label}' doesn't found!")
+
 
     def click_combo(self, field, value, position):
         '''Select a value for list combo inputs.
