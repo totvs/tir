@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 import socket
 import inspect
+import sys
 
 filename = None
 folder = None
@@ -49,8 +50,8 @@ def create_folder():
             folder_path = Path(config.log_folder)
             os.makedirs(Path(folder_path))
         else:
-            path = Path("Log", socket.gethostname())
-            os.makedirs(Path("Log", socket.gethostname()))
+            path = Path("/tmp/Log", socket.gethostname()) if sys.platform.startswith('linux') else Path("Log", socket.gethostname())
+            os.makedirs(path)
     except Exception as e:
         error = e
 
