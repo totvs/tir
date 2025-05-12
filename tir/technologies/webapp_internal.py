@@ -406,24 +406,37 @@ class WebappInternal(Base):
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
 
+        wizard_screen = []
+
         if not environment:
             environment = self.config.environment
 
+        if self.config.coverage:
+            self.open_url_coverage(url=self.config.url, initial_program=initial_program,
+                                   environment=environment)
 
         self.config.poui_login = poui
+        endtime = time.time() + 10
 
-        self.filling_initial_program(initial_program)
-        self.filling_server_environment(environment)
+        while time.time() < endtime and not wizard_screen:
+            wizard_screen = self.web_scrap(term=self.language.next, scrap_type=enum.ScrapType.TEXT,
+                                     optional_term=".wa-button, wa-text-view",
+                                     main_container=self.containers_selectors["AllContainers"],
+                                     check_help=False, check_error=False)
 
-        if self.webapp_shadowroot():
-            self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
-            parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
-            buttons = self.find_shadow_element('wa-button', parameters_screen)
-            button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
-        else:
-            button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
+        if not wizard_screen:
+            self.filling_initial_program(initial_program)
+            self.filling_server_environment(environment)
 
-        self.click(button)
+            if self.webapp_shadowroot():
+                self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
+                parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
+                buttons = self.find_shadow_element('wa-button', parameters_screen)
+                button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
+            else:
+                button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
+
+            self.click(button)
 
     def filling_initial_program(self, initial_program):
         """
@@ -883,7 +896,7 @@ class WebappInternal(Base):
                             break
 
                         if not self.is_active_element(date()) and click_type == 3:
-                            self.filling_group(shadow_root, container)
+                            self.filling_group(shadow_root, container, group_value)
 
                 click_type += 1
                 if click_type > 3:
