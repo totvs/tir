@@ -2444,7 +2444,8 @@ class PouiInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
@@ -3681,9 +3682,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        return next(iter(list(filter(lambda x: any(
+        icon_classes = list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
-                                     elements))))
+                                     elements))
+        if icon_classes:
+            return next(iter(icon_classes))
 
     def click_avatar(self, position):
         """
