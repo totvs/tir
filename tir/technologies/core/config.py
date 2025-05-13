@@ -116,6 +116,7 @@ class ConfigLoader:
             self.routine_type = ""
             self.server_mock  = str(data["ServerMock"]) if "ServerMock" in data else ""
 
+
     def check_keys(self, json_data):
         valid_keys = [
         "ipExec",
