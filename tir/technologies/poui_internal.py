@@ -2444,7 +2444,8 @@ class PouiInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
@@ -3551,7 +3552,6 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not checked:
-
             table = self.return_table(selector=selector, table_number=table_number)
 
             tr = table.select('tbody > tr')
@@ -3682,9 +3682,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        return next(iter(list(filter(lambda x: any(
+        icon_classes = list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
-                                     elements))))
+                                     elements))
+        if icon_classes:
+            return next(iter(icon_classes))
 
     def click_avatar(self, position):
         """
@@ -3760,9 +3762,12 @@ class PouiInternal(Base):
     def click_checkbox(self, label):
         """Click on the POUI Checkbox.
         https://po-ui.io/documentation/po-checkbox
+
         :param label:
         :type label: str
+
         Usage:
+
         >>> # Call the method:
         >>> oHelper.ClickCheckBox(label="CheckBox label")
         """
@@ -3786,6 +3791,7 @@ class PouiInternal(Base):
 
         if not container_element:
             self.log_error(f"CheckBox '{label}' doesn't found!")
+
 
     def click_combo(self, field, value, position):
         '''Select a value for list combo inputs.

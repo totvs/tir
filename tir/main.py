@@ -1486,6 +1486,7 @@ class Webapp():
         """
         return self.__webapp.replace_slash(path)
 
+
     def CurrentWorkDirectory(self):
 
         """
@@ -1495,17 +1496,40 @@ class Webapp():
 
         return os.chmod()
 
+
     def StartSchedule(self):
         """Access de Schedule settings and Start all itens
 
         """
         return self.__webapp.set_schedule(schedule_status=True)
 
+
     def StopSchedule(self):
         """Access de Schedule settings and Stop all itens
 
         """
         return self.__webapp.set_schedule(schedule_status=False)
+
+
+    def SetRouteMock(self, route, sub_route="", registry=False):
+        """Set up mock server ip on appserver.ini file
+        """
+        self.__webapp.set_mock_route(route, sub_route=sub_route, registry=registry)
+
+
+    def GetRouteMock(self):
+        """Set up mock server ip on appserver.ini file
+
+        """
+        return self.__webapp.get_route_mock()
+
+
+    def RestRegistry(self):
+        """restore registry keys on appserver.ini file
+
+        """
+        return self.__webapp.rest_resgistry()
+
 
 class Apw():
 
@@ -1957,9 +1981,12 @@ class Poui():
         """
         ClickChecKBox to check or uncheck box selectors
         https://po-ui.io/documentation/po-checkbox
+
         :param label: The CheckBox label
         :type label: str
+
         Usage:
+
         >>> # Calling the method:
         >>> oHelper.ClickCheckBox("Processing")
         """

@@ -125,7 +125,7 @@ class Log:
                     path = Path(self.folder, self.station+"_v6")
                     os.makedirs(path)
                 else:
-                    path = Path("Log", self.station)
+                    path = Path("/tmp/Log", self.station) if sys.platform.lower() == "linux" else Path("Log", self.station)
                     os.makedirs(path)
             except OSError:
                 pass
@@ -424,7 +424,7 @@ class Log:
                 path = Path(self.folder, "new_log")
                 os.makedirs(path)
             else:
-                path = Path("Log")
+                path = Path("/tmp/Log") if sys.platform.lower() == "linux" else Path("Log")
                 os.makedirs(path)
         except OSError:
             pass
@@ -503,8 +503,8 @@ class Log:
                 path = Path(folder_path, screenshot_file)
                 os.makedirs(Path(folder_path))
             else:
-                path = Path("Log", self.station, screenshot_file)
-                os.makedirs(Path("Log", self.station))
+                path = Path("/tmp/Log", self.station, screenshot_file) if sys.platform.lower() == "linux" else Path("Log", self.station, screenshot_file)
+                os.makedirs(path)
         except OSError:
             pass
 
