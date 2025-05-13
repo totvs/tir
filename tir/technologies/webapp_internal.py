@@ -128,6 +128,7 @@ class WebappInternal(Base):
         self.rac_endpoint = ''
         self.platform_endpoint = ''
 
+
         if not Base.driver:
             Base.driver = self.driver
 
@@ -843,7 +844,8 @@ class WebappInternal(Base):
         click_type = 1
         send_type = 1
         base_date_value = ''
-        is_active_element = None
+        group_bs = None
+
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
 
@@ -856,6 +858,11 @@ class WebappInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 main_container='body',
                                                 optional_term='wa-text-input')
+                    if not group_bs:
+                        group_bs = self.group_element(shadow_root, container)
+                        if group_bs:
+                            group_element = lambda: self.soup_to_selenium(group_bs)
+                            group_value = self.get_web_value(group_element())
                 else:
                     base_dates = self.web_scrap(term="[name='dDataBase'] input, [name='__dInfoData'] input",
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, label=True,
@@ -907,15 +914,20 @@ class WebappInternal(Base):
                 if click_type > 3:
                     click_type = 1
 
-    def filling_group(self, shadow_root=None, container=None):
+    def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
         [Internal]
         """
 
         click_type = 1
-        group_value = ''
+        group_current_value = ''
+        if group_value:
+            group_value = group_value
+        else:
+            group_value = self.config.group
+
         endtime = time.time() + self.config.time_out / 2
-        while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
+        while (time.time() < endtime and (group_current_value.strip() != group_value.strip())):
 
             group_element = self.group_element(shadow_root, container)
 
@@ -925,14 +937,14 @@ class WebappInternal(Base):
                 if self.config.poui_login:
                     self.switch_to_iframe()
 
-                logger().info(f'Filling Group: "{self.config.group}"')
+                logger().info(f'Filling Group: "{group_value}"')
                 self.wait_blocker()
                 self.click(group(), click_type=enum.ClickType(click_type))
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
                 ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
                     Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(group(), self.config.group)
-                group_value = self.get_web_value(group())
+                self.send_keys(group(), group_value)
+                group_current_value = self.get_web_value(group())
                 if self.config.poui_login:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
@@ -1250,7 +1262,7 @@ class WebappInternal(Base):
                         self.click(selenium_close_button())
                     except:
                         pass
-
+    
     def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED, check_error=True):
         """
         [Internal]
@@ -11432,3 +11444,4 @@ class WebappInternal(Base):
                 configfile.close()
 
             logger().info(f'Endpoints has been restored in .ini file.')
+

@@ -51,6 +51,7 @@ setup(
         'opencv-python==4.9.0.80',
         'webdriver-manager==4.0.2'
     ],
+    python_requires='==3.12.*',
     packages=find_packages(),
     scripts=[],
     name='tir_framework',

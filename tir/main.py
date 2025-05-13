@@ -1981,9 +1981,12 @@ class Poui():
         """
         ClickChecKBox to check or uncheck box selectors
         https://po-ui.io/documentation/po-checkbox
+
         :param label: The CheckBox label
         :type label: str
+
         Usage:
+
         >>> # Calling the method:
         >>> oHelper.ClickCheckBox("Processing")
         """
