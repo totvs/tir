@@ -220,7 +220,7 @@ class WebappInternal(Base):
         self.SetValue('cPass', self.config.password, name_attr = True)
         self.SetButton("Entrar")
 
-    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
+    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True, sso=False):
         """
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
@@ -286,19 +286,20 @@ class WebappInternal(Base):
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
-            self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
+            if sso:
+                self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
-            endtime = time.time() + self.config.time_out
-            if not self.config.poui_login:
-                if self.webapp_shadowroot():
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container="body", optional_term='wa-text-view'))):
-                        self.update_password()
-                else:
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container=".twindow", optional_term=".tsay"))):
+                endtime = time.time() + self.config.time_out
+                if not self.config.poui_login:
+                    if self.webapp_shadowroot():
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container="body", optional_term='wa-text-view'))):
+                            self.update_password()
+                    else:
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container=".twindow", optional_term=".tsay"))):
                         self.update_password()
 
             self.environment_screen()
