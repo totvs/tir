@@ -830,7 +830,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
-        self.__webapp.Setup(initial_program, date, group, branch, module, sso)
+        self.__webapp.Setup(initial_program, date, group, branch, module, sso=sso)
 
     def SetTIRConfig(self, config_name, value):
         """
