@@ -300,7 +300,7 @@ class WebappInternal(Base):
                         while (time.time() < endtime and (
                         not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
                                                 main_container=".twindow", optional_term=".tsay"))):
-                        self.update_password()
+                            self.update_password()
 
             self.environment_screen()
 
