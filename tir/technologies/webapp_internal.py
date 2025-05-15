@@ -287,7 +287,6 @@ class WebappInternal(Base):
 
                 self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
-
                 self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
                 endtime = time.time() + self.config.time_out
