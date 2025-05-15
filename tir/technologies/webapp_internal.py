@@ -281,12 +281,13 @@ class WebappInternal(Base):
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
-            if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
-
-            self.log.webapp_version = self.driver.execute_script("return app.VERSION")
-
             if not sso:
+                if not self.config.skip_environment and not self.config.coverage:
+                    self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
+
+                self.log.webapp_version = self.driver.execute_script("return app.VERSION")
+
+
                 self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
                 endtime = time.time() + self.config.time_out
