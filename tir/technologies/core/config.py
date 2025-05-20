@@ -115,7 +115,7 @@ class ConfigLoader:
             self.module = ""
             self.routine_type = ""
             self.api_url = str(data["APIURL"]) if "APIURL" in data else ""
-            self.api_upl_ip = str(data["APIURLIP"]) if "APIURLIP" in data else ""
+            self.api_url_ip = str(data["APIURLIP"]) if "APIURLIP" in data else ""
             self.api_json_path = str(data["APIJSONPATH"]) if "APIJSONPATH" in data else ""
 
     def check_keys(self, json_data):
