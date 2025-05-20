@@ -8196,7 +8196,7 @@ class WebappInternal(Base):
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -8811,7 +8811,7 @@ class WebappInternal(Base):
             self.log.new_line(False, self.message)
 
         if self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         self.errors = []
 
@@ -9653,7 +9653,7 @@ class WebappInternal(Base):
                 self.SetButton(self.language.yes)
 
         if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):

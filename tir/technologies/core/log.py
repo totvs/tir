@@ -68,6 +68,7 @@ class Log:
         self.hash_exec = ""
         self.test_case = self.list_of_testcases()
         self.finish_testcase = []
+        self.testcase_generate_log = []
 
     def generate_header(self):
         """
@@ -175,8 +176,7 @@ class Log:
 
     def has_csv_condition(self):
 
-        return ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (
-                    self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
+        return (self.get_testcase_stack() not in self.testcase_generate_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()
 
     def set_seconds(self, initial_time):
         """
@@ -441,6 +441,90 @@ class Log:
         except Exception as error:
             logger().debug(f"Fail in create json file in: {Path(path, log_file)}: Error: {str(error)}")
             pass
+
+    def generate_log(self):
+        total_cts = self.table_rows[1][5]
+        passed = self.table_rows[1][6]
+        failed = self.table_rows[1][7]
+        printable_message = self.table_rows[1][11]
+        sequence = uuid.uuid4().hex[:6]
+        area = self.config.num_exec if self.config.num_exec else "Desenvolvimento"
+        minutes = self.table_rows[1][8] / 60
+
+        log_data = {
+            "cLogDtExec": self.suite_datetime,
+            "cLogNomUsr": self.user,
+            "cLogNomEst": self.station,
+            "cLogProgra": self.program,
+            "cLogDtProg": self.program_date,
+            "cLogHrProg": self.suite_datetime.split(" ")[1],
+            "nLogCtsOk": passed,
+            "nLogCtsNok": failed,
+            "nLogCtsSeg": self.seconds,
+            "cLogVersao": self.version,
+            "cLogReleas": self.release,
+            "nLogCtsErr": printable_message,
+            "cLogBancod": self.database,
+            "cLogIdenti": self.issue,
+            "cLogIdExec": self.execution_id,
+            "cLogPais": self.country,
+            "cLogTool": self.test_type,
+            "cLogSequen": sequence,
+            "nLogCtsTot": total_cts,
+            "cLogDtExea": self.suite_datetime.split(" ")[0],
+            "cLogHrExea": self.suite_datetime.split(" ")[1],
+            "cLogArea": area,
+            "cLogMnExec": minutes
+        }
+
+        api_url = "https://log.backend.engpro.totvs.com.br"
+        api_url_ip = "http://10.171.80.117:5901"
+        path_folder = "C:/logs"
+        self.table_rows.pop() # Remove the last row which is empty
+        self.testcase_generate_log.append(self.get_testcase_stack()) 
+
+        self.send_log_with_retries(log_data, api_url, api_url_ip, path_folder)
+
+    def send_log_with_retries(self, log_data, api_url, api_url_ip, path_folder):
+        headers = {"Content-Type": "application/json; charset=utf-8"}
+        body = json.dumps(log_data)
+        timeout_dns = 600
+        timeout_ip = 1200
+        max_retries = 4
+        log_file_name = None
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Primeiras tentativas usando DNS
+                if attempt <= 2:
+                    response = requests.post(f"{api_url}/createlog/", data=body, headers=headers, timeout=timeout_dns)
+                # Tentativas adicionais usando IP
+                else:
+                    response = requests.post(f"{api_url_ip}/createlog/", data=body, headers=headers, timeout=timeout_ip)
+
+                if response.status_code == 200:
+                    logger().debug(f"[FwSendLog]: Log enviado com sucesso na tentativa {attempt}.")
+                    return
+                elif response.status_code == 400:
+                    logger().debug("[FwSendLog]: Erro 400 - Limpando caracteres especiais do JSON.")
+                    body = body.encode("ascii", "ignore").decode()
+
+            except requests.RequestException as e:
+                logger().debug(f"[FwSendLog]: Erro ao enviar log na tentativa {attempt}: {e}")
+
+            time.sleep(3)  # Aguarda 3 segundos antes da próxima tentativa
+
+        # Caso todas as tentativas falhem
+        logger().debug("[FwSendLog]: Não foi possível enviar o log após todas as tentativas.")
+        log_file_name = f"{int(time.time())}.json"
+        log_file_path = f"{path_folder}/{log_file_name}"
+
+        try:
+            with open(log_file_path, "w", encoding="utf-8") as log_file:
+                log_file.write(body)
+            logger().debug(f"[FwSendLog]: Log salvo localmente em {log_file_path}.")
+        except IOError as e:
+            logger().debug(f"[FwSendLog]: Falha ao salvar o log localmente: {e}")
 
     def ident_test(self):
         """
