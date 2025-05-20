@@ -477,9 +477,10 @@ class Log:
             "cLogMnExec": minutes
         }
 
-        api_url = "https://log.backend.engpro.totvs.com.br"
-        api_url_ip = "http://10.171.80.117:5901"
-        path_folder = "C:/logs"
+        api_url = self.config.api_url
+        api_url_ip = self.config.api_url_ip
+        path_folder = self.config.api_json_path
+        
         self.table_rows.pop() # Remove the last row which is empty
         self.testcase_generate_log.append(self.get_testcase_stack()) 
 
