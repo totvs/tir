@@ -180,7 +180,10 @@ class ConfigLoader:
         "ChromeDriverAutoInstall",
         "SSLChromeInstallDisable",
         "DataDelimiter",
-        "ProcedureMenu"
+        "ProcedureMenu",
+        "APIURL",
+        "APIURLIP",
+        "APIJSONPATH"
     ]
         keys_json = set(json_data.keys())
         wrong_keys = keys_json - set(valid_keys)
