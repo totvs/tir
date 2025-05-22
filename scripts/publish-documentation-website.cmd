@@ -5,7 +5,7 @@ echo Publishing TIR Documentation Website...
 echo -------------------------------------
 
 git checkout .
-git checkout master
+git checkout main
 
 cd ..
 cd doc_files
