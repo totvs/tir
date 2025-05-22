@@ -1959,11 +1959,11 @@ class PouiInternal(Base):
         Call switch_to_active_element method
         """
         try:
-            self.driver.switch_to_active_element()
+            return self.driver.switch_to.active_element
         except NoSuchElementException:
             return None
         except Exception as e:
-            logger().exception(f"Warning switch_to_active_element() exception : {str(e)}")
+            logger().debug(f"Warning switch_to.active_element exception : {str(e)}")
             return None
 
     def wait_element(self, term, scrap_type=enum.ScrapType.CSS_SELECTOR, presence=True, position=0, optional_term=None, main_container="body", check_error=True):
@@ -2299,12 +2299,15 @@ class PouiInternal(Base):
         if self.config.new_log:
             self.execution_flow()
 
-        if self.config.screenshot:
+        proceed_action = lambda: (
+                    (stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3))
+
+        if self.config.screenshot and proceed_action() and stack_item not in self.log.test_case_log and self.driver:
             self.log.take_screenshot_log(self.driver, stack_item, test_number)
 
-        if new_log_line:
+        if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
-        if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
+        if proceed_action() and self.log.has_csv_condition():
             self.log.save_file()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
@@ -2444,7 +2447,8 @@ class PouiInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        if self.log.has_csv_condition():
+            self.log.save_file()
 
         self.errors = []
 
@@ -3127,7 +3131,7 @@ class PouiInternal(Base):
             input_field_element().clear()
             input_field_element().send_keys(value)
 
-            if self.driver.switch_to_active_element() == input_field_element():
+            if self.switch_to_active_element() == input_field_element():
                 time.sleep(1)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 time.sleep(1)
@@ -3551,7 +3555,6 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not checked:
-
             table = self.return_table(selector=selector, table_number=table_number)
 
             tr = table.select('tbody > tr')
@@ -3682,9 +3685,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        return next(iter(list(filter(lambda x: any(
+        icon_classes = list(filter(lambda x: any(
             class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
-                                     elements))))
+                                     elements))
+        if icon_classes:
+            return next(iter(icon_classes))
 
     def click_avatar(self, position):
         """
@@ -3760,9 +3765,12 @@ class PouiInternal(Base):
     def click_checkbox(self, label):
         """Click on the POUI Checkbox.
         https://po-ui.io/documentation/po-checkbox
+
         :param label:
         :type label: str
+
         Usage:
+
         >>> # Call the method:
         >>> oHelper.ClickCheckBox(label="CheckBox label")
         """
@@ -3786,6 +3794,7 @@ class PouiInternal(Base):
 
         if not container_element:
             self.log_error(f"CheckBox '{label}' doesn't found!")
+
 
     def click_combo(self, field, value, position):
         '''Select a value for list combo inputs.
