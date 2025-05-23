@@ -6262,8 +6262,8 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             container_soup = next(iter(soup.select('body')))
             container_element = self.driver.find_element(By.XPATH, xpath_soup(container_soup))
-                dialog_selector = 'wa-dialog'
-                find_element_method = By.CSS_SELECTOR
+            dialog_selector = 'wa-dialog'
+            find_element_method = By.CSS_SELECTOR
             initial_layer = len(container_element.find_elements(find_element_method, dialog_selector))
 
         for field in self.grid_input:
@@ -6428,14 +6428,14 @@ class WebappInternal(Base):
                     next(iter(rows), None))
 
                 if row:
-                        row_id = row.get_attribute("id")
+                    row_id = row.get_attribute("id")
                     while (int(row_id) < self.grid_counters[grid_id]) and (down_loop < 2) and self.down_loop_grid and field[
                         4] is None and time.time() < endtime:
                         self.new_grid_line(field, False)
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop += 1
                     self.down_loop_grid = False
-                        columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
+                    columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
                     if columns:
                         if column_name in headers[field[2]]:
                             logger().debug('Column found!')
@@ -6444,9 +6444,9 @@ class WebappInternal(Base):
                             current_value = columns[column_number].text.strip()
                             current_value = self.remove_mask(current_value).strip()
     
-                                selenium_column = lambda: columns[column_number]
-    
-                                term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
+                            selenium_column = lambda: columns[column_number]
+
+                            term = "wa-multi-get" if self.grid_memo_field else "wa-dialog"
 
                             soup = self.get_current_DOM()
                             tmodal_list = soup.select(term)
@@ -6496,23 +6496,23 @@ class WebappInternal(Base):
                             soup = self.get_current_DOM()
                             new_container = self.zindex_sort(soup.select(new_container_selector), True)[0]
 
-                                endtime_child = time.time() + self.config.time_out
-                                child = None
-                                while time.time() < endtime_child and not child:
-                                    try:
-                                        child = self.driver.execute_script(
-                                            "return arguments[0].shadowRoot.querySelector('input, textarea')",
-                                            self.soup_to_selenium(new_container))
-                                    except Exception as err:
-                                        logger().info(f'fillgrid child error: {str(err)}')
-                                        pass
+                            endtime_child = time.time() + self.config.time_out
+                            child = None
+                            while time.time() < endtime_child and not child:
+                                try:
+                                    child = self.driver.execute_script(
+                                        "return arguments[0].shadowRoot.querySelector('input, textarea')",
+                                        self.soup_to_selenium(new_container))
+                                except Exception as err:
+                                    logger().info(f'fillgrid child error: {str(err)}')
+                                    pass
 
                             child_type = "input"
                             option_text = ""
                             if not child or 'dict-tcombobox' in new_container['class']:
-                                    child = self.driver.execute_script(
-                                        "return arguments[0].shadowRoot.querySelector('select')",
-                                        self.soup_to_selenium(new_container))
+                                child = self.driver.execute_script(
+                                    "return arguments[0].shadowRoot.querySelector('select')",
+                                    self.soup_to_selenium(new_container))
                                 child_type = "select"
 
                             if isinstance(child, list):
@@ -6520,11 +6520,10 @@ class WebappInternal(Base):
 
                             if child_type == "input":
 
-                                # time.sleep(2)
-                                    selenium_input = lambda: child
-                                    EC.visibility_of(child)
+                                selenium_input = lambda: child
+                                EC.visibility_of(child)
 
-                                    valtype = self.value_type(new_container.get("type"))
+                                valtype = self.value_type(new_container.get("type"))
 
                                 lenfield = len(self.get_element_value(selenium_input()))
                                 user_value = field[1]
@@ -7445,8 +7444,8 @@ class WebappInternal(Base):
 
         if isinstance(grids, list):
             for item in grids:
-                    labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
-                                                                        self.soup_to_selenium(item))
+                labels = self.driver.execute_script("return arguments[0].shadowRoot.querySelectorAll('thead tr label')",
+                                                                    self.soup_to_selenium(item))
                 if labels:
                     keys = list(map(lambda x: x.text.strip().lower(), labels))
                     labels_list.append(keys)
