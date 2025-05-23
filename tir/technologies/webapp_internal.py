@@ -6253,10 +6253,7 @@ class WebappInternal(Base):
 
         initial_layer = 0
         if self.grid_input:
-            if self.webapp_shadowroot():
                 selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
-            else:
-                selector = ".tgetdados, .tgrid, .tcbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
             soup = self.get_current_DOM()
@@ -6303,6 +6300,7 @@ class WebappInternal(Base):
         if fields:
             x3_dictionaries = self.get_x3_dictionaries(fields)
         return x3_dictionaries
+
 
     def fill_grid(self, field, x3_dictionaries, initial_layer, duplicate_fields=[]):
         """
@@ -6375,7 +6373,7 @@ class WebappInternal(Base):
                     if not field[4]:
                         grid_reload = False
 
-                        container = self.get_current_shadow_root_container()
+                    container = self.get_current_shadow_root_container()
                     if container:
                         try:
                             container_id = self.soup_to_selenium(container).get_attribute("id") if self.soup_to_selenium(
@@ -6595,7 +6593,7 @@ class WebappInternal(Base):
                                         except:
                                             pass
 
-                                        element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body', check_error=False)
+                                    element_exist = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR, position= tmodal_layer + 1, timeout=10, presence=False, main_container='body', check_error=False)
                                     if element_exist:
                                         current_value = self.get_element_text(selenium_column())
                                         if current_value == None:
@@ -6624,7 +6622,7 @@ class WebappInternal(Base):
                                     if not option_text:
                                         self.log_error("Couldn't find option")
                                     if (option_text != option_value_dict[option_value]):
-                                        self.select_combo(new_container, field[1]) if self.webapp_shadowroot() else self.select_combo(child, field[1])
+                                        self.select_combo(new_container, field[1])
 
                                         if self.config.browser.lower() == 'chrome':
                                             self.set_element_focus(self.soup_to_selenium(new_container))
