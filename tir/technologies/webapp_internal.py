@@ -6385,8 +6385,8 @@ class WebappInternal(Base):
                             logger().exception(str(err))
                             pass
     
-                            grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
-                            grids = self.filter_active_tabs(grids)
+                        grids = container.select(".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase, .dict-brgetddb, .dict-twbrowse")
+                        grids = self.filter_active_tabs(grids)
                         grids = self.filter_displayed_elements(grids)
 
                     if grids:
