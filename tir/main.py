@@ -1512,20 +1512,33 @@ class Webapp():
 
 
     def SetRouteMock(self, route, sub_route="", registry=False):
-        """Set up mock server ip on appserver.ini file
+        """Adds a new mock route entry to the appserver.ini configuration file.
+
+        This method is used to configure mock routes for development or testing environments.
+        The route is added to the ``appserver.ini`` file, optionally including a sub-route.
+        f ``registry`` is set to True, the sub route '/registry also will be added as the endpoint.
+
+        :param route: The main route to be added to the configuration file.
+        :type route: str
+        :param sub_route: An optional sub-route appended to the main route. Defaults to an empty string.
+        :type sub_route: str
+        :param registry: Whether the registry endpoint should also be registered as sub route  . Defaults to False.
+        :type registry: bool
+        :returns: None
+        :rtype: None
         """
         self.__webapp.set_mock_route(route, sub_route=sub_route, registry=registry)
 
 
     def GetRouteMock(self):
-        """Set up mock server ip on appserver.ini file
+        """Get server mock route seted in config.json file
 
         """
         return self.__webapp.get_route_mock()
 
 
     def RestRegistry(self):
-        """restore registry keys on appserver.ini file
+        """Restore registry keys in appserver.ini to start point
 
         """
         return self.__webapp.rest_resgistry()
