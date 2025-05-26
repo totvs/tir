@@ -6253,7 +6253,7 @@ class WebappInternal(Base):
 
         initial_layer = 0
         if self.grid_input:
-                selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
+            selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
             soup = self.get_current_DOM()
@@ -6402,9 +6402,9 @@ class WebappInternal(Base):
                                 self.grid_counters[grid_id] = 0
 
                             down_loop = 0
-                                rows = self.driver.execute_script(
-                                    "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
-                                    self.soup_to_selenium(grids[field[2]]))
+                            rows = self.driver.execute_script(
+                                "return arguments[0].shadowRoot.querySelectorAll('tbody tr')",
+                                self.soup_to_selenium(grids[field[2]]))
     
                     else:
                         grid_reload = True
