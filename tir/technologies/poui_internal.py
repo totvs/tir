@@ -2305,7 +2305,7 @@ class PouiInternal(Base):
         if new_log_line:
             self.log.new_line(False, log_message)
         if ((stack_item != "setUpClass") or (stack_item == "setUpClass" and self.restart_counter == 3)):
-            self.log.save_file()
+            self.log.generate_log()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -2444,7 +2444,7 @@ class PouiInternal(Base):
             self.message = self.language.assert_false_message if assert_false and not self.errors else log_message
             self.log.new_line(False, self.message)
 
-        self.log.save_file()
+        self.log.generate_log()
 
         self.errors = []
 
