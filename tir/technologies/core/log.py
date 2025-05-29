@@ -452,13 +452,20 @@ class Log:
 
         self.checks_empty_line()
         
-        total_cts = self.table_rows[1][5]
-        passed = self.table_rows[1][6]
-        failed = self.table_rows[1][7]
-        printable_message = self.table_rows[1][11]
+        row = self.table_rows[1]
+        total_cts = row[5]
+        passed = row[6]
+        failed = row[7]
+        seconds = row[8]
+        printable_message = row[11]
         sequence = uuid.uuid4().hex[:6]
-        area = self.config.num_exec if self.config.num_exec else "Desenvolvimento"
-        minutes = self.table_rows[1][8] / 60
+        area = self.config.num_exec or "Desenvolvimento"
+        minutes = float(seconds) / 60 if isinstance(seconds, (int, float)) else 0
+
+        self.program = self.program or row[3]
+        self.release = self.release or row[10]
+        self.country = self.country or row[15]
+        self.database = self.database or row[12]
 
         log_data = {
             "cLogDtExec": self.suite_datetime,
@@ -491,7 +498,9 @@ class Log:
         path_folder = self.config.api_json_path
         
         self.table_rows.pop() # Remove the last row which is empty
-        self.testcase_generate_log.append(self.get_testcase_stack()) 
+        self.testcase_generate_log.append(self.get_testcase_stack())
+
+        logger().debug(f'Json log_data: {log_data}')
 
         self.send_log_with_retries(log_data, api_url, api_url_ip, path_folder)
 
