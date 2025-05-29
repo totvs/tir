@@ -443,6 +443,15 @@ class Log:
             pass
 
     def generate_log(self):
+        """
+        Generates a log entry with the execution details and sends it to the API.
+        This method collects various details such as execution time, user, station, program, and results,
+        and formats them into a dictionary that is then sent as a JSON payload to the specified API endpoint.
+
+        """
+
+        self.checks_empty_line()
+        
         total_cts = self.table_rows[1][5]
         passed = self.table_rows[1][6]
         failed = self.table_rows[1][7]
