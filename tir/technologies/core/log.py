@@ -451,7 +451,7 @@ class Log:
         """
 
         self.checks_empty_line()
-        
+
         row = self.table_rows[1]
         total_cts = row[5]
         passed = row[6]
@@ -510,7 +510,11 @@ class Log:
         timeout_dns = 600
         timeout_ip = 1200
         max_retries = 4
-        log_file_name = None
+
+        if not api_url or not api_url_ip:
+            logger().info("Saving log locally.")
+            self.save_log_locally(path_folder, body)
+            return
 
         for attempt in range(1, max_retries + 1):
             try:
@@ -534,16 +538,23 @@ class Log:
             time.sleep(3)  # Aguarda 3 segundos antes da próxima tentativa
 
         # Caso todas as tentativas falhem
-        logger().debug("[FwSendLog]: Não foi possível enviar o log após todas as tentativas.")
-        log_file_name = f"{int(time.time())}.json"
-        log_file_path = f"{path_folder}/{log_file_name}"
+        self.save_log_locally(path_folder, body)
 
+    def save_log_locally(self, path_folder, body):
+        """
+        Saves the log data locally as a JSON file.
+        """
+        
+        logger().info("[FwSendLog]: Não foi possível enviar o log após todas as tentativas.")
+        log_file_name = f"{int(time.time())}.json"
+        log_file_path = Path(path_folder, log_file_name)
+        
         try:
             with open(log_file_path, "w", encoding="utf-8") as log_file:
                 log_file.write(body)
-            logger().debug(f"[FwSendLog]: Log salvo localmente em {log_file_path}.")
+                logger().info(f"[FwSendLog]: Log salvo localmente em {log_file_path}.")
         except IOError as e:
-            logger().debug(f"[FwSendLog]: Falha ao salvar o log localmente: {e}")
+            logger().info(f"[FwSendLog]: Falha ao salvar o log localmente: {e}")
 
     def ident_test(self):
         """

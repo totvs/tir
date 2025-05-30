@@ -19,21 +19,30 @@ class ConfigLoader:
 
     def _initialize(self, path="config.json"):
         if ConfigLoader._json_data is None:
-
             if not path:
                 path = os.path.join(sys.path[0], r"config.json")
 
-            valid = os.path.isfile(path)
+            if not os.path.isfile(path):
+                raise FileNotFoundError(f"Arquivo de configuração não encontrado: {path}")
 
-            if valid:
-                with open(path) as json_data_file:
-                    try:
-                        data = json.load(json_data_file)
-                        if self.check_keys(data):
-                            raise Exception(self.check_keys(data))
-                        ConfigLoader._json_data = data
-                    except Exception as e:
-                        raise Exception(f"JSON file issue: {e}. \n* Please check your config.json *")
+            try:
+                with open(path, 'r', encoding='utf-8') as json_data_file:
+                    data = json.load(json_data_file)
+
+                    bypass_check_keys = data.get('SmartTest', False)
+
+                    if not bypass_check_keys:
+                        key_validation_result = self.check_keys(data)
+
+                    if key_validation_result is True:
+                        raise ValueError(f"Configuration validation error: {key_validation_result}")
+
+                    ConfigLoader._json_data = data
+
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Error parsing JSON file '{path}': {e}. Please check the JSON syntax.")
+            except Exception as e:
+                raise RuntimeError(f"Unexpected problem loading configuration file: {e}. \n* Please check your config.json *")
 
         if ConfigLoader._json_data:
             for key, value in ConfigLoader._json_data.items():
@@ -116,7 +125,8 @@ class ConfigLoader:
             self.routine_type = ""
             self.api_url = str(data["APIURL"]) if "APIURL" in data else ""
             self.api_url_ip = str(data["APIURLIP"]) if "APIURLIP" in data else ""
-            self.api_json_path = str(data["APIJSONPATH"]) if "APIJSONPATH" in data else ""
+            self.api_json_path = str(data["APIJSONPATH"]) if "APIJSONPATH" in data else os.path.join(os.getcwd())
+
 
     def check_keys(self, json_data):
         valid_keys = [
