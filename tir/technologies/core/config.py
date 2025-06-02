@@ -195,7 +195,7 @@ class ConfigLoader:
         "ProcedureMenu",
         "APIURL",
         "APIURLIP",
-        "APIJSONPATH"
+        "APIJSONPATH",
         "ServerMock"
     ]
         keys_json = set(json_data.keys())
