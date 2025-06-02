@@ -1516,7 +1516,7 @@ class Webapp():
 
         This method is used to configure mock routes for development or testing environments.
         The route is added to the ``appserver.ini`` file, optionally including a sub-route.
-        f ``registry`` is set to True, the sub route '/registry also will be added as the endpoint.
+        If ``registry`` is set to True, the sub route '/registry also will be added as the endpoint.
 
         :param route: The main route to be added to the configuration file.
         :type route: str
