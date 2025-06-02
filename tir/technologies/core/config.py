@@ -30,11 +30,12 @@ class ConfigLoader:
                     data = json.load(json_data_file)
 
                     bypass_check_keys = data.get('SmartTest', False)
+                    key_validation_result = None  # Initialize to a default value
 
                     if not bypass_check_keys:
                         key_validation_result = self.check_keys(data)
 
-                    if key_validation_result is True:
+                    if key_validation_result:
                         raise ValueError(f"Configuration validation error: {key_validation_result}")
 
                     ConfigLoader._json_data = data
