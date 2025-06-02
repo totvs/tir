@@ -176,7 +176,7 @@ class Log:
 
     def has_csv_condition(self):
 
-        return (self.get_testcase_stack() not in self.testcase_generate_log) or (self.get_testcase_stack() == "setUpClass") and self.checks_empty_line()
+        return (self.get_testcase_stack() not in self.testcase_generate_log) or ((self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
 
     def set_seconds(self, initial_time):
         """
