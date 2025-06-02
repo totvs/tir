@@ -68,6 +68,7 @@ class Log:
         self.hash_exec = ""
         self.test_case = self.list_of_testcases()
         self.finish_testcase = []
+        self.testcase_generate_log = []
 
     def generate_header(self):
         """
@@ -175,8 +176,7 @@ class Log:
 
     def has_csv_condition(self):
 
-        return ((len(self.table_rows[1:]) == len(self.test_case) and self.get_testcase_stack() not in self.csv_log) or (
-                    self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
+        return (self.get_testcase_stack() not in self.testcase_generate_log) or ((self.get_testcase_stack() == "setUpClass") and self.checks_empty_line())
 
     def set_seconds(self, initial_time):
         """
@@ -441,6 +441,120 @@ class Log:
         except Exception as error:
             logger().debug(f"Fail in create json file in: {Path(path, log_file)}: Error: {str(error)}")
             pass
+
+    def generate_log(self):
+        """
+        Generates a log entry with the execution details and sends it to the API.
+        This method collects various details such as execution time, user, station, program, and results,
+        and formats them into a dictionary that is then sent as a JSON payload to the specified API endpoint.
+
+        """
+
+        self.checks_empty_line()
+
+        row = self.table_rows[1]
+        total_cts = row[5]
+        passed = row[6]
+        failed = row[7]
+        seconds = row[8]
+        printable_message = row[11]
+        sequence = uuid.uuid4().hex[:6]
+        area = self.config.num_exec or "Desenvolvimento"
+        minutes = float(seconds) / 60 if isinstance(seconds, (int, float)) else 0
+
+        self.program = self.program or row[3]
+        self.release = self.release or row[10]
+        self.country = self.country or row[15]
+        self.database = self.database or row[12]
+
+        log_data = {
+            "cLogDtExec": self.suite_datetime,
+            "cLogNomUsr": self.user,
+            "cLogNomEst": self.station,
+            "cLogProgra": self.program,
+            "cLogDtProg": "",
+            "cLogHrProg": "",
+            "nLogCtsOk": passed,
+            "nLogCtsNok": failed,
+            "nLogCtsSeg": seconds,
+            "cLogVersao": self.version,
+            "cLogReleas": self.release,
+            "nLogCtsErr": printable_message,
+            "cLogBancod": self.database,
+            "cLogIdenti": self.issue,
+            "cLogIdExec": self.execution_id,
+            "cLogPais": self.country,
+            "cLogTool": self.test_type,
+            "cLogSequen": sequence,
+            "nLogCtsTot": total_cts,
+            "cLogDtExea": self.suite_datetime.split(" ")[0],
+            "cLogHrExea": self.suite_datetime.split(" ")[1],
+            "cLogArea": area,
+            "cLogMnExec": minutes
+        }
+
+        api_url = self.config.api_url
+        api_url_ip = self.config.api_url_ip
+        path_folder = self.config.api_json_path
+        
+        self.table_rows.pop() # Remove the last row which is empty
+        self.testcase_generate_log.append(self.get_testcase_stack())
+
+        logger().debug(f'Json log_data: {log_data}')
+
+        self.send_log_with_retries(log_data, api_url, api_url_ip, path_folder)
+
+    def send_log_with_retries(self, log_data, api_url, api_url_ip, path_folder):
+        headers = {"Content-Type": "application/json; charset=utf-8"}
+        body = json.dumps(log_data)
+        timeout_dns = 600
+        timeout_ip = 1200
+        max_retries = 4
+
+        if not api_url or not api_url_ip:
+            logger().info("Saving log locally.")
+            self.save_log_locally(path_folder, body)
+            return
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Primeiras tentativas usando DNS
+                if attempt <= 2:
+                    response = requests.post(f"{api_url}/createlog/", data=body, headers=headers, timeout=timeout_dns)
+                # Tentativas adicionais usando IP
+                else:
+                    response = requests.post(f"{api_url_ip}/createlog/", data=body, headers=headers, timeout=timeout_ip)
+
+                if response.status_code == 200:
+                    logger().debug(f"[FwSendLog]: Log enviado com sucesso na tentativa {attempt}.")
+                    return
+                elif response.status_code == 400:
+                    logger().debug("[FwSendLog]: Erro 400 - Limpando caracteres especiais do JSON.")
+                    body = body.encode("ascii", "ignore").decode()
+
+            except requests.RequestException as e:
+                logger().debug(f"[FwSendLog]: Erro ao enviar log na tentativa {attempt}: {e}")
+
+            time.sleep(3)  # Aguarda 3 segundos antes da próxima tentativa
+
+        # Caso todas as tentativas falhem
+        self.save_log_locally(path_folder, body)
+
+    def save_log_locally(self, path_folder, body):
+        """
+        Saves the log data locally as a JSON file.
+        """
+        
+        logger().info("[FwSendLog]: Não foi possível enviar o log após todas as tentativas.")
+        log_file_name = f"{int(time.time())}.json"
+        log_file_path = Path(path_folder, log_file_name)
+        
+        try:
+            with open(log_file_path, "w", encoding="utf-8") as log_file:
+                log_file.write(body)
+                logger().info(f"[FwSendLog]: Log salvo localmente em {log_file_path}.")
+        except IOError as e:
+            logger().info(f"[FwSendLog]: Falha ao salvar o log localmente: {e}")
 
     def ident_test(self):
         """
