@@ -1531,7 +1531,7 @@ class Webapp():
 
 
     def GetRouteMock(self):
-        """Get server mock route seted in config.json file
+        """Get server mock route set in config.json file
 
         """
         return self.__webapp.get_route_mock()
