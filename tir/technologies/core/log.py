@@ -476,7 +476,7 @@ class Log:
             "cLogHrProg": "",
             "nLogCtsOk": passed,
             "nLogCtsNok": failed,
-            "nLogCtsSeg": self.seconds,
+            "nLogCtsSeg": seconds,
             "cLogVersao": self.version,
             "cLogReleas": self.release,
             "nLogCtsErr": printable_message,
