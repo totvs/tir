@@ -3937,7 +3937,7 @@ class WebappInternal(Base):
                 textarea = next(iter(top_layer.select("textarea")), None)
                 textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element(By.XPATH, xpath_soup(textarea)))
 
-            error_paragraphs = textarea_value.split("\n\n")
+            error_paragraphs = re.split(r'\n\s*\n', textarea_value.strip())
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
@@ -8215,7 +8215,7 @@ class WebappInternal(Base):
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -8830,7 +8830,7 @@ class WebappInternal(Base):
             self.log.new_line(False, self.message)
 
         if self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         self.errors = []
 
@@ -9672,7 +9672,7 @@ class WebappInternal(Base):
                 self.SetButton(self.language.yes)
 
         if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
