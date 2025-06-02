@@ -3937,7 +3937,7 @@ class WebappInternal(Base):
                 textarea = next(iter(top_layer.select("textarea")), None)
                 textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element(By.XPATH, xpath_soup(textarea)))
 
-            error_paragraphs = textarea_value.split("\n\n")
+            error_paragraphs = re.split(r'\n\s*\n', textarea_value.strip())
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
