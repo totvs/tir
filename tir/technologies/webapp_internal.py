@@ -932,9 +932,9 @@ class WebappInternal(Base):
         try:
             datepicker_class = datepicker.get_attribute("class").split()
             return True if "ng-valid" in datepicker_class else False
-        except:
-            logger().debug(f'Something wrong with Datepicker, please check it')
-            pass
+        except (AttributeError, TypeError) as e:
+            logger().debug(f'Something wrong with Datepicker, please check it: {e}')
+            return False
 
 
     def filling_group(self, shadow_root=None, container=None, group_value=''):
