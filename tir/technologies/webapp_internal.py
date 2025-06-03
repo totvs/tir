@@ -977,7 +977,7 @@ class WebappInternal(Base):
                     click_type = 1
 
         if not self.config.group:
-            poui_iframe = True if self.config.poui_login else None
+            poui_iframe = True if self.config.poui_login else False
             group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=poui_iframe))
             if group_content:
                 self.config.group = group_content
