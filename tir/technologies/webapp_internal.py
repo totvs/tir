@@ -927,7 +927,7 @@ class WebappInternal(Base):
         :param datepicker: beautiful soup datepicker tag component
         :type datepicker: BeautifulSoup
 
-        :return:
+        :return: True when valid else False
         """
         try:
             datepicker_class = datepicker.get_attribute("class").split()
@@ -977,8 +977,8 @@ class WebappInternal(Base):
                     click_type = 1
 
         if not self.config.group:
-            twebview = True if self.config.poui_login else None
-            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=twebview))
+            poui_iframe = True if self.config.poui_login else None
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=poui_iframe))
             if group_content:
                 self.config.group = group_content
             else:
