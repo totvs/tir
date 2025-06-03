@@ -845,6 +845,7 @@ class WebappInternal(Base):
         send_type = 1
         base_date_value = ''
         group_bs = None
+        datepicker_main = None
 
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -878,8 +879,13 @@ class WebappInternal(Base):
                     if self.webapp_shadowroot() and not self.config.poui_login:
                         date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))),
                                             None)
+                        datepicker_is_valid =lambda: True
                     else:
                         date = lambda: self.soup_to_selenium(base_date)
+                        datepicker_main = base_date.find_parent('po-datepicker')
+                        if datepicker_main:
+                            datepicker_element = self.soup_to_selenium(datepicker_main)
+                            datepicker_is_valid = lambda: self.poui_datepicker_is_valid(datepicker_element)
 
                     if self.config.poui_login:
                         self.switch_to_iframe()
@@ -904,7 +910,7 @@ class WebappInternal(Base):
                         if send_type > 3:
                             send_type = 1
 
-                        if base_date_value.strip() == self.config.date.strip():
+                        if base_date_value.strip() == self.config.date.strip() and datepicker_is_valid():
                             break
 
                         if not self.is_active_element(date()) and click_type == 3:
@@ -913,6 +919,23 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
+
+
+    def poui_datepicker_is_valid(self, datepicker):
+        """
+
+        :param datepicker: beautiful soup datepicker tag component
+        :type datepicker: BeautifulSoup
+
+        :return: True when valid else False
+        """
+        try:
+            datepicker_class = datepicker.get_attribute("class").split()
+            return "ng-valid" in datepicker_class
+        except (AttributeError, TypeError) as e:
+            logger().debug(f'Something wrong with Datepicker, please check it: {e}')
+            return False
+
 
     def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
@@ -954,7 +977,8 @@ class WebappInternal(Base):
                     click_type = 1
 
         if not self.config.group:
-            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container)))
+            poui_iframe = True if self.config.poui_login else False
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=poui_iframe))
             if group_content:
                 self.config.group = group_content
             else:
