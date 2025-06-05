@@ -9983,6 +9983,9 @@ class WebappInternal(Base):
         except TimeoutException as e:
             logger().exception(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
             pass
+        except StaleElementReferenceException as e:
+            logger().debug(f"Element is stale, skipping...")
+            pass
 
         if timeout:
             setattr(self.wait, '_timeout', self.config.time_out)
