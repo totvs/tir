@@ -4526,6 +4526,7 @@ class WebappInternal(Base):
 
                     if next_button:
                         id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
+                        logger().info(f'{id_parent_element}')
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         self.scroll_to_element(soup_element)
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
