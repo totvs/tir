@@ -8384,9 +8384,6 @@ class WebappInternal(Base):
         else:
             twebview = False
 
-        endtime = time.time() + self.config.time_out
-        halftime = ((endtime - time.time()) / 2)
-
         if(self.config.smart_test or self.config.parameter_url):
 
             if self.tmenu_screen is None:
@@ -8395,11 +8392,18 @@ class WebappInternal(Base):
             value = self.parameter_url_value( self.config.language.lower(),
                 {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
 
+            logger().debug(f"Adding parameter url...")
+
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
+            logger().debug(f"Parameter Url added")
+
+            endtime = time.time() + self.config.time_out
+            halftime = time.time() + 30
+
+            while (time.time() < endtime and not self.element_exists(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
+                                    scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8408,7 +8412,8 @@ class WebappInternal(Base):
                     self.restart_counter = 3
                     self.log_error(f" AddParameter error: {tmessagebox[0].text}")
 
-                if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+                if ( not tmessagebox and time.time() >= halftime):
+                    halftime = time.time() + 30
                     logger().info(f"Enter if tmessagebox: {parameter}")
                     self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                         branch}&a={value}&Env={self.config.environment}""")
