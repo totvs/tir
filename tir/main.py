@@ -810,7 +810,7 @@ class Webapp():
         """
         self.__webapp.SetValue(field, value, grid, grid_number, ignore_case, row, name_attr, position, check_value, grid_memo_field, range_multiplier, direction, duplicate_fields)
 
-    def Setup(self, initial_program,  date="", group="99", branch="01", module=""):
+    def Setup(self, initial_program,  date="", group="99", branch="01", module="", sso=False):
         """
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
@@ -830,7 +830,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Setup("SIGAFAT", "18/08/2018", "T1", "D MG 01 ")
         """
-        self.__webapp.Setup(initial_program, date, group, branch, module)
+        self.__webapp.Setup(initial_program, date, group, branch, module, sso=sso)
 
     def SetTIRConfig(self, config_name, value):
         """

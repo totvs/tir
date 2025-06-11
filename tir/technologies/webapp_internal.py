@@ -220,7 +220,7 @@ class WebappInternal(Base):
         self.SetValue('cPass', self.config.password, name_attr = True)
         self.SetButton("Entrar")
 
-    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
+    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True, sso=False):
         """
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
