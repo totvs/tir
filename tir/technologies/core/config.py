@@ -128,6 +128,7 @@ class ConfigLoader:
             self.api_url_ip = str(data["APIURLIP"]) if "APIURLIP" in data else ""
             self.api_json_path = str(data["APIJSONPATH"]) if "APIJSONPATH" in data else os.path.join(os.getcwd())
             self.server_mock  = str(data["ServerMock"]) if "ServerMock" in data else ""
+            self.sso_login = ("SSOLogin" in data and bool(data["SSOLogin"]))
 
 
     def check_keys(self, json_data):
@@ -196,7 +197,8 @@ class ConfigLoader:
         "APIURL",
         "APIURLIP",
         "APIJSONPATH",
-        "ServerMock"
+        "ServerMock",
+        "SSOLogin"
     ]
         keys_json = set(json_data.keys())
         wrong_keys = keys_json - set(valid_keys)
