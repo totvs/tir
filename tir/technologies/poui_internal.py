@@ -3471,6 +3471,7 @@ class PouiInternal(Base):
         :return: None
         """
         element = None
+        UNNAMED_COLUMN = 'Unnamed: 0'
 
         if not self.config.poui:
             self.twebview_context = True
@@ -3496,7 +3497,7 @@ class PouiInternal(Base):
                     if click_cell:
                         column_index_number = df.columns.get_loc(click_cell)
 
-                    if first_column and second_column and first_column != 'Unnamed: 0':
+                    if first_column and second_column and first_column != UNNAMED_COLUMN:
                         index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
@@ -3553,7 +3554,7 @@ class PouiInternal(Base):
 
                     else:
                         element_bs4 = next(iter(tr[index].select('td')))
-                        if first_column == 'Unnamed: 0':
+                        if first_column == UNNAMED_COLUMN:
                             element_bs4 = tr[index].select('td')[0].select('.po-clickable')[0]
                     self.poui_click(element_bs4)
         else:
