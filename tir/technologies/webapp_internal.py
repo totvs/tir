@@ -281,25 +281,27 @@ class WebappInternal(Base):
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
+           
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
-            self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
+            if not self.config.sso_login:    
+                self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
-            endtime = time.time() + self.config.time_out
-            if not self.config.poui_login:
-                if self.webapp_shadowroot():
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container="body", optional_term='wa-text-view'))):
-                        self.update_password()
-                else:
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container=".twindow", optional_term=".tsay"))):
-                        self.update_password()
+                endtime = time.time() + self.config.time_out
+                if not self.config.poui_login:
+                    if self.webapp_shadowroot():
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container="body", optional_term='wa-text-view'))):
+                            self.update_password()
+                    else:
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container=".twindow", optional_term=".tsay"))):
+                            self.update_password()
 
             self.environment_screen()
 
@@ -9138,6 +9140,7 @@ class WebappInternal(Base):
 
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
+        dialog_layers = self.check_layers('wa-dialog')
 
         for row, label in enumerate(labels):
 
@@ -9233,6 +9236,10 @@ class WebappInternal(Base):
                                                 
                                                 if not success:
                                                     success = True if is_element_acessible() else False
+
+                                                    # If dialog layers show up through last click
+                                                    if not success and dialog_layers < self.check_layers('wa-dialog'):
+                                                        success = True
 
                                                 if success and right_click:
                                                     last_zindex = self.return_last_zindex()
@@ -9429,10 +9436,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+        tr = []
 
         if self.webapp_shadowroot():
-           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[tree_number]))
-           return tr
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+            return tr
         else:
             tr = container.select("tr")
             tr_class = list(filter(lambda x: "class" in x.attrs, tr))
