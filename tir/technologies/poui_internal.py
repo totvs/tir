@@ -3555,7 +3555,11 @@ class PouiInternal(Base):
                     else:
                         element_bs4 = next(iter(tr[index].select('td')))
                         if first_column == UNNAMED_COLUMN:
-                            element_bs4 = tr[index].select('td')[0].select('.po-clickable')[0]
+                            clickable_spans = tr[index].select('td')[0].select('.po-clickable')
+                            if clickable_spans:
+                                element_bs4 = clickable_spans[0]
+                            else:
+                                self.log_error("No clickable spans found in the table row.")
                     self.poui_click(element_bs4)
         else:
             index = index_number
