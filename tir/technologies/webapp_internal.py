@@ -220,7 +220,7 @@ class WebappInternal(Base):
         self.SetValue('cPass', self.config.password, name_attr = True)
         self.SetButton("Entrar")
 
-    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True, sso=False):
+    def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
         """
         Prepare the Protheus Webapp for the test case, filling the needed information to access the environment.
 
@@ -281,6 +281,7 @@ class WebappInternal(Base):
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
+           
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
