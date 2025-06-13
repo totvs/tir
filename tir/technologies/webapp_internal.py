@@ -281,25 +281,27 @@ class WebappInternal(Base):
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
+           
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
-            self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
+            if not self.config.sso_login:    
+                self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
-            endtime = time.time() + self.config.time_out
-            if not self.config.poui_login:
-                if self.webapp_shadowroot():
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container="body", optional_term='wa-text-view'))):
-                        self.update_password()
-                else:
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container=".twindow", optional_term=".tsay"))):
-                        self.update_password()
+                endtime = time.time() + self.config.time_out
+                if not self.config.poui_login:
+                    if self.webapp_shadowroot():
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container="body", optional_term='wa-text-view'))):
+                            self.update_password()
+                    else:
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container=".twindow", optional_term=".tsay"))):
+                            self.update_password()
 
             self.environment_screen()
 
