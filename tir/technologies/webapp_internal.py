@@ -9235,7 +9235,7 @@ class WebappInternal(Base):
                                                 if not success:
                                                     success = True if is_element_acessible() else False
 
-                                                    # If throug last click some dialog layers show up',
+                                                    # If dialog layers show up throug last click',
                                                     if not success and dialog_layers < self.check_layers('wa-dialog'):
                                                         success = True
 
