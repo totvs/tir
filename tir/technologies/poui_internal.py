@@ -3512,7 +3512,7 @@ class PouiInternal(Base):
                             if len(index_number) > 0:
                                 index_number = [index_number[0]]
                     elif first_column and second_column and second_content:
-                        second_column = next(iter(list(filter(lambda x: second_column.lower().strip() in x.lower().strip(), df.columns))))
+                        second_column = next(iter(list(filter(lambda x: second_column.lower().strip() in x.lower().strip(), df.columns))), None)
                         second_column_values = df[second_column].values
                         second_column_formatted_values = list(map(lambda x: x.replace(' ', ''), second_column_values))
                         content = next(iter(list(filter(lambda x: x == second_content.replace(' ', ''), second_column_formatted_values))), None)
