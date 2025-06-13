@@ -9438,7 +9438,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             bs_tree_node = container.select('wa-tree')
-            if bs_tree_node:
+            if bs_tree_node and len(bs_tree_node) > tree_number:
                 tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
             return tr
         else:
