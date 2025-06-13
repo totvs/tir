@@ -9140,6 +9140,7 @@ class WebappInternal(Base):
 
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
+        dialog_layers = self.check_layers('wa-dialog')
 
         for row, label in enumerate(labels):
 
@@ -9235,6 +9236,10 @@ class WebappInternal(Base):
                                                 
                                                 if not success:
                                                     success = True if is_element_acessible() else False
+
+                                                    # If dialog layers show up through last click
+                                                    if not success and dialog_layers < self.check_layers('wa-dialog'):
+                                                        success = True
 
                                                 if success and right_click:
                                                     last_zindex = self.return_last_zindex()
@@ -9431,10 +9436,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+        tr = []
 
         if self.webapp_shadowroot():
-           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[tree_number]))
-           return tr
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+            return tr
         else:
             tr = container.select("tr")
             tr_class = list(filter(lambda x: "class" in x.attrs, tr))
