@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Poui Internal &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Poui Internal &mdash; TIR 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=8d563738"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=51b770b3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -84,7 +82,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_checkbox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_po_list_box()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_popup"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_popup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_poui_component"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_poui_component()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.close_coin_screen()</span></code></a></li>
@@ -126,6 +127,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_error"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_result"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_csv"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_input_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_url_coverage()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.po_loading"><code class="docutils literal notranslate"><span class="pre">PouiInternal.po_loading()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.pop_dict_itens"><code class="docutils literal notranslate"><span class="pre">PouiInternal.pop_dict_itens()</span></code></a></li>
@@ -193,24 +195,24 @@
 <span id="poui-internal"></span><h1>Poui Internal<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.poui_internal.</span></span><span class="sig-name descname"><span class="pre">PouiInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.poui_internal.</span></span><span class="sig-name descname"><span class="pre">PouiInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal" title="Link to this definition"></a></dt>
 <dd><p>Internal implementation of POUI class.</p>
 <p>This class contains all the methods defined to run Selenium Interface Tests on POUI.</p>
 <p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>config_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>config_path</strong> (<em>str</em>) – The path to the config file. - <strong>Default:</strong> “” (empty string)</p></li>
 <li><p><strong>autostart</strong> – Sets whether TIR should open browser and execute from the start. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Inside __init__ method in Webapp class of main.py</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">autostart</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">autostart</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">__webapp</span> <span class="o">=</span> <span class="n">PouiInternal</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">autostart</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -222,10 +224,10 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – The group to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>module</strong> (<em>str</em>) – The module to fill on the environment screen. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 </dl>
@@ -243,10 +245,10 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The initial program to load. - <strong>Default:</strong> “” (previous initial_program)</p></li>
-<li><p><strong>date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (previous date)</p></li>
-<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The group to fill on the environment screen. - <strong>Default:</strong> “previous date group”</p></li>
-<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The branch to fill on the environment screen. - <strong>Default:</strong> “previous branch”</p></li>
+<li><p><strong>initial_program</strong> (<em>str</em>) – The initial program to load. - <strong>Default:</strong> “” (previous initial_program)</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date to fill on the environment screen. - <strong>Default:</strong> “” (previous date)</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – The group to fill on the environment screen. - <strong>Default:</strong> “previous date group”</p></li>
+<li><p><strong>branch</strong> (<em>str</em>) – The branch to fill on the environment screen. - <strong>Default:</strong> “previous branch”</p></li>
 </ul>
 </dd>
 </dl>
@@ -268,9 +270,9 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The value that the field is expected to contain.</p></li>
-<li><p><strong>po_component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – POUI component name that you want to check content on screen</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – The value that the field is expected to contain.</p></li>
+<li><p><strong>po_component</strong> (<em>str</em>) – POUI component name that you want to check content on screen</p></li>
 </ul>
 </dd>
 </dl>
@@ -306,14 +308,14 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>first_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Column name to be used as reference.</p></li>
-<li><p><strong>second_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Column name to be used as reference.</p></li>
-<li><p><strong>first_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content of the column to be searched.</p></li>
-<li><p><strong>second_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content of the column to be searched.</p></li>
-<li><p><strong>table_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
-<li><p><strong>click_cell</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content to click based on a column position to close the axis</p></li>
-<li><p><strong>checkbox</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If you want to click on the checkbox component in the table</p></li>
+<li><p><strong>first_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
+<li><p><strong>second_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
+<li><p><strong>first_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
+<li><p><strong>second_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
+<li><p><strong>table_number</strong> (<em>int</em>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>itens</strong> (<em>bool</em>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
+<li><p><strong>click_cell</strong> (<em>str</em>) – Content to click based on a column position to close the axis</p></li>
+<li><p><strong>checkbox</strong> (<em>bool</em>) – If you want to click on the checkbox component in the table</p></li>
 </ul>
 </dd>
 </dl>
@@ -367,8 +369,8 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>string_left</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – String of the left side of content.</p></li>
-<li><p><strong>string_right</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – String of the right side of content.</p></li>
+<li><p><strong>string_left</strong> (<em>str</em>) – String of the left side of content.</p></li>
+<li><p><strong>string_right</strong> (<em>str</em>) – String of the right side of content.</p></li>
 </ul>
 </dd>
 </dl>
@@ -388,11 +390,11 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>grid_memo_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>line</strong> (<em>int</em>) – Grid line that contains the column field to be checked.- <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be checked when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>grid_memo_field</strong> (<em>bool</em>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>
@@ -411,9 +413,9 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Input text title that you want to fill</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Value that fill in input</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Input text title that you want to fill</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – Value that fill in input</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -450,7 +452,7 @@ fills the environment screen.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-page-dynamic-search">https://po-ui.io/documentation/po-page-dynamic-search</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content to be Search.</p>
+<dd class="field-odd"><p><strong>content</strong> (<em>str</em>) – Content to be Search.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -468,7 +470,7 @@ fills the environment screen.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-tabs">https://po-ui.io/documentation/po-tabs</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The tab label name</p>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The tab label name</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
@@ -489,17 +491,17 @@ fills the environment screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field name or label to receive the value</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – The value to be inputted on the element.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
-<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field name or label to receive the value</p></li>
+<li><p><strong>value</strong> (<em>str</em><em> or </em><em>bool</em>) – The value to be inputted on the element.</p></li>
+<li><p><strong>grid</strong> (<em>bool</em>) – Boolean if this is a grid field or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>grid_number</strong> (<em>int</em>) – Grid number of which grid should be inputted when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>ignore_case</strong> (<em>bool</em>) – Boolean if case should be ignored or not. - <strong>Default:</strong> True</p></li>
 <li><p><strong>check_value</strong> – Boolean ignore input check - <strong>Default:</strong> True</p></li>
-<li><p><strong>row</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Row number that will be filled</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
-<li><p><strong>grid_memo_field</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
-<li><p><strong>range_multiplier</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.</p></li>
-<li><p><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Desired direction to search for the element from a label, currently accepts right and down.</p></li>
+<li><p><strong>row</strong> (<em>int</em>) – Row number that will be filled</p></li>
+<li><p><strong>name_attr</strong> (<em>bool</em>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
+<li><p><strong>grid_memo_field</strong> (<em>bool</em>) – Boolean if this is a memo grid field. - <strong>Default:</strong> False</p></li>
+<li><p><strong>range_multiplier</strong> (<em>int</em>) – Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – Desired direction to search for the element from a label, currently accepts right and down.</p></li>
 </ul>
 </dd>
 </dl>
@@ -549,7 +551,7 @@ fills the environment screen.</p>
 <dd><p>Search string that was sent and wait hide the element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – String that will hold the wait.</p>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String that will hold the wait.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -565,7 +567,7 @@ fills the environment screen.</p>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – List of itens that will hold the wait.</p>
+<dd class="field-odd"><p><strong>itens</strong> (<em>str</em>) – List of itens that will hold the wait.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -581,7 +583,7 @@ fills the environment screen.</p>
 <dd><p>Search string that was sent and wait show the elements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – String that will hold the wait.</p>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String that will hold the wait.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -598,7 +600,7 @@ fills the environment screen.</p>
 <p>Asserts the result based on the expected value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>expected</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Expected value</p>
+<dd class="field-odd"><p><strong>expected</strong> (<em>bool</em>) – Expected value</p>
 </dd>
 </dl>
 <p>Usage :</p>
@@ -631,14 +633,14 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element</strong> (<em>BeautifulSoup object</em>) – The target element object.</p></li>
-<li><p><strong>expected_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The text that is expected to exist in button’s tooltip.</p></li>
+<li><p><strong>expected_text</strong> (<em>str</em>) – The text that is expected to exist in button’s tooltip.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean value whether element has tooltip text or not.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -683,15 +685,15 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>element_selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The selector to find the first element.</p></li>
-<li><p><strong>children_selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The selector to find the children elements inside of the first element.</p></li>
+<li><p><strong>element_selector</strong> (<em>str</em>) – The selector to find the first element.</p></li>
+<li><p><strong>children_selector</strong> (<em>str</em>) – The selector to find the children elements inside of the first element.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The count of elements matching the children_selector inside of element_selector.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -708,7 +710,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <a class="reference external" href="https://po-ui.io/guides/Avatar">https://po-ui.io/guides/Avatar</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – <ul class="simple">
+<dd class="field-odd"><p><strong>position</strong> (<em>int</em>) – <ul class="simple">
 <li><p><strong>Default:</strong> 1</p></li>
 </ul>
 </p>
@@ -750,6 +752,40 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_checkbox">
+<span class="sig-name descname"><span class="pre">click_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox" title="Link to this definition"></a></dt>
+<dd><p>Click on the POUI Checkbox.
+<a class="reference external" href="https://po-ui.io/documentation/po-checkbox">https://po-ui.io/documentation/po-checkbox</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickCheckBox</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CheckBox label&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_combo">
+<span class="sig-name descname"><span class="pre">click_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_combo" title="Link to this definition"></a></dt>
+<dd><p>Select a value for list combo inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field</strong> – label of field</p>
+</dd>
+</dl>
+<p>:type : str
+:param value: value to input on field
+:type : str
+:param position:
+:type : int
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_icon">
 <span class="sig-name descname"><span class="pre">click_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_icon" title="Link to this definition"></a></dt>
 <dd><p>Click on the POUI Icon by label, class_name or both.
@@ -757,9 +793,9 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The tooltip name for icon</p></li>
-<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The POUI class name for icon</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>)</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – The tooltip name for icon</p></li>
+<li><p><strong>class_name</strong> (<em>str</em>) – The POUI class name for icon</p></li>
+<li><p><strong>position</strong> (<em>int</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -776,13 +812,25 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_po_list_box">
+<span class="sig-name descname"><span class="pre">click_po_list_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – Value to select on po-list-box</p>
+</dd>
+</dl>
+<p>:type str
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_popup">
 <span class="sig-name descname"><span class="pre">click_popup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_popup" title="Link to this definition"></a></dt>
 <dd><p>Click on the POUI Profile Avatar icon.
 <a class="reference external" href="https://po-ui.io/documentation/po-popup">https://po-ui.io/documentation/po-popup</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>)</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -911,7 +959,7 @@ Filter and remove tsvg class an return a container_filtered</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>List</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – A list of strings to be replaced in each message.</p></li>
+<li><p><strong>args</strong> (<em>List</em><em> of </em><em>str</em>) – A list of strings to be replaced in each message.</p></li>
 <li><p><strong>message_type</strong> (<em>enum.MessageType</em>) – Enum of which message type should be created. - <strong>Default:</strong> enum.MessageType.Correct</p></li>
 </ul>
 </dd>
@@ -943,17 +991,17 @@ Filter and remove tsvg class an return a container_filtered</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The first term to use on a search of element</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first term to use on a search of element</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType</em>) – Type of element search. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – Second term to use on a search of element. Used in MIXED search. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if element is present. False if element is not present.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -978,7 +1026,7 @@ Filter and remove tsvg class an return a container_filtered</p>
 Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>change_env</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if the method is being called by ChangeEnvironment. - <strong>Default:</strong> False</p>
+<dd class="field-odd"><p><strong>change_env</strong> (<em>bool</em>) – Boolean if the method is being called by ChangeEnvironment. - <strong>Default:</strong> False</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1004,7 +1052,7 @@ is triggered.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element_list</strong> (<em>Beautiful Soup object list</em>) – The list to be filtered</p></li>
-<li><p><strong>expected_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The expected tooltip text.</p></li>
+<li><p><strong>expected_text</strong> (<em>str</em>) – The expected tooltip text.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1059,7 +1107,7 @@ Filter and remove a specified character with regex, return only displayed elemen
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The label text to be searched</p></li>
+<li><p><strong>label_text</strong> (<em>str</em>) – The label text to be searched</p></li>
 <li><p><strong>container</strong> (<em>BeautifulSoup object</em>) – The main container object to be used</p></li>
 </ul>
 </dd>
@@ -1081,7 +1129,7 @@ Filter and remove a specified character with regex, return only displayed elemen
 <span class="sig-name descname"><span class="pre">get_config_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_config_value" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>json_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Json Key in config.json</p>
+<dd class="field-odd"><p><strong>json_key</strong> (<em>str</em>) – Json Key in config.json</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Json Key item in config.json</p>
@@ -1123,8 +1171,8 @@ Internal method of input_value and CheckResult.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Field name or field label to be searched</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Field name or field label to be searched</p></li>
+<li><p><strong>name_attr</strong> (<em>bool</em>) – Boolean if search by Name attribute must be forced. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1180,7 +1228,7 @@ Internal method of input_value and CheckResult.</p>
 <dd class="field-odd"><p>The current language of the html.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1211,7 +1259,7 @@ Internal method of input_value and CheckResult.</p>
 <dd class="field-odd"><p>The current release of the Protheus.</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1290,7 +1338,7 @@ Internal method of input_value and CheckResult.</p>
 <dd class="field-even"><p>The value or text of passed element</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1308,8 +1356,8 @@ Internal method of input_value and CheckResult.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Message to be logged</p></li>
-<li><p><strong>new_log_line</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Message to be logged</p></li>
+<li><p><strong>new_log_line</strong> (<em>bool</em>) – Boolean value if Message should be logged as new line or not. - <strong>Default:</strong> True</p></li>
 </ul>
 </dd>
 </dl>
@@ -1328,9 +1376,9 @@ Internal method of input_value and CheckResult.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field whose values would be compared</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The value the user expects</p></li>
-<li><p><strong>captured_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The value that was captured on the screen</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field whose values would be compared</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – The value the user expects</p></li>
+<li><p><strong>captured_value</strong> (<em>str</em>) – The value that was captured on the screen</p></li>
 </ul>
 </dd>
 </dl>
@@ -1357,12 +1405,12 @@ The folder must be entered in the CSVPath parameter in the config.json. Ex:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>csv_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – .csv file name</p></li>
-<li><p><strong>delimiter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Delimiter option such like ‘;’ or ‘,’ or ‘|’</p></li>
-<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – To files with Header is possible return only a column by header name or Int value for no header files</p></li>
-<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Indicate with the file contains a Header or not default is Header None</p></li>
-<li><p><strong>filter_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Is possible to filter a specific value by column and value content, if value is int starts with number 1</p></li>
-<li><p><strong>filter_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Value used in pair with filter_column parameter</p></li>
+<li><p><strong>csv_file</strong> (<em>str</em>) – .csv file name</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – Delimiter option such like ‘;’ or ‘,’ or ‘|’</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – To files with Header is possible return only a column by header name or Int value for no header files</p></li>
+<li><p><strong>header</strong> (<em>bool</em>) – Indicate with the file contains a Header or not default is Header None</p></li>
+<li><p><strong>filter_column</strong> (<em>str</em><em> or </em><em>int</em>) – Is possible to filter a specific value by column and value content, if value is int starts with number 1</p></li>
+<li><p><strong>filter_value</strong> (<em>str</em>) – Value used in pair with filter_column parameter</p></li>
 </ul>
 </dd>
 </dl>
@@ -1394,6 +1442,22 @@ The folder must be entered in the CSVPath parameter in the config.json. Ex:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file_csv</span> <span class="n">_no_header_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">OpenCSV</span><span class="p">(</span><span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="n">csv_file</span><span class="o">=</span><span class="s2">&quot;no_header.csv&quot;</span><span class="p">,</span> <span class="n">filter_column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">filter_value</span><span class="o">=</span><span class="s1">&#39;A00_FILIAL&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.open_input_combo">
+<span class="sig-name descname"><span class="pre">open_input_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">po_combo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>po_combo</strong> – po-combo object</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bs4 object</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1436,8 +1500,8 @@ Usage:
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The initial program to load</p></li>
-<li><p><strong>environment</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The environment to connect</p></li>
+<li><p><strong>initial_program</strong> (<em>str</em>) – The initial program to load</p></li>
+<li><p><strong>environment</strong> (<em>str</em>) – The environment to connect</p></li>
 </ul>
 </dd>
 </dl>
@@ -1520,8 +1584,8 @@ Usage:
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The POUI class name for icon</p></li>
-<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><em>object</em></a>) – bs4 element</p></li>
+<li><p><strong>class_name</strong> (<em>str</em>) – The POUI class name for icon</p></li>
+<li><p><strong>elements</strong> (<em>object</em>) – bs4 element</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1645,8 +1709,8 @@ Meant to be used inside of a loop.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>element_function</strong> (<em>function object</em>) – The function that returns the element that would receive the value.</p></li>
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>selenium.webdriver.common.keys</em>) – The value that would be sent to the element.</p></li>
-<li><p><strong>try_counter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – This counter will decide which technique should be used. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>selenium.webdriver.common.keys</em>) – The value that would be sent to the element.</p></li>
+<li><p><strong>try_counter</strong> (<em>int</em>) – This counter will decide which technique should be used. - <strong>Default:</strong> 0</p></li>
 </ul>
 </dd>
 </dl>
@@ -1677,12 +1741,12 @@ Meant to be used inside of a loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The first search term. A text or a selector.</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first search term. A text or a selector.</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>presence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
-<li><p><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
+<li><p><strong>presence</strong> (<em>bool</em>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
+<li><p><strong>main_container</strong> (<em>str</em>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 </dl>
@@ -1746,14 +1810,14 @@ Wait element Lose focus</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The first search term. A text or a selector.</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first search term. A text or a selector.</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – The maximum amount of time of wait. - <strong>Default:</strong> 5.0</p></li>
+<li><p><strong>timeout</strong> (<em>float</em>) – The maximum amount of time of wait. - <strong>Default:</strong> 5.0</p></li>
 <li><p><strong>timeout</strong> – The amount of time each step should wait. - <strong>Default:</strong> 0.1</p></li>
-<li><p><strong>presence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
-<li><p><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
+<li><p><strong>presence</strong> (<em>bool</em>) – If the element should exist or not in the screen. - <strong>Default:</strong> False</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – If the element should exist at a specific position. e.g. The fourth button. - <strong>Default:</strong> 0</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
+<li><p><strong>main_container</strong> (<em>str</em>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 </dl>
@@ -1780,12 +1844,12 @@ Wait element Lose focus</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The first search term. A text or a selector</p></li>
+<li><p><strong>term</strong> (<em>str</em>) – The first search term. A text or a selector</p></li>
 <li><p><strong>scrap_type</strong> (<em>enum.ScrapType.</em>) – The type of webscraping. - <strong>Default:</strong> enum.ScrapType.TEXT</p></li>
-<li><p><strong>optional_term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
-<li><p><strong>main_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>optional_term</strong> (<em>str</em>) – The second search term. A selector used in MIXED webscraping. - <strong>Default:</strong> None</p></li>
+<li><p><strong>label</strong> (<em>bool</em>) – If the search is based on a label near the element. - <strong>Default:</strong> False</p></li>
+<li><p><strong>main_container</strong> (<em>str</em>) – The selector of a container element that has all other elements. - <strong>Default:</strong> None</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

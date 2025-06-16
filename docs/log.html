@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Log &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Log &mdash; TIR 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=8d563738"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=51b770b3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -61,8 +59,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.generate_dict"><code class="docutils literal notranslate"><span class="pre">Log.generate_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.generate_header"><code class="docutils literal notranslate"><span class="pre">Log.generate_header()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.generate_json"><code class="docutils literal notranslate"><span class="pre">Log.generate_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.generate_log"><code class="docutils literal notranslate"><span class="pre">Log.generate_log()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.generate_result"><code class="docutils literal notranslate"><span class="pre">Log.generate_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.get_file_name"><code class="docutils literal notranslate"><span class="pre">Log.get_file_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.get_program_name"><code class="docutils literal notranslate"><span class="pre">Log.get_program_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.get_testcase_stack"><code class="docutils literal notranslate"><span class="pre">Log.get_testcase_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.ident_test"><code class="docutils literal notranslate"><span class="pre">Log.ident_test()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.list_of_testcases"><code class="docutils literal notranslate"><span class="pre">Log.list_of_testcases()</span></code></a></li>
@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.printable_message"><code class="docutils literal notranslate"><span class="pre">Log.printable_message()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.save_file"><code class="docutils literal notranslate"><span class="pre">Log.save_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.save_json_file"><code class="docutils literal notranslate"><span class="pre">Log.save_json_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.save_log_locally"><code class="docutils literal notranslate"><span class="pre">Log.save_log_locally()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.save_response_log"><code class="docutils literal notranslate"><span class="pre">Log.save_response_log()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.screenshot_file_name"><code class="docutils literal notranslate"><span class="pre">Log.screenshot_file_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.log.Log.search_stack"><code class="docutils literal notranslate"><span class="pre">Log.search_stack()</span></code></a></li>
@@ -111,7 +112,7 @@
 <span id="log"></span><h1>Log<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.core.log.Log">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.log.</span></span><span class="sig-name descname"><span class="pre">Log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suite_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'19800101'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">release</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">country</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TIR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.log.</span></span><span class="sig-name descname"><span class="pre">Log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suite_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'19800101'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">release</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">country</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TIR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log" title="Link to this definition"></a></dt>
 <dd><p>This class is instantiated to create the log file and to append the results and failures to it.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instanted inside base.py:</span>
@@ -149,14 +150,22 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.log.Log.generate_log">
+<span class="sig-name descname"><span class="pre">generate_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_log" title="Link to this definition"></a></dt>
+<dd><p>Generates a log entry with the execution details and sends it to the API.
+This method collects various details such as execution time, user, station, program, and results,
+and formats them into a dictionary that is then sent as a JSON payload to the specified API endpoint.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.log.Log.generate_result">
 <span class="sig-name descname"><span class="pre">generate_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.generate_result" title="Link to this definition"></a></dt>
 <dd><p>Generate a result of testcase and export to a json.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – The result of the case.</p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The message to be logged..</p></li>
+<li><p><strong>result</strong> (<em>bool</em>) – The result of the case.</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – The message to be logged..</p></li>
 </ul>
 </dd>
 </dl>
@@ -171,6 +180,12 @@
 <dt class="sig sig-object py" id="tir.technologies.core.log.Log.get_file_name">
 <span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.get_file_name" title="Link to this definition"></a></dt>
 <dd><p>Returns a Testsuite name</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.log.Log.get_program_name">
+<span class="sig-name descname"><span class="pre">get_program_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.get_program_name" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -209,8 +224,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – The result of the case.</p></li>
-<li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The message to be logged..</p></li>
+<li><p><strong>result</strong> (<em>bool</em>) – The result of the case.</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – The message to be logged..</p></li>
 </ul>
 </dd>
 </dl>
@@ -257,6 +272,12 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.log.Log.save_log_locally">
+<span class="sig-name descname"><span class="pre">save_log_locally</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_log_locally" title="Link to this definition"></a></dt>
+<dd><p>Saves the log data locally as a JSON file.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.log.Log.save_response_log">
 <span class="sig-name descname"><span class="pre">save_response_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.log.Log.save_response_log" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -280,13 +301,13 @@
 <dd><p>Returns True if passed function is present in the call stack.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>function</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Name of the function</p>
+<dd class="field-odd"><p><strong>function</strong> (<em>str</em>) – Name of the function</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean if passed function is present or not in the call stack.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -330,10 +351,10 @@
 <dd class="field-even"><p>Selenium Driver</p>
 </dd>
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Usage:</p>
