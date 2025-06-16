@@ -29,6 +29,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Documentation :: Sphinx',
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries :: Python Modules',
