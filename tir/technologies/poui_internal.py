@@ -2308,7 +2308,7 @@ class PouiInternal(Base):
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -2448,7 +2448,7 @@ class PouiInternal(Base):
             self.log.new_line(False, self.message)
 
         if self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         self.errors = []
 
@@ -3471,6 +3471,7 @@ class PouiInternal(Base):
         :return: None
         """
         element = None
+        UNNAMED_COLUMN = 'Unnamed: 0'
 
         if not self.config.poui:
             self.twebview_context = True
@@ -3496,7 +3497,7 @@ class PouiInternal(Base):
                     if click_cell:
                         column_index_number = df.columns.get_loc(click_cell)
 
-                    if first_column and second_column:
+                    if first_column and second_column and first_column != UNNAMED_COLUMN:
                         index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
@@ -3509,6 +3510,15 @@ class PouiInternal(Base):
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
                         if content:
                             index_number.append(first_column_formatted_values.index(content))
+                            if len(index_number) > 0:
+                                index_number = [index_number[0]]
+                    elif first_column and second_column and second_content:
+                        second_column = next(iter(list(filter(lambda x: second_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        second_column_values = df[second_column].values
+                        second_column_formatted_values = list(map(lambda x: x.replace(' ', ''), second_column_values))
+                        content = next(iter(list(filter(lambda x: x == second_content.replace(' ', ''), second_column_formatted_values))), None)
+                        if content:
+                            index_number.append(second_column_formatted_values.index(content))
                             if len(index_number) > 0:
                                 index_number = [index_number[0]]
                     else:
@@ -3541,8 +3551,15 @@ class PouiInternal(Base):
                 else:
                     if column_index_number:
                         element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+
                     else:
                         element_bs4 = next(iter(tr[index].select('td')))
+                        if first_column == UNNAMED_COLUMN:
+                            clickable_spans = tr[index].select('td')[0].select('.po-clickable')
+                            if clickable_spans:
+                                element_bs4 = clickable_spans[0]
+                            else:
+                                self.log_error("No clickable spans found in the table row.")
                     self.poui_click(element_bs4)
         else:
             index = index_number
