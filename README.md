@@ -1,7 +1,7 @@
 
 # TIR - Test Interface Robot
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/totvs/tir)
-
+![Python Version](https://img.shields.io/pypi/pyversions/tir-framework)
 TIR is a Python module used to create test scripts for web interfaces. With it, you can easily create and execute test suites and test cases for any supported web interface systems, such as Protheus Webapp.
 
 ### Current Supported Technologies
