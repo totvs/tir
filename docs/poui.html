@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Poui &mdash; TIR 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Poui &mdash; TIR 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=8d563738"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=51b770b3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -55,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickAvatar"><code class="docutils literal notranslate"><span class="pre">Poui.ClickAvatar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickButton"><code class="docutils literal notranslate"><span class="pre">Poui.ClickButton()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.ClickByLocator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCheckBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
@@ -68,6 +67,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.POSearch"><code class="docutils literal notranslate"><span class="pre">Poui.POSearch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.POtabs"><code class="docutils literal notranslate"><span class="pre">Poui.POtabs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.TearDown"><code class="docutils literal notranslate"><span class="pre">Poui.TearDown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.WaitProcessing"><code class="docutils literal notranslate"><span class="pre">Poui.WaitProcessing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.WaitShow"><code class="docutils literal notranslate"><span class="pre">Poui.WaitShow()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -111,7 +112,7 @@
 <span id="poui"></span><h1>Poui<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.main.Poui">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Poui</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Poui</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.AssertFalse">
 <span class="sig-name descname"><span class="pre">AssertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.AssertFalse" title="Link to this definition"></a></dt>
@@ -143,10 +144,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The value that the field is expected to contain.</p></li>
-<li><p><strong>po_component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – POUI component name that you want to check content on screen</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>user_value</strong> (<em>str</em>) – The value that the field is expected to contain.</p></li>
+<li><p><strong>po_component</strong> (<em>str</em>) – POUI component name that you want to check content on screen</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -164,7 +165,7 @@
 <a class="reference external" href="https://po-ui.io/documentation/po-avatar">https://po-ui.io/documentation/po-avatar</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – <ul class="simple">
+<dd class="field-odd"><p><strong>position</strong> (<em>int</em>) – <ul class="simple">
 <li><p><strong>Default:</strong> 1</p></li>
 </ul>
 </p>
@@ -219,9 +220,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
-<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
-<li><p><strong>right_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Perform a right-click action if True (default is False).</p></li>
+<li><p><strong>selector</strong> (<em>str</em>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<em>str</em>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>right_click</strong> (<em>bool</em>) – Perform a right-click action if True (default is False).</p></li>
 </ul>
 </dd>
 </dl>
@@ -229,6 +230,23 @@ before using these methods in the script.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper_Poui</span><span class="o">.</span><span class="n">ClickByLocator</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="s1">&#39;.po-page-header-actions &gt; po-button:nth-child(1) &gt; button:nth-child(1)&#39;</span><span class="p">,</span> <span class="n">locator</span><span class="o">=</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">)</span>
 <span class="go">:return: None</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickCheckBox">
+<span class="sig-name descname"><span class="pre">ClickCheckBox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickCheckBox" title="Link to this definition"></a></dt>
+<dd><p>ClickChecKBox to check or uncheck box selectors
+<a class="reference external" href="https://po-ui.io/documentation/po-checkbox">https://po-ui.io/documentation/po-checkbox</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The CheckBox label</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickCheckBox</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -263,9 +281,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The tooltip name for icon</p></li>
-<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The POUI class name for icon</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>)</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – The tooltip name for icon</p></li>
+<li><p><strong>class_name</strong> (<em>str</em>) – The POUI class name for icon</p></li>
+<li><p><strong>position</strong> (<em>int</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -302,7 +320,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-popup">https://po-ui.io/documentation/po-popup</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>)</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -343,14 +361,14 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>first_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Column name to be used as reference.</p></li>
-<li><p><strong>second_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Column name to be used as reference.</p></li>
-<li><p><strong>first_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content of the column to be searched.</p></li>
-<li><p><strong>second_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content of the column to be searched.</p></li>
-<li><p><strong>table_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
-<li><p><strong>click_cell</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content to click based on a column position to close the axis</p></li>
-<li><p><strong>checkbox</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If you want to click on the checkbox component in the table</p></li>
+<li><p><strong>first_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
+<li><p><strong>second_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
+<li><p><strong>first_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
+<li><p><strong>second_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
+<li><p><strong>table_number</strong> (<em>int</em>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>itens</strong> (<em>bool</em>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
+<li><p><strong>click_cell</strong> (<em>str</em>) – Content to click based on a column position to close the axis</p></li>
+<li><p><strong>checkbox</strong> (<em>bool</em>) – If you want to click on the checkbox component in the table</p></li>
 </ul>
 </dd>
 </dl>
@@ -411,9 +429,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
-<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The value to be used (e.g., for input or interaction).</p></li>
+<li><p><strong>selector</strong> (<em>str</em>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<em>str</em>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value to be used (e.g., for input or interaction).</p></li>
 </ul>
 </dd>
 </dl>
@@ -433,9 +451,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Input text title that you want to fill</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Value that fill in input</p></li>
-<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<em>str</em>) – Input text title that you want to fill</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – Value that fill in input</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -454,7 +472,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-page-dynamic-search">https://po-ui.io/documentation/po-page-dynamic-search</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Content to be Search.</p>
+<dd class="field-odd"><p><strong>content</strong> (<em>str</em>) – Content to be Search.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -472,7 +490,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-tabs">https://po-ui.io/documentation/po-tabs</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The tab label name</p>
+<dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The tab label name</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
@@ -489,6 +507,41 @@ before using these methods in the script.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#Calling the method</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">inst</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">TearDown</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.WaitProcessing">
+<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.WaitProcessing" title="Link to this definition"></a></dt>
+<dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>itens</strong> (<em>str</em>) – List of itens that will hold the wait.</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitProcessing</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.WaitShow">
+<span class="sig-name descname"><span class="pre">WaitShow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">throw_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.WaitShow" title="Link to this definition"></a></dt>
+<dd><p>Search string that was sent and wait show the elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>itens</strong> – String that will hold the wait.</p></li>
+<li><p><strong>timeout</strong> (<em>str</em>) – Timeout that wait before return.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitShow</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

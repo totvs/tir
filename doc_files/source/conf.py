@@ -205,7 +205,11 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'Selenium': ('https://selenium-python.readthedocs.io', None),
+    'Beautiful Soup': ('https://www.crummy.com/software/BeautifulSoup/bs4/doc/', None)
+}
 
 # # At the bottom of conf.py
 # github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/doc/'
