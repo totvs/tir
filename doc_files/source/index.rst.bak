@@ -5,7 +5,7 @@
 
 Test Interface Robot
 =====================
-.. image:: img/completoCor.png
+.. image:: img/CompletoCor.png
    :width: 800
 
 .. toctree::
