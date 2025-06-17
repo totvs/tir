@@ -281,25 +281,27 @@ class WebappInternal(Base):
                 self.config.language = self.get_language()
                 self.language = LanguagePack(self.config.language)
 
+           
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
             self.log.webapp_version = self.driver.execute_script("return app.VERSION")
 
-            self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
+            if not self.config.sso_login:    
+                self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
 
-            endtime = time.time() + self.config.time_out
-            if not self.config.poui_login:
-                if self.webapp_shadowroot():
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container="body", optional_term='wa-text-view'))):
-                        self.update_password()
-                else:
-                    while (time.time() < endtime and (
-                    not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
-                                            main_container=".twindow", optional_term=".tsay"))):
-                        self.update_password()
+                endtime = time.time() + self.config.time_out
+                if not self.config.poui_login:
+                    if self.webapp_shadowroot():
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container="body", optional_term='wa-text-view'))):
+                            self.update_password()
+                    else:
+                        while (time.time() < endtime and (
+                        not self.element_exists(term=self.language.database, scrap_type=enum.ScrapType.MIXED,
+                                                main_container=".twindow", optional_term=".tsay"))):
+                            self.update_password()
 
             self.environment_screen()
 
@@ -845,6 +847,7 @@ class WebappInternal(Base):
         send_type = 1
         base_date_value = ''
         group_bs = None
+        datepicker_main = None
 
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
@@ -878,8 +881,13 @@ class WebappInternal(Base):
                     if self.webapp_shadowroot() and not self.config.poui_login:
                         date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))),
                                             None)
+                        datepicker_is_valid =lambda: True
                     else:
                         date = lambda: self.soup_to_selenium(base_date)
+                        datepicker_main = base_date.find_parent('po-datepicker')
+                        if datepicker_main:
+                            datepicker_element = self.soup_to_selenium(datepicker_main)
+                            datepicker_is_valid = lambda: self.poui_datepicker_is_valid(datepicker_element)
 
                     if self.config.poui_login:
                         self.switch_to_iframe()
@@ -904,7 +912,7 @@ class WebappInternal(Base):
                         if send_type > 3:
                             send_type = 1
 
-                        if base_date_value.strip() == self.config.date.strip():
+                        if base_date_value.strip() == self.config.date.strip() and datepicker_is_valid():
                             break
 
                         if not self.is_active_element(date()) and click_type == 3:
@@ -913,6 +921,23 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
+
+
+    def poui_datepicker_is_valid(self, datepicker):
+        """
+
+        :param datepicker: beautiful soup datepicker tag component
+        :type datepicker: BeautifulSoup
+
+        :return: True when valid else False
+        """
+        try:
+            datepicker_class = datepicker.get_attribute("class").split()
+            return "ng-valid" in datepicker_class
+        except (AttributeError, TypeError) as e:
+            logger().debug(f'Something wrong with Datepicker, please check it: {e}')
+            return False
+
 
     def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
@@ -954,7 +979,8 @@ class WebappInternal(Base):
                     click_type = 1
 
         if not self.config.group:
-            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container)))
+            poui_iframe = True if self.config.poui_login else False
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=poui_iframe))
             if group_content:
                 self.config.group = group_content
             else:
@@ -2938,7 +2964,7 @@ class WebappInternal(Base):
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
                 else:
-                        input_field = lambda : textarea
+                    input_field = lambda : textarea
             else:
                 input_field = lambda : self.soup_to_selenium(element)
 
@@ -2966,7 +2992,7 @@ class WebappInternal(Base):
                     main_value = value[0:6] + value[8:10]
 
                 if self.element_name(element) == "input":
-                        valtype = self.value_type(element.attrs["type"])
+                    valtype = self.value_type(element.attrs["type"])
 
                 self.scroll_to_element(input_field())
 
@@ -3928,7 +3954,7 @@ class WebappInternal(Base):
                 textarea = next(iter(top_layer.select("textarea")), None)
                 textarea_value = self.driver.execute_script(f"return arguments[0].value", self.driver.find_element(By.XPATH, xpath_soup(textarea)))
 
-            error_paragraphs = textarea_value.split("\n\n")
+            error_paragraphs = re.split(r'\n\s*\n', textarea_value.strip())
             error_message = f"Error Log: {error_paragraphs[0]} - {error_paragraphs[1]}" if len(error_paragraphs) > 2 else label
             message = error_message.replace("\n", " ")
 
@@ -8134,7 +8160,7 @@ class WebappInternal(Base):
         if new_log_line and proceed_action():
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
         if not self.config.skip_restart and len(self.log.list_of_testcases()) >= 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -8279,9 +8305,6 @@ class WebappInternal(Base):
         else:
             twebview = False
 
-        endtime = time.time() + self.config.time_out
-        halftime = ((endtime - time.time()) / 2)
-
         if(self.config.smart_test or self.config.parameter_url):
 
             if self.tmenu_screen is None:
@@ -8290,11 +8313,18 @@ class WebappInternal(Base):
             value = self.parameter_url_value( self.config.language.lower(),
                 {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
 
+            logger().debug(f"Adding parameter url...")
+
             self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                 branch}&a={value}&Env={self.config.environment}""")
 
-            while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
-                scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
+            logger().debug(f"Parameter Url added")
+
+            endtime = time.time() + self.config.time_out
+            halftime = time.time() + 30
+
+            while (time.time() < endtime and not self.element_exists(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']",
+                                    scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
 
                 logger().info(f"Start while timeout: {parameter}")
                 tmessagebox = self.web_scrap(".tmessagebox", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -8303,7 +8333,8 @@ class WebappInternal(Base):
                     self.restart_counter = 3
                     self.log_error(f" AddParameter error: {tmessagebox[0].text}")
 
-                if ( not tmessagebox and ((endtime) - time.time() < halftime) ):
+                if ( not tmessagebox and time.time() >= halftime):
+                    halftime = time.time() + 30
                     logger().info(f"Enter if tmessagebox: {parameter}")
                     self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                         branch}&a={value}&Env={self.config.environment}""")
@@ -8749,7 +8780,7 @@ class WebappInternal(Base):
             self.log.new_line(False, self.message)
 
         if self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         self.errors = []
 
@@ -9028,6 +9059,7 @@ class WebappInternal(Base):
 
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
+        dialog_layers = self.check_layers('wa-dialog')
 
         for row, label in enumerate(labels):
 
@@ -9123,6 +9155,10 @@ class WebappInternal(Base):
                                                 
                                                 if not success:
                                                     success = True if is_element_acessible() else False
+
+                                                    # If dialog layers show up through last click
+                                                    if not success and dialog_layers < self.check_layers('wa-dialog'):
+                                                        success = True
 
                                                 if success and right_click:
                                                     last_zindex = self.return_last_zindex()
@@ -9319,10 +9355,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+        tr = []
 
         if self.webapp_shadowroot():
-           tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(container.select('wa-tree')[tree_number]))
-           return tr
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+            return tr
         else:
             tr = container.select("tr")
             tr_class = list(filter(lambda x: "class" in x.attrs, tr))
@@ -9591,7 +9630,7 @@ class WebappInternal(Base):
                 self.SetButton(self.language.yes)
 
         if len(self.log.table_rows[1:]) > 0 and not self.log.has_csv_condition():
-            self.log.save_file()
+            self.log.generate_log()
 
         if self.config.num_exec:
             if not self.num_exec.post_exec(self.config.url_set_end_exec, 'ErrorSetFimExec'):
@@ -9877,6 +9916,9 @@ class WebappInternal(Base):
 
         except TimeoutException as e:
             logger().exception(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
+            pass
+        except StaleElementReferenceException as e:
+            logger().exception(f"Element is stale, skipping...")
             pass
 
         if timeout:
