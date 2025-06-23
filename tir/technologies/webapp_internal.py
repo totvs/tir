@@ -6864,7 +6864,7 @@ class WebappInternal(Base):
         down_count = 0
         success = False
         text = ''
-        tryes = 0
+        tries = 0
 
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -6949,9 +6949,9 @@ class WebappInternal(Base):
                     if success and get_value:
                         if text:
                             return text
-                        if tryes <= 2: # if not found any text using GetValue try twice more
+                        if tries <= 2: # if not found any text using GetValue try twice more
                             success = False
-                            tryes += 1
+                            tries += 1
 
         for i in range(down_count):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
