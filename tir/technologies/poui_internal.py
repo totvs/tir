@@ -3887,3 +3887,22 @@ class PouiInternal(Base):
             endtime = time.time() + self.config.time_out
             while (closed_combo() and time.time() < endtime):
                 self.click(self.soup_to_selenium(combo_input, twebview=True))
+
+    def exists_modal(self, title):
+        """
+        :param po-modal: po-modal-title
+        :type: 
+        :return:
+        """
+        try:
+            self.wait_element(term='.po-modal', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            modals = self.web_scrap(term=title, scrap_type=enum.ScrapType.MIXED, optional_term=".po-modal", main_container='body', check_help=False)
+            if not modals:
+                return False
+            for modal in modals:
+                title_element = modal.select_one('.po-modal-title')
+                if title_element and title.lower().strip() in title_element.text.lower().strip():
+                    return True
+            return False
+        except Exception:
+            return False

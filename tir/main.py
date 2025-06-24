@@ -2004,3 +2004,19 @@ class Poui():
         >>> oHelper.ClickCheckBox("Processing")
         """
         self.__poui.click_checkbox(label)
+
+    def ExistsModal(self, string=''):
+        """
+        ExistsModal to validate if a modal exists in the screen.
+        https://po-ui.io/documentation/po-modal
+        
+        :param label: Expected modal title to be checked.
+        :type label: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> if self.oHelper_Poui.ExistsModal("Novidade: Acompanhamento de custos!"):
+        >>>     print('Found!')
+        """
+        return self.__poui.exists_modal(string)
