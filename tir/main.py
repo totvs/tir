@@ -2020,3 +2020,18 @@ class Poui():
         >>>     print('Found!')
         """
         return self.__poui.exists_modal(string)
+    
+    def ClickSearchIcon(self, label):
+        """
+        Clicks on the Search Icon of POUI component.
+        https://po-ui.io/documentation/po-search
+
+        :param label: The Search Icon label
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickSearchIcon("Search")
+        """
+        self.__poui.click_search_icon(label)
