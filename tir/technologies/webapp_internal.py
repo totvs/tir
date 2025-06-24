@@ -3384,7 +3384,8 @@ class WebappInternal(Base):
                     selenium_element = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                     value = self.get_web_value(selenium_element())
         else:
-            field_array = [line-1, field, "", grid_number-1]
+            field_array = [line-1, field, "", grid_number-1, position, True]
+
             if re.match(r"\w+(_)", field_array[1]):
                 x3_dictionaries = self.get_x3_dictionaries([field_array[1].strip()])
             value = self.check_grid(field_array, x3_dictionaries, get_value=True, position=position)
@@ -6785,6 +6786,8 @@ class WebappInternal(Base):
         obscured_row = None
         down_count = 0
         success = False
+        text = ''
+        tries = 0
 
         endtime = time.time() + self.config.time_out
         if x3_dictionaries:
@@ -6866,18 +6869,23 @@ class WebappInternal(Base):
                                 text = self.get_status_color(icon)
                         success = True
 
-                    if success and get_value and text:
-                        return text
+                    if success and get_value:
+                        if text:
+                            return text
+                        if tries <= 2: # if not found any text using GetValue try twice more
+                            success = False
+                            tries += 1
 
         for i in range(down_count):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
 
         field_name = f"({field[0]}, {column_name})"
+        logger().info(f"Collected value: {text}")
+
         if field[5]:
             self.log_result(field_name, field[2].lower(), text.lower())
         else:
             self.log_result(field_name, field[2], text)
-        logger().info(f"Collected value: {text}")
         if not success:
             self.check_grid_error(grids, headers, column_name, rows, columns, field)
 
