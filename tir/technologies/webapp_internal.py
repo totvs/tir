@@ -2960,7 +2960,7 @@ class WebappInternal(Base):
             multiget = "dict-tmultiget"
 
             if multiget in element.attrs['class'] if element.get('class') else None:
-                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element))))
+                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element))), None)
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
                 else:
