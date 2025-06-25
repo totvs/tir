@@ -2004,3 +2004,36 @@ class Poui():
         >>> oHelper.ClickCheckBox("Processing")
         """
         self.__poui.click_checkbox(label)
+
+    def IfExists(self, string='', timeout=5):
+        """
+        Returns True if element exists in timeout or return False if not exist.
+
+        :param string: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
+        """
+        return self.__poui.WaitShow(string, timeout, throw_error=False)
+    
+    def ClickSearchIcon(self, label):
+        """
+        Clicks on the Search Icon of POUI component.
+        https://po-ui.io/documentation/po-search
+
+        :param label: The Search Icon label
+        :type label: str
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickSearchIcon("Search")
+        """
+        self.__poui.click_search_icon(label)

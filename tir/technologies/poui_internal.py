@@ -1850,10 +1850,12 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term=".po-loading-overlay, span, .po-modal-title", main_container='body', check_help=False)
 
             if element:
-                return element
+                for el in element:
+                    if el.text and string.lower().strip() in el.text.lower().strip():
+                        return element
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
@@ -3887,3 +3889,41 @@ class PouiInternal(Base):
             endtime = time.time() + self.config.time_out
             while (closed_combo() and time.time() < endtime):
                 self.click(self.soup_to_selenium(combo_input, twebview=True))
+
+    def click_search_icon(self, label=None):
+        """
+        Busca o seletor '.po-field-icon' relacionado ao label informado e clica nele para abrir a janela de busca.
+        :param label: Texto do label associado ao campo de busca.
+        :type label: str
+        """
+        try:
+            self.wait_element(term='.po-field-icon', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            field_container = None
+
+            containers = self.web_scrap(term=".po-field-container", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', check_help=False)
+            if label:
+                if containers is not None:
+                    # Procura o container do campo pelo texto do label
+                    for container in containers:
+                        label_element = container.select_one('.po-label')
+                        if label_element and label.lower().strip() in label_element.text.lower().strip():
+                            field_container = container
+                            break
+            else:
+                # Se não passar label, pega o primeiro
+                field_container = containers[0] if containers else None
+
+            if field_container:
+                icon = field_container.select_one('.po-field-icon')
+                if icon:
+                    # Encontra o mesmo ícone no Selenium pelo índice
+                    self.scroll_to_element(self.soup_to_selenium(icon, twebview=True))
+                    self.set_element_focus(self.soup_to_selenium(icon, twebview=True))
+                    self.click(self.soup_to_selenium(icon, twebview=True))                
+                    logger().info(f"Ícone de busca do campo '{label}' clicado com sucesso.")
+                    return True
+            logger().warning(f"Ícone de busca do campo '{label}' não encontrado no DOM.")
+            return False
+        except Exception as e:
+            logger().error(f"Erro ao clicar no ícone de busca do campo '{label}': {e}")
+            return False    
