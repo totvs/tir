@@ -3914,9 +3914,10 @@ class PouiInternal(Base):
             if field_container:
                 icon = field_container.select_one('.po-field-icon')
                 if icon:
-                    self.scroll_to_element(self.soup_to_selenium(icon, twebview=True))
-                    self.set_element_focus(self.soup_to_selenium(icon, twebview=True))
-                    self.click(self.soup_to_selenium(icon, twebview=True))                
+                    selenium_icon = self.soup_to_selenium(icon, twebview=True)
+                    self.scroll_to_element(selenium_icon)
+                    self.set_element_focus(selenium_icon)
+                    self.click(selenium_icon)                
                     logger().info(f"Search icon for the '{label}' field clicked successfully.")
                     return True
             logger().warning(f"Search icon for the '{label}' field not found in the DOM.")
