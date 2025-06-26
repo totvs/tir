@@ -880,12 +880,12 @@ class Base(unittest.TestCase):
 
         return combo
 
-    def return_selected_combo_value(self, element):
+    def return_selected_combo_value(self, element, shadow_root=True, locator=False):
         """"
         [Internal]
         """
 
-        combo = self.return_combo_object(element)
+        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=shadow_root)
 
         if combo.all_selected_options:
             return combo.all_selected_options[0].text

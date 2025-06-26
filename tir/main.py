@@ -1690,7 +1690,7 @@ class Poui():
         >>> oHelper.ClickSelect('Espécie', 'Compra')
         :return:
         """
-        self.__poui.click_poui_component(field, value, position, selector="po-select", container=True)
+        self.__poui.click_select(field, value, position)
 
     def ClickButton(self, button='', position=1):
         """
