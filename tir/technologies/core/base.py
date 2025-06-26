@@ -885,7 +885,7 @@ class Base(unittest.TestCase):
         [Internal]
         """
 
-        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=shadow_root)
+        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if combo.all_selected_options:
             return combo.all_selected_options[0].text
