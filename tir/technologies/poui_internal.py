@@ -3892,9 +3892,9 @@ class PouiInternal(Base):
 
     def click_search_icon(self, label=None):
         """
-        Busca o seletor '.po-field-icon' relacionado ao label informado e clica nele para abrir a janela de busca.
-        :param label: Texto do label associado ao campo de busca.
-        :type label: str
+        :param label: po-field-icon
+        :type: str
+        :return:
         """
         try:
             self.wait_element(term='.po-field-icon', scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -3903,27 +3903,24 @@ class PouiInternal(Base):
             containers = self.web_scrap(term=".po-field-container", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', check_help=False)
             if label:
                 if containers is not None:
-                    # Procura o container do campo pelo texto do label
                     for container in containers:
                         label_element = container.select_one('.po-label')
                         if label_element and label.lower().strip() in label_element.text.lower().strip():
                             field_container = container
                             break
             else:
-                # Se não passar label, pega o primeiro
                 field_container = containers[0] if containers else None
 
             if field_container:
                 icon = field_container.select_one('.po-field-icon')
                 if icon:
-                    # Encontra o mesmo ícone no Selenium pelo índice
                     self.scroll_to_element(self.soup_to_selenium(icon, twebview=True))
                     self.set_element_focus(self.soup_to_selenium(icon, twebview=True))
                     self.click(self.soup_to_selenium(icon, twebview=True))                
-                    logger().info(f"Ícone de busca do campo '{label}' clicado com sucesso.")
+                    logger().info(f"Search icon for the '{label}' field clicked successfully.")
                     return True
-            logger().warning(f"Ícone de busca do campo '{label}' não encontrado no DOM.")
+            logger().warning(f"Search icon for the '{label}' field not found in the DOM.")
             return False
         except Exception as e:
-            logger().error(f"Erro ao clicar no ícone de busca do campo '{label}': {e}")
+            logger().error(f"Error clicking the search icon for the '{label}' field: {e}")
             return False    
