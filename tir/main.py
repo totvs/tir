@@ -2004,3 +2004,18 @@ class Poui():
         >>> oHelper.ClickCheckBox("Processing")
         """
         self.__poui.click_checkbox(label)
+
+    def IfExists(self, string='', timeout=5):
+        """
+        Returns True if element exists in timeout or return False if not exist.
+        :param string: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+        Usage:
+        >>> # Calling the method:
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
+        """
+        return self.__poui.WaitShow(string, timeout, throw_error=False)
