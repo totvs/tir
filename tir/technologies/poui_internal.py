@@ -3213,7 +3213,7 @@ class PouiInternal(Base):
 
             loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
 
-    def click_poui_component(self, field, value, position, selector, container):
+    def click_select(self, field, value, position):
         """
         
         :param field: Combo text title that you want to click.
@@ -3222,37 +3222,32 @@ class PouiInternal(Base):
         """
 
         position -= 1
-        element = None
         main_element = None
+        trated_field = field.strip()
+        select_bs = []
+        success = False
 
         if not self.config.poui:
             self.twebview_context = True
 
         logger().info(f"Clicking on {field}")
-        self.wait_element(term=selector)
+        self.wait_element(term='po-select')
         endtime = time.time() + self.config.time_out
-        while (not main_element and time.time() < endtime):
-            main_element = self.return_main_element(field, position, selector=selector, container=container)
+        while (not success and time.time() < endtime):
+            po_select_bs = self.web_scrap(term='po-select', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
-            if main_element:
-                span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
-                if span_icon:
+            if po_select_bs:
+                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x), po_select_bs))), None)
+                if select_element_filtred:
                     self.switch_to_iframe()
-                    self.driver.find_element(By.XPATH, xpath_soup(span_icon)).click()
-                    self.po_loading(selector)
+                    select_bs = select_element_filtred.find_next('select')
+                    if select_bs:
+                        self.select_combo(select_bs, value, shadow_root=False)
+                        current_option = self.return_selected_combo_value(select_bs, shadow_root=False)
+                        success = current_option == value
 
-                    ul = next(iter(main_element.select('ul')), None)
-                    if ul:
-                        li = ul.select('li')
-                        element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))),
-                                       None)
-                    else:
-                        self.log_error("Couldn't find table element.")
-
-                    if not element:
-                        self.log_error("Couldn't find element")
-
-                    self.poui_click(element)
+        if not success:
+            self.log_error(f"Couldn't set {field}. Please check it")
 
 
     def poui_click(self, element):
