@@ -1517,6 +1517,14 @@ class Base(unittest.TestCase):
             return element
 
     def return_non_blocked_elements(self, elements, reverse):
+        '''Filter container without Blocker attribute
+
+        :param elements:
+        :type elements: BeautifulSoup Object or List of them
+        :param reverse:
+        :type reverse: Boolean
+        :return:
+        '''
 
         non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
