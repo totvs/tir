@@ -3191,7 +3191,7 @@ class PouiInternal(Base):
                     if has_index:
                         po_component_span = has_index
 
-            if len(po_component_span) >= position:
+            if po_component_span and len(po_component_span) >= position:
                 po_component_span = po_component_span[position]
                 return next(iter(po_component_span.find_parent('po-field-container')), None) if container else po_component_span
 
