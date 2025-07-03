@@ -548,17 +548,15 @@ class Base(unittest.TestCase):
         if not self.config.poui:
             iframes = None
             filtered_iframe = None
-            endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not iframes:
-                iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
 
-                if iframes:
-                    filtered_iframe = self.filter_active_iframe(iframes)
-                else:
-                    self.driver.switch_to.default_content()
+            iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
+            if iframes:
+                filtered_iframe = self.filter_active_iframe(iframes)
+            else:
+                self.driver.switch_to.default_content()
 
-                if filtered_iframe:
-                    self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+            if filtered_iframe:
+                self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
 
 
     def filter_active_iframe(self, iframes):
@@ -1517,6 +1515,14 @@ class Base(unittest.TestCase):
             return element
 
     def return_non_blocked_elements(self, elements, reverse):
+        '''Filter container without Blocker attribute
+
+        :param elements:
+        :type elements: BeautifulSoup Object or List of them
+        :param reverse:
+        :type reverse: Boolean
+        :return:
+        '''
 
         non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
