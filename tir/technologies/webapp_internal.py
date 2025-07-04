@@ -3731,7 +3731,7 @@ class WebappInternal(Base):
 
                 containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
-                if container_selector == 'wa-text-view' or (optional_term and 'wa-text-view' in optional_term):
+                if container_selector == 'wa-text-view':
                     return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
 
                 if self.base_container in container_selector:
@@ -4951,7 +4951,7 @@ class WebappInternal(Base):
 
             element = None
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     optional_term=".tsay, .tgroupbox, wa-text-view, wa-dialog",
                                      main_container=self.containers_selectors["AllContainers"],
                                      check_help=False, match_case=match_case)
 
@@ -4988,7 +4988,7 @@ class WebappInternal(Base):
             element = None
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view",
+                                     optional_term=".tsay, .tgroupbox, wa-text-view, wa-dialog",
                                      main_container=self.containers_selectors["AllContainers"],
                                      check_help=False, match_case=match_case)
 
