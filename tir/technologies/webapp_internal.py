@@ -4951,7 +4951,7 @@ class WebappInternal(Base):
 
             element = None
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view, wa-dialog",
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
                                      main_container=self.containers_selectors["AllContainers"],
                                      check_help=False, match_case=match_case)
 
@@ -4988,7 +4988,7 @@ class WebappInternal(Base):
             element = None
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view, wa-dialog",
+                                     optional_term=".tsay, .tgroupbox, wa-text-view",
                                      main_container=self.containers_selectors["AllContainers"],
                                      check_help=False, match_case=match_case)
 
