@@ -2019,3 +2019,15 @@ class Poui():
         >>>     print('Found!')
         """
         return self.__poui.WaitShow(string, timeout, throw_error=False)
+    
+    def ClickLookUp(self, label='', button_label='', search_value='', position=1):
+        """
+        Component used to open a search window with a table that lists data from a service. 
+        https://po-ui.io/documentation/po-lookup
+        :param label: Click LookUp label.
+        :type label: str
+        Usage:
+        >>> # Call the method:
+        >>> oHelper.ClickLookUp("Base de Atendimento", "Selecionar", "006TE - PLS_08")
+        """
+        self.__poui.click_look_up(label, button_label, search_value, position)

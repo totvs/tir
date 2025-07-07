@@ -3882,3 +3882,60 @@ class PouiInternal(Base):
             endtime = time.time() + self.config.time_out
             while (closed_combo() and time.time() < endtime):
                 self.click(self.soup_to_selenium(combo_input, twebview=True))
+                
+    def click_look_up(self, label=None, button_label=None, search_value=None, position=1):
+        """
+        :param label: po-lookup
+        :type: str
+        :return:
+        """
+        try:
+            self.wait_element(term='.po-field-icon', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            field_container = None
+
+            containers = self.web_scrap(term=".po-field-container", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', check_help=False)
+            if label:
+                if containers is not None:
+                    for container in containers:
+                        label_element = container.select_one('.po-label')
+                        if label_element and label.lower().strip() in label_element.text.lower().strip():
+                            field_container = container
+                            break
+            else:
+                field_container = containers[0] if containers else None
+
+            if field_container:
+                icon = field_container.select_one('.po-field-icon')
+                if icon:
+                    selenium_icon = self.soup_to_selenium(icon, twebview=True)
+                    self.scroll_to_element(selenium_icon)
+                    self.set_element_focus(selenium_icon)
+                    self.click(selenium_icon)                
+                    logger().info(f"Search icon for the '{label}' field clicked successfully.")
+
+                    self.wait_element_timeout(term=".po-table-row", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=10, main_container='body')
+                    rows = self.web_scrap(term=".po-table-row", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+                    found = False
+                    for row in rows:
+                        cells = row.select(".po-table-column-cell")
+                        for cell in cells:
+                            span = cell.find("span")
+                            if span and span.text.strip() == search_value:
+                                selectable = row.select_one(".po-table-column-selectable").select_one("po-radio").select_one("input")
+                                if selectable:
+                                    self.poui_click(selectable)
+                                    found = True
+                                    break
+                        if found:
+                            break
+                    if not found:
+                        self.log_error(f"Value '{search_value}' not found.")
+                        return False
+                    self.click_button(button_label, 1, selector="po-button", container=False)
+                    return True
+            else:
+                logger().warning(f"Search icon for the '{label}' field not found in the DOM.")
+                return False
+        except Exception as e:
+            logger().error(f"Error clicking the search icon for the '{label}' field: {e}")
+            return False
