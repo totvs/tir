@@ -3883,7 +3883,7 @@ class PouiInternal(Base):
             while (closed_combo() and time.time() < endtime):
                 self.click(self.soup_to_selenium(combo_input, twebview=True))
                 
-    def click_look_up(self, label=None, button_label=None, search_value=None, position=1):
+    def click_look_up(self, label=None, button_label=None, search_value=None):
         """
         :param label: po-lookup
         :type: str
