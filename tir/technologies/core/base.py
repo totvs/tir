@@ -1524,7 +1524,11 @@ class Base(unittest.TestCase):
         :return:
         '''
 
-        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+        non_blocked_elements = elements
+
+        # if WaitProcessing in stack doesn't filter blocked elements
+        if not self.search_stack('WaitProcessing'):
+            non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
             if len(non_blocked_elements) > 1:
