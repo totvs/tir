@@ -2030,4 +2030,4 @@ class Poui():
         >>> # Call the method:
         >>> oHelper.ClickLookUp("Base de Atendimento", "Selecionar", "006TE - PLS_08")
         """
-        self.__poui.click_look_up(label, button_label, search_value, position)
+        return self.__poui.click_look_up(label, button_label, search_value, position)

@@ -3885,7 +3885,7 @@ class PouiInternal(Base):
                 
     def click_look_up(self, label=None, button_label=None, search_value=None, position=1):
         """
-        :param label: po-lookup
+        :param label: po-field-icon
         :type: str
         :return:
         """
@@ -3894,8 +3894,8 @@ class PouiInternal(Base):
             field_container = None
 
             containers = self.web_scrap(term=".po-field-container", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', check_help=False)
-            if label:
-                if containers is not None:
+            if containers is not None:
+                if label:
                     for container in containers:
                         label_element = container.select_one('.po-label')
                         if label_element and label.lower().strip() in label_element.text.lower().strip():
@@ -3916,18 +3916,19 @@ class PouiInternal(Base):
                     self.wait_element_timeout(term=".po-table-row", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=10, main_container='body')
                     rows = self.web_scrap(term=".po-table-row", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
                     found = False
-                    for row in rows:
-                        cells = row.select(".po-table-column-cell")
-                        for cell in cells:
-                            span = cell.find("span")
-                            if span and span.text.strip() == search_value:
-                                selectable = row.select_one(".po-table-column-selectable").select_one("po-radio").select_one("input")
-                                if selectable:
-                                    self.poui_click(selectable)
-                                    found = True
-                                    break
-                        if found:
-                            break
+                    if rows:
+                        for row in rows:
+                            cells = row.select(".po-table-column-cell")
+                            for cell in cells:
+                                span = cell.find("span")
+                                if span and span.text.strip() == search_value:
+                                    selectable = row.select_one(".po-table-column-selectable").select_one("po-radio").select_one("input")
+                                    if selectable:
+                                        self.poui_click(selectable)
+                                        found = True
+                                        break
+                            if found:
+                                break
                     if not found:
                         self.log_error(f"Value '{search_value}' not found.")
                         return False
