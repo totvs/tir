@@ -1526,7 +1526,7 @@ class Base(unittest.TestCase):
 
         non_blocked_elements = elements
 
-        # if WaitProcessing in stack doesn't filter blocked elements
+        # Only filter out blocked elements if 'WaitProcessing' is not in the stack
         if not self.search_stack('WaitProcessing'):
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
