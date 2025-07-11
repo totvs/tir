@@ -3575,8 +3575,6 @@ class PouiInternal(Base):
         # method prepared only to radios in tr(rows) until this moment
         # it still be changed to another cases
 
-        success = False
-
         selenium_radio = self.soup_to_selenium(po_radio, twebview=True)
 
         radio_status = lambda: self.radio_is_active(po_radio)
