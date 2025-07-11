@@ -3588,7 +3588,7 @@ class PouiInternal(Base):
     def radio_is_active(self, radio):
         '''Check if radio is active
 
-        :param radio: BeatifulSoup4
+        :param radio: BeautifulSoup4
         :return: Boolean
         '''
 
