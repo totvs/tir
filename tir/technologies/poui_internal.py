@@ -3597,8 +3597,9 @@ class PouiInternal(Base):
         if radio_tr:
             self.switch_to_iframe()
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
+            return 'active' in radio_selenium.get_attribute('class')
 
-        return 'active' in radio_selenium.get_attribute('class')
+        return False
 
 
     def click_table_checkbox(self, selector, index, table_number):
