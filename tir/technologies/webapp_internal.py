@@ -10355,7 +10355,7 @@ class WebappInternal(Base):
         has_header = 'infer' if header else None
 
         if self.config.csv_path:
-            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines=False, header=has_header, index_col=False, dtype=str)
+            data = pd.read_csv(self.replace_slash(f"{self.config.csv_path}\\{csv_file}"), sep=delimiter, encoding='latin-1', on_bad_lines="warn", header=has_header, index_col=False, dtype=str)
             df = pd.DataFrame(data)
             df = df.dropna(axis=1, how='all')
 
