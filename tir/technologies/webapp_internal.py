@@ -1289,14 +1289,14 @@ class WebappInternal(Base):
                     except:
                         pass
     
-    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED, check_error=True):
+    def check_screen_element(self, term="", selector=None, scraptype=enum.ScrapType.MIXED, check_error=True, twebview=False):
         """
         [Internal]
 
         This method checks if the screen element is displayed.
         """
 
-        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body", check_error=check_error) else False
+        element_exists = True if self.element_exists(term=term, scrap_type=scraptype, optional_term=selector, main_container="body", check_error=check_error, twebview=twebview) else False
         
         logger().debug(f'Checking screen element: "{term}": {element_exists}')
 
@@ -1405,7 +1405,10 @@ class WebappInternal(Base):
         """
         selector = self.news_screen_selectors()
 
-        return self.check_screen_element(term=self.language.news, selector=selector, check_error=False)
+        news = self.check_screen_element(term=self.language.news, selector=selector, check_error=False)
+        text_inside_iframe = self.check_screen_element(term=self.language.news, selector='header', check_error=False, twebview=True)
+        element_on_screen = news or text_inside_iframe
+        return element_on_screen
     
     def check_screen(self):
         """
@@ -4126,7 +4129,7 @@ class WebappInternal(Base):
                 selector = "div"
 
         if not element_list:
-            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term)
+            element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term, twebview=twebview)
             if not element_list and f"wa-dialog[title*={self.language.warning}]" in term:
                 return container_element.get_attribute('title') == self.language.warning
             if not element_list:
