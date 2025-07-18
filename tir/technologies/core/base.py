@@ -541,19 +541,26 @@ class Base(unittest.TestCase):
 
     def switch_to_iframe(self):
         """
+        This method switches the Selenium driver to the active iframe.
+        It will try to find the iframe in current webdriver with the class "twebview" or "dict-twebengine" and switch to it.
         [Internal]
         :return:
         """
-
         if not self.config.poui:
             iframes = None
             filtered_iframe = None
+            tries = 0
 
-            iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
-            if iframes:
-                filtered_iframe = self.filter_active_iframe(iframes)
-            else:
-                self.driver.switch_to.default_content()
+            while tries < 3 and not iframes:
+                # Try to find iframes with the class "twebview" or "dict-twebengine" in current webdriver
+                iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
+
+                # If iframes are found, filter the active by zindex else switch to default content
+                if iframes:
+                    filtered_iframe = self.filter_active_iframe(iframes)
+                else:
+                    self.driver.switch_to.default_content()
+                tries += 1
 
             if filtered_iframe:
                 self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
