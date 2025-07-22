@@ -1850,7 +1850,7 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
@@ -3191,7 +3191,7 @@ class PouiInternal(Base):
                     if has_index:
                         po_component_span = has_index
 
-            if len(po_component_span) >= position:
+            if po_component_span and len(po_component_span) >= position:
                 po_component_span = po_component_span[position]
                 return next(iter(po_component_span.find_parent('po-field-container')), None) if container else po_component_span
 
@@ -3213,7 +3213,7 @@ class PouiInternal(Base):
 
             loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
 
-    def click_poui_component(self, field, value, position, selector, container):
+    def click_select(self, field, value, position):
         """
         
         :param field: Combo text title that you want to click.
@@ -3222,37 +3222,32 @@ class PouiInternal(Base):
         """
 
         position -= 1
-        element = None
         main_element = None
+        trated_field = field.strip()
+        select_bs = []
+        success = False
 
         if not self.config.poui:
             self.twebview_context = True
 
         logger().info(f"Clicking on {field}")
-        self.wait_element(term=selector)
+        self.wait_element(term='po-select')
         endtime = time.time() + self.config.time_out
-        while (not main_element and time.time() < endtime):
-            main_element = self.return_main_element(field, position, selector=selector, container=container)
+        while (not success and time.time() < endtime):
+            po_select_bs = self.web_scrap(term='po-select', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
-            if main_element:
-                span_icon = next(iter(main_element.select("span[class*='po-icon']")), None)
-                if span_icon:
+            if po_select_bs:
+                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x), po_select_bs))), None)
+                if select_element_filtred:
                     self.switch_to_iframe()
-                    self.driver.find_element(By.XPATH, xpath_soup(span_icon)).click()
-                    self.po_loading(selector)
+                    select_bs = select_element_filtred.find_next('select')
+                    if select_bs:
+                        self.select_combo(select_bs, value, shadow_root=False)
+                        current_option = self.return_selected_combo_value(select_bs, shadow_root=False)
+                        success = current_option == value
 
-                    ul = next(iter(main_element.select('ul')), None)
-                    if ul:
-                        li = ul.select('li')
-                        element = next(iter(list(filter(lambda x: value.lower().strip() in x.text.lower().strip(), li))),
-                                       None)
-                    else:
-                        self.log_error("Couldn't find table element.")
-
-                    if not element:
-                        self.log_error("Couldn't find element")
-
-                    self.poui_click(element)
+        if not success:
+            self.log_error(f"Couldn't set {field}. Please check it")
 
 
     def poui_click(self, element):
@@ -3444,7 +3439,8 @@ class PouiInternal(Base):
         ActionChains(self.driver).move_to_element(action()).click().perform()
 
 
-    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox):
+    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell,
+                   checkbox, radio_input):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table
@@ -3548,6 +3544,10 @@ class PouiInternal(Base):
             for index in index_number:
                 if checkbox:
                     self.click_table_checkbox(selector=term, index=index, table_number=table_number)
+                elif radio_input:
+                    row_radio_component = tr[index].select_one('po-radio')
+                    if row_radio_component:
+                        self.toggle_radio(row_radio_component, radio_input)
                 else:
                     if column_index_number:
                         element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
@@ -3565,6 +3565,47 @@ class PouiInternal(Base):
             index = index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
+
+    def toggle_radio(self, po_radio, active=True):
+        '''Set input Radio from a tr Tag element
+
+        :param po_radio: BeautifulSoup4
+        :return:
+        '''
+        # method prepared only to radios in tr(rows) until this moment
+        # it still be changed to another cases
+
+        radio_input = po_radio.select_one('input')
+
+        if radio_input:
+            selenium_radio = self.soup_to_selenium(radio_input, twebview=True)
+        else:
+            selenium_radio = self.soup_to_selenium(po_radio, twebview=True)
+
+        radio_status = lambda: self.radio_is_active(po_radio)
+
+        success = lambda: radio_status() == active
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success():
+            self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
+
+    def radio_is_active(self, radio):
+        '''Check if radio is active
+
+        :param radio: BeautifulSoup4
+        :return: Boolean
+        '''
+
+        # check if po-radio is active in tr
+        radio_tr = radio.find_parent('tr')
+        if radio_tr:
+            self.switch_to_iframe()
+            radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
+            return 'active' in radio_selenium.get_attribute('class')
+
+        return False
+
 
     def click_table_checkbox(self, selector, index, table_number):
 
@@ -3600,6 +3641,11 @@ class PouiInternal(Base):
                 return tables[table_number]
 
     def data_frame(self, object):
+        '''Return a DataFrame from a Beautiful Soup Table
+
+        :param object: BeautifulSoup4 Table
+        :return: Pandas dataframe
+        '''
 
         df = (next(iter(pd.read_html(str(object)))))
 
@@ -3887,3 +3933,80 @@ class PouiInternal(Base):
             endtime = time.time() + self.config.time_out
             while (closed_combo() and time.time() < endtime):
                 self.click(self.soup_to_selenium(combo_input, twebview=True))
+                
+    def click_look_up(self, label=None, search_value=None):
+        """Use to click and search value in Lookup components
+
+        https://po-ui.io/documentation/po-lookup
+        :param label: field from lookup input
+        :type: str
+        :param search_value: Value to input in search field
+        :type: str
+        :return:
+        """
+
+        try:
+            self.wait_element(term='po-lookup', scrap_type=enum.ScrapType.CSS_SELECTOR)
+            lookup_filtered = []
+
+            lookup_components = self.web_scrap(term="po-lookup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', check_help=False)
+            if lookup_components is not None:
+                if label:
+                    #filter lookup by label match
+                    lookup_filtered = list(filter(lambda x: hasattr(x, 'label') and label.lower().strip() in x.text.lower().strip() ,lookup_components))
+                    lookup_filtered = next(iter(lookup_filtered), None)
+
+            if lookup_filtered:
+                # find search po-icon component in lookup window
+                search_icon = lookup_filtered.select_one('po-icon')
+                if search_icon:
+                    selenium_icon = self.wait_soup_to_selenium(search_icon, twebview=True)
+                    self.scroll_to_element(selenium_icon)
+                    self.set_element_focus(selenium_icon)
+                    self.click(selenium_icon)
+
+                    logger().info(f"Search icon for the '{label}' field clicked successfully.")
+
+                    # Wait table show up
+                    self.wait_element_timeout(term=".po-table-row", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=10,
+                                              main_container='body')
+
+                    if search_value:
+                        # Scrap lookup filter component
+                        search_field = next(iter(self.web_scrap(term=".po-lookup-filter-content",
+                                                      scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')), None)
+                        if search_field:
+                            search_input_field = search_field.select_one('.po-input')
+                            if search_input_field:
+                                # Click on component and send search_value keys
+                                self.switch_to_iframe()
+                                selenium_input_field = self.wait_soup_to_selenium(search_input_field, twebview=True)
+                                self.set_element_focus(selenium_input_field)
+                                self.click(selenium_input_field, click_type=enum.ClickType.SELENIUM)
+                                self.send_keys(selenium_input_field, search_value)
+
+                                # Click on search icon to filter inputed value
+                                po_search_icon = search_field.select_one('po-icon')
+                                selenium_search_icon = self.wait_soup_to_selenium(po_search_icon, twebview=True)
+                                self.click(selenium_search_icon, click_type=enum.ClickType.SELENIUM)
+
+                        if not search_field:
+                            self.log_error(f"Field '{search_value}' not found.")
+                else:
+                    self.log_error(f"Search icon for the '{label}' field not found in the DOM.")
+            else:
+                self.log_error(f"Lookup to {label} component not found in the DOM.")
+        except Exception as e:
+            self.log_error(f"Error clicking the search icon for the '{label}' field: {e}")
+
+    def wait_soup_to_selenium(self, soup_object, twebview=False, timeout=60):
+
+        success = False
+        endtime = time.time() + timeout
+        while (not success and time.time() < endtime):
+            success = self.soup_to_selenium(soup_object=soup_object, twebview=twebview)
+
+        if time.time() > endtime:
+            logger().debug(f'SOUP:{element} to Selenium element not found')
+
+        return success

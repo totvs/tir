@@ -541,24 +541,29 @@ class Base(unittest.TestCase):
 
     def switch_to_iframe(self):
         """
+        This method switches the Selenium driver to the active iframe.
+        It will try to find the iframe in current webdriver with the class "twebview" or "dict-twebengine" and switch to it.
         [Internal]
         :return:
         """
-
         if not self.config.poui:
             iframes = None
             filtered_iframe = None
-            endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not iframes:
+            tries = 0
+
+            while tries < 3 and not iframes:
+                # Try to find iframes with the class "twebview" or "dict-twebengine" in current webdriver
                 iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
 
+                # If iframes are found, filter the active by zindex else switch to default content
                 if iframes:
                     filtered_iframe = self.filter_active_iframe(iframes)
                 else:
                     self.driver.switch_to.default_content()
+                tries += 1
 
-                if filtered_iframe:
-                    self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+            if filtered_iframe:
+                self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
 
 
     def filter_active_iframe(self, iframes):
@@ -880,12 +885,12 @@ class Base(unittest.TestCase):
 
         return combo
 
-    def return_selected_combo_value(self, element):
+    def return_selected_combo_value(self, element, shadow_root=True, locator=False):
         """"
         [Internal]
         """
 
-        combo = self.return_combo_object(element)
+        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if combo.all_selected_options:
             return combo.all_selected_options[0].text
@@ -1517,8 +1522,20 @@ class Base(unittest.TestCase):
             return element
 
     def return_non_blocked_elements(self, elements, reverse):
+        '''Filter container without Blocker attribute
 
-        non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
+        :param elements:
+        :type elements: BeautifulSoup Object or List of them
+        :param reverse:
+        :type reverse: Boolean
+        :return:
+        '''
+
+        non_blocked_elements = elements
+
+        # Only filter out blocked elements if 'WaitProcessing' is not in the stack
+        if not self.search_stack('WaitProcessing'):
+            non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
             if len(non_blocked_elements) > 1:

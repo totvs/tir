@@ -1690,7 +1690,7 @@ class Poui():
         >>> oHelper.ClickSelect('Espécie', 'Compra')
         :return:
         """
-        self.__poui.click_poui_component(field, value, position, selector="po-select", container=True)
+        self.__poui.click_select(field, value, position)
 
     def ClickButton(self, button='', position=1):
         """
@@ -1775,7 +1775,8 @@ class Poui():
         """
         self.__poui.POSearch(content, placeholder)
 
-    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1, itens=False, click_cell=None, checkbox=False):
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1,
+                   itens=False, click_cell=None, checkbox=False, radio_input=None):
         """
         Clicks on the Table of POUI component.
         https://po-ui.io/documentation/po-table
@@ -1802,7 +1803,7 @@ class Poui():
         :return: None
         """
 
-        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox)
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox, radio_input)
         
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
@@ -2004,3 +2005,36 @@ class Poui():
         >>> oHelper.ClickCheckBox("Processing")
         """
         self.__poui.click_checkbox(label)
+
+    def IfExists(self, string='', timeout=5):
+        """
+        Returns True if element exists in timeout or return False if not exist.
+        :param string: String that will hold the wait.
+        :type string: str
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
+        Usage:
+        >>> # Calling the method:
+        >>> exist = oHelper.IfExists("Aviso", timeout=10)
+        >>> if oHelper.IfExists("Aviso", timeout=10):
+        >>>     print('Found!')
+        """
+        return self.__poui.WaitShow(string, timeout, throw_error=False)
+    
+    def ClickLookUp(self, label='', search_value=''):
+        """
+        Component used to open a search window with a table that lists data from a service.
+        https://po-ui.io/documentation/po-lookup
+
+        :param label: field from lookup input
+        :type: str
+        :param search_value: Value to input in search field
+        :type: str
+        :return:
+        Usage:
+        >>> # Call the method:
+        >>> oHelper.ClickLookUp("Base de Atendimento", "006TE - PLS_08")
+        >>> oHelper.ClickLookUp("Base de Atendimento")
+
+        """
+        self.__poui.click_look_up(label, search_value)
