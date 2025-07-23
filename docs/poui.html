@@ -56,12 +56,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCheckBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickLookUp"><code class="docutils literal notranslate"><span class="pre">Poui.ClickLookUp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickPopup"><code class="docutils literal notranslate"><span class="pre">Poui.ClickPopup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSelect"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSelect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickWidget"><code class="docutils literal notranslate"><span class="pre">Poui.ClickWidget()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.GetUrl"><code class="docutils literal notranslate"><span class="pre">Poui.GetUrl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.IfExists"><code class="docutils literal notranslate"><span class="pre">Poui.IfExists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.InputByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.InputByLocator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.InputValue"><code class="docutils literal notranslate"><span class="pre">Poui.InputValue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.POSearch"><code class="docutils literal notranslate"><span class="pre">Poui.POSearch()</span></code></a></li>
@@ -300,6 +302,34 @@ before using these methods in the script.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickLookUp">
+<span class="sig-name descname"><span class="pre">ClickLookUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickLookUp" title="Link to this definition"></a></dt>
+<dd><p>Component used to open a search window with a table that lists data from a service.
+<a class="reference external" href="https://po-ui.io/documentation/po-lookup">https://po-ui.io/documentation/po-lookup</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – field from lookup input</p></li>
+<li><p><strong>search_value</strong> – Value to input in search field</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+<p>Usage:
+&gt;&gt;&gt; # Call the method:
+&gt;&gt;&gt; oHelper.ClickLookUp(“Base de Atendimento”, “006TE - PLS_08”)
+&gt;&gt;&gt; oHelper.ClickLookUp(“Base de Atendimento”)</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickMenu">
 <span class="sig-name descname"><span class="pre">ClickMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menu_item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickMenu" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the menu-item of the POUI component.
@@ -355,7 +385,7 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickTable">
-<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickTable" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radio_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickTable" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the Table of POUI component.
 <a class="reference external" href="https://po-ui.io/documentation/po-table">https://po-ui.io/documentation/po-table</a></p>
 <dl class="field-list simple">
@@ -407,6 +437,21 @@ before using these methods in the script.</p>
 <dd><p>Loads a web page in the current browser session.
 :param url:
 :type url: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.IfExists">
+<span class="sig-name descname"><span class="pre">IfExists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.IfExists" title="Link to this definition"></a></dt>
+<dd><p>Returns True if element exists in timeout or return False if not exist.
+:param string: String that will hold the wait.
+:type string: str
+:param timeout: Timeout that wait before return.
+:type timeout: str
+Usage:
+&gt;&gt;&gt; # Calling the method:
+&gt;&gt;&gt; exist = oHelper.IfExists(“Aviso”, timeout=10)
+&gt;&gt;&gt; if oHelper.IfExists(“Aviso”, timeout=10):
+&gt;&gt;&gt;     print(‘Found!’)</p>
 </dd></dl>
 
 <dl class="py method">
