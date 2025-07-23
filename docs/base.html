@@ -83,6 +83,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_combo_object"><code class="docutils literal notranslate"><span class="pre">Base.return_combo_object()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_iframe"><code class="docutils literal notranslate"><span class="pre">Base.return_iframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_last_zindex"><code class="docutils literal notranslate"><span class="pre">Base.return_last_zindex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_non_blocked_elements"><code class="docutils literal notranslate"><span class="pre">Base.return_non_blocked_elements()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.return_selected_combo_value"><code class="docutils literal notranslate"><span class="pre">Base.return_selected_combo_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_into_view"><code class="docutils literal notranslate"><span class="pre">Base.scroll_into_view()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.scroll_to_element"><code class="docutils literal notranslate"><span class="pre">Base.scroll_to_element()</span></code></a></li>
@@ -663,8 +664,25 @@ naming convention.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_non_blocked_elements">
+<span class="sig-name descname"><span class="pre">return_non_blocked_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_non_blocked_elements" title="Link to this definition"></a></dt>
+<dd><p>Filter container without Blocker attribute</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> (<em>BeautifulSoup Object</em><em> or </em><em>List</em><em> of </em><em>them</em>)</p></li>
+<li><p><strong>reverse</strong> (<em>Boolean</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.return_selected_combo_value">
-<span class="sig-name descname"><span class="pre">return_selected_combo_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_selected_combo_value" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_selected_combo_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.return_selected_combo_value" title="Link to this definition"></a></dt>
 <dd><p>”
 [Internal]</p>
 </dd></dl>
@@ -856,7 +874,9 @@ naming convention.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.switch_to_iframe">
 <span class="sig-name descname"><span class="pre">switch_to_iframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.switch_to_iframe" title="Link to this definition"></a></dt>
-<dd><p>[Internal]
+<dd><p>This method switches the Selenium driver to the active iframe.
+It will try to find the iframe in current webdriver with the class “twebview” or “dict-twebengine” and switch to it.
+[Internal]
 :return:</p>
 </dd></dl>
 
