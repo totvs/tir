@@ -3884,10 +3884,10 @@ class PouiInternal(Base):
         while (not success and time.time() < endtime):
             po_combo = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, main_container='body')
             if po_combo:
-                po_combo = next(iter(po_combo),None)
-                po_input = po_combo.find_next('input')
+                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x), po_combo)),None)
+                po_input = po_combo_filtred.find_next('input')
                 if po_input:
-                    self.open_input_combo(po_combo)
+                    self.open_input_combo(po_combo_filtred)
                     self.click_po_list_box(value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
