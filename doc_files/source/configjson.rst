@@ -16,7 +16,7 @@ Structure (exemple):
 
    {
      "Url": "http://localhost:8080/",
-     "Browser": "Chrome",
+     "Browser": "Firefox",
      "Environment": "MyProtheusEnvironment",
      "User": "MyUser",
      "Password": "MyP4ssW0rd123"
@@ -26,11 +26,11 @@ Structure (exemple):
 
 
 Execution Parameters
-====================
+---------------------
 
 
 Required Parameters
----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. list-table:: Required Parameters
    :header-rows: 1
    :widths: 15 10 50 25
@@ -67,7 +67,7 @@ Required Parameters
 ********************************
 
 POUI Interface
-----------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table:: POUI & UI Settings
    :header-rows: 1
@@ -93,8 +93,8 @@ POUI Interface
 
 ********************************
 
-Behaviors Parameters
----------------------
+Additional Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table:: General Settings
    :header-rows: 1
@@ -141,7 +141,7 @@ Behaviors Parameters
 ********************************
 
 Logging & Monitoring
---------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table:: Log Configuration
    :header-rows: 1
@@ -195,7 +195,7 @@ Logging & Monitoring
 ********************************
 
 Database Configuration
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This section contains optional parameters used to configure the database connection for your tests.
 By specifying these settings in the config file, you avoid the need to 
 provide connection details directly as parameters in the QueryExecute method.
@@ -241,7 +241,7 @@ This approach simplifies test setup and centralizes database configuration manag
 ********************************
 
 Aditional Parameters
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table:: Advanced Settings
    :header-rows: 1
@@ -280,7 +280,7 @@ Aditional Parameters
 ********************************
 
 Chrome Parameters
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Only for Chrome browser.
 
 .. list-table:: Chrome Settings
@@ -303,7 +303,8 @@ Only for Chrome browser.
 ********************************
 
 Versioning Info
----------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*This configuration can be used to skip the About menu.*
 
 .. list-table:: Release & Version Info
    :header-rows: 1
