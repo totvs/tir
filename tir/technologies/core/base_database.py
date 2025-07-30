@@ -1,20 +1,23 @@
+
 import pandas as pd
-import pyodbc
 import re
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
 from tir.technologies.core.logging_config import logger
 from tir.technologies.core.config import ConfigLoader
+
 
 class BaseDatabase:
 
     def __init__(self):
         self.config = ConfigLoader()
 
-    def odbc_connect(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
+
+    def sqlalchemy_engine(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password="") -> Engine:
         """
-        :return:
+        Cria e retorna um SQLAlchemy Engine para ODBC (SQL Server, Oracle, etc).
         """
-        connection = None
-        
         database_driver = self.config.database_driver if not database_driver else database_driver
         database_server = self.config.database_server if not database_server else database_server
         database_port = self.config.database_port if not database_port else database_port
@@ -23,100 +26,75 @@ class BaseDatabase:
         database_password = self.config.database_password if not database_password else database_password
         dbq_oracle_server = self.config.dbq_oracle_server if not dbq_oracle_server else dbq_oracle_server
 
-        if dbq_oracle_server:
-            connection = pyodbc.connect(f'DRIVER={database_driver};dbq={dbq_oracle_server};database={database_name};uid={database_user};pwd={database_password}')
+        # SQL Server ODBC
+        if database_driver.lower().startswith("odbc") or "sql server" in database_driver.lower():
+            conn_str = (
+                f"mssql+pyodbc://{database_user}:{database_password}@{database_server}:{database_port}/{database_name}"
+                f"?driver={database_driver.replace(' ', '+')}"
+            )
+            return create_engine(conn_str)
+
+        # Oracle ODBC (usando oracledb)
+        elif "oracle" in database_driver.lower():
+            # Exemplo de dbq_oracle_server: "host:port/service_name"
+            if dbq_oracle_server:
+                conn_str = (
+                    f"oracle+oracledb://{database_user}:{database_password}@{dbq_oracle_server}"
+                )
+            else:
+                conn_str = (
+                    f"oracle+oracledb://{database_user}:{database_password}@{database_server}:{database_port}/{database_name}"
+                )
+            return create_engine(conn_str)
+
         else:
-            connection = pyodbc.connect(f'DRIVER={database_driver};server={database_server};port={database_port};database={database_name};uid={database_user};pwd={database_password}')
+            raise ValueError("Database driver não suportado para SQLAlchemy.")
 
-        return connection
 
-    def test_odbc_connection(self, connection):
+    def test_sqlalchemy_connection(self, engine: Engine):
         """
-        :param connection:
-        :return: cursor attribute if connection ok else return False
+        Testa se a conexão está ativa.
         """
-        return connection.cursor()
+        try:
+            with engine.connect() as conn:
+                return True
+        except SQLAlchemyError as e:
+            logger().error(f"Erro ao testar conexão: {e}")
+            return False
+
 
     def connect_database(self, query="", database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
-
-        connection = self.odbc_connect(database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
-
-        if self.test_odbc_connection(connection):
+        engine = self.sqlalchemy_engine(database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+        if self.test_sqlalchemy_connection(engine):
             logger().info('DataBase connection started')
         else:
             logger().info('DataBase connection is stopped')
+        return engine
 
-        return connection
 
-    def disconnect_database(self, connection):
-
-        if not connection:
-            connection = self.odbc_connect()
-
-        cursor = self.test_odbc_connection(connection)
-        if cursor:
-            cursor.close()
-            connection.close()
-            if not self.test_odbc_connection(connection):
-                logger().info('DataBase connection stopped')
+    def disconnect_database(self, engine: Engine):
+        if engine:
+            engine.dispose()
+            logger().info('DataBase connection stopped')
         else:
             logger().info('DataBase connection already stopped')
             
+
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
         """
-        Return a dictionary if the query statement is a SELECT otherwise print a number of row 
-        affected in case of INSERT|UPDATE|DELETE statement.
-
-        .. note::  
-            Default Database information is in config.json another way is possible put this in the QueryExecute method parameters:
-            Parameters:
-            "DBDriver": "",
-            "DBServer": "",
-            "DBName": "",
-            "DBUser": "",
-            "DBPassword": ""
-
-        .. note::        
-            Must be used an ANSI default SQL statement.
-
-        .. note::        
-            dbq_oracle_server parameter is necessary only for Oracle connection.
-        
-        :param query: ANSI SQL estatement query
-        :type query: str
-        :param database_driver: ODBC Driver database name
-        :type database_driver: str
-        :param dbq_oracle_server: Only for Oracle: DBQ format:Host:Port/oracle instance
-        :type dbq_oracle_server: str
-        :param database_server: Database Server Name
-        :type database_server: str
-        :param database_port: Database port default port=1521
-        :type database_port: int
-        :param database_name: Database Name
-        :type database_name: str
-        :param database_user: User Database Name
-        :type database_user: str
-        :param database_password: Database password
-        :type database_password: str
-
-        Usage:
-
-        >>> # Call the method:
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
-        >>> # Oracle Example:
-        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server="Host:Port/oracle instance", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        Executa uma query usando SQLAlchemy. Retorna um dicionário se SELECT, senão retorna número de linhas afetadas.
         """
-        connection = self.connect_database(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
-        
-        if re.findall(r'^(SELECT)', query.upper()):
-            df = pd.read_sql(sql=query, con=connection)
-            return (df.to_dict())
-        else:
-            self.cursor_execute(query, connection)
-
-    def cursor_execute(self, query, connection):
-        cursor = connection.cursor()
-        rowcount = cursor.execute(query).rowcount
-        logger().info(f'{rowcount} row(s) affected')
-        connection.commit()
+        engine = self.connect_database(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
+        try:
+            with engine.connect() as conn:
+                if re.findall(r'^(SELECT)', query.strip().upper()):
+                    df = pd.read_sql_query(sql=text(query), con=conn)
+                    return df.to_dict()
+                else:
+                    result = conn.execute(text(query))
+                    conn.commit()
+                    logger().info(f'{result.rowcount} row(s) affected')
+                    return result.rowcount
+        except SQLAlchemyError as e:
+            logger().error(f'Erro ao executar query: {e}')
+            return None

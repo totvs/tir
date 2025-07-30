@@ -1256,7 +1256,7 @@ class Webapp():
         
         :param query: ANSI SQL estatement query
         :type query: str
-        :param database_driver: ODBC Driver database name
+        :param database_driver: ODBC Driver database name or Oracle Driver name.
         :type database_driver: str
         :param dbq_oracle_server: Only for Oracle: DBQ format:Host:Port/oracle instance
         :type dbq_oracle_server: str
@@ -1276,8 +1276,10 @@ class Webapp():
         >>> # Call the method:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10")
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="DRIVER_ODBC_NAME", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
-        >>> # Oracle Example:
+        >>> # Oracle ODBC Example:
         >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle in OraClient19Home1", dbq_oracle_server="Host:Port/oracle instance", database_server="SERVER_NAME", database_name="DATABASE_NAME", database_user="sa", database_password="123456")
+        >>> # Oracledb Example:
+        >>> self.oHelper.QueryExecute("SELECT * FROM SA1T10", database_driver="Oracle", database_server="localhost/freepdb1", database_user="system", database_password="Oracle123")
         """
         return self.__webapp.query_execute(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
 
