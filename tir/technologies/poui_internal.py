@@ -3892,7 +3892,7 @@ class PouiInternal(Base):
                     self.open_input_combo(po_combo_filtred)
                     self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
+                    # success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
@@ -3901,23 +3901,43 @@ class PouiInternal(Base):
         '''
         :param value: Value to select on po-list-box
         :type str
+        :param second_value: value below the principal value (after the ":")
+        :type : str
         :return:
         '''
+        orig_value = value
+        orig_second_value = second_value
         replace = r'[\s,\.:]'
-        value = value.strip().lower()
+        value = re.sub(replace, '', value).strip().lower()
+        second_value = re.sub(replace, '', second_value).strip().lower()
         self.wait_element(term='po-listbox')
 
-        po_list_itens = self.web_scrap(term='.po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
+        po_list_itens = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        main_container='body')
+        
+        def find_value_atr(element, param_label, param_value):
+            atr_value_dict = json.loads(element.get('data-item-list'))
+
+            elem_label = re.sub(replace, '', atr_value_dict.get('label')).strip().lower()
+            elem_value = re.sub(replace, '', atr_value_dict.get('value')).strip().lower()
+
+            if param_label and param_value:
+                return param_label == elem_label and param_value == elem_value
+
+            elif param_label and not param_value:
+                return param_label == elem_label
+
+            elif not param_label and param_value:
+                return param_value == elem_value
 
         if po_list_itens:
-            item_filtered = next(iter(list(filter(lambda x: re.sub(replace, '', x.text.strip().lower()) ==
-                                                            re.sub(replace, '', value), po_list_itens))), None)
+            item_filtered = next(iter(list(filter(lambda x: find_value_atr(x, value, second_value), po_list_itens))), None)
             if item_filtered:
-                self.scroll_to_element(self.soup_to_selenium(item_filtered, twebview=True))
-                self.click(self.soup_to_selenium(item_filtered, twebview=True))
+                item_filtered_div = item_filtered.find_next('div')
+                self.scroll_to_element(self.soup_to_selenium(item_filtered_div, twebview=True))
+                self.click(self.soup_to_selenium(item_filtered_div, twebview=True))
             else:
-                self.log_error(f'{value} not found')
+                self.log_error(f'{orig_value if orig_value else orig_second_value} not found')
 
 
     def open_input_combo(self, po_combo):
