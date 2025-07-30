@@ -3889,14 +3889,12 @@ class PouiInternal(Base):
                 po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x), po_combo)),None)
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
+                    po_input_sel = self.wait_soup_to_selenium(po_input, twebview=True)
                     self.open_input_combo(po_combo_filtred)
-                    self.click_po_list_box(value, second_value)
+                    self.send_keys(po_input_sel, value if value else second_value)
+                    expected_value = self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    if value:
-                        success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
-                    else:
-                        # Implementar uma lógica de validar apenas com o second_value
-                        success = True
+                    success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', expected_value).lower()
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
@@ -3940,8 +3938,12 @@ class PouiInternal(Base):
                 item_filtered_div = item_filtered.find_next('div')
                 self.scroll_to_element(self.soup_to_selenium(item_filtered_div, twebview=True))
                 self.click(self.soup_to_selenium(item_filtered_div, twebview=True))
+
+                return json.loads(item_filtered.get('data-item-list')).get('label') if not value else orig_value
             else:
                 self.log_error(f'{orig_value if orig_value else orig_second_value} not found')
+
+        return orig_value
 
 
     def open_input_combo(self, po_combo):
