@@ -3859,7 +3859,7 @@ class PouiInternal(Base):
             self.log_error(f"CheckBox '{label}' doesn't found!")
 
 
-    def click_combo(self, field, value, position):
+    def click_combo(self, field, value, position, second_value):
         '''Select a value for list combo inputs.
 
         :param field: label of field
@@ -3868,6 +3868,8 @@ class PouiInternal(Base):
         :type : str
         :param position:
         :type : int
+        :param second_value: value below the principal value (after the ":")
+        :type : str
         :return:
         '''
 
@@ -3888,14 +3890,14 @@ class PouiInternal(Base):
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
                     self.open_input_combo(po_combo_filtred)
-                    self.click_po_list_box(value)
+                    self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
 
-    def click_po_list_box(self, value):
+    def click_po_list_box(self, value, second_value):
         '''
         :param value: Value to select on po-list-box
         :type str

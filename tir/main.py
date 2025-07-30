@@ -1658,7 +1658,7 @@ class Poui():
         """
         self.__poui.InputValue(field, value, position)
 
-    def ClickCombo(self, field='', value='', position=1):
+    def ClickCombo(self, field='', value='', position=1, second_value=''):
         """
         Clicks on the Combo of POUI component.
         https://po-ui.io/documentation/po-combo
@@ -1673,7 +1673,7 @@ class Poui():
         >>> oHelper.ClickCombo('Visão', 'Compras')
         :return:
         """
-        self.__poui.click_combo(field, value, position)
+        self.__poui.click_combo(field, value, position, second_value)
 
     def ClickSelect(self, field='', value='', position=1):
         """
