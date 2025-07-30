@@ -307,17 +307,6 @@ class WebappInternal(Base):
 
             self.close_screen_before_menu()
 
-            if initial_program.lower() != 'sigacfg':
-                cget_term = '[name=cGet]'
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
-                    logger().debug('Waiting menu screen after environment screen')
-                    time.sleep(10)
-
-                if time.time() > endtime:
-                    self.restart_counter + 1
-                    self.log_error(f"'Unable to load screen '{cget_term}' content.")
-
             if save_input:
                 self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
 
