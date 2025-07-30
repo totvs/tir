@@ -3892,7 +3892,11 @@ class PouiInternal(Base):
                     self.open_input_combo(po_combo_filtred)
                     self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    # success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
+                    if value:
+                        success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
+                    else:
+                        # Implementar uma lógica de validar apenas com o second_value
+                        success = True
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
