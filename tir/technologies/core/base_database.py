@@ -42,8 +42,10 @@ class BaseDatabase:
                     f"oracle+oracledb://{database_user}:{database_password}@{dbq_oracle_server}"
                 )
             else:
+                host, service_name = database_server.split("/")
+                
                 conn_str = (
-                    f"oracle+oracledb://{database_user}:{database_password}@{database_server}:{database_port}/{database_name}"
+                    f"oracle+oracledb://{database_user}:{database_password}@{host}:{database_port}/?service_name={service_name}"
                 )
             return create_engine(conn_str)
 
