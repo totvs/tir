@@ -3636,6 +3636,9 @@ class PouiInternal(Base):
 
         tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                main_container='body')
+        
+        tables = list(filter(lambda x: self.element_is_displayed(x), tables))
+        
         if tables:
             if len(tables) - 1 >= table_number:
                 return tables[table_number]
