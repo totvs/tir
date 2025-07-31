@@ -3885,6 +3885,7 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while (not success and time.time() < endtime):
             po_combo = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, main_container='body')
+            po_combo = list(filter(lambda x: self.element_is_displayed(x), po_combo))
             if po_combo:
                 po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x), po_combo)),None)
                 po_input = po_combo_filtred.find_next('input')
