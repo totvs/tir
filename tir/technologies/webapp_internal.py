@@ -1863,17 +1863,21 @@ class WebappInternal(Base):
 
         """
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and self.check_layers('wa-dialog') > 1:
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().info('Escape to menu')
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
-            if self.check_layers('wa-dialog') > 1:
-                logger().info('Found layers after Escape to menu')
-                self.close_screen_before_menu()
+            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
+                if self.check_layers('wa-dialog') > 1:
+                    logger().info('Found layers after Escape to menu')
+                    self.close_screen_before_menu()
+            # wait trasitions between screens to avoid errors in layers number
+            self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      position=2, timeout=6, main_container='body')
 
     def check_layers(self, term):
         """
