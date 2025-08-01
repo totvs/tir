@@ -1234,7 +1234,7 @@ class Webapp():
         """
         self.__database.connect_database()
 
-    def QueryExecute(self, query, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password=""):
+    def QueryExecute(self, query, database_driver="", dbq_oracle_server="", database_server="", database_port=1433, database_name="", database_user="", database_password=""):
         """
         Return a dictionary if the query statement is a SELECT otherwise print a number of row 
         affected in case of INSERT|UPDATE|DELETE statement.

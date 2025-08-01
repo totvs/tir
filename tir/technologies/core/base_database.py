@@ -14,7 +14,7 @@ class BaseDatabase:
         self.config = ConfigLoader()
 
 
-    def sqlalchemy_engine(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1521, database_name="", database_user="", database_password="") -> Engine:
+    def sqlalchemy_engine(self, database_driver="", dbq_oracle_server="", database_server="", database_port=1433, database_name="", database_user="", database_password="") -> Engine:
         """
         Cria e retorna um SQLAlchemy Engine para ODBC (SQL Server, Oracle, etc).
         """
