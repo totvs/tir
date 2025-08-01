@@ -3884,13 +3884,15 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (not success and time.time() < endtime):
-            po_combo = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, main_container='body')
-            po_combo = list(filter(lambda x: self.element_is_displayed(x), po_combo))
-            if po_combo:
-                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x), po_combo)),None)
+            po_combo_list = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            position=position, main_container='body')
+            po_combo_displayeds = list(filter(lambda x: self.element_is_displayed(x), po_combo_list))
+            if po_combo_displayeds:
+                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x),
+                                                    po_combo_displayeds)),None)
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
-                    po_input_sel = self.wait_soup_to_selenium(po_input, twebview=True)
+                    po_input_sel = self.soup_to_selenium(po_input, twebview=True)
                     self.open_input_combo(po_combo_filtred)
                     self.send_keys(po_input_sel, value if value else second_value)
                     expected_value = self.click_po_list_box(value, second_value)
@@ -3913,28 +3915,15 @@ class PouiInternal(Base):
         replace = r'[\s,\.:]'
         value = re.sub(replace, '', value).strip().lower()
         second_value = re.sub(replace, '', second_value).strip().lower()
+
+
         self.wait_element(term='po-listbox')
 
-        po_list_itens = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
+        po_items_list = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        main_container='body')
-        
-        def find_value_atr(element, param_label, param_value):
-            atr_value_dict = json.loads(element.get('data-item-list'))
 
-            elem_label = re.sub(replace, '', atr_value_dict.get('label')).strip().lower()
-            elem_value = re.sub(replace, '', atr_value_dict.get('value')).strip().lower()
-
-            if param_label and param_value:
-                return param_label == elem_label and param_value == elem_value
-
-            elif param_label and not param_value:
-                return param_label == elem_label
-
-            elif not param_label and param_value:
-                return param_value == elem_value
-
-        if po_list_itens:
-            item_filtered = next(iter(list(filter(lambda x: find_value_atr(x, value, second_value), po_list_itens))), None)
+        if po_items_list:
+            item_filtered = next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value), po_items_list))), None)
             if item_filtered:
                 item_filtered_div = item_filtered.find_next('div')
                 self.scroll_to_element(self.soup_to_selenium(item_filtered_div, twebview=True))
@@ -3942,9 +3931,61 @@ class PouiInternal(Base):
 
                 return json.loads(item_filtered.get('data-item-list')).get('label') if not value else orig_value
             else:
-                self.log_error(f'{orig_value if orig_value else orig_second_value} not found')
+                self.log_error(f'Item list {orig_value if orig_value else orig_second_value} not found')
 
-        return orig_value
+
+    def find_po_item_list(self, po_item_list, param_label, param_value):
+        '''This method is used to filter the po-item-list elements based on the label and value match.
+
+
+        :param list_elements: list of BeautifulSoup po-item-list elements
+        :type list_elements: list
+        :param label_text:
+        :param value_text:
+        :param attr: attribute to be checked in the po-item-list
+        :return: Filtered BeautifulSoup element or None if not found
+        '''
+
+
+        element_data_str = po_item_list.get(f'data-item-list')
+        if element_data_str:
+            atr_value_dict = self.string_to_json(element_data_str)
+
+            if atr_value_dict:
+                normalized_dict = self.normalize_json(atr_value_dict)
+
+                elem_label = normalized_dict.get('label')
+                elem_value = normalized_dict.get('value')
+
+                if param_label and param_value:
+                    return param_label == elem_label and param_value == elem_value
+
+                elif param_label and not param_value:
+                    return param_label == elem_label
+
+                elif not param_label and param_value:
+                    return param_value == elem_value
+
+
+    def normalize_json(self, json, lower_case=True):
+        if lower_case:
+            return {str(k).strip().lower(): self.normalize_json(v) if isinstance(v, dict) else str(v).strip().lower() for k, v in json.items()}
+        else:
+            return {str(k).strip(): self.normalize_json(v) if isinstance(v, dict) else str(v).strip() for k, v in json.items()}
+
+
+    def string_to_json(self, string):
+        '''Convert a string to a json object
+
+        :param string: String to be converted
+        :type string: str
+        :return: json object
+        '''
+        try:
+            return json.loads(string)
+        except json.JSONDecodeError as e:
+            logger().debug(f"Error decoding JSON data: {e}")
+            return None
 
 
     def open_input_combo(self, po_combo):
