@@ -89,7 +89,7 @@ class BaseDatabase:
         engine = self.connect_database(query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password)
         try:
             with engine.connect() as conn:
-                if re.findall(r'^(SELECT)', query.strip().upper()):
+                if query.strip().upper().startswith('SELECT'):
                     df = pd.read_sql_query(sql=text(query), con=conn)
                     return df.to_dict()
                 else:
