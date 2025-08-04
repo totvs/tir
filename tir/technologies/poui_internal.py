@@ -3862,7 +3862,7 @@ class PouiInternal(Base):
             self.log_error(f"CheckBox '{label}' doesn't found!")
 
 
-    def click_combo(self, field, value, position):
+    def click_combo(self, field, value, position, second_value):
         '''Select a value for list combo inputs.
 
         :param field: label of field
@@ -3871,54 +3871,122 @@ class PouiInternal(Base):
         :type : str
         :param position:
         :type : int
+        :param second_value: value below the principal value (after the ":")
+        :type : str
         :return:
         '''
 
-        main_element = None
         success = None
         position -= 1
         current_value = None
-        replace = r'[\s,\.:]'
+        main_value = ''
 
         logger().info(f"Clicking on {field}")
         self.wait_element(term='po-combo')
 
         endtime = time.time() + self.config.time_out
         while (not success and time.time() < endtime):
-            po_combo = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, main_container='body')
-            if po_combo:
-                po_combo = next(iter(po_combo),None)
-                po_input = po_combo.find_next('input')
+            po_combo_list = self.web_scrap(term='po-combo', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            position=position, main_container='body')
+            po_combo_displayeds = list(filter(lambda x: self.element_is_displayed(x), po_combo_list))
+            if po_combo_displayeds:
+                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x),
+                                                    po_combo_displayeds)),None)
+                po_input = po_combo_filtred.find_next('input')
                 if po_input:
-                    self.open_input_combo(po_combo)
-                    self.click_po_list_box(value)
+                    po_input_sel = self.soup_to_selenium(po_input, twebview=True)
+
+                    main_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
+                    self.open_input_combo(po_combo_filtred)
+                    self.send_keys(po_input_sel, value if value else second_value)
+                    self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', value).lower()
+                    success = current_value.strip().lower() == main_value.strip().lower() if value else True
+
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
 
-    def click_po_list_box(self, value):
+    def click_po_list_box(self, value, second_value):
         '''
         :param value: Value to select on po-list-box
         :type str
+        :param second_value: value below the principal value (after the ":")
+        :type : str
         :return:
         '''
-        replace = r'[\s,\.:]'
+        orig_value = value
+        orig_second_value = second_value
         value = value.strip().lower()
+        second_value = second_value.strip().lower()
+
         self.wait_element(term='po-listbox')
 
-        po_list_itens = self.web_scrap(term='.po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
+        po_items_list = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                        main_container='body')
 
-        if po_list_itens:
-            item_filtered = next(iter(list(filter(lambda x: re.sub(replace, '', x.text.strip().lower()) ==
-                                                            re.sub(replace, '', value), po_list_itens))), None)
+        if po_items_list:
+            item_filtered = next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value), po_items_list))), None)
             if item_filtered:
-                self.scroll_to_element(self.soup_to_selenium(item_filtered, twebview=True))
-                self.click(self.soup_to_selenium(item_filtered, twebview=True))
+                item_filtered_div = item_filtered.find_next('div')
+                self.scroll_to_element(self.soup_to_selenium(item_filtered_div, twebview=True))
+                self.click(self.soup_to_selenium(item_filtered_div, twebview=True))
             else:
-                self.log_error(f'{value} not found')
+                self.log_error(f'Item list {orig_value if orig_value else orig_second_value} not found')
+
+
+    def find_po_item_list(self, po_item_list, param_label, param_value):
+        '''This method is used to filter the po-item-list elements based on the label and value match.
+
+
+        :param list_elements: list of BeautifulSoup po-item-list elements
+        :type list_elements: list
+        :param label_text:
+        :param value_text:
+        :param attr: attribute to be checked in the po-item-list
+        :return: Filtered BeautifulSoup element or None if not found
+        '''
+
+
+        element_data_str = po_item_list.get(f'data-item-list')
+        if element_data_str:
+            atr_value_dict = self.string_to_json(element_data_str)
+
+            if atr_value_dict:
+                normalized_dict = self.normalize_json(atr_value_dict)
+
+                elem_label = normalized_dict.get('label')
+                elem_value = normalized_dict.get('value')
+
+                if param_label and param_value:
+                    return param_label == elem_label and param_value == elem_value
+
+                elif param_label and not param_value:
+                    return param_label == elem_label
+
+                elif not param_label and param_value:
+                    return param_value == elem_value
+
+
+    def normalize_json(self, json, lower_case=True):
+        if lower_case:
+            return {str(k).strip().lower(): self.normalize_json(v) if isinstance(v, dict) else str(v).strip().lower() for k, v in json.items()}
+        else:
+            return {str(k).strip(): self.normalize_json(v) if isinstance(v, dict) else str(v).strip() for k, v in json.items()}
+
+
+    def string_to_json(self, string):
+        '''Convert a string to a json object
+
+        :param string: String to be converted
+        :type string: str
+        :return: json object
+        '''
+        try:
+            return json.loads(string)
+        except json.JSONDecodeError as e:
+            logger().debug(f"Error decoding JSON data: {e}")
+            return None
 
 
     def open_input_combo(self, po_combo):
