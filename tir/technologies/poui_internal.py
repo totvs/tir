@@ -3873,11 +3873,10 @@ class PouiInternal(Base):
         :return:
         '''
 
-        main_element = None
         success = None
         position -= 1
         current_value = None
-        replace = r'[\s,\.:]'
+        main_value = ''
 
         logger().info(f"Clicking on {field}")
         self.wait_element(term='po-combo')
@@ -3893,11 +3892,14 @@ class PouiInternal(Base):
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
                     po_input_sel = self.soup_to_selenium(po_input, twebview=True)
+
+                    main_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     self.open_input_combo(po_combo_filtred)
                     self.send_keys(po_input_sel, value if value else second_value)
-                    expected_value = self.click_po_list_box(value, second_value)
+                    self.click_po_list_box(value, second_value)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    success = re.sub(replace, '', current_value).lower() == re.sub(replace, '', expected_value).lower()
+                    success = current_value.strip().lower() == main_value.strip().lower() if value else True
+
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
@@ -3912,10 +3914,8 @@ class PouiInternal(Base):
         '''
         orig_value = value
         orig_second_value = second_value
-        replace = r'[\s,\.:]'
-        value = re.sub(replace, '', value).strip().lower()
-        second_value = re.sub(replace, '', second_value).strip().lower()
-
+        value = value.strip().lower()
+        second_value = second_value.strip().lower()
 
         self.wait_element(term='po-listbox')
 
@@ -3928,8 +3928,6 @@ class PouiInternal(Base):
                 item_filtered_div = item_filtered.find_next('div')
                 self.scroll_to_element(self.soup_to_selenium(item_filtered_div, twebview=True))
                 self.click(self.soup_to_selenium(item_filtered_div, twebview=True))
-
-                return json.loads(item_filtered.get('data-item-list')).get('label') if not value else orig_value
             else:
                 self.log_error(f'Item list {orig_value if orig_value else orig_second_value} not found')
 
