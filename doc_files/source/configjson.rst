@@ -177,12 +177,8 @@ Logging & Monitoring
      - C:\\TIR\\Log
    * - LogFile
      - bool
-     - Save log file. Currently disabled
+     - Save log file. *Currently disabled*
      - 
-   * - NumExec ========***////////****
-     - bool
-     - Enable HTTP POST for Start/End execution (Needs to set UrlSetStart and UrlSetEndExec).
-     - true
    * - LogHttp
      - str
      - HTTP server to send Log folder by URL/HTTP
@@ -211,8 +207,8 @@ This approach simplifies test setup and centralizes database configuration manag
      - **Example**
    * - DBDriver
      - str
-     - ODBC driver name. Consult your ODBC drivers configuration* .
-     - Oracle in OraDB18Home1
+     - ODBC driver name or Oracle Driver name.
+     - Oracle
    * - DBServer
      - str
      - Host address of the database
@@ -233,10 +229,6 @@ This approach simplifies test setup and centralizes database configuration manag
      - str
      - Database password
      - MyDataB4s3P4ssW0rd123
-   * - DBQOracleServer
-     - str
-     - Only for oracle connection. DSN or TNS Name/Address.
-     - XE
 
 ********************************
 
