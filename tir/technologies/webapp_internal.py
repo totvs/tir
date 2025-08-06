@@ -7154,7 +7154,7 @@ class WebappInternal(Base):
                                 columns = rows[row_number].select("td")
 
                     if columns:
-                        if column_name in headers[grid_number]:
+                        if len(headers) >= grid_number and column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
                             if self.webapp_shadowroot():
                                 column_element = lambda: columns[column_number]
