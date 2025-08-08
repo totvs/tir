@@ -10021,13 +10021,28 @@ class WebappInternal(Base):
                 text_extracted = container_text
 
             if text_extracted:
+                btn_term = f'wa-button[caption="{button}"]'
+                btn_container = self.get_bs4_css_selector(self.get_current_container())
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
+                if self.element_exists(term=btn_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=btn_container, check_error=False):
+                    self.SetButton(button, check_error=False)
                 self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
                  optional_term=label_term, presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
 
         if not text_extracted:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
+
+    def get_bs4_css_selector(self, element) -> str:
+        """
+        Return a CSS selector string from a BeautifulSoup element.
+        The returned value follows the format: <tag_name>#<id>.<class1>.<class2>
+
+        :param element: The BeautifulSoup element to extract information from.
+        :type element: bs4.element.Tag
+        """
+
+        return (element.name) + (f"#{element.get('id')}" if element.get('id') else '') + ("".join(f".{cls}" for cls in element.get('class')) if element.get('class') else '')
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
