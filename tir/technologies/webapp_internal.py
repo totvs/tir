@@ -8842,8 +8842,7 @@ class WebappInternal(Base):
                         else:
                             self.send_action(action=self.click, element=label_box_element)
                             check_after_click = checked_status()
-                            label_in_selenium = self.soup_to_selenium(label_box)
-                            success = check_after_click != check_before_click or label_in_selenium.get_attribute('checked') == 'true'
+                            success = check_after_click != check_before_click
 
                     if not success:
                         label_box = label_box.parent
