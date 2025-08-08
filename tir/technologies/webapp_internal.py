@@ -7154,7 +7154,7 @@ class WebappInternal(Base):
                                 columns = rows[row_number].select("td")
 
                     if columns:
-                        if column_name in headers[grid_number]:
+                        if len(headers) > grid_number and column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
                             if self.webapp_shadowroot():
                                 column_element = lambda: columns[column_number]
@@ -8828,8 +8828,9 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
+                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
+                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                         label_box_element  = lambda: self.soup_to_selenium(label_box)
                         check_before_click = checked_status()
