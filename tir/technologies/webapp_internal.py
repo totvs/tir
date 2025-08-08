@@ -8828,8 +8828,9 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
+                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
+                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                         label_box_element  = lambda: self.soup_to_selenium(label_box)
                         check_before_click = checked_status()
