@@ -10025,7 +10025,8 @@ class WebappInternal(Base):
                 btn_container = self.get_bs4_css_selector(self.get_current_container())
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                if self.element_exists(term=btn_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=btn_container, check_error=False):
+                if btn_container and self.element_exists(term=btn_term, scrap_type=enum.ScrapType.CSS_SELECTOR
+                                                         , main_container=btn_container, check_error=False):
                     self.SetButton(button, check_error=False)
                 self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
                  optional_term=label_term, presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
@@ -10041,9 +10042,12 @@ class WebappInternal(Base):
         :param element: The BeautifulSoup element to extract information from.
         :type element: bs4.element.Tag
         """
+        if element and isinstance(element, Tag):
 
-        return (element.name) + (f"#{element.get('id')}" if element.get('id') else '') + ("".join(f".{cls}" for cls in element.get('class')) if element.get('class') else '')
-
+            return (element.name if element.name else '') + (f"#{element.get('id')}" if element.get('id') else '') + ("".join(f".{cls}" for cls in element.get('class')) if element.get('class') else '')
+        else:
+            return None
+        
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
             if text_user.replace(" ","") in text_extracted.replace(" ",""):
