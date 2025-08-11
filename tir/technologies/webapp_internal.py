@@ -307,17 +307,6 @@ class WebappInternal(Base):
 
             self.close_screen_before_menu()
 
-            if initial_program.lower() != 'sigacfg':
-                cget_term = '[name=cGet]'
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not self.element_exists(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"):
-                    logger().debug('Waiting menu screen after environment screen')
-                    time.sleep(10)
-
-                if time.time() > endtime:
-                    self.restart_counter + 1
-                    self.log_error(f"'Unable to load screen '{cget_term}' content.")
-
             if save_input:
                 self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
 
@@ -1874,17 +1863,21 @@ class WebappInternal(Base):
 
         """
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and self.check_layers('wa-dialog') > 1:
             if not self.webapp_shadowroot():
                 ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
             elif self.check_layers('wa-dialog') > 1:
                 logger().info('Escape to menu')
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
+                ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
-            if self.check_layers('wa-dialog') > 1:
-                logger().info('Found layers after Escape to menu')
-                self.close_screen_before_menu()
+            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
+                if self.check_layers('wa-dialog') > 1:
+                    logger().info('Found layers after Escape to menu')
+                    self.close_screen_before_menu()
+            # wait trasitions between screens to avoid errors in layers number
+            self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      position=2, timeout=6, main_container='body')
 
     def check_layers(self, term):
         """
@@ -7161,7 +7154,7 @@ class WebappInternal(Base):
                                 columns = rows[row_number].select("td")
 
                     if columns:
-                        if column_name in headers[grid_number]:
+                        if len(headers) > grid_number and column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
                             if self.webapp_shadowroot():
                                 column_element = lambda: columns[column_number]
@@ -8835,8 +8828,9 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
+                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
+                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                         label_box_element  = lambda: self.soup_to_selenium(label_box)
                         check_before_click = checked_status()
