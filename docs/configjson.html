@@ -46,7 +46,21 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="poui.html">Poui</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Config.json</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Config.json</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#structure-exemple">Structure (exemple):</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#execution-parameters">Execution Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required-parameters">Required Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#poui-interface">POUI Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-parameters">Additional Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging-monitoring">Logging &amp; Monitoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#database-configuration">Database Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aditional-parameters">Aditional Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chrome-parameters">Chrome Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#versioning-info">Versioning Info</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">TIR internal classes:</span></p>
 <ul>
@@ -83,60 +97,433 @@
              
   <section id="config-json">
 <h1>Config.json<a class="headerlink" href="#config-json" title="Link to this heading"></a></h1>
-<p>The config.json file is where the configs of the tests are defined.</p>
+<p>The environment must be configured through a <a class="reference external" href="https://github.com/totvs/tir/blob/main/config.json">config.json</a> file.</p>
+<p>You can find one to be used as a base in this repository. To select your file,
+you can either put it in your workspace or pass its path as a parameter of any of our classes’ initialization.
+The config.json file is where the configs of the tests are defined.</p>
 <p>These are the accepted config keys, and whether they are required or not:</p>
-<ul class="simple">
-<li><p><strong>Url:</strong> The URL that will run the tests. <strong>Required</strong></p></li>
-<li><p><strong>Browser:</strong> Browser that will be used to run the tests. (Firefox or Chrome) <strong>Required</strong></p></li>
-<li><p><strong>Environment:</strong> Environment used to run the tests. <strong>Required</strong></p></li>
-<li><p><strong>User:</strong> User that will be logged into the environment. <strong>Required</strong></p></li>
-<li><p><strong>Password:</strong> Password to log  on to the environment. <strong>Required</strong></p></li>
-<li><p><strong>Language:</strong> Language to be considered in execution.</p></li>
-<li><p><strong>DebugLog:</strong> Defines whether the run log will be displayed during tests.</p></li>
-<li><p><strong>TimeOut:</strong> Time set to expire the test if it is reached.</p></li>
-<li><p><strong>SkipEnvironment</strong> Skips the module selection screen, if your Protheus configuration does not have it.</p></li>
-<li><p><strong>Headless:</strong> Defines whether the test will run with or without interface.</p></li>
-<li><p><strong>ScreenshotFolder</strong>: A folder to contain all screenshots taken by the user with the Screenshot method.</p></li>
-<li><p><strong>NewLog</strong>: (boolean) true to activate the new log.</p></li>
-<li><p><strong>MotExec</strong>: Execution tag. Example: “MotExec”:”HOMOLOG_TIR”</p></li>
-<li><p><strong>ExecId</strong>: Execution id. Example: “ExecId”:”20201119”</p></li>
-<li><p><strong>LogUrl1</strong>: service url. Example: “LogUrl1”:”<a class="reference external" href="http://127.0.0.1:3333/log/">http://127.0.0.1:3333/log/</a>”</p></li>
-<li><p><strong>CheckValue</strong>: Indicates if TIR must check each value after fill. Example: “CheckValue”: true</p></li>
-<li><p><strong>ChromeDriverAutoInstall</strong>: For chromedriver auto install. Example: “ChromeDriverAutoInstall”: true</p></li>
-<li><p><strong>SSLChromeInstallDisable</strong>: In some cases will be necessary deactivate ssl to download chromedriver automatically. Example: “SSLChromeInstallDisable”: true</p></li>
-<li><p><strong>ScreenShot:</strong> If applicable, add screenshots to help explain your problem.</p></li>
-<li><p><strong>Country:</strong> Defines which country will be set as main. Example: pt-br</p></li>
-<li><p><strong>NumExec:</strong> Returns Status, URL and ID for execution.</p></li>
-<li><p><strong>MotExec:</strong> Checks the main content of MotExec key.</p></li>
-<li><p><strong>LogFolder:</strong> Used for determinate the local you want save the log. Example “LogFolder”: “C:\TIR\Log</p></li>
-<li><p><strong>LogFile:</strong> Create a log csv file.</p></li>
-<li><p><strong>ParameterMenu:</strong> Internal method of SetParameters and RestoreParameters.</p></li>
-<li><p><strong>UserCfg:</strong> Fills the user login screen of Protheus with the user and password located on config.json</p></li>
-<li><p><strong>PasswordCfg:</strong> Fills the user login screen of Protheus with the user and password located on config.json</p></li>
-<li><p><strong>BinPath:</strong> Fix firefox options and chromeoptions. Remove obsolete drivers.</p></li>
-<li><p><strong>CSVPath:</strong> This method return data as a string if necessary use some method to convert data like int(). Example: CSVPath : “C:\temp”</p></li>
-<li><p><strong>DBDriver:</strong> ODBC Driver database name</p></li>
-<li><p><strong>DBServer:</strong> Database Server Name</p></li>
-<li><p><strong>DBPort:</strong> Database port default port=1521</p></li>
-<li><p><strong>DBName:</strong> Database Name</p></li>
-<li><p><strong>DBUser:</strong> User Database Name</p></li>
-<li><p><strong>DBPassword:</strong> Database password</p></li>
-<li><p><strong>DBQOracleServer:</strong> Only for Oracle: DBQ format:Host:Port/oracle instance</p></li>
-<li><p><strong>URL_TSS:</strong> Used for TSS only.</p></li>
-<li><p><strong>StartProgram:</strong> Opens the browser maximized and goes to defined URL</p></li>
-<li><p><strong>LogUrl2:</strong> Add default server address and save response log.</p></li>
-<li><p><strong>ParameterUrl:</strong> Filter the correct value to fill</p></li>
-<li><p><strong>LogHttp:</strong> Add folder to save log by loghttp structure</p></li>
-<li><p><strong>BaseLine_Spool:</strong> Baseline_Spool is the path of report spool in your environment</p></li>
-<li><p><strong>POUI:</strong> For POUI interfaces.</p></li>
-<li><p><strong>POUILogin</strong>: For new POUI login protheus interface. Example: “POUILogin”: true</p></li>
-<li><p><strong>LogInfoConfig:</strong> Add set_log_info alternative</p></li>
-<li><p><strong>Release:</strong> Get the current Release.</p></li>
-<li><p><strong>TopDataBase:</strong> Get the current Data Base.</p></li>
-<li><p><strong>Lib:</strong> Get the current Lib.</p></li>
-<li><p><strong>Build:</strong> Get the current Lib.</p></li>
-<li><p><strong>Data Delimiter:</strong> Used when you have a dot in the date instead of a slash.</p></li>
-</ul>
+<section id="structure-exemple">
+<h2>Structure (exemple):<a class="headerlink" href="#structure-exemple" title="Link to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:8080/&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Browser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Firefox&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyProtheusEnvironment&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;User&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyUser&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyP4ssW0rd123&quot;</span>
+<span class="w">  </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="execution-parameters">
+<h2>Execution Parameters<a class="headerlink" href="#execution-parameters" title="Link to this heading"></a></h2>
+<section id="required-parameters">
+<h3>Required Parameters<a class="headerlink" href="#required-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Required Parameters</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Url</strong></p></td>
+<td><p>str</p></td>
+<td><p>The URL that will run the tests.</p></td>
+<td><p><a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Browser</strong></p></td>
+<td><p>str</p></td>
+<td><p>Browser used for execution. Firefox or Chrome.</p></td>
+<td><p>Firefox</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Environment</strong></p></td>
+<td><p>str</p></td>
+<td><p>Target Protheus environment.</p></td>
+<td><p>MyProtheusEnvironment</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>User</strong></p></td>
+<td><p>str</p></td>
+<td><p>Username to login into the environment.</p></td>
+<td><p>MyUser</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Password</strong></p></td>
+<td><p>str</p></td>
+<td><p>User password to login.</p></td>
+<td><p>MyP4ssW0rd123</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Language</strong></p></td>
+<td><p>str</p></td>
+<td><p>Language used in your protheus environment. Options: pt-br, en-us, es-es.</p></td>
+<td><p>pt-br</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="poui-interface">
+<h3>POUI Interface<a class="headerlink" href="#poui-interface" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">POUI &amp; UI Settings</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>POUI</p></td>
+<td><p>bool</p></td>
+<td><p>Enable POUI interface. Enable only if running POUI Tests outside Protheus environments. <strong>Default:</strong> false</p></td>
+<td><p>false</p></td>
+</tr>
+<tr class="row-odd"><td><p>POUILogin</p></td>
+<td><p>bool</p></td>
+<td><p>Needed when APPENVIRONMENT key enabled in your environment using POUI login interface. <em>This paramter is deprecated and will be removed in &gt;= 12.1.2510 version</em></p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-even"><td><p>SSOLogin</p></td>
+<td><p>bool</p></td>
+<td><p>Enable when login by SSO has been configured in the environment. Skips login screen.</p></td>
+<td><p>true</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="additional-parameters">
+<h3>Additional Parameters<a class="headerlink" href="#additional-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">General Settings</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Headless</p></td>
+<td><p>bool</p></td>
+<td><p>Headless mode, meaning that the browser window wouldn’t be visible. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-odd"><td><p>DebugLog</p></td>
+<td><p>bool</p></td>
+<td><p>Show debug logs during execution. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-even"><td><p>ScreenshotFolder</p></td>
+<td><p>str</p></td>
+<td><p>Path to send all screenshots taken during execution Screenshot method. <strong>Default:</strong> Current execution path</p></td>
+<td><p>C:\Path\to\folder</p></td>
+</tr>
+<tr class="row-odd"><td><p>ScreenShot</p></td>
+<td><p>bool</p></td>
+<td><p>Save screenshots in execution path in case of errors. <strong>Default:</strong> true</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-even"><td><p>TimeOut</p></td>
+<td><p>int</p></td>
+<td><p>Time set (in seconds) to expire the test if it is reached. <strong>Default:</strong> 90</p></td>
+<td><p>60</p></td>
+</tr>
+<tr class="row-odd"><td><p>SkipEnvironment</p></td>
+<td><p>bool</p></td>
+<td><p>Skips module selection screen. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-even"><td><p>StartProgram</p></td>
+<td><p>str</p></td>
+<td><p>Start test case directly in url of seted program .</p></td>
+<td><p>SIGAFAT</p></td>
+</tr>
+<tr class="row-odd"><td><p>Country</p></td>
+<td><p>str</p></td>
+<td><p>Country will be seted as main in log of execution.</p></td>
+<td><p>BRA</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="logging-monitoring">
+<h3>Logging &amp; Monitoring<a class="headerlink" href="#logging-monitoring" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">Log Configuration</span><a class="headerlink" href="#id4" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NewLog</p></td>
+<td><p>bool</p></td>
+<td><p>Enable new log by JSON API. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-odd"><td><p>MotExec</p></td>
+<td><p>str</p></td>
+<td><p>Identifier log tag</p></td>
+<td><p>HOMOLOG_TIR</p></td>
+</tr>
+<tr class="row-even"><td><p>ExecId</p></td>
+<td><p>str</p></td>
+<td><p>Execution ID for log tracking</p></td>
+<td><p>20201119</p></td>
+</tr>
+<tr class="row-odd"><td><p>LogUrl1</p></td>
+<td><p>str</p></td>
+<td><p>URL/API to send execution logs</p></td>
+<td><p><a class="reference external" href="http://127.0.0.1:3333/log/">http://127.0.0.1:3333/log/</a></p></td>
+</tr>
+<tr class="row-even"><td><p>LogUrl2</p></td>
+<td><p>str</p></td>
+<td><p>Additional log server URL</p></td>
+<td><p><a class="reference external" href="http://10.171.78.43:8204/rest/LOGEXEC/">http://10.171.78.43:8204/rest/LOGEXEC/</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>LogFolder</p></td>
+<td><p>str</p></td>
+<td><p>Folder to save log files. <strong>Default:</strong> Script execution path</p></td>
+<td><p>C:\TIR\Log</p></td>
+</tr>
+<tr class="row-even"><td><p>LogFile</p></td>
+<td><p>bool</p></td>
+<td><p>Save log file. <em>Currently disabled</em></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>LogHttp</p></td>
+<td><p>str</p></td>
+<td><p>HTTP server to send Log folder by URL/HTTP</p></td>
+<td><p><a class="reference external" href="http://www.logtest.com.br/api/">http://www.logtest.com.br/api/</a></p></td>
+</tr>
+<tr class="row-even"><td><p>BaseLine_Spool</p></td>
+<td><p>str</p></td>
+<td><p>Path to report spool in your environment</p></td>
+<td><p>acda080rbase.##r</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="database-configuration">
+<h3>Database Configuration<a class="headerlink" href="#database-configuration" title="Link to this heading"></a></h3>
+<p>This section contains optional parameters used to configure the database connection for your tests.
+By specifying these settings in the config file, you avoid the need to
+provide connection details directly as parameters in the QueryExecute method.
+This approach simplifies test setup and centralizes database configuration management.</p>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Database Settings</span><a class="headerlink" href="#id5" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>DBDriver</p></td>
+<td><p>str</p></td>
+<td><p>ODBC driver name or Oracle Driver name.</p></td>
+<td><p>Oracle</p></td>
+</tr>
+<tr class="row-odd"><td><p>DBServer</p></td>
+<td><p>str</p></td>
+<td><p>Host address of the database</p></td>
+<td><p>10.171.83.18</p></td>
+</tr>
+<tr class="row-even"><td><p>DBPort</p></td>
+<td><p>str</p></td>
+<td><p>Port number of the database. <strong>Default:</strong> 1521</p></td>
+<td><p>1521</p></td>
+</tr>
+<tr class="row-odd"><td><p>DBName</p></td>
+<td><p>str</p></td>
+<td><p>Database name</p></td>
+<td><p>MyDatabase</p></td>
+</tr>
+<tr class="row-even"><td><p>DBUser</p></td>
+<td><p>str</p></td>
+<td><p>Database user</p></td>
+<td><p>MyUser</p></td>
+</tr>
+<tr class="row-odd"><td><p>DBPassword</p></td>
+<td><p>str</p></td>
+<td><p>Database password</p></td>
+<td><p>MyDataB4s3P4ssW0rd123</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="aditional-parameters">
+<h3>Aditional Parameters<a class="headerlink" href="#aditional-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">Advanced Settings</span><a class="headerlink" href="#id6" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ParameterMenu</p></td>
+<td><p>str</p></td>
+<td><p>Custom path for parameter menu. Only for costumized environments*.</p></td>
+<td><p>Updates &gt; Parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p>UserCfg</p></td>
+<td><p>bool</p></td>
+<td><p>Autofill user from config.json</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-even"><td><p>PasswordCfg</p></td>
+<td><p>bool</p></td>
+<td><p>Autofill password from config.json</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-odd"><td><p>CSVPath</p></td>
+<td><p>str</p></td>
+<td><p>Path to CSV file used by OpenCSV to locate and read CSV files.</p></td>
+<td><p>C:\path\to\csv\file</p></td>
+</tr>
+<tr class="row-even"><td><p>ParameterUrl</p></td>
+<td><p>Bool</p></td>
+<td><p>Input Parameters in URL. If true, the parameters will be passed in the URL(Needs RPO package installed in Protheus Environment).</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Data Delimiter</p></td>
+<td><p>str</p></td>
+<td><p>Defines date delimiter format. Only for costumized date delimiters in protheus Environment.Example “22.02.20xx” instead “22/02/20xx”(dot or slash)</p></td>
+<td><p>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="chrome-parameters">
+<h3>Chrome Parameters<a class="headerlink" href="#chrome-parameters" title="Link to this heading"></a></h3>
+<p>Only for Chrome browser.</p>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">Chrome Settings</span><a class="headerlink" href="#id7" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ChromeDriverAutoInstall</p></td>
+<td><p>bool</p></td>
+<td><p>Automatically install ChromeDriver. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-odd"><td><p>SSLChromeInstallDisable</p></td>
+<td><p>bool</p></td>
+<td><p>Disable SSL to allow driver download. <strong>Default:</strong> false</p></td>
+<td><p>true</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="versioning-info">
+<h3>Versioning Info<a class="headerlink" href="#versioning-info" title="Link to this heading"></a></h3>
+<p><em>This configuration can be used to skip the About menu.</em></p>
+<table class="docutils align-default" id="id8">
+<caption><span class="caption-text">Release &amp; Version Info</span><a class="headerlink" href="#id8" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Parameter</strong></p></th>
+<th class="head"><p><strong>Type</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+<th class="head"><p><strong>Example</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>LogInfoConfig</p></td>
+<td><p>bool</p></td>
+<td><p>Skip About menu (Needs to set Release, TopDataBase, Lib and Build)</p></td>
+<td><p>true</p></td>
+</tr>
+<tr class="row-odd"><td><p>Release</p></td>
+<td><p>str</p></td>
+<td><p>Manual release version</p></td>
+<td><p>12.1.2410</p></td>
+</tr>
+<tr class="row-even"><td><p>TopDataBase</p></td>
+<td><p>str</p></td>
+<td><p>Database version manually set</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Lib</p></td>
+<td><p>str</p></td>
+<td><p>Library version manually set</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Build</p></td>
+<td><p>str</p></td>
+<td><p>Build version manually set</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
 </section>
 
 
