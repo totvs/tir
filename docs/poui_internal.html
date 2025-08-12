@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.filter_is_displayed"><code class="docutils literal notranslate"><span class="pre">PouiInternal.filter_is_displayed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.filter_label_element"><code class="docutils literal notranslate"><span class="pre">PouiInternal.filter_label_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.find_label_element"><code class="docutils literal notranslate"><span class="pre">PouiInternal.find_label_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.find_po_item_list"><code class="docutils literal notranslate"><span class="pre">PouiInternal.find_po_item_list()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_config_value"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_config_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_distance"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_distance()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_distance_x"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_distance_x()</span></code></a></li>
@@ -148,6 +149,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.search_text"><code class="docutils literal notranslate"><span class="pre">PouiInternal.search_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.service_process_bat_file"><code class="docutils literal notranslate"><span class="pre">PouiInternal.service_process_bat_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.set_log_info"><code class="docutils literal notranslate"><span class="pre">PouiInternal.set_log_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.string_to_json"><code class="docutils literal notranslate"><span class="pre">PouiInternal.string_to_json()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.sub_string"><code class="docutils literal notranslate"><span class="pre">PouiInternal.sub_string()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.switch_to_active_element"><code class="docutils literal notranslate"><span class="pre">PouiInternal.switch_to_active_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.toggle_radio"><code class="docutils literal notranslate"><span class="pre">PouiInternal.toggle_radio()</span></code></a></li>
@@ -774,7 +776,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_combo">
-<span class="sig-name descname"><span class="pre">click_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_combo" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_combo" title="Link to this definition"></a></dt>
 <dd><p>Select a value for list combo inputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -786,6 +788,8 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 :type : str
 :param position:
 :type : int
+:param second_value: value below the principal value (after the “:”)
+:type : str
 :return:</p>
 </dd></dl>
 
@@ -829,13 +833,15 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_po_list_box">
-<span class="sig-name descname"><span class="pre">click_po_list_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">click_po_list_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_po_list_box" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> – Value to select on po-list-box</p>
 </dd>
 </dl>
 <p>:type str
+:param second_value: value below the principal value (after the “:”)
+:type : str
 :return:</p>
 </dd></dl>
 
@@ -1152,6 +1158,25 @@ Filter and remove a specified character with regex, return only displayed elemen
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">find_label_element</span><span class="p">(</span><span class="s2">&quot;User:&quot;</span><span class="p">,</span> <span class="n">container_object</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.find_po_item_list">
+<span class="sig-name descname"><span class="pre">find_po_item_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">po_item_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.find_po_item_list" title="Link to this definition"></a></dt>
+<dd><p>This method is used to filter the po-item-list elements based on the label and value match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_elements</strong> (<em>list</em>) – list of BeautifulSoup po-item-list elements</p></li>
+<li><p><strong>label_text</strong></p></li>
+<li><p><strong>value_text</strong></p></li>
+<li><p><strong>attr</strong> – attribute to be checked in the po-item-list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered BeautifulSoup element or None if not found</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1712,6 +1737,20 @@ Fills the log information needed by opening the About page.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">set_log_info</span><span class="p">()</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.string_to_json">
+<span class="sig-name descname"><span class="pre">string_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.string_to_json" title="Link to this definition"></a></dt>
+<dd><p>Convert a string to a json object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – String to be converted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>json object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
