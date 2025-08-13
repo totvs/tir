@@ -7154,7 +7154,7 @@ class WebappInternal(Base):
                                 columns = rows[row_number].select("td")
 
                     if columns:
-                        if column_name in headers[grid_number]:
+                        if len(headers) > grid_number and column_name in headers[grid_number]:
                             column_number = headers[grid_number][column_name]
                             if self.webapp_shadowroot():
                                 column_element = lambda: columns[column_number]
@@ -8828,8 +8828,9 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: (hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)
+                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
+                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
+                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
                         label_box_element  = lambda: self.soup_to_selenium(label_box)
                         check_before_click = checked_status()
@@ -9965,12 +9966,13 @@ class WebappInternal(Base):
         text_solution_extracted = ""
         text_extracted = ""
         regex = r"(<[^>]*>)"
+        closed_modal = False
 
         if not button:
             button = self.get_single_button().text
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not text_extracted):
+        while(time.time() < endtime and (not text_extracted or not closed_modal)):
 
             logger().info(f"Checking Help on screen: {text}")
             # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
@@ -10021,33 +10023,15 @@ class WebappInternal(Base):
                 text_extracted = container_text
 
             if text_extracted:
-                btn_term = f'wa-button[caption="{button}"]'
-                btn_container = self.get_bs4_css_selector(self.get_current_container())
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                if btn_container and self.element_exists(term=btn_term, scrap_type=enum.ScrapType.CSS_SELECTOR
-                                                         , main_container=btn_container, check_error=False):
-                    self.SetButton(button, check_error=False)
-                self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=label_term, presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
+                closed_modal = not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED,
+                                                        optional_term=label_term, main_container = self.containers_selectors["AllContainers"], 
+                                                        check_error=False)
 
-        if not text_extracted:
+        if not text_extracted or not closed_modal:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
 
-    def get_bs4_css_selector(self, element) -> str:
-        """
-        Return a CSS selector string from a BeautifulSoup element.
-        The returned value follows the format: <tag_name>#<id>.<class1>.<class2>
-
-        :param element: The BeautifulSoup element to extract information from.
-        :type element: bs4.element.Tag
-        """
-        if element and isinstance(element, Tag):
-
-            return (element.name if element.name else '') + (f"#{element.get('id')}" if element.get('id') else '') + ("".join(f".{cls}" for cls in element.get('class')) if element.get('class') else '')
-        else:
-            return None
-        
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
         if verbosity == False:
             if text_user.replace(" ","") in text_extracted.replace(" ",""):
