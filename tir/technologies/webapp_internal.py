@@ -6610,7 +6610,7 @@ class WebappInternal(Base):
                                                     self.send_keys(selenium_input(), Keys.ENTER)
 
                                     elif lenfield == len(field[1]) and self.get_current_container().attrs[
-                                        'id'] != container_id:
+                                        'id'] != container_id and not modal_open:
                                         try:
                                             self.send_keys(selenium_input(), Keys.ENTER)
                                         except:
