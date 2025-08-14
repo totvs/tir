@@ -9972,7 +9972,7 @@ class WebappInternal(Base):
             button = self.get_single_button().text
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and (not text_extracted or not closed_modal)):
+        while(time.time() < endtime and (not text_extracted or not modal_is_closed)):
 
             logger().info(f"Checking Help on screen: {text}")
             # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
