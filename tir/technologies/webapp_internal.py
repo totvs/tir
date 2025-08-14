@@ -10029,7 +10029,7 @@ class WebappInternal(Base):
                                                             optional_term=label_term, main_container=self.containers_selectors["AllContainers"], 
                                                             check_error=False)
 
-        if not text_extracted or not closed_modal:
+        if not text_extracted or not modal_is_closed:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
