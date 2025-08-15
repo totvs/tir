@@ -9966,7 +9966,7 @@ class WebappInternal(Base):
         text_solution_extracted = ""
         text_extracted = ""
         regex = r"(<[^>]*>)"
-        modal_is_closed= False
+        modal_is_closed = False
 
         if not button:
             button = self.get_single_button().text
