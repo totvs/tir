@@ -6704,7 +6704,7 @@ class WebappInternal(Base):
 
         return ret
 
-    def check_grid(self, field, x3_dictionaries, position=0):
+    def check_grid(self, field, x3_dictionaries, get_value=False, position=0):
         """
         [Internal]
 
@@ -6736,14 +6736,17 @@ class WebappInternal(Base):
 
         selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
 
-        text = selenium_column.text.strip()      
+        text = selenium_column.text.strip()
+
+        logger().info(f"Collected value: {text}")
+        if get_value:
+            return text
 
         field_name = f"({field[0]}, {column})"
         if field[5]:
             self.log_result(field_name, value.lower(), text.lower())
         else:
             self.log_result(field_name, value, text)
-        logger().info(f"Collected value: {text}")
 
     def get_status_color(self, sl_object):
         colors = {
