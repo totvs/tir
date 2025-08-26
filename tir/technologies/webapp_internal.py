@@ -6400,7 +6400,7 @@ class WebappInternal(Base):
             if selenium_input():
                 if isinstance(selenium_input(), Select):
                     filled = self.select_combo(selenium_input(), user_value)
-                    self.send_keys(child, Keys.TAB)
+                    self.send_keys(selenium_column, Keys.TAB)
                 else:
                     container_input = self.get_container_selector('wa-text-input', select_all=False)
                     value_type = self.value_type(container_input.get('type'))
