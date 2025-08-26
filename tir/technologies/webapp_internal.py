@@ -6373,31 +6373,40 @@ class WebappInternal(Base):
 
         """
         column = field[0]
+        value_type = field_to_valtype[field[0]] if '_' in field[0] else None
         user_value = field[1]
         grid_number = field[2]
         row = field[4]
         check_value = field[5]
-        value_type = field_to_valtype[field[0]] if '_' in field[0] else None
-        position = field[7]
         duplicate_fields = field[6]
+        column_position = field[7]
 
         current_value = ""
         try_counter = 1
+        filled = False
+        selenium_column = None
         # check_value = False if grid_number else check_value
 
         endtime = time.time() + self.config.time_out
-        while current_value != field_one and time.time() < endtime:
-            selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=position, duplicate_fields=duplicate_fields)
+        while not filled and time.time() < endtime:
+
+            if not selenium_column:
+                selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
+
             layer = lambda: self.check_layers(layer_selector)
             self.open_cell(field, layer(), element=selenium_column)
-            selenium_input = lambda: self.get_input_element()
+            selenium_input = lambda: self.get_grid_input_element()
+
             if selenium_input():
-                if not value_type:
-                    container_input = self.get_input_container('wa-text-input')
+                if isinstance(selenium_input(), Select):
+                    filled = self.select_combo(selenium_input(), user_value)
+                else:
+                    container_input = self.get_container_selector('wa-text-input', select_all=False)
                     value_type = self.value_type(container_input.get('type'))
-                self.process_input_element(field, selenium_input, user_value, value_type, layer, try_counter)
-                current_value = selenium_column.text.strip()
-                current_value = self.check_value_type(current_value, value_type).strip()
+                    self.process_input_element(field, selenium_input, user_value, value_type, layer, try_counter)
+                    current_value = selenium_column.text.strip()
+                    filled = self.check_value_type(current_value, value_type).strip() == field_one
+
                 try_counter += 1
                 if try_counter > 3:
                     try_counter = 1
@@ -6459,10 +6468,7 @@ class WebappInternal(Base):
             selenium_column = lambda: columns_element[column_index]
 
             self.scroll_to_element(selenium_column())
-            if self.webapp_shadowroot():
-                self.click(selenium_column(), click_type=enum.ClickType.ACTIONCHAINS)
-            else:
-                self.click(selenium_column())
+            self.click(selenium_column(), click_type=enum.ClickType.ACTIONCHAINS)
             self.set_element_focus(selenium_column())
 
             endtime = time.time() + self.config.time_out
@@ -6496,7 +6502,8 @@ class WebappInternal(Base):
        
         return self.remove_mask(value, valtype)
 
-    def get_input_element(self):
+
+    def get_grid_input_element(self):
         """
         [Internal]
 
@@ -6508,27 +6515,17 @@ class WebappInternal(Base):
         :return: The input element of the grid.
         :rtype: Selenium object
         """
-        text_input = self.get_input_container(selector='wa-text-input')
-        if text_input:
-            element = next(iter(self.find_shadow_element('input, textarea', self.soup_to_selenium(text_input))))
-            return element if element else None
+        grid_inputs_selectors = "wa-text-input, wa-combobox"
 
-    def get_input_container(self, selector=None):
-        """
-        [Internal]
+        #text_input = self.get_input_container(selector='wa-text-input')
+        input_container = self.get_container_selector(selector=grid_inputs_selectors, select_all=False)
+        if input_container:
+            return (
+                    self.return_combo_object(input_container)
+                    or
+                    next(iter(self.find_shadow_element('input, textarea', self.soup_to_selenium(input_container))), None)
+            )
 
-        Returns the input container of the grid.
-
-        :param selector: The selector of the input container.
-        :type selector: str
-        
-        """
-
-        if selector:
-            container = self.get_current_container()
-            if container:
-                return next(iter(container.select(selector)))
-            
     def get_column_index(self, field=None, columns=None, field_to_label=None, position=1, duplicate_fields=[]):
         """
         [Internal]
@@ -11068,11 +11065,11 @@ class WebappInternal(Base):
             self.tmenu_screen = None
 
 
-    def get_container_selector(self, selector):
+    def get_container_selector(self, selector, select_all=True):
 
         container = self.get_current_container()
 
-        return container.select(selector)
+        return container.select(selector) if select_all else next(iter(container.select(selector)), None)
 
 
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
