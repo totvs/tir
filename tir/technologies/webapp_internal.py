@@ -6404,21 +6404,17 @@ class WebappInternal(Base):
                 else:
                     container_input = self.get_container_selector('wa-text-input', select_all=False)
                     value_type = self.value_type(container_input.get('type'))
-                    self.process_input_element(field, selenium_input, user_value, value_type, layer, try_counter)
+                    self.process_input_element(field, selenium_input, user_value, value_type, layer)
                     current_value = selenium_column.text.strip()
                     filled = self.check_value_type(current_value, value_type).strip() == field_one
 
-                try_counter += 1
-                if try_counter > 3:
-                    try_counter = 1
-                if not check_value:
-                    break
 
-    def process_input_element(self, field, selenium_input, user_value, value_type, layer, try_counter):
+    def process_input_element(self, field, selenium_input, user_value, value_type, layer):
         logger().info(f"Sending keys: {user_value}")
+        type_input_key = 2
         user_value = self.check_value_type(user_value, value_type)
         current_layer = layer()
-        self.try_send_keys(selenium_input, user_value, try_counter)
+        self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
 
         if field[9]:
