@@ -5762,7 +5762,7 @@ class WebappInternal(Base):
         return string
 
     def remove_numeric_mask(self, string):
-        return string.replace('.', '') #ASK why removed re.findall
+        return string.replace('.', '')
 
     def remove_non_numeric_mask(self, string):
         caracter = (r'[.\/+-]')
@@ -6346,9 +6346,8 @@ class WebappInternal(Base):
         return ""
 
     def get_layer_selector(self, field):
-        if self.webapp_shadowroot():
-            return "wa-multi-get" if field[9] else "wa-dialog"
-        return ".tmodaldialog"
+        return "wa-multi-get" if field[9] else "wa-dialog"
+
 
     def fill_grid_loop(self, field, field_to_label, field_to_valtype, field_one, layer_selector):
         """
@@ -6383,46 +6382,102 @@ class WebappInternal(Base):
 
         current_value = ""
         try_counter = 1
-        filled = False
+        cell_filled = False
         selenium_column = None
-        # check_value = False if grid_number else check_value
+        initial_layers = self.check_layers(layer_selector)
 
         endtime = time.time() + self.config.time_out
-        while not filled and time.time() < endtime:
+        while not cell_filled and time.time() < endtime:
 
             if not selenium_column:
                 selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
 
-            layer = lambda: self.check_layers(layer_selector)
-            self.open_cell(field, layer(), element=selenium_column)
+            cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
             selenium_input = lambda: self.get_grid_input_element()
 
             if selenium_input():
                 if isinstance(selenium_input(), Select):
-                    filled = self.select_combo(selenium_input(), user_value)
+                    cell_filled = self.select_combo(selenium_input(), user_value)
                     self.send_keys(selenium_column, Keys.TAB)
                 else:
-                    container_input = self.get_container_selector('wa-text-input', select_all=False)
-                    value_type = self.value_type(container_input.get('type'))
-                    self.process_input_element(field, selenium_input, user_value, value_type, layer)
-                    current_value = selenium_column.text.strip()
-                    filled = self.check_value_type(current_value, value_type).strip() == field_one
+                    if cell_opened:
+                        container_input = self.get_container_selector('wa-text-input', select_all=False)
+                        value_type = self.value_type(container_input.get('type'))
+                        self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
+
+                    cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
 
 
-    def process_input_element(self, field, selenium_input, user_value, value_type, layer):
+    def compare_cell_value(self, selenium_column, user_value, value_type=None):
+        """Compares two values, ignoring formatting differences.
+
+        [Internal]
+        :param selenium_column: Selenium object of the grid cell.
+        :param user_value: value to be compared.
+        :param value_type: field value type attribute (N, C)
+        :return:
+        """
+
+        match_field = False
+
+        if selenium_column:
+            current_cell_value = selenium_column.text.strip()
+            is_equal = False
+
+            match_field = self.check_value_type(current_cell_value, value_type).strip() == user_value.strip()
+
+            if not match_field:
+                match_field = self.compare_numeric_values(current_cell_value, user_value)
+
+            return match_field
+
+
+    def compare_numeric_values(self, current_value, user_value):
+        """Compares two numeric values, ignoring formatting differences.
+        [Internal]
+        :param current_value:
+        :param user_value:
+        :return:
+        """
+        unmasked_current_value = re.sub(r'[\,\.]', '', self.remove_mask(current_value).strip())
+        unmasked_user_value = re.sub(r'[\,\.]', '', self.remove_mask(user_value).strip())
+
+        if unmasked_current_value.isnumeric() and unmasked_user_value.isnumeric():
+            if float(unmasked_current_value) == float(unmasked_user_value):
+                return True
+
+
+    def process_input_element(self, field, selenium_input, user_value, value_type, layers):
+        """
+        Inputs the value in opened grid cell.
+
+        [Internal]
+        :param field: Grid list item
+        :param selenium_input: input element
+        :param user_value: value to be inputted
+        :param value_type: type of the value (N, C)
+        :param layers: current number of layers
+        :return:
+        """
         logger().info(f"Sending keys: {user_value}")
         type_input_key = 2
         user_value = self.check_value_type(user_value, value_type)
-        current_layer = layer()
+        memo_field = field[9]
+        layers_selector = self.get_layer_selector(field)
+
+
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
 
-        if field[9]:
+        #if memo field
+        if memo_field:
             self.SetButton('Ok')
 
-        time.sleep(1)
-        if current_layer == layer():
-            self.close_cell(field, layer(), element=selenium_input())
+
+        current_layer = self.check_layers(layers_selector)
+
+        if current_layer > layers:
+            self.close_cell(field, layers, element=selenium_input())
 
     def select_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -6449,7 +6504,8 @@ class WebappInternal(Base):
                 return None
 
             selected_row = self.get_selected_row(rows)
-            if row != None:
+
+            if row is not None:
                 row_element = rows[row]
             elif selected_row:
                 row_element = selected_row
@@ -6459,7 +6515,7 @@ class WebappInternal(Base):
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
             column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
             if column_index is None:
-                self.log_error(f"Couldn't find column '{column}' in grid {grid_number}")
+                self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
                 return None
 
             selenium_column = lambda: columns_element[column_index]
@@ -6577,15 +6633,18 @@ class WebappInternal(Base):
         while (time.time() < endtime and current_layer == layer):
             logger().debug('Trying open cell in grid!')
             if self.selected_cell(element):
-                
+
                 self.toggle_cell(element)
-                
+
                 if(field[1] == True):
                     break
 
             current_layer = self.check_layers('wa-dialog')
 
             time.sleep(1)
+
+        if current_layer > layer:
+            return True
 
     def close_cell(self, field, layer, element):
 
@@ -7513,23 +7572,15 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> selected_row = self.get_selected_row(rows)
         """
-        if self.webapp_shadowroot():
-            filtered_rows = list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", x),rows))
-            if filtered_rows:
-                return next(iter(filtered_rows), None)
 
-            filtered_rows =list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('.selected-row')", x),rows))
-            if filtered_rows:
-                return next(iter(filtered_rows), None)
+        filtered_rows = list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('td.selected-cell')", x),rows))
+        if filtered_rows:
+            return next(iter(filtered_rows), None)
 
-        else:
-            filtered_rows = list(filter(lambda x: len(x.select("td.selected-cell")), rows))
-            if filtered_rows:
-                return next(iter(filtered_rows))
-            else:
-                filtered_rows = list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))
-                if filtered_rows:
-                    return next(iter(list(filter(lambda x: "selected-row" == self.soup_to_selenium(x).get_attribute('class'), rows))), None)
+        filtered_rows =list(filter(lambda x: self.driver.execute_script("return arguments[0].querySelector('.selected-row')", x),rows))
+        if filtered_rows:
+            return next(iter(filtered_rows), None)
+
         return next(reversed(rows), None)
 
 
@@ -11063,7 +11114,11 @@ class WebappInternal(Base):
 
 
     def get_container_selector(self, selector, select_all=True):
-
+        """Get a soup select object from current container.
+        :param selector: Css selector
+        :param select_all: If true return a list of objects, if false return the first
+        :return: Return a soup select object
+        """
         container = self.get_current_container()
 
         return container.select(selector) if select_all else next(iter(container.select(selector)), None)
