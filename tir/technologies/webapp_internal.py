@@ -6469,7 +6469,6 @@ class WebappInternal(Base):
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
 
-        #if memo field
         if memo_field:
             self.SetButton('Ok')
 
