@@ -6502,6 +6502,10 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find rows in grid {grid_number}")
                 return None
 
+            if (row is not None) and (row > len(rows) - 1 or row < 0):
+                self.log_error(f"Couldn't select the specified row: {row + 1}")
+                return None
+
             selected_row = self.get_selected_row(rows)
 
             if row is not None:
