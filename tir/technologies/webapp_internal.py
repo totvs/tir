@@ -6384,7 +6384,8 @@ class WebappInternal(Base):
         try_counter = 1
         cell_filled = False
         selenium_column = None
-        initial_layers = self.check_layers(layer_selector)
+        current_layers = lambda : self.check_layers(layer_selector)
+        initial_layers = current_layers()
 
         endtime = time.time() + self.config.time_out
         while not cell_filled and time.time() < endtime:
@@ -6398,7 +6399,10 @@ class WebappInternal(Base):
             if selenium_input():
                 if isinstance(selenium_input(), Select):
                     cell_filled = self.select_combo(selenium_input(), user_value)
-                    self.send_keys(selenium_column, Keys.TAB)
+                    time.sleep(1)
+                    # if modal opened close it
+                    if current_layers() > initial_layers:
+                        self.send_keys(selenium_column, Keys.TAB)
                 else:
                     if cell_opened:
                         container_input = self.get_container_selector('wa-text-input', select_all=False)
@@ -6469,6 +6473,7 @@ class WebappInternal(Base):
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
 
+        #if memo field
         if memo_field:
             self.SetButton('Ok')
 
@@ -6476,7 +6481,7 @@ class WebappInternal(Base):
         current_layer = self.check_layers(layers_selector)
 
         if current_layer > layers:
-            self.close_cell(field, layers, element=selenium_input())
+            self.close_cell(field, current_layer, element=selenium_input())
 
     def select_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -6650,6 +6655,13 @@ class WebappInternal(Base):
             return True
 
     def close_cell(self, field, layer, element):
+        """Close opened grid cell
+
+        :param field: grid field list item
+        :param layer: initial layers number
+        :param element: cell modal opened
+        :return:
+        """
 
         current_layer = layer
 
@@ -6662,15 +6674,18 @@ class WebappInternal(Base):
             if(field[1] == True):
                 break
 
-            current_layer = self.check_layers('wa-dialog')
-
             time.sleep(1)
+
+            current_layer = self.check_layers('wa-dialog')
 
     def toggle_cell(self, element):
         try:
             ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
         except WebDriverException:
-            self.send_keys(element, Keys.ENTER)    
+            try:
+                self.send_keys(element, Keys.ENTER)
+            except WebDriverException:
+                logger().debug("Couldn't send ENTER key to close grid cell.")
 
     def select_cell(self, element):
 
