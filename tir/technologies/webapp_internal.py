@@ -403,7 +403,7 @@ class WebappInternal(Base):
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
 
-        wizard_screen = []
+        program_screen = []
 
         if not environment:
             environment = self.config.environment
@@ -415,13 +415,14 @@ class WebappInternal(Base):
         self.config.poui_login = poui
         endtime = time.time() + 10
 
-        while time.time() < endtime and not wizard_screen:
-            wizard_screen = self.web_scrap(term=self.language.next.replace(">>", "").strip(), scrap_type=enum.ScrapType.TEXT,
-                                     optional_term=".wa-button, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"],
-                                     check_help=False, check_error=False)
+        while time.time() < endtime and not program_screen:
+            start_program_term = '#selectStartProg'
+            program_screen = self.web_scrap(term=start_program_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                    main_container=self.containers_selectors["AllContainers"],
+                                    check_help=False, check_error=False)
 
-        if not wizard_screen:
+
+        if program_screen:
             self.filling_initial_program(initial_program)
             self.filling_server_environment(environment)
 
