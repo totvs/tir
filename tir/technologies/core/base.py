@@ -1265,14 +1265,20 @@ class Base(unittest.TestCase):
             self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
     def get_url(self, url=None):
+        """This method loads the URL in the browser and waits for the page to be ready.
+
+        :param url: The URL to be loaded. If None, it uses the URL from the config.
+        :return:
+        """
 
         get_url = False
         start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser], [name=cUser]"
+        wait_timeout = 10
 
         url = self.config.url if not url else url
 
         num_of_trying = 1
-        while not get_url and num_of_trying <= 5:
+        while not get_url and num_of_trying <= 3:
             self.driver.get(url)
 
             if self.config.skip_environment:
@@ -1283,7 +1289,7 @@ class Base(unittest.TestCase):
                     time.sleep(3)
                     self.switch_to_iframe()
 
-                WebDriverWait(self.driver, int(self.config.time_out / num_of_trying)).until(EC.presence_of_element_located((By.CSS_SELECTOR, start_selector)))
+                WebDriverWait(self.driver, int(wait_timeout)).until(EC.presence_of_element_located((By.CSS_SELECTOR, start_selector)))
                 self.driver.switch_to.default_content()
                 logger().info("Page is ready!")
                 get_url = True
