@@ -33,6 +33,7 @@ from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from pathlib import Path
+from tir.technologies.core.js_scripts import inspector_js
 
 
 class Base(unittest.TestCase):
@@ -1264,6 +1265,9 @@ class Base(unittest.TestCase):
 
             self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
+        # instala inspector
+        self.setup_inspector()
+
     def get_url(self, url=None):
 
         get_url = False
@@ -1553,3 +1557,10 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
+        
+    def setup_inspector(self):
+        # Instala o inspector.js no browser (só precisa uma vez por sessão)
+        try:
+            self.driver.execute_script(inspector_js)
+        except Exception as e:
+            logger().warning(f"setup_inspector: erro ao executar o inspector: {e}")

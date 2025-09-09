@@ -33,7 +33,6 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from io import StringIO
 from tir.technologies.core.base_database import BaseDatabase
-from tir.technologies.core.js_scripts import inspector_js
 
 def count_time(func):
     """
@@ -330,8 +329,6 @@ class WebappInternal(Base):
             self.restart()
             self.restart_coverage = False
 
-        # instala inspector
-        self.setup_inspector()
 
     def date_format(self, date):
         """
@@ -4708,13 +4705,6 @@ class WebappInternal(Base):
         time_fin = time.time()
 
         logger().info(f'{'Foi identificado alterações!! ' if time_fin-time_ini > 4 else ''}Tempo de aguardo: {time_fin-time_ini}')
-
-    def setup_inspector(self):
-        # Instala o inspector.js no browser (só precisa uma vez por sessão)
-        try:
-            self.driver.execute_script(inspector_js)
-        except Exception as e:
-            logger().warning(f"setup_inspector: erro ao executar o inspector: {e}")
 
     def wait_until_idle(self, timeout=7000, quiet=3000):
         # Timeout máximo da função `execute_async_script`
