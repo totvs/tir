@@ -403,7 +403,7 @@ class WebappInternal(Base):
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
 
-        wizard_screen = []
+        program_screen = []
 
         if not environment:
             environment = self.config.environment
@@ -415,13 +415,14 @@ class WebappInternal(Base):
         self.config.poui_login = poui
         endtime = time.time() + 10
 
-        while time.time() < endtime and not wizard_screen:
-            wizard_screen = self.web_scrap(term=self.language.next.replace(">>", "").strip(), scrap_type=enum.ScrapType.TEXT,
-                                     optional_term=".wa-button, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"],
-                                     check_help=False, check_error=False)
+        while time.time() < endtime and not program_screen:
+            start_program_term = '#selectStartProg'
+            program_screen = self.web_scrap(term=start_program_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                    main_container=self.containers_selectors["AllContainers"],
+                                    check_help=False, check_error=False)
 
-        if not wizard_screen:
+
+        if program_screen:
             self.filling_initial_program(initial_program)
             self.filling_server_environment(environment)
 
@@ -9966,12 +9967,13 @@ class WebappInternal(Base):
         text_solution_extracted = ""
         text_extracted = ""
         regex = r"(<[^>]*>)"
+        modal_is_closed = False
 
         if not button:
             button = self.get_single_button().text
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not text_extracted):
+        while(time.time() < endtime and (not text_extracted or not modal_is_closed)):
 
             logger().info(f"Checking Help on screen: {text}")
             # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
@@ -10024,10 +10026,11 @@ class WebappInternal(Base):
             if text_extracted:
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                self.wait_element(term=text, scrap_type=enum.ScrapType.MIXED,
-                 optional_term=label_term, presence=False, main_container = self.containers_selectors["AllContainers"], check_error=False)
+                modal_is_closed = not self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
+                                                            optional_term=label_term, main_container=self.containers_selectors["AllContainers"], 
+                                                            check_error=False)
 
-        if not text_extracted:
+        if not text_extracted or not modal_is_closed:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
 
     def check_text_container(self, text_user, text_extracted, container_text, verbosity):
