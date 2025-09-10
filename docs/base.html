@@ -76,6 +76,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_current_DOM"><code class="docutils literal notranslate"><span class="pre">Base.get_current_DOM()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_text"><code class="docutils literal notranslate"><span class="pre">Base.get_element_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_value"><code class="docutils literal notranslate"><span class="pre">Base.get_element_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_url"><code class="docutils literal notranslate"><span class="pre">Base.get_url()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.log_error"><code class="docutils literal notranslate"><span class="pre">Base.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.move_to_element"><code class="docutils literal notranslate"><span class="pre">Base.move_to_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.normalize_config_name"><code class="docutils literal notranslate"><span class="pre">Base.normalize_config_name()</span></code></a></li>
@@ -565,6 +566,20 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_value</span><span class="p">(</span><span class="n">element</span><span class="p">())</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.get_url">
+<span class="sig-name descname"><span class="pre">get_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.get_url" title="Link to this definition"></a></dt>
+<dd><p>This method loads the URL in the browser and waits for the page to be ready.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>url</strong> – The URL to be loaded. If None, it uses the URL from the config.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
