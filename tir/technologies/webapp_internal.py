@@ -4408,7 +4408,7 @@ class WebappInternal(Base):
             if self.config.smart_test or self.config.debug_log:
                 logger().warning(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
 
-
+    @count_time
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -4681,7 +4681,7 @@ class WebappInternal(Base):
             # Calcular mutações
             if mut_after and mut_before:
                 mut_delta = (mut_after.get("mutations") if mut_after.get("mutations") else 0) - (mut_before.get("mutations") if mut_before.get("mutations") else 0)
-                logger().info(f'Qtd. de mutações na tela: {mut_delta}')
+                logger().debug(f'Qtd. de mutações na tela: {mut_delta}')
 
         except ValueError as error:
             logger().exception(str(error))
@@ -4695,16 +4695,12 @@ class WebappInternal(Base):
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
+    @count_time
     def wait_elements_js(self, timeout=7000, quiet=3000):
-        time_ini = time.time()
         try:
             self.wait_until_idle(timeout=timeout, quiet=quiet)
         except Exception as e:
             logger().warning(f"wait_elements_js: erro ao aguardar idle: {e}")
-            return
-        time_fin = time.time()
-
-        logger().info(f'{'Foi identificado alterações!! ' if time_fin-time_ini > 4 else ''}Tempo de aguardo: {time_fin-time_ini}')
 
     def wait_until_idle(self, timeout=7000, quiet=3000):
         # Timeout máximo da função `execute_async_script`
