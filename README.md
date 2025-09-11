@@ -30,7 +30,23 @@ Our documentation can be found here:
 
 This project has a docs folder with [Sphinx](http://www.sphinx-doc.org/en/master/) files.
 
-Our **create_docs.cmd** script handles the installation of dependencies and creates the offline documentation on the doc_files/build/html folder.
+### Building Documentation Locally
+
+Our **create_docs.cmd** (Windows) and **create_docs.sh** (Linux/Unix) scripts handle the installation of dependencies and create the offline documentation in the doc_files/build/html folder.
+
+For Windows:
+```cmd
+scripts\create_docs.cmd
+```
+
+For Linux/Unix:
+```bash
+scripts/create_docs.sh
+```
+
+### Automated Documentation
+
+Documentation is automatically built and deployed using GitHub Actions on every push to the main branch. The workflow is defined in `.github/workflows/docs.yml` and publishes the documentation to GitHub Pages.
 
 ## Installation
 
