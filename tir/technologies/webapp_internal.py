@@ -4440,6 +4440,11 @@ class WebappInternal(Base):
         """
         logger().info(f"Clicking on {button}")
 
+        self.wait_elements_js()
+
+        # Recuperar alterações atuais na dom
+        mut_before = self.snapshot()
+
         initial_program = ['sigaadv', 'sigamdi']
 
         self.wait_blocker()
@@ -4668,6 +4673,16 @@ class WebappInternal(Base):
             elif not self.webapp_shadowroot() and button == self.language.confirm and id_parent_element in self.get_enchoice_button_ids(layers):
                 self.wait_element_timeout(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, position=layers + 1, main_container="body", timeout=10, step=0.1, check_error=False)
 
+            self.wait_elements_js()
+
+            # Recuperar alterações atuais na dom
+            mut_after = self.snapshot()
+
+            # Calcular mutações
+            if mut_after and mut_before:
+                mut_delta = (mut_after.get("mutations") if mut_after.get("mutations") else 0) - (mut_before.get("mutations") if mut_before.get("mutations") else 0)
+                logger().info(f'Qtd. de mutações na tela: {mut_delta}')
+
         except ValueError as error:
             logger().exception(str(error))
             logger().exception(f"Button {button} could not be located.")
@@ -4679,7 +4694,41 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
-    
+
+    def wait_elements_js(self, timeout=7000, quiet=3000):
+        time_ini = time.time()
+        try:
+            self.wait_until_idle(timeout=timeout, quiet=quiet)
+        except Exception as e:
+            logger().warning(f"wait_elements_js: erro ao aguardar idle: {e}")
+            return
+        time_fin = time.time()
+
+        logger().info(f'{'Foi identificado alterações!! ' if time_fin-time_ini > 4 else ''}Tempo de aguardo: {time_fin-time_ini}')
+
+    def wait_until_idle(self, timeout=7000, quiet=3000):
+        # Timeout máximo da função `execute_async_script`
+        if timeout > 30000:
+            timeout = 30000
+        
+        return self.driver.execute_async_script(f"""
+            const done = arguments[arguments.length-1];
+            if (window.__waitForIdle) {{
+                __waitForIdle({timeout}, {quiet}).then(done);
+            }} else {{
+                done({{}});
+            }}
+        """)
+
+    def snapshot(self): 
+        return self.driver.execute_script(""" 
+            return window.__activityState ? { 
+                mutations: __activityState.mutations, 
+                mutationLog: __activityState.mutationLog || [], 
+                totals: __activityState.totals, 
+            } : null; 
+        """)
+
     def set_button_character(self, term, position=1, check_error=True):
         """
         [Internal]
