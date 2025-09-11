@@ -14,12 +14,18 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # import recommonmark
 # from recommonmark.transform import AutoStructify
 
-import tir
+# Try to import tir, but handle missing dependencies gracefully
+try:
+    import tir
+except ImportError as e:
+    print(f"Warning: Could not import tir module: {e}")
+    print("Documentation will be built without dynamic imports from tir package")
+    tir = None
 
 # -- Project information -----------------------------------------------------
 
