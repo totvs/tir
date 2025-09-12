@@ -6391,8 +6391,9 @@ class WebappInternal(Base):
         while not cell_filled and time.time() < endtime:
 
             if not selenium_column:
-                selenium_column = self.select_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
+                selenium_column = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
 
+            self.select_grid_cell(selenium_column)
             cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
             selenium_input = lambda: self.get_grid_input_element()
 
@@ -6405,8 +6406,6 @@ class WebappInternal(Base):
                         self.send_keys(selenium_column, Keys.TAB)
                 else:
                     if cell_opened:
-                        container_input = self.get_container_selector('wa-text-input', select_all=False)
-                        value_type = self.value_type(container_input.get('type'))
                         self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
 
                     cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
@@ -6465,10 +6464,21 @@ class WebappInternal(Base):
         """
         logger().info(f"Sending keys: {user_value}")
         type_input_key = 2
-        user_value = self.check_value_type(user_value, value_type)
         memo_field = field[9]
         layers_selector = self.get_layer_selector(field)
 
+        #get text input container
+        container_input = self.get_container_selector('wa-text-input', select_all=False)
+        container_selenium = self.soup_to_selenium(container_input)
+
+        #get input value type if not recived by x3 dictionary
+        if not value_type:
+            value_type = self.value_type(container_input.get('type'))
+
+        check_mask = self.check_mask(container_selenium)
+        # remove mask if exists and valtype is numeric
+        if check_mask and value_type == 'N':
+            user_value = self.check_value_type(user_value, value_type)
 
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
@@ -6483,7 +6493,7 @@ class WebappInternal(Base):
         if current_layer > layers:
             self.close_cell(field, current_layer, element=selenium_input())
 
-    def select_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
+    def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
         [Internal]
 
@@ -6526,20 +6536,23 @@ class WebappInternal(Base):
                 self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
                 return None
 
-            selenium_column = lambda: columns_element[column_index]
-
-            self.scroll_to_element(selenium_column())
-            self.click(selenium_column(), click_type=enum.ClickType.ACTIONCHAINS)
-            self.set_element_focus(selenium_column())
-
-            endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not self.selected_cell(selenium_column()):
-                self.select_cell(selenium_column())
-
-            return selenium_column()
+            return columns_element[column_index]
         except Exception as e:
             self.log_error(f"Couldn't find column '{column}' in grid {grid_number}. Error: {str(e)}")
             return None
+
+    def select_grid_cell(self, grid_cell):
+        try:
+            self.scroll_to_element(grid_cell)
+            self.click(grid_cell, click_type=enum.ClickType.ACTIONCHAINS)
+            self.set_element_focus(grid_cell)
+
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not self.selected_cell(grid_cell):
+                logger().debug('Trying to select cell in grid!')
+                self.select_cell(grid_cell)
+        except:
+            logger.debug("Couldn't select grid cell.")
 
     def check_value_type(self, value, valtype):
         """
@@ -6632,26 +6645,36 @@ class WebappInternal(Base):
         except ValueError:
             self.log_error(f"Couldn't find column '{field}' in the provided columns list.")
         return None
-        
-    def open_cell(self, field, layer, element):
 
-        current_layer = layer
+    @count_time
+    def open_cell(self, field, layers, element):
+        """Open grid cell for editing
+
+        :param field: grid field list item
+        :param layers: initial layers number
+        :param element: cell modal opened
+        :return:
+        """
+
+        cell_opened = False
+        current_layer = layers
 
         endtime = time.time() + self.config.time_out / 3
-        while (time.time() < endtime and current_layer == layer):
+        while (time.time() < endtime and not cell_opened):
             logger().debug('Trying open cell in grid!')
-            if self.selected_cell(element):
 
-                self.toggle_cell(element)
+            self.toggle_cell(element)
 
-                if(field[1] == True):
-                    break
+            if(field[1] == True):
+                break
 
-            current_layer = self.check_layers('wa-dialog')
+            cell_opened = self.wait_element_timeout(term='wa-dialog',
+                                      scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      position=layers + 1,
+                                      timeout=4,
+                                      main_container='body')
 
-            time.sleep(1)
-
-        if current_layer > layer:
+        if cell_opened:
             return True
 
     def close_cell(self, field, layer, element):
@@ -6680,7 +6703,7 @@ class WebappInternal(Base):
 
     def toggle_cell(self, element):
         try:
-            ActionChains(self.driver).move_to_element(element).send_keys_to_element(element, Keys.ENTER).perform()
+            ActionChains(self.driver).move_to_element(element).send_keys(Keys.ENTER).perform()
         except WebDriverException:
             try:
                 self.send_keys(element, Keys.ENTER)
@@ -6693,7 +6716,7 @@ class WebappInternal(Base):
         while time.time() < endtime and not self.selected_cell(element):
             logger().debug('Trying to select cell in grid!')
             self.scroll_to_element(element)
-            self.click(element,click_type=enum.ClickType.ACTIONCHAINS) if self.webapp_shadowroot() else self.click(element)
+            self.click(element,click_type=enum.ClickType.ACTIONCHAINS)
             self.set_element_focus(element)
             self.wait_blocker()
             time.sleep(1)
@@ -6800,12 +6823,13 @@ class WebappInternal(Base):
         value = field[2]
         grid_number = field[3]
         row = field[0]
+        ignore_case = field[5]
 
         if '_' in column:
             x3_dictionaries = self.get_x3_dictionaries([column])
             field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
-        selenium_column = self.select_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
+        selenium_column = self.get_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
 
         text = selenium_column.text.strip()
 
@@ -6814,7 +6838,7 @@ class WebappInternal(Base):
             return text
 
         field_name = f"({field[0]}, {column})"
-        if field[5]:
+        if ignore_case:
             self.log_result(field_name, value.lower(), text.lower())
         else:
             self.log_result(field_name, value, text)
@@ -7023,7 +7047,8 @@ class WebappInternal(Base):
 
         logger().info(f"Clicking on grid cell: {column}")
 
-        self.select_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)       
+        grid_cell = self.get_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)
+        self.select_grid_cell(grid_cell)
 
     def filter_non_obscured(self, elements, grid_number):
 
