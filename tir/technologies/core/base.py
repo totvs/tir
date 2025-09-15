@@ -852,8 +852,12 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
+        text_value = ""
 
-        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
+        if isinstance(element, Select):
+            combo = element
+        else:
+            combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if index:
             index_number = self.return_combo_index(combo, option)
@@ -869,19 +873,22 @@ class Base(unittest.TestCase):
                 text_value = value.text
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+                return text_value
 
     def return_combo_object(self, element, shadow_root=True, locator=False):
         """
         [Internal]
         """
-
-        if locator:
-            combo = Select(element)
-        elif self.webapp_shadowroot(shadow_root=shadow_root):
-            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
-                                                      self.soup_to_selenium(element)))
-        else:
-            combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        try:
+            if locator:
+                combo = Select(element)
+            elif self.webapp_shadowroot(shadow_root=shadow_root):
+                combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                          self.soup_to_selenium(element)))
+            else:
+                combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        except:
+            return None
 
         return combo
 
@@ -1265,7 +1272,7 @@ class Base(unittest.TestCase):
             self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
     def get_url(self, url=None):
-        """This method loads the URL in the browser and waits for the page to be ready.
+"""This method loads the URL in the browser and waits for the page to be ready.
 
         :param url: The URL to be loaded. If None, it uses the URL from the config.
         :return:
@@ -1273,7 +1280,7 @@ class Base(unittest.TestCase):
 
         get_url = False
         start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser], [name=cUser]"
-        wait_timeout = 10
+wait_timeout = 10
 
         url = self.config.url if not url else url
 
