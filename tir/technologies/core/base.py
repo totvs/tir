@@ -1272,7 +1272,7 @@ class Base(unittest.TestCase):
             self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
 
     def get_url(self, url=None):
-"""This method loads the URL in the browser and waits for the page to be ready.
+        """This method loads the URL in the browser and waits for the page to be ready.
 
         :param url: The URL to be loaded. If None, it uses the URL from the config.
         :return:

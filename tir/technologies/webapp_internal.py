@@ -9879,9 +9879,9 @@ class WebappInternal(Base):
             if text_extracted:
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-modal_is_closed = not                 self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
-                 optional_term=label_term, main_container=self.containers_selectors["AllContainers"], 
-check_error=False)
+                modal_is_closed = not self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
+                                                            optional_term=label_term, main_container=self.containers_selectors["AllContainers"], 
+                                                            check_error=False)
 
         if not text_extracted or not modal_is_closed:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
