@@ -33,6 +33,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from io import StringIO
 from tir.technologies.core.base_database import BaseDatabase
+from tir.technologies.core.js_scripts import inspector_js
 
 def count_time(func):
     """
@@ -705,6 +706,8 @@ class WebappInternal(Base):
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            # instala inspector
+            self.setup_inspector()
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program, environment=server_environment)
@@ -8387,10 +8390,12 @@ class WebappInternal(Base):
                     halftime = time.time() + 30
                     logger().info(f"Enter if tmessagebox: {parameter}")
                     self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
-                        branch}&a={value}&Env={self.config.environment}""")
+                        branch}&a={value}&Env={self.config.environment}""")                    
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
 
+        # instala inspector
+        self.setup_inspector()
 
     def SetParameters(self):
         """
@@ -8489,6 +8494,9 @@ class WebappInternal(Base):
                 self.Program(self.config.routine)
 
         self.tmenu_screen = None
+
+        # instala inspector
+        self.setup_inspector()
 
     def parameter_screen(self, restore_backup):
         """
@@ -10447,6 +10455,8 @@ class WebappInternal(Base):
         >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
         """
         self.driver.get(f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}")
+        # instala inspector
+        self.setup_inspector()
 
     def returns_printable_string(self, string):
         """
@@ -11357,6 +11367,9 @@ class WebappInternal(Base):
 
             self.tmenu_screen = None
 
+            # instala inspector
+            self.setup_inspector()
+
 
     def get_container_selector(self, selector):
 
@@ -11459,3 +11472,9 @@ class WebappInternal(Base):
 
             logger().info(f'Endpoints has been restored in .ini file.')
 
+def setup_inspector(self):
+        # Instala o inspector.js no browser (só precisa uma vez por sessão)
+        try:
+            self.driver.execute_script(inspector_js)
+        except Exception as e:
+            logger().warning(f"setup_inspector: erro ao executar o inspector: {e}")
