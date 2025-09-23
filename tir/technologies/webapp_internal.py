@@ -9697,7 +9697,7 @@ class WebappInternal(Base):
         if label_selector:
             term = label_selector
         else:
-            term = 'wa-text-view, wa-checkbox, wa-button, wa-tree'
+            term = "wa-text-view, wa-checkbox, wa-button, wa-tree"
 
         shadow_root = not twebview
 
@@ -9706,7 +9706,7 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select(f'{term}')
+            wa_text_view = container.select(term)
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
