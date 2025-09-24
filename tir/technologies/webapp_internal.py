@@ -10442,6 +10442,8 @@ class WebappInternal(Base):
         :return: True if there was a change in the object
         """
 
+        self.wait_blocker()
+
         twebview = True if self.config.poui_login else False
 
         soup_before_event = self.get_current_DOM(twebview=twebview)
@@ -10457,7 +10459,6 @@ class WebappInternal(Base):
             classes_before = self.get_selenium_attribute(element(), 'class')
             classes_after = classes_before
 
-        self.wait_blocker()
         soup_select = None
 
         main_click_type = click_type
@@ -10480,6 +10481,8 @@ class WebappInternal(Base):
                     action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
+                    
+                time.sleep(1)
 
                 if soup_select:
                     soup_after_event = soup_select
@@ -10500,7 +10503,6 @@ class WebappInternal(Base):
 
                 if not wait_change:
                     return True
-                time.sleep(1)
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
