@@ -2563,7 +2563,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self, field, position=1, input_field=True, direction=None):
+    def search_element_position(self, field, position=1, input_field=True, direction=None, input_selector=''):
         """
         [Internal]
         Usage:
@@ -2575,12 +2575,14 @@ class WebappInternal(Base):
         label = None
         elem = []
         active_tab = []
-        if self.webapp_shadowroot():
-            term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
-            label_term = ".dict-tsay, label, wa-button"
+
+        if input_selector:
+            term = input_selector
         else:
-            term=".tget, .tcombobox, .tmultiget"
-            label_term = "label"
+            term = ".dict-tget, .dict-tcombobox, .dict-tmultiget"
+
+        label_term = ".dict-tsay, label, wa-button"
+
 
         position-=1
 
@@ -8875,17 +8877,16 @@ class WebappInternal(Base):
         label_box = None
         container = self.get_current_container()
         if not container:
-            self.log_error("Couldn't locate container.")
+            logger().debug("Couldn't locate box container.")
+            return
 
-        labels_boxs = container.select("span, wa-checkbox")
-        label_box_name = label_box_name.lower().strip()
-        if self.webapp_shadowroot():
-            filtered_labels_boxs = list(
-                filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
-        else:
-            filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
+        filtered_labels_boxs = self.filter_label_element(label_box_name, container, position,
+                             twebview=False, label_selector="span, wa-checkbox")
+
         if not filtered_labels_boxs:
-            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+            filtered_labels_boxs = self.search_element_position(label_box_name, position, input_field=True,
+                                                                direction=None, input_selector='wa-checkbox')
+            label_box = filtered_labels_boxs
 
         if position <= len(filtered_labels_boxs):
             position -= 1
@@ -9679,7 +9680,8 @@ class WebappInternal(Base):
         return container_filtered
 
 
-    def filter_label_element(self, label_text, container, position, twebview=False):
+    def filter_label_element(self, label_text, container, position,
+                             twebview=False, label_selector=''):
         """
         [Internal]
         Filter and remove a specified character with regex, return only displayed elements if > 1.
@@ -9692,6 +9694,10 @@ class WebappInternal(Base):
 
         elements = None
         position -= 1
+        if label_selector:
+            term = label_selector
+        else:
+            term = "wa-text-view, wa-checkbox, wa-button, wa-tree"
 
         shadow_root = not twebview
 
@@ -9700,7 +9706,7 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view, wa-checkbox, wa-button, wa-tree')
+            wa_text_view = container.select(term)
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
@@ -9709,7 +9715,7 @@ class WebappInternal(Base):
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label, span')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
-                if not wa_text_view_filtered:
+                if not wa_text_view_filtered and not label_selector:
                    wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree, wa-tgrid')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
