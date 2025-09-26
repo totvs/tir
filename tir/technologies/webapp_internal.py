@@ -3037,14 +3037,16 @@ class WebappInternal(Base):
                             tries = 0
                             try_counter = 1
                             while(tries < 3):
+                                self.click(input_field(), enum.ClickType.SELENIUM)
                                 self.set_element_focus(input_field())
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
+                                self.set_element_focus(input_field())
                                 current_number_value = self.get_web_value(input_field())
                                 if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
                                     break
-                                tries+=1
-                                try_counter+=1
+                                tries += 1
+                                try_counter += 1
 
 
                         if self.check_mask(input_field()):
@@ -9101,7 +9103,7 @@ class WebappInternal(Base):
                         filter(lambda x: not x.find_parents(class_='hidden'), tree_node))
 
                 elements = list(
-                    filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x),
+                    filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
                            tree_node_filtered))
 
                 if elements:
@@ -9353,7 +9355,7 @@ class WebappInternal(Base):
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
-        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+        return next(iter(list(filter(lambda x: label_filtered == re.sub(r'[ ]{2,}', ' ', x.text).lower().strip(), treenode_selected))), None)
 
     def treenode(self, tree_number=0):
         """
