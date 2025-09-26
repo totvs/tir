@@ -9101,7 +9101,7 @@ class WebappInternal(Base):
                         filter(lambda x: not x.find_parents(class_='hidden'), tree_node))
 
                 elements = list(
-                    filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x),
+                    filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
                            tree_node_filtered))
 
                 if elements:
@@ -9353,7 +9353,7 @@ class WebappInternal(Base):
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
-        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+        return next(iter(list(filter(lambda x: label_filtered == re.sub(r'[ ]{2,}', ' ', x.text).lower().strip(), treenode_selected))), None)
 
     def treenode(self, tree_number=0):
         """
