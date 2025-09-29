@@ -10467,6 +10467,8 @@ class WebappInternal(Base):
             classes_before = self.get_selenium_attribute(element(), 'class')
             classes_after = classes_before
 
+        self.wait_blocker()
+
         soup_select = None
 
         main_click_type = click_type
