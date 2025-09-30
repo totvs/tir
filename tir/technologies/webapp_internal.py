@@ -2563,7 +2563,7 @@ class WebappInternal(Base):
         label = next(iter(list(filter(lambda x: x.text.lower() == panel_name.lower(), tsays)), None))
         return tsays.index(label)
 
-    def search_element_position(self, field, position=1, input_field=True, direction=None):
+    def search_element_position(self, field, position=1, input_field=True, direction=None, input_selector=''):
         """
         [Internal]
         Usage:
@@ -2575,12 +2575,14 @@ class WebappInternal(Base):
         label = None
         elem = []
         active_tab = []
-        if self.webapp_shadowroot():
-            term=".dict-tget, .dict-tcombobox, .dict-tmultiget"
-            label_term = ".dict-tsay, label, wa-button"
+
+        if input_selector:
+            term = input_selector
         else:
-            term=".tget, .tcombobox, .tmultiget"
-            label_term = "label"
+            term = ".dict-tget, .dict-tcombobox, .dict-tmultiget"
+
+        label_term = ".dict-tsay, label, wa-button"
+
 
         position-=1
 
@@ -3035,14 +3037,15 @@ class WebappInternal(Base):
                             tries = 0
                             try_counter = 1
                             while(tries < 3):
+                                self.click(input_field(), enum.ClickType.SELENIUM)
                                 self.set_element_focus(input_field())
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
                                 if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
                                     break
-                                tries+=1
-                                try_counter+=1
+                                tries += 1
+                                try_counter += 1
 
 
                         if self.check_mask(input_field()):
@@ -8875,17 +8878,16 @@ class WebappInternal(Base):
         label_box = None
         container = self.get_current_container()
         if not container:
-            self.log_error("Couldn't locate container.")
+            logger().debug("Couldn't locate box container.")
+            return
 
-        labels_boxs = container.select("span, wa-checkbox")
-        label_box_name = label_box_name.lower().strip()
-        if self.webapp_shadowroot():
-            filtered_labels_boxs = list(
-                filter(lambda x: label_box_name in x.get('caption').lower().strip(), labels_boxs))
-        else:
-            filtered_labels_boxs = list(filter(lambda x: label_box_name in x.text.lower().strip(), labels_boxs))
+        filtered_labels_boxs = self.filter_label_element(label_box_name, container, position,
+                             twebview=False, label_selector="span, wa-checkbox")
+
         if not filtered_labels_boxs:
-            filtered_labels_boxs = list(filter(lambda x: label_box_name.lower() in x.parent.text.lower(), labels_boxs))
+            filtered_labels_boxs = self.search_element_position(label_box_name, position, input_field=True,
+                                                                direction=None, input_selector='wa-checkbox')
+            label_box = filtered_labels_boxs
 
         if position <= len(filtered_labels_boxs):
             position -= 1
@@ -9100,7 +9102,7 @@ class WebappInternal(Base):
                         filter(lambda x: not x.find_parents(class_='hidden'), tree_node))
 
                 elements = list(
-                    filter(lambda x: label_filtered in x.text.lower().strip() and self.element_is_displayed(x),
+                    filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
                            tree_node_filtered))
 
                 if elements:
@@ -9352,7 +9354,7 @@ class WebappInternal(Base):
         else:
             treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
 
-        return next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
+        return next(iter(list(filter(lambda x: label_filtered == re.sub(r'[ ]{2,}', ' ', x.text).lower().strip(), treenode_selected))), None)
 
     def treenode(self, tree_number=0):
         """
@@ -9679,7 +9681,8 @@ class WebappInternal(Base):
         return container_filtered
 
 
-    def filter_label_element(self, label_text, container, position, twebview=False):
+    def filter_label_element(self, label_text, container, position,
+                             twebview=False, label_selector=''):
         """
         [Internal]
         Filter and remove a specified character with regex, return only displayed elements if > 1.
@@ -9692,6 +9695,10 @@ class WebappInternal(Base):
 
         elements = None
         position -= 1
+        if label_selector:
+            term = label_selector
+        else:
+            term = "wa-text-view, wa-checkbox, wa-button, wa-tree"
 
         shadow_root = not twebview
 
@@ -9700,7 +9707,7 @@ class WebappInternal(Base):
             regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
             label_text =  re.sub(regex, '', label_text)
 
-            wa_text_view = container.select('wa-text-view, wa-checkbox, wa-button, wa-tree')
+            wa_text_view = container.select(term)
             wa_text_view_filtered = list(filter(lambda x: hasattr(x, 'caption') and x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(label_text.lower().strip()), wa_text_view))
 
             if len(wa_text_view_filtered) > 1:
@@ -9709,7 +9716,7 @@ class WebappInternal(Base):
             if not wa_text_view_filtered:
                 wa_text_view = container.select('label, span')
                 wa_text_view_filtered = list(filter(lambda x: re.sub(regex, '', x.text).lower().strip() == label_text.lower().strip(), wa_text_view))
-                if not wa_text_view_filtered:
+                if not wa_text_view_filtered and not label_selector:
                    wa_text_view_filtered= self.selenium_web_scrap(term=sl_term, container=container, optional_term='wa-radio, wa-tree, wa-tgrid')
 
             if wa_text_view_filtered and len(wa_text_view_filtered)-1 >= position:
@@ -10442,6 +10449,8 @@ class WebappInternal(Base):
         :return: True if there was a change in the object
         """
 
+        self.wait_blocker()
+
         twebview = True if self.config.poui_login else False
 
         soup_before_event = self.get_current_DOM(twebview=twebview)
@@ -10458,6 +10467,7 @@ class WebappInternal(Base):
             classes_after = classes_before
 
         self.wait_blocker()
+
         soup_select = None
 
         main_click_type = click_type
@@ -10480,6 +10490,8 @@ class WebappInternal(Base):
                     action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
+                    
+                time.sleep(1)
 
                 if soup_select:
                     soup_after_event = soup_select
@@ -10500,7 +10512,6 @@ class WebappInternal(Base):
 
                 if not wait_change:
                     return True
-                time.sleep(1)
 
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
