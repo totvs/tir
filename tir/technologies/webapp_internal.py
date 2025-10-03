@@ -429,7 +429,7 @@ class WebappInternal(Base):
             if self.webapp_shadowroot():
                 self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
                 parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
-                buttons = self.find_shadow_element('wa-button', parameters_screen)
+                buttons = self.execute_js_selector('wa-button', parameters_screen)
                 button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
             else:
                 button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
@@ -467,7 +467,7 @@ class WebappInternal(Base):
     def fill_select_element(self, term, user_value):
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-      
+
         element_value = ''
         try_counter = 0	
 
@@ -494,7 +494,7 @@ class WebappInternal(Base):
                 try_counter = 0
             
             if self.webapp_shadowroot():
-                element_value = self.get_web_value(next(iter(self.find_shadow_element('input', element())))).strip() if self.find_shadow_element('input', element()) else None
+                element_value = self.get_web_value(next(iter(self.execute_js_selector('input', element())))).strip() if self.execute_js_selector('input', element()) else None
             else:
                 element_value = self.get_web_value(element())
 
@@ -869,7 +869,7 @@ class WebappInternal(Base):
 
                 if base_date:
                     if self.webapp_shadowroot() and not self.config.poui_login:
-                        date = lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(base_date))),
+                        date = lambda: next(iter(self.execute_js_selector('input', self.soup_to_selenium(base_date))),
                                             None)
                         datepicker_is_valid =lambda: True
                     else:
@@ -1353,7 +1353,7 @@ class WebappInternal(Base):
             return selectors[screen_type]["shadowroot"]
         else:
             return selectors[screen_type]["default"]
-        
+
     def check_browse_screen(self):
         """
         [Internal]
@@ -2959,7 +2959,7 @@ class WebappInternal(Base):
             multiget = "dict-tmultiget"
 
             if multiget in element.attrs['class'] if element.get('class') else None:
-                textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(element))), None)
+                textarea = next(iter(self.execute_js_selector('textarea', self.soup_to_selenium(element))), None)
                 if not textarea:
                     input_field = lambda : self.soup_to_selenium(element)
                 else:
@@ -3219,7 +3219,7 @@ class WebappInternal(Base):
                 web_value = element.text.strip()
         elif element.tag_name == "select" or element.tag_name == "wa-combobox":
             if self.webapp_shadowroot():
-                is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.find_shadow_element('option', element)))), None)
+                is_selected = next(iter(list(filter(lambda x: x.is_selected(), self.execute_js_selector('option', element)))), None)
                 if is_selected:
                     web_value = is_selected.text
             else:
@@ -3855,7 +3855,7 @@ class WebappInternal(Base):
                 return elements
 
             if not element:
-                header = self.find_shadow_element('wa-dialog-header', self.soup_to_selenium(container))
+                header = self.execute_js_selector('wa-dialog-header', self.soup_to_selenium(container))
                 if header:
                     if match_case:
                         element = next(iter(list(filter(
@@ -4279,7 +4279,7 @@ class WebappInternal(Base):
                         time.sleep(2)
 
                     if count < len(menu_itens) - 1:
-                        if not self.webapp_shadowroot():  
+                        if not self.webapp_shadowroot():
                             self.wait_element(term=menu_itens[count], scrap_type=enum.ScrapType.MIXED,
                                               optional_term=menu_itens_term, main_container="body")
                             menu = self.get_current_DOM().select(f"#{child.attrs['id']}")[0]
@@ -4499,9 +4499,9 @@ class WebappInternal(Base):
 
                     if self.webapp_shadowroot():
                         if not soup_objects:
-                            footer = self.find_shadow_element('footer', self.soup_to_selenium(soup), get_all=False)
+                            footer = self.execute_js_selector('footer', self.soup_to_selenium(soup), get_all=False)
                             if footer:
-                                buttons = self.find_shadow_element("wa-button", footer)
+                                buttons = self.execute_js_selector("wa-button", footer)
                                 if not buttons:
                                     buttons = footer.find_elements(By.CSS_SELECTOR, "wa-button")
                                 if buttons:
@@ -4746,8 +4746,8 @@ class WebappInternal(Base):
             element_soup = close_list.pop(position)
         element_selenium = self.soup_to_selenium(element_soup)
         if self.webapp_shadowroot():
-            header = self.find_shadow_element('wa-dialog-header', element_selenium, get_all=False)
-            x_button = self.find_shadow_element("button[class~=button-close]", header, get_all=False)
+            header = self.execute_js_selector('wa-dialog-header', element_selenium, get_all=False)
+            x_button = self.execute_js_selector("button[class~=button-close]", header, get_all=False)
             if x_button:
                 element_selenium = x_button
 
@@ -5226,12 +5226,12 @@ class WebappInternal(Base):
                 endtime = time.time() + self.config.time_out
                 while time.time() < endtime and not success:
                     try:
-                        th = self.find_shadow_element('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
+                        th = self.execute_js_selector('th', self.soup_to_selenium(grid)) if self.webapp_shadowroot() else next(
                             iter(grid.select('th')))
 
                         if th:
                             if self.webapp_shadowroot():
-                                first_cell = self.find_shadow_element('tr td div', self.soup_to_selenium(grid))
+                                first_cell = self.execute_js_selector('tr td div', self.soup_to_selenium(grid))
                                 if first_cell:
                                     current_box = lambda: next(iter(first_cell)).get_attribute('style')
                                     before_box = current_box()
@@ -5343,7 +5343,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             sel_grid  = self.soup_to_selenium(grid)
-            tr = self.find_shadow_element('tbody > tr', sel_grid)
+            tr = self.execute_js_selector('tbody > tr', sel_grid)
         else:
             tr = grid.select('tbody > tr')
 
@@ -5398,7 +5398,7 @@ class WebappInternal(Base):
 
                         if self.webapp_shadowroot():
                             sel_grid = self.soup_to_selenium(grid)
-                            tr = self.find_shadow_element('tbody > tr', sel_grid)
+                            tr = self.execute_js_selector('tbody > tr', sel_grid)
 
                             if len(tr) - 1 >= index:
                                 td = next(iter(tr[index].find_elements(By.CSS_SELECTOR, 'td > div')))
@@ -5446,7 +5446,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             shadow_grid = self.soup_to_selenium(grid)
-            shadow_table = next(iter(self.find_shadow_element('table', shadow_grid)),None)
+            shadow_table = next(iter(self.execute_js_selector('table', shadow_grid)),None)
             shadow_html = shadow_table.get_attribute('outerHTML')
             df = (next(iter(pd.read_html(StringIO(shadow_html)))))
         else:
@@ -6053,7 +6053,7 @@ class WebappInternal(Base):
             if element:
                 if self.webapp_shadowroot():
                     element = self.soup_to_selenium(element)
-                    input_element = next(iter(self.find_shadow_element('input', element)), None)
+                    input_element = next(iter(self.execute_js_selector('input', element)), None)
                     if input_element:
                         element = input_element
 
@@ -6460,7 +6460,7 @@ class WebappInternal(Base):
                         row = self.get_selected_row(self.get_current_DOM().select(f"#{grid_id} tbody tr"))
                         down_loop += 1
                     self.down_loop_grid = False
-                    columns = self.driver.execute_script("return arguments[0].querySelectorAll('td')", row)
+                    columns = self.execute_js_selector("td", row, shadow_root=False)
                     if columns:
                         if column_name in headers[field[2]]:
                             logger().debug('Column found!')
@@ -6824,7 +6824,7 @@ class WebappInternal(Base):
 
                 if self.webapp_shadowroot():
                     grid = self.soup_to_selenium(grids[field[3]])
-                    rows = self.find_shadow_element('tbody tr', grid)
+                    rows = self.execute_js_selector('tbody tr', grid)
                 else:
                     rows = grids[field[3]].select("tbody tr")
 
@@ -6915,7 +6915,7 @@ class WebappInternal(Base):
         row_list = []
 
         if self.webapp_shadowroot():
-            grid_lines = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
             before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
@@ -6958,7 +6958,7 @@ class WebappInternal(Base):
         textarea = next(iter(container.select(term)), None)
 
         if self.webapp_shadowroot() and textarea:
-            textarea = next(iter(self.find_shadow_element('textarea', self.soup_to_selenium(textarea))))
+            textarea = next(iter(self.execute_js_selector('textarea', self.soup_to_selenium(textarea))))
             content = self.driver.execute_script(f"return arguments[0].value",textarea).strip()
         else:
             content = self.driver.execute_script(f"return arguments[0].value",self.driver.find_element(By.XPATH, xpath_soup(textarea))).strip()
@@ -7031,12 +7031,12 @@ class WebappInternal(Base):
                 self.log_error(self.language.messages.grid_number_error)
 
             if self.webapp_shadowroot():
-                shadowroot_tr = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grids[field[2]]))
+                shadowroot_tr = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grids[field[2]]))
 
             rows = shadowroot_tr() if self.webapp_shadowroot() else grids[field[2]].select("tbody tr")
             row = self.get_selected_row(rows)
             if row:
-                columns = self.find_shadow_element('td', self.soup_to_selenium(grids[field[2]])) if self.webapp_shadowroot() else row.select("td")
+                columns = self.execute_js_selector('td', self.soup_to_selenium(grids[field[2]])) if self.webapp_shadowroot() else row.select("td")
                 if columns:
                     second_column = lambda: (
                     columns[1]) if self.webapp_shadowroot() else self.driver.find_element(By.XPATH,
@@ -7293,9 +7293,9 @@ class WebappInternal(Base):
         if not column_name:
 
             if self.webapp_shadowroot():
-                column_element_selenium = self.find_shadow_element('thead label', self.soup_to_selenium(grid))[column]
+                column_element_selenium = self.execute_js_selector('thead label', self.soup_to_selenium(grid))[column]
                 if not column_element_selenium.text:
-                    column_element_selenium = self.find_shadow_element('thead th', self.soup_to_selenium(grid))[column]
+                    column_element_selenium = self.execute_js_selector('thead th', self.soup_to_selenium(grid))[column]
                 self.wait.until(EC.visibility_of((column_element_selenium)))
             else:
                 column_element = grid.select('thead label')[column].find_parent('th')
@@ -7316,7 +7316,7 @@ class WebappInternal(Base):
                 column_number = header[0][column_name]
 
             if self.webapp_shadowroot():
-                column_element_selenium = self.find_shadow_element('thead label', self.soup_to_selenium(grid))[column_number]
+                column_element_selenium = self.execute_js_selector('thead label', self.soup_to_selenium(grid))[column_number]
                 if column_element_selenium:
                     self.wait.until(EC.visibility_of((column_element_selenium)))
             else:
@@ -7368,7 +7368,7 @@ class WebappInternal(Base):
     def search_column_index(self, grid, column):
 
         if self.webapp_shadowroot():
-            column_enumeration = list(enumerate(self.find_shadow_element('thead label', self.soup_to_selenium(grid))))
+            column_enumeration = list(enumerate(self.execute_js_selector('thead label', self.soup_to_selenium(grid))))
             chosen_column = list(filter(lambda x: column.lower().strip() == x[1].text.lower().strip(),
                                         column_enumeration))
 
@@ -7812,7 +7812,7 @@ class WebappInternal(Base):
                 self.driver.execute_script("document.querySelector('wa-file-picker').shadowRoot.querySelector('#{}').value='';".format(element.get_attribute("id")))
 
                 self.send_keys(element, self.replace_slash(value))
-                elements = self.find_shadow_element('button, wa-button', self.soup_to_selenium(containers_soup))
+                elements = self.execute_js_selector('button, wa-button', self.soup_to_selenium(containers_soup))
                 possible_buttons = button.upper() + '_' + self.language.open.upper() + '_' + self.language.save.upper()
                 if elements:
                     elements = list(filter(lambda x: x.text.strip().upper() in possible_buttons, elements))
@@ -7864,7 +7864,7 @@ class WebappInternal(Base):
         soup = BeautifulSoup(content,"html.parser")
         container = soup.select(box_term)
         if container:
-            buttons = self.find_shadow_element('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button")
+            buttons = self.execute_js_selector('wa-button', self.soup_to_selenium(container[0])) if self.webapp_shadowroot() else container[0].select(".ui-button")
             button = list(filter(lambda x: re.sub(regx_sub,'', x.text).lower() == button_text.lower(), buttons))
             if button:
                 selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element(By.XPATH, xpath_soup(button[0]))
@@ -8015,7 +8015,7 @@ class WebappInternal(Base):
         if is_active:
             return is_active
         else :
-            shadow_input = self.find_shadow_element('input, textarea', self.switch_to_active_element(), get_all=False)
+            shadow_input = self.execute_js_selector('input, textarea', self.switch_to_active_element(), get_all=False)
             return shadow_input == element
 
 
@@ -8496,7 +8496,7 @@ class WebappInternal(Base):
                 if self.webapp_shadowroot():
                     bs_tree = container.select('wa-tree')
                     if bs_tree:
-                        shadow_tree_node = self.find_shadow_element('wa-tree-node',
+                        shadow_tree_node = self.execute_js_selector('wa-tree-node',
                                                                     self.soup_to_selenium(next(iter(bs_tree))))
                         if shadow_tree_node:
                             label_serv1 = next(iter(shadow_tree_node), None)
@@ -8512,7 +8512,7 @@ class WebappInternal(Base):
                     if self.webapp_shadowroot():
                         bs_tree_2 = container.select('wa-tree')
                         if bs_tree_2:
-                            tree_nodes = self.find_shadow_element('wa-tree-node', self.soup_to_selenium(next(iter(bs_tree_2))))
+                            tree_nodes = self.execute_js_selector('wa-tree-node', self.soup_to_selenium(next(iter(bs_tree_2))))
                             if len(tree_nodes) > 1 :
                                 img_param = tree_nodes[1]
                     else:
@@ -8683,8 +8683,8 @@ class WebappInternal(Base):
             tooltip_term = 'wa-tooltip'
             if type(element) == Tag:
                 element = self.soup_to_selenium(element)
-            if self.find_shadow_element('button', element):
-                element_function = lambda: next(iter(self.find_shadow_element('button', element)))
+            if self.execute_js_selector('button', element):
+                element_function = lambda: next(iter(self.execute_js_selector('button', element)))
             elif element:
                 element_function = lambda: element
             try:
@@ -8840,7 +8840,7 @@ class WebappInternal(Base):
                         check_before_click = checked_status()
 
                         if self.webapp_shadowroot():
-                            label_box_element =  lambda: next(iter(self.find_shadow_element('input', self.soup_to_selenium(label_box))), None)
+                            label_box_element =  lambda: next(iter(self.execute_js_selector('input', self.soup_to_selenium(label_box))), None)
 
                         if double_click:
                             success = self.send_action(action=self.double_click, element=label_box_element)
@@ -9293,8 +9293,8 @@ class WebappInternal(Base):
                 return False
         else:
             if self.webapp_shadowroot():
-                tree_selected = self.find_shadow_element('span[class~=toggler]', treenode_selected, get_all=False)
-                if self.find_shadow_element('span[class~=toggler]', treenode_selected, get_all=False):
+                tree_selected = self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False)
+                if self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False):
                     return not treenode_selected.get_attribute('closed')
             else:
                 tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
@@ -9337,8 +9337,8 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        
-        return True if self.find_shadow_element('span[class~=toggler]', element, get_all=False) else False
+
+        return True if self.execute_js_selector('span[class~=toggler]', element, get_all=False) else False
 
 
     def treenode_selected(self, label_filtered, tree_number=0):
@@ -9530,7 +9530,7 @@ class WebappInternal(Base):
 
         """
         if self.webapp_shadowroot():
-            columns_list = self.find_shadow_element('td', self.soup_to_selenium(grid))
+            columns_list = self.execute_js_selector('td', self.soup_to_selenium(grid))
             element = next(iter(list(filter(lambda x: text.strip() == x.text.strip(), columns_list))), None)
             if element:
                 return element
@@ -9554,7 +9554,7 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
 
-            grid_lines = lambda: self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+            grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
             before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
@@ -10034,7 +10034,7 @@ class WebappInternal(Base):
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
                 modal_is_closed = not self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
-                                                            optional_term=label_term, main_container=self.containers_selectors["AllContainers"], 
+                                                            optional_term=label_term, main_container=self.containers_selectors["AllContainers"],
                                                             check_error=False)
 
         if not text_extracted or not modal_is_closed:
@@ -10204,7 +10204,7 @@ class WebappInternal(Base):
         tlist = container.select(term)
 
         if self.webapp_shadowroot():
-            list_option = next(iter(list(map(lambda x: self.find_shadow_element('option', self.soup_to_selenium(x)), tlist))))
+            list_option = next(iter(list(map(lambda x: self.execute_js_selector('option', self.soup_to_selenium(x)), tlist))))
         else:
             list_option = next(iter(list(filter(lambda x: x.select('option'), tlist))))
 
@@ -10539,7 +10539,7 @@ class WebappInternal(Base):
             if element:
                 parent_sl = element().parent.switch_to.active_element
                 if parent_sl:
-                    sl_classes = list(map(lambda x: x.get_attribute('class'), self.find_shadow_element('div', parent_sl))) if self.find_shadow_element('div', parent_sl) else None
+                    sl_classes = list(map(lambda x: x.get_attribute('class'), self.execute_js_selector('div', parent_sl))) if self.execute_js_selector('div', parent_sl) else None
                     return sl_classes
             return
         except Exception as e:
@@ -10856,7 +10856,7 @@ class WebappInternal(Base):
 
         if grid:
             if self.webapp_shadowroot():
-                return self.find_shadow_element('tbody tr', self.soup_to_selenium(grid))
+                return self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
             else:
                 return grid.select('tbody tr')
 
@@ -10895,13 +10895,24 @@ class WebappInternal(Base):
             raise ValueError(message)
 
 
-    def find_shadow_element(self, term, objects, get_all=True):
+    def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
+        """
+        Execute a javascript selector in a selenium object and return the element or elements found
+
+        :param term: Css selector
+        :param objects: Selenium object
+        :param get_all: True if you want all elements found or False if you want only the first element found
+        :param shadow_root: True if the element is in a shadow root 
+        :return: Selenium object or list of selenium objects
+        """
 
         elements = None
+        selector_prefix = "arguments[0].shadowRoot." if shadow_root else "arguments[0]."
+
         if get_all:
-            script = f"return arguments[0].shadowRoot.querySelectorAll('{term}')"
+            script = f"return {selector_prefix}querySelectorAll('{term}')"
         else:
-            script = f"return arguments[0].shadowRoot.querySelector('{term}')"
+            script = f"return {selector_prefix}querySelector('{term}')"
 
         try:
             elements = self.driver.execute_script(script, objects)
@@ -10921,7 +10932,7 @@ class WebappInternal(Base):
         element_list = []
 
         for element in elements:
-            shadow_root = next(iter(self.find_shadow_element(selectors, self.soup_to_selenium(element))), None)
+            shadow_root = next(iter(self.execute_js_selector(selectors, self.soup_to_selenium(element))), None)
 
             if shadow_root:
                 if term.lower().strip() == shadow_root.text.lower().strip():
@@ -11035,7 +11046,7 @@ class WebappInternal(Base):
                     self.log_error(self.language.messages.grid_number_error)
 
                 grid = self.soup_to_selenium(grids[grid_number])
-                rows = self.find_shadow_element('tbody tr', grid)
+                rows = self.execute_js_selector('tbody tr', grid)
 
             if rows:
                 for row in rows:
@@ -11152,13 +11163,13 @@ class WebappInternal(Base):
                 for group in procedure_groups:
                     self.ClickBox(self.language.code, group)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()   
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()
 
                 for code in procedure_codes:
                     self.ClickBox(self.language.code, code, grid_number=2)
                     time.sleep(2)
-                    ActionChains(self.driver).key_down(Keys.HOME).perform()                   
-                    
+                    ActionChains(self.driver).key_down(Keys.HOME).perform()
+
                 procedure_buttons = container.select('wa-button')
 
                 if is_procedure_install:
@@ -11227,24 +11238,24 @@ class WebappInternal(Base):
                 elem_calendar = self.soup_to_selenium(calendar)
                 # setting year proccess
                 if year:
-                    year_header = next(iter(self.find_shadow_element('wa-datepicker-year', elem_calendar)))
-                    year_select = next(iter(self.find_shadow_element('select', year_header)))
+                    year_header = next(iter(self.execute_js_selector('wa-datepicker-year', elem_calendar)))
+                    year_select = next(iter(self.execute_js_selector('select', year_header)))
                     year_interface = lambda: self.return_selected_combo_value(year_select, locator=True)
                     self.select_combo(year_select, year, index=True, locator=True)
                 # setting month proccess
                 if month:
                     if int(month) >= 1 and int(month) <= 12:
                         month = int(month) - 1
-                        month_header = next(iter(self.find_shadow_element('wa-datepicker-month', elem_calendar)))
-                        month_select = next(iter(self.find_shadow_element('select', month_header)))
+                        month_header = next(iter(self.execute_js_selector('wa-datepicker-month', elem_calendar)))
+                        month_select = next(iter(self.execute_js_selector('select', month_header)))
                         month_combo = self.return_combo_object(month_select, locator=True)
                         month_combo.select_by_index(str(month))
                     else:
                         return self.log_error(f"Month {month} doesn't exist")
                 # setting day proccess
                 if day:
-                    days_body = next(iter(self.find_shadow_element('wa-datepicker-body', elem_calendar)))
-                    days_elements = self.find_shadow_element('wa-datepicker-day', days_body)
+                    days_body = next(iter(self.execute_js_selector('wa-datepicker-body', elem_calendar)))
+                    days_elements = self.execute_js_selector('wa-datepicker-day', days_body)
                     filtered_day = next(iter(list(filter(lambda x: x.get_attribute('day') == day, days_elements))),None)
                     if filtered_day:
                         click_try = time.time() + 20
