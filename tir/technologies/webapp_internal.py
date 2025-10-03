@@ -7868,7 +7868,7 @@ class WebappInternal(Base):
             button = list(filter(lambda x: re.sub(regx_sub,'', x.text).lower() == button_text.lower(), buttons))
             if button:
                 selenium_button = button[0] if self.webapp_shadowroot() else self.driver.find_element(By.XPATH, xpath_soup(button[0]))
-                self.click(selenium_button)
+                self.send_action(action=self.click, element=lambda: selenium_button)
 
 
     def get_enchoice_button_ids(self, layer):
