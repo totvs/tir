@@ -2151,17 +2151,20 @@ class WebappInternal(Base):
                             filter(lambda x: not re.search(r"(\.\.)$", x.next.text), radio_menu))
 
                     if tradiobuttonitens_not_ends_dots:
-                        if self.webapp_shadowroot():
-                            radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
-                            if radio:
-                                radio.find_element(By.TAG_NAME, 'input').click()
-                                success = True
-                        else:
-                            radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.next.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
-                            if radio:
-                                self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
-                                self.click(self.soup_to_selenium(radio))
-                                success = True
+                        try_click = 0
+                        while not success and try_click < 3:
+                            if self.webapp_shadowroot():
+                                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"(\s)?(\.+$)?", '', x.text).lower() , tradiobuttonitens_not_ends_dots))), None)
+                                if radio:
+                                    radio.find_element(By.TAG_NAME, 'input').click()
+                                    success = self.check_input_radio(radio)
+                            else:
+                                radio = next(iter(list(filter(lambda x: search_key in re.sub(r"\.+$", '', x.text.strip()).lower() , tradiobuttonitens_not_ends_dots))), None)
+                                if radio:
+                                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = radio, locator = By.XPATH )
+                                    self.click(self.soup_to_selenium(radio))
+                                    success = self.check_input_radio(radio)
+                            try_click += 1
 
                     if tradiobuttonitens_ends_dots and not success and self.config.initial_program.lower() != "sigaadv":
                         for element in tradiobuttonitens_ends_dots:
@@ -2270,7 +2273,18 @@ class WebappInternal(Base):
             self.send_keys(self.soup_to_selenium(bs_radio_menu), Keys.ESCAPE)
             time.sleep(1)
 
-    def search_browse_column(self, search_column, search_elements, index=False):
+    def check_input_radio(self, element):
+        """
+        Checks if the div (parent) containing the radio input has the 'selected' class
+
+        :param element: selenium object of the input's parent div
+        :type: selenium.webdriver.remote.webelement.WebElement
+
+        """
+
+        return True if 'selected' in element.get_attribute('class') else False
+
+    def search_browse_bcolumn(self, search_column, search_elements, index=False):
         """
         [Internal]
 
