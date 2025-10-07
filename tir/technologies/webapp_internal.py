@@ -9280,7 +9280,7 @@ class WebappInternal(Base):
         else:
             if self.webapp_shadowroot():
                 tree_selected = self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False)
-                if self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False):
+                if tree_selected:
                     return not treenode_selected.get_attribute('closed')
             else:
                 tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
