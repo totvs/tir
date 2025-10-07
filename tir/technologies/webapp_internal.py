@@ -9065,23 +9065,24 @@ class WebappInternal(Base):
         position -= 1
         tree_number = tree_number-1 if tree_number > 0 else 0
 
+        # Split the treepath into label segments using '>' not preceded by '-'
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
         dialog_layers = self.check_layers('wa-dialog')
 
         for row, label in enumerate(labels):
+            logger().debug("Clicking on tree label: " + label)
 
+            # Normalize the label, collapse multiple spaces into one and trim leading/trailing spaces
             label = re.sub(r'[ ]{2,}', ' ', label).strip()
+            label_filtered = label.lower().strip()
 
             self.wait_blocker()
 
+            # Check if the label is the last item in the path
             last_item = True if row == len(labels) - 1 else False
-
             success = False
-
             try_counter = 0
-
-            label_filtered = label.lower().strip()
 
             try:
                 if self.tree_base_element and label_filtered == self.tree_base_element[0]:
@@ -9090,61 +9091,48 @@ class WebappInternal(Base):
                 pass
 
             endtime = time.time() + self.config.time_out
-
             while ((time.time() < endtime) and (try_counter < 3 and not success)):
 
+                # Get tree node
                 tree_node = self.find_tree_bs(label_filtered, tree_number)
+                # Filter out hidden nodes
+                non_hidden_tree_nodes = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
 
-                if self.webapp_shadowroot():
-                    tree_node_filtered = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
-                else:
-                    tree_node_filtered = list(
-                        filter(lambda x: not x.find_parents(class_='hidden'), tree_node))
-
-                elements = list(
+                # Filter node elements matching the label displayeds
+                filtred_nodes = list(
                     filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
-                           tree_node_filtered))
+                           non_hidden_tree_nodes))
 
-                if elements:
-
+                if filtred_nodes:
                     if position:
-                        elements = elements[position] if len(elements) >= position + 1 else next(iter(elements))
+                        elements = filtred_nodes[position] if len(filtred_nodes) >= position + 1 else next(iter(filtred_nodes))
                         if hierarchy:
                             elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs[
                                 'hierarchy'] != hierarchy else None
                     else:
-                        elements = list(filter(lambda x: self.element_is_displayed(x), elements))
+                        elements = list(filter(lambda x: self.element_is_displayed(x), filtred_nodes))
 
                         if hierarchy:
                             if not self.webapp_shadowroot():
                                 elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs[
-                                    'hierarchy'] != hierarchy, elements))
+                                    'hierarchy'] != hierarchy, filtred_nodes))
 
                     for element in elements:
                         if not success:
-                            if self.webapp_shadowroot():
-                                element_class = self.driver.execute_script(
-                                    f"return arguments[0].shadowRoot.querySelectorAll('.toggler, .lastchild, .data, label')",
-                                    element)
-                                if not element_class:
-                                    element_class = self.driver.execute_script(
-                                        f"return arguments[0].shadowRoot.querySelectorAll('.icon')", element)
-                                if not element_class:
-                                    if element.get_attribute('icon') != None:
-                                        element_class = [element]
-                            else:
-                                element_class = next(iter(element.select(".toggler, .lastchild, .data")), None)
-
-                                if "data" in element_class.get_attribute_list("class"):
-                                    element_class = element_class.select("img, span")
+                            # get node elements to click
+                            element_class = self.execute_js_selector('.toggler, .lastchild, .data, label',
+                                                                     element, get_all=True)
+                            if not element_class:
+                                element_class = self.execute_js_selector('.icon',
+                                                                     element, get_all=True)
+                            if not element_class:
+                                if element.get_attribute('icon') != None:
+                                    element_class = [element]
 
                             for element_class_item in element_class:
                                 if not success:
                                     try:
-                                        if self.webapp_shadowroot(): # exclusive shadow_root condition
-                                            element_click = lambda: element_class_item
-                                        else:
-                                            element_click = lambda: self.soup_to_selenium(element_class_item)
+                                        element_click = lambda: element_class_item
 
                                         if last_item:
                                             self.wait_blocker()
@@ -9200,16 +9188,11 @@ class WebappInternal(Base):
 
                                                 click_try = 0
                                                 while click_try < 3 and element_is_closed():
-                                                    if element.get_attribute(
-                                                            'closed') == 'true' or element.get_attribute(
-                                                            'closed') == '':
+                                                    if (element.get_attribute('closed') == 'true' or
+                                                            element.get_attribute('closed') == ''):
                                                         element_click().click()
-                                                    try:
-                                                        element_closed_click = self.driver.execute_script(
-                                                        f"return arguments[0].shadowRoot.querySelector('.toggler, .lastchild, .data')",
-                                                        element_click())
-                                                    except:
-                                                        element_closed_click = None
+
+                                                    element_closed_click = self.execute_js_selector(".toggler, .lastchild, .data", element_click(), get_all=False)
 
                                                     if element_closed_click:
                                                         element_closed_click.click()
@@ -9251,6 +9234,7 @@ class WebappInternal(Base):
 
         Search the label string in current container and return a treenode element.
         """
+        logger().debug("Searching tree node: " + label)
 
         tree_node = ""
 
@@ -9269,13 +9253,15 @@ class WebappInternal(Base):
                 tree = container.select("wa-tree")
                 if len(tree) >= tree_number:
                     tree = tree[tree_number]
-                    tree_node = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(tree))
+                    tree_node = self.execute_js_selector('wa-tree-node',
+                                             self.soup_to_selenium(tree), get_all=True)
             else:
                 tree_node = container.select(".ttreenode")
 
         if not tree_node:
             self.log_error("Couldn't find tree element.")
 
+        logger().debug(f"Tree node found for label: {label}")
         return(tree_node)
 
     def clicktree_status_selected(self, label_filtered, check_expanded=False):
