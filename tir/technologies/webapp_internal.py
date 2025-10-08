@@ -2281,6 +2281,9 @@ class WebappInternal(Base):
         :type: selenium.webdriver.remote.webelement.WebElement
         :return: True if the parent div has the 'selected' class, False otherwise.
         :rtype: bool
+
+        """
+        
         return True if 'selected' in element.get_attribute('class') else False
 
     def search_browse_bcolumn(self, search_column, search_elements, index=False):
