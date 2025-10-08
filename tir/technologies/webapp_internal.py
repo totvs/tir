@@ -9099,23 +9099,23 @@ class WebappInternal(Base):
                 non_hidden_tree_nodes = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
 
                 # Filter node elements matching the label displayeds
-                filtred_nodes = list(
+                filtered_nodes = list(
                     filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
                            non_hidden_tree_nodes))
 
-                if filtred_nodes:
+                if filtered_nodes:
                     if position:
-                        elements = filtred_nodes[position] if len(filtred_nodes) >= position + 1 else next(iter(filtred_nodes))
+                        elements = filtered_nodes[position] if len(filtered_nodes) >= position + 1 else next(iter(filtered_nodes))
                         if hierarchy:
                             elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs[
                                 'hierarchy'] != hierarchy else None
                     else:
-                        elements = list(filter(lambda x: self.element_is_displayed(x), filtred_nodes))
+                        elements = list(filter(lambda x: self.element_is_displayed(x), filtered_nodes))
 
                         if hierarchy:
                             if not self.webapp_shadowroot():
                                 elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs[
-                                    'hierarchy'] != hierarchy, filtred_nodes))
+                                    'hierarchy'] != hierarchy, filtered_nodes))
 
                     for element in elements:
                         if not success:
