@@ -9098,7 +9098,7 @@ class WebappInternal(Base):
                 # Filter out hidden nodes
                 non_hidden_tree_nodes = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
 
-                # Filter node elements matching the label displayeds
+                # Filter node elements matching the label displayed
                 filtered_nodes = list(
                     filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
                            non_hidden_tree_nodes))
