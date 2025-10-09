@@ -12,6 +12,8 @@ import socket
 import pathlib
 import sys
 import tir.technologies.core.enumerations as enum
+import configparser
+from pathlib import Path
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -11438,3 +11440,51 @@ class WebappInternal(Base):
 
             logger().info(f'Endpoints has been restored in .ini file.')
 
+    def get_ini_value(self, key, section, ini_path=""):
+        """
+        Get value from appserver.ini file.
+
+        :param section: Nome da seção no arquivo .ini.
+        :param key: Chave dentro da seção.
+        :param ini_path: Caminho opcional para um arquivo .ini específico.
+        :return: Valor da chave ou None se não encontrado.
+        """
+
+        if not ini_path:
+            ini_path = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
+        else:
+            ini_path = self.replace_slash(f'{ini_path}\\appserver.ini')
+
+        if not section:
+            section = self.config.environment
+
+        try:
+            if not pathlib.Path(ini_path).exists():
+                self.log_error(f'INI file not found in: {ini_path}')
+                return None
+
+            config = configparser.ConfigParser()
+            config.read(ini_path, encoding="utf-8")
+
+            # Adjust case-insensitive to section
+            if not config.has_section(section):
+                section_map = {s.lower(): s for s in config.sections()}
+                real_section = section_map.get(section.lower())
+                if real_section:
+                    section = real_section
+                else:
+                    self.log_error(f'Section "{section}" not found in {ini_path}')
+                    return None
+
+            # key verification
+            if not config.has_option(section, key):
+                self.log_error(f'Key "{key}" not found in section "{section}" in {ini_path}')
+                return None
+
+            value = config.get(section, key)
+            logger().debug(f'INI value retrieved: "{value}"')
+            return value
+
+        except Exception as e:
+            self.log_error(f'Error reading INI "{ini_path}": {str(e)}')
+            return None
