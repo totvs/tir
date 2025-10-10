@@ -11496,9 +11496,9 @@ class WebappInternal(Base):
 
             logger().info(f'Endpoints has been restored in .ini file.')
 
-def setup_inspector(self):
-        # Instala o inspector.js no browser (só precisa uma vez por sessão)
-        try:
-            self.driver.execute_script(inspector_js)
-        except Exception as e:
-            logger().warning(f"setup_inspector: erro ao executar o inspector: {e}")
+    def setup_inspector(self):
+            # Instala o inspector.js no browser (só precisa uma vez por sessão)
+            try:
+                self.driver.execute_script(inspector_js)
+            except Exception as e:
+                logger().warning(f"setup_inspector: erro ao executar o inspector: {e}")
