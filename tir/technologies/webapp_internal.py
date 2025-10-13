@@ -8838,7 +8838,7 @@ class WebappInternal(Base):
         img = None
         success = False
         containers_term = self.containers_selectors["AllContainers"]
-        current_layers = int
+        current_layers = self.check_layers(containers_term)
 
         logger().info(f"ClickCheckBox - Clicking on {label_box_name}")
         if position > 0:
