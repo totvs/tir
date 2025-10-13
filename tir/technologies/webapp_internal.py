@@ -13,7 +13,6 @@ import pathlib
 import sys
 import tir.technologies.core.enumerations as enum
 import configparser
-from pathlib import Path
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
