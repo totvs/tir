@@ -8836,8 +8836,9 @@ class WebappInternal(Base):
         """
 
         img = None
-
         success = False
+        containers_term = self.containers_selectors["AllContainers"]
+        layers_before_click = self.check_layers(containers_term)
 
         logger().info(f"ClickCheckBox - Clicking on {label_box_name}")
         if position > 0:
@@ -8848,20 +8849,22 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
-                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
+                    checked_status = lambda: self.get_checkbox_status(label_box_name, position)
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
-                        label_box_element  = lambda: self.soup_to_selenium(label_box)
+                        label_box_element =  lambda: self.execute_js_selector('input', self.soup_to_selenium(label_box),
+                                                                              get_all=False)
                         check_before_click = checked_status()
+                        click_action = self.double_click if double_click else self.click
 
-                        if self.webapp_shadowroot():
-                            label_box_element =  lambda: next(iter(self.execute_js_selector('input', self.soup_to_selenium(label_box))), None)
+                        success = self.send_action(action=click_action, element=label_box_element)
+                        layers_after_click = self.check_layers(containers_term)
+                        # If clicked opened a new screen assign success
+                        if layers_after_click > layers_before_click:
+                            success = True
+                            break
 
-                        if double_click:
-                            success = self.send_action(action=self.double_click, element=label_box_element)
-                        else:
-                            self.send_action(action=self.click, element=label_box_element)
+                        # If not double click, check if the status changed
+                        if not double_click:
                             check_after_click = checked_status()
                             success = check_after_click != check_before_click
 
@@ -8883,6 +8886,27 @@ class WebappInternal(Base):
 
             if not success:
                 self.log_error("Checkbox index is invalid.")
+
+
+    def get_checkbox_status(self, label_box_name, position=1):
+        """
+        Get the status of a checkbox
+        (checked or not checked)
+
+        :param label_box_name:
+        :param position:
+        :return: Boolean
+        :rtype: bool
+        """
+        checkbox_label = self.get_checkbox_label(label_box_name, position)
+        try:
+            if hasattr(checkbox_label, 'attrs') and 'checked' in checkbox_label.attrs:
+                return True
+            selenium_elem = self.soup_to_selenium(checkbox_label)
+            return bool(selenium_elem.get_attribute('checked'))
+        except Exception:
+            return False
+
 
     def get_checkbox_label(self, label_box_name, position):
         '''Get checkbox from label name
