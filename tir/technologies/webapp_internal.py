@@ -8838,7 +8838,7 @@ class WebappInternal(Base):
         img = None
         success = False
         containers_term = self.containers_selectors["AllContainers"]
-        current_layers = int
+        layers_before_click = self.check_layers(containers_term)
 
         logger().info(f"ClickCheckBox - Clicking on {label_box_name}")
         if position > 0:
@@ -8849,18 +8849,17 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    current_layers = self.check_layers(containers_term)
                     checked_status = lambda: self.get_checkbox_status(label_box_name, position)
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
-                        label_box_element  = lambda: self.soup_to_selenium(label_box)
+                        label_box_element =  lambda: self.execute_js_selector('input', self.soup_to_selenium(label_box),
+                                                                              get_all=False)
                         check_before_click = checked_status()
-                        label_box_element =  lambda: self.execute_js_selector('input', self.soup_to_selenium(label_box), get_all=False)
                         click_action = self.double_click if double_click else self.click
 
                         success = self.send_action(action=click_action, element=label_box_element)
                         layers_after_click = self.check_layers(containers_term)
                         # If clicked opened a new screen assign success
-                        if layers_after_click > current_layers:
+                        if layers_after_click > layers_before_click:
                             success = True
                             break
 
