@@ -6536,7 +6536,7 @@ class WebappInternal(Base):
             columns = [col.lower() for col in grid_dataframe.columns.tolist()]
             grid = grids[grid_number] if isinstance(grids, list) else grids
 
-            rows = self.execute_js_script('tbody tr', self.soup_to_selenium(grid))
+            rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
             if not rows:
                 self.log_error(f"Couldn't find rows in grid {grid_number}")
                 return None
@@ -6621,7 +6621,7 @@ class WebappInternal(Base):
             return (
                     self.return_combo_object(input_container)
                     or
-                    next(iter(self.execute_js_script('input, textarea', self.soup_to_selenium(input_container))), None)
+                    next(iter(self.execute_js_selector('input, textarea', self.soup_to_selenium(input_container))), None)
             )
 
     def get_column_index(self, field=None, columns=None, field_to_label=None, position=1, duplicate_fields=[]):
