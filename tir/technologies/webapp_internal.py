@@ -6531,10 +6531,6 @@ class WebappInternal(Base):
         try:
             grid = self.get_grid(grid_number=grid_number)
 
-            if not grid:
-                self.log_error(f"Couldn't find grid {grid_number}")
-                return None
-
             rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
 
             if not rows:
