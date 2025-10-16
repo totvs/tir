@@ -6525,18 +6525,18 @@ class WebappInternal(Base):
 
         :param field: The field that must be selected.
         """
+        column_index = None
+        column_name = field_to_label[column].lower().strip() if '_' in column else column.lower().strip()
 
         try:
-            grid_dataframe, grids = self.grid_dataframe(grid_number=grid_number)
+            grid = self.get_grid(grid_number=grid_number)
 
-            if grid_dataframe.empty or not grids:
-                self.log_error("Couldn't find grid")
+            if not grid:
+                self.log_error(f"Couldn't find grid {grid_number}")
                 return None
 
-            columns = [col.lower() for col in grid_dataframe.columns.tolist()]
-            grid = grids[grid_number] if isinstance(grids, list) else grids
-
             rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
+
             if not rows:
                 self.log_error(f"Couldn't find rows in grid {grid_number}")
                 return None
@@ -6555,7 +6555,11 @@ class WebappInternal(Base):
                 row_element = next(iter(rows), None)
 
             columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
-            column_index = self.get_column_index(column, columns, field_to_label, position=position, duplicate_fields=duplicate_fields)
+            grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
+
+            if column_name in grid_header_index[grid_number]:
+                column_index = grid_header_index[grid_number][column_name]
+
             if column_index is None:
                 self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
                 return None
@@ -6842,17 +6846,17 @@ class WebappInternal(Base):
         """
         text = ""
         field_to_label = {}
-        column = field[1]
+        field_column = field[1]
         value = field[2]
         grid_number = field[3]
         row = field[0]
         ignore_case = field[5]
 
-        if '_' in column:
-            x3_dictionaries = self.get_x3_dictionaries([column])
+        if '_' in field_column:
+            x3_dictionaries = self.get_x3_dictionaries([field_column])
             field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
-        selenium_column = self.get_grid_cell(column=column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
+        selenium_column = self.get_grid_cell(column=field_column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
 
         text = selenium_column.text.strip()
 
@@ -7060,7 +7064,7 @@ class WebappInternal(Base):
         """
         grid_number -= 1
         row_number -= 1
-        column = column.strip()
+        column = column.lower().strip()
         field_to_label = None
 
         if '_' in column:
