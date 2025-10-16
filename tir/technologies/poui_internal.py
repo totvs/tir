@@ -4148,6 +4148,17 @@ class PouiInternal(Base):
         return success
     
     def switch(self, label='', position=1):
+        """
+        
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        """
 
         logger().info(f"Clicking on Switch: {label}")
         
