@@ -349,31 +349,6 @@ class Webapp():
         """
         return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field, position)
 
-    def GetIniValue(self, key, section='', ini_path=''):
-        """
-        Gets a value from an ini file.
-
-        :param section: The section of the ini file.
-        :type section: str
-        :param key: The key of the ini file.
-        :type key: str
-        :param ini_path: The path to the appserver ini file. - **Default:** appserver folder defined in config.json
-        :type ini_path: str
-        :return: The value of the key in the ini file.
-        :rtype: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> value = oHelper.GetIniValue(key="sourcepath", section="PROTHEUS_ENVIRONMENT")
-        >>> #--------------------------------------------------
-        >>> # Calling the method with custom ini path:
-        >>> value = oHelper.GetIniValue(key="dbport", ini_path="C:\\TOTVS\\Protheus12\\appserver")
-
-        """
-        return self.__webapp.get_ini_value(key, section, ini_path)
-
-
     def LoadGrid(self):
         """
         This method is responsible for running all actions of the input and check queues
@@ -2065,3 +2040,23 @@ class Poui():
 
         """
         self.__poui.click_look_up(label, search_value)
+
+    def Switch(self, label='', position=1):
+        """
+        
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+        >>> # Call the method:
+        >>> def Switch(label='Codigo')
+        >>> def Switch(label='', position=2)
+
+        """
+        
+        self.__poui.switch(label=label, position=position)

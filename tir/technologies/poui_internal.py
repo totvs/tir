@@ -7,7 +7,7 @@ import random
 import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -69,7 +69,7 @@ class PouiInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": ".tmodaldialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
@@ -826,65 +826,127 @@ class PouiInternal(Base):
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
         return language
 
-    def search_element_position(self, field, position=1, input_field=True, direction=None):
+    def search_element_position(self, field, position=1, input_field=True, direction=None, input_selector=''):
         """
         [Internal]
         Usage:
         >>> # Calling the method
         >>> self.search_element_position(field)
         """
+
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
-        term=".tget, .tcombobox, .tmultiget"
+        active_tab = []
+
+        if input_selector:
+            term = input_selector
+        else:
+            term = ".dict-tget, .dict-tcombobox, .dict-tmultiget"
+
+        label_term = ".dict-tsay, label, wa-button, span"
+
+
         position-=1
 
         if not input_field:
-            term=".tsay"
+            term=".tsay, .dict-tsay"
 
         try:
             while( time.time() < endtime and not label ):
                 container = self.get_current_container()
-                labels = container.select("label")
+                regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
+                # labels = container.select(label_term)
+                labels = self.web_scrap(term=label_term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
+                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text,re.IGNORECASE) ,labels_displayed))
+
+                if self.webapp_shadowroot():
+                    if not view_filtred:
+                        field =  re.sub(regex, '', field).lower().strip()
+                        view_filtred = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,labels))
+                        if len(view_filtred) > 1:
+                            view_filtred = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels))
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent) , view_filtred))
+                else:
+                    labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
+
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
             if not label:
                 self.log_error(f"Label: '{field}'' wasn't found.")
 
-            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
-            
-            container_size = self.get_element_size(container['id'])
+            self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
+
+            # container_size = self.get_element_size(container['id'])
+            container_size = {'height': 868, 'width':1913}
             # The safe values add to postion of element
             width_safe, height_safe = self.width_height(container_size)
 
             label_s  = lambda:self.soup_to_selenium(label)
-            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            if self.webapp_shadowroot():
+                xy_label = lambda: label_s().location
+            else:
+                xy_label = lambda: self.driver.execute_script('return arguments[0].getPosition()', label_s())
+
+            if input_field:
+                active_tab = self.filter_active_tabs(container)
+
+                if active_tab :
+                    active_childs = list(filter(lambda x: 'active' in x.attrs , active_tab.find_all_next('wa-tab-page'))) if active_tab else None
+                    if active_childs:
+                        if len(active_childs) == 0 and active_tab and active_tab.name == 'wa-panel':
+                           active_childs = [active_tab]
+                        labels_in_tab = next(iter(active_childs), None)
+                        if labels_in_tab != None and labels_in_tab.contents != None:
+                            label_class = list(filter(lambda x: x.get('class')[0] == 'dict-tsay' , labels_in_tab.contents))
+                            if label_class:
+                                if len(label_class) > 0:
+                                    is_label_in_tab = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,labels_in_tab))
+                                    label_tab = len(is_label_in_tab) > 0
+                                else:
+                                    label_tab = True
+                            else:
+                                label_tab = True
+                        if active_childs and label_tab:
+                            active_tab = next(iter(active_childs), None)
+                            active_tab_labels = active_tab.select(label_term)
+                            filtered_labels = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,active_tab_labels))
+                            if not filtered_labels:
+                                filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip().startswith(field) ,active_tab_labels))
+                                if len(filtered_labels) > 1:
+                                    filtered_labels = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).lower().strip() == (field) ,active_tab_labels))
+                            if not filtered_labels:
+                                active_tab = None
+
+
+            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
+            list_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
+            if self.search_stack('SetValue') and list_in_range:
+                list_in_range = self.filter_not_read_only(list_in_range)
 
             if not input_field:
-                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+                if self.webapp_shadowroot():
+                    list_in_range = list(filter(lambda x: x.previousSibling and field.strip().lower() == re.sub(regex, '', x.previousSibling.get('caption')).strip().lower(), list_in_range))
+                else:
+                    list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
 
             position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
-            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
+            position_list = self.filter_by_direction(xy_label(), width_safe, height_safe, position_list, direction)
+            distance      = self.get_distance_by_direction(xy_label(), position_list, direction)
             if distance:
-                elem          = min(distance, key = lambda x: x[1])
+                elem          = min(distance, key = lambda x: abs(x[1]))
                 elem          = list_in_range[elem[0]]
 
             if not elem:
                 self.log_error(f"Label '{field}' wasn't found")
             return elem
-            
+
         except AssertionError as error:
             raise error
         except Exception as error:
             logger().exception(str(error))
-            self.log_error(str(error))
 
     def width_height(self, container_size):
 
@@ -907,7 +969,10 @@ class PouiInternal(Base):
 
         """
         selenium_element = self.soup_to_selenium(element)
-        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
+        if self.webapp_shadowroot():
+            position = selenium_element.location
+        else:
+            position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
         return position
 
     def get_distance(self,label_pos,element_pos):
@@ -4081,3 +4146,120 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+    
+    def switch(self, label='', position=1):
+
+        logger().info(f"Clicking on Switch: {label}")
+        
+        term = 'po-switch'
+        term_label = ''
+        label = label.strip().lower()
+        position -= 1
+        success = False
+
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            switches = self.find_switch(label, term)
+            
+            if switches:
+
+                switch = switches[position]
+                switch_container = self.soup_to_selenium(switch.select('.po-switch-container')[0], twebview=True)
+                switch_status = switch_container.get_attribute('aria-checked').lower()
+
+                self.click(switch_container)
+
+                switches_after = self.find_switch(label, term)
+                switch_after = switches_after[position]
+                switch_after_container = self.soup_to_selenium(switch_after.select('.po-switch-container')[0], twebview=True)
+                switch_after_status = switch_after_container.get_attribute('aria-checked').lower()
+
+                success = switch_after_status != switch_status
+
+        if not success:
+            self.log_error(f"Couldn't find element {label}")
+
+    def find_switch(self, label, term):
+        elements = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
+
+        # 1ª tentativa: Pegar label pelo atributo do elemento
+        switches = list(filter(lambda x: self.soup_to_selenium(x, twebview=True).get_attribute('p-label').strip().lower() == label if self.soup_to_selenium(x, twebview=True).get_attribute('p-label') else False, elements))
+
+        # 2ª tentativa: Pegar pela label (próximo span após o elemento)
+        if not switches:
+
+            # Recuperar por aproximação da label
+            # switches = self.search_element_position(label, input_selector=term)
+            # switches = [switches]
+
+            # Recuperar pelo elemento "irmão", dentro do mesmo "pai"
+            switches = list(filter(lambda x: x.find_next_sibling().text.strip().lower() == label and x.find_next_sibling().name in ['span', 'label', 'p'] if x.find_next_sibling() else False, elements))
+
+        # 3ª tentativa: Pegar pela posição dos inputs sem labels
+        if not switches:
+
+            switches = list(filter(lambda x: not self.soup_to_selenium(x, twebview=True).get_attribute('p-label'), elements))
+
+        return switches
+    
+    def get_current_container(self):
+        """
+        [Internal]
+
+        An internal method designed to get the current container.
+        Returns the BeautifulSoup object that represents this container or NONE if nothing is found.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_current_container()
+        """
+        soup = self.get_current_DOM()
+        containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
+        return next(iter(containers), None)
+
+    def filter_active_tabs(self, object):
+            """
+
+            :param object:
+            :return: return the object if parent wa-tab-page is active else []
+            """
+            if not object:
+                return []
+
+            if isinstance(object, list):
+                filtered_object = list(
+                    filter(lambda x: hasattr(x.find_parent('wa-tab-page'), 'attrs') if x else None, object))
+
+                if filtered_object:
+                    activated_objects = list(filter(lambda x: 'active' in x.find_parent('wa-tab-page').attrs, object))
+                    activated_tabs = list(map(lambda x: x.find_parent('wa-tab-page'), activated_objects))
+                    for i, j in enumerate(activated_tabs[:-1]):
+                        if j != activated_tabs[i+1]:
+                            parents_folders = list(filter(lambda x: 'data-advpl' and "caption" in x.attrs and x['caption'] and x['data-advpl'] == 'tfolderpage', j.find_parents('wa-tab-page')))
+                            prev_siblings = list(map(lambda x: x.find_previous_siblings("wa-tab-page"), parents_folders))
+                            next_siblings = list(map(lambda x: x.find_next_siblings("wa-tab-page"), parents_folders))
+                            is_same_layer = list(filter(lambda x: activated_tabs[i+1] in prev_siblings[x[0]] or activated_tabs[i+1] in next_siblings[x[0]], enumerate(parents_folders)))
+                            if is_same_layer:
+                                activated_objects.pop(i)
+                    return activated_objects
+                else:
+                    filtered_object = next(iter(object))
+                    if filtered_object.name == 'wa-tgrid':
+                        return [filtered_object]
+
+            elif isinstance(object, Tag):
+                if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
+                    return object if 'active' in object.find_parent('wa-tab-page').attrs else None
+                elif hasattr(object, 'opened') and 'opened' in object.attrs:
+                    panels_object = object.select('.dict-tscrollarea')
+                    if panels_object:
+                        filtered_object = next(iter(panels_object))
+                        if filtered_object.contents:
+                            return next(iter(filtered_object.contents))
+                    
