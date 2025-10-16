@@ -3298,7 +3298,7 @@ class WebappInternal(Base):
         if grid:
             self.check_grid_appender(line - 1, field, user_value, grid_number - 1, position, ignore_case)
         elif isinstance(user_value, bool):
-            current_value = self.result_checkbox(field, user_value, position)
+            current_value = self.result_checkbox(field, user_value)
             self.log_result(field, user_value, current_value)
         else:
             endtime = time.time() + self.config.time_out
