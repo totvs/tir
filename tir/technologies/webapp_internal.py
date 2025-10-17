@@ -5708,7 +5708,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         grids = None
-        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = self.grid_selectors["new_web_app"]
         while(time.time() < endtime and not grids):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -6299,6 +6299,7 @@ class WebappInternal(Base):
             self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         for field in self.grid_input:
+            # if new line parameter and field column is empty
             if field[3] and field[0] == "":
                 self.new_grid_line(field)
             else:
@@ -6416,24 +6417,25 @@ class WebappInternal(Base):
         while not cell_filled and time.time() < endtime:
 
             if not selenium_column:
-                selenium_column = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
+                selenium_column, _ = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
 
-            self.select_grid_cell(selenium_column)
-            cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
-            selenium_input = lambda: self.get_grid_input_element()
+            if selenium_column:
+                self.select_grid_cell(selenium_column)
+                cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
+                selenium_input = lambda: self.get_grid_input_element()
 
-            if selenium_input():
-                if isinstance(selenium_input(), Select):
-                    cell_filled = self.select_combo(selenium_input(), user_value)
-                    time.sleep(1)
-                    # if modal opened close it
-                    if current_layers() > initial_layers:
-                        self.send_keys(selenium_column, Keys.TAB)
-                else:
-                    if cell_opened:
-                        self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
+                if selenium_input():
+                    if isinstance(selenium_input(), Select):
+                        cell_filled = self.select_combo(selenium_input(), user_value)
+                        time.sleep(1)
+                        # if modal opened close it
+                        if current_layers() > initial_layers:
+                            self.send_keys(selenium_column, Keys.TAB)
+                    else:
+                        if cell_opened:
+                            self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
 
-                    cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
+                        cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
 
 
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
@@ -6521,48 +6523,66 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        Selects the cell of the grid.
+        Get a cell of the grid, based on the column and row informed.
 
-        :param field: The field that must be selected.
+        :param column: The column that must be selected.
+        :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
+        :param row: The row that must be selected  - **Default:** 1
+        :param field_to_label: A dictionary containing the field labels.
+        :param position: Position which element is located. - **Default:** 1
+        :param duplicate_fields: A list of fields that have the same label.
         """
         column_index = None
         column_name = field_to_label[column].lower().strip() if '_' in column else column.lower().strip()
+        column_cell = None
+        page_down_count = 0
 
         try:
-            grid = self.get_grid(grid_number=grid_number)
+            endtime = time.time() + self.config.time_out
 
-            rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
+            while endtime > time.time() and column_cell is None:
+                # get grids on the screen
+                grid = self.get_grid(grid_number=grid_number)
 
-            if not rows:
-                self.log_error(f"Couldn't find rows in grid {grid_number}")
-                return None
+                # get rows of the grid
+                rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
 
-            if (row is not None) and (row > len(rows) - 1 or row < 0):
-                self.log_error(f"Couldn't select the specified row: {row + 1}")
-                return None
+                # check if the specified row exists and row is valid
+                if (len(rows) < row or row < 0):
+                    self.log_error(f"Couldn't select the specified row: {row + 1}")
+                    return None
 
-            selected_row = self.get_selected_row(rows)
+                if rows:
 
-            if row is not None:
-                row_element = rows[row]
-            elif selected_row:
-                row_element = selected_row
-            else:
-                row_element = next(iter(rows), None)
+                    selected_row = self.get_selected_row(rows)
 
-            columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
-            grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
+                    # if shoewed lines is less than the row number, check obscured lines
+                    if len(rows) <= row:
+                        grid_lenght = self.lenght_grid_lines(grid)
+                        if grid_lenght > row:
+                            row_element, page_down_count = self.get_obscure_gridline(grid, row)
+                    elif row is not None:
+                        row_element = rows[row]
+                    elif selected_row:
+                        row_element = selected_row
+                    else:
+                        row_element = next(iter(rows), None)
 
-            if column_name in grid_header_index[grid_number]:
-                column_index = grid_header_index[grid_number][column_name]
+                    columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
+                    grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
+
+                    if grid_number < len(grid_header_index) and column_name in grid_header_index[grid_number]:
+                        column_index = grid_header_index[grid_number][column_name]
+                        column_cell = columns_element[column_index]
+
+            return column_cell, page_down_count
 
             if column_index is None:
-                self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
+                logger().debug(f"Couldn't find column '{column}' in grid {grid_number + 1}")
                 return None
 
-            return columns_element[column_index]
         except Exception as e:
-            self.log_error(f"Couldn't find column '{column}' in grid {grid_number}. Error: {str(e)}")
+            logger().debug(f"Couldn't find column '{column}' in grid {grid_number}. Error: {str(e)}")
             return None
 
     def select_grid_cell(self, grid_cell):
@@ -6847,24 +6867,34 @@ class WebappInternal(Base):
         grid_number = field[3]
         row = field[0]
         ignore_case = field[5]
+        selenium_column = None
+        down_loop = 0
 
         if '_' in field_column:
             x3_dictionaries = self.get_x3_dictionaries([field_column])
             field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
-        selenium_column = self.get_grid_cell(column=field_column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not selenium_column:
+            selenium_column, down_loop = self.get_grid_cell(column=field_column, row=row, grid_number=grid_number, field_to_label=field_to_label, position=position)
 
-        text = selenium_column.text.strip()
+        if selenium_column:
+            text = selenium_column.text.strip()
 
-        logger().info(f"Collected value: {text}")
-        if get_value:
-            return text
+            logger().info(f"Collected value: {text}")
+            if get_value:
+                return text
 
-        field_name = f"({field[0]}, {column})"
+            field_name = f"({field[0]}, {field_column})"
+
+        for i in range(down_loop):
+            ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+
         if ignore_case:
             self.log_result(field_name, value.lower(), text.lower())
         else:
             self.log_result(field_name, value, text)
+
 
     def get_status_color(self, sl_object):
         colors = {
@@ -7069,7 +7099,7 @@ class WebappInternal(Base):
 
         logger().info(f"Clicking on grid cell: {column}")
 
-        grid_cell = self.get_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)
+        grid_cell, _ = self.get_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)
         self.select_grid_cell(grid_cell)
 
     def filter_non_obscured(self, elements, grid_number):
@@ -9077,7 +9107,7 @@ class WebappInternal(Base):
                                         element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                         self.scroll_to_element(element_click())
                                         element_click().click()
-                                        success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered) else self.check_hierarchy(label_filtered)
+                                        success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered, element_click()) else self.check_hierarchy(label_filtered)
                                     except:
                                         pass
 
