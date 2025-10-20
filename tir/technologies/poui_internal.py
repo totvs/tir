@@ -69,7 +69,7 @@ class PouiInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": ".tmodaldialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
             "AllContainers": "body,.tmodaldialog,.ui-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
@@ -3709,7 +3709,7 @@ class PouiInternal(Base):
         position -= 1
         element = None
 
-        term = '[class*="po-icon"]'
+        term = 'po-icon'
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -3725,10 +3725,10 @@ class PouiInternal(Base):
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
 
                 if label and class_name:
-                    class_element = self.return_icon_class(class_name, po_icon_filtered)
+                    class_element = self.return_icon_class(class_name, po_icon_filtered, position)
                     element = class_element if self.check_element_tooltip(class_element, label, contains=True) else None
                 elif class_name:
-                    element = self.return_icon_class(class_name, po_icon_filtered)
+                    element = self.return_icon_class(class_name, po_icon_filtered, position)
                 else:
                     element = self.filter_by_tooltip_value(po_icon_filtered, label)
 
@@ -3741,7 +3741,7 @@ class PouiInternal(Base):
         if not element:
             self.log_error(f"Element '{element}' doesn't found!")
 
-    def return_icon_class(self, class_name, elements):
+    def return_icon_class(self, class_name, elements, position):
         """
 
         :param class_name: The POUI class name for icon
@@ -3751,11 +3751,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        icon_classes = list(filter(lambda x: any(
-            class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
+        icon_classes = list(filter(lambda x: 
+            class_name.lower().strip() in ' '.join(x.select('i')[0].get('class', [])),
                                      elements))
         if icon_classes:
-            return next(iter(icon_classes))
+            return icon_classes[position]
 
     def click_avatar(self, position):
         """
