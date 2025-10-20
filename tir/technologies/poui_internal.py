@@ -3733,8 +3733,6 @@ class PouiInternal(Base):
                     element = self.filter_by_tooltip_value(po_icon_filtered, label)
 
                 if element:
-                    if position > 0 and position >= len(element):
-                        element = element[position]
 
                     self.poui_click(element)
 
