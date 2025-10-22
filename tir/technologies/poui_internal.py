@@ -3154,12 +3154,14 @@ class PouiInternal(Base):
         while(not input_field and time.time() < endtime):
             po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
             if po_input:
-                po_input_filtered = list(filter(lambda x: x.find_parent('po-field-container') is not None, po_input))
-                po_input_filtered = list(
-                    filter(lambda x: x.find_parent('po-field-container').select('span, label'), po_input_filtered))
+                po_input_filtered = list(filter(lambda x: x.find_parent('po-field-container').select('span, label') 
+                                                            if x.find_parent('po-field-container') else None
+                                    , po_input))
+                
                 po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
                     map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
-                        po_input_filtered))))
+                        po_input_filtered)))) or list(filter(lambda x: field.lower() in x.get('placeholder').lower()
+                                                    if x.get('placeholder') else None, po_input))
                 if po_input_text:
                     if len(po_input_text) >= position:
                         po_input_text = po_input_text[position]
