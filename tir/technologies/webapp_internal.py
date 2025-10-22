@@ -12,6 +12,7 @@ import socket
 import pathlib
 import sys
 import tir.technologies.core.enumerations as enum
+import configparser
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup, Tag
@@ -8720,8 +8721,9 @@ class WebappInternal(Base):
         """
 
         img = None
-
         success = False
+        containers_term = self.containers_selectors["AllContainers"]
+        layers_before_click = self.check_layers(containers_term)
 
         logger().info(f"ClickCheckBox - Clicking on {label_box_name}")
         if position > 0:
@@ -8732,20 +8734,22 @@ class WebappInternal(Base):
             while time.time() < endtime and not success:
                 label_box = self.get_checkbox_label(label_box_name, position)
                 if label_box:
-                    checked_status =lambda: ((hasattr(self.get_checkbox_label(label_box_name, position), 'attrs') and
-                                             'checked' in self.get_checkbox_label(label_box_name, position).attrs)  or \
-                                             (self.soup_to_selenium(label_box).get_attribute('checked')))
+                    checked_status = lambda: self.get_checkbox_status(label_box_name, position)
                     if 'tcheckbox' or 'dict-tcheckbox' in label_box.get_attribute_list('class'):
-                        label_box_element  = lambda: self.soup_to_selenium(label_box)
+                        label_box_element =  lambda: self.execute_js_selector('input', self.soup_to_selenium(label_box),
+                                                                              get_all=False)
                         check_before_click = checked_status()
+                        click_action = self.double_click if double_click else self.click
 
-                        if self.webapp_shadowroot():
-                            label_box_element =  lambda: next(iter(self.execute_js_selector('input', self.soup_to_selenium(label_box))), None)
+                        success = self.send_action(action=click_action, element=label_box_element)
+                        layers_after_click = self.check_layers(containers_term)
+                        # If clicked opened a new screen assign success
+                        if layers_after_click > layers_before_click:
+                            success = True
+                            break
 
-                        if double_click:
-                            success = self.send_action(action=self.double_click, element=label_box_element)
-                        else:
-                            self.send_action(action=self.click, element=label_box_element)
+                        # If not double click, check if the status changed
+                        if not double_click:
                             check_after_click = checked_status()
                             success = check_after_click != check_before_click
 
@@ -8767,6 +8771,27 @@ class WebappInternal(Base):
 
             if not success:
                 self.log_error("Checkbox index is invalid.")
+
+
+    def get_checkbox_status(self, label_box_name, position=1):
+        """
+        Get the status of a checkbox
+        (checked or not checked)
+
+        :param label_box_name:
+        :param position:
+        :return: Boolean
+        :rtype: bool
+        """
+        checkbox_label = self.get_checkbox_label(label_box_name, position)
+        try:
+            if hasattr(checkbox_label, 'attrs') and 'checked' in checkbox_label.attrs:
+                return True
+            selenium_elem = self.soup_to_selenium(checkbox_label)
+            return bool(selenium_elem.get_attribute('checked'))
+        except Exception:
+            return False
+
 
     def get_checkbox_label(self, label_box_name, position):
         '''Get checkbox from label name
@@ -11326,3 +11351,51 @@ class WebappInternal(Base):
 
             logger().info(f'Endpoints has been restored in .ini file.')
 
+    def get_ini_value(self, key, section, ini_path=""):
+        """
+        Get value from appserver.ini file.
+
+        :param section: Name of the section in the .ini file.
+        :param key: Key within the section.
+        :param ini_path: Optional path to a specific .ini file.
+        :return: Value of the key or None if not found.
+        """
+
+        if not ini_path:
+            ini_path = self.replace_slash(f'{self.config.appserver_folder}\\appserver.ini')
+        else:
+            ini_path = self.replace_slash(f'{ini_path}\\appserver.ini')
+
+        if not section:
+            section = self.config.environment
+
+        try:
+            if not pathlib.Path(ini_path).exists():
+                self.log_error(f'INI file not found in: {ini_path}')
+                return None
+
+            config = configparser.ConfigParser()
+            config.read(ini_path, encoding="utf-8")
+
+            # Adjust case-insensitive to section
+            if not config.has_section(section):
+                section_map = {s.lower(): s for s in config.sections()}
+                real_section = section_map.get(section.lower())
+                if real_section:
+                    section = real_section
+                else:
+                    self.log_error(f'Section "{section}" not found in {ini_path}')
+                    return None
+
+            # key verification
+            if not config.has_option(section, key):
+                self.log_error(f'Key "{key}" not found in section "{section}" in {ini_path}')
+                return None
+
+            value = config.get(section, key)
+            logger().debug(f'INI value retrieved: "{value}"')
+            return value
+
+        except Exception as e:
+            self.log_error(f'Error reading INI "{ini_path}": {str(e)}')
+            return None
