@@ -6436,6 +6436,8 @@ class WebappInternal(Base):
                             self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
 
                         cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
+                        if not cell_filled:
+                            self.search_for_errors()
 
 
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
@@ -6476,7 +6478,7 @@ class WebappInternal(Base):
                 return True
 
 
-    def process_input_element(self, field, selenium_input, user_value, value_type, layers):
+    def process_input_element(self, field, selenium_input, user_value, value_type, initial_layers):
         """
         Inputs the value in opened grid cell.
 
@@ -6485,7 +6487,7 @@ class WebappInternal(Base):
         :param selenium_input: input element
         :param user_value: value to be inputted
         :param value_type: type of the value (N, C)
-        :param layers: current number of layers
+        :param initial_layers: initial number of layers on screen
         :return:
         """
         logger().info(f"Sending keys: {user_value}")
@@ -6506,6 +6508,10 @@ class WebappInternal(Base):
         if check_mask and value_type == 'N':
             user_value = self.check_value_type(user_value, value_type)
 
+        #get length of field before input
+        lenfield = len(self.get_element_value(selenium_input()))
+        len_user_value = len(user_value)
+
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
 
@@ -6513,10 +6519,12 @@ class WebappInternal(Base):
         if memo_field:
             self.SetButton('Ok')
 
+        opened_cell = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                  position= initial_layers + 1, timeout=5,
+                                                  presence=True, main_container='body', check_error=False)
 
-        current_layer = self.check_layers(layers_selector)
-
-        if current_layer > layers:
+        if opened_cell and lenfield > len_user_value:
+            current_layer = self.check_layers(layers_selector)
             self.close_cell(field, current_layer, element=selenium_input())
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
@@ -6536,6 +6544,9 @@ class WebappInternal(Base):
         column_name = field_to_label[column].lower().strip() if '_' in column else column.lower().strip()
         column_cell = None
         page_down_count = 0
+        row_element = None
+
+        logger().debug(f"Getting grid cell: Column '{column}'")
 
         try:
             endtime = time.time() + self.config.time_out
@@ -6544,46 +6555,41 @@ class WebappInternal(Base):
                 # get grids on the screen
                 grid = self.get_grid(grid_number=grid_number)
 
-                # get rows of the grid
+                # get all rows from the grid
                 rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
 
-                # check if the specified row exists and row is valid
-                if (len(rows) < row or row < 0):
-                    self.log_error(f"Couldn't select the specified row: {row + 1}")
-                    return None
-
                 if rows:
-
-                    selected_row = self.get_selected_row(rows)
-
-                    # if shoewed lines is less than the row number, check obscured lines
-                    if len(rows) <= row:
-                        grid_lenght = self.lenght_grid_lines(grid)
-                        if grid_lenght > row:
-                            row_element, page_down_count = self.get_obscure_gridline(grid, row)
-                    elif row is not None:
-                        row_element = rows[row]
-                    elif selected_row:
-                        row_element = selected_row
+                    if row is not None:
+                        # if shoewed lines is less than the row number, check obscured lines
+                        if len(rows) <= row:
+                            grid_lenght = self.lenght_grid_lines(grid)
+                            if grid_lenght > row:
+                                row_element, page_down_count = self.get_obscure_gridline(grid, row)
+                        else:
+                            row_element = rows[row]
                     else:
-                        row_element = next(iter(rows), None)
+                        row_element = self.get_selected_row(rows) or next(iter(rows), None)
 
                     columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
                     grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
 
-                    if grid_number < len(grid_header_index) and column_name in grid_header_index[grid_number]:
-                        column_index = grid_header_index[grid_number][column_name]
+                    # get column index from header index
+                    if grid_header_index and column_name in grid_header_index[0]:
+                        column_index = grid_header_index[0][column_name]
                         column_cell = columns_element[column_index]
 
-            return column_cell, page_down_count
+            if (row is not None) and (row > len(rows) - 1 or row < 0) and not column_cell:
+                self.log_error("Couldn't select the specified row: {row + 1}")
 
             if column_index is None:
                 logger().debug(f"Couldn't find column '{column}' in grid {grid_number + 1}")
-                return None
+                return None, page_down_count
+
+            return column_cell, page_down_count
 
         except Exception as e:
-            logger().debug(f"Couldn't find column '{column}' in grid {grid_number}. Error: {str(e)}")
-            return None
+            logger().debug(f"Couldn't find column '{column}' in grid {grid_number + 1}. Error: {str(e)}")
+            return None, page_down_count
 
     def select_grid_cell(self, grid_cell):
         try:
@@ -6734,9 +6740,9 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 3
         while (time.time() < endtime and current_layer == layer):
             logger().debug('Trying close cell in grid!')
-            
+
             self.toggle_cell(element)
-            
+
             if(field[1] == True):
                 break
 
@@ -6747,11 +6753,11 @@ class WebappInternal(Base):
     def toggle_cell(self, element):
         try:
             ActionChains(self.driver).move_to_element(element).send_keys(Keys.ENTER).perform()
-        except WebDriverException:
+        except Exception:
             try:
                 self.send_keys(element, Keys.ENTER)
-            except WebDriverException:
-                logger().debug("Couldn't send ENTER key to close grid cell.")
+            except Exception as e:
+                logger().debug(f"Couldn't send ENTER key to close grid cell. Exception: {e}")
 
     def select_cell(self, element):
 
@@ -6885,7 +6891,7 @@ class WebappInternal(Base):
             if get_value:
                 return text
 
-            field_name = f"({field[0]}, {field_column})"
+        field_name = f"({row}, {field_column})"
 
         for i in range(down_loop):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
