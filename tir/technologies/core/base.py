@@ -1273,7 +1273,7 @@ class Base(unittest.TestCase):
 
         get_url = False
         start_selector = ".po-page-login-info-field .po-input, #fieldsetStartProg, [name=cGetUser], [name=cUser]"
-        wait_timeout = 10
+        wait_timeout = 25
 
         url = self.config.url if not url else url
 
