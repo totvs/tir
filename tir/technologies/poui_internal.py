@@ -27,6 +27,18 @@ from tir.technologies.core.logging_config import logger
 import pathlib
 import json
 
+def count_time(func):
+    """
+    Decorator to count the time spent in a function.
+    """
+    def wrapper(*args, **kwargs):
+        starttime = time.time()
+        result = func(*args, **kwargs)
+        endtime = time.time()
+        logger().debug(f"Time spent in {func.__name__}: {endtime - starttime}")
+        return result
+    return wrapper
+
 class PouiInternal(Base):
     """
     Internal implementation of POUI class.
@@ -3711,12 +3723,15 @@ class PouiInternal(Base):
 
         term = 'po-icon'
 
+        if class_name:
+            term += ' i.' + '.'.join(class_name.split(' '))
+
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        logger().info(f"Clicking on Icon: {label or class_name}")
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-
-            logger().info("Clicking on Icon")
 
             po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                      main_container='body')
@@ -3750,7 +3765,7 @@ class PouiInternal(Base):
         """
 
         icon_classes = list(filter(lambda x: 
-            class_name.lower().strip() in ' '.join(x.select('i')[0].get('class', [])),
+            class_name.lower().strip() in ' '.join(x.get('class', [])),
                                      elements))
         if icon_classes:
             return icon_classes[position]
