@@ -2066,7 +2066,7 @@ class Poui():
         """
         self.__poui.click_look_up(label, search_value)
 
-    def Switch(self, label='', position=1):
+    def Switch(self, label='', value=True, position=1):
         """
 
         Click on POUI Switch component
@@ -2081,7 +2081,8 @@ class Poui():
         >>> # Call the method:
         >>> oHelper.Switch(label='Codigo')
         >>> oHelper.Switch(label='Ativo', position=2)
+        >>> oHelper.Switch(label='Ver Sld Alt', value=False)
 
         """
 
-        self.__poui.switch(label=label, position=position)
+        self.__poui.switch(label=label, value=value, position=position)

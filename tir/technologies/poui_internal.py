@@ -850,20 +850,21 @@ class PouiInternal(Base):
             while(time.time() < endtime and not labels_filtred):
                 container = self.get_current_DOM(twebview=True)
                 labels = container.select(label_term)
-                labels_displayed = [x for x in labels if self.element_is_displayed(x)]
-                labels_filtred  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)), x.text) ,labels_displayed))
+                labels_filtred  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)), x.text) , labels))
 
                 if not labels_filtred:
                     labels_filtred = list(filter(lambda x: hasattr(x, "text")  and
-                                  re.sub(regex, '', x.text).lower().strip().startswith(field), labels_displayed))
+                                  re.sub(regex, '', x.text).lower().strip().startswith(field), labels))
                     if len(labels_filtred) > 1:
                         labels_filtred = list(filter(lambda x: hasattr(x, "text") and
-                                    re.sub(regex, '', x.text).lower().strip() == (field), labels_displayed))
+                                    re.sub(regex, '', x.text).lower().strip() == (field), labels))
 
             labels_filtered_th = list(filter(lambda x: 'th' not in self.element_name(x.parent), labels_filtred))
 
-            if labels_filtered_th and len(labels_filtered_th) -1 >= position:
-                label = labels_filtered_th[position]
+            labels_displayed = [x for x in labels_filtered_th if self.element_is_displayed(x)]
+
+            if labels_displayed and len(labels_displayed) -1 >= position:
+                label = labels_displayed[position]
 
             if not label:
                 self.log_error(f"Label: '{field}'' wasn't found.")
@@ -897,6 +898,7 @@ class PouiInternal(Base):
         >>> # Calling the method
         >>> self.get_closer_element_by_location(label_pos, elements_list, direction=None)
         """
+        elem = []
 
         # Get container size
         iframe_size = self.get_iframe_size()
@@ -4182,22 +4184,29 @@ class PouiInternal(Base):
         switch_term = 'po-switch'
         label = label.strip().lower()
         success = False
+        switch_bs_component = []
 
         self.wait_element(term=switch_term)
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not success):
 
-            switch_bs_component = self.search_element_position(label, position, input_selector=switch_term)
+            if not switch_bs_component:
+                switch_bs_component = self.search_element_position(label, position, input_selector=switch_term)
 
             if switch_bs_component:
+                switch_container_component = switch_bs_component.select_one('.po-switch-container')
+
                 switch_element = lambda : self.soup_to_selenium(switch_bs_component, twebview=True)
 
-                switch_status_before = switch_element()
+                switch_status = lambda : self.soup_to_selenium(switch_container_component,
+                                                                      twebview=True).get_attribute('aria-checked')
+
+                switch_status_before = switch_status()
 
                 self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
 
-                switch_status_after = switch_element().
+                switch_status_after = switch_status()
 
                 success = switch_status_after.lower() == str(value).lower()
 
