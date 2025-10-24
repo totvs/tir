@@ -826,7 +826,7 @@ class PouiInternal(Base):
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
         return language
 
-    def search_element_position(self, field, position=1, input_field=True, direction=None):
+    def search_element_position(self, field, position=1, input_field=True, direction=None, input_selector=''):
         """
         [Internal]
         Usage:
@@ -836,55 +836,131 @@ class PouiInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
-        term=".tget, .tcombobox, .tmultiget"
         position-=1
+        regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
+        field = re.sub(regex, '', field).lower().strip()
+        term = input_selector if input_selector else ".dict-tget, .dict-tcombobox, .dict-tmultiget"
+        label_term = "label, span"
+        labels_filtred = []
 
         if not input_field:
             term=".tsay"
 
         try:
-            while( time.time() < endtime and not label ):
-                container = self.get_current_container()
-                labels = container.select("label")
-                labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
-                if labels_list_filtered and len(labels_list_filtered) -1 >= position:
-                    label = labels_list_filtered[position]
+            while(time.time() < endtime and not labels_filtred):
+                container = self.get_current_DOM(twebview=True)
+                labels = container.select(label_term)
+                labels_displayed = [x for x in labels if self.element_is_displayed(x)]
+                labels_filtred  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)), x.text) ,labels_displayed))
+
+                if not labels_filtred:
+                    labels_filtred = list(filter(lambda x: hasattr(x, "text")  and
+                                  re.sub(regex, '', x.text).lower().strip().startswith(field), labels_displayed))
+                    if len(labels_filtred) > 1:
+                        labels_filtred = list(filter(lambda x: hasattr(x, "text") and
+                                    re.sub(regex, '', x.text).lower().strip() == (field), labels_displayed))
+
+            labels_filtered_th = list(filter(lambda x: 'th' not in self.element_name(x.parent), labels_filtred))
+
+            if labels_filtered_th and len(labels_filtered_th) -1 >= position:
+                label = labels_filtered_th[position]
 
             if not label:
                 self.log_error(f"Label: '{field}'' wasn't found.")
 
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
-            
-            container_size = self.get_element_size(container['id'])
-            # The safe values add to postion of element
-            width_safe, height_safe = self.width_height(container_size)
 
-            label_s  = lambda:self.soup_to_selenium(label)
-            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            elements_candidates = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                 main_container='body', twebview=True)
 
-            if not input_field:
-                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+            nearest_element = self.get_closest_element(label, elements_candidates,
+                                                       direction, input_field, twebview=True)
 
-            position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
-            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
-            if distance:
-                elem          = min(distance, key = lambda x: x[1])
-                elem          = list_in_range[elem[0]]
-
-            if not elem:
-                self.log_error(f"Label '{field}' wasn't found")
-            return elem
+            return nearest_element
             
         except AssertionError as error:
             raise error
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
+
+    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True):
+        """Find the closest element by term from a reference element using euclidean distance (location x,y).
+
+        :param ref_element: The reference element to calculate the distance from.
+        :type ref_element: bs4.element.Tag
+        :param direction: The direction to filter the elements. Options are 'right', 'down
+
+        [Internal]
+        Usage:
+        >>> # Calling the method
+        >>> self.get_closer_element_by_location(label_pos, elements_list, direction=None)
+        """
+
+        # Get container size
+        iframe_size = self.get_iframe_size()
+
+        # The safe values add to postion of element
+        width_safe, height_safe = self.width_height(iframe_size)
+
+        # Get location from element reference
+        xy_ref_element = self.get_position_from_bs_element(ref_element)
+
+        list_in_range = [
+            x for x in element_list
+            if self.element_is_displayed(x) and (
+                    'readonly' not in self.soup_to_selenium(x, twebview=True).get_attribute("class") or
+                    'readonly focus' in self.soup_to_selenium(x, twebview=True).get_attribute("class"))
+        ]
+
+        if not input_field:
+            list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+
+        displayeds_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
+
+        position_list = list(map(lambda x: (x[0], self.get_position_from_bs_element(x[1])), enumerate(displayeds_in_range)))
+        position_list = self.filter_by_direction(xy_ref_element, width_safe, height_safe, position_list, direction)
+        distance      = self.get_distance_by_direction(xy_ref_element, position_list, direction)
+        if distance:
+            elem          = min(distance, key = lambda x: x[1])
+            elem          = list_in_range[elem[0]]
+
+        if not elem:
+            self.log_error(f"Label '{field}' wasn't found")
+        return elem
+
+
+    def get_iframe_size(self):
+        """
+        [Internal]
+        Gets the size of the current iframe when no container ID is available.
+
+        :return: Dictionary with width and height of the iframe
+        :rtype: dict
+        """
+        try:
+            # Tenta obter o tamanho do iframe atual
+            iframe_size = self.driver.execute_script("""
+                var iframe = window.frameElement;
+                if (iframe) {
+                    return {
+                        'width': iframe.offsetWidth || iframe.clientWidth,
+                        'height': iframe.offsetHeight || iframe.clientHeight
+                    };
+                } else {
+                    // Se não estiver em iframe, usa o tamanho da janela
+                    return {
+                        'width': window.innerWidth || document.documentElement.clientWidth,
+                        'height': window.innerHeight || document.documentElement.clientHeight
+                    };
+                }
+            """)
+            return iframe_size
+        except Exception:
+            # Fallback para tamanho padrão se houver erro
+            return None
+
 
     def width_height(self, container_size):
 
@@ -901,14 +977,17 @@ class PouiInternal(Base):
         return (width_safe, height_safe)
 
 
-    def get_position_from_bs_element(self,element):
+    def get_position_from_bs_element(self,element, twebview=True):
         """
         [Internal]
 
         """
-        selenium_element = self.soup_to_selenium(element)
-        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
-        return position
+        try:
+            selenium_element = self.soup_to_selenium(element, twebview=twebview)
+            position = selenium_element.location
+            return position
+        except Exception as e:
+            logger().exception(str(e))
 
     def get_distance(self,label_pos,element_pos):
         """
@@ -2516,7 +2595,7 @@ class PouiInternal(Base):
 
         """
         self.switch_to_iframe()
-        element_selenium = self.soup_to_selenium(element)
+        element_selenium = self.soup_to_selenium(element, twebview=True)
         if element_selenium:
             return element_selenium.is_displayed()
         else:
@@ -4081,3 +4160,66 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+
+
+    def switch(self, label='', value=True , position=1):
+        """
+
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param value: Desired value of the Switch component. - **Default:** True
+        :type value: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        """
+
+        logger().info(f"Clicking on Switch: {label}")
+
+        switch_term = 'po-switch'
+        label = label.strip().lower()
+        success = False
+
+        self.wait_element(term=switch_term)
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            switch_bs_component = self.search_element_position(label, position, input_selector=switch_term)
+
+            if switch_bs_component:
+                switch_element = lambda : self.soup_to_selenium(switch_bs_component, twebview=True)
+
+                switch_status_before = switch_element()
+
+                self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
+
+                switch_status_after = switch_element().
+
+                success = switch_status_after.lower() == str(value).lower()
+
+        if not success:
+            self.log_error(f"Couldn't find element {label}")
+
+
+    def get_current_container(self):
+        """
+        [Internal]
+
+        An internal method designed to get the current container.
+        Returns the BeautifulSoup object that represents this container or NONE if nothing is found.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_current_container()
+        """
+        soup = self.get_current_DOM()
+        containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
+        return next(iter(containers), None)
