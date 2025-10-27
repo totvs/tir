@@ -7,7 +7,7 @@ import random
 import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -2369,10 +2369,7 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> filtered_elements = self.filter_by_tooltip_value(my_element_list, "Edit")
         """
-
-        for element in element_list:
-            if self.check_element_tooltip(element, expected_text, contains=True):
-                return element
+        return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
 
     def check_element_tooltip(self, element, expected_text, contains=False):
         """
@@ -2396,25 +2393,41 @@ class PouiInternal(Base):
         >>> # Call the method:
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
-
+        
         has_text = False
+        expected_text = re.sub(' ', '', expected_text.lower())
+        element_function = False
 
-        element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-        self.switch_to_iframe()
-        ActionChains(self.driver).move_to_element(element_function()).perform()
-        tooltips = self.driver.find_elements(By.CSS_SELECTOR, "[class*=po-tooltip]")
+        if self.webapp_shadowroot():
+            tooltip_term = 'wa-tooltip, .po-tooltip'
+            if type(element) == Tag:
+                element = self.soup_to_selenium(element)
+            if self.execute_js_selector('button', element):
+                element_function = lambda: next(iter(self.execute_js_selector('button', element)))
+            elif element:
+                element_function = lambda: element
+            if not element:
+                return False
+            try:
+                ActionChains(self.driver).move_to_element(element_function().find_element(By.TAG_NAME, "input")).perform()
+            except:
+                ActionChains(self.driver).move_to_element(element_function()).perform()
+        else:
+            tooltip_term = '.ttooltip'
+            element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
 
+        time.sleep(2)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, tooltip_term)
         if not tooltips:
-            tooltips = self.get_current_DOM().select("[class*=po-tooltip]")
-
+            tooltips = self.get_current_DOM().select(tooltip_term)
         if tooltips:
-            tooltips = list(filter(lambda x: x.is_displayed(), tooltips))
-
-            if tooltips:
-                has_text = (len(list(
-                    filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (
-                        tooltips[0].text.lower() == expected_text.lower()))
-
+            has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
+        if element_function:
+            try:
+                self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
+            except:
+                pass
         return has_text
 
     def assert_result(self, expected, script_message):
@@ -3733,26 +3746,20 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container='body')
+            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
 
-                if label and class_name:
-                    class_element = self.return_icon_class(class_name, po_icon_filtered, position)
-                    element = class_element if self.check_element_tooltip(class_element, label, contains=True) else None
-                elif class_name:
-                    element = self.return_icon_class(class_name, po_icon_filtered, position)
-                else:
-                    element = self.filter_by_tooltip_value(po_icon_filtered, label)
+                if label:
+                    po_icon_filtered = self.filter_by_tooltip_value(po_icon_filtered, label)
 
-                if element:
-
+                if po_icon_filtered:
+                    element = po_icon_filtered[position]
                     self.poui_click(element)
 
         if not element:
-            self.log_error(f"Element '{element}' doesn't found!")
+            self.log_error(f"Element '{label or class_name}' doesn't found!")
 
     def return_icon_class(self, class_name, elements, position):
         """
@@ -4094,3 +4101,29 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+
+    def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
+            """
+            Execute a javascript selector in a selenium object and return the element or elements found
+
+            :param term: Css selector
+            :param objects: Selenium object
+            :param get_all: True if you want all elements found or False if you want only the first element found
+            :param shadow_root: True if the element is in a shadow root 
+            :return: Selenium object or list of selenium objects
+            """
+
+            elements = None
+            selector_prefix = "arguments[0].shadowRoot." if shadow_root else "arguments[0]."
+
+            if get_all:
+                script = f"return {selector_prefix}querySelectorAll('{term}')"
+            else:
+                script = f"return {selector_prefix}querySelector('{term}')"
+
+            try:
+                elements = self.driver.execute_script(script, objects)
+            except:
+                pass
+                
+            return elements if elements else None
