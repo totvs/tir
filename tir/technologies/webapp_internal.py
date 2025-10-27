@@ -88,15 +88,6 @@ class WebappInternal(Base):
         except WebDriverException as e:
             webdriver_exception = e
 
-        self.containers_selectors = {
-            "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
-            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
-            "ClickImage": "wa-dialog, .tmodaldialog",
-            "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
-            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
-        }
-
         self.grid_selectors = {
             "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse, .dict-tsbrowse"
         }
@@ -110,7 +101,14 @@ class WebappInternal(Base):
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
-
+        self.containers_selectors = {
+            "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
+            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
+            "ClickImage": "wa-dialog, .tmodaldialog",
+            "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
+            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
+        }
         self.blocker = None
         self.parameters = []
         self.procedures = []
@@ -1450,7 +1448,7 @@ class WebappInternal(Base):
 
         tmodaldialog_list = []
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 2
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -1513,7 +1511,7 @@ class WebappInternal(Base):
 
         uidialog_list = []
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 2
         while(time.time() < endtime and not uidialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -1565,7 +1563,7 @@ class WebappInternal(Base):
 
         tmodaldialog_list = []
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + self.config.time_out / 3
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -2633,6 +2631,7 @@ class WebappInternal(Base):
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
 
             container_size = self.get_element_size(container['id'])
+
             # The safe values add to postion of element
             width_safe, height_safe = self.width_height(container_size)
 
@@ -2805,7 +2804,8 @@ class WebappInternal(Base):
 
         elif direction.lower() == 'left':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['x'] + width_safe <= xy_label['x']) and (xy_elem[1]['y'] + height_safe  >= xy_label['y']), position_list))
+                lambda xy_elem: (xy_elem[1]['x'] + width_safe <= xy_label['x']) and
+                                (xy_elem[1]['y'] + height_safe  >= xy_label['y']), position_list))
 
 
 

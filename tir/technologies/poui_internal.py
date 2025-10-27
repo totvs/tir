@@ -7,7 +7,7 @@ import random
 import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -69,8 +69,8 @@ class PouiInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": ".tmodaldialog",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog",
+            "GetCurrentContainer": "po-page-default, po-page-detail, po-page-edit ,po-page-list ,po-page-slide",
+            "AllContainers": "body, .tmodaldialog, .ui-dialog, wa-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
@@ -848,7 +848,7 @@ class PouiInternal(Base):
 
         try:
             while(time.time() < endtime and not labels_filtred):
-                container = self.get_current_DOM(twebview=True)
+                container = self.get_current_container()
                 labels = container.select(label_term)
                 labels_filtred  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)), x.text) , labels))
 
@@ -991,7 +991,7 @@ class PouiInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
-    def get_distance(self,label_pos,element_pos):
+    def get_distance(self, label_pos, element_pos):
         """
         [internal]
 
@@ -1026,27 +1026,34 @@ class PouiInternal(Base):
 
         return (y_element['y'] - y_label['y'])
 
+
     def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction):
         """
         [Internal]
         
         """
+        if direction == False:
+            return position_list
 
-        if not direction:
-
-            return list(filter(lambda xy_elem: (
-                        xy_elem[1]['y'] + width_safe >= xy_label['y'] and xy_elem[1]['x'] + height_safe >= xy_label['x']),
-                        position_list))
+        elif direction is None:
+            return list(filter(lambda xy_elem: (xy_elem[1]['y'] + height_safe >= xy_label['y'] and
+                                                xy_elem[1]['x'] + width_safe >= xy_label['x']),
+                               position_list))
 
         elif direction.lower() == 'right':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and (xy_elem[1]['y'] >= xy_label['y'] - height_safe and xy_elem[1]['y'] <= xy_label[
-                    'y'] + height_safe), position_list))
-        
+                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and
+                                (xy_elem[1]['y'] >= xy_label['y'] - height_safe and
+                                 xy_elem[1]['y'] <= xy_label['y'] + height_safe),
+                position_list))
+
         elif direction.lower() == 'down':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
-                               xy_elem[1]['x'] - width_safe <= xy_label['x']), position_list))
+                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and
+                                (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
+                                 xy_elem[1]['x'] - width_safe <= xy_label['x']),
+                position_list))
+
 
     def get_distance_by_direction(self, xy_label, position_list, direction):
         
@@ -2591,13 +2598,19 @@ class PouiInternal(Base):
         """
         return list(filter(lambda x: self.element_is_displayed(x), elements))
 
+
     def element_is_displayed(self, element):
         """
         [Internal]
 
         """
         self.switch_to_iframe()
-        element_selenium = self.soup_to_selenium(element, twebview=True)
+
+        if type(element) == Tag:
+            element_selenium = self.soup_to_selenium(element, twebview=True)
+        else:
+            element_selenium = element
+
         if element_selenium:
             return element_selenium.is_displayed()
         else:
@@ -4192,27 +4205,46 @@ class PouiInternal(Base):
         while (time.time() < endtime and not success):
 
             if not switch_bs_component:
-                switch_bs_component = self.search_element_position(label, position, input_selector=switch_term)
+                switch_bs_component = self.search_element_position(label, position,
+                                                                   input_selector=switch_term, direction=False)
 
             if switch_bs_component:
-                switch_container_component = switch_bs_component.select_one('.po-switch-container')
-
                 switch_element = lambda : self.soup_to_selenium(switch_bs_component, twebview=True)
 
-                switch_status = lambda : self.soup_to_selenium(switch_container_component,
-                                                                      twebview=True).get_attribute('aria-checked')
+                switch_value = lambda : self.get_switch_value(switch_bs_component)
 
-                switch_status_before = switch_status()
+                value_success = lambda: switch_value() == value
 
-                self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
-
-                switch_status_after = switch_status()
-
-                success = switch_status_after.lower() == str(value).lower()
+                if not value_success():
+                    self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
+                else:
+                    success = True
 
         if not success:
             self.log_error(f"Couldn't find element {label}")
 
+
+    def get_switch_value(self, switch_component):
+        """
+
+        Get the current value of a POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param switch_component: BeautifulSoup object representing the switch component
+        :type switch_component: BeautifulSoup object
+        :return: Current value of the switch (True/False)
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> switch_value = self.get_switch_value(switch_component)
+        """
+        switch_container = switch_component.select_one('.po-switch-container')
+        if switch_container:
+            switch_status = self.soup_to_selenium(switch_container, twebview=True).get_attribute('aria-checked')
+            return switch_status.lower() == 'true'
+        return None
 
     def get_current_container(self):
         """
@@ -4229,6 +4261,8 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> container = self.get_current_container()
         """
-        soup = self.get_current_DOM()
-        containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
-        return next(iter(containers), None)
+        soup = self.get_current_DOM(twebview=True)
+        containers = soup.select(self.containers_selectors["GetCurrentContainer"])
+        displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
+        sorted_containers = self.zindex_sort(displayeds_containers, True)
+        return next(iter(sorted_containers), None)
