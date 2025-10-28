@@ -2066,7 +2066,7 @@ class Poui():
         """
         self.__poui.click_look_up(label, search_value)
 
-    def Switch(self, label='', value=True, position=1):
+    def ClickSwitch(self, label='', value=True, position=1):
         """
 
         Click on POUI Switch component
@@ -2085,4 +2085,4 @@ class Poui():
 
         """
 
-        self.__poui.switch(label=label, value=value, position=position)
+        self.__poui.click_switch(label=label, value=value, position=position)

@@ -88,6 +88,15 @@ class WebappInternal(Base):
         except WebDriverException as e:
             webdriver_exception = e
 
+        self.containers_selectors = {
+            "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
+            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
+            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
+            "ClickImage": "wa-dialog, .tmodaldialog",
+            "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
+            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
+        }
+
         self.grid_selectors = {
             "new_web_app": ".dict-tgetdados, .dict-tcbrowse, .dict-msbrgetdbase, .dict-tgrid, .dict-brgetddb, .dict-msselbr, .dict-twbrowse, .dict-tsbrowse"
         }
@@ -101,14 +110,6 @@ class WebappInternal(Base):
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
-        self.containers_selectors = {
-            "SetButton" : ".tmodaldialog,.ui-dialog, wa-dialog",
-            "GetCurrentContainer": ".tmodaldialog, wa-dialog, wa-message-box",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog,wa-dialog",
-            "ClickImage": "wa-dialog, .tmodaldialog",
-            "BlockerContainers": ".tmodaldialog,.ui-dialog, wa-dialog",
-            "Containers": ".tmodaldialog,.ui-dialog, wa-dialog"
-        }
         self.blocker = None
         self.parameters = []
         self.procedures = []
@@ -1448,7 +1449,7 @@ class WebappInternal(Base):
 
         tmodaldialog_list = []
 
-        endtime = time.time() + self.config.time_out / 2
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -1511,7 +1512,7 @@ class WebappInternal(Base):
 
         uidialog_list = []
 
-        endtime = time.time() + self.config.time_out / 2
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not uidialog_list):
             try:
                 soup = self.get_current_DOM()
@@ -1563,7 +1564,7 @@ class WebappInternal(Base):
 
         tmodaldialog_list = []
 
-        endtime = time.time() + self.config.time_out / 3
+        endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not tmodaldialog_list):
             try:
                 soup = self.get_current_DOM()

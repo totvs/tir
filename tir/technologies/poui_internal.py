@@ -4177,7 +4177,7 @@ class PouiInternal(Base):
         return success
 
 
-    def switch(self, label='', value=True , position=1):
+    def click_switch(self, label='', value=True , position=1):
         """
 
         Click on POUI Switch component
