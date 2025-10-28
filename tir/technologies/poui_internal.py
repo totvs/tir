@@ -4209,13 +4209,10 @@ class PouiInternal(Base):
                                                                    input_selector=switch_term, direction=False)
 
             if switch_bs_component:
-                switch_element = lambda : self.soup_to_selenium(switch_bs_component, twebview=True)
+                toggle_container = switch_bs_component.select_one('.po-switch-container')
+                switch_element = lambda: self.soup_to_selenium(toggle_container or switch_bs_component, twebview=True)
 
-                switch_value = lambda : self.get_switch_value(switch_bs_component)
-
-                value_success = lambda: switch_value() == value
-
-                if not value_success():
+                if self.get_switch_value(switch_bs_component) != value:
                     self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
                 else:
                     success = True
