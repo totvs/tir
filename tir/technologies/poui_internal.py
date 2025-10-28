@@ -3254,6 +3254,10 @@ class PouiInternal(Base):
                 po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
                     map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
                         po_input_filtered))))
+                
+                if not po_input_text:
+                    po_input_text = list(filter(lambda x: field.lower() in x.get('placeholder').lower()
+                                                    if x.get('placeholder') else None, po_input))
                 if po_input_text:
                     if len(po_input_text) >= position:
                         po_input_text = po_input_text[position]
