@@ -110,7 +110,6 @@ class WebappInternal(Base):
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
-
         self.blocker = None
         self.parameters = []
         self.procedures = []
@@ -2633,6 +2632,7 @@ class WebappInternal(Base):
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
 
             container_size = self.get_element_size(container['id'])
+
             # The safe values add to postion of element
             width_safe, height_safe = self.width_height(container_size)
 
@@ -2805,7 +2805,8 @@ class WebappInternal(Base):
 
         elif direction.lower() == 'left':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['x'] + width_safe <= xy_label['x']) and (xy_elem[1]['y'] + height_safe  >= xy_label['y']), position_list))
+                lambda xy_elem: (xy_elem[1]['x'] + width_safe <= xy_label['x']) and
+                                (xy_elem[1]['y'] + height_safe  >= xy_label['y']), position_list))
 
 
 

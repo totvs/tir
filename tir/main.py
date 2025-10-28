@@ -2065,3 +2065,24 @@ class Poui():
 
         """
         self.__poui.click_look_up(label, search_value)
+
+    def ClickSwitch(self, label='', value=True, position=1):
+        """
+
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+        >>> # Call the method:
+        >>> oHelper.Switch(label='Codigo')
+        >>> oHelper.Switch(label='Ativo', position=2)
+        >>> oHelper.Switch(label='Ver Sld Alt', value=False)
+
+        """
+
+        self.__poui.click_switch(label=label, value=value, position=position)
