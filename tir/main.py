@@ -2065,3 +2065,22 @@ class Poui():
 
         """
         self.__poui.click_look_up(label, search_value)
+
+    def ClickLink(self, text='', position=1, contains=False):
+        """
+        Component link.
+        https://po-ui.io/documentation/po-link?view=web
+
+        :param text: Link text that will be clicked
+        :type: str
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type: int
+        :param contains: When false, the text must be the same as the link; when true, the text must be contained within the link.
+        :type: bool
+
+        Usage:
+        >>> # Call the method:
+        >>> oHelper.ClickLink("PO Link")
+
+        """
+        self.__poui.click_link(text=text, position=position, contains=contains)

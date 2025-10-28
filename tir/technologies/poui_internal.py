@@ -4081,3 +4081,29 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+    
+    def click_link(self, text='', position=1, contains=False):
+        
+        logger().info(f"Clicking on Link: {text}")
+        
+        term = 'po-link'
+        text = text.strip().lower()
+        position -= 1
+        success = False
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            links = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
+            links = list(filter(lambda x: self.element_is_displayed(x), links))
+            links = list(filter(lambda x: text == x.text.strip().lower() if not contains else text in x.text.strip().lower(), links))
+
+            if links:
+                link = links[position]
+                link_child = link.find(True, recursive=False)
+                if link_child:
+                    link_child = self.soup_to_selenium(link_child)
+                    success = self.click(link_child)
+
+        if not success:
+            self.log_error(f"Couldn't find link: {text}")
