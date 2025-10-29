@@ -27,6 +27,18 @@ from tir.technologies.core.logging_config import logger
 import pathlib
 import json
 
+def count_time(func):
+    """
+    Decorator to count the time spent in a function.
+    """
+    def wrapper(*args, **kwargs):
+        starttime = time.time()
+        result = func(*args, **kwargs)
+        endtime = time.time()
+        logger().debug(f"Time spent in {func.__name__}: {endtime - starttime}")
+        return result
+    return wrapper
+
 class PouiInternal(Base):
     """
     Internal implementation of POUI class.
@@ -2445,10 +2457,7 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> filtered_elements = self.filter_by_tooltip_value(my_element_list, "Edit")
         """
-
-        for element in element_list:
-            if self.check_element_tooltip(element, expected_text, contains=True):
-                return element
+        return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
 
     def check_element_tooltip(self, element, expected_text, contains=False):
         """
@@ -2472,25 +2481,41 @@ class PouiInternal(Base):
         >>> # Call the method:
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
-
+        
         has_text = False
+        expected_text = re.sub(' ', '', expected_text.lower())
+        element_function = False
 
-        element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-        self.switch_to_iframe()
-        ActionChains(self.driver).move_to_element(element_function()).perform()
-        tooltips = self.driver.find_elements(By.CSS_SELECTOR, "[class*=po-tooltip]")
+        if self.webapp_shadowroot():
+            tooltip_term = 'wa-tooltip, .po-tooltip'
+            if type(element) == Tag:
+                element = self.soup_to_selenium(element)
+            if self.execute_js_selector('button', element):
+                element_function = lambda: self.execute_js_selector('button', element , get_all = False)
+            elif element:
+                element_function = lambda: element
+            if not element:
+                return False
+            try:
+                ActionChains(self.driver).move_to_element(element_function().find_element(By.TAG_NAME, "input")).perform()
+            except:
+                ActionChains(self.driver).move_to_element(element_function()).perform()
+        else:
+            tooltip_term = '.ttooltip'
+            element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
 
+        time.sleep(2)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, tooltip_term)
         if not tooltips:
-            tooltips = self.get_current_DOM().select("[class*=po-tooltip]")
-
+            tooltips = self.get_current_DOM().select(tooltip_term)
         if tooltips:
-            tooltips = list(filter(lambda x: x.is_displayed(), tooltips))
-
-            if tooltips:
-                has_text = (len(list(
-                    filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (
-                        tooltips[0].text.lower() == expected_text.lower()))
-
+            has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
+        if element_function:
+            try:
+                self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
+            except:
+                pass
         return has_text
 
     def assert_result(self, expected, script_message):
@@ -3807,39 +3832,34 @@ class PouiInternal(Base):
         position -= 1
         element = None
 
-        term = '[class*="po-icon"]'
+        term = 'po-icon'
+
+        if class_name:
+            term += ' i.' + '.'.join(class_name.split(' '))
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        logger().info(f"Clicking on Icon: {label or class_name}")
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            logger().info("Clicking on Icon")
-
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container='body')
+            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
 
-                if label and class_name:
-                    class_element = self.return_icon_class(class_name, po_icon_filtered)
-                    element = class_element if self.check_element_tooltip(class_element, label, contains=True) else None
-                elif class_name:
-                    element = self.return_icon_class(class_name, po_icon_filtered)
-                else:
-                    element = self.filter_by_tooltip_value(po_icon_filtered, label)
+                if label:
+                    po_icon_filtered = self.filter_by_tooltip_value(po_icon_filtered, label)
 
-                if element:
-                    if position > 0 and position >= len(element):
-                        element = element[position]
-
+                if po_icon_filtered:
+                    element = po_icon_filtered[position]
                     self.poui_click(element)
 
         if not element:
-            self.log_error(f"Element '{element}' doesn't found!")
+            self.log_error(f"Element '{label or class_name}' doesn't found!")
 
-    def return_icon_class(self, class_name, elements):
+    def return_icon_class(self, class_name, elements, position):
         """
 
         :param class_name: The POUI class name for icon
@@ -3849,11 +3869,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        icon_classes = list(filter(lambda x: any(
-            class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
+        icon_classes = list(filter(lambda x: 
+            class_name.lower().strip() in ' '.join(x.get('class', [])),
                                      elements))
         if icon_classes:
-            return next(iter(icon_classes))
+            return icon_classes[position]
 
     def click_avatar(self, position):
         """
@@ -4246,6 +4266,7 @@ class PouiInternal(Base):
             switch_status = self.soup_to_selenium(switch_container, twebview=True).get_attribute('aria-checked')
             return switch_status.lower() == 'true'
         return None
+
 
     def get_current_container(self):
         """
