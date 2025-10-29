@@ -2491,7 +2491,7 @@ class PouiInternal(Base):
             if type(element) == Tag:
                 element = self.soup_to_selenium(element)
             if self.execute_js_selector('button', element):
-                element_function = lambda: next(iter(self.execute_js_selector('button', element)))
+                element_function = lambda: self.execute_js_selector('button', element , get_all = False)
             elif element:
                 element_function = lambda: element
             if not element:
