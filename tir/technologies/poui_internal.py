@@ -1850,7 +1850,7 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
