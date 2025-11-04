@@ -4200,33 +4200,53 @@ class PouiInternal(Base):
 
         return success
     
-    def click_link(self, text='', position=1, contains=False):
+    def _click_link(self, text='', href='', position=1, contains=False) -> None:
+
+        logger().info(f"Clicking on Link: {text or href}")
         
-        logger().info(f"Clicking on Link: {text}")
-        
-        term = 'po-link'
+        term = "po-link"
         text = text.strip().lower()
+        href = href.strip().lower()
         position -= 1
         success = False
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not success):
+            links = []
+            links_filtered = []
 
             links = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
             links = list(filter(lambda x: self.element_is_displayed(x), links))
-            links = list(filter(lambda x: text == x.text.strip().lower() if not contains else text in x.text.strip().lower(), links))
 
-            if links:
-                link = links[position]
-                link_child = link.find(True, recursive=False)
-                if link_child:
-                    link_child = self.soup_to_selenium(link_child)
-                    success = self.send_action(action=self.click, element=lambda: link_child)
+            if text:
+                links_filtered = list(filter(lambda x: text == x.text.strip().lower() if not contains else 
+                                                       text in x.text.strip().lower()
+                                            , links))
+
+            if href:
+                if text:
+                    links = links_filtered
+
+                links_filtered = list(filter(lambda x: x.select_one('a').get('href') if x.select_one('a') else None
+                                            , links))
+                links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower() if not contains else 
+                                                       href in x.select_one('a').get('href').strip().lower()
+                                            , links_filtered))
+            
+            if links_filtered:
+                link = links_filtered[position]
+
+                if link.name == 'po-link':
+                    link = link.find(True, recursive=False)
+                
+                if link:
+                    link = self.soup_to_selenium(link)
+                    success = self.send_action(action=self.click, element=lambda: link, twebview=True)
 
         if not success:
             self.log_error(f"Couldn't find link: {text}")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, twebview=False):
         """
 
         Sends an action to element and compare it object state change.
@@ -4240,14 +4260,11 @@ class PouiInternal(Base):
         :return: True if there was a change in the object
         """
 
-        self.wait_blocker()
-
-        twebview = True if self.config.poui_login else False
+        if not twebview:
+            twebview = True if self.config.poui_login else False
 
         soup_before_event = self.get_current_DOM(twebview=twebview)
         soup_after_event = soup_before_event
-
-        self.wait_blocker()
 
         soup_select = None
 
@@ -4263,11 +4280,10 @@ class PouiInternal(Base):
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
                         action(element(), right_click=right_click)
-                        self.wait_blocker()
                 elif value:
                     action(element(), value)
                 elif element:
-                    self.set_element_focus(element())
+                    self.set_element_focus(element(), twebview=True)
                     action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
@@ -4297,115 +4313,6 @@ class PouiInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
         return soup_before_event != soup_after_event
-
-    def wait_blocker(self):
-        """
-        [Internal]
-
-        Wait blocker disappear
-
-        """
-
-        twebview = True if self.config.poui_login else False
-
-        logger().debug("Waiting blocker to continue...")
-        soup = None
-        result = True
-        endtime = time.time() + self.config.time_out / 2
-
-        while (time.time() < endtime and result):
-            blocker_container = None
-            blocker = None
-            soup = lambda: self.get_current_DOM(twebview=twebview)
-            blocker_container = lambda: self.blocker_containers(soup())
-
-            try:
-                if blocker_container():
-                    if self.webapp_shadowroot():
-                        blocker_container_soup = blocker_container()
-                        blocker_container = self.soup_to_selenium(blocker_container())
-                        blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
-                            blocker_container, 'get_property') else None
-                    else:
-                        blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
-                            'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
-                                blocker_container, 'attrs') else None
-            except:
-                pass
-
-            logger().debug(f'Blocker status: {blocker}')
-
-            if blocker:
-                result = True
-            else:
-                self.blocker = None
-                return False
-
-        if time.time() > endtime:
-            self.check_blocked_container(blocker_container_soup)
-
-        return result
-
-    def blocker_containers(self, soup):
-        """
-        Return The container index by z-index and filter if it is displayed
-
-        :param soup: soup object
-        :return: The container index by z-index and filter if it is displayed
-        """
-
-        try:
-            containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
-
-            if containers:
-                containers_filtered = list(filter(lambda x: self.element_is_displayed(x), containers))
-                if containers_filtered:
-                    return next(iter(containers_filtered), None)
-                else:
-                    return None
-            else:
-                return None
-
-        except AttributeError as e:
-            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception (AttributeError)\n {str(e)}")
-        except Exception as e:
-            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
-
-    def check_blocked_container(self, blocker_container_soup):
-        """
-
-        :return:
-        """
-
-        try:
-
-            if hasattr(blocker_container_soup, 'attrs'):
-                blocker_container_soup_info = str(blocker_container_soup.attrs)
-
-                if hasattr(blocker_container_soup, 'id'):
-                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
-
-                if hasattr(blocker_container_soup, 'title'):
-                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
-
-            else:
-                blocker_container_soup_info = blocker_container_soup[:1000]
-
-            logger().debug(f'wait_blocker timeout | blocker container: {str(blocker_container_soup_info)}')
-
-            soup = lambda: self.get_current_DOM()
-
-            containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
-
-            for container in containers:
-                blocked = hasattr(container, 'attrs') and 'blocked' in container.attrs
-
-                logger().debug(
-                    f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
-                if blocked:
-                    self.blocker = blocked
-        except:
-            pass
 
     def get_soup_select(self, selector):
         """
