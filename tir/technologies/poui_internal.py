@@ -4416,3 +4416,29 @@ class PouiInternal(Base):
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
         return next(iter(sorted_containers), None)
+
+
+    def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
+            """
+            Execute a javascript selector in a selenium object and return the element or elements found
+            :param term: Css selector
+            :param objects: Selenium object
+            :param get_all: True if you want all elements found or False if you want only the first element found
+            :param shadow_root: True if the element is in a shadow root 
+            :return: Selenium object or list of selenium objects
+            """
+
+            elements = None
+            selector_prefix = "arguments[0].shadowRoot." if shadow_root else "arguments[0]."
+
+            if get_all:
+                script = f"return {selector_prefix}querySelectorAll('{term}')"
+            else:
+                script = f"return {selector_prefix}querySelector('{term}')"
+
+            try:
+                elements = self.driver.execute_script(script, objects)
+            except:
+                pass
+
+            return elements if elements else None
