@@ -4205,8 +4205,8 @@ class PouiInternal(Base):
         logger().info(f"Clicking on Link: {text or href}")
         
         term = "po-link"
-        text = text.strip().lower()
-        href = href.strip().lower()
+        text = text.strip().lower() if text else ''
+        href = href.strip().lower() if href else ''
         position -= 1
         success = False
 
