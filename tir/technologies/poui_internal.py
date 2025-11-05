@@ -4233,7 +4233,7 @@ class PouiInternal(Base):
                                                        href in x.select_one('a').get('href').strip().lower()
                                             , links_filtered))
             
-            if links_filtered:
+            if links_filtered and 0 <= position < len(links_filtered):
                 link = links_filtered[position]
 
                 if link.name == 'po-link':
