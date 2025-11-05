@@ -3576,7 +3576,7 @@ class WebappInternal(Base):
             
         endtime = time.time() + timeout
 
-        logger().debug("Startin coverage.")
+        logger().debug("Starting coverage.")
 
         while not coverage_finished:
 
@@ -3610,13 +3610,14 @@ class WebappInternal(Base):
                 coverage_finished = current_layers >= self.check_layers('wa-dialog')
 
             if not new_modal and program_screen:
-                logger().debug("Coverage Screen not found, but fineshed")
+                logger().debug("Coverage Screen not found, finishing coverage.")
                 coverage_finished = True
 
             if coverage_finished:
                 logger().debug("Coverage finished.")
                 
             time.sleep(1)
+
 
     def click_button_finish(self, click_counter=None):
         """
