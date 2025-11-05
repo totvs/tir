@@ -4244,7 +4244,7 @@ class PouiInternal(Base):
                     success = self.send_action(action=self.click, element=lambda: link, twebview=True)
 
         if not success:
-            self.log_error(f"Couldn't find link: {text}")
+            self.log_error(f"Couldn't find link: {text or href}")
 
     def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, twebview=False):
         """
