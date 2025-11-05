@@ -3594,16 +3594,25 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('q').key_up(Keys.CONTROL).perform()
                 element = self.wait_element_timeout(term=self.language.finish, scrap_type=enum.ScrapType.MIXED,
                                                     optional_term=optional_term, timeout=5, step=1, main_container="body", check_error=False)
-                
+                if element:
+                    current_layers = self.check_layers('wa-dialog')
+                    self.SetButton(self.language.finish)
+
             if element and not new_modal:
-                current_layers = self.check_layers('wa-dialog')
-                self.SetButton(self.language.finish)
                 new_modal = current_layers + 1 == self.check_layers('wa-dialog')
+                program_screen = self.wait_element_timeout(term=start_program_term,
+                                                           scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5,
+                                                           main_container=self.containers_selectors["AllContainers"],
+                                                           check_error=False)
                 logger().debug("Waiting for coverage to finish.")
 
             if new_modal:
                 coverage_finished = current_layers >= self.check_layers('wa-dialog')
-            
+
+            if not new_modal and program_screen:
+                logger().debug("Coverage Screen not found, but fineshed")
+                coverage_finished = True
+
             if coverage_finished:
                 logger().debug("Coverage finished.")
                 
