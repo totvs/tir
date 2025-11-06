@@ -4203,6 +4203,9 @@ class PouiInternal(Base):
     def _click_link(self, text='', href='', position=1, contains=False) -> None:
 
         logger().info(f"Clicking on Link: {text or href}")
+
+        if not text and not href:
+            self.log_error("No search parameters were passed (text and href).")
         
         term = "po-link"
         text = text.strip().lower() if text else ''
@@ -4227,8 +4230,8 @@ class PouiInternal(Base):
                 if text:
                     links = links_filtered
 
-                links_filtered = list(filter(lambda x: x.select_one('a').get('href') if x.select_one('a') else None
-                                            , links))
+                links_filtered = list(filter(lambda x: x.select_one('a'), links))
+                links_filtered = list(filter(lambda x: x.select_one('a').get('href'), links_filtered))
                 links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower() if not contains else 
                                                        href in x.select_one('a').get('href').strip().lower()
                                             , links_filtered))
