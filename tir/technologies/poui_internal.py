@@ -4212,36 +4212,39 @@ class PouiInternal(Base):
         href = href.strip().lower() if href else ''
         position -= 1
         success = False
+        links = []
+        links_filtered = []
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not success):
-            links = []
-            links_filtered = []
 
             links = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
             links = list(filter(lambda x: self.element_is_displayed(x), links))
 
             if text:
-                links_filtered = list(filter(lambda x: text == x.text.strip().lower() if not contains else 
-                                                       text in x.text.strip().lower()
-                                            , links))
+                if contains:
+                    links_filtered = list(filter(lambda x: text in x.text.strip().lower(), links))
+                else:
+                    links_filtered = list(filter(lambda x: text == x.text.strip().lower(), links))
 
             if href:
+                # if text filter was applied, filter again based on href
                 if text:
                     links = links_filtered
 
-                links_filtered = list(filter(lambda x: x.select_one('a'), links))
-                links_filtered = list(filter(lambda x: x.select_one('a').get('href'), links_filtered))
-                links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower() if not contains else 
-                                                       href in x.select_one('a').get('href').strip().lower()
-                                            , links_filtered))
-            
+                links_filtered = list(filter(lambda x: x.select_one('a') and x.select_one('a').get('href'), links))
+
+                if contains:
+                    links_filtered = list(filter(lambda x: href in x.select_one('a').get('href').strip().lower(), links_filtered))
+                else:
+                    links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower(), links_filtered))
+
             if links_filtered and 0 <= position < len(links_filtered):
                 link = links_filtered[position]
 
                 if link.name == 'po-link':
                     link = link.find(True, recursive=False)
-                
+
                 if link:
                     link = self.soup_to_selenium(link)
                     success = self.send_action(action=self.click, element=lambda: link, twebview=True)
