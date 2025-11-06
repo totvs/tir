@@ -3574,6 +3574,7 @@ class WebappInternal(Base):
         new_modal = False
         coverage_exceed_timeout = False
         start_program_term = '#selectStartProg'
+        program_screen = None
             
         endtime = time.time() + timeout
 
