@@ -2077,7 +2077,7 @@ class Poui():
         Parameters
         :param text: Visible text of the link to click. If empty, text matching is ignored.
         :type text: str
-        :param href: Destination URL (`href` attribute) to match — intended for external links only.
+        :param href: Destination URL (`href` attribute) to match. Can be a relative or absolute URL.
         :type href: str
         :param position: 1-based index of the occurrence to click when several elements match - Default: 1
         :type position: int
