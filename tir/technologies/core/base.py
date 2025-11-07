@@ -1559,3 +1559,25 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
+
+    def file_comparison(self, base_file: str, current_file: str) -> bool:
+        base_full: Path = self._extract_file_path(base_file).resolve()
+        current_full: Path = self._extract_file_path(current_file).resolve()
+
+        if not base_full.is_file() or not current_full.is_file():
+            self.log_error("Base and/or current file not found or is not a valid file. Please check the file name.")
+
+        # Atalho rápido: tamanhos diferentes já garante desigualdade
+        if base_full.stat().st_size != current_full.stat().st_size:
+            return False
+        
+        with open(base_full, 'rb') as f1, open(current_full, 'rb') as f2:
+            return f1.read() == f2.read()
+        
+    def _extract_file_path(self, file: str) -> Path:
+        path: Path = Path(self.config.baseline_path) if Path(file).parent == Path(".") else Path(file).parent
+        filename: str = Path(file).name
+        return Path(path) / filename
+    
+    def get_current_path(self) -> str:
+        return os.getcwd()
