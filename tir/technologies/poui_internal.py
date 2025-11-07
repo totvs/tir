@@ -4252,7 +4252,7 @@ class PouiInternal(Base):
         if not success:
             self.log_error(f"Couldn't find link: {text or href}")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, twebview=False):
+    def send_action(self, action=None, element=None, value=None, right_click=False, click_type=None, wait_change=True, twebview=False):
         """
 
         Sends an action to element and compare it object state change.
