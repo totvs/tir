@@ -2115,6 +2115,47 @@ class Poui():
         """
         self.__poui.click_look_up(label, search_value)
 
+    def ClickLink(self, text='', href='', position=1, contains=False):
+        """
+        Click a PO UI link (po-link) element.
+
+        Locate a link element inside PO UI components and perform a click on it. The search can use the
+        visible link text and/or the element's `href` attribute. When multiple elements match, the
+        `position` parameter selects which occurrence to click (1-based).
+
+        Parameters
+        :param text: Visible text of the link to click. If empty, text matching is ignored.
+        :type text: str
+        :param href: Destination URL (`href` attribute) to match. Can be a relative or absolute URL.
+        :type href: str
+        :param position: 1-based index of the occurrence to click when several elements match - Default: 1
+        :type position: int
+        :param contains:    If False (default) the method requires an exact match of `text` or `href`;
+                            If True the method accepts a substring match.
+        :type contains: bool
+
+        Behavior
+        - If only `text` is provided, matching is performed on the element's visible text.
+        - If only `href` is provided, matching is performed solely on the `href` attribute.
+        - If both `text` and `href` are provided, the method filters first by visible text, then by the destination URL (`href`).
+
+        Returns
+        :return: None
+
+        Examples
+        >>> # Click by visible text
+        >>> oHelper.ClickLink('PO Link')
+
+        >>> # Click by href
+        >>> oHelper.ClickLink(href='https://po-ui.io')
+
+        >>> # Click the second link whose visible text contains 'More'
+        >>> oHelper.ClickLink(text='Link', position=2, contains=True)
+
+        See also: https://po-ui.io/documentation/po-link?view=web
+        """
+        self.__poui._click_link(text=text, href=href, position=position, contains=contains)
+
     def ClickSwitch(self, label='', value=True, position=1):
         """
 
