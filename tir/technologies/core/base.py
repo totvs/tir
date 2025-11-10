@@ -1568,7 +1568,9 @@ class Base(unittest.TestCase):
         current_full: Path = self._extract_file_path(current_file).resolve()
 
         if not base_full.is_file() or not current_full.is_file():
-            self.log_error("Base and/or current file not found or is not a valid file. Please check the file name.")
+            self.log_error('Base and/or current file not found or is not a valid file. ' +
+                           'Please check the file name and "BaselinePath" in config.json. ' +
+                          f'base_file = "{base_full}", current_file = "{current_full}"')
 
         # Atalho rápido: tamanhos diferentes já garante desigualdade
         if base_full.stat().st_size != current_full.stat().st_size:
@@ -1583,4 +1585,5 @@ class Base(unittest.TestCase):
         return Path(path) / filename
     
     def get_current_path(self) -> str:
-        return os.getcwd()
+        current = os.getcwd()
+        return current + (os.sep if not current.endswith(os.sep) else "")
