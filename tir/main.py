@@ -2202,7 +2202,7 @@ class Poui():
             # Using absolute paths
             >>> oHelper.FileComparison(r'C:/example/file1.txt', r'D:/temp/file2.txt')
             # Using current script directory for both files
-            >>> oHelper.FileComparison(self.oHelper.GetCurrentPath() + 'expected.txt', self.oHelper.GetCurrentPath() + 'generated.txt')
+            >>> oHelper.FileComparison(oHelper.GetCurrentPath() + 'expected.txt', oHelper.GetCurrentPath() + 'generated.txt')
         """
         return self.__webapp.file_comparison(base_file=base_file, current_file=current_file)
     
