@@ -1572,7 +1572,7 @@ class Base(unittest.TestCase):
                            'Please check the file name and "BaselinePath" in config.json. ' +
                           f'base_file = "{base_full}", current_file = "{current_full}"')
             return False
-        # Atalho rápido: tamanhos diferentes já garante desigualdade
+        # Quick shortcut: different sizes already guarantee inequality
         if base_full.stat().st_size != current_full.stat().st_size:
             return False
         
