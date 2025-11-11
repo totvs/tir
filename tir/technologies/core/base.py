@@ -1571,7 +1571,7 @@ class Base(unittest.TestCase):
             self.log_error('Base and/or current file not found or is not a valid file. ' +
                            'Please check the file name and "BaselinePath" in config.json. ' +
                           f'base_file = "{base_full}", current_file = "{current_full}"')
-
+            return False
         # Atalho rápido: tamanhos diferentes já garante desigualdade
         if base_full.stat().st_size != current_full.stat().st_size:
             return False
