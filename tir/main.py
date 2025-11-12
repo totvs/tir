@@ -1569,7 +1569,54 @@ class Webapp():
 
         """
         return self.__webapp.rest_resgistry()
+    
+    def FileComparison(self, base_file:str, current_file:str) -> bool:
+        """Compares two files and returns True if they are byte‑for‑byte identical.
 
+        Attention to the use of file paths:
+            1. Bare file name (no directory) -> looked up under "BaselinePath" (or cwd if BaselinePath missing/empty).
+            2. Path with a directory component (absolute or relative) -> used as provided; no BaselinePath prefix.
+
+        Config note:
+            - Define "BaselinePath" (e.g. "BaselinePath": "C:/TOTVS/Protheus/.../baseline") to avoid unintended
+              fallback to the current working directory and potential "file not found" errors.
+
+        Files in the script root:
+            - If the file you want to compare is located in the test script root folder, use the `GetCurrentPath()`
+              function to obtain that path in a portable way (local execution and SmartTest). `GetCurrentPath()`
+              already returns a path with a trailing separator.
+
+        Return values:
+            True  -> identical content
+            False -> different content
+            (If a file does not exist the framework logs an error and the test fails.)
+
+        Usage examples:
+            # Using BaselinePath (or cwd fallback if BaselinePath is empty)
+            >>> oHelper.FileComparison('file1.txt', 'file2.txt')
+            # Using absolute paths
+            >>> oHelper.FileComparison(r'C:/example/file1.txt', r'D:/temp/file2.txt')
+            # Using current script directory for both files
+            >>> oHelper.FileComparison(oHelper.GetCurrentPath() + 'expected.txt', oHelper.GetCurrentPath() + 'generated.txt')
+        """
+        return self.__webapp.file_comparison(base_file=base_file, current_file=current_file)
+    
+    def GetCurrentPath(self) -> str:
+        """Returns the current working directory (root where the test script is being executed).
+
+        Primary usage:
+            - Build file paths (baseline, reports, exports) without relying on hard‑coded absolute paths.
+            - Ensure portability between local execution and SmartTest.
+
+        Return:
+            str: Absolute path of the current directory (with trailing slash).
+
+        Examples:
+            >>> base_dir = oHelper.GetCurrentPath()
+            >>> full_path = base_dir + 'report_base.txt'
+        """
+
+        return self.__webapp.get_current_path()
 
 class Apw():
 
@@ -2066,6 +2113,47 @@ class Poui():
         """
         self.__poui.click_look_up(label, search_value)
 
+    def ClickLink(self, text='', href='', position=1, contains=False):
+        """
+        Click a PO UI link (po-link) element.
+
+        Locate a link element inside PO UI components and perform a click on it. The search can use the
+        visible link text and/or the element's `href` attribute. When multiple elements match, the
+        `position` parameter selects which occurrence to click (1-based).
+
+        Parameters
+        :param text: Visible text of the link to click. If empty, text matching is ignored.
+        :type text: str
+        :param href: Destination URL (`href` attribute) to match. Can be a relative or absolute URL.
+        :type href: str
+        :param position: 1-based index of the occurrence to click when several elements match - Default: 1
+        :type position: int
+        :param contains:    If False (default) the method requires an exact match of `text` or `href`;
+                            If True the method accepts a substring match.
+        :type contains: bool
+
+        Behavior
+        - If only `text` is provided, matching is performed on the element's visible text.
+        - If only `href` is provided, matching is performed solely on the `href` attribute.
+        - If both `text` and `href` are provided, the method filters first by visible text, then by the destination URL (`href`).
+
+        Returns
+        :return: None
+
+        Examples
+        >>> # Click by visible text
+        >>> oHelper.ClickLink('PO Link')
+
+        >>> # Click by href
+        >>> oHelper.ClickLink(href='https://po-ui.io')
+
+        >>> # Click the second link whose visible text contains 'More'
+        >>> oHelper.ClickLink(text='Link', position=2, contains=True)
+
+        See also: https://po-ui.io/documentation/po-link?view=web
+        """
+        self.__poui._click_link(text=text, href=href, position=position, contains=contains)
+
     def ClickSwitch(self, label='', value=True, position=1):
         """
 
@@ -2086,3 +2174,51 @@ class Poui():
         """
 
         self.__poui.click_switch(label=label, value=value, position=position)
+
+    def FileComparison(self, base_file:str, current_file:str) -> bool:
+        """Compares two files and returns True if they are byte‑for‑byte identical.
+
+        Attention to the use of file paths:
+            1. Bare file name (no directory) -> looked up under "BaselinePath" (or cwd if BaselinePath missing/empty).
+            2. Path with a directory component (absolute or relative) -> used as provided; no BaselinePath prefix.
+
+        Config note:
+            - Define "BaselinePath" (e.g. "BaselinePath": "C:/TOTVS/Protheus/.../baseline") to avoid unintended
+              fallback to the current working directory and potential "file not found" errors.
+
+        Files in the script root:
+            - If the file you want to compare is located in the test script root folder, use the `GetCurrentPath()`
+              function to obtain that path in a portable way (local execution and SmartTest). `GetCurrentPath()`
+              already returns a path with a trailing separator.
+
+        Return values:
+            True  -> identical content
+            False -> different content
+            (If a file does not exist the framework logs an error and the test fails.)
+
+        Usage examples:
+            # Using BaselinePath (or cwd fallback if BaselinePath is empty)
+            >>> oHelper.FileComparison('file1.txt', 'file2.txt')
+            # Using absolute paths
+            >>> oHelper.FileComparison(r'C:/example/file1.txt', r'D:/temp/file2.txt')
+            # Using current script directory for both files
+            >>> oHelper.FileComparison(oHelper.GetCurrentPath() + 'expected.txt', oHelper.GetCurrentPath() + 'generated.txt')
+        """
+        return self.__webapp.file_comparison(base_file=base_file, current_file=current_file)
+    
+    def GetCurrentPath(self) -> str:
+        """Returns the current working directory (root where the test script is being executed).
+
+        Primary usage:
+            - Build file paths (baseline, reports, exports) without relying on hard‑coded absolute paths.
+            - Ensure portability between local execution and SmartTest.
+
+        Return:
+            str: Absolute path of the current directory (with trailing slash).
+
+        Examples:
+            >>> base_dir = oHelper.GetCurrentPath()
+            >>> full_path = base_dir + 'report_base.txt'
+        """
+
+        return self.__webapp.get_current_path()
