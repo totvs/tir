@@ -1929,49 +1929,63 @@ class PouiInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True) -> bool:
+    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True, contains: bool = True) -> bool:
         """
         Search string that was sent and wait show the elements.
 
         :param string: String that will hold the wait.
         :type string: str
+        :param timeout: Maximum time to wait in seconds. Default is 1200.
+        :type timeout: int
+        :param throw_error: Whether to raise an error if element is not found. Default is True.
+        :type throw_error: bool
+        :param contains: If True, matches partial text. If False, requires exact match. Default is True.
+        :type contains: bool
+        :return: True if element is found and displayed, False otherwise (only if throw_error is False).
+        :rtype: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
+        >>> # With exact match:
+        >>> oHelper.WaitShow("Processing", contains=False)
         """
         logger().info(f"Waiting show text '{string}'...")
 
-        container: BeautifulSoup
-        elements: List[Tag]
+        timeout = timeout if timeout else 1200
 
-        if not timeout:
-            timeout = 1200
+        endtime = time.time() + timeout        
+        while time.time() < endtime:
+            container = self.get_current_container()
 
-        endtime = time.time() + timeout
-        while(time.time() < endtime):
-
-            container = self.get_current_DOM(twebview=True)
-
-            if string in container.text:
-
+            # Quick check: verify if string exists in the entire DOM text (case-insensitive)
+            if container and string.lower() in container.text.lower():
+                
+                # Find all elements containing the search string (case-insensitive)
                 elements = [
                     node.parent
-                    for node in container.find_all(string=re.compile(string, re.I))
+                    for node in container.find_all(string=re.compile(re.escape(string), re.IGNORECASE))
                 ]
+                
                 elements = list(filter(lambda x: self.element_is_displayed(x), elements))
 
-                if elements:                
+                # If exact match is required, filter further
+                if not contains:
+                    elements = list(filter(lambda x: string.strip().lower() == x.text.strip().lower(), elements))
+
+                if elements:
                     return True
 
-            if endtime - time.time() < 1180:
-                time.sleep(0.5)
+                if endtime - time.time() < 1180:
+                    time.sleep(0.5)
 
-        if not throw_error:
-            return False
-        else:
+        logger().warning(f"Element '{string}' not found within {timeout} seconds.")
+        
+        if throw_error:
             self.log_error(f"Element {string} not found")
+        
+        return False
 
     def WaitProcessing(self, itens, timeout=None):
         """
