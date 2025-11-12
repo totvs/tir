@@ -4199,6 +4199,140 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+    
+    def _click_link(self, text='', href='', position=1, contains=False) -> None:
+
+        logger().info(f"Clicking on Link: {text or href}")
+
+        if not text and not href:
+            self.log_error("No search parameters were passed (text and href).")
+        
+        term = "po-link"
+        text = text.strip().lower() if text else ''
+        href = href.strip().lower() if href else ''
+        position -= 1
+        success = False
+        links = []
+        links_filtered = []
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            links = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
+            links = list(filter(lambda x: self.element_is_displayed(x), links))
+
+            if text:
+                if contains:
+                    links_filtered = list(filter(lambda x: text in x.text.strip().lower(), links))
+                else:
+                    links_filtered = list(filter(lambda x: text == x.text.strip().lower(), links))
+
+            if href:
+                # if text filter was applied, filter again based on href
+                if text:
+                    links = links_filtered
+
+                links_filtered = list(filter(lambda x: x.select_one('a') and x.select_one('a').get('href'), links))
+
+                if contains:
+                    links_filtered = list(filter(lambda x: href in x.select_one('a').get('href').strip().lower(), links_filtered))
+                else:
+                    links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower(), links_filtered))
+
+            if links_filtered and 0 <= position < len(links_filtered):
+                link = links_filtered[position]
+
+                if link.name == 'po-link':
+                    link = link.find(True, recursive=False)
+
+                if link:
+                    link = self.soup_to_selenium(link)
+                    success = self.send_action(action=self.click, element=lambda: link, twebview=True)
+
+        if not success:
+            self.log_error(f"Couldn't find link: {text or href}")
+
+    def send_action(self, action=None, element=None, value=None, right_click=False, click_type=None, wait_change=True, twebview=False):
+        """
+
+        Sends an action to element and compare it object state change.
+
+        :param action: selenium function as a reference like click, actionchains or send_keys.
+        :param element: selenium element as a reference
+        :param value: send keys value
+        :param right_click: True if you want a right click
+        :param click_type: ClickType enum. 1-3 types- **Default:** None
+        :type click_type: int
+        :return: True if there was a change in the object
+        """
+
+        if not twebview:
+            twebview = True if self.config.poui_login else False
+
+        soup_before_event = self.get_current_DOM(twebview=twebview)
+        soup_after_event = soup_before_event
+
+        soup_select = None
+
+        main_click_type = click_type
+
+        click_type = 1 if not main_click_type else click_type
+
+        endtime = time.time() + self.config.time_out
+        try:
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
+                logger().debug(f"Trying to send action")
+                if right_click:
+                    soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
+                    if not soup_select:
+                        action(element(), right_click=right_click)
+                elif value:
+                    action(element(), value)
+                elif element:
+                    self.set_element_focus(element(), twebview=True)
+                    action(click_type=enum.ClickType(click_type), element=element())
+                elif action:
+                    action()
+                    
+                time.sleep(1)
+
+                if soup_select:
+                    soup_after_event = soup_select
+                elif soup_select == []:
+                    soup_after_event = soup_before_event
+                else:
+                    soup_after_event = self.get_current_DOM(twebview=twebview)
+
+                click_type = click_type+1 if not main_click_type else click_type
+
+                if click_type > 3:
+                    click_type = 1
+
+                if not wait_change:
+                    return True
+
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception send_action {str(e)}")
+            return False
+
+        if self.config.smart_test or self.config.debug_log:
+            logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
+        return soup_before_event != soup_after_event
+
+    def get_soup_select(self, selector):
+        """
+        Get a soup select object.
+
+        :param selector: Css selector
+        :return: Return a soup select object
+        """
+
+        twebview = True if self.config.poui_login else False
+
+        soup = self.get_current_DOM(twebview=twebview)
+
+        return soup.select(selector)
 
 
     def click_switch(self, label='', value=True , position=1):
@@ -4288,6 +4422,7 @@ class PouiInternal(Base):
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
         return next(iter(sorted_containers), None)
+
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
             """
