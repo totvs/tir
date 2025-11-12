@@ -26,6 +26,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 import pathlib
 import json
+from typing import List
 
 def count_time(func):
     """
@@ -1928,7 +1929,7 @@ class PouiInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True) -> bool:
         """
         Search string that was sent and wait show the elements.
 
@@ -1942,18 +1943,27 @@ class PouiInternal(Base):
         """
         logger().info(f"Waiting show text '{string}'...")
 
+        container: BeautifulSoup
+        elements: List[Tag]
+
         if not timeout:
             timeout = 1200
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
 
-            element = None
+            container = self.get_current_DOM(twebview=True)
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            if string in container.text:
 
-            if element:
-                return element
+                elements = [
+                    node.parent
+                    for node in container.find_all(string=re.compile(string, re.I))
+                ]
+                elements = list(filter(lambda x: self.element_is_displayed(x), elements))
+
+                if elements:                
+                    return True
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)

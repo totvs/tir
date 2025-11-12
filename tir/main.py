@@ -2035,7 +2035,7 @@ class Poui():
         """
         self.__poui.click_popup(label)
 
-    def WaitShow(self, string, timeout=None, throw_error = True):
+    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True) -> bool:
         """
         Search string that was sent and wait show the elements.
 
