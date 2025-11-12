@@ -1562,3 +1562,35 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
+
+    def file_comparison(self, base_file: str, current_file: str) -> bool:
+        base_full: Path = self._extract_file_path(base_file).resolve()
+        current_full: Path = self._extract_file_path(current_file).resolve()
+
+        if not base_full.is_file() or not current_full.is_file():
+            self.log_error('Base and/or current file not found or is not a valid file. ' +
+                           'Please check the file name and "BaselinePath" in config.json. ' +
+                          f'base_file = "{base_full}", current_file = "{current_full}"')
+            return False
+        # Quick shortcut: different sizes already guarantee inequality
+        if base_full.stat().st_size != current_full.stat().st_size:
+            return False
+        
+        with open(base_full, 'rb') as f1, open(current_full, 'rb') as f2:
+            CHUNK_SIZE = 8192
+            while True:
+                chunk1 = f1.read(CHUNK_SIZE)
+                chunk2 = f2.read(CHUNK_SIZE)
+                if chunk1 != chunk2:
+                    return False
+                if not chunk1:  # End of file
+                    break
+            return True
+    def _extract_file_path(self, file: str) -> Path:
+        path: Path = Path(self.config.baseline_path) if Path(file).parent == Path(".") else Path(file).parent
+        filename: str = Path(file).name
+        return Path(path) / filename
+    
+    def get_current_path(self) -> str:
+        current = os.getcwd()
+        return current + (os.sep if not current.endswith(os.sep) else "")
