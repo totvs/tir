@@ -33,7 +33,24 @@ from tir.version import __version__
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from pathlib import Path
+from PIL import Image, ImageChops
+import uuid
+import logging
 
+# Suprime logs do PIL/Pillow
+logging.getLogger('PIL').setLevel(logging.CRITICAL + 1)
+
+def count_time(func):
+    """
+    Decorator to count the time spent in a function.
+    """
+    def wrapper(*args, **kwargs):
+        starttime = time.time()
+        result = func(*args, **kwargs)
+        endtime = time.time()
+        logger().debug(f"Time spent in {func.__name__}: {endtime - starttime}")
+        return result
+    return wrapper
 
 class Base(unittest.TestCase):
     """
@@ -736,6 +753,8 @@ class Base(unittest.TestCase):
         fullpath = os.path.join(directory, filename)
 
         self.driver.save_screenshot(fullpath)
+
+        return fullpath
 
     def scroll_to_element(self, element):
         """
@@ -1594,3 +1613,48 @@ class Base(unittest.TestCase):
     def get_current_path(self) -> str:
         current = os.getcwd()
         return current + (os.sep if not current.endswith(os.sep) else "")
+    
+    def _image_comparison(self, img1_path: str, img2_path: str, threshold_percent: float = 1.0) -> bool:
+        """
+        Compara duas imagens baseado no percentual de pixels diferentes.
+        Ignora pequenas mudanças de posição, detectando apenas modificações significativas.
+        
+        :param threshold_percent: Percentual máximo de pixels diferentes permitido (0-100).
+                                 1.0 = até 1% da imagem pode ser diferente
+                                 Default: 1.0 (recomendado para mudanças de posição)
+        """
+        img1 = Image.open(img1_path)
+        img2 = Image.open(img2_path)
+
+        # Calcula diferença pixel a pixel
+        diff = ImageChops.difference(img1, img2)
+        
+        # Converte para escala de cinza para simplificar análise
+        diff_gray = diff.convert('L')
+        
+        # Conta pixels diferentes (considera diferente se > 30 de diferença, ignorando anti-aliasing)
+        threshold = 30
+        diff_pixels = sum(1 for pixel in diff_gray.getdata() if pixel > threshold)
+        
+        # Calcula percentual de diferença
+        total_pixels = img1.size[0] * img1.size[1]
+        diff_percent = (diff_pixels / total_pixels) * 100
+        
+        # Imagens são consideradas iguais se diferença está abaixo do threshold
+        equal = diff_percent <= threshold_percent
+        
+        logger().debug(f"Image comparison: equal={equal}, diff={diff_percent:.2f}%, threshold={threshold_percent}%, diff_pixels={diff_pixels}/{total_pixels}")
+        return equal
+    
+    @count_time
+    def _wait_screen_change(self, img_path_before: str, timeout: int = 5) -> None:
+
+        equal_images = True
+
+        endtime = time.time() + timeout
+        while (time.time() < endtime and equal_images):
+            img_path_after = self.take_screenshot(f"{uuid.uuid4()}.png")
+            equal_images = self._image_comparison(img_path_before, img_path_after)
+            os.remove(img_path_after)
+
+        os.remove(img_path_before)

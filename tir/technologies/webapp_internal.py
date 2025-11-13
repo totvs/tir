@@ -4486,6 +4486,8 @@ class WebappInternal(Base):
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
+        img_path_before = self.take_screenshot(f"{uuid.uuid4()}.png")
+
         try:
             restore_zoom = False
             soup_element  = ""
@@ -4708,6 +4710,8 @@ class WebappInternal(Base):
             raise
         except Exception as error:
             logger().exception(str(error))
+
+        self._wait_screen_change(img_path_before, 100)
 
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")

@@ -52,6 +52,7 @@ setup(
         'webdriver-manager==4.0.2',
         'sqlalchemy==2.0.42',
         'oracledb==3.2.0',
+        'Pillow==12.0.0'
     ],
     python_requires='==3.12.*',
     packages=find_packages(),
