@@ -3276,14 +3276,14 @@ class PouiInternal(Base):
             input_field_element().clear()
             input_field_element().send_keys(value)
 
-            if self.switch_to_active_element() == input_field_element():
+            if self.switch_to_active_element() == input_field_element() and not self.config.new_home:
                 time.sleep(1)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 time.sleep(1)
                 ActionChains(self.driver).key_down(Keys.TAB).perform()
 
             time.sleep(2)
-            success = self.get_web_value(input_field_element()).strip() != ''
+            success = self.get_web_value(input_field_element()).strip() != '' if not self.config.new_home else True
 
     def return_input_element(self, field=None, position=1, term=None):
         """
@@ -4246,7 +4246,7 @@ class PouiInternal(Base):
             self.log_error(f"CheckBox '{label}' doesn't found!")
 
 
-    def click_combo(self, field, value, position, second_value):
+    def click_combo(self, field, value='', position=1, second_value=''):
         '''Select a value for list combo inputs.
 
         :param field: label of field
@@ -4291,7 +4291,7 @@ class PouiInternal(Base):
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
 
-    def click_po_list_box(self, value, second_value):
+    def click_po_list_box(self, value='', second_value=''):
         '''
         :param value: Value to select on po-list-box
         :type str

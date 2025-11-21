@@ -34,6 +34,7 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from io import StringIO
 from tir.technologies.core.base_database import BaseDatabase
+from tir.technologies.poui_internal import PouiInternal
 
 def count_time(func):
     """
@@ -371,7 +372,8 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")) and
+                not self.config.new_home):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
@@ -1767,7 +1769,8 @@ class WebappInternal(Base):
                 self.log_error_newlog()
 
         if not self.log.program:
-            self.log.program = program_name
+            self.log.program = program_name        
+
         self.set_program(program_name)
 
 
@@ -1785,10 +1788,15 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_program("MATA020")
         """
+        
+        logger().info(f"Setting program: {program}")
+
+        if self.config.new_home:
+            self.set_program_new_home(program)
+            return
 
         cget_term = '[name=cGet]'
         try:
-            logger().info(f"Setting program: {program}")
 
             self.escape_to_main_menu()
 
@@ -1858,6 +1866,44 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             logger().exception(str(e))
+
+    def set_program_new_home(self, program):
+        """
+        [Internal]
+
+        Method that sets the program in the initial menu search field on New Home.
+
+        :param program: The program name
+        :type program: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.set_program_new_home("MATA020")
+        """
+        success = False
+        poui = PouiInternal(autostart=False)
+
+        poui.WaitShow('Pesquisar e executar', throw_error=False)
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            
+            poui.InputValue('Pesquisar e executar', program, 1)
+            poui.click_po_list_box(second_value=program)
+
+            endtime_changes = time.time() + 60
+            while time.time() < endtime_changes and not success:
+                success = not poui.WaitShow('Pesquisar e executar', timeout=5, throw_error=False)
+                time.sleep(1)
+
+        if not success:
+            self.log_error(f"Couldn't find program: {program}")
+
+        if self.config.initial_program.lower() == 'sigaadv':                
+            self.close_warning_screen_after_routine()
+            self.close_coin_screen_after_routine()
+            self.close_news_screen_after_routine()        
 
     def escape_to_main_menu(self):
         """
