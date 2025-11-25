@@ -2038,33 +2038,21 @@ class Poui():
         """
         self.__poui.click_popup(label)
 
-    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True, contains: bool = True) -> bool:
+    def WaitShow(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait show the elements.
 
-        :param string: String that will hold the wait.
+        :param itens: String that will hold the wait.
         :type string: str
-        :param timeout: Maximum time to wait in seconds. Default is 1200.
-        :type timeout: int
-        :param throw_error: Whether to raise an error if element is not found. Default is True.
-        :type throw_error: bool
-        :param contains: If True, matches partial text. If False, requires exact match. Default is True.
-        :type contains: bool
-        :return: True if element is found and displayed, False otherwise (only if throw_error is False).
-        :rtype: bool
+        :param timeout: Timeout that wait before return.
+        :type timeout: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
-        >>> # With exact match:
-        >>> oHelper.WaitShow("Processing", contains=False)
-        >>> # With custom timeout and no error:
-        >>> if oHelper.WaitShow("Optional Text", timeout=30, throw_error=False):
-        >>>     print("Element found!")
         """
-        
-        self.__poui.WaitShow(string=string, timeout=timeout, throw_error=throw_error, contains=contains)
+        self.__poui.WaitShow(string, timeout, throw_error)
 
     def WaitProcessing(self, itens, timeout=None):
         """

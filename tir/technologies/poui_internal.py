@@ -1932,63 +1932,40 @@ class PouiInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitShow(self, string: str, timeout: int = None, throw_error: bool = True, contains: bool = True) -> bool:
+    def WaitShow(self, string, timeout=None, throw_error = True):
         """
         Search string that was sent and wait show the elements.
 
         :param string: String that will hold the wait.
         :type string: str
-        :param timeout: Maximum time to wait in seconds. Default is 1200.
-        :type timeout: int
-        :param throw_error: Whether to raise an error if element is not found. Default is True.
-        :type throw_error: bool
-        :param contains: If True, matches partial text. If False, requires exact match. Default is True.
-        :type contains: bool
-        :return: True if element is found and displayed, False otherwise (only if throw_error is False).
-        :rtype: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitShow("Processing")
-        >>> # With exact match:
-        >>> oHelper.WaitShow("Processing", contains=False)
         """
         logger().info(f"Waiting show text '{string}'...")
 
-        timeout = timeout if timeout else 1200
+        if not timeout:
+            timeout = 1200
 
-        endtime = time.time() + timeout        
-        while time.time() < endtime:
-            container = self.get_current_container()
+        endtime = time.time() + timeout
+        while(time.time() < endtime):
 
-            # Quick check: verify if string exists in the entire DOM text (case-insensitive)
-            if container and string.lower() in container.text.lower():
-                
-                # Find all elements containing the search string (case-insensitive)
-                elements = [
-                    node.parent
-                    for node in container.find_all(string=re.compile(re.escape(string), re.IGNORECASE))
-                ]
-                
-                elements = list(filter(lambda x: self.element_is_displayed(x), elements))
+            element = None
 
-                # If exact match is required, filter further
-                if not contains:
-                    elements = list(filter(lambda x: string.strip().lower() == x.text.strip().lower(), elements))
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
-                if elements:
-                    return True
+            if element:
+                return element
 
-                if endtime - time.time() < 1180:
-                    time.sleep(0.5)
+            if endtime - time.time() < 1180:
+                time.sleep(0.5)
 
-        logger().warning(f"Element '{string}' not found within {timeout} seconds.")
-        
-        if throw_error:
+        if not throw_error:
+            return False
+        else:
             self.log_error(f"Element {string} not found")
-        
-        return False
 
     def WaitProcessing(self, itens, timeout=None):
         """
