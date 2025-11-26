@@ -349,6 +349,31 @@ class Webapp():
         """
         return self.__webapp.GetValue(field, grid, line, grid_number, grid_memo_field, position)
 
+    def GetIniValue(self, key, section='', ini_path=''):
+        """
+        Gets a value from an ini file.
+
+        :param section: The section of the ini file.
+        :type section: str
+        :param key: The key of the ini file.
+        :type key: str
+        :param ini_path: The path to the appserver ini file. - **Default:** appserver folder defined in config.json
+        :type ini_path: str
+        :return: The value of the key in the ini file.
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> value = oHelper.GetIniValue(key="sourcepath", section="PROTHEUS_ENVIRONMENT")
+        >>> #--------------------------------------------------
+        >>> # Calling the method with custom ini path:
+        >>> value = oHelper.GetIniValue(key="dbport", ini_path="C:\\TOTVS\\Protheus12\\appserver")
+
+        """
+        return self.__webapp.get_ini_value(key, section, ini_path)
+
+
     def LoadGrid(self):
         """
         This method is responsible for running all actions of the input and check queues
@@ -1552,7 +1577,6 @@ class Webapp():
         """
         return self.__webapp.rest_resgistry()
 
-
 class Apw():
 
     def __init__(self, config_path=""):
@@ -1785,35 +1809,86 @@ class Poui():
         self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1,
-                   itens=False, click_cell=None, checkbox=False, radio_input=None):
+                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False):
         """
-        Clicks on the Table of POUI component.
-        https://po-ui.io/documentation/po-table
+            Clicks on the Table of POUI component.
+            https://po-ui.io/documentation/po-table
+            and
+            https://thf.dev.totvs.app/v19/documentation/thf-grid
 
-        :param first_column: Column name to be used as reference.
-        :type first_column: str
-        :param second_column: Column name to be used as reference.
-        :type second_column: str
-        :param first_content: Content of the column to be searched.
-        :type first_content: str
-        :param second_content: Content of the column to be searched.
-        :type second_content: str
-        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
-        :type table_number: int
-        :param itens: Bool parameter that click in all itens based in the field and content reference.
-        :type itens: bool
-        :param click_cell: Content to click based on a column position to close the axis
-        :type click_cell: str
-        :param checkbox: If you want to click on the checkbox component in the table
-        :type checkbox: bool
+            Supports both legacy and new syntax:
 
-        >>> # Call the method:
-        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
-        :return: None
-        """
+            **Legacy syntax (Deprecated):**
+            Use `first_column`, `second_column`, `first_content`, `second_content` parameters.
+            Will be removed in future versions.
+            >>> oHelper.ClickTable("Code", "", "000001", "", click_cell="Edit")
+            >>> oHelper.ClickTable("Code", "Name", "000001", "John", click_cell="Edit")
 
-        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens, click_cell, checkbox, radio_input)
-        
+            **New syntax (recommended):**
+            Use `columns` and `values` parameters for cleaner, more flexible filtering.
+            >>> oHelper.ClickTable(columns='Code', values='000001', click_cell='Edit')
+            >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Edit')
+
+            :param first_column: [DEPRECATED] First column name to filter
+            :type first_column: str
+            :param second_column: [DEPRECATED] Second column name to filter
+            :type second_column: str
+            :param first_content: [DEPRECATED] Value to match in first column
+            :type first_content: str
+            :param second_content: [DEPRECATED] Value to match in second column
+            :type second_content: str
+            :param table_number:  Table position number when multiple table exist - **Default:** 1
+            :type table_number: int
+            :param itens: [DEPRECATED] Click all items matching criteria - **Default:** False
+            :type itens: bool
+            :param click_cell: Column name where the click action should occur.
+            If you need to select rows consider to use checkbox or radio_input parameters - **Default:** None
+            :type click_cell: str
+            :param checkbox: If True/False, toggles checkbox to that state - **Default:** None
+            :type checkbox: bool
+            :param radio_input: Click radio button - **Default:** False
+            :type radio_input: bool
+            :param columns: Column name(s) to filter. Can be a string, or list
+            :type columns: str or list
+            :param values: Value(s) to match in columns. Can be a string, or list
+            :type values: str or list
+            :param match_all: If True, performs action on all matching rows. If False, only first match - **Default:** False
+            :type match_all: bool
+
+            Usage:
+
+            >>> # Legacy calls (deprecated):
+            >>> oHelper.ClickTable("Branch", "", "D MG 01", "", click_cell="Edit")
+            >>> oHelper.ClickTable("Code", "Name", "000001", "John")
+            >>> oHelper.ClickTable("Code", "", "000001", "", itens=True)
+
+            >>> # New calls (recommended):
+            >>> oHelper.ClickTable(columns='Branch', values='D MG 01', click_cell='Edit')
+            >>> # New syntax - Multiple columns filter:
+            >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Actions')
+            >>> # New syntax - Toggle checkbox:
+            >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
+            >>> # New syntax - Click all matching rows:
+            >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
+
+            .. warning::
+                Do not mix legacy and new syntax in the same call.
+                Legacy parameters will be removed in a future release.
+
+            .. note::
+                - When `columns` is None and `values` is None, clicks the first row
+                - `click_cell` specifies which column cell to click (by column name)
+                - `checkbox` parameter only works with checkbox columns
+                - `radio_input` parameter only works with radio button columns
+                - Use `match_all=True` to interact with all rows matching the filter criteria
+
+            :return: None
+            """
+
+        self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
+                               click_cell, checkbox, radio_input, columns, values, match_all)
+
+
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
         Checks if a field has the value the user expects.
@@ -2047,3 +2122,66 @@ class Poui():
 
         """
         self.__poui.click_look_up(label, search_value)
+
+    def ClickLink(self, text='', href='', position=1, contains=False):
+        """
+        Click a PO UI link (po-link) element.
+
+        Locate a link element inside PO UI components and perform a click on it. The search can use the
+        visible link text and/or the element's `href` attribute. When multiple elements match, the
+        `position` parameter selects which occurrence to click (1-based).
+
+        Parameters
+        :param text: Visible text of the link to click. If empty, text matching is ignored.
+        :type text: str
+        :param href: Destination URL (`href` attribute) to match. Can be a relative or absolute URL.
+        :type href: str
+        :param position: 1-based index of the occurrence to click when several elements match - Default: 1
+        :type position: int
+        :param contains:    If False (default) the method requires an exact match of `text` or `href`;
+                            If True the method accepts a substring match.
+        :type contains: bool
+
+        Behavior
+        - If only `text` is provided, matching is performed on the element's visible text.
+        - If only `href` is provided, matching is performed solely on the `href` attribute.
+        - If both `text` and `href` are provided, the method filters first by visible text, then by the destination URL (`href`).
+
+        Returns
+        :return: None
+
+        Examples
+        >>> # Click by visible text
+        >>> oHelper.ClickLink('PO Link')
+
+        >>> # Click by href
+        >>> oHelper.ClickLink(href='https://po-ui.io')
+
+        >>> # Click the second link whose visible text contains 'More'
+        >>> oHelper.ClickLink(text='Link', position=2, contains=True)
+
+        See also: https://po-ui.io/documentation/po-link?view=web
+        """
+        self.__poui._click_link(text=text, href=href, position=position, contains=contains)
+
+    def ClickSwitch(self, label='', value=True, position=1):
+        """
+
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        Usage:
+        >>> # Call the method:
+        >>> oHelper.Switch(label='Codigo')
+        >>> oHelper.Switch(label='Ativo', position=2)
+        >>> oHelper.Switch(label='Ver Sld Alt', value=False)
+
+        """
+
+        self.__poui.click_switch(label=label, value=value, position=position)
+    

@@ -7,7 +7,7 @@ import random
 import uuid
 from functools import reduce
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -26,6 +26,19 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 import pathlib
 import json
+from typing import List
+
+def count_time(func):
+    """
+    Decorator to count the time spent in a function.
+    """
+    def wrapper(*args, **kwargs):
+        starttime = time.time()
+        result = func(*args, **kwargs)
+        endtime = time.time()
+        logger().debug(f"Time spent in {func.__name__}: {endtime - starttime}")
+        return result
+    return wrapper
 
 class PouiInternal(Base):
     """
@@ -69,8 +82,8 @@ class PouiInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": ".tmodaldialog",
-            "AllContainers": "body,.tmodaldialog,.ui-dialog",
+            "GetCurrentContainer": "po-page-default, po-page-detail, po-page-edit ,po-page-list ,po-page-slide",
+            "AllContainers": "body, .tmodaldialog, .ui-dialog, wa-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
@@ -86,6 +99,9 @@ class PouiInternal(Base):
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
+        self.grid_selectors= {
+            "grid_containers": "po-table, kendo-grid"
+        }
 
         self.parameters = []
         self.backup_parameters = []
@@ -826,7 +842,7 @@ class PouiInternal(Base):
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
         return language
 
-    def search_element_position(self, field, position=1, input_field=True, direction=None):
+    def search_element_position(self, field, position=1, input_field=True, direction=None, input_selector=''):
         """
         [Internal]
         Usage:
@@ -836,55 +852,133 @@ class PouiInternal(Base):
         endtime = (time.time() + self.config.time_out)
         label = None
         elem = []
-        term=".tget, .tcombobox, .tmultiget"
         position-=1
+        regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
+        field = re.sub(regex, '', field).lower().strip()
+        term = input_selector if input_selector else ".dict-tget, .dict-tcombobox, .dict-tmultiget"
+        label_term = "label, span"
+        labels_filtred = []
 
         if not input_field:
             term=".tsay"
 
         try:
-            while( time.time() < endtime and not label ):
+            while(time.time() < endtime and not labels_filtred):
                 container = self.get_current_container()
-                labels = container.select("label")
-                labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                labels_list  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
-                labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , labels_list))
-                if labels_list_filtered and len(labels_list_filtered) -1 >= position:
-                    label = labels_list_filtered[position]
+                labels = container.select(label_term)
+                labels_filtred  = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)), x.text) , labels))
+
+                if not labels_filtred:
+                    labels_filtred = list(filter(lambda x: hasattr(x, "text")  and
+                                  re.sub(regex, '', x.text).lower().strip().startswith(field), labels))
+                    if len(labels_filtred) > 1:
+                        labels_filtred = list(filter(lambda x: hasattr(x, "text") and
+                                    re.sub(regex, '', x.text).lower().strip() == (field), labels))
+
+            labels_filtered_th = list(filter(lambda x: 'th' not in self.element_name(x.parent), labels_filtred))
+
+            labels_displayed = [x for x in labels_filtered_th if self.element_is_displayed(x)]
+
+            if labels_displayed and len(labels_displayed) -1 >= position:
+                label = labels_displayed[position]
 
             if not label:
                 self.log_error(f"Label: '{field}'' wasn't found.")
 
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH )
-            
-            container_size = self.get_element_size(container['id'])
-            # The safe values add to postion of element
-            width_safe, height_safe = self.width_height(container_size)
 
-            label_s  = lambda:self.soup_to_selenium(label)
-            xy_label =  self.driver.execute_script('return arguments[0].getPosition()', label_s())
-            list_in_range = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR) 
-            list_in_range = list(filter(lambda x: self.element_is_displayed(x) and 'readonly' not in self.soup_to_selenium(x).get_attribute("class") or 'readonly focus' in self.soup_to_selenium(x).get_attribute("class"), list_in_range))
+            elements_candidates = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                 main_container='body', twebview=True)
 
-            if not input_field:
-                list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+            nearest_element = self.get_closest_element(label, elements_candidates,
+                                                       direction, input_field, twebview=True)
 
-            position_list = list(map(lambda x:(x[0], self.get_position_from_bs_element(x[1])), enumerate(list_in_range)))
-            position_list = self.filter_by_direction(xy_label, width_safe, height_safe, position_list, direction)
-            distance      = self.get_distance_by_direction(xy_label, position_list, direction)
-            if distance:
-                elem          = min(distance, key = lambda x: x[1])
-                elem          = list_in_range[elem[0]]
-
-            if not elem:
-                self.log_error(f"Label '{field}' wasn't found")
-            return elem
+            return nearest_element
             
         except AssertionError as error:
             raise error
         except Exception as error:
             logger().exception(str(error))
             self.log_error(str(error))
+
+
+    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True):
+        """Find the closest element by term from a reference element using euclidean distance (location x,y).
+
+        :param ref_element: The reference element to calculate the distance from.
+        :type ref_element: bs4.element.Tag
+        :param direction: The direction to filter the elements. Options are 'right', 'down
+
+        [Internal]
+        Usage:
+        >>> # Calling the method
+        >>> self.get_closer_element_by_location(label_pos, elements_list, direction=None)
+        """
+        elem = []
+
+        # Get container size
+        iframe_size = self.get_iframe_size()
+
+        # The safe values add to postion of element
+        width_safe, height_safe = self.width_height(iframe_size)
+
+        # Get location from element reference
+        xy_ref_element = self.get_position_from_bs_element(ref_element)
+
+        list_in_range = [
+            x for x in element_list
+            if self.element_is_displayed(x) and (
+                    'readonly' not in self.soup_to_selenium(x, twebview=True).get_attribute("class") or
+                    'readonly focus' in self.soup_to_selenium(x, twebview=True).get_attribute("class"))
+        ]
+
+        if not input_field:
+            list_in_range = list(filter(lambda x: field.strip().lower() != x.text.strip().lower(), list_in_range))
+
+        displayeds_in_range = list(filter(lambda x: self.element_is_displayed(x), list_in_range))
+
+        position_list = list(map(lambda x: (x[0], self.get_position_from_bs_element(x[1])), enumerate(displayeds_in_range)))
+        position_list = self.filter_by_direction(xy_ref_element, width_safe, height_safe, position_list, direction)
+        distance      = self.get_distance_by_direction(xy_ref_element, position_list, direction)
+        if distance:
+            elem          = min(distance, key = lambda x: x[1])
+            elem          = list_in_range[elem[0]]
+
+        if not elem:
+            self.log_error(f"Label '{field}' wasn't found")
+        return elem
+
+
+    def get_iframe_size(self):
+        """
+        [Internal]
+        Gets the size of the current iframe when no container ID is available.
+
+        :return: Dictionary with width and height of the iframe
+        :rtype: dict
+        """
+        try:
+            # Tenta obter o tamanho do iframe atual
+            iframe_size = self.driver.execute_script("""
+                var iframe = window.frameElement;
+                if (iframe) {
+                    return {
+                        'width': iframe.offsetWidth || iframe.clientWidth,
+                        'height': iframe.offsetHeight || iframe.clientHeight
+                    };
+                } else {
+                    // Se não estiver em iframe, usa o tamanho da janela
+                    return {
+                        'width': window.innerWidth || document.documentElement.clientWidth,
+                        'height': window.innerHeight || document.documentElement.clientHeight
+                    };
+                }
+            """)
+            return iframe_size
+        except Exception:
+            # Fallback para tamanho padrão se houver erro
+            return None
+
 
     def width_height(self, container_size):
 
@@ -901,16 +995,19 @@ class PouiInternal(Base):
         return (width_safe, height_safe)
 
 
-    def get_position_from_bs_element(self,element):
+    def get_position_from_bs_element(self,element, twebview=True):
         """
         [Internal]
 
         """
-        selenium_element = self.soup_to_selenium(element)
-        position = self.driver.execute_script('return arguments[0].getPosition()', selenium_element)
-        return position
+        try:
+            selenium_element = self.soup_to_selenium(element, twebview=twebview)
+            position = selenium_element.location
+            return position
+        except Exception as e:
+            logger().exception(str(e))
 
-    def get_distance(self,label_pos,element_pos):
+    def get_distance(self, label_pos, element_pos):
         """
         [internal]
 
@@ -945,27 +1042,34 @@ class PouiInternal(Base):
 
         return (y_element['y'] - y_label['y'])
 
+
     def filter_by_direction(self, xy_label, width_safe, height_safe, position_list, direction):
         """
         [Internal]
         
         """
+        if direction == False:
+            return position_list
 
-        if not direction:
-
-            return list(filter(lambda xy_elem: (
-                        xy_elem[1]['y'] + width_safe >= xy_label['y'] and xy_elem[1]['x'] + height_safe >= xy_label['x']),
-                        position_list))
+        elif direction is None:
+            return list(filter(lambda xy_elem: (xy_elem[1]['y'] + height_safe >= xy_label['y'] and
+                                                xy_elem[1]['x'] + width_safe >= xy_label['x']),
+                               position_list))
 
         elif direction.lower() == 'right':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and (xy_elem[1]['y'] >= xy_label['y'] - height_safe and xy_elem[1]['y'] <= xy_label[
-                    'y'] + height_safe), position_list))
-        
+                lambda xy_elem: (xy_elem[1]['x'] > xy_label['x']) and
+                                (xy_elem[1]['y'] >= xy_label['y'] - height_safe and
+                                 xy_elem[1]['y'] <= xy_label['y'] + height_safe),
+                position_list))
+
         elif direction.lower() == 'down':
             return list(filter(
-                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
-                               xy_elem[1]['x'] - width_safe <= xy_label['x']), position_list))
+                lambda xy_elem: (xy_elem[1]['y'] > xy_label['y']) and
+                                (xy_elem[1]['x'] + width_safe >= xy_label['x'] and
+                                 xy_elem[1]['x'] - width_safe <= xy_label['x']),
+                position_list))
+
 
     def get_distance_by_direction(self, xy_label, position_list, direction):
         
@@ -1850,7 +1954,7 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
@@ -2357,10 +2461,7 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> filtered_elements = self.filter_by_tooltip_value(my_element_list, "Edit")
         """
-
-        for element in element_list:
-            if self.check_element_tooltip(element, expected_text, contains=True):
-                return element
+        return list(filter(lambda x: self.check_element_tooltip(x, expected_text), element_list))
 
     def check_element_tooltip(self, element, expected_text, contains=False):
         """
@@ -2384,25 +2485,41 @@ class PouiInternal(Base):
         >>> # Call the method:
         >>> has_add_text = self.check_element_tooltip(button_object, "Add")
         """
-
+        
         has_text = False
+        expected_text = re.sub(' ', '', expected_text.lower())
+        element_function = False
 
-        element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-        self.switch_to_iframe()
-        ActionChains(self.driver).move_to_element(element_function()).perform()
-        tooltips = self.driver.find_elements(By.CSS_SELECTOR, "[class*=po-tooltip]")
+        if self.webapp_shadowroot():
+            tooltip_term = 'wa-tooltip, .po-tooltip'
+            if type(element) == Tag:
+                element = self.soup_to_selenium(element)
+            if self.execute_js_selector('button', element):
+                element_function = lambda: self.execute_js_selector('button', element , get_all = False)
+            elif element:
+                element_function = lambda: element
+            if not element:
+                return False
+            try:
+                ActionChains(self.driver).move_to_element(element_function().find_element(By.TAG_NAME, "input")).perform()
+            except:
+                ActionChains(self.driver).move_to_element(element_function()).perform()
+        else:
+            tooltip_term = '.ttooltip'
+            element_function = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+            self.driver.execute_script(f"$(arguments[0]).mouseover()", element_function())
 
+        time.sleep(2)
+        tooltips = self.driver.find_elements(By.CSS_SELECTOR, tooltip_term)
         if not tooltips:
-            tooltips = self.get_current_DOM().select("[class*=po-tooltip]")
-
+            tooltips = self.get_current_DOM().select(tooltip_term)
         if tooltips:
-            tooltips = list(filter(lambda x: x.is_displayed(), tooltips))
-
-            if tooltips:
-                has_text = (len(list(
-                    filter(lambda x: expected_text.lower() in x.text.lower(), tooltips))) > 0 if contains else (
-                        tooltips[0].text.lower() == expected_text.lower()))
-
+            has_text = (len(list(filter(lambda x: expected_text in re.sub(' ', '', x.text.lower()), tooltips))) > 0 if contains else (tooltips[0].text.lower() == expected_text.lower()))
+        if element_function:
+            try:
+                self.driver.execute_script(f"$(arguments[0]).mouseout()", element_function())
+            except:
+                pass
         return has_text
 
     def assert_result(self, expected, script_message):
@@ -2510,13 +2627,19 @@ class PouiInternal(Base):
         """
         return list(filter(lambda x: self.element_is_displayed(x), elements))
 
+
     def element_is_displayed(self, element):
         """
         [Internal]
 
         """
         self.switch_to_iframe()
-        element_selenium = self.soup_to_selenium(element)
+
+        if type(element) == Tag:
+            element_selenium = self.soup_to_selenium(element, twebview=True)
+        else:
+            element_selenium = element
+
         if element_selenium:
             return element_selenium.is_displayed()
         else:
@@ -3041,12 +3164,11 @@ class PouiInternal(Base):
         """
 
         grid_number -= 1
-        
-        self.wait_element(term=".tgetdados tbody tr, .tgrid tbody tr, .tcbrowse",
-                          scrap_type=enum.ScrapType.CSS_SELECTOR)
+
         grid = self.get_grid(grid_number, grid_element)
 
         return grid.select('tbody tr')
+
 
     def LengthGridLines(self, grid):
         """
@@ -3160,6 +3282,10 @@ class PouiInternal(Base):
                 po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
                     map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
                         po_input_filtered))))
+                
+                if not po_input_text:
+                    po_input_text = list(filter(lambda x: field.lower() in x.get('placeholder').lower()
+                                                    if x.get('placeholder') else None, po_input))
                 if po_input_text:
                     if len(po_input_text) >= position:
                         po_input_text = po_input_text[position]
@@ -3250,7 +3376,14 @@ class PouiInternal(Base):
             self.log_error(f"Couldn't set {field}. Please check it")
 
 
-    def poui_click(self, element):
+    def poui_click(self, element, click_type=1):
+        """
+        POUI Click method
+        :param element:
+        :param click_type: ClickType enum. 1-3 types- **Default:** 1
+        :type click_type: int
+        :return:
+        """
 
         self.switch_to_iframe()
         click_element = lambda: self.soup_to_selenium(element)
@@ -3260,13 +3393,14 @@ class PouiInternal(Base):
         self.set_element_focus(click_element())
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element, locator=By.XPATH)
         time.sleep(1)
-        self.click(click_element())
+        self.click(click_element(), click_type=enum.ClickType(click_type))
 
     def click_button(self, button, position, selector, container):
         """
 
         :param field: Button to be clicked.
         :param position: Position which element is located. - **Default:** 1
+
 
         """
         position -= 1
@@ -3440,131 +3574,324 @@ class PouiInternal(Base):
 
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell,
-                   checkbox, radio_input):
+                   checkbox, radio_input, columns=None, values=None, match_all=False):
         """
-        Clicks on the Table of POUI component.
-        https://po-ui.io/documentation/po-table
+            Clicks on the Table of POUI component.
+            https://po-ui.io/documentation/po-table
 
-        :param first_column: Column name to be used as reference.
-        :type first_column: str
-        :param second_column: Column name to be used as reference.
-        :type second_column: str
-        :param first_content: Content of the column to be searched.
-        :type first_content: str
-        :param second_content: Content of the column to be searched.
-        :type second_content: str
-        :param table_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
-        :type table_number: int
-        :param itens: Bool parameter that click in all itens based in the field and content reference.
-        :type itens: bool
-        :param click_cell: Content to click based on a column position to close the axis
-        :type click_cell: str
-        :param checkbox: If you want to click on the checkbox component in the table
-        :type checkbox: bool
+            Supports both legacy and new syntax:
 
-        >>> # Call the method:
-        >>> oHelper.ClickTable(first_column='Código', first_content='000003', click_cell='Editar')
-        :return: None
-        """
+            **Legacy syntax (backward compatible):**
+            >>> oHelper.ClickTable("Code", "", "000001", "", click_cell="Edit")
+            >>> oHelper.ClickTable("Code", "Name", "000001", "John", click_cell="Edit")
+
+            **New syntax (recommended):**
+
+            >>> oHelper.ClickTable(columns='Code', values='000001', click_cell='Edit')
+            >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Edit')
+
+            :param first_column: [LEGACY] First column name - **Default:** ""
+            :type first_column: str
+            :param second_column: [LEGACY] Second column name - **Default:** ""
+            :type second_column: str
+            :param first_content: [LEGACY] First column content - **Default:** ""
+            :type first_content: str
+            :param second_content: [LEGACY] Second column content - **Default:** ""
+            :type second_content: str
+            :param table_number: Grid position number when multiple grids exist - **Default:** 1
+            :type table_number: int
+            :param itens: [LEGACY] Click all items matching criteria - **Default:** False
+            :type itens: bool
+            :param click_cell: Column name to click - **Default:** ""
+            :type click_cell: str
+            :param checkbox: Click checkbox - **Default:** False
+            :type checkbox: bool
+            :param radio_input: Click radio button - **Default:** False
+            :type radio_input: bool
+            :param columns: [NEW] List of column names or comma-separated string - **Default:** None
+            :type columns: list or str
+            :param values: [NEW] List of values or comma-separated string - **Default:** None
+            :type values: list or str
+            :param match_all: [NEW] If True, click in all matching rows - **Default:** False
+            :type match_all: bool
+
+            Usage:
+
+            >>> # Legacy calls (still supported):
+            >>> oHelper.ClickTable("Branch", "", "D MG 01", "", click_cell="Edit")
+            >>> oHelper.ClickTable("Code", "Name", "000001", "John")
+            >>> oHelper.ClickTable("Code", "", "000001", "", itens=True)
+
+            >>> # New calls (recommended):
+            >>> oHelper.ClickTable(columns='Branch', values='D MG 01', click_cell='Edit')
+            >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'])
+            >>> oHelper.ClickTable(columns='Status', values=True, match_all=True, checkbox=True)
+
+            :return: None
+            """
         element = None
-        UNNAMED_COLUMN = 'Unnamed: 0'
 
         if not self.config.poui:
             self.twebview_context = True
 
-        index_number = []
+        # Detect if using legacy syntax
+        using_legacy = bool(first_column or second_column or first_content or second_content)
+        using_new = bool(columns is not None or values is not None)
+
+        # Cannot mix syntaxes
+        if using_legacy and using_new:
+            self.log_error(
+                "Cannot mix legacy parameters (first_column, second_column, etc.) with new syntax (columns, values)")
+            return
+
+        # Convert legacy to new format
+        if using_legacy:
+            columns_list = []
+            values_list = []
+            if first_column and first_column.startswith('unnamed'):
+                first_column = ''
+
+            if first_column and first_content:
+                columns_list.append(first_column)
+                values_list.append(first_content)
+
+            if second_column and second_content:
+                columns_list.append(second_column)
+                values_list.append(second_content)
+
+            # Use itens parameter for legacy
+            if itens:
+                match_all = True
+
+            logger().warning(
+                "Deprecation: legacy parameters (first_column, second_column, first_content, second_content, itens)"
+                " will be removed in a future version. Please use 'columns' and 'values'."
+                " Applied conversion -> Columns: %s, Values: %s",
+                columns_list, values_list)
+        else:
+            # Normalize new syntax to lists
+            columns_list = self._normalize_to_list(columns)
+            values_list = self._normalize_to_list(values)
+
+        row_index_number = []
         count = 0
         column_index_number = None
-        term = "[class='po-table'], po-table"
-        logger().info(f"Clicking on Table")
+        term = "[class='po-table'], po-table, kendo-grid"
+        filter_info = dict(zip(columns_list, values_list)) if columns_list else {}
+        logger().info(f"Clicking on Row with filters: {filter_info}")
         self.wait_element(term=term)
 
         endtime = time.time() + self.config.time_out
-        while time.time() < endtime and len(index_number) < 1 and count <= 3:
+        while time.time() < endtime and len(row_index_number) < 1 and count <= 3:
 
             try:
                 table = self.return_table(selector=term, table_number=table_number)
 
-                df = self.data_frame(object=table)
-
-                last_df = df
-
-                if not df.empty:
+                if table:
+                    headers = self.get_headers_from_grids(table)
+                    # Get column index if click_cell is specified
                     if click_cell:
-                        column_index_number = df.columns.get_loc(click_cell)
+                        try:
+                            # Get the column index from headers
+                            click_cell_lower = click_cell.lower().strip()
+                            if headers and len(headers) > 0:
+                                header_dict = headers[0]  # Get first (and usually only) header dict
+                                if click_cell_lower in header_dict:
+                                    column_index_number = header_dict[click_cell_lower]
+                                else:
+                                    logger().warning(f"Column '{click_cell}' not found for click_cell")
+                        except (KeyError, IndexError) as e:
+                            logger().warning(f"Error getting column index for '{click_cell}': {str(e)}")
 
-                    if first_column and second_column and first_column != UNNAMED_COLUMN:
-                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
-                    elif first_column and (first_content and second_content):
-                        index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
-                    elif itens:
-                        index_number = df.loc[(df[first_column] == first_content)].index.array
-                    elif first_column and first_content:
-                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))))
-                        first_column_values = df[first_column].values
-                        first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
-                        content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
-                        if content:
-                            index_number.append(first_column_formatted_values.index(content))
-                            if len(index_number) > 0:
-                                index_number = [index_number[0]]
-                    elif first_column and second_column and second_content:
-                        second_column = next(iter(list(filter(lambda x: second_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        second_column_values = df[second_column].values
-                        second_column_formatted_values = list(map(lambda x: x.replace(' ', ''), second_column_values))
-                        content = next(iter(list(filter(lambda x: x == second_content.replace(' ', ''), second_column_formatted_values))), None)
-                        if content:
-                            index_number.append(second_column_formatted_values.index(content))
-                            if len(index_number) > 0:
-                                index_number = [index_number[0]]
+                    # Build filter conditions
+                    if columns_list and values_list:
+                        if len(columns_list) != len(values_list):
+                            self.log_error(f"Number of columns ({len(columns_list)}) must match number of values ({len(values_list)})")
+                            return
+                        row_index_number = self._find_row_by_content(table, columns_list, values_list, match_all)
                     else:
-                        index_number.append(0)
-
-                    if len(index_number) < 1 and count <= 3:
-                        first_element_focus = table.select('th')[column_index_number]
-                        if first_element_focus:
-                            self.wait_until_to(expected_condition="element_to_be_clickable",
-                                               element=first_element_focus, locator=By.XPATH)
-                            self.soup_to_selenium(first_element_focus).click()
-                        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                        table = self.return_table(selector=term, table_number=table_number)
-                        df = self.data_frame(object=table)
-                        if df.equals(last_df):
-                            count += 1
+                        # No filters, select first row
+                        row_index_number.append(0)
 
             except Exception as e:
                 self.log_error(f"Content doesn't found on the screen! {str(e)}")
 
-        if len(index_number) < 1:
-            self.log_error(f"Content doesn't found on the screen! {first_content}")
+        if len(row_index_number) < 1:
+            self.log_error(f"Content doesn't found on the screen with filters: {filter_info}")
 
         tr = table.select('tbody > tr')
 
-        if hasattr(index_number, '__iter__'):
-            for index in index_number:
-                if checkbox:
-                    self.click_table_checkbox(selector=term, index=index, table_number=table_number)
+        if hasattr(row_index_number, '__iter__'):
+            for index in row_index_number:
+                if checkbox is not None:
+                    self.click_table_checkbox(table_number, row_index=index, checkbox_value=checkbox)
                 elif radio_input:
                     row_radio_component = tr[index].select_one('po-radio')
                     if row_radio_component:
                         self.toggle_radio(row_radio_component, radio_input)
                 else:
                     if column_index_number:
-                        element_bs4 = tr[index].select('td')[column_index_number].select('span')[0]
+                        element_bs4 = tr[index].select('td')[column_index_number].select_one('span')
 
                     else:
                         element_bs4 = next(iter(tr[index].select('td')))
-                        if first_column == UNNAMED_COLUMN:
-                            clickable_spans = tr[index].select('td')[0].select('.po-clickable')
+                        if click_cell is None:
+                            clickable_spans = tr[index].select_one('td')
                             if clickable_spans:
-                                element_bs4 = clickable_spans[0]
+                                icon = clickable_spans.select_one('.po-clickable')
+                                if icon:
+                                    element_bs4 = icon
                             else:
                                 self.log_error("No clickable spans found in the table row.")
                     self.poui_click(element_bs4)
         else:
-            index = index_number
+            index = row_index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
+
+
+    def _normalize_to_list(self, value) -> list:
+        """
+        [Internal]
+        Normalize input to list format.
+
+        :param value: Can be None, string (comma-separated), or list
+        :return: List or empty list
+        """
+        if value is None:
+            return []
+
+        if isinstance(value, list):
+            return value
+
+        # Single value, convert to list
+        return [str(value)]
+
+
+    def _find_row_by_content(self, grid, columns, values, match_all=False, grid_number=0):
+        """
+        [Internal]
+        Filter table rows based on column-value pairs and return matching indices.
+
+        :param grid: BeautifulSoup grid to filter
+        :param columns: List of column names
+        :param values: List of values to match
+        :param match_all: If True, return all matches. If False, return first match only
+        :return: List of matching row indices
+        """
+
+        # Start with all rows as True
+
+        col_indices_match = []
+        matching_row_indices = []
+        UNNAMED_COLUMN = 'unnamed'
+        headers = self.get_headers_from_grids(grid)
+
+        normalized_values = list(map(lambda x: x.lower().strip(), values))
+        columns_numbers = []
+
+        if columns:
+            expected_columns = [x.lower().strip() for x in columns]
+            expected_columns = ['' if x.startswith(UNNAMED_COLUMN) else x for x in expected_columns]
+            difference = list(filter(lambda x: x not in list(headers[grid_number].keys()), expected_columns))
+            columns_numbers = list(map(lambda x: headers[grid_number][x], expected_columns))
+
+            if difference:
+                logger.warning(f"Columns '{difference}' not found in table")
+                return
+
+        grid_rows = grid.select('tbody tr')
+
+        for row in grid_rows:
+            row_columns = row.select('td')
+
+            if len(row_columns) < len(columns) or not row_columns:
+                self.log_error(f"There are not number of columns present in the grid")
+                return
+
+            filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
+            if filtered_columns:
+                filtered_cells = list(
+                    filter(lambda x: x[1].text.lower().strip() == normalized_values[x[0]], enumerate(filtered_columns)))
+
+                if len(filtered_cells) == len(normalized_values):
+                    matching_row_indices.append(grid_rows.index(row))
+                    if not match_all:
+                        return matching_row_indices
+
+
+    def _find_matching_column(self, grid_headers, column_name):
+        """
+        [Internal]
+        Find column by name (case-insensitive, partial match).
+
+        :param df: DataFrame
+        :param column_name: Column name to search
+        :return: Matched column name or None
+        """
+        normalized_search = column_name.lower().strip()
+        if normalized_search in grid_headers:
+            return grid_headers[normalized_search]
+        return None
+
+
+    def get_headers_from_grids(self, grids, column_name='', position=0):
+        """
+        [Internal]
+
+        Returns a Dict with the headers and their indexes of each grid in *grids* parameter.
+
+        :param grids: The grids to extract the headers.
+        :type grids: List of BeautifulSoup objects
+
+        :return: List of Dictionaries with each header value and index.
+        :rtype: List of Dict
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> headers = self.get_headers_from_grids(grids)
+        """
+
+        headers = []
+        labels = None
+        index = []
+        labels_list= []
+        headers_term = "thead tr th"
+
+        if isinstance(grids, list):
+            for item in grids:
+                labels = item.select(headers_term)
+                if labels:
+                    keys = list(map(lambda x: x.text.strip().lower(), labels))
+                    labels_list.append(keys)
+                    values = list(map(lambda x: x[0], enumerate(labels)))
+                    headers.append(dict(zip(keys, values)))
+
+        else:
+            labels = grids.select(headers_term)
+            if labels:
+                keys = list(map(lambda x: x.text.strip().lower(), labels))
+                labels_list.append(keys)
+                values = list(map(lambda x: x[0], enumerate(labels)))
+                headers.append(dict(zip(keys, values)))
+
+        if column_name or column_name == '':
+            duplicated_key = column_name.lower()
+            duplicated_value = position-1 if position > 0 else 0
+
+            for labels in labels_list:
+                for idx, value in enumerate(labels):
+                    if value == duplicated_key:
+                        index.append(idx)
+                if len(index) > 1:
+                    for header in headers:
+                        if duplicated_key in header:
+                            header[duplicated_key] = index[duplicated_value]
+                index = []
+
+        return headers
+
 
     def toggle_radio(self, po_radio, active=True):
         '''Set input Radio from a tr Tag element
@@ -3607,26 +3934,62 @@ class PouiInternal(Base):
         return False
 
 
-    def click_table_checkbox(self, selector, index, table_number):
+    def click_table_checkbox(self, table_position, row_index, checkbox_value=True, checkbox_position=1):
 
-        checked = False
+        checkbox_position -= 1
+        is_checked = False
+        table_checkbox_term = "po-checkbox, kendo-checkbox"
 
         endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not checked:
-            table = self.return_table(selector=selector, table_number=table_number)
-
+        while time.time() < endtime and not is_checked:
+            table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=table_position)
             tr = table.select('tbody > tr')
+            columns = tr[row_index].select('td')
+            checkbox_columns = [col for col in columns if col.select_one(table_checkbox_term)]
+            if len(checkbox_columns) > checkbox_position:
+                checkbox = checkbox_columns[checkbox_position].select_one(table_checkbox_term)
+                if checkbox:
+                    is_checked = self.checkbox_is_checked(checkbox)
+                    check_icon = checkbox.select_one('span, input')
 
-            checkbox = next(iter(tr[index].select("[name='checkbox']")), None)
+                    # Click only if current state is different from desired state
+                    if check_icon and is_checked != checkbox_value:
+                        logger().debug(f"Clicking checkbox at row {row_index + 1}.")
+                        self.poui_click(check_icon)
+                        time.sleep(1)
 
-            if checkbox:
-                element = checkbox.select('span')[0]
 
-                if 'checked' in checkbox.contents[0].attrs:
-                    checked = 'true' in checkbox.contents[0].attrs['checked']
+    def checkbox_is_checked(self, checkbox_element):
+        """
+        Verifica se o checkbox está marcado em componentes POUI ou Kendo Grid.
 
-            if not checked:
-                self.poui_click(element)
+        :param checkbox_element: Elemento BeautifulSoup4 do checkbox
+        :type checkbox_element: bs4.element.Tag
+        :return: True se o checkbox estiver marcado, False caso contrário
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> is_checked = self.checkbox_is_checked(checkbox_element)
+        """
+
+        # Verifica se é um po-checkbox (POUI)
+        span = checkbox_element.select_one('span')
+        if span:
+            span_sl = self.soup_to_selenium(span, twebview=True)
+            if span_sl.get_attribute('aria-checked') is not None:
+                return 'true' in span_sl.get_attribute('aria-checked')
+
+        # Verifica pela célula da tabela (Kendo Grid)
+        td_cell = checkbox_element.find_parent('td')
+        if td_cell:
+            td_cell_sl = self.soup_to_selenium(td_cell, twebview=True)
+            if td_cell_sl.get_attribute('aria-selected') is not None:
+                return 'true' in td_cell_sl.get_attribute('aria-selected')
+
+        return None
+
 
     def return_table(self, selector, table_number):
 
@@ -3641,7 +4004,9 @@ class PouiInternal(Base):
         
         if tables:
             if len(tables) - 1 >= table_number:
+                self.scroll_to_element(self.soup_to_selenium(tables[table_number], twebview=True))
                 return tables[table_number]
+
 
     def data_frame(self, object):
         '''Return a DataFrame from a Beautiful Soup Table
@@ -3658,6 +4023,7 @@ class PouiInternal(Base):
 
         if not df.empty:
             return df.fillna('Not Value')
+
 
     def POTabs(self, label):
         """
@@ -3709,39 +4075,34 @@ class PouiInternal(Base):
         position -= 1
         element = None
 
-        term = '[class*="po-icon"]'
+        term = 'po-icon'
+
+        if class_name:
+            term += ' i.' + '.'.join(class_name.split(' '))
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        logger().info(f"Clicking on Icon: {label or class_name}")
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            logger().info("Clicking on Icon")
-
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container='body')
+            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
 
-                if label and class_name:
-                    class_element = self.return_icon_class(class_name, po_icon_filtered)
-                    element = class_element if self.check_element_tooltip(class_element, label, contains=True) else None
-                elif class_name:
-                    element = self.return_icon_class(class_name, po_icon_filtered)
-                else:
-                    element = self.filter_by_tooltip_value(po_icon_filtered, label)
+                if label:
+                    po_icon_filtered = self.filter_by_tooltip_value(po_icon_filtered, label)
 
-                if element:
-                    if position > 0 and position >= len(element):
-                        element = element[position]
-
+                if po_icon_filtered:
+                    element = po_icon_filtered[position]
                     self.poui_click(element)
 
         if not element:
-            self.log_error(f"Element '{element}' doesn't found!")
+            self.log_error(f"Element '{label or class_name}' doesn't found!")
 
-    def return_icon_class(self, class_name, elements):
+    def return_icon_class(self, class_name, elements, position):
         """
 
         :param class_name: The POUI class name for icon
@@ -3751,11 +4112,11 @@ class PouiInternal(Base):
         :return: filtered bs4 object
         """
 
-        icon_classes = list(filter(lambda x: any(
-            class_name.lower().strip() == f'po-icon {attr.lower().strip()}' for attr in x.attrs.get('class', [])),
+        icon_classes = list(filter(lambda x: 
+            class_name.lower().strip() in ' '.join(x.get('class', [])),
                                      elements))
         if icon_classes:
-            return next(iter(icon_classes))
+            return icon_classes[position]
 
     def click_avatar(self, position):
         """
@@ -4081,3 +4442,252 @@ class PouiInternal(Base):
             logger().debug(f'SOUP:{element} to Selenium element not found')
 
         return success
+    
+    def _click_link(self, text='', href='', position=1, contains=False) -> None:
+
+        logger().info(f"Clicking on Link: {text or href}")
+
+        if not text and not href:
+            self.log_error("No search parameters were passed (text and href).")
+        
+        term = "po-link"
+        text = text.strip().lower() if text else ''
+        href = href.strip().lower() if href else ''
+        position -= 1
+        success = False
+        links = []
+        links_filtered = []
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            links = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True, main_container='body')
+            links = list(filter(lambda x: self.element_is_displayed(x), links))
+
+            if text:
+                if contains:
+                    links_filtered = list(filter(lambda x: text in x.text.strip().lower(), links))
+                else:
+                    links_filtered = list(filter(lambda x: text == x.text.strip().lower(), links))
+
+            if href:
+                # if text filter was applied, filter again based on href
+                if text:
+                    links = links_filtered
+
+                links_filtered = list(filter(lambda x: x.select_one('a') and x.select_one('a').get('href'), links))
+
+                if contains:
+                    links_filtered = list(filter(lambda x: href in x.select_one('a').get('href').strip().lower(), links_filtered))
+                else:
+                    links_filtered = list(filter(lambda x: href == x.select_one('a').get('href').strip().lower(), links_filtered))
+
+            if links_filtered and 0 <= position < len(links_filtered):
+                link = links_filtered[position]
+
+                if link.name == 'po-link':
+                    link = link.find(True, recursive=False)
+
+                if link:
+                    link = self.soup_to_selenium(link)
+                    success = self.send_action(action=self.click, element=lambda: link, twebview=True)
+
+        if not success:
+            self.log_error(f"Couldn't find link: {text or href}")
+
+    def send_action(self, action=None, element=None, value=None, right_click=False, click_type=None, wait_change=True, twebview=False):
+        """
+
+        Sends an action to element and compare it object state change.
+
+        :param action: selenium function as a reference like click, actionchains or send_keys.
+        :param element: selenium element as a reference
+        :param value: send keys value
+        :param right_click: True if you want a right click
+        :param click_type: ClickType enum. 1-3 types- **Default:** None
+        :type click_type: int
+        :return: True if there was a change in the object
+        """
+
+        if not twebview:
+            twebview = True if self.config.poui_login else False
+
+        soup_before_event = self.get_current_DOM(twebview=twebview)
+        soup_after_event = soup_before_event
+
+        soup_select = None
+
+        main_click_type = click_type
+
+        click_type = 1 if not main_click_type else click_type
+
+        endtime = time.time() + self.config.time_out
+        try:
+            while ((time.time() < endtime) and (soup_before_event == soup_after_event)):
+                logger().debug(f"Trying to send action")
+                if right_click:
+                    soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
+                    if not soup_select:
+                        action(element(), right_click=right_click)
+                elif value:
+                    action(element(), value)
+                elif element:
+                    self.set_element_focus(element(), twebview=True)
+                    action(click_type=enum.ClickType(click_type), element=element())
+                elif action:
+                    action()
+                    
+                time.sleep(1)
+
+                if soup_select:
+                    soup_after_event = soup_select
+                elif soup_select == []:
+                    soup_after_event = soup_before_event
+                else:
+                    soup_after_event = self.get_current_DOM(twebview=twebview)
+
+                click_type = click_type+1 if not main_click_type else click_type
+
+                if click_type > 3:
+                    click_type = 1
+
+                if not wait_change:
+                    return True
+
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception send_action {str(e)}")
+            return False
+
+        if self.config.smart_test or self.config.debug_log:
+            logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
+        return soup_before_event != soup_after_event
+
+    def get_soup_select(self, selector):
+        """
+        Get a soup select object.
+
+        :param selector: Css selector
+        :return: Return a soup select object
+        """
+
+        twebview = True if self.config.poui_login else False
+
+        soup = self.get_current_DOM(twebview=twebview)
+
+        return soup.select(selector)
+
+
+    def click_switch(self, label='', value=True , position=1):
+        """
+
+        Click on POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param label: field from lookup input
+        :type: str
+        :param value: Desired value of the Switch component. - **Default:** True
+        :type value: bool
+        :param position: Position which duplicated element is located. - **Default:** 1
+        :type position: int
+
+        """
+
+        logger().info(f"Clicking on Switch: {label}")
+
+        switch_term = 'po-switch'
+        label = label.strip().lower()
+        success = False
+        switch_bs_component = []
+
+        self.wait_element(term=switch_term)
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not success):
+
+            if not switch_bs_component:
+                switch_bs_component = self.search_element_position(label, position,
+                                                                   input_selector=switch_term, direction=False)
+
+            if switch_bs_component:
+                toggle_container = switch_bs_component.select_one('.po-switch-container')
+                switch_element = lambda: self.soup_to_selenium(toggle_container or switch_bs_component, twebview=True)
+
+                if self.get_switch_value(switch_bs_component) != value:
+                    self.click(switch_element(), click_type=enum.ClickType.SELENIUM)
+                else:
+                    success = True
+
+        if not success:
+            self.log_error(f"Couldn't find element {label}")
+
+
+    def get_switch_value(self, switch_component):
+        """
+
+        Get the current value of a POUI Switch component
+        https://po-ui.io/documentation/po-switch
+
+        :param switch_component: BeautifulSoup object representing the switch component
+        :type switch_component: BeautifulSoup object
+        :return: Current value of the switch (True/False)
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> switch_value = self.get_switch_value(switch_component)
+        """
+        switch_container = switch_component.select_one('.po-switch-container')
+        if switch_container:
+            switch_status = self.soup_to_selenium(switch_container, twebview=True).get_attribute('aria-checked')
+            return switch_status.lower() == 'true'
+        return None
+
+
+    def get_current_container(self):
+        """
+        [Internal]
+
+        An internal method designed to get the current container.
+        Returns the BeautifulSoup object that represents this container or NONE if nothing is found.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> container = self.get_current_container()
+        """
+        soup = self.get_current_DOM(twebview=True)
+        containers = soup.select(self.containers_selectors["GetCurrentContainer"])
+        displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
+        sorted_containers = self.zindex_sort(displayeds_containers, True)
+        return next(iter(sorted_containers), None)
+
+
+    def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
+            """
+            Execute a javascript selector in a selenium object and return the element or elements found
+            :param term: Css selector
+            :param objects: Selenium object
+            :param get_all: True if you want all elements found or False if you want only the first element found
+            :param shadow_root: True if the element is in a shadow root 
+            :return: Selenium object or list of selenium objects
+            """
+
+            elements = None
+            selector_prefix = "arguments[0].shadowRoot." if shadow_root else "arguments[0]."
+
+            if get_all:
+                script = f"return {selector_prefix}querySelectorAll('{term}')"
+            else:
+                script = f"return {selector_prefix}querySelector('{term}')"
+
+            try:
+                elements = self.driver.execute_script(script, objects)
+            except:
+                pass
+
+            return elements if elements else None

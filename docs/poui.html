@@ -56,10 +56,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCheckBox"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCheckBox()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickCombo"><code class="docutils literal notranslate"><span class="pre">Poui.ClickCombo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickIcon"><code class="docutils literal notranslate"><span class="pre">Poui.ClickIcon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickLink"><code class="docutils literal notranslate"><span class="pre">Poui.ClickLink()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickLookUp"><code class="docutils literal notranslate"><span class="pre">Poui.ClickLookUp()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickPopup"><code class="docutils literal notranslate"><span class="pre">Poui.ClickPopup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSelect"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSelect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSwitch"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSwitch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickWidget"><code class="docutils literal notranslate"><span class="pre">Poui.ClickWidget()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.GetUrl"><code class="docutils literal notranslate"><span class="pre">Poui.GetUrl()</span></code></a></li>
@@ -146,10 +148,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<em>str</em>) – The field or label of a field that must be checked.</p></li>
-<li><p><strong>user_value</strong> (<em>str</em>) – The value that the field is expected to contain.</p></li>
-<li><p><strong>po_component</strong> (<em>str</em>) – POUI component name that you want to check content on screen</p></li>
-<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The field or label of a field that must be checked.</p></li>
+<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The value that the field is expected to contain.</p></li>
+<li><p><strong>po_component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – POUI component name that you want to check content on screen</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -167,7 +169,7 @@
 <a class="reference external" href="https://po-ui.io/documentation/po-avatar">https://po-ui.io/documentation/po-avatar</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>position</strong> (<em>int</em>) – <ul class="simple">
+<dd class="field-odd"><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – <ul class="simple">
 <li><p><strong>Default:</strong> 1</p></li>
 </ul>
 </p>
@@ -222,9 +224,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>selector</strong> (<em>str</em>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
-<li><p><strong>locator</strong> (<em>str</em>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
-<li><p><strong>right_click</strong> (<em>bool</em>) – Perform a right-click action if True (default is False).</p></li>
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>right_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Perform a right-click action if True (default is False).</p></li>
 </ul>
 </dd>
 </dl>
@@ -243,7 +245,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-checkbox">https://po-ui.io/documentation/po-checkbox</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The CheckBox label</p>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The CheckBox label</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -283,9 +285,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>label</strong> (<em>str</em>) – The tooltip name for icon</p></li>
-<li><p><strong>class_name</strong> (<em>str</em>) – The POUI class name for icon</p></li>
-<li><p><strong>position</strong> (<em>int</em>)</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The tooltip name for icon</p></li>
+<li><p><strong>class_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The POUI class name for icon</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -302,6 +304,46 @@ before using these methods in the script.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickLink">
+<span class="sig-name descname"><span class="pre">ClickLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">href</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickLink" title="Link to this definition"></a></dt>
+<dd><p>Click a PO UI link (po-link) element.</p>
+<p>Locate a link element inside PO UI components and perform a click on it. The search can use the
+visible link text and/or the element’s <cite>href</cite> attribute. When multiple elements match, the
+<cite>position</cite> parameter selects which occurrence to click (1-based).</p>
+<p>Parameters
+:param text: Visible text of the link to click. If empty, text matching is ignored.
+:type text: str
+:param href: Destination URL (<cite>href</cite> attribute) to match. Can be a relative or absolute URL.
+:type href: str
+:param position: 1-based index of the occurrence to click when several elements match - Default: 1
+:type position: int
+:param contains:    If False (default) the method requires an exact match of <cite>text</cite> or <cite>href</cite>;</p>
+<blockquote>
+<div><p>If True the method accepts a substring match.</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
+<p>Behavior
+- If only <cite>text</cite> is provided, matching is performed on the element’s visible text.
+- If only <cite>href</cite> is provided, matching is performed solely on the <cite>href</cite> attribute.
+- If both <cite>text</cite> and <cite>href</cite> are provided, the method filters first by visible text, then by the destination URL (<cite>href</cite>).</p>
+<p>Returns
+:return: None</p>
+<p>Examples
+&gt;&gt;&gt; # Click by visible text
+&gt;&gt;&gt; oHelper.ClickLink(‘PO Link’)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Click by href</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickLink</span><span class="p">(</span><span class="n">href</span><span class="o">=</span><span class="s1">&#39;https://po-ui.io&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Click the second link whose visible text contains &#39;More&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickLink</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Link&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">contains</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See also: <a class="reference external" href="https://po-ui.io/documentation/po-link?view=web">https://po-ui.io/documentation/po-link?view=web</a></p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickLookUp">
 <span class="sig-name descname"><span class="pre">ClickLookUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickLookUp" title="Link to this definition"></a></dt>
 <dd><p>Component used to open a search window with a table that lists data from a service.
@@ -314,10 +356,10 @@ before using these methods in the script.</p>
 </ul>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -350,7 +392,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-popup">https://po-ui.io/documentation/po-popup</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<em>str</em>)</p>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -384,29 +426,107 @@ before using these methods in the script.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tir.main.Poui.ClickTable">
-<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radio_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickTable" title="Link to this definition"></a></dt>
-<dd><p>Clicks on the Table of POUI component.
-<a class="reference external" href="https://po-ui.io/documentation/po-table">https://po-ui.io/documentation/po-table</a></p>
+<dt class="sig sig-object py" id="tir.main.Poui.ClickSwitch">
+<span class="sig-name descname"><span class="pre">ClickSwitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickSwitch" title="Link to this definition"></a></dt>
+<dd><p>Click on POUI Switch component
+<a class="reference external" href="https://po-ui.io/documentation/po-switch">https://po-ui.io/documentation/po-switch</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>first_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
-<li><p><strong>second_column</strong> (<em>str</em>) – Column name to be used as reference.</p></li>
-<li><p><strong>first_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
-<li><p><strong>second_content</strong> (<em>str</em>) – Content of the column to be searched.</p></li>
-<li><p><strong>table_number</strong> (<em>int</em>) – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
-<li><p><strong>itens</strong> (<em>bool</em>) – Bool parameter that click in all itens based in the field and content reference.</p></li>
-<li><p><strong>click_cell</strong> (<em>str</em>) – Content to click based on a column position to close the axis</p></li>
-<li><p><strong>checkbox</strong> (<em>bool</em>) – If you want to click on the checkbox component in the table</p></li>
+<li><p><strong>label</strong> – field from lookup input</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Position which duplicated element is located. - <strong>Default:</strong> 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p>Usage:
+&gt;&gt;&gt; # Call the method:
+&gt;&gt;&gt; oHelper.Switch(label=’Codigo’)
+&gt;&gt;&gt; oHelper.Switch(label=’Ativo’, position=2)
+&gt;&gt;&gt; oHelper.Switch(label=’Ver Sld Alt’, value=False)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickTable">
+<span class="sig-name descname"><span class="pre">ClickTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radio_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickTable" title="Link to this definition"></a></dt>
+<dd><p>Clicks on the Table of POUI component.
+<a class="reference external" href="https://po-ui.io/documentation/po-table">https://po-ui.io/documentation/po-table</a>
+and
+<a class="reference external" href="https://thf.dev.totvs.app/v19/documentation/thf-grid">https://thf.dev.totvs.app/v19/documentation/thf-grid</a></p>
+<p>Supports both legacy and new syntax:</p>
+<p><strong>Legacy syntax (Deprecated):</strong>
+Use <cite>first_column</cite>, <cite>second_column</cite>, <cite>first_content</cite>, <cite>second_content</cite> parameters.
+Will be removed in future versions.
+&gt;&gt;&gt; oHelper.ClickTable(“Code”, “”, “000001”, “”, click_cell=”Edit”)
+&gt;&gt;&gt; oHelper.ClickTable(“Code”, “Name”, “000001”, “John”, click_cell=”Edit”)</p>
+<p><strong>New syntax (recommended):</strong>
+Use <cite>columns</cite> and <cite>values</cite> parameters for cleaner, more flexible filtering.
+&gt;&gt;&gt; oHelper.ClickTable(columns=’Code’, values=’000001’, click_cell=’Edit’)
+&gt;&gt;&gt; oHelper.ClickTable(columns=[‘Code’, ‘Name’], values=[‘000001’, ‘John’], click_cell=’Edit’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – [DEPRECATED] First column name to filter</p></li>
+<li><p><strong>second_column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – [DEPRECATED] Second column name to filter</p></li>
+<li><p><strong>first_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – [DEPRECATED] Value to match in first column</p></li>
+<li><p><strong>second_content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – [DEPRECATED] Value to match in second column</p></li>
+<li><p><strong>table_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Table position number when multiple table exist - <strong>Default:</strong> 1</p></li>
+<li><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – [DEPRECATED] Click all items matching criteria - <strong>Default:</strong> False</p></li>
+<li><p><strong>click_cell</strong> – Column name where the click action should occur.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="n">first_column</span><span class="o">=</span><span class="s1">&#39;Código&#39;</span><span class="p">,</span> <span class="n">first_content</span><span class="o">=</span><span class="s1">&#39;000003&#39;</span><span class="p">,</span> <span class="n">click_cell</span><span class="o">=</span><span class="s1">&#39;Editar&#39;</span><span class="p">)</span>
-<span class="go">:return: None</span>
+<p>If you need to select rows consider to use checkbox or radio_input parameters - <strong>Default:</strong> None
+:type click_cell: str
+:param checkbox: If True/False, toggles checkbox to that state - <strong>Default:</strong> None
+:type checkbox: bool
+:param radio_input: Click radio button - <strong>Default:</strong> False
+:type radio_input: bool
+:param columns: Column name(s) to filter. Can be a string, or list
+:type columns: str or list
+:param values: Value(s) to match in columns. Can be a string, or list
+:type values: str or list
+:param match_all: If True, performs action on all matching rows. If False, only first match - <strong>Default:</strong> False
+:type match_all: bool</p>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Legacy calls (deprecated):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="s2">&quot;Branch&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;D MG 01&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">click_cell</span><span class="o">=</span><span class="s2">&quot;Edit&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="s2">&quot;Code&quot;</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="s2">&quot;John&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="s2">&quot;Code&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">itens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># New calls (recommended):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;Branch&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;D MG 01&#39;</span><span class="p">,</span> <span class="n">click_cell</span><span class="o">=</span><span class="s1">&#39;Edit&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># New syntax - Multiple columns filter:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Code&#39;</span><span class="p">,</span> <span class="s1">&#39;Name&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;000001&#39;</span><span class="p">,</span> <span class="s1">&#39;John&#39;</span><span class="p">],</span> <span class="n">click_cell</span><span class="o">=</span><span class="s1">&#39;Actions&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># New syntax - Toggle checkbox:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;Code&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;000001&#39;</span><span class="p">,</span> <span class="n">checkbox</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># New syntax - Click all matching rows:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickTable</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;Active&#39;</span><span class="p">,</span> <span class="n">match_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not mix legacy and new syntax in the same call.
+Legacy parameters will be removed in a future release.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>When <cite>columns</cite> is None and <cite>values</cite> is None, clicks the first row</p></li>
+<li><p><cite>click_cell</cite> specifies which column cell to click (by column name)</p></li>
+<li><p><cite>checkbox</cite> parameter only works with checkbox columns</p></li>
+<li><p><cite>radio_input</cite> parameter only works with radio button columns</p></li>
+<li><p>Use <cite>match_all=True</cite> to interact with all rows matching the filter criteria</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -474,9 +594,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>selector</strong> (<em>str</em>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
-<li><p><strong>locator</strong> (<em>str</em>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
-<li><p><strong>value</strong> (<em>str</em>) – The value to be used (e.g., for input or interaction).</p></li>
+<li><p><strong>selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The type of selector to use (e.g., ‘css’, ‘xpath’, ‘id’).</p></li>
+<li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The locator expression to identify the element. (e.g., By.CSS_SELECTOR, By.ID)</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The value to be used (e.g., for input or interaction).</p></li>
 </ul>
 </dd>
 </dl>
@@ -496,9 +616,9 @@ before using these methods in the script.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<em>str</em>) – Input text title that you want to fill</p></li>
-<li><p><strong>value</strong> (<em>str</em>) – Value that fill in input</p></li>
-<li><p><strong>position</strong> (<em>int</em>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Input text title that you want to fill</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Value that fill in input</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -517,7 +637,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-page-dynamic-search">https://po-ui.io/documentation/po-page-dynamic-search</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>content</strong> (<em>str</em>) – Content to be Search.</p>
+<dd class="field-odd"><p><strong>content</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Content to be Search.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -535,7 +655,7 @@ before using these methods in the script.</p>
 <a class="reference external" href="https://po-ui.io/documentation/po-tabs">https://po-ui.io/documentation/po-tabs</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The tab label name</p>
+<dd class="field-odd"><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The tab label name</p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
@@ -562,7 +682,7 @@ before using these methods in the script.</p>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>itens</strong> (<em>str</em>) – List of itens that will hold the wait.</p>
+<dd class="field-odd"><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – List of itens that will hold the wait.</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -580,7 +700,7 @@ before using these methods in the script.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>itens</strong> – String that will hold the wait.</p></li>
-<li><p><strong>timeout</strong> (<em>str</em>) – Timeout that wait before return.</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Timeout that wait before return.</p></li>
 </ul>
 </dd>
 </dl>

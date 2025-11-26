@@ -948,7 +948,7 @@ class Base(unittest.TestCase):
         """
         return len(list(filter(lambda x: x.function == function, inspect.stack()))) > 0
 
-    def set_element_focus(self, element):
+    def set_element_focus(self, element, twebview=False):
         """
         [Internal]
 
@@ -965,6 +965,9 @@ class Base(unittest.TestCase):
         >>> text = self.set_element_focus(element())
         """   
         try:
+            if twebview:
+                self.switch_to_iframe()
+            
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
             logger().exception("********Element Stale set_element_focus*********")
@@ -1559,3 +1562,4 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
+    
