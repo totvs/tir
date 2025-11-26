@@ -591,10 +591,14 @@ class Webapp():
 
         :param button: Button to be clicked.
         :type button: str
-        :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
+        :param sub_item: Sub item to be clicked inside the first button, if the sub_item is also a menu with sub items, separate sub items of the sub item with comma and spaces. - **Default:** "" (empty string)
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+		
+        .. note::
+            If the `sub_item` is also a menu with other elements, it is necessary to add a comma and a space for each menu and item.
+			`self.oHelper.SetButton("Other Actions", sub_item="Delete, Residue")`
 
         > ⚠️ **Warning:**
         > If there are a sequence of similar buttons. Example:
@@ -610,6 +614,9 @@ class Webapp():
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
+        >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
