@@ -1867,7 +1867,7 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
-    def set_program_new_home(self, program):
+    def set_program_new_home(self, program: str) -> None:
         """
         [Internal]
 
@@ -1882,20 +1882,25 @@ class WebappInternal(Base):
         >>> self.set_program_new_home("MATA020")
         """
         success = False
+        search_label = 'Pesquisar e executar'
         poui = PouiInternal(autostart=False)
 
-        poui.WaitShow('Pesquisar e executar', throw_error=False)
+        get_wtb = lambda: len(self.web_scrap(term='wa-tab-button', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body'))
+        wtb_before = get_wtb()
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
+            poui.WaitShow(search_label, throw_error=False)
             
-            poui.InputValue('Pesquisar e executar', program, 1)
+            poui.InputValue(search_label, program, 1)
+            poui.WaitHide('Carregando', timeout=30, throw_error=False)
             poui.click_po_list_box(second_value=program)
+            
+            ele_hidden = poui.WaitHide(search_label, timeout=60, throw_error=False)
 
-            endtime_changes = time.time() + 60
-            while time.time() < endtime_changes and not success:
-                success = not poui.WaitShow('Pesquisar e executar', timeout=5, throw_error=False)
-                time.sleep(1)
+            wtb_after = get_wtb()
+
+            success = (ele_hidden is True or ele_hidden is None) and (wtb_before != wtb_after)
 
         if not success:
             self.log_error(f"Couldn't find program: {program}")
