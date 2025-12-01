@@ -1789,10 +1789,10 @@ class WebappInternal(Base):
         >>> self.set_program("MATA020")
         """
         
-        logger().info(f"Setting program: {program}")
+        logger().info(f"Setting program{' on the new home' if self.config.new_home else ''}: {program}")
 
         if self.config.new_home:
-            self.set_program_new_home(program)
+            self._set_program_new_home(program)
             return
 
         cget_term = '[name=cGet]'
@@ -1867,7 +1867,7 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
-    def set_program_new_home(self, program: str) -> None:
+    def _set_program_new_home(self, program: str) -> None:
         """
         [Internal]
 
@@ -1884,12 +1884,21 @@ class WebappInternal(Base):
         success = False
         search_label = 'Pesquisar e executar'
         poui = PouiInternal(autostart=False)
+        attempts = 1
 
         get_wtb = lambda: len(self.web_scrap(term='wa-tab-button', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body'))
         wtb_before = get_wtb()
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
+            logger().debug(f'Attempt {attempts} to set the program. Tabs count before: {wtb_before}')
+
+            if attempts > 1:
+                time.sleep(0.5)
+
+            ele_hidden = None
+            wtb_after = None
+
             poui.WaitShow(search_label, throw_error=False)
             
             poui.InputValue(search_label, program, 1)
@@ -1902,13 +1911,17 @@ class WebappInternal(Base):
 
             success = (ele_hidden is True or ele_hidden is None) and (wtb_before != wtb_after)
 
+            attempts += 1
+
         if not success:
             self.log_error(f"Couldn't find program: {program}")
 
         if self.config.initial_program.lower() == 'sigaadv':                
             self.close_warning_screen_after_routine()
             self.close_coin_screen_after_routine()
-            self.close_news_screen_after_routine()        
+            self.close_news_screen_after_routine()
+
+        logger().debug(f'Program set successfully! ele_hidden = "{ele_hidden}", wtb_after = "{ele_hidden}".')
 
     def escape_to_main_menu(self):
         """
