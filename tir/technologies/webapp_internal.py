@@ -6308,12 +6308,10 @@ class WebappInternal(Base):
         """
 
         x3_dictionaries = self.create_x3_tuple()
-
-        if self.grid_input:
-            selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
-            self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
+        selector = ".dict-tgetdados, .dict-tgrid, .dict-tcbrowse, .dict-msbrgetdbase,.dict-brgetddb, .dict-twbrowse"
 
         for field in self.grid_input:
+            self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
             # if new line parameter and field column is empty
             if field[3] and field[0] == "":
                 self.new_grid_line(field)
