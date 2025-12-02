@@ -4691,3 +4691,53 @@ class PouiInternal(Base):
                 pass
 
             return elements if elements else None
+    
+    def Program(self, program_name):
+        """
+        [Internal]
+
+        Method that sets the program in the initial menu search field on New Home.
+
+        :param program: The program name
+        :type program: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.set_program_new_home("MATA020")
+        """
+        success = False
+        search_term = "[class*='card-wrapper']"
+        attempts = 1
+
+        self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        
+        get_wtb = lambda: len(self.get_current_DOM().select('wa-tab-button'))
+        wtb_before = get_wtb()
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            logger().debug(f'Attempt {attempts} to set the program. Tabs count before: {wtb_before}')
+
+            if attempts > 1:
+                time.sleep(0.5)
+
+            ele_hidden = None
+            wtb_after = None
+
+            hide_element = next(iter(self.web_scrap(term=search_term, 
+                                                    scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                    main_container='body')))
+            
+            self.InputValue('Pesquisar e executar', program_name, 1)
+            self.po_loading('body')
+            self.click_po_list_box(second_value=program_name)
+
+            self.wait_element_is_not_displayed(hide_element, timeout=60)
+            ele_hidden = not self.element_is_displayed(hide_element)
+
+            wtb_after = get_wtb()
+
+            success = (ele_hidden) and (wtb_before != wtb_after)
+
+            attempts += 1

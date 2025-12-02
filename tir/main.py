@@ -24,6 +24,14 @@ class Webapp():
         self.__webapp = WebappInternal(config_path, autostart)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+        self.__poui = None
+        
+        self.__webapp.set_program_delegate(lambda program_name: self._ensure_poui().Program(program_name))
+
+    def _ensure_poui(self):
+        if self.__poui is None:
+            self.__poui = PouiInternal(autostart=False)
+        return self.__poui
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """

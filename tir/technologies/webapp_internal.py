@@ -34,7 +34,6 @@ from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from io import StringIO
 from tir.technologies.core.base_database import BaseDatabase
-from tir.technologies.poui_internal import PouiInternal
 
 def count_time(func):
     """
@@ -128,6 +127,7 @@ class WebappInternal(Base):
         self.registry_endpoint = ''
         self.rac_endpoint = ''
         self.platform_endpoint = ''
+        self.program_delegate = None
 
 
         if not Base.driver:
@@ -147,6 +147,9 @@ class WebappInternal(Base):
             self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)
+
+    def set_program_delegate(self, func):
+        self.program_delegate = func
 
     def SetupTSS( self, initial_program = "", enviroment = ""):
         """
@@ -1773,7 +1776,6 @@ class WebappInternal(Base):
 
         self.set_program(program_name)
 
-
     def set_program(self, program):
         """
         [Internal]
@@ -1791,70 +1793,76 @@ class WebappInternal(Base):
         
         logger().info(f"Setting program{' on the new home' if self.config.new_home else ''}: {program}")
 
-        if self.config.new_home:
-            self._set_program_new_home(program)
-            return
-
         cget_term = '[name=cGet]'
+
         try:
 
-            self.escape_to_main_menu()
+            if self.config.new_home:
+                if not self.program_delegate:
+                    self.log_error("No program delegate injected for new home; cannot set program.")
+                    return
+                
+                self.program_delegate(program)
 
-            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+            else:
 
-            soup = self.get_current_DOM()
-            tget = next(iter(soup.select(cget_term)), None)
-            if tget:
-                if self.webapp_shadowroot():
-                    tget_img = next(iter(tget.select(".button-image")), None)
-                    s_tget_img = lambda: self.soup_to_selenium(tget_img)
+                self.escape_to_main_menu()
 
-                    s_tget = lambda: self.soup_to_selenium(tget)
-                    tget_input = self.find_child_element('input', s_tget())[0]
-                else:
-                    tget_input = next(iter(tget.select("input")), None)
-                    tget_img = next(iter(tget.select("img")), None)
-                    if tget_img is None or not self.element_is_displayed(tget_img):
-                        self.log_error("Couldn't find Program field.")
-                    s_tget = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_input))
-                    s_tget_img = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_img))
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
-                self.double_click(s_tget())
-                self.set_element_focus(s_tget())
-                self.send_keys(s_tget(), Keys.HOME)
-                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                soup = self.get_current_DOM()
+                tget = next(iter(soup.select(cget_term)), None)
+                if tget:
+                    if self.webapp_shadowroot():
+                        tget_img = next(iter(tget.select(".button-image")), None)
+                        s_tget_img = lambda: self.soup_to_selenium(tget_img)
 
-                if self.webapp_shadowroot():
-                    self.find_child_element('input', s_tget())
-                else:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                        s_tget = lambda: self.soup_to_selenium(tget)
+                        tget_input = self.find_child_element('input', s_tget())[0]
+                    else:
+                        tget_input = next(iter(tget.select("input")), None)
+                        tget_img = next(iter(tget.select("img")), None)
+                        if tget_img is None or not self.element_is_displayed(tget_img):
+                            self.log_error("Couldn't find Program field.")
+                        s_tget = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_input))
+                        s_tget_img = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_img))
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                self.send_keys(s_tget(), program)
-                current_value = self.get_web_value(s_tget()).strip()
+                    self.double_click(s_tget())
+                    self.set_element_focus(s_tget())
+                    self.send_keys(s_tget(), Keys.HOME)
+                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
 
-                endtime = time.time() + self.config.time_out
-                while(time.time() < endtime and current_value != program):
-                    self.send_keys(s_tget(), Keys.BACK_SPACE)
-                    if not self.webapp_shadowroot():
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+                    if self.webapp_shadowroot():
+                        self.find_child_element('input', s_tget())
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
 
-                if current_value.strip() != program.strip():
-                    self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
-                self.set_element_focus(s_tget_img())
+                    endtime = time.time() + self.config.time_out
+                    while(time.time() < endtime and current_value != program):
+                        self.send_keys(s_tget(), Keys.BACK_SPACE)
+                        if not self.webapp_shadowroot():
+                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
 
-                if self.webapp_shadowroot():
-                    self.find_child_element('input', s_tget())
-                else:
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                        self.send_keys(s_tget(), program)
+                        current_value = self.get_web_value(s_tget()).strip()
 
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
-                self.send_action(self.click, s_tget_img)
-                self.wait_element_is_not_displayed(tget_img)
-                self.close_news_screen()
+                    if current_value.strip() != program.strip():
+                        self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
+                    self.set_element_focus(s_tget_img())
+
+                    if self.webapp_shadowroot():
+                        self.find_child_element('input', s_tget())
+                    else:
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
+                    self.send_action(self.click, s_tget_img)
+                    self.wait_element_is_not_displayed(tget_img)
+                    self.close_news_screen()
 
             if self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
@@ -1866,62 +1874,6 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             logger().exception(str(e))
-
-    def _set_program_new_home(self, program: str) -> None:
-        """
-        [Internal]
-
-        Method that sets the program in the initial menu search field on New Home.
-
-        :param program: The program name
-        :type program: str
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.set_program_new_home("MATA020")
-        """
-        success = False
-        search_label = 'Pesquisar e executar'
-        poui = PouiInternal(autostart=False)
-        attempts = 1
-
-        get_wtb = lambda: len(self.web_scrap(term='wa-tab-button', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body'))
-        wtb_before = get_wtb()
-
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not success:
-            logger().debug(f'Attempt {attempts} to set the program. Tabs count before: {wtb_before}')
-
-            if attempts > 1:
-                time.sleep(0.5)
-
-            ele_hidden = None
-            wtb_after = None
-
-            poui.WaitShow(search_label, throw_error=False)
-            
-            poui.InputValue(search_label, program, 1)
-            poui.WaitHide('Carregando', timeout=30, throw_error=False)
-            poui.click_po_list_box(second_value=program)
-            
-            ele_hidden = poui.WaitHide(search_label, timeout=60, throw_error=False)
-
-            wtb_after = get_wtb()
-
-            success = (ele_hidden is True or ele_hidden is None) and (wtb_before != wtb_after)
-
-            attempts += 1
-
-        if not success:
-            self.log_error(f"Couldn't find program: {program}")
-
-        if self.config.initial_program.lower() == 'sigaadv':                
-            self.close_warning_screen_after_routine()
-            self.close_coin_screen_after_routine()
-            self.close_news_screen_after_routine()
-
-        logger().debug(f'Program set successfully! ele_hidden = "{ele_hidden}", wtb_after = "{ele_hidden}".')
 
     def escape_to_main_menu(self):
         """
