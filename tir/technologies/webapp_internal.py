@@ -127,8 +127,7 @@ class WebappInternal(Base):
         self.registry_endpoint = ''
         self.rac_endpoint = ''
         self.platform_endpoint = ''
-        self.program_delegate = None
-
+        self.__adapter = None
 
         if not Base.driver:
             Base.driver = self.driver
@@ -148,8 +147,14 @@ class WebappInternal(Base):
             self.log_error(message)
             self.assertTrue(False, message)
 
-    def set_program_delegate(self, func):
-        self.program_delegate = func
+    def set_adapter(self, adapter):
+        """
+        [Internal]
+
+        Receives an Adapter instance injected by the public Webapp class.
+        Avoids internal instantiation and circular coupling.
+        """
+        self.__adapter = adapter
 
     def SetupTSS( self, initial_program = "", enviroment = ""):
         """
@@ -375,8 +380,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")) and
-                not self.config.new_home):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")) and not self.config.new_home):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
@@ -1772,9 +1776,9 @@ class WebappInternal(Base):
                 self.log_error_newlog()
 
         if not self.log.program:
-            self.log.program = program_name        
-
+            self.log.program = program_name
         self.set_program(program_name)
+
 
     def set_program(self, program):
         """
@@ -1790,79 +1794,68 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.set_program("MATA020")
         """
-        
-        logger().info(f"Setting program{' on the new home' if self.config.new_home else ''}: {program}")
 
         cget_term = '[name=cGet]'
-
         try:
+            logger().info(f"Setting program: {program}")
 
-            if self.config.new_home:
-                if not self.program_delegate:
-                    self.log_error("No program delegate injected for new home; cannot set program.")
-                    return
-                
-                self.program_delegate(program)
+            self.escape_to_main_menu()
 
-            else:
+            self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
-                self.escape_to_main_menu()
+            soup = self.get_current_DOM()
+            tget = next(iter(soup.select(cget_term)), None)
+            if tget:
+                if self.webapp_shadowroot():
+                    tget_img = next(iter(tget.select(".button-image")), None)
+                    s_tget_img = lambda: self.soup_to_selenium(tget_img)
 
-                self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+                    s_tget = lambda: self.soup_to_selenium(tget)
+                    tget_input = self.find_child_element('input', s_tget())[0]
+                else:
+                    tget_input = next(iter(tget.select("input")), None)
+                    tget_img = next(iter(tget.select("img")), None)
+                    if tget_img is None or not self.element_is_displayed(tget_img):
+                        self.log_error("Couldn't find Program field.")
+                    s_tget = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_input))
+                    s_tget_img = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_img))
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                soup = self.get_current_DOM()
-                tget = next(iter(soup.select(cget_term)), None)
-                if tget:
-                    if self.webapp_shadowroot():
-                        tget_img = next(iter(tget.select(".button-image")), None)
-                        s_tget_img = lambda: self.soup_to_selenium(tget_img)
+                self.double_click(s_tget())
+                self.set_element_focus(s_tget())
+                self.send_keys(s_tget(), Keys.HOME)
+                ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
 
-                        s_tget = lambda: self.soup_to_selenium(tget)
-                        tget_input = self.find_child_element('input', s_tget())[0]
-                    else:
-                        tget_input = next(iter(tget.select("input")), None)
-                        tget_img = next(iter(tget.select("img")), None)
-                        if tget_img is None or not self.element_is_displayed(tget_img):
-                            self.log_error("Couldn't find Program field.")
-                        s_tget = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_input))
-                        s_tget_img = lambda : self.driver.find_element(By.XPATH, xpath_soup(tget_img))
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                if self.webapp_shadowroot():
+                    self.find_child_element('input', s_tget())
+                else:
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                    self.double_click(s_tget())
-                    self.set_element_focus(s_tget())
-                    self.send_keys(s_tget(), Keys.HOME)
-                    ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+                self.send_keys(s_tget(), program)
+                current_value = self.get_web_value(s_tget()).strip()
 
-                    if self.webapp_shadowroot():
-                        self.find_child_element('input', s_tget())
-                    else:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
+                endtime = time.time() + self.config.time_out
+                while(time.time() < endtime and current_value != program):
+                    self.send_keys(s_tget(), Keys.BACK_SPACE)
+                    if not self.webapp_shadowroot():
+                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
 
                     self.send_keys(s_tget(), program)
                     current_value = self.get_web_value(s_tget()).strip()
 
-                    endtime = time.time() + self.config.time_out
-                    while(time.time() < endtime and current_value != program):
-                        self.send_keys(s_tget(), Keys.BACK_SPACE)
-                        if not self.webapp_shadowroot():
-                            self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
+                if current_value.strip() != program.strip():
+                    self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
+                self.set_element_focus(s_tget_img())
 
-                        self.send_keys(s_tget(), program)
-                        current_value = self.get_web_value(s_tget()).strip()
+                if self.webapp_shadowroot():
+                    self.find_child_element('input', s_tget())
+                else:
+                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                    if current_value.strip() != program.strip():
-                        self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
-                    self.set_element_focus(s_tget_img())
-
-                    if self.webapp_shadowroot():
-                        self.find_child_element('input', s_tget())
-                    else:
-                        self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
-
-                    self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
-                    self.send_action(self.click, s_tget_img)
-                    self.wait_element_is_not_displayed(tget_img)
-                    self.close_news_screen()
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
+                self.send_action(self.click, s_tget_img)
+                self.wait_element_is_not_displayed(tget_img)
+                self.close_news_screen()
 
             if self.config.initial_program.lower() == 'sigaadv':
                 self.close_warning_screen_after_routine()
@@ -3505,7 +3498,7 @@ class WebappInternal(Base):
                 if self.config.routine_type == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
-                    self.set_program(self.config.routine)
+                    self.__adapter.set_program(self.config.routine)
 
     def wait_user_screen(self):
 
@@ -8490,7 +8483,7 @@ class WebappInternal(Base):
             if ">" in self.config.routine:
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
-                self.Program(self.config.routine)
+                self.__adapter.Program(self.config.routine)
 
         self.tmenu_screen = None
 
@@ -8590,7 +8583,7 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    self.__adapter.Program(self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11259,7 +11252,7 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    self.__adapter.Program(self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11386,7 +11379,7 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    self.__adapter.Program(self.config.routine)
 
             self.tmenu_screen = None
 

@@ -4706,6 +4706,12 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.set_program_new_home("MATA020")
         """
+
+        logger().info(f"Setting program on the New Home: {program_name}")
+
+        self.config.routine_type = 'Program'
+        self.config.routine = program_name
+
         success = False
         search_term = "[class*='card-wrapper']"
         attempts = 1
@@ -4729,6 +4735,7 @@ class PouiInternal(Base):
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                     main_container='body')))
             
+            # Implementar lógica de diferentes idiomas (self.language)
             self.InputValue('Pesquisar e executar', program_name, 1)
             self.po_loading('body')
             self.click_po_list_box(second_value=program_name)
@@ -4741,3 +4748,7 @@ class PouiInternal(Base):
             success = (ele_hidden) and (wtb_before != wtb_after)
 
             attempts += 1
+
+        if not success:
+            self.log_error("Couldn't find Program field.")
+    

@@ -5,6 +5,8 @@ from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
+from tir.technologies.core.adapter import Adapter
+
 """
 This file must contain the definition of all User Classes.
 
@@ -22,16 +24,11 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__adapter = Adapter(config_path)
+        self.__adapter.set_webapp(self.__webapp)
+        self.__webapp.set_adapter(self.__adapter)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
-        self.__poui = None
-        
-        self.__webapp.set_program_delegate(lambda program_name: self._ensure_poui().Program(program_name))
-
-    def _ensure_poui(self):
-        if self.__poui is None:
-            self.__poui = PouiInternal(autostart=False)
-        return self.__poui
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -456,7 +453,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__webapp.Program(program_name)
+        self.__adapter.Program(program_name)
 
     def RestoreParameters(self):
         """
