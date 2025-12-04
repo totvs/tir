@@ -6587,9 +6587,17 @@ class WebappInternal(Base):
                     grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
 
                     # get column index from header index
-                    if grid_header_index and column_name in grid_header_index[0]:
-                        column_index = grid_header_index[0][column_name]
-                        column_cell = columns_element[column_index]
+                    if grid_header_index:
+                        # try remove spaces from column name to find match
+                        if column_name not in grid_header_index[0]:
+                            column_name = next(
+                                (x for x in grid_header_index[0].keys()
+                                 if re.sub(r'\s+', '', column_name) in re.sub(r'\s+', '', x)),
+                                ''
+                            )
+                        if column_name in grid_header_index[0]:
+                            column_index = grid_header_index[0][column_name]
+                            column_cell = columns_element[column_index]
 
             if (row is not None) and (row > len(rows) - 1 or row < 0) and not column_cell:
                 self.log_error("Couldn't select the specified row: {row + 1}")
