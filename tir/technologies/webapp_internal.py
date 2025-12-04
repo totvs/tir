@@ -6363,6 +6363,11 @@ class WebappInternal(Base):
         :type x3_dictionaries: Tuple of Dictionaries
 
         """
+
+        if isinstance(field[1], str) and field[1].strip() == "":
+            logger().debug(f"Skipping fill_grid for field '{field[0]}' - empty string value provided")
+            return
+
         field_to_label, field_to_valtype = self.extract_field_info(x3_dictionaries)
         field_one = self.get_field_one(field)
         layer_selector = self.get_layer_selector(field)
