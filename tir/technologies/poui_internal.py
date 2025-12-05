@@ -4740,6 +4740,14 @@ class PouiInternal(Base):
             self.po_loading('body')
             self.click_po_list_box(second_value=program_name)
 
+            # -- Trecho de código temporário --
+            time.sleep(1)
+            btn_confirmar = lambda: self.get_current_DOM().select("wa-button[caption='Confirmar']")
+            if btn_confirmar():
+                btn_confirmar_sel = lambda: self.soup_to_selenium(next(iter(btn_confirmar())))
+                self.click(btn_confirmar_sel())
+            # -- --
+
             self.wait_element_is_not_displayed(hide_element, timeout=60)
             ele_hidden = not self.element_is_displayed(hide_element)
 
