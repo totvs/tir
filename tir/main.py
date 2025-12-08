@@ -5,7 +5,7 @@ from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
-from tir.technologies.core.adapter import Adapter
+from tir.technologies.core.router import Router
 
 """
 This file must contain the definition of all User Classes.
@@ -24,21 +24,20 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
-        self.__adapter = Adapter(config_path)
-        self.__adapter.set_webapp(self.__webapp)
-        self._subscribe_routes()
+        self.__router = Router(config_path, inst_webapp=self.__webapp)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+        self._subscribe_routes()
 
     def _subscribe_routes(self):
-        """Registra handlers do Adapter no event bus para roteamento.
+        """Registra handlers do Router no event bus para roteamento.
 
-        Mantém scripts existentes e evita acoplamento do Adapter no
+        Mantém scripts existentes e evita acoplamento do Router no
         WebappInternal.
         """
         from tir.technologies.core.events import subscribe
-        subscribe('route.program', self.__adapter.Program)
-        subscribe('route.set_program', self.__adapter.set_program)
+        subscribe('route.program', self.__router.Program)
+        subscribe('route.set_program', self.__router.set_program)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -463,7 +462,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__adapter.Program(program_name)
+        self.__router.Program(program_name)
 
     def RestoreParameters(self):
         """

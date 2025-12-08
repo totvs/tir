@@ -1,47 +1,54 @@
 
 from tir.technologies.core.config import ConfigLoader
 
-class Adapter:
+class Router:
     """
-    Adapter for routing between UI implementations (POUI and WebApp).
+    Routes method calls between POUI and WebApp implementations dynamically.
 
-    This class exposes a stable interface for scripts, deciding at runtime
-    which internal implementation will be triggered based on configuration.
+    This class maintains backward compatibility with existing test scripts while
+    enabling transparent migration from WebApp to POUI. It automatically selects
+    the appropriate driver based on runtime configuration.
 
-    Goals:
-    - Preserve compatibility with existing scripts that import `Webapp`.
-    - Avoid unnecessary coupling through dependency injection (instances of
-        `WebappInternal`/`PouiInternal` can be provided externally).
+    Design Patterns:
+    - **Strategy**: Selects POUI or WebApp at runtime based on configuration
+      (e.g., `config.new_home` flag). Needed because Protheus is gradually
+      migrating screens from WebApp to POUI.
 
-    Parameters:
-    - config_path: Path to the configuration file (config.json).
-    - inst_webapp: Pre-existing instance of `WebappInternal` (optional).
-    - inst_poui: Pre-existing instance of `PouiInternal` (optional).
+    - **Adapter**: Translates method calls when interfaces differ between
+      implementations (e.g., `set_program()` in WebApp → `Program()` in POUI).
 
-    Behavior:
-    - Internal instances are lazily initialized: they are created only when
-        a path is selected and there is no corresponding instance yet.
+    :param config_path: Path to config.json file
+    :param inst_webapp: Optional WebappInternal instance for injection
+    :param inst_poui: Optional PouiInternal instance for injection
+
+    Note: Driver instances are created lazily only when needed.
     """
 
     def __init__(self, config_path: str = "", inst_webapp=None, inst_poui=None):
         self.config = ConfigLoader()
         self._config_path = config_path
-        self.__webapp = inst_webapp
-        self.__poui = inst_poui
+        self.__webapp = None
+        self.__poui = None
+        self.set_webapp(inst_webapp)
+        self.set_poui(inst_poui)
 
     def set_webapp(self, inst):
         """Set the `WebappInternal` instance to be used.
 
-        Recommended usage: allow injection by whoever orchestrates the lifecycle,
-        avoiding that the Adapter takes responsibility for creation in testing
-        or reuse scenarios.
+        Allows injection at initialization or later. Passing None is valid
+        and will trigger lazy initialization when needed.
+
+        :param inst: WebappInternal instance or None for lazy initialization
         """
         self.__webapp = inst
 
     def set_poui(self, inst):
         """Set the `PouiInternal` instance to be used.
 
-        Similar to `set_webapp`.
+        Allows injection at initialization or later. Passing None is valid
+        and will trigger lazy initialization when needed.
+
+        :param inst: PouiInternal instance or None for lazy initialization
         """
         self.__poui = inst
 
@@ -66,6 +73,14 @@ class Adapter:
             from tir.technologies.poui_internal import PouiInternal
             self.__poui = PouiInternal(self._config_path, autostart=False)
         return self.__poui
+    
+    def _route_to_driver(self, condition_fn):
+        """Roteia para o driver apropriado baseado em uma função de condição.
+        
+        :param condition_fn: Função que retorna True para POUI, False para WebApp
+        :return: Driver selecionado (POUI ou WebApp)
+        """
+        return self._ensure_poui() if condition_fn() else self._ensure_webapp()
 
     def Program(self, program_name: str):
         """Open/select a Protheus program routine.
@@ -79,7 +94,7 @@ class Adapter:
             runs auxiliary WebApp routines to close accessory screens
             (warnings, currency conversion, news) after opening the routine.
         """
-        drv = self._ensure_poui() if self.config.new_home else self._ensure_webapp()
+        drv = self._route_to_driver(lambda: self.config.new_home)
         drv.Program(program_name)
 
         if self.config.new_home and self.config.initial_program.lower() == 'sigaadv':
