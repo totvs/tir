@@ -3498,7 +3498,8 @@ class WebappInternal(Base):
                 if self.config.routine_type == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
-                    self.__adapter.set_program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.set_program', self.config.routine)
 
     def wait_user_screen(self):
 
@@ -8483,7 +8484,8 @@ class WebappInternal(Base):
             if ">" in self.config.routine:
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
-                self.__adapter.Program(self.config.routine)
+                from tir.technologies.core.events import emit
+                emit('route.program', self.config.routine)
 
         self.tmenu_screen = None
 
@@ -8583,7 +8585,8 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.__adapter.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.program', self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11252,7 +11255,8 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.__adapter.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.program', self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):

@@ -26,9 +26,19 @@ class Webapp():
         self.__webapp = WebappInternal(config_path, autostart)
         self.__adapter = Adapter(config_path)
         self.__adapter.set_webapp(self.__webapp)
-        self.__webapp.set_adapter(self.__adapter)
+        self._subscribe_routes()
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+
+    def _subscribe_routes(self):
+        """Registra handlers do Adapter no event bus para roteamento.
+
+        Mantém scripts existentes e evita acoplamento do Adapter no
+        WebappInternal.
+        """
+        from tir.technologies.core.events import subscribe
+        subscribe('route.program', self.__adapter.Program)
+        subscribe('route.set_program', self.__adapter.set_program)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
