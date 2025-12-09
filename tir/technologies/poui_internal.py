@@ -4735,8 +4735,7 @@ class PouiInternal(Base):
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                     main_container='body')))
             
-            # Implementar lógica de diferentes idiomas (self.language)
-            self.InputValue('Pesquisar e executar', program_name, 1)
+            self.InputValue(self.language.input_set_program, program_name, 1)
             self.po_loading('body')
             self.click_po_list_box(second_value=program_name)
 

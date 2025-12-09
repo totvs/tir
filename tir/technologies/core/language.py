@@ -88,6 +88,7 @@ class LanguagePack:
         self.procedure_install = languagepack["Procedure Install"]
         self.procedure_uninstall = languagepack["Procedure Uninstall"]
         self.schedule_menu = languagepack["Schedule Menu"]
+        self.input_set_program = languagepack["Input Set Program"]
         
         self.messages = Messages(languagepack)
 
@@ -184,7 +185,8 @@ class LanguagePack:
             "Success": "Success",
             "Procedure Install": "Install selected processes",
             "Procedure Uninstall": "Remove selected processes",
-            "Schedule Menu": "Settings > Schedule > Schedule"
+            "Schedule Menu": "Settings > Schedule > Schedule",
+            "Input Set Program": "Search and run"
             
         }
 
@@ -279,7 +281,8 @@ class LanguagePack:
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
-            "Schedule Menu": "Ambiente > Schedule > Schedule"
+            "Schedule Menu": "Ambiente > Schedule > Schedule",
+            "Input Set Program": "Pesquisar e executar"
 
         }
         spanish = {
@@ -373,7 +376,8 @@ class LanguagePack:
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
-            "Schedule Menu": "Entorno > Schedule > Schedule"
+            "Schedule Menu": "Entorno > Schedule > Schedule",
+            "Input Set Program": "Buscar y ejecutar"
 
         }
         russian = {
@@ -469,7 +473,8 @@ class LanguagePack:
             "Success": "успех",
             "Procedure Install": "Установить выбранные процессы",
             "Procedure Uninstall": "Удалить выбранные процессы",
-            "Schedule Menu": "Settings > Schedule > Schedule"
+            "Schedule Menu": "Settings > Schedule > Schedule",
+            "Input Set Program": "Ищи и беги"
         }
 
         if language.lower() == "en-us":
