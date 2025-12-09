@@ -1260,6 +1260,9 @@ class Base(unittest.TestCase):
             if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
                 logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
+        
+        Base.driver = self.driver
+        Base.wait = self.wait
 
         if not self.config.poui:
             if not self.config.skip_environment:

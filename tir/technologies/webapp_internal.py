@@ -129,12 +129,6 @@ class WebappInternal(Base):
         self.platform_endpoint = ''
         self.__adapter = None
 
-        if not Base.driver:
-            Base.driver = self.driver
-
-        if not Base.wait:
-            Base.wait = self.wait
-
         if not Base.errors:
             Base.errors = self.errors
 

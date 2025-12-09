@@ -54,25 +54,52 @@ class Router:
 
     def _ensure_webapp(self):
         """Get (or lazily create) the `WebappInternal` instance.
+        
+        Verifies if the instance has a valid driver. If the driver is invalid
+        (closed or None), recreates the instance which will automatically
+        get the updated Base.driver.
 
         Returns:
         - Active `WebappInternal` instance ready for use.
         """
-        if self.__webapp is None:
+        # Criar instância se não existe ou se o driver está inválido
+        if self.__webapp is None or not self._is_driver_active(self.__webapp):
             from tir.technologies.webapp_internal import WebappInternal
             self.__webapp = WebappInternal(self._config_path, autostart=False)
+        
         return self.__webapp
 
     def _ensure_poui(self):
         """Get (or lazily create) the `PouiInternal` instance.
+        
+        Verifies if the instance has a valid driver. If the driver is invalid
+        (closed or None), recreates the instance which will automatically
+        get the updated Base.driver.
 
         Returns:
         - Active `PouiInternal` instance ready for use.
         """
-        if self.__poui is None:
+        # Criar instância se não existe ou se o driver está inválido
+        if self.__poui is None or not self._is_driver_active(self.__poui):
             from tir.technologies.poui_internal import PouiInternal
             self.__poui = PouiInternal(self._config_path, autostart=False)
+        
         return self.__poui
+    
+    def _is_driver_active(self, instance):
+        """Verifica se o driver da instância está ativo e funcional.
+        
+        :param instance: Instância de WebappInternal ou PouiInternal
+        :return: True se o driver está ativo, False caso contrário
+        """
+        try:
+            if not hasattr(instance, 'driver') or instance.driver is None:
+                return False
+            # Tenta acessar current_url para verificar se a sessão está ativa
+            _ = instance.driver.current_url
+            return True
+        except Exception:
+            return False
     
     def _route_to_driver(self, condition_fn):
         """Roteia para o driver apropriado baseado em uma função de condição.
