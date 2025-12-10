@@ -1917,7 +1917,7 @@ class PouiInternal(Base):
 
             element = None
             
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title, p", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay", main_container = self.containers_selectors["AllContainers"], check_help=False)
             element = next(iter(element), None)
             if hasattr(element, "attrs") and "hidden" in element.attrs:
                 element = []
@@ -1954,7 +1954,7 @@ class PouiInternal(Base):
 
             element = None
 
-            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title, p", main_container = self.containers_selectors["AllContainers"], check_help=False)
+            element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED, optional_term="po-loading-overlay, span, .po-modal-title, .po-page-header-title", main_container = self.containers_selectors["AllContainers"], check_help=False)
 
             if element:
                 return element
@@ -3213,7 +3213,7 @@ class PouiInternal(Base):
 
         self.poui_click(menu)
 
-    def InputValue(self, field, value, position):
+    def InputValue(self, field, value, position, exec_enter_tab: bool = True):
         """
         Filling input component of POUI
         https://po-ui.io/documentation/po-input
@@ -3224,6 +3224,8 @@ class PouiInternal(Base):
         :type value: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+        :param exec_enter_tab: Defines whether the enter and tab commands will be executed after filling in the field. - **Default:** True
+        :type exec_enter_tab: bool
 
         Usage:
 
@@ -3253,14 +3255,14 @@ class PouiInternal(Base):
             input_field_element().clear()
             input_field_element().send_keys(value)
 
-            if self.switch_to_active_element() == input_field_element() and not self.config.new_home:
+            if self.switch_to_active_element() == input_field_element() and exec_enter_tab:
                 time.sleep(1)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 time.sleep(1)
                 ActionChains(self.driver).key_down(Keys.TAB).perform()
 
             time.sleep(2)
-            success = self.get_web_value(input_field_element()).strip() != '' if not self.config.new_home else True
+            success = self.get_web_value(input_field_element()).strip() != ''
 
     def return_input_element(self, field=None, position=1, term=None):
         """
@@ -4735,7 +4737,7 @@ class PouiInternal(Base):
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                     main_container='body')))
             
-            self.InputValue(self.language.input_set_program, program_name, 1)
+            self.InputValue(self.language.input_set_program, program_name, 1, exec_enter_tab=False)
             self.po_loading('body')
             self.click_po_list_box(second_value=program_name)
 

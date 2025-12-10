@@ -127,7 +127,6 @@ class WebappInternal(Base):
         self.registry_endpoint = ''
         self.rac_endpoint = ''
         self.platform_endpoint = ''
-        self.__adapter = None
 
         if not Base.errors:
             Base.errors = self.errors
@@ -140,15 +139,6 @@ class WebappInternal(Base):
             self.restart_counter = 3
             self.log_error(message)
             self.assertTrue(False, message)
-
-    def set_adapter(self, adapter):
-        """
-        [Internal]
-
-        Receives an Adapter instance injected by the public Webapp class.
-        Avoids internal instantiation and circular coupling.
-        """
-        self.__adapter = adapter
 
     def SetupTSS( self, initial_program = "", enviroment = ""):
         """
@@ -370,11 +360,16 @@ class WebappInternal(Base):
 
         logger().debug('Closing screen before the menu')
 
-        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+        if self.config.new_home:
+            term = "[class*='card-wrapper']"
+            twebview = True
+        else:
+            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            twebview = False
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")) and not self.config.new_home):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview))):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
@@ -11377,7 +11372,8 @@ class WebappInternal(Base):
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.__adapter.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.set_program', self.config.routine)
 
             self.tmenu_screen = None
 
