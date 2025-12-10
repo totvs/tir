@@ -9647,7 +9647,12 @@ class WebappInternal(Base):
         webdriver_exception = None
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
-        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+        if self.config.new_home:
+            term = "[class*='card-wrapper']"
+            twebview = True
+        else:
+            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            twebview = False
 
         if self.config.coverage:
             try:
@@ -9670,7 +9675,7 @@ class WebappInternal(Base):
                 self.environment_screen()
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview))):
                     self.close_screen_before_menu()
                 self.Finish()
             elif not webdriver_exception:
