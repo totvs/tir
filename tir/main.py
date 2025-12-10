@@ -1802,7 +1802,7 @@ class Poui():
         self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1,
-                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False):
+                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False, icon_class=None):
         """
             Clicks on the Table of POUI component.
             https://po-ui.io/documentation/po-table
@@ -1847,6 +1847,9 @@ class Poui():
             :type values: str or list
             :param match_all: If True, performs action on all matching rows. If False, only first match - **Default:** False
             :type match_all: bool
+            :param icon_class: Icon class name to click within the row. Supports partial class name
+            matching (e.g., 'arrow-up-right', 'ph-arrow-up-right', 'an-arrow-up-right') - **Default:** None
+            :type icon_class: str
 
             Usage:
 
@@ -1863,6 +1866,10 @@ class Poui():
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
+            >>> # New syntax - Click icon in row:
+            >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='an an-arrow-up-right')
+            >>> # Click icon in specific column:
+            >>> oHelper.ClickTable(columns='Code', values='000001', click_cell='Actions', icon_class='an an-arrow-up-right')
 
             .. warning::
                 Do not mix legacy and new syntax in the same call.
@@ -1879,7 +1886,7 @@ class Poui():
             """
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
-                               click_cell, checkbox, radio_input, columns, values, match_all)
+                               click_cell, checkbox, radio_input, columns, values, match_all, icon_class)
 
 
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
