@@ -123,7 +123,7 @@ class Router:
         drv = self._route_to_driver(lambda: self.config.new_home)
         drv.set_program(program_name)
 
-        if self.config.new_home and self.config.initial_program.lower() == 'sigaadv':
+        if self.config.new_home:
             self._ensure_webapp().close_warning_screen_after_routine()
             self._ensure_webapp().close_coin_screen_after_routine()
             self._ensure_webapp().close_news_screen_after_routine()
