@@ -4709,10 +4709,14 @@ class PouiInternal(Base):
         >>> self.set_program_new_home("MATA020")
         """
 
-        logger().info(f"Setting program on the New Home: {program_name}")
-
         self.config.routine_type = 'Program'
         self.config.routine = program_name
+
+        self.set_program(program_name)
+
+    def set_program(self, program_name):
+
+        logger().info(f"Setting program on the New Home: {program_name}")
 
         success = False
         search_term = "[class*='card-wrapper']"

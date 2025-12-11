@@ -3471,8 +3471,10 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
+            twebview = True if self.config.new_home else False
+
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)):
                 self.close_warning_screen()
                 self.close_modal()
 
@@ -8588,8 +8590,9 @@ class WebappInternal(Base):
         """
 
         try:
+            twebview = True if self.config.new_home else False
             return self.element_is_displayed(
-                next(iter(self.web_scrap(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                next(iter(self.web_scrap(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)),
                      None))
         except:
             return False

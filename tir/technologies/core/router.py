@@ -110,17 +110,6 @@ class Router:
         return self._ensure_poui() if condition_fn() else self._ensure_webapp()
 
     def Program(self, program_name: str):
-        """Open/select a Protheus program routine.
-
-        Parameters:
-        - program_name: Routine/program code (e.g., 'OMSA010').
-
-        Behavior:
-        - Routes the call to the active implementation (POUI/WebApp).
-        - When `new_home` is enabled and `initial_program` is 'SIGAADV',
-            runs auxiliary WebApp routines to close accessory screens
-            (warnings, currency conversion, news) after opening the routine.
-        """
         drv = self._route_to_driver(lambda: self.config.new_home)
         drv.Program(program_name)
 
@@ -129,18 +118,25 @@ class Router:
             self._ensure_webapp().close_coin_screen_after_routine()
             self._ensure_webapp().close_news_screen_after_routine()
 
-
     def set_program(self, program_name: str):
-        """Set the current routine without executing additional flows.
 
-        Parameters:
-        - program_name: Routine/program code.
+        drv = self._route_to_driver(lambda: self.config.new_home)
+        drv.set_program(program_name)
 
-        Notes:
-        - In POUI, delegates to `Program` to keep implementation compatibility.
-        - In WebApp, uses native `set_program` when available.
+        if self.config.new_home and self.config.initial_program.lower() == 'sigaadv':
+            self._ensure_webapp().close_warning_screen_after_routine()
+            self._ensure_webapp().close_coin_screen_after_routine()
+            self._ensure_webapp().close_news_screen_after_routine()
+
+    def SetLateralMenu(self, menu_itens, save_input=True, click_menu_functional=False):
         """
+        Esse método foi adaptado, pois a função SetLateralMenu ainda
+        não foi implementado no POUI.
+        """
+
         if self.config.new_home:
-            self._ensure_poui().Program(program_name)
-        else:
-            self._ensure_webapp().set_program(program_name)
+            self._ensure_webapp().config.routine = None
+            self._ensure_webapp().config.routine_type = None
+            self._ensure_webapp().log_error('Função SetLateralMenu não implementada na nova home.')
+        else:            
+            self._ensure_webapp().SetLateralMenu(menu_itens, save_input, click_menu_functional)
