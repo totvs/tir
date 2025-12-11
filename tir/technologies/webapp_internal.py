@@ -5724,12 +5724,11 @@ class WebappInternal(Base):
         term = self.grid_selectors["new_web_app"]
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not grids):
+        while(time.time() < endtime and not success):
             if not grid_element:
                 grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             else:
                 grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
-
 
             if grids:
                 grids = self.filter_active_tabs(grids)
