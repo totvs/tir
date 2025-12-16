@@ -6536,13 +6536,15 @@ class WebappInternal(Base):
         if memo_field:
             self.SetButton('Ok')
 
-        opened_cell = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                  position= initial_layers + 1, timeout=5,
-                                                  presence=True, main_container='body', check_error=False)
-
-        if opened_cell and lenfield > len_user_value:
-            current_layer = self.check_layers(layers_selector)
-            self.close_cell(field, current_layer, element=selenium_input())
+        if lenfield > len_user_value:
+            # ensure modal is closed. if True is closed
+            cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    position=initial_layers + 1, timeout=5,
+                                                    presence=False, main_container='body', check_error=False)
+            # if cell is still opened, try close
+            if not cell_is_closed:
+                current_layer = self.check_layers(layers_selector)
+                self.close_cell(field, current_layer, element=selenium_input())
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
