@@ -113,20 +113,30 @@ class Router:
         drv = self._route_to_driver(lambda: self.config.new_home)
         drv.Program(program_name)
 
-        if self.config.new_home and self.config.initial_program.lower() == 'sigaadv':
+        if self.config.new_home:
+            '''
+            O certo seria para fechar os 3 apenas se for SIGAADV, mas 
+            na nova home está aparecendo idependente do programa inicial
+            '''
             self._ensure_webapp().close_warning_screen_after_routine()
-            self._ensure_webapp().close_coin_screen_after_routine()
-            self._ensure_webapp().close_news_screen_after_routine()
+            if self.config.initial_program.lower() == 'sigaadv':
+                self._ensure_webapp().close_coin_screen_after_routine()
+                self._ensure_webapp().close_news_screen_after_routine()
 
     def set_program(self, program_name: str):
 
         drv = self._route_to_driver(lambda: self.config.new_home)
         drv.set_program(program_name)
 
-        if self.config.new_home and self.config.initial_program.lower() == 'sigaadv':
+        if self.config.new_home:
+            '''
+            O certo seria para fechar os 3 apenas se for SIGAADV, mas 
+            na nova home está aparecendo idependente do programa inicial
+            '''
             self._ensure_webapp().close_warning_screen_after_routine()
-            self._ensure_webapp().close_coin_screen_after_routine()
-            self._ensure_webapp().close_news_screen_after_routine()
+            if self.config.initial_program.lower() == 'sigaadv':
+                self._ensure_webapp().close_coin_screen_after_routine()
+                self._ensure_webapp().close_news_screen_after_routine()
 
     def SetLateralMenu(self, menu_itens, save_input=True, click_menu_functional=False):
         """

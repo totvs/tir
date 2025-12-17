@@ -4739,7 +4739,7 @@ class PouiInternal(Base):
 
             hide_element = next(iter(self.web_scrap(term=search_term, 
                                                     scrap_type=enum.ScrapType.CSS_SELECTOR, 
-                                                    main_container='body')))
+                                                    main_container='body')), None)
             
             self.InputValue(self.language.input_set_program, program_name, 1, exec_enter_tab=False)
             self.po_loading('body')
@@ -4756,7 +4756,14 @@ class PouiInternal(Base):
             self.wait_element_is_not_displayed(hide_element, timeout=60)
             ele_hidden = not self.element_is_displayed(hide_element)
 
-            wtb_after = get_wtb()
+            endtime_routine = time.time() + (self.config.time_out / 2)
+
+            while time.time() < endtime_routine:
+
+                wtb_after = get_wtb()
+
+                if wtb_before != wtb_after:
+                    break
 
             success = (ele_hidden) and (wtb_before != wtb_after)
 
