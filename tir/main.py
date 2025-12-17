@@ -108,7 +108,7 @@ class Webapp():
         """
         self.__webapp.ChangeEnvironment(date, group, branch, module)
 
-    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01'):
+    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01', module=""):
         """
         Change the user.
 
@@ -130,7 +130,7 @@ class Webapp():
         >>> oHelper.ChangeUser(user="user08", password="8" )
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
+        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch, module=module)
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """

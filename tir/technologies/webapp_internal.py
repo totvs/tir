@@ -1205,7 +1205,7 @@ class WebappInternal(Base):
 
         return False
 
-    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch=''):
+    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch='', module=""):
         """
         Change the user then init protheus on home page.
 
@@ -1235,13 +1235,14 @@ class WebappInternal(Base):
         date = self.config.date if not self.config.date else date
         group = self.config.group if not self.config.group else group
         branch = self.config.branch if not self.config.branch else branch
+        module = self.config.module if not self.config.module else module
 
         self.config.user = user
         self.config.password = password
 
         self.driver.refresh()
         logger().info(f"Change to the user: {user}")
-        self.Setup(initial_program, date, group, branch)
+        self.Setup(initial_program, date, group, branch, module)
 
 
     def close_modal(self):
@@ -8468,7 +8469,7 @@ class WebappInternal(Base):
         logger().info(f"Finish parameter_url while")
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
-            self.config.branch, save_input=not self.config.autostart)
+            self.config.branch, self.config.module, save_input=not self.config.autostart)
 
 
         if not self.tmenu_screen:
@@ -8514,7 +8515,7 @@ class WebappInternal(Base):
                 except:
                     pass
 
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -8570,7 +8571,7 @@ class WebappInternal(Base):
             else:
                 self.Finish()
 
-            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
@@ -11192,7 +11193,7 @@ class WebappInternal(Base):
                 except:
                     pass
 
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -11246,7 +11247,7 @@ class WebappInternal(Base):
             else:
                 self.Finish()
 
-            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
@@ -11348,7 +11349,7 @@ class WebappInternal(Base):
                     pass
 
             #Access Schedule environment
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.language.schedule_menu, save_input=False)
 
             #Wait show grid
@@ -11374,7 +11375,7 @@ class WebappInternal(Base):
 
             self.driver.get(self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group,
-                       self.config.branch, save_input=not self.config.autostart)
+                       self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
