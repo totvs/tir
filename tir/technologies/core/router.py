@@ -140,13 +140,26 @@ class Router:
 
     def SetLateralMenu(self, menu_itens, save_input=True, click_menu_functional=False):
         """
-        Esse método foi adaptado, pois a função SetLateralMenu ainda
-        não foi implementado no POUI.
+        This method was adapted because the SetLateralMenu function has 
+        not yet been implemented on the new home page.
         """
 
         if self.config.new_home:
             self._ensure_webapp().config.routine = None
             self._ensure_webapp().config.routine_type = None
-            self._ensure_webapp().log_error('Função SetLateralMenu não implementada na nova home.')
+            self._ensure_webapp().log_error('The SetLateralMenu function has not yet been implemented on the new home page.')
         else:            
             self._ensure_webapp().SetLateralMenu(menu_itens, save_input, click_menu_functional)
+
+    def ChangeEnvironment(self, date="", group="", branch="", module=""):
+        """
+        This method was adapted because the ChangeEnvironment function has 
+        not yet been implemented on the new home page.
+        """
+
+        if self.config.new_home:
+            self._ensure_webapp().config.routine = None
+            self._ensure_webapp().config.routine_type = None
+            self._ensure_webapp().log_error('The ChangeEnvironment function has not yet been implemented on the new home page.')
+        else:            
+            self._ensure_webapp().ChangeEnvironment(date, group, branch, module)

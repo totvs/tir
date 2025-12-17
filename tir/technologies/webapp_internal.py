@@ -1231,11 +1231,11 @@ class WebappInternal(Base):
             self.log_error("You must enter a user and a password to use ChangeUser!")
             return
 
-        initial_program = self.config.initial_program if not self.config.initial_program else initial_program
-        date = self.config.date if not self.config.date else date
-        group = self.config.group if not self.config.group else group
-        branch = self.config.branch if not self.config.branch else branch
-        module = self.config.module if not self.config.module else module
+        initial_program = self.config.initial_program if (not initial_program and self.config.initial_program) else initial_program
+        date = self.config.date if (not date and self.config.date) else date
+        group = self.config.group if (not group and self.config.group) else group
+        branch = self.config.branch if (not branch and self.config.branch) else branch
+        module = self.config.module if (not module and self.config.module) else module
 
         self.config.user = user
         self.config.password = password

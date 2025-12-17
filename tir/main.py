@@ -106,7 +106,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
-        self.__webapp.ChangeEnvironment(date, group, branch, module)
+        self.__router.ChangeEnvironment(date, group, branch, module)
 
     def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01', module=""):
         """
