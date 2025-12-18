@@ -158,8 +158,6 @@ class Router:
         """
 
         if self.config.new_home:
-            self._ensure_webapp().config.routine = None
-            self._ensure_webapp().config.routine_type = None
             self._ensure_webapp().log_error('The ChangeEnvironment function has not yet been implemented on the new home page.')
         else:            
             self._ensure_webapp().ChangeEnvironment(date, group, branch, module)
