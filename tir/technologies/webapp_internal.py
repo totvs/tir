@@ -2630,7 +2630,10 @@ class WebappInternal(Base):
 
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
 
-            container_size = self.get_element_size(container['id'])
+            if len(self.get_current_DOM().select(container['id'])) == 1:
+                container_size = self.get_element_size(container['id'])
+            else:
+                container_size = self.get_element_size(element=self.soup_to_selenium(container))
 
             # The safe values add to postion of element
             width_safe, height_safe = self.width_height(container_size)
@@ -2752,16 +2755,21 @@ class WebappInternal(Base):
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
-    def get_element_size(self, id):
+    def get_element_size(self, id=None, element=None):
         """
         Internal
         Return Height/Width
 
         """
-        script = f'return document.getElementById("{id}").offsetHeight;'
-        height = self.driver.execute_script(script)
-        script = f'return document.getElementById("{id}").offsetWidth;'
-        width  = self.driver.execute_script(script)
+        if id:
+            script = f'return document.getElementById("{id}").offsetHeight;'
+            height = self.driver.execute_script(script)
+            script = f'return document.getElementById("{id}").offsetWidth;'
+            width  = self.driver.execute_script(script)
+        else:
+            height = self.driver.execute_script('return arguments[0].offsetHeight', element)
+            width = self.driver.execute_script('return arguments[0].offsetWidth', element)
+
         return {'height': height, 'width':width}
 
     def get_distance_x(self, x_label, x_element):
