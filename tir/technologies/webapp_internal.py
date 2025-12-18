@@ -6435,6 +6435,8 @@ class WebappInternal(Base):
 
             if not selenium_column:
                 selenium_column, _ = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
+                current_container = self.get_current_container()
+                current_container_id = current_container.get("id")
 
             if selenium_column:
                 self.select_grid_cell(selenium_column)
@@ -6452,6 +6454,14 @@ class WebappInternal(Base):
                         if cell_opened:
                             self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
 
+                        # if modal/dialog still opened, do not check value
+                        if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                               position=initial_layers + 1, main_container="body"):
+                            container_id_after_modal = self.get_current_container().get("id")
+                            if container_id_after_modal != current_container_id:
+                                logger().debug(
+                                    "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
+                                return
                         cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
                         if not cell_filled:
                             self.search_for_errors()
