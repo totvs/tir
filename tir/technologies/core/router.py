@@ -1,5 +1,10 @@
 
+from typing import TYPE_CHECKING, Union, Callable, Optional
 from tir.technologies.core.config import ConfigLoader
+
+if TYPE_CHECKING:
+    from tir.technologies.webapp_internal import WebappInternal
+    from tir.technologies.poui_internal import PouiInternal
 
 class Router:
     """
@@ -14,8 +19,7 @@ class Router:
       (e.g., `config.new_home` flag). Needed because Protheus is gradually
       migrating screens from WebApp to POUI.
 
-    - **Adapter**: Translates method calls when interfaces differ between
-      implementations (e.g., `set_program()` in WebApp → `Program()` in POUI).
+    - **Adapter**: Translates method calls when interfaces differ between.
 
     :param config_path: Path to config.json file
     :param inst_webapp: Optional WebappInternal instance for injection
@@ -24,124 +28,90 @@ class Router:
     Note: Driver instances are created lazily only when needed.
     """
 
-    def __init__(self, config_path: str = "", inst_webapp=None, inst_poui=None):
+    def __init__(self, config_path: str = "", inst_webapp: Optional[WebappInternal] = None, inst_poui: Optional[PouiInternal] = None):
         self.config = ConfigLoader()
         self._config_path = config_path
         self.__webapp = None
         self.__poui = None
-        self.set_webapp(inst_webapp)
-        self.set_poui(inst_poui)
+        inst_webapp and self.set_webapp(inst_webapp)
+        inst_poui and self.set_poui(inst_poui)
 
-    def set_webapp(self, inst):
-        """Set the `WebappInternal` instance to be used.
-
-        Allows injection at initialization or later. Passing None is valid
-        and will trigger lazy initialization when needed.
-
-        :param inst: WebappInternal instance or None for lazy initialization
-        """
+    def set_webapp(self, inst: WebappInternal):
+        """Setter for WebappInternal instance."""
         self.__webapp = inst
 
-    def set_poui(self, inst):
-        """Set the `PouiInternal` instance to be used.
-
-        Allows injection at initialization or later. Passing None is valid
-        and will trigger lazy initialization when needed.
-
-        :param inst: PouiInternal instance or None for lazy initialization
-        """
+    def set_poui(self, inst: PouiInternal):
+        """Setter for PouiInternal instance."""
         self.__poui = inst
 
-    def _ensure_webapp(self):
-        """Get (or lazily create) the `WebappInternal` instance.
+    def _ensure_webapp(self) -> WebappInternal:
+        """Get or lazily create WebappInternal instance.
         
-        Verifies if the instance has a valid driver. If the driver is invalid
-        (closed or None), recreates the instance which will automatically
-        get the updated Base.driver.
-
-        Returns:
-        - Active `WebappInternal` instance ready for use.
+        Recreates the instance if driver is closed or None.
         """
-        # Criar instância se não existe ou se o driver está inválido
         if self.__webapp is None or not self._is_driver_active(self.__webapp):
             from tir.technologies.webapp_internal import WebappInternal
             self.__webapp = WebappInternal(self._config_path, autostart=False)
         
         return self.__webapp
 
-    def _ensure_poui(self):
-        """Get (or lazily create) the `PouiInternal` instance.
+    def _ensure_poui(self) -> PouiInternal:
+        """Get or lazily create PouiInternal instance.
         
-        Verifies if the instance has a valid driver. If the driver is invalid
-        (closed or None), recreates the instance which will automatically
-        get the updated Base.driver.
-
-        Returns:
-        - Active `PouiInternal` instance ready for use.
+        Recreates the instance if driver is closed or None.
         """
-        # Criar instância se não existe ou se o driver está inválido
         if self.__poui is None or not self._is_driver_active(self.__poui):
             from tir.technologies.poui_internal import PouiInternal
             self.__poui = PouiInternal(self._config_path, autostart=False)
         
         return self.__poui
     
-    def _is_driver_active(self, instance):
-        """Verifica se o driver da instância está ativo e funcional.
-        
-        :param instance: Instância de WebappInternal ou PouiInternal
-        :return: True se o driver está ativo, False caso contrário
-        """
+    def _is_driver_active(self, instance: Union[WebappInternal, PouiInternal]) -> bool:
+        """Check if instance has an active driver."""
         try:
             if not hasattr(instance, 'driver') or instance.driver is None:
                 return False
-            # Tenta acessar current_url para verificar se a sessão está ativa
+            # Try accessing current_url to verify if session is active
             _ = instance.driver.current_url
             return True
         except Exception:
             return False
     
-    def _route_to_driver(self, condition_fn):
-        """Roteia para o driver apropriado baseado em uma função de condição.
+    def _get_driver_instance(self, condition_fn: Callable[[], bool]) -> Union[WebappInternal, PouiInternal]:
+        """Get driver instance based on condition.
         
-        :param condition_fn: Função que retorna True para POUI, False para WebApp
-        :return: Driver selecionado (POUI ou WebApp)
+        Returns PouiInternal if condition is True, otherwise WebappInternal.
         """
         return self._ensure_poui() if condition_fn() else self._ensure_webapp()
 
-    def Program(self, program_name: str):
-        drv = self._route_to_driver(lambda: self.config.new_home)
+    def Program(self, program_name: str) -> None:
+        """Execute program using appropriate driver (POUI or WebApp)."""
+        drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.Program(program_name)
 
         if self.config.new_home:
-            '''
-            O certo seria para fechar os 3 apenas se for SIGAADV, mas 
-            na nova home está aparecendo idependente do programa inicial
-            '''
+            # Should close all 3 only for SIGAADV, but on new home they appear regardless of initial program
             self._ensure_webapp().close_warning_screen_after_routine()
             if self.config.initial_program.lower() == 'sigaadv':
                 self._ensure_webapp().close_coin_screen_after_routine()
                 self._ensure_webapp().close_news_screen_after_routine()
 
-    def set_program(self, program_name: str):
-
-        drv = self._route_to_driver(lambda: self.config.new_home)
+    def set_program(self, program_name: str) -> None:
+        """Set program using appropriate driver (POUI or WebApp)."""
+        drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.set_program(program_name)
 
         if self.config.new_home:
-            '''
-            O certo seria para fechar os 3 apenas se for SIGAADV, mas 
-            na nova home está aparecendo idependente do programa inicial
-            '''
+            # Should close all 3 only for SIGAADV, but on new home they appear regardless of initial program
             self._ensure_webapp().close_warning_screen_after_routine()
             if self.config.initial_program.lower() == 'sigaadv':
                 self._ensure_webapp().close_coin_screen_after_routine()
                 self._ensure_webapp().close_news_screen_after_routine()
 
-    def SetLateralMenu(self, menu_itens, save_input=True, click_menu_functional=False):
-        """
-        This method was adapted because the SetLateralMenu function has 
-        not yet been implemented on the new home page.
+    def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False) -> None:
+        """Navigate through lateral menu.
+        
+        Note: Not yet implemented for new home page.
         """
 
         if self.config.new_home:
@@ -151,10 +121,10 @@ class Router:
         else:            
             self._ensure_webapp().SetLateralMenu(menu_itens, save_input, click_menu_functional)
 
-    def ChangeEnvironment(self, date="", group="", branch="", module=""):
-        """
-        This method was adapted because the ChangeEnvironment function has 
-        not yet been implemented on the new home page.
+    def ChangeEnvironment(self, date: str = "", group: str = "", branch: str = "", module: str = "") -> None:
+        """Change environment settings.
+        
+        Note: Not yet implemented for new home page.
         """
 
         if self.config.new_home:
