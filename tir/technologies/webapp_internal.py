@@ -6457,15 +6457,15 @@ class WebappInternal(Base):
                         # if modal/dialog still opened, do not check value
                         if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                position=initial_layers + 1, main_container="body"):
-                            container_id_after_modal = self.get_current_container().get("id")
-                            if container_id_after_modal != current_container_id:
-                                logger().debug(
-                                    "Consider using the waithide and setkey('ESC') method because the input can remain selected.")
-                                return
+                                logger().info(
+                                    "Check cell fill, consider use check_value = False, if you need to valid Help screen")
+
+                    if check_value:
                         cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
                         if not cell_filled:
                             self.search_for_errors()
-
+                    else:
+                        cell_filled = True
 
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
         """Compares two values, ignoring formatting differences.
