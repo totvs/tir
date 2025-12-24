@@ -1,10 +1,5 @@
 
-from typing import TYPE_CHECKING, Union, Callable, Optional
 from tir.technologies.core.config import ConfigLoader
-
-if TYPE_CHECKING:
-    from tir.technologies.webapp_internal import WebappInternal
-    from tir.technologies.poui_internal import PouiInternal
 
 class Router:
     """
@@ -28,7 +23,7 @@ class Router:
     Note: Driver instances are created lazily only when needed.
     """
 
-    def __init__(self, config_path: str = "", inst_webapp: Optional[WebappInternal] = None, inst_poui: Optional[PouiInternal] = None):
+    def __init__(self, config_path="", inst_webapp=None, inst_poui=None):
         self.config = ConfigLoader()
         self._config_path = config_path
         self.__webapp = None
@@ -36,15 +31,15 @@ class Router:
         inst_webapp and self.set_webapp(inst_webapp)
         inst_poui and self.set_poui(inst_poui)
 
-    def set_webapp(self, inst: WebappInternal):
+    def set_webapp(self, inst):
         """Setter for WebappInternal instance."""
         self.__webapp = inst
 
-    def set_poui(self, inst: PouiInternal):
+    def set_poui(self, inst):
         """Setter for PouiInternal instance."""
         self.__poui = inst
 
-    def _ensure_webapp(self) -> WebappInternal:
+    def _ensure_webapp(self):
         """Get or lazily create WebappInternal instance.
         
         Recreates the instance if driver is closed or None.
@@ -55,7 +50,7 @@ class Router:
         
         return self.__webapp
 
-    def _ensure_poui(self) -> PouiInternal:
+    def _ensure_poui(self):
         """Get or lazily create PouiInternal instance.
         
         Recreates the instance if driver is closed or None.
@@ -66,7 +61,7 @@ class Router:
         
         return self.__poui
     
-    def _is_driver_active(self, instance: Union[WebappInternal, PouiInternal]) -> bool:
+    def _is_driver_active(self, instance):
         """Check if instance has an active driver."""
         try:
             if not hasattr(instance, 'driver') or instance.driver is None:
@@ -77,7 +72,7 @@ class Router:
         except Exception:
             return False
     
-    def _get_driver_instance(self, condition_fn: Callable[[], bool]) -> Union[WebappInternal, PouiInternal]:
+    def _get_driver_instance(self, condition_fn):
         """Get driver instance based on condition.
         
         Returns PouiInternal if condition is True, otherwise WebappInternal.
