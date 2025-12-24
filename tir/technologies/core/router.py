@@ -1,5 +1,6 @@
 
 from tir.technologies.core.config import ConfigLoader
+import time
 
 class Router:
     """
@@ -91,6 +92,12 @@ class Router:
                 self._ensure_webapp().close_coin_screen_after_routine()
                 self._ensure_webapp().close_news_screen_after_routine()
 
+            if (self.config.initial_program.lower() == 'sigaloja' or \
+                program_name.lower().startswith('loj') or \
+                program_name.lower().startswith('ljl')):
+                time.sleep(2)
+                self._ensure_webapp().close_modal()
+
     def set_program(self, program_name: str) -> None:
         """Set program using appropriate driver (POUI or WebApp)."""
         drv = self._get_driver_instance(lambda: self.config.new_home)
@@ -102,6 +109,12 @@ class Router:
             if self.config.initial_program.lower() == 'sigaadv':
                 self._ensure_webapp().close_coin_screen_after_routine()
                 self._ensure_webapp().close_news_screen_after_routine()
+
+            if (self.config.initial_program.lower() == 'sigaloja' or \
+                program_name.lower().startswith('loj') or \
+                program_name.lower().startswith('ljl')):
+                time.sleep(2)
+                self._ensure_webapp().close_modal()
 
     def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False) -> None:
         """Navigate through lateral menu.
