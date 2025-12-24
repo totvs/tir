@@ -5420,7 +5420,7 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
 
                         term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
-                        tmodal_list = soup.select(term)
+                        tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(term)))
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                         self.set_grid_focus(grid_number)
