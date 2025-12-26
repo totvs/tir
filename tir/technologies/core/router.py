@@ -136,6 +136,18 @@ class Router:
         """
 
         if self.config.new_home:
-            self._ensure_webapp().log_error('The ChangeEnvironment function has not yet been implemented on the new home page.')
+            self.config.date = date if date else self.config.date
+            self.config.group = group if group else self.config.group
+            self.config.branch = branch if branch else self.config.branch
+            self.config.module = module if module else self.config.module
+
+            self._ensure_webapp().get_url(self.config.url)
+            self._ensure_webapp().Setup(
+                initial_program=self.config.initial_program,
+                date=self.config.date,
+                group=self.config.group,
+                branch=self.config.branch,
+                module=self.config.module
+            )
         else:            
             self._ensure_webapp().ChangeEnvironment(date, group, branch, module)
