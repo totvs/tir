@@ -6460,12 +6460,12 @@ class WebappInternal(Base):
                                 logger().info(
                                     "Check cell fill, consider use check_value = False, if you need to valid Help screen")
 
-                    if check_value:
-                        cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
-                        if not cell_filled:
-                            self.search_for_errors()
-                    else:
-                        cell_filled = True
+                        if check_value:
+                            cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
+                            if not cell_filled:
+                                self.search_for_errors()
+                        else:
+                            cell_filled = True
 
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
         """Compares two values, ignoring formatting differences.
