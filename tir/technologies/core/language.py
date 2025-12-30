@@ -186,7 +186,7 @@ class LanguagePack:
             "Procedure Install": "Install selected processes",
             "Procedure Uninstall": "Remove selected processes",
             "Schedule Menu": "Settings > Schedule > Schedule",
-            "Input Set Program": "Search and run"
+            "Input Set Program": "Search and execute"
             
         }
 
