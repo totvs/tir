@@ -4789,7 +4789,7 @@ class PouiInternal(Base):
                                                     main_container='body')), None)
             
             self.InputValue(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-            self.po_loading('body')
+            self.po_loading(self.containers_selectors['GetCurrentContainer'])
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
             self.click_po_list_box(value=program_desc,second_value=program_name)
