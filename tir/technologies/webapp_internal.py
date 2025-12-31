@@ -1740,7 +1740,7 @@ class WebappInternal(Base):
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
         return language
 
-    def Program(self, program_name):
+    def Program(self, program_name, program_desc: str = ""):
         """
         Method that sets the program in the initial menu search field.
 
@@ -1770,7 +1770,7 @@ class WebappInternal(Base):
         self.set_program(program_name)
 
 
-    def set_program(self, program):
+    def set_program(self, program, program_desc: str = ""):
         """
         [Internal]
 
@@ -3952,7 +3952,8 @@ class WebappInternal(Base):
                 selector = "wa-dialog"
             else:
                 selector = ".tmodaldialog, .ui-dialog"
-            top_layer = next(iter(self.zindex_sort(soup.select(selector), True)), None)
+            tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(selector)))
+            top_layer = next(iter(self.zindex_sort(tmodal_list, True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
