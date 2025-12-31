@@ -2991,7 +2991,7 @@ class WebappInternal(Base):
                 if 'type' in element.attrs:
                     valtype = self.value_type(element.attrs["type"])
 
-                unmasked_value = self.remove_mask(value, valtype)
+                unmasked_value = self.remove_mask(value, valtype, input_field())
                 main_value = unmasked_value if value != unmasked_value and self.check_mask(input_field()) else value
 
                 if self.check_combobox(element):
@@ -5790,7 +5790,10 @@ class WebappInternal(Base):
         """
         if type(string) is str:
             if valtype == 'N':
-                return self.remove_numeric_mask(string)
+                if element:
+                    pattern = (r'\,')
+                    if re.findall(pattern, element.get_attribute('picture')):
+                        return self.remove_numeric_mask(string)
             else:
                 return self.remove_non_numeric_mask(string)
         return string
