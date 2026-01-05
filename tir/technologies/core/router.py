@@ -93,6 +93,16 @@ class Router:
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.Program(program_name=program_name, program_desc=program_desc)
 
+        """
+        Sync POUI → WebApp program name (new_home):
+        WebApp and POUI use separate Log instances. If the test filename is misspelled 
+        (e.g., TESTECASE.py), get_program_name() fails and Program() sets self.log.program 
+        only on POUI. Copying it here ensures WebApp's generate_log() uses the correct 
+        program.
+        """
+        if self.config.new_home:
+            self._ensure_webapp().log.program = self._ensure_poui().log.program
+
     def set_program(self, program_name: str = "", program_desc: str = "") -> None:
         """Set program using appropriate driver (POUI or WebApp)."""
 
