@@ -4741,6 +4741,27 @@ class PouiInternal(Base):
         item_list_data = self._get_item_list_data(po_item_list)
         return item_list_data.get('value').upper()
     
+    def set_log_info_config(self):
+        """
+        [Internal]
+        """
+
+        if self.config.release:
+            self.log.release = self.config.release
+            self.log.version = self.config.release.split('.')[0]
+
+        if self.config.top_database:
+            self.log.database = self.config.top_database
+
+        if self.config.build_version:
+            self.log.build_version = self.config.build_version
+
+        if self.config.lib_version:
+            self.log.lib_version = self.config.lib_version
+
+    def log_error_newlog(self):
+        self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
+    
     def Program(self, program_name: str = "", program_desc: str = ""):
         """
         [Internal]
@@ -4758,6 +4779,16 @@ class PouiInternal(Base):
 
         self.config.routine_type = 'Program'
         self.config.routine = program_name
+
+        if self.config.log_info_config:
+            self.set_log_info_config()
+
+        if self.config.new_log:
+            if not self.log.release:
+                self.log_error_newlog()
+
+        if not self.log.program:
+            self.log.program = program_name
 
         self.set_program(program_name, program_desc)
 
