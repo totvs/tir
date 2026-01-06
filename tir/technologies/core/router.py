@@ -100,7 +100,7 @@ class Router:
         only on POUI. Copying it here ensures WebApp's generate_log() uses the correct 
         program.
         """
-        if self.config.new_home:
+        if self.config.new_home and not self._ensure_webapp().log.program:
             self._ensure_webapp().log.program = self._ensure_poui().log.program
 
     def set_program(self, program_name: str = "", program_desc: str = "") -> None:
