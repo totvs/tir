@@ -6329,7 +6329,7 @@ class WebappInternal(Base):
             container_element = self.driver.find_element(By.XPATH, xpath_soup(container_soup))
             dialog_selector = 'wa-dialog'
             find_element_method = By.CSS_SELECTOR
-            initial_layer = len(container_element.find_elements(find_element_method, dialog_selector))
+            initial_layer = len(list(filter(lambda x: self.element_is_displayed(x), container_element.find_elements(find_element_method, dialog_selector))))
 
         for field in self.grid_input:
             if field[3] and field[0] == "":
