@@ -8957,7 +8957,10 @@ class WebappInternal(Base):
                                                                 direction=None, input_selector='wa-checkbox')
             label_box = filtered_labels_boxs
 
-        if position <= len(filtered_labels_boxs):
+        if len(filtered_labels_boxs) == 1:
+            label_box = filtered_labels_boxs[0]
+        
+        elif position <= len(filtered_labels_boxs):
             position -= 1
             label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[
                 position]
