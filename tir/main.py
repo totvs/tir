@@ -47,6 +47,11 @@ class Webapp():
         subscribe('webapp.close_news_screen_after_routine', self.__webapp.close_news_screen_after_routine)
         subscribe('webapp.close_modal', self.__webapp.close_modal)
 
+        subscribe('webapp.check_warning_screen', self.__webapp.check_warning_screen)
+        subscribe('webapp.check_coin_screen', self.__webapp.check_coin_screen)
+        subscribe('webapp.check_news_screen', self.__webapp.check_news_screen)
+        subscribe('webapp.close_screen_before_menu', self.__webapp.close_screen_before_menu)
+
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
         Adds a parameter to the queue of parameters to be set by SetParameters method.

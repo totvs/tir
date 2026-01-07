@@ -4762,6 +4762,26 @@ class PouiInternal(Base):
     def log_error_newlog(self):
         self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
     
+    def escape_to_main_menu(self, term):
+        """
+
+        """
+
+        endtime = time.time() + self.config.time_out /2
+        while time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                            main_container="body", check_error=False):
+            
+            logger().info('Escape to menu')
+            ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+
+            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
+                logger().info('Found layers after Escape to menu')
+                self.close_screen_before_menu()
+            
+            # wait trasitions between screens to avoid errors in layers number
+            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      timeout=6, main_container='body')
+    
     def Program(self, program_name: str = "", program_desc: str = ""):
         """
         [Internal]
@@ -4799,6 +4819,8 @@ class PouiInternal(Base):
         success = False
         search_term = "[class*='card-wrapper']"
         attempts = 1
+
+        self.escape_to_main_menu(search_term)
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -4882,6 +4904,22 @@ class PouiInternal(Base):
             program_name.lower().startswith('ljl')):
             time.sleep(2)
             self.close_modal()
+
+    def check_warning_screen(self):
+        from tir.technologies.core.events import emit
+        emit('webapp.check_warning_screen')
+
+    def check_coin_screen(self):
+        from tir.technologies.core.events import emit
+        emit('webapp.check_coin_screen')
+
+    def check_news_screen(self):
+        from tir.technologies.core.events import emit
+        emit('webapp.check_news_screen')
+
+    def close_screen_before_menu(self):
+        from tir.technologies.core.events import emit
+        emit('webapp.close_screen_before_menu')
 
     def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
         from tir.technologies.core.events import emit
