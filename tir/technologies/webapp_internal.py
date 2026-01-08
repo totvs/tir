@@ -1362,7 +1362,7 @@ class WebappInternal(Base):
 
         selector = self.browse_screen_selectors()
 
-        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR)
+        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR, check_error=False)
 
     def check_coin_screen(self):
         """
@@ -1373,7 +1373,7 @@ class WebappInternal(Base):
 
         selector = self.coin_screen_selectors()
 
-        return self.check_screen_element(term=self.language.coins, selector=selector)
+        return self.check_screen_element(term=self.language.coins, selector=selector, check_error=False)
     
     def check_warning_screen(self):
         """
@@ -1384,7 +1384,7 @@ class WebappInternal(Base):
 
         selector = self.warning_screen_selectors()
 
-        return self.check_screen_element(term=self.language.warning, selector=selector)
+        return self.check_screen_element(term=self.language.warning, selector=selector, check_error=False)
     
     def check_news_screen(self):
         """
@@ -1493,7 +1493,7 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.check_warning_screen():
-            self.set_button_x()
+            self.set_button_x(check_error=False)
 
 
     def close_warning_screen_after_routine(self):
@@ -3769,7 +3769,7 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                containers = self.zindex_sort(list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector))), reverse=True)
 
                 if container_selector == 'wa-text-view':
                     return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
