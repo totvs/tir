@@ -4124,7 +4124,7 @@ class WebappInternal(Base):
                     container_selector = main_container
 
                 try:
-                    containers_soup = soup.select(container_selector)
+                    containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))                    
 
                     if not containers_soup:
                         return False
