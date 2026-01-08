@@ -6573,7 +6573,16 @@ class WebappInternal(Base):
         :param duplicate_fields: A list of fields that have the same label.
         """
         column_index = None
-        column_name = field_to_label[column].lower().strip() if '_' in column else column.lower().strip()
+
+        if '_' in column:
+            column_normalized = column.upper()
+            if column_normalized in field_to_label:
+                column_name = field_to_label[column_normalized].lower().strip()
+            else:
+                logger().info(f'{column} not found in x3 dictionaries. Please check field name.')
+        else:
+            column_name = column.lower().strip()
+
         column_cell = None
         page_down_count = 0
         row_element = None
@@ -7138,11 +7147,10 @@ class WebappInternal(Base):
         """
         grid_number -= 1
         row_number -= 1
-        column = column.lower().strip()
         field_to_label = None
 
         if '_' in column:
-            x3_dictionaries = self.get_x3_dictionaries([column])
+            x3_dictionaries = self.get_x3_dictionaries([column.upper()])
             field_to_label, _ = self.extract_field_info(x3_dictionaries)
 
         logger().info(f"Clicking on grid cell: {column}")
