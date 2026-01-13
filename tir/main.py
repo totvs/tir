@@ -444,7 +444,7 @@ class Webapp():
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
-        self.__webapp.Finish()
+        self.__router.Finish()
 
     def MessageBoxClick(self, button_text):
         """

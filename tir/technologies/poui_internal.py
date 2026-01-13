@@ -1423,6 +1423,11 @@ class PouiInternal(Base):
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
+
+        if self.config.new_home:
+            self.finish_new_home()
+            return
+        
         element = None
         text_cover = None
         string = "Aguarde... Coletando informacoes de cobertura de codigo."
@@ -1468,6 +1473,29 @@ class PouiInternal(Base):
                 logger().warning("Warning method finish use driver.refresh. element not found")
 
             self.driver_refresh() if not element else self.SetButton(self.language.finish)
+
+    def finish_new_home(self):
+        self.driver.switch_to.default_content()
+        iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
+        iframes = list(filter(lambda x: x.is_displayed(), iframes))
+        iframe = iframes[1]
+        self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe)[0])
+        time.sleep(0.5)
+
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        user_icon = next(iter(soup.select('po-icon i.an.an-user')))
+        self.click(self.soup_to_selenium(user_icon), click_type=enum.ClickType(2))
+        time.sleep(0.5)
+
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        exit_button = next(iter(soup.select('po-icon i.an.an-sign-out')))
+        self.click(self.soup_to_selenium(exit_button), click_type=enum.ClickType(2))
+        time.sleep(0.5)
+
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")))
+        self.click(self.soup_to_selenium(finish_button), click_type=enum.ClickType(2))
+        time.sleep(0.5)
 
     def click_button_finish(self, click_counter=None):
         """

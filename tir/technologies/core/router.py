@@ -120,3 +120,9 @@ class Router:
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.ChangeEnvironment(date=date, group=group, branch=branch, module=module)
+
+    def Finish(self) -> None:
+        """Finish using appropriate driver (POUI or WebApp)."""
+
+        drv = self._get_driver_instance(lambda: self.config.new_home)
+        drv.Finish()
