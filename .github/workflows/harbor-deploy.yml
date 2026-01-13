@@ -1,0 +1,124 @@
+name: Harbor Deploy
+
+on:
+  # Permite execução disparada por outra pipeline
+  workflow_call:
+    inputs:
+      release:
+        description: 'Set tag version (sem v)'
+        required: false
+        type: string
+      harbor_project:
+        description: 'Harbor project name'
+        required: false
+        type: string
+        default: 'tir'
+    secrets:
+      HARBOR_USERNAME:
+        required: true
+      HARBOR_PASSWORD:
+        required: true
+      HARBOR_REGISTRY:
+        required: true
+
+  # Permite executar manualmente
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Set tag version (sem v)'
+        required: true
+      harbor_registry:
+        description: 'Harbor registry URL (ex: harbor.example.com)'
+        required: true
+      harbor_project:
+        description: 'Harbor project name (ex: tir-project)'
+        required: true
+        default: 'tir'
+
+  # Trigger automático em tags de release
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  IMAGE_NAME: 'tir'
+
+jobs:
+  harbor-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set version
+        id: version
+        run: |
+          if [ -n "${{ inputs.release }}" ]; then
+            echo "version=${{ inputs.release }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=${GITHUB_REF#refs/*/v}
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Clean Harbor registry URL
+        id: clean
+        run: |
+          REGISTRY="${{ inputs.harbor_registry }}"
+          if [ -z "$REGISTRY" ]; then
+            REGISTRY="${{ secrets.HARBOR_REGISTRY }}"
+          fi
+          # Remove https:// ou http://
+          REGISTRY=${REGISTRY#https://}
+          REGISTRY=${REGISTRY#http://}
+          # Remove qualquer path depois do domínio
+          REGISTRY=${REGISTRY%%/*}
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "Cleaned Registry: ${REGISTRY}"
+
+      - name: Set Harbor project
+        id: project
+        run: |
+          PROJECT="${{ inputs.harbor_project }}"
+          if [ -z "$PROJECT" ]; then
+            PROJECT="tir"
+          fi
+          echo "name=${PROJECT}" >> $GITHUB_OUTPUT
+          echo "Harbor Project: ${PROJECT}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.clean.outputs.registry }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and push to Harbor
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_NO_SUMMARY: true
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image pushed successfully
+        run: |
+          echo "Image pushed to Harbor successfully!"
+          echo "Registry: ${{ steps.clean.outputs.registry }}"
+          echo "Project: ${{ steps.project.outputs.name }}"
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo ""
+          echo "Full image names:"
+          echo "  - ${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          echo "  - ${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:latest"
