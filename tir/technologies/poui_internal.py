@@ -4275,7 +4275,7 @@ class PouiInternal(Base):
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
-    def click_po_list_box(self, value="", second_value="") -> None:
+    def click_po_list_box(self, value="", second_value="", program_call=False) -> None:
         '''
         :param value: Value to select on po-list-box
         :type str
@@ -4291,7 +4291,13 @@ class PouiInternal(Base):
         po_item_list = self._get_po_item_list(value, second_value)
 
         if not po_item_list:
-            self.log_error(f'Item list {orig_value or orig_second_value} not found')
+            message = f'Item list {orig_value or orig_second_value} not found'
+            if program_call:
+                self.config.routine_type = ''
+                self.config.routine = ''
+            self.log_error(message)
+            message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
+            self.assertTrue(False, message)
 
         po_item_list_div = po_item_list.find_next('div')
         self.scroll_to_element(self.soup_to_selenium(po_item_list_div, twebview=True))
@@ -4736,8 +4742,13 @@ class PouiInternal(Base):
         program_desc = program_desc.strip().lower()
 
         po_item_list = self._get_po_item_list(value=program_desc)
-        if not po_item_list:
-            self.log_error(f"Item list '{program_desc}' not found!")
+        if not po_item_list: 
+            message = f"Item list '{program_desc}' not found!"
+            self.config.routine_type = ''
+            self.config.routine = ''
+            self.log_error(message)            
+            message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
+            self.assertTrue(False, message)
         item_list_data = self._get_item_list_data(po_item_list)
         return item_list_data.get('value').upper()
     
@@ -4845,7 +4856,7 @@ class PouiInternal(Base):
             self.po_loading(self.containers_selectors['GetCurrentContainer'])
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
-            self.click_po_list_box(value=program_desc,second_value=program_name)
+            self.click_po_list_box(value=program_desc, second_value=program_name, program_call=True)
 
             # -- Trecho de código temporário --
             time.sleep(1)
@@ -4874,7 +4885,12 @@ class PouiInternal(Base):
         self.close_after_routine(program_name)
 
         if not success:
-            self.log_error("Couldn't find Program field.")
+            message = "Couldn't find Program field."
+            self.config.routine_type = ''
+            self.config.routine = ''
+            self.log_error()
+            message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
+            self.assertTrue(False, message)
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
