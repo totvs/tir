@@ -1475,27 +1475,57 @@ class PouiInternal(Base):
             self.driver_refresh() if not element else self.SetButton(self.language.finish)
 
     def finish_new_home(self):
-        self.driver.switch_to.default_content()
-        iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
-        iframes = list(filter(lambda x: x.is_displayed(), iframes))
-        iframe = iframes[1]
-        self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe)[0])
+        logger().info('Finishing on the new home.')
+
+        user_icon = None
+        exit_button = None
+        finish_button = None
+        endtime = time.time() + self.config.time_out
+        get_soup = lambda: BeautifulSoup(self.driver.page_source, "html.parser")
+
+        self.switch_to_header_iframe()
         time.sleep(0.5)
 
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-        user_icon = next(iter(soup.select('po-icon i.an.an-user')))
+        while((time.time() < endtime) and not user_icon):
+            soup = get_soup()
+            user_icon = next(iter(soup.select('po-icon i.an.an-user')))
         self.click(self.soup_to_selenium(user_icon), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-        exit_button = next(iter(soup.select('po-icon i.an.an-sign-out')))
+        while((time.time() < endtime) and not exit_button):
+            soup = get_soup()
+            exit_button = next(iter(soup.select('po-icon i.an.an-sign-out')))
         self.click(self.soup_to_selenium(exit_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-        finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")))
+        while((time.time() < endtime) and not finish_button):
+            soup = get_soup()
+            finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")))
         self.click(self.soup_to_selenium(finish_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
+
+        self.driver.switch_to.default_content()
+
+    def switch_to_header_iframe(self):
+
+        success = False
+
+        endtime = time.time() + self.config.time_out
+        while((time.time() < endtime) and not success):
+
+            self.driver.switch_to.default_content()
+            iframes = self.driver.find_elements(By.CSS_SELECTOR, '[class*="twebview"], [class*="dict-twebengine"]')
+            iframes = list(filter(lambda x: x.is_displayed(), iframes))            
+
+            for iframe in iframes:
+                self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe)[0])
+                soup = BeautifulSoup(self.driver.page_source, "html.parser")
+                if soup.select('po-icon i.an.an-user') and soup.select('po-icon i.an.an-bell') and soup.select('po-icon i.an.an-dots-nine'):
+                    success = True
+                    break
+
+                self.driver.switch_to.default_content()
+
 
     def click_button_finish(self, click_counter=None):
         """
