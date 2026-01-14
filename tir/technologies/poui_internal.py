@@ -4778,3 +4778,101 @@ class PouiInternal(Base):
                 pass
 
             return elements if elements else None
+
+    def _click_dropdown(self, label, subitems, position):
+        """
+        Click on the POUI Dropdown by label and subitems.
+        https://po-ui.io/documentation/po-dropdown
+
+        :param label: The dropdown label name
+        :type label: str
+        :param subitems: The dropdown subitem name
+        :type subitems: List[str]
+        :param position:
+        :type position: int
+        :return: None
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickDropdown(label='Actions', subitems='Delete')
+        """
+
+        position -= 1
+        element = None
+        term = 'po-dropdown'
+        subitems_list = self._normalize_to_list(subitems)
+        success = False
+        po_dropdown = None
+        click_type = 1
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        logger().info(f"Clicking on Dropdown: {label} -> {subitems}")
+
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+
+            if not po_dropdown:
+                dropdown_button = self.get_component_by_label(label, term, position)
+
+            if dropdown_button:
+                drowpdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
+                if self.get_dropdown_state(dropdown_button) == 'closed':
+                    self.click(drowpdown_selenium, click_type=enum.ClickType(click_type))
+                    time.sleep(1)
+                    click_type += 1
+
+            if drowpdown_selenium:
+                dropdown_options = drowpdown_selenium.find_elements(By.CSS_SELECTOR, 'po-item-list')
+                if dropdown_options:
+                    for subitem in subitems_list:
+                        self.click_popup(subitem)
+                        success = True
+
+        if not success:
+            self.log_error(f"Element '{label} -> {subitems}' doesn't found!")
+
+
+    def get_component_by_label(self, label, selector, position):
+        """
+        Get BS object by label.
+        :param label:
+        :param selector:
+        :param position:
+        :return:
+        """
+
+        po_dropdown_label = None
+
+        po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        if po_dropdown:
+            po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x),
+                                            po_dropdown))
+        if po_dropdown_label:
+            if len(po_dropdown_label) > position:
+                return po_dropdown[position]
+
+
+    def get_dropdown_state(self, dropdown_element):
+        """
+        Get the current state of a POUI Dropdown component
+        https://po-ui.io/documentation/po-dropdown
+
+        :param dropdown_element: BeautifulSoup object representing the dropdown component
+        :type dropdown_element: BeautifulSoup object
+        :return: Current state of the dropdown (open/closed)
+        :rtype: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> dropdown_state = self.get_dropdown_state(dropdown_element)
+        """
+        dropdown_selenium = self.soup_to_selenium(dropdown_element, twebview=True)
+        if dropdown_selenium:
+            dropdown_status = dropdown_selenium.find_elements(By.CLASS_NAME, 'po-dropdown-button-open')
+            return 'open' if dropdown_status else 'closed'
+        else:
+            return None
