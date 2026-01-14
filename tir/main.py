@@ -616,10 +616,14 @@ class Webapp():
 
         :param button: Button to be clicked.
         :type button: str
-        :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
+        :param sub_item: Sub item to be clicked inside the first button, if the sub_item is also a menu with sub items, separate sub items of the sub item with comma and spaces. - **Default:** "" (empty string)
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+		
+        .. note::
+            If the `sub_item` is also a menu with other elements, it is necessary to add a comma and a space for each menu and item.
+			`self.oHelper.SetButton("Other Actions", sub_item="Delete, Residue")`
 
         > ⚠️ **Warning:**
         > If there are a sequence of similar buttons. Example:
@@ -635,6 +639,9 @@ class Webapp():
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
+        >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
         self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
 
@@ -1802,7 +1809,7 @@ class Poui():
         self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1,
-                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False):
+                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False, icon_class=None):
         """
             Clicks on the Table of POUI component.
             https://po-ui.io/documentation/po-table
@@ -1847,6 +1854,9 @@ class Poui():
             :type values: str or list
             :param match_all: If True, performs action on all matching rows. If False, only first match - **Default:** False
             :type match_all: bool
+            :param icon_class: Icon class name to click within the row. Supports partial class name
+            matching (e.g., 'arrow-up-right', 'ph-arrow-up-right', 'an-arrow-up-right') - **Default:** None
+            :type icon_class: str
 
             Usage:
 
@@ -1863,6 +1873,10 @@ class Poui():
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
+            >>> # New syntax - Click icon in row:
+            >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='an an-arrow-up-right')
+            >>> # Click icon in specific column:
+            >>> oHelper.ClickTable(columns='Code', values='000001', click_cell='Actions', icon_class='an an-arrow-up-right')
 
             .. warning::
                 Do not mix legacy and new syntax in the same call.
@@ -1879,7 +1893,7 @@ class Poui():
             """
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
-                               click_cell, checkbox, radio_input, columns, values, match_all)
+                               click_cell, checkbox, radio_input, columns, values, match_all, icon_class)
 
 
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):

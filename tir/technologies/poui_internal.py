@@ -3574,7 +3574,7 @@ class PouiInternal(Base):
 
 
     def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell,
-                   checkbox, radio_input, columns=None, values=None, match_all=False):
+                   checkbox, radio_input, columns=None, values=None, match_all=False, icon_class=None):
         """
             Clicks on the Table of POUI component.
             https://po-ui.io/documentation/po-table
@@ -3626,6 +3626,9 @@ class PouiInternal(Base):
             >>> oHelper.ClickTable(columns='Branch', values='D MG 01', click_cell='Edit')
             >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'])
             >>> oHelper.ClickTable(columns='Status', values=True, match_all=True, checkbox=True)
+            >>> # Click icon in row:
+            >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='arrow-up-right')
+            >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='ph-arrow-up-right')
 
             :return: None
             """
@@ -3729,6 +3732,9 @@ class PouiInternal(Base):
                     row_radio_component = tr[index].select_one('po-radio')
                     if row_radio_component:
                         self.toggle_radio(row_radio_component, radio_input)
+                elif icon_class:
+                    # Click on icon within the row
+                    self._click_table_icon(tr[index], icon_class)
                 else:
                     if column_index_number:
                         element_bs4 = tr[index].select('td')[column_index_number].select_one('span')
@@ -3748,6 +3754,87 @@ class PouiInternal(Base):
             index = row_index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
+
+    def _click_table_icon(self, row_element, icon_class, column_index=None):
+        """
+        [Internal]
+        Click on an icon within a table row based on class name.
+
+        :param row_element: BeautifulSoup row element (tr)
+        :param icon_class: Icon class name to search for (supports partial matching)
+        :param column_index: Optional column index to restrict search
+        :return: None
+        """
+
+        # Normalize icon class for searching (remove prefixes if needed)
+        icon_class_normalized = icon_class.lower().strip()
+
+        # Remove common prefixes to support flexible matching
+        icon_class_patterns = [
+            icon_class_normalized,
+            f'an-{icon_class_normalized}'
+        ]
+
+        # If column_index is specified, search only in that column
+        if column_index is not None:
+            td_elements = row_element.select('td')
+            if column_index < len(td_elements):
+                cells = [td_elements[column_index]]
+        else:
+            cells = row_element.select('td')
+
+        icon_element = None
+
+        # Search for icon in cells
+        for cell in cells:
+            # Look for po-icon elements
+            po_icons = cell.select('po-icon i, po-icon')
+
+            for po_icon in po_icons:
+                # Check if any of the class patterns match
+                icon_classes = po_icon.get('class')
+                icon_class_str = ' '.join(icon_classes).lower()
+
+                # Check if any pattern matches in the icon classes
+                for pattern in icon_class_patterns:
+                    if pattern in icon_class_str or any(pattern in cls.lower() for cls in icon_classes):
+                        icon_element = po_icon
+                        break
+
+                if icon_element:
+                    break
+
+            if icon_element:
+                break
+
+        # If not found in po-icon, try looking for direct icon classes
+        if not icon_element:
+            for cell in cells:
+                for pattern in icon_class_patterns:
+                    # Try to find by class attribute
+                    potential_icons = cell.select(f'i.{pattern.replace("-", ".")}')
+                    if potential_icons:
+                        icon_element = potential_icons[0]
+                        break
+
+                if icon_element:
+                    break
+
+        if icon_element:
+            logger().info(f"Clicking on icon with class '{icon_class}' in table row")
+            # Click on the parent clickable element if it exists, otherwise click the icon itself
+            clickable_parent = icon_element.find_parent(class_='po-clickable')
+            if clickable_parent:
+                self.poui_click(clickable_parent)
+            else:
+                # Try to find any clickable parent (div, span, etc.)
+                potential_clickable = icon_element.find_parent(['po-icon'])
+                if potential_clickable:
+                    self.poui_click(potential_clickable)
+                else:
+                    self.poui_click(icon_element)
+        else:
+            self.log_error(f"Icon with class '{icon_class}' not found in table row")
 
 
     def _normalize_to_list(self, value) -> list:
