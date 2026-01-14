@@ -2177,4 +2177,24 @@ class Poui():
         """
 
         self.__poui.click_switch(label=label, value=value, position=position)
-    
+
+
+    def ClickDropdown(self, label='', subitems='', position=1):
+        """
+        Clicks on a POUI Dropdown component and optionally selects a subitem.
+        https://po-ui.io/documentation/po-dropdown
+
+        :param label: The dropdown button label
+        :type label: str
+        :param subitems: The subitem text to click after opening the dropdown - **Default:** ''
+        :type subitems: str
+        :param position: Position which element is located - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickDropdown(label='Actions', subitems='Edit')
+        >>> oHelper.ClickDropdown(label='Ações de registro')
+        """
+        self.__poui._click_dropdown(label, subitems, position)
