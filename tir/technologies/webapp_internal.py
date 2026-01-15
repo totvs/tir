@@ -1884,9 +1884,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        soup = self.get_current_DOM()
+        soup = self.get_current_DOM()        
 
-        return len(soup.select(term))
+        return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -9001,7 +9001,7 @@ class WebappInternal(Base):
         >>> container = self.get_current_container()
         """
         soup = self.get_current_DOM()
-        containers = self.zindex_sort(soup.select("wa-dialog"), True)
+        containers = self.zindex_sort(list(filter(lambda x: self.element_is_displayed(x), soup.select("wa-dialog"))), True)        
         return next(iter(containers), None)
 
     def get_all_containers(self):
