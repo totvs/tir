@@ -707,8 +707,8 @@ class WebappInternal(Base):
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program, environment=server_environment)
 
-        self.wait_element_timeout(term="[name='cGetUser']",
-         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
+        self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                  timeout = self.config.time_out , main_container='body')
 
 
     def close_ballon_last_login(self):
@@ -1884,7 +1884,7 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        soup = self.get_current_DOM()        
+        soup = self.get_current_DOM()
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 

@@ -109,6 +109,7 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
+        self.restart_tss = False
         
         if not Base.driver:
             Base.driver = self.driver
@@ -137,7 +138,7 @@ class PouiInternal(Base):
             with open("firefox_task_kill.bat", "w", ) as firefox_task_kill:
                 firefox_task_kill.write(f"taskkill /f /PID {self.driver.service.process.pid} /T")
 
-    def program_screen(self, initial_program="", environment="", coverage=False):
+    def program_screen(self, initial_program="", environment="", poui=True):
         """
         [Internal]
 
@@ -153,81 +154,92 @@ class PouiInternal(Base):
         >>> # Calling the method
         >>> self.program_screen("SIGAADV", "MYENVIRONMENT")
         """
-        if coverage:
-            self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
-        else:
-            try_counter = 0
-            self.wait_element(term='#inputStartProg', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-            self.wait_element(term='#inputEnv', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        program_screen = []
+        self.config.poui_login = poui
+
+        if not environment:
+            environment = self.config.environment
+
+        if self.config.coverage:
+            self.open_url_coverage(url=self.config.url, initial_program=initial_program,
+                                   environment=environment)
+        
+        endtime = time.time() + 10
+        while time.time() < endtime and not program_screen:
+            start_program_term = '#selectStartProg'
+            program_screen = self.web_scrap(term=start_program_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                            main_container=self.containers_selectors["AllContainers"],
+                                            check_help=False, check_error=False)
+        
+        if program_screen:
+            self.filling_initial_program(initial_program)
+            self.filling_server_environment(environment)
+
+            self.wait_until_to(expected_condition = "element_to_be_clickable", element=".startParameters", locator = By.CSS_SELECTOR)
+            parameters_screen = self.driver.find_element(By.CSS_SELECTOR, ".startParameters")
+            buttons = self.execute_js_selector('wa-button', parameters_screen)
+            button = next(iter(list(filter(lambda x: 'ok' in x.text.lower().strip(), buttons))), None)
+            self.click(button)
+
+    def filling_initial_program(self, initial_program):
+        """
+        [Internal]
+        """
+
+        logger().info(f'Filling Initial Program: "{initial_program}"')
+
+        start_program = '#selectStartProg'        
+
+        self.fill_select_element(term=start_program, user_value=initial_program)
+
+    def filling_server_environment(self, environment):
+        """
+        [Internal]
+        """
+
+        input_environment = '#selectEnv'
+
+        logger().info(f'Filling Server Environment: "{environment}"')
+
+        self.fill_select_element(term=input_environment, user_value=environment)
+    
+    def fill_select_element(self, term, user_value):
+
+        element_value = ''
+        try_counter = 0	
+
+        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")        
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and (element_value != user_value.strip())):
+
             soup = self.get_current_DOM()
 
-            logger().info("Filling Initial Program")
-            start_prog_element = next(iter(soup.select("#inputStartProg")), None)
-            if start_prog_element is None:
+            soup_element = next(iter(soup.select(term)), None)
+            if soup_element is None:
                 self.restart_counter += 1
-                message = "Couldn't find Initial Program input element."
+                message = f"Couldn't find '{term}' element."
                 self.log_error(message)
                 raise ValueError(message)
 
-            start_prog = lambda: self.soup_to_selenium(start_prog_element)
-            start_prog_value = self.get_web_value(start_prog())
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and (start_prog_value.strip() != initial_program.strip())):
+            element = lambda: self.soup_to_selenium(soup_element)
 
-                if try_counter == 0:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element)
-                else:
-                    start_prog = lambda: self.soup_to_selenium(start_prog_element.parent)
+            self.set_element_focus(element())
+            self.click(element())
+            self.try_send_keys(element, user_value, try_counter)
+            try_counter += 1
 
-                self.set_element_focus(start_prog())
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(start_prog(), initial_program)
-                start_prog_value = self.get_web_value(start_prog())
-                try_counter += 1 if(try_counter < 1) else -1
+            if try_counter > 4:
+                try_counter = 0
             
-            if (start_prog_value.strip() != initial_program.strip()):
-                self.restart_counter += 1
-                message = "Couldn't fill Program input element."
-                self.log_error(message)
-                raise ValueError(message)
+            element_value = self.get_web_value(next(iter(self.execute_js_selector('input', element())))).strip() if self.execute_js_selector('input', element()) else None
+            
 
-            logger().info("Filling Environment")
-            env_element = next(iter(soup.select("#inputEnv")), None)
-            if env_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find Environment input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            env = lambda: self.soup_to_selenium(env_element)
-            env_value = self.get_web_value(env())
-            endtime = time.time() + self.config.time_out
-            try_counter = 0
-            while (time.time() < endtime and (env_value.strip() != self.config.environment.strip())):
-
-                if try_counter == 0:
-                    env = lambda: self.soup_to_selenium(env_element)
-                else:
-                    env = lambda: self.soup_to_selenium(env_element.parent)
-
-                self.set_element_focus(env())
-                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-                self.send_keys(env(), self.config.environment)
-                env_value = self.get_web_value(env())
-                try_counter += 1 if(try_counter < 1) else -1
-
-            if (env_value.strip() != self.config.environment.strip()):
-                self.restart_counter += 1
-                message = "Couldn't fill Environment input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
-            self.click(button)
+        if (element_value.strip() != user_value.strip()):
+            self.restart_counter += 1
+            message = f"Couldn't fill '{term}' element."
+            self.log_error(message)
+            raise ValueError(message)
 
     def user_screen(self, admin_user = False):
         """
@@ -240,6 +252,9 @@ class PouiInternal(Base):
         >>> # Calling the method
         >>> self.user_screen()
         """
+
+        logger().debug('Filling user screen')
+
         user_text = self.config.user_cfg if  admin_user and self.config.user_cfg else self.config.user
         password_text = self.config.password_cfg if admin_user and self.config.password_cfg else self.config.password
 
@@ -248,45 +263,44 @@ class PouiInternal(Base):
             password_text = "1234"
 
         self.twebview_context = True
-        if not self.wait_element_timeout(term=".po-page-login-info-field .po-input",
-        scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=self.config.time_out * 3,main_container='body'):
+
+        if not self.wait_element_timeout(term=".po-page-login-info-field .po-input", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                         timeout=self.config.time_out * 3,main_container='body'):
             self.reload_user_screen()
 
         self.set_multilanguage()
 
         try_counter = 0
-        soup = self.get_current_DOM()
-
-        logger().info("Filling User")
-
-        try:
-            user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
-        
-            if user_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find User input element."
-                self.log_error(message)
-                raise ValueError(message)
-
-            user = lambda: self.soup_to_selenium(user_element)
-            user_value = self.get_web_value(user())
-        except AttributeError as e:
-            self.log_error(str(e))
-            raise AttributeError(e)
-            
+        user_value = ''
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
 
-            if try_counter == 0:
+            soup = self.get_current_DOM(twebview=True)
+
+            logger().info("Filling User")
+
+            try:
+                user_element = next(iter(soup.select(".po-page-login-info-field .po-input")), None)
+            
+                if user_element is None:
+                    self.restart_counter += 1
+                    message = "Couldn't find User input element."
+                    self.log_error(message)
+                    raise ValueError(message)
+
                 user = lambda: self.soup_to_selenium(user_element)
-            else:
-                user = lambda: self.soup_to_selenium(user_element.parent)
+                user_value = self.get_web_value(user())
+            except AttributeError as e:
+                self.log_error(str(e))
+                raise AttributeError(e)            
+
+            user = lambda: self.soup_to_selenium(user_element)
 
             self.set_element_focus(user())
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = user_element, locator = By.XPATH, timeout=True)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=user_element, locator=By.XPATH, timeout=True)
             self.double_click(user())
             self.send_keys(user(), user_text)
-            self.send_keys(user(), Keys.TAB)
+            self.send_keys(user(), Keys.ENTER)
             user_value = self.get_web_value(user())
             try_counter += 1 if(try_counter < 1) else -1
 
@@ -298,33 +312,39 @@ class PouiInternal(Base):
 
         logger().info("Filling Password")
         
-        password_element = next(iter(soup.select(".po-input-icon-right")), None)
-
-        if password_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find User input element."
-            self.log_error(message)
-            raise ValueError(message)
-
-        password = lambda: self.soup_to_selenium(password_element)
-        password_value = self.get_web_value(password())
-        endtime = time.time() + self.config.time_out
         try_counter = 0
-        while (time.time() < endtime and not password_value.strip() and self.config.password != ''):
+        password_value = ''
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not password_value and self.config.password != ''):
 
-            if try_counter == 0:
-                password = lambda: self.soup_to_selenium(password_element)
-            else:
-                password = lambda: self.soup_to_selenium(password_element.parent)
+            soup = self.get_current_DOM(twebview=True)
+
+            logger().info("Filling Password")
+
+            password_element = next(iter(soup.select(".po-input-icon-right")), None)
+
+            if password_element is None:
+                self.restart_counter += 1
+                message = "Couldn't find User input element."
+                self.log_error(message)
+                raise ValueError(message)
+
+            password = lambda: self.soup_to_selenium(password_element)
 
             self.set_element_focus(password())
-            self.wait_until_to( expected_condition="element_to_be_clickable", element = password_element, locator = By.XPATH, timeout=True)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element=password_element, locator=By.XPATH, timeout=True)
             self.click(password())
             self.send_keys(password(), Keys.HOME)
             self.send_keys(password(), password_text)
             self.send_keys(password(), Keys.TAB)
+
             password_value = self.get_web_value(password())
-            try_counter += 1 if(try_counter < 1) else -1
+
+            if not password_value:
+                password_value = ''
+
+            self.wait_blocker()
+            try_counter += 1 if (try_counter < 1) else -1
         
         if not password_value.strip() and self.config.password != '':
             self.restart_counter += 1
@@ -333,6 +353,7 @@ class PouiInternal(Base):
             raise ValueError(message)
 
         button_element = next(iter(list(filter(lambda x: self.language.enter in x.text, soup.select("button")))), None)
+
         if button_element is None:
             self.restart_counter += 1
             message = "Couldn't find Enter button."
@@ -340,7 +361,111 @@ class PouiInternal(Base):
             raise ValueError(message)
 
         button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
-        self.click(button())
+
+        self.switch_to_iframe()
+
+        self.send_action(self.click, button)
+
+    def wait_blocker(self):
+        """
+        [Internal]
+
+        Wait blocker disappear
+
+        """
+
+        logger().debug("Waiting blocker to continue...")
+        soup = None
+        result = True
+        endtime = time.time() + self.config.time_out / 2
+
+        while (time.time() < endtime and result):
+            blocker_container = None
+            blocker = None
+            soup = lambda: self.get_current_DOM(twebview=True)
+            blocker_container = lambda: self.blocker_containers(soup())
+
+            try:
+                if blocker_container():
+                    blocker_container_soup = blocker_container()
+                    blocker_container = self.soup_to_selenium(blocker_container())
+                    blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(blocker_container, 'get_property') else None
+            except:
+                pass
+
+            logger().debug(f'Blocker status: {blocker}')
+
+            if blocker:
+                result = True
+            else:
+                self.blocker = None
+                return False
+
+        if time.time() > endtime:
+            self.check_blocked_container(blocker_container_soup)
+
+        return result
+    
+    def check_blocked_container(self, blocker_container_soup):
+        """
+
+        :return:
+        """
+
+        try:
+
+            if hasattr(blocker_container_soup, 'attrs'):
+                blocker_container_soup_info = str(blocker_container_soup.attrs)
+
+                if hasattr(blocker_container_soup, 'id'):
+                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
+
+                if hasattr(blocker_container_soup, 'title'):
+                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
+
+            else:
+                blocker_container_soup_info = blocker_container_soup[:1000]
+
+            logger().debug(f'wait_blocker timeout | blocker container: {str(blocker_container_soup_info)}')
+
+            soup = lambda: self.get_current_DOM()
+
+            containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
+
+            for container in containers:
+                blocked = hasattr(container, 'attrs') and 'blocked' in container.attrs
+
+                logger().debug(
+                    f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
+                if blocked:
+                    self.blocker = blocked
+        except:
+            pass
+    
+    def blocker_containers(self, soup):
+        """
+        Return The container index by z-index and filter if it is displayed
+
+        :param soup: soup object
+        :return: The container index by z-index and filter if it is displayed
+        """
+
+        try:
+            containers = self.zindex_sort(soup.select(self.containers_selectors["BlockerContainers"]), True)
+
+            if containers:
+                containers_filtered = list(filter(lambda x: self.element_is_displayed(x), containers))
+                if containers_filtered:
+                    return next(iter(containers_filtered), None)
+                else:
+                    return None
+            else:
+                return None
+
+        except AttributeError as e:
+            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception (AttributeError)\n {str(e)}")
+        except Exception as e:
+            logger().exception(f"Warning: wait_blocker > blocker_containers Exeception {str(e)}")
 
     def reload_user_screen(self):
         """
@@ -349,16 +474,20 @@ class PouiInternal(Base):
         Refresh the page - retry load user_screen
         """
 
-        self.driver_refresh()
+        logger().debug('Reloading user screen')
+
+        server_environment = self.config.environment
+
+        self.restart_browser()
 
         if self.config.coverage:
             self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program)
+            self.program_screen(self.config.initial_program, environment=server_environment)
 
-        self.wait_element_timeout(term="[name='cGetUser'] > input",
-         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
+        self.wait_element_timeout(term="[name='cGetUser']", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                  timeout = self.config.time_out , main_container='body')
 
     def environment_screen(self, change_env=False):
         """
@@ -375,134 +504,292 @@ class PouiInternal(Base):
         >>> # Calling the method
         >>> self.environment_screen()
         """
-        if not self.config.date:
-            self.config.date = datetime.today().strftime('%d/%m/%Y')
 
         if change_env:
             label = self.language.confirm
             container = "body"
         else:
-            label = self.language.enter
+            label = self.language.confirm_in_environment_screen
             container = ".twindow"
 
-        self.wait_element(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        shadow_root = True
 
-        logger().info("Filling Date")
-        base_dates = self.web_scrap(term=".po-datepicker", main_container='body', scrap_type=enum.ScrapType.CSS_SELECTOR)
+        self.filling_date(shadow_root=shadow_root, container=container)
 
-        if len(base_dates) > 1:
-            base_date = base_dates.pop()
+        self.filling_group(shadow_root=shadow_root, container=container)
+
+        self.filling_branch(shadow_root=shadow_root, container=container)
+
+        self.filling_environment(shadow_root=shadow_root, container=container)
+
+        buttons = self.filter_displayed_elements(
+            self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body",
+                            twebview=True),
+            True, twebview=True)
+
+        if len(buttons) > 1:
+            button_element = buttons.pop()
         else:
-            base_date = next(iter(base_dates), None)
-            
-        if base_date is None:
-            self.restart_counter += 1
-            message = "Couldn't find Date input element."
-            self.log_error(message)
-            raise ValueError(message)
+            button_element = next(iter(buttons), None) if buttons else None
 
-        date = lambda: self.soup_to_selenium(base_date)
-        base_date_value = ''
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
-            self.double_click(date())
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(date(), self.config.date)
-            base_date_value = self.get_web_value(date())
-            ActionChains(self.driver).send_keys(Keys.TAB).perform()
+        button = lambda: self.soup_to_selenium(button_element)
 
-        logger().info("Filling Group")
-        group_elements = self.web_scrap(term=self.language.group, main_container='body',scrap_type=enum.ScrapType.TEXT)
-        group_element = next(iter(group_elements))
-        group_element = group_element.find_parent('pro-company-lookup')
-        group_element = next(iter(group_element.select('input')), None)
-
-        if group_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find Group input element."
-            self.log_error(message)
-            raise ValueError(message)
-        
-        group = lambda: self.soup_to_selenium(group_element)
-        group_value = ''
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (group_value.strip() != self.config.group.strip())):
-            self.double_click(group())
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(group(), self.config.group)
-            group_value = self.get_web_value(group())
-            ActionChains(self.driver).send_keys(Keys.TAB).perform()
-
-        logger().info("Filling Branch")
-        branch_elements = self.web_scrap(term=self.language.branch, main_container='body',scrap_type=enum.ScrapType.TEXT)
-        branch_element = next(iter(branch_elements))
-        branch_element = branch_element.find_parent('pro-branch-lookup')
-        branch_element = next(iter(branch_element.select('input')), None)
-
-        if branch_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find Branch input element."
-            self.log_error(message)
-            raise ValueError(message)
-
-        branch = lambda: self.soup_to_selenium(branch_element)
-        branch_value = ''
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
-            self.double_click(branch())
-            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
-            ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
-                Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
-            self.send_keys(branch(), self.config.branch)
-            branch_value = self.get_web_value(branch())
-            ActionChains(self.driver).send_keys(Keys.TAB).perform()
-
-        logger().info("Filling Environment")
-        environment_elements = self.web_scrap(term=self.language.environment, main_container='body',scrap_type=enum.ScrapType.TEXT)
-        environment_element = next(iter(environment_elements))
-        environment_element = environment_element.find_parent('pro-system-module-lookup')
-        environment_element = next(iter(environment_element.select('input')), None)
-
-        if environment_element is None:
-            self.restart_counter += 1
-            message = "Couldn't find Module input element."
-            self.log_error(message)
-            raise ValueError(message)
-
-
-        env = lambda: self.soup_to_selenium(environment_element)
-        enable = env().is_enabled()
-
-        if enable:
-            env_value = self.get_web_value(env())
-            endtime = time.time() + self.config.time_out
-            while (time.time() < endtime and env_value != self.config.module):
-                self.double_click(env())
-                self.send_keys(env(), Keys.HOME)
-                self.send_keys(env(), self.config.module)
-                env_value = self.get_web_value(env())
-                ActionChains(self.driver).send_keys(Keys.TAB).perform()
-                time.sleep(1)
-                self.close_warning_screen()
-
-        buttons = self.filter_displayed_elements(self.web_scrap(label, scrap_type=enum.ScrapType.MIXED, optional_term="button", main_container="body"), True)
-        button_element = next(iter(buttons), None) if buttons else None
-
-        if button_element  and hasattr(button_element, "name") and hasattr(button_element, "parent"):
-            button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
-            self.click(button())
-        elif not change_env:
+        if not change_env and not button:
             self.restart_counter += 1
             message = f"Couldn't find {label} button."
             self.log_error(message)
             raise ValueError(message)
 
+        click = 1
+        num_of_trying = 0
+        max_num_of_trying = 5
+
+        self.switch_to_iframe()
+        logger().info('Clicking on Button')
+
+        self.wait_blocker()
+        while max_num_of_trying >= num_of_trying:
+            try:
+                self.click(button(), enum.ClickType(click))
+                time.sleep(1)
+            except:
+                logger().info('Button click completed')
+                break
+            num_of_trying += 1
+
         self.driver.switch_to.default_content()
+        # self.config.poui_login = False # I didn't understand the reason 
+
+    def filling_date(self, shadow_root=None, container=None):
+        """
+        [Internal]
+        """
+        d = self.config.data_delimiter
+        if not self.config.date:
+            self.config.date = datetime.today().strftime(f'%d{d}%m{d}%Y')
+
+        click_type = 1
+        send_type = 1
+        base_date_value = ''
+        group_bs = None
+        datepicker_main = None
+
+        endtime = time.time() + self.config.time_out / 2
+        while (time.time() < endtime and (base_date_value.strip() != self.config.date.strip())):
+
+            base_dates = self.web_scrap(term=".po-datepicker", main_container='body',
+                                        scrap_type=enum.ScrapType.CSS_SELECTOR, twebview=True)
+
+            if not group_bs:
+                group_bs = self.group_element(shadow_root, container)
+                if group_bs:
+                    group_element = lambda: self.soup_to_selenium(group_bs, True)
+                    group_value = self.get_web_value(group_element())
             
+            if base_dates:
+                base_date = base_dates.pop() if len(base_dates) > 1 else next(iter(base_dates), None)
+
+                if base_date:
+                    date = lambda: self.soup_to_selenium(base_date)
+                    datepicker_main = base_date.find_parent('po-datepicker')
+                    if datepicker_main:
+                        datepicker_element = self.soup_to_selenium(datepicker_main)
+                        datepicker_is_valid = lambda: self.poui_datepicker_is_valid(datepicker_element)
+
+                    self.switch_to_iframe()
+
+                    logger().info(f'Filling Date: "{self.config.date}"')
+
+                    self.wait_blocker()
+                    for i in range(3):
+                        self.click(date(), click_type=enum.ClickType(click_type))
+                        ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                        ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+
+                        self.try_send_keys(date, self.config.date, try_counter=send_type)
+
+                        base_date_value = self.merge_date_mask(self.config.date, self.get_web_value(date()))
+                        ActionChains(self.driver).send_keys(Keys.TAB * 2).perform()
+
+                        time.sleep(1)
+                        send_type += 1
+                        if send_type > 3:
+                            send_type = 1
+
+                        if base_date_value.strip() == self.config.date.strip() and datepicker_is_valid():
+                            break
+
+                        if not self.is_active_element(date()) and click_type == 3:
+                            self.filling_group(shadow_root, container, group_value)
+
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
+
+    def poui_datepicker_is_valid(self, datepicker):
+        """
+
+        :param datepicker: beautiful soup datepicker tag component
+        :type datepicker: BeautifulSoup
+
+        :return: True when valid else False
+        """
+        try:
+            datepicker_class = datepicker.get_attribute("class").split()
+            return "ng-valid" in datepicker_class
+        except (AttributeError, TypeError) as e:
+            logger().debug(f'Something wrong with Datepicker, please check it: {e}')
+            return False
+    
+    def merge_date_mask(self, base_date, date):
+
+        d = self.config.data_delimiter
+        pattern_1 = (r"\d{2}*\d{2}*\d{4}").replace("*", d)
+        pattern_2 = (r"\d{2}*\d{2}*\d{2}").replace("*", d)
+
+        match1 = re.match(pattern_1, base_date)
+        match2 = re.match(pattern_2, base_date)
+
+
+        if match1:
+            return date
+        elif match2:
+            split_date = date.split(d)
+            return f"{split_date[0]}{d}{split_date[1]}{d}{split_date[-1][-2:]}"
+    
+    def filling_group(self, shadow_root=None, container=None, group_value=''):
+        """
+        [Internal]
+        """
+
+        click_type = 1
+        group_current_value = ''
+        if not group_value:
+            group_value = self.config.group
+
+        endtime = time.time() + self.config.time_out / 2
+        while (time.time() < endtime and (group_current_value.strip() != group_value.strip())):
+
+            group_element = self.group_element(shadow_root, container)
+
+            if group_element:
+                group = lambda: self.soup_to_selenium(group_element)
+
+                self.switch_to_iframe()
+
+                logger().info(f'Filling Group: "{group_value}"')
+                self.wait_blocker()
+                self.click(group(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(group(), group_value)
+                group_current_value = self.get_web_value(group())
+                ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
+
+        if not self.config.group:
+            group_content =  self.get_web_value(self.soup_to_selenium(self.group_element(shadow_root, container), twebview=True))
+            if group_content:
+                self.config.group = group_content
+            else:
+                self.log_error(f'Please, fill group parameter in Setup() method')
+
+    def group_element(self, shadow_root, container):
+
+        group_elements = self.web_scrap(term=self.language.group, main_container='body',
+                                        scrap_type=enum.ScrapType.TEXT, twebview=True)
+
+        if group_elements:
+            group_element = next(iter(group_elements))
+            group_element = group_element.find_parent('pro-company-lookup')
+            return next(iter(group_element.select('input')), None)
+    
+    def filling_branch(self, shadow_root=None, container=None):
+        """
+        [Internal]
+        """
+
+        click_type = 1
+        branch_value = ''
+        endtime = time.time() + self.config.time_out / 2
+        while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
+
+            branch_elements = self.web_scrap(term=self.language.branch, main_container='body',
+                                                scrap_type=enum.ScrapType.TEXT, twebview=True)
+
+            if branch_elements:
+                branch_element = next(iter(branch_elements))
+                branch_element = branch_element.find_parent('pro-branch-lookup')
+                branch_element = next(iter(branch_element.select('input')), None)
+
+            if branch_element:
+                branch = lambda: self.soup_to_selenium(branch_element)
+
+                self.switch_to_iframe()
+
+                logger().info(f'Filling Branch: "{self.config.branch}"')
+                self.wait_blocker()
+                self.click(branch(), click_type=enum.ClickType(click_type))
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                self.send_keys(branch(), self.config.branch)
+                branch_value = self.get_web_value(branch())
+                ActionChains(self.driver).send_keys(Keys.TAB).perform()
+
+                time.sleep(1)
+                click_type += 1
+                if click_type > 3:
+                    click_type = 1
+    
+    def filling_environment(self, shadow_root=None, container=None):
+        """
+        [Internal]
+        """
+
+        click_type = 1
+        env_value = ''
+        environment_element = None
+        enable = True
+        endtime = time.time() + self.config.time_out / 2
+        while (time.time() < endtime and env_value.strip() != self.config.module.strip() and enable):
+
+            environment_elements = self.web_scrap(term=self.language.environment, main_container='body',
+                                                    scrap_type=enum.ScrapType.TEXT, twebview=True)
+
+            if environment_elements:
+                environment_element = next(iter(environment_elements))
+                environment_element = environment_element.find_parent('pro-system-module-lookup')
+                environment_element = next(iter(environment_element.select('input')), None)
+
+            if environment_element:
+                env = lambda: self.soup_to_selenium(environment_element)
+
+                self.switch_to_iframe()
+                enable = env().is_enabled()
+
+                if enable:
+                    self.switch_to_iframe()
+
+                    logger().info(f'Filling Environment: "{self.config.module}"')
+                    self.wait_blocker()
+                    self.click(env(), click_type=enum.ClickType(click_type))
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                    ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+                    self.send_keys(env(), self.config.module)
+                    env_value = self.get_web_value(env())
+                    ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                    time.sleep(1)
+                    self.close_warning_screen()
+
+                    time.sleep(1)
+                    click_type += 1
+                    if click_type > 3:
+                        click_type = 1
+    
     def ChangeEnvironment(self, date="", group="", branch="", module=""):
         """
         Clicks on the change environment area of Protheus Webapp and
@@ -614,12 +901,16 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_modal()
         """
+        dialog_term = "wa-dialog"
+        button_term = ".dict-tbrowsebutton"
         soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
-        if modals and self.element_exists(term=".tmodaldialog .tbrowsebutton", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error = False):
-            buttons = modals[0].select(".tbrowsebutton")
+        modals = self.zindex_sort(soup.select(dialog_term), True)
+        if modals and self.element_exists(term=f"{dialog_term} {button_term}", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False):
+            buttons = modals[0].select(button_term)
             if buttons:
-                close_button = next(iter(list(filter(lambda x: x.text == self.language.close, buttons))), None)
+                regex = r"(<[^>]*>)?"
+                close_button = list(filter(lambda x: x.get('caption') and re.sub(regex, '', x['caption']).strip() == self.language.close ,buttons))
+                close_button = next(iter(close_button),None)
                 time.sleep(0.5)
                 selenium_close_button = lambda: self.driver.find_element(By.XPATH, xpath_soup(close_button))
                 if close_button:
@@ -686,32 +977,111 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
-        soup = self.get_current_DOM()
-        modals = self.zindex_sort(soup.select(".ui-dialog"), True)
-        if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-         optional_term=".ui-dialog > .ui-dialog-titlebar", main_container="body", check_error = False):
-            self.set_button_x()
 
+        logger().debug('Closing warning screen!')
+
+        selector = self.warning_screen_selectors()
+
+        time.sleep(1)
+        soup = self.get_current_DOM()
+        modals = self.zindex_sort(soup.select(selector), True)
+        if modals and self.check_warning_screen():
+            self.set_button_x(check_error=False)
+
+    def coin_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the coin screen.
+        """
+        return self.get_screen_selectors("coin")
+
+    def warning_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the warning screen.
+        """
+        return self.get_screen_selectors("warning")
+
+    def news_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the news screen.
+        """
+        return self.get_screen_selectors("news")
+    
+    def browse_screen_selectors(self):
+        """
+        [Internal]
+
+        This method returns the selectors for the browse screen.
+        """
+        return self.get_screen_selectors("browse")
+
+    def get_screen_selectors(self, screen_type):
+        """
+        [Internal]
+
+        This method returns the selectors for different screens based on the screen type.
+        """
+
+        selectors = {
+            "coin": {
+                "shadowroot": "wa-dialog > wa-panel > wa-text-view",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "warning": {
+                "shadowroot": "wa-dialog",
+                "default": ".ui-dialog > .ui-dialog-titlebar"
+            },
+            "news": {
+                "shadowroot": "wa-dialog> .dict-tpanel > .dict-tsay",
+                "default": ".tmodaldialog > .tpanel > .tsay"
+            },
+            "browse": {
+                "shadowroot": "[style*='fwskin_seekbar_ico']"
+            }
+        }
+
+        return selectors[screen_type]["shadowroot"]
+        
     def set_button_x(self, position=1, check_error=True):
+        endtime = self.config.time_out/2
+        term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
+
         position -= 1
-        term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
-        wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
-        soup = self.get_current_DOM() if not wait_button else self.get_current_container()
+        wait_button = self.wait_element_timeout(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=endtime, position=position, check_error=check_error)
+
+        if wait_button:
+            soup = self.get_current_container()
+            if hasattr(soup, 'attrs') and 'title' in soup.attrs and f'{self.language.warning}' in soup.attrs['title']:
+                soup = self.get_current_DOM()
+        else:
+            soup = self.get_current_DOM()
 
         close_list = soup.select(term_button)
         if not close_list:
+            soup = self.get_current_DOM()
+            close_list = soup.select(term_button)
+
+        if not close_list:
             self.log_error(f"Element not found")
-        if len(close_list) < position+1:
+        if len(close_list) < position + 1:
             self.log_error(f"Element x position: {position} not found")
-        if position == 0:
-            element_soup = close_list.pop()
-        else:
-            element_soup = close_list.pop(position)
-        element_selenium = self.soup_to_selenium(element_soup)
-        self.scroll_to_element(element_selenium)
-        self.wait_until_to( expected_condition = "element_to_be_clickable", element = element_soup, locator = By.XPATH )
         
-        self.click(element_selenium)
+        element_soup = close_list.pop() if position == 0 else close_list.pop(position)
+        element_selenium = self.soup_to_selenium(element_soup)
+        header = self.execute_js_selector('wa-dialog-header', element_selenium, get_all=False)
+        x_button = self.execute_js_selector("button[class~=button-close]", header, get_all=False)
+        if x_button:
+            element_selenium = x_button
+
+        self.scroll_to_element(element_selenium)
+        self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
+
+        self.send_action(action=self.click, element=lambda : element_selenium)
         
     def close_warning_screen_after_routine(self):
         """
@@ -1352,17 +1722,18 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.restart()
         """
-        webdriver_exception = None
+        webdriver_exception = None        
+        server_environment = self.config.environment
+        self.config.poui_login = True
+
+        if self.config.appserver_service:
+            try:
+                self.sc_query(self.config.appserver_service)
+            except Exception as err:
+                logger().debug(f'sc_query exception: {err}')
 
         try:
-            if self.restart_counter == 2:
-                logger().info("Closing the Browser")
-                self.driver.close()
-                logger().info("Starting the Browser")
-                self.Start()
-            else:
-                logger().info("Refreshing the Browser")
-                self.driver_refresh()
+            self.restart_browser()
         except WebDriverException as e:
             webdriver_exception = e
 
@@ -1376,27 +1747,87 @@ class PouiInternal(Base):
         try:
             self.driver.switch_to_alert().accept()
         except:
-            pass
+            pass        
 
         if self.config.initial_program != ''  and self.restart_counter < 3:
 
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(self.config.initial_program)
-            self.user_screen()
+            
+            self.wait_user_screen()         
+
+            if self.restart_tss:
+                # AINDA NÃO TESTADO
+                self.user_screen_tss()
+                self.restart_tss = False
+                return
+
+            self.user_screen()            
             self.environment_screen()
 
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
                 self.close_warning_screen()
                 self.close_modal()
 
-            
+            # Até aqui está ok
             if self.config.routine:
                 if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.config.routine_type.lower() == 'program':
                     self.set_program(self.config.routine)
 
+    def restart_browser(self):
+        """
+        [Internal]
+        """
+
+        logger().info("Closing the Browser")
+        self.driver.close()
+        # self.close_process()
+        logger().info("Starting the Browser")
+        self.Start()
+
+        try:
+            line_parameters_url = f"{self.config.url}/?StartProg={self.config.initial_program}&Env={self.config.environment}"
+            logger().debug(f"Get url with line parameters: {line_parameters_url}")
+            self.get_url(line_parameters_url)
+        except:
+            pass
+
+        time.sleep(10)
+
+        logger().debug(f"Get url {self.config.url}")
+        self.get_url()
+    
+    def wait_user_screen(self):
+
+        term = ".po-page-login-info-field .po-input"
+        element = None
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not element:
+
+            soup = self.get_current_DOM(twebview=True)
+            element = next(iter(soup.select(term)), None)
+    
+    def user_screen_tss(self):
+        """
+        [Internal]
+
+        Fills the user login screen of Protheus with the user and password located on config.json.
+
+        Usage:
+
+        >>> # Calling the method
+        >>> self.user_screen()
+        """
+        logger().info("Fill user Screen")
+        self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+
+        self.SetValue('cUser', self.config.user, name_attr = True)
+        self.SetValue('cPass', self.config.password, name_attr = True)
+        self.click_button("Entrar")
+    
     def driver_refresh(self):
         """
         [Internal]
@@ -2311,20 +2742,53 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.try_send_keys(selenium_input, user_value, try_counter)
         """
+        action_send_keys = None
+        is_active_element  = lambda : self.is_active_element(element_function())
+
+        logger().debug(f"Trying to send keys to element using technique {try_counter}")
         self.wait_until_to( expected_condition = "visibility_of", element = element_function )
-        
-        if try_counter == 0:
+
+        if try_counter == 1:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            element_function().send_keys(key)
-        elif try_counter == 1:
-            element_function().send_keys(Keys.HOME)
+            if is_active_element():
+                element_function().send_keys(key)
+        elif try_counter == 2:
+            ActionChains(self.driver).send_keys(Keys.HOME).perform()
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys_to_element(element_function(), key).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
+        elif try_counter == 3:
+            element_function().send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.DOWN).key_up(Keys.SHIFT).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
         else:
             element_function().send_keys(Keys.HOME)
             ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
-            ActionChains(self.driver).move_to_element(element_function()).send_keys(key).perform()
+            action_send_keys = ActionChains(self.driver).move_to_element(element_function()).send_keys(key)
+
+        if action_send_keys and is_active_element():
+            action_send_keys.perform()
+
+    def is_active_element(self, element):
+        """
+        [Internal]
+
+        Return true if an element is active status
+
+        :param element: Element to analyse
+        :type element: Selenium object
+
+        :return: A list containing a BeautifulSoup object next to the label
+        :rtype: List of BeautifulSoup objects
+        """
+
+        is_active = self.switch_to_active_element() == element
+
+        if is_active:
+            return is_active
+        else :
+            shadow_input = self.execute_js_selector('input, textarea', self.switch_to_active_element(), get_all=False)
+            return shadow_input == element
 
     def find_label_element(self, label_text, container= None, position = 1, input_field=True, direction=None):
         """
@@ -3186,14 +3650,41 @@ class PouiInternal(Base):
 
     def set_multilanguage(self):
 
-        soup = self.get_current_DOM()
-        po_select = next(iter(soup.select(".po-select-container")), None)
-        if po_select:
-            span_label = next(iter(po_select.select('span')), None)
-            if span_label:
+        po_select = None
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not po_select:
+
+            soup = lambda: self.get_current_DOM(twebview=True)
+            po_select = next(iter(soup().select(".po-select-container")), None)
+
+            if po_select:
+                span_label = lambda: next(iter(po_select.select('span')), None)
                 language = self.return_select_language()
-                if not span_label.text.lower() in language:
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not span_label().text.lower() in language:
                     self.set_language_poui(language, po_select)
+
+            else:
+                po_select = next(iter(soup().select("po-select")), None)
+
+                if po_select:
+                    po_select_object = po_select.select('select')[0]
+
+                    success = False
+                    endtime = time.time() + self.config.time_out
+                    while time.time() < endtime and not success:
+
+                        languages = self.return_select_language()
+
+                        for language in languages:
+                            self.select_combo(po_select_object, language, index=True, shadow_root=False)
+                            combo = self.return_combo_object(po_select_object, shadow_root=False)
+                            text = combo.all_selected_options[0].text.lower()
+
+                            if text == language:
+                                success = True
+                                break
 
     def set_language_poui(self, language, container):
 
@@ -3204,18 +3695,24 @@ class PouiInternal(Base):
 
             container_ul = next(iter(container.select('ul')), None)
             if container_ul:
-                item = next(iter(list(filter(lambda x: x.text.lower() in language ,container_ul.select('li')))), None)
+                item = next(iter(list(filter(lambda x: x.text.lower() in language, container_ul.select('li')))), None)
                 element = self.soup_to_selenium(item)
                 element.click()
 
     def return_select_language(self):
 
-        if self.config.language == 'pt-br':
+        language = None
+        config_language = None
+        config_language = self.config.language.lower().strip()
+
+        if config_language == 'pt-br':
             language = ['português', 'portugués', 'portuguese']
-        elif self.config.language == 'es-es':
+        elif config_language == 'es-es':
             language = ['espanhol', 'español', 'spanish']
-        elif self.config.language == 'en-us':
+        elif config_language == 'en-us':
             language = ['inglês', 'inglés', 'english']
+        elif config_language == 'ru-ru':
+            language = ['русс.', 'русс.', 'русский']
 
         return language
 
