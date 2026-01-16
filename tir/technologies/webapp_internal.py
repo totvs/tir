@@ -6618,11 +6618,13 @@ class WebappInternal(Base):
                     if grid_header_index:
                         # try remove spaces from column name to find match
                         if column_name not in grid_header_index[0]:
-                            column_name = next(
+                            column_name_match = next(
                                 (x for x in grid_header_index[0].keys()
                                  if re.sub(r'\s+', '', column_name) in re.sub(r'\s+', '', x)),
                                 ''
                             )
+                            if column_name_match:
+                                column_name = column_name_match
                         if column_name in grid_header_index[0]:
                             column_index = grid_header_index[0][column_name]
                             column_cell = columns_element[column_index]
@@ -6631,14 +6633,12 @@ class WebappInternal(Base):
                 self.log_error("Couldn't select the specified row: {row + 1}")
 
             if column_index is None:
-                logger().debug(f"Couldn't find column '{column}' in grid {grid_number + 1}")
-                return None, page_down_count
+                self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
 
             return column_cell, page_down_count
 
-        except Exception as e:
-            logger().debug(f"Couldn't find column '{column}' in grid {grid_number + 1}. Error: {str(e)}")
-            return None, page_down_count
+        except (TypeError, KeyError, InvalidElementStateException, NoSuchElementException) as e:
+            self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}. Error: {str(e)}")
 
     def select_grid_cell(self, grid_cell):
         try:
