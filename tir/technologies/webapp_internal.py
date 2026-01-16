@@ -6547,7 +6547,7 @@ class WebappInternal(Base):
         check_mask = self.check_mask(container_selenium)
         # remove mask if exists and valtype is numeric
         if check_mask and value_type == 'N':
-            user_value = self.check_value_type(user_value, value_type)
+            user_value = self.remove_mask(user_value)
 
         #get length of field before input
         lenfield = len(self.get_element_value(selenium_input()))
