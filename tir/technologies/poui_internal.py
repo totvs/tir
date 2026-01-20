@@ -5011,17 +5011,22 @@ class PouiInternal(Base):
                 self.click(btn_confirmar_sel())
             # -- --
 
+            logger().debug(f'Waiting for the new home to disappear.')
             self.wait_element_is_not_displayed(hide_element, timeout=60)
             ele_hidden = not self.element_is_displayed(hide_element)
+            logger().debug(f'New home disappeared.')
 
             endtime_routine = time.time() + (self.config.time_out / 2)
 
             while time.time() < endtime_routine:
+                logger().debug(f'Waiting for a new tab to open.')
 
                 wtb_after = get_wtb()
 
                 if wtb_before != wtb_after:
                     break
+
+                time.sleep(1)
 
             success = (ele_hidden) and (wtb_before != wtb_after)
 
