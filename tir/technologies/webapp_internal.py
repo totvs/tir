@@ -5700,7 +5700,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def  get_grid(self, grid_number=0, grid_element = None, grid_list=False):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6662,6 +6662,7 @@ class WebappInternal(Base):
                 self.select_cell(grid_cell)
         except Exception as e:
             logger().debug(f"Couldn't select grid cell. Exception: {e}")
+
 
     def filter_grids_with_headers(self, grids):
         """
