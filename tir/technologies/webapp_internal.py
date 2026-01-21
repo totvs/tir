@@ -5700,7 +5700,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None, grid_list=False):
+    def  get_grid(self, grid_number=0, grid_element = None, grid_list=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6536,7 +6536,7 @@ class WebappInternal(Base):
         check_mask = self.check_mask(container_selenium)
         # remove mask if exists and valtype is numeric
         if check_mask and value_type == 'N':
-            user_value = self.check_value_type(user_value, value_type)
+            user_value = self.remove_mask(user_value)
 
         #get length of field before input
         lenfield = len(self.get_element_value(selenium_input()))
@@ -6586,6 +6586,9 @@ class WebappInternal(Base):
         column_cell = None
         page_down_count = 0
         row_element = None
+        filtered_grid = []
+        rows = []
+        grid_header_index = None
 
         logger().debug(f"Getting grid cell: Column '{column}'")
 
@@ -6594,25 +6597,29 @@ class WebappInternal(Base):
 
             while endtime > time.time() and column_cell is None:
                 # get grids on the screen
-                grid = self.get_grid(grid_number=grid_number)
+                grids = self.get_grid(grid_list=True)
+                filtered_grids = self.filter_grids_with_headers(grids)
+                if len(filtered_grids) >= grid_number:
+                    filtered_grid = filtered_grids[grid_number]
 
-                # get all rows from the grid
-                rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
+                    # get all rows from the grid
+                    rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(filtered_grid))
 
                 if rows:
                     if row is not None:
                         # if shoewed lines is less than the row number, check obscured lines
                         if len(rows) <= row:
-                            grid_lenght = self.lenght_grid_lines(grid)
+                            grid_lenght = self.lenght_grid_lines(filtered_grid)
                             if grid_lenght > row:
-                                row_element, page_down_count = self.get_obscure_gridline(grid, row)
+                                row_element, page_down_count = self.get_obscure_gridline(filtered_grid, row)
                         else:
                             row_element = rows[row]
                     else:
                         row_element = self.get_selected_row(rows) or next(iter(rows), None)
 
-                    columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
-                    grid_header_index = self.get_headers_from_grids(grid, column, position, duplicate_fields)
+                    if row_element:
+                        columns_element = row_element.find_elements(By.CSS_SELECTOR, 'td')
+                        grid_header_index = self.get_headers_from_grids(filtered_grid, column, position, duplicate_fields)
 
                     # get column index from header index
                     if grid_header_index:
@@ -6628,6 +6635,9 @@ class WebappInternal(Base):
                         if column_name in grid_header_index[0]:
                             column_index = grid_header_index[0][column_name]
                             column_cell = columns_element[column_index]
+
+            if not filtered_grid:
+                self.log_error(f'couldn\'t find grid number {grid_number + 1} on the screen.')
 
             if (row is not None) and (row > len(rows) - 1 or row < 0) and not column_cell:
                 self.log_error("Couldn't select the specified row: {row + 1}")
@@ -6652,6 +6662,21 @@ class WebappInternal(Base):
                 self.select_cell(grid_cell)
         except Exception as e:
             logger().debug(f"Couldn't select grid cell. Exception: {e}")
+
+    def filter_grids_with_headers(self, grids):
+        """
+        [Internal]
+        Filters grids that have headers.
+        :param grids: list of grid elements
+        :return: list of grids with headers
+        """
+        grids_with_headers = []
+        for grid in grids:
+            headers = self.get_headers_from_grids(grid)
+            if headers:
+                grids_with_headers.append(grid)
+        return grids_with_headers if grids_with_headers else grids
+
 
     def check_value_type(self, value, valtype):
         """
