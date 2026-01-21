@@ -4442,6 +4442,11 @@ class PouiInternal(Base):
                 self.config.routine = ''
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
+            if self.log.get_testcase_stack() == 'setUpClass':
+                try:
+                    self.TearDown()
+                except Exception:
+                    pass
             self.assertTrue(False, message)
 
         po_item_list_div = po_item_list.find_next('div')
@@ -4893,6 +4898,11 @@ class PouiInternal(Base):
             self.config.routine = ''
             self.log_error(message)            
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
+            if self.log.get_testcase_stack() == 'setUpClass':
+                try:
+                    self.TearDown()
+                except Exception:
+                    pass
             self.assertTrue(False, message)
         item_list_data = self._get_item_list_data(po_item_list)
         return item_list_data.get('value').upper()
