@@ -128,13 +128,6 @@ class WebappInternal(Base):
         self.rac_endpoint = ''
         self.platform_endpoint = ''
 
-
-        if not Base.driver:
-            Base.driver = self.driver
-
-        if not Base.wait:
-            Base.wait = self.wait
-
         if not Base.errors:
             Base.errors = self.errors
 
@@ -367,11 +360,16 @@ class WebappInternal(Base):
 
         logger().debug('Closing screen before the menu')
 
-        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+        if self.config.new_home:
+            term = "[class*='card-wrapper']"
+            twebview = True
+        else:
+            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            twebview = False
 
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview))):
             self.close_warning_screen()
             self.close_coin_screen()
             self.close_modal()
@@ -1207,7 +1205,7 @@ class WebappInternal(Base):
 
         return False
 
-    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch=''):
+    def ChangeUser(self, user, password, initial_program = "", date='', group='', branch='', module=""):
         """
         Change the user then init protheus on home page.
 
@@ -1233,17 +1231,18 @@ class WebappInternal(Base):
             self.log_error("You must enter a user and a password to use ChangeUser!")
             return
 
-        initial_program = self.config.initial_program if not self.config.initial_program else initial_program
-        date = self.config.date if not self.config.date else date
-        group = self.config.group if not self.config.group else group
-        branch = self.config.branch if not self.config.branch else branch
+        initial_program = self.config.initial_program if (not initial_program and self.config.initial_program) else initial_program
+        date = self.config.date if (not date and self.config.date) else date
+        group = self.config.group if (not group and self.config.group) else group
+        branch = self.config.branch if (not branch and self.config.branch) else branch
+        module = self.config.module if (not module and self.config.module) else module
 
         self.config.user = user
         self.config.password = password
 
         self.driver.refresh()
         logger().info(f"Change to the user: {user}")
-        self.Setup(initial_program, date, group, branch)
+        self.Setup(initial_program, date, group, branch, module)
 
 
     def close_modal(self):
@@ -1363,7 +1362,7 @@ class WebappInternal(Base):
 
         selector = self.browse_screen_selectors()
 
-        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR)
+        return self.check_screen_element(term=selector, scraptype=enum.ScrapType.CSS_SELECTOR, check_error=False)
 
     def check_coin_screen(self):
         """
@@ -1374,7 +1373,7 @@ class WebappInternal(Base):
 
         selector = self.coin_screen_selectors()
 
-        return self.check_screen_element(term=self.language.coins, selector=selector)
+        return self.check_screen_element(term=self.language.coins, selector=selector, check_error=False)
     
     def check_warning_screen(self):
         """
@@ -1385,7 +1384,7 @@ class WebappInternal(Base):
 
         selector = self.warning_screen_selectors()
 
-        return self.check_screen_element(term=self.language.warning, selector=selector)
+        return self.check_screen_element(term=self.language.warning, selector=selector, check_error=False)
     
     def check_news_screen(self):
         """
@@ -1494,7 +1493,7 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(selector), True)
         if modals and self.check_warning_screen():
-            self.set_button_x()
+            self.set_button_x(check_error=False)
 
 
     def close_warning_screen_after_routine(self):
@@ -1741,7 +1740,7 @@ class WebappInternal(Base):
         language = self.driver.find_element(By.CSS_SELECTOR, "html").get_attribute("lang")
         return language
 
-    def Program(self, program_name):
+    def Program(self, program_name, program_desc: str = ""):
         """
         Method that sets the program in the initial menu search field.
 
@@ -1771,7 +1770,7 @@ class WebappInternal(Base):
         self.set_program(program_name)
 
 
-    def set_program(self, program):
+    def set_program(self, program, program_desc: str = ""):
         """
         [Internal]
 
@@ -1885,9 +1884,9 @@ class WebappInternal(Base):
         [Internal]
         """
 
-        soup = self.get_current_DOM()
+        soup = self.get_current_DOM()        
 
-        return len(soup.select(term))
+        return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
     def standard_search_field(self, term, name_attr=False,send_key=False):
         """
@@ -1937,7 +1936,7 @@ class WebappInternal(Base):
                 container = self.get_current_container()
                 self.send_keys(input_field(), Keys.F3)
             else:
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup]")),None)
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")),None)
                 icon_s = self.soup_to_selenium(icon)
                 container = self.get_current_container()
                 self.click(icon_s)
@@ -2631,7 +2630,10 @@ class WebappInternal(Base):
 
             self.wait_until_to( expected_condition = "element_to_be_clickable", element = label, locator = By.XPATH, timeout=True)
 
-            container_size = self.get_element_size(container['id'])
+            if len(self.get_current_DOM().select(container['id'])) == 1:
+                container_size = self.get_element_size(container['id'])
+            else:
+                container_size = self.get_element_size(element=self.soup_to_selenium(container))
 
             # The safe values add to postion of element
             width_safe, height_safe = self.width_height(container_size)
@@ -2753,16 +2755,21 @@ class WebappInternal(Base):
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
-    def get_element_size(self, id):
+    def get_element_size(self, id=None, element=None):
         """
         Internal
         Return Height/Width
 
         """
-        script = f'return document.getElementById("{id}").offsetHeight;'
-        height = self.driver.execute_script(script)
-        script = f'return document.getElementById("{id}").offsetWidth;'
-        width  = self.driver.execute_script(script)
+        if id:
+            script = f'return document.getElementById("{id}").offsetHeight;'
+            height = self.driver.execute_script(script)
+            script = f'return document.getElementById("{id}").offsetWidth;'
+            width  = self.driver.execute_script(script)
+        else:
+            height = self.driver.execute_script('return arguments[0].offsetHeight', element)
+            width = self.driver.execute_script('return arguments[0].offsetWidth', element)
+
         return {'height': height, 'width':width}
 
     def get_distance_x(self, x_label, x_element):
@@ -3473,8 +3480,10 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
+            twebview = True if self.config.new_home else False
+
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)):
                 self.close_warning_screen()
                 self.close_modal()
 
@@ -3489,7 +3498,8 @@ class WebappInternal(Base):
                 if self.config.routine_type == 'SetLateralMenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
-                    self.set_program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.set_program', self.config.routine)
 
     def wait_user_screen(self):
 
@@ -3759,7 +3769,7 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
+                containers = self.zindex_sort(list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector))), reverse=True)
 
                 if container_selector == 'wa-text-view':
                     return self.filter_label_element(term, container=soup, position=position, twebview=twebview) if self.filter_label_element(term, container=soup, position=position, twebview=twebview) else []
@@ -3942,7 +3952,8 @@ class WebappInternal(Base):
                 selector = "wa-dialog"
             else:
                 selector = ".tmodaldialog, .ui-dialog"
-            top_layer = next(iter(self.zindex_sort(soup.select(selector), True)), None)
+            tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(selector)))
+            top_layer = next(iter(self.zindex_sort(tmodal_list, True)), None)
 
         except AttributeError as e:
             self.log_error(f"Search for erros couldn't find DOM\n Exception: {str(e)}")
@@ -4113,7 +4124,7 @@ class WebappInternal(Base):
                     container_selector = main_container
 
                 try:
-                    containers_soup = soup.select(container_selector)
+                    containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))                    
 
                     if not containers_soup:
                         return False
@@ -5410,7 +5421,7 @@ class WebappInternal(Base):
                         soup = self.get_current_DOM()
 
                         term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
-                        tmodal_list = soup.select(term)
+                        tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(term)))
                         tmodal_layer = len(tmodal_list) if tmodal_list else 0
 
                         self.set_grid_focus(grid_number)
@@ -8413,14 +8424,15 @@ class WebappInternal(Base):
         logger().info(f"Finish parameter_url while")
         self.driver.get(self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
-            self.config.branch, save_input=not self.config.autostart)
+            self.config.branch, self.config.module, save_input=not self.config.autostart)
 
 
         if not self.tmenu_screen:
             if ">" in self.config.routine:
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
-                self.Program(self.config.routine)
+                from tir.technologies.core.events import emit
+                emit('route.program', self.config.routine)
 
         self.tmenu_screen = None
 
@@ -8458,7 +8470,7 @@ class WebappInternal(Base):
                 except:
                     pass
 
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -8514,13 +8526,14 @@ class WebappInternal(Base):
             else:
                 self.Finish()
 
-            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.program', self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -8533,8 +8546,9 @@ class WebappInternal(Base):
         """
 
         try:
+            twebview = True if self.config.new_home else False
             return self.element_is_displayed(
-                next(iter(self.web_scrap(term=".tmenu, .dict-tmenu", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")),
+                next(iter(self.web_scrap(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)),
                      None))
         except:
             return False
@@ -8889,7 +8903,10 @@ class WebappInternal(Base):
                                                                 direction=None, input_selector='wa-checkbox')
             label_box = filtered_labels_boxs
 
-        if position <= len(filtered_labels_boxs):
+        if len(filtered_labels_boxs) == 1:
+            label_box = filtered_labels_boxs[0]
+        
+        elif position <= len(filtered_labels_boxs):
             position -= 1
             label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[
                 position]
@@ -9010,7 +9027,7 @@ class WebappInternal(Base):
         >>> container = self.get_current_container()
         """
         soup = self.get_current_DOM()
-        containers = self.zindex_sort(soup.select("wa-dialog"), True)
+        containers = self.zindex_sort(list(filter(lambda x: self.element_is_displayed(x), soup.select("wa-dialog"))), True)        
         return next(iter(containers), None)
 
     def get_all_containers(self):
@@ -9592,7 +9609,12 @@ class WebappInternal(Base):
         webdriver_exception = None
         timeout = 1500
         string = self.language.codecoverage #"Aguarde... Coletando informacoes de cobertura de codigo."
-        term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+        if self.config.new_home:
+            term = "[class*='card-wrapper']"
+            twebview = True
+        else:
+            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            twebview = False
 
         if self.config.coverage:
             try:
@@ -9615,7 +9637,7 @@ class WebappInternal(Base):
                 self.environment_screen()
                 endtime = time.time() + self.config.time_out
                 while (time.time() < endtime and (
-                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body"))):
+                not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview))):
                     self.close_screen_before_menu()
                 self.Finish()
             elif not webdriver_exception:
@@ -11129,7 +11151,7 @@ class WebappInternal(Base):
                 except:
                     pass
 
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -11183,13 +11205,14 @@ class WebappInternal(Base):
             else:
                 self.Finish()
 
-            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, save_input=not self.config.autostart)
+            self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.program', self.config.routine)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11284,7 +11307,7 @@ class WebappInternal(Base):
                     pass
 
             #Access Schedule environment
-            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, save_input=False)
+            self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
             self.SetLateralMenu(self.language.schedule_menu, save_input=False)
 
             #Wait show grid
@@ -11310,13 +11333,14 @@ class WebappInternal(Base):
 
             self.driver.get(self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group,
-                       self.config.branch, save_input=not self.config.autostart)
+                       self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
                 if ">" in self.config.routine:
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
-                    self.Program(self.config.routine)
+                    from tir.technologies.core.events import emit
+                    emit('route.set_program', self.config.routine)
 
             self.tmenu_screen = None
 

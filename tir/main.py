@@ -5,6 +5,8 @@ from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
+from tir.technologies.core.router import Router
+
 """
 This file must contain the definition of all User Classes.
 
@@ -22,8 +24,33 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__router = Router(config_path, inst_webapp=self.__webapp)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+        self._subscribe_routes()
+
+    def _subscribe_routes(self):
+        """Registra handlers do Router no event bus para roteamento.
+
+        Mantém scripts existentes e evita acoplamento do Router no
+        WebappInternal.
+        """
+        from tir.technologies.core.events import subscribe
+        subscribe('route.program', self.__router.Program)
+        subscribe('route.set_program', self.__router.set_program)
+        
+        subscribe('webapp.setup', self.__webapp.Setup)
+        subscribe('webapp.log_error', self.__webapp.log_error)
+
+        subscribe('webapp.close_warning_screen_after_routine', self.__webapp.close_warning_screen_after_routine)
+        subscribe('webapp.close_coin_screen_after_routine', self.__webapp.close_coin_screen_after_routine)
+        subscribe('webapp.close_news_screen_after_routine', self.__webapp.close_news_screen_after_routine)
+        subscribe('webapp.close_modal', self.__webapp.close_modal)
+
+        subscribe('webapp.check_warning_screen', self.__webapp.check_warning_screen)
+        subscribe('webapp.check_coin_screen', self.__webapp.check_coin_screen)
+        subscribe('webapp.check_news_screen', self.__webapp.check_news_screen)
+        subscribe('webapp.close_screen_before_menu', self.__webapp.close_screen_before_menu)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -92,9 +119,9 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
-        self.__webapp.ChangeEnvironment(date, group, branch, module)
+        self.__router.ChangeEnvironment(date, group, branch, module)
 
-    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01'):
+    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01', module=""):
         """
         Change the user.
 
@@ -116,7 +143,7 @@ class Webapp():
         >>> oHelper.ChangeUser(user="user08", password="8" )
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
+        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch, module=module)
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
@@ -417,7 +444,7 @@ class Webapp():
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
-        self.__webapp.Finish()
+        self.__router.Finish()
 
     def MessageBoxClick(self, button_text):
         """
@@ -448,7 +475,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__webapp.Program(program_name)
+        self.__router.Program(program_name)
 
     def RestoreParameters(self):
         """
@@ -744,7 +771,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__webapp.SetLateralMenu(menuitens, save_input, click_menu_functional)
+        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional)
 
     def SetParameters(self):
         """
@@ -2192,6 +2219,23 @@ class Poui():
 
         self.__poui.click_switch(label=label, value=value, position=position)
 
+    def Program(self, program_name):
+        """
+        Method that sets the program in the initial menu search field.
+
+        .. note::
+            Only used when the Initial Program is the module Ex: SIGAFAT.
+
+        :param program_name: The program name
+        :type program_name: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Program("MATA020")
+        """
+        self.__poui.Program(program_name)
+    
 
     def ClickDropdown(self, label='', subitems='', position=1):
         """
