@@ -1752,7 +1752,7 @@ class PouiInternal(Base):
         if self.config.initial_program != ''  and self.restart_counter < 3:
 
             if not self.config.skip_environment and not self.config.coverage:
-                self.program_screen(self.config.initial_program)
+                self.program_screen(self.config.initial_program, environment=server_environment)
             
             self.wait_user_screen()         
 
@@ -1766,11 +1766,17 @@ class PouiInternal(Base):
             self.environment_screen()
 
             endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")):
+            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=True)):
                 self.close_warning_screen()
                 self.close_modal()
 
-            # Até aqui está ok
+            self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
+
+            self.log.country = self.config.country
+            self.log.execution_id = self.config.execution_id
+            self.log.issue = self.config.issue
+
+
             if self.config.routine:
                 if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
