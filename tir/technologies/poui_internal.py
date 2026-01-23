@@ -141,6 +141,7 @@ class PouiInternal(Base):
     def program_screen(self, initial_program="", environment="", poui=True):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Fills the first screen of Protheus with the first program to run and the environment to connect.
 
@@ -184,6 +185,7 @@ class PouiInternal(Base):
     def filling_initial_program(self, initial_program):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         logger().info(f'Filling Initial Program: "{initial_program}"')
@@ -195,6 +197,7 @@ class PouiInternal(Base):
     def filling_server_environment(self, environment):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         input_environment = '#selectEnv'
@@ -204,6 +207,9 @@ class PouiInternal(Base):
         self.fill_select_element(term=input_environment, user_value=environment)
     
     def fill_select_element(self, term, user_value):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         element_value = ''
         try_counter = 0	
@@ -244,6 +250,7 @@ class PouiInternal(Base):
     def user_screen(self, admin_user = False):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Fills the user login screen of Protheus with the user and password located on config.json.
 
@@ -369,6 +376,7 @@ class PouiInternal(Base):
     def wait_blocker(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Wait blocker disappear
 
@@ -408,6 +416,7 @@ class PouiInternal(Base):
     
     def check_blocked_container(self, blocker_container_soup):
         """
+        [Reviewed by Vinicius on January 23, 2026]
 
         :return:
         """
@@ -444,6 +453,7 @@ class PouiInternal(Base):
     
     def blocker_containers(self, soup):
         """
+        [Reviewed by Vinicius on January 23, 2026]
         Return The container index by z-index and filter if it is displayed
 
         :param soup: soup object
@@ -470,6 +480,7 @@ class PouiInternal(Base):
     def reload_user_screen(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Refresh the page - retry load user_screen
         """
@@ -492,6 +503,7 @@ class PouiInternal(Base):
     def environment_screen(self, change_env=False):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Fills the environment screen of Protheus with the values passed on the Setup method.
         Used to fill the fields triggered by the ChangeEnvironment method as well.
@@ -563,6 +575,7 @@ class PouiInternal(Base):
     def filling_date(self, shadow_root=None, container=None):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
         d = self.config.data_delimiter
         if not self.config.date:
@@ -628,6 +641,7 @@ class PouiInternal(Base):
 
     def poui_datepicker_is_valid(self, datepicker):
         """
+        [Reviewed by Vinicius on January 23, 2026]
 
         :param datepicker: beautiful soup datepicker tag component
         :type datepicker: BeautifulSoup
@@ -642,6 +656,9 @@ class PouiInternal(Base):
             return False
     
     def merge_date_mask(self, base_date, date):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         d = self.config.data_delimiter
         pattern_1 = (r"\d{2}*\d{2}*\d{4}").replace("*", d)
@@ -660,6 +677,7 @@ class PouiInternal(Base):
     def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         click_type = 1
@@ -699,6 +717,9 @@ class PouiInternal(Base):
                 self.log_error(f'Please, fill group parameter in Setup() method')
 
     def group_element(self, shadow_root, container):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         group_elements = self.web_scrap(term=self.language.group, main_container='body',
                                         scrap_type=enum.ScrapType.TEXT, twebview=True)
@@ -711,6 +732,7 @@ class PouiInternal(Base):
     def filling_branch(self, shadow_root=None, container=None):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         click_type = 1
@@ -748,6 +770,7 @@ class PouiInternal(Base):
     def filling_environment(self, shadow_root=None, container=None):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         click_type = 1
@@ -893,6 +916,7 @@ class PouiInternal(Base):
     def close_modal(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method closes the modal in the opening screen.
 
@@ -971,6 +995,7 @@ class PouiInternal(Base):
     def close_warning_screen(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         Closes the warning screen.
 
         Usage:
@@ -991,6 +1016,7 @@ class PouiInternal(Base):
     def coin_screen_selectors(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method returns the selectors for the coin screen.
         """
@@ -999,6 +1025,7 @@ class PouiInternal(Base):
     def warning_screen_selectors(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method returns the selectors for the warning screen.
         """
@@ -1007,6 +1034,7 @@ class PouiInternal(Base):
     def news_screen_selectors(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method returns the selectors for the news screen.
         """
@@ -1015,6 +1043,7 @@ class PouiInternal(Base):
     def browse_screen_selectors(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method returns the selectors for the browse screen.
         """
@@ -1023,6 +1052,7 @@ class PouiInternal(Base):
     def get_screen_selectors(self, screen_type):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         This method returns the selectors for different screens based on the screen type.
         """
@@ -1048,6 +1078,9 @@ class PouiInternal(Base):
         return selectors[screen_type]["shadowroot"]
         
     def set_button_x(self, position=1, check_error=True):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
         endtime = self.config.time_out/2
         term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
 
@@ -1086,6 +1119,7 @@ class PouiInternal(Base):
     def close_warning_screen_after_routine(self):
         """
         [internal]
+        [Reviewed by Vinicius on January 23, 2026]
         This method is responsible for closing the "warning screen" that opens after searching for the routine
         """
         endtime = time.time() + self.config.time_out
@@ -1135,6 +1169,7 @@ class PouiInternal(Base):
     def set_log_info(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         Fills the log information needed by opening the About page.
 
         Usage:
@@ -1714,6 +1749,7 @@ class PouiInternal(Base):
     def restart(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Restarts the Protheus Webapp and fills the initial screens.
 
@@ -1776,7 +1812,6 @@ class PouiInternal(Base):
             self.log.execution_id = self.config.execution_id
             self.log.issue = self.config.issue
 
-
             if self.config.routine:
                 if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
@@ -1786,6 +1821,7 @@ class PouiInternal(Base):
     def restart_browser(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         logger().info("Closing the Browser")
@@ -1807,6 +1843,9 @@ class PouiInternal(Base):
         self.get_url()
     
     def wait_user_screen(self):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         term = ".po-page-login-info-field .po-input"
         element = None
@@ -1837,6 +1876,7 @@ class PouiInternal(Base):
     def driver_refresh(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Refresh the driver.
 
@@ -2778,6 +2818,7 @@ class PouiInternal(Base):
     def is_active_element(self, element):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
 
         Return true if an element is active status
 
@@ -3443,6 +3484,7 @@ class PouiInternal(Base):
     def open_url_coverage(self, url='', initial_program='', environment=''):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         Open a webapp url with line parameters
         :param url: server url.
         :type url: str
@@ -3655,6 +3697,9 @@ class PouiInternal(Base):
             self.log_error("Current file doesn't exist! Please confirm the file name and path.")
 
     def set_multilanguage(self):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         po_select = None
 
@@ -3693,6 +3738,9 @@ class PouiInternal(Base):
                                 break
 
     def set_language_poui(self, language, container):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         icon = next(iter(list(filter(lambda x: "class" in x.attrs, container.select('span')))), None)
         if icon:
@@ -3706,6 +3754,9 @@ class PouiInternal(Base):
                 element.click()
 
     def return_select_language(self):
+        """
+        [Reviewed by Vinicius on January 23, 2026]
+        """
 
         language = None
         config_language = None
@@ -5413,6 +5464,7 @@ class PouiInternal(Base):
     def set_log_info_config(self):
         """
         [Internal]
+        [Reviewed by Vinicius on January 23, 2026]
         """
 
         if self.config.release:
