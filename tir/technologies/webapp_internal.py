@@ -1770,14 +1770,14 @@ class WebappInternal(Base):
         self.set_program(program_name)
 
 
-    def set_program(self, program, program_desc: str = ""):
+    def set_program(self, program_name, program_desc: str = ""):
         """
         [Internal]
 
         Method that sets the program in the initial menu search field.
 
-        :param program: The program name
-        :type program: str
+        :param program_name: The program name
+        :type program_name: str
 
         Usage:
 
@@ -1787,7 +1787,7 @@ class WebappInternal(Base):
 
         cget_term = '[name=cGet]'
         try:
-            logger().info(f"Setting program: {program}")
+            logger().info(f"Setting program: {program_name}")
 
             self.escape_to_main_menu()
 
@@ -1821,20 +1821,20 @@ class WebappInternal(Base):
                 else:
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
-                self.send_keys(s_tget(), program)
+                self.send_keys(s_tget(), program_name)
                 current_value = self.get_web_value(s_tget()).strip()
 
                 endtime = time.time() + self.config.time_out
-                while(time.time() < endtime and current_value != program):
+                while(time.time() < endtime and current_value != program_name):
                     self.send_keys(s_tget(), Keys.BACK_SPACE)
                     if not self.webapp_shadowroot():
                         self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH, timeout=True)
 
-                    self.send_keys(s_tget(), program)
+                    self.send_keys(s_tget(), program_name)
                     current_value = self.get_web_value(s_tget()).strip()
 
-                if current_value.strip() != program.strip():
-                    self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program}")
+                if current_value.strip() != program_name.strip():
+                    self.log_error(f"Couldn't fill program input - current value:  {current_value} - Program: {program_name}")
                 self.set_element_focus(s_tget_img())
 
                 if self.webapp_shadowroot():
