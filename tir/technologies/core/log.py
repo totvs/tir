@@ -14,6 +14,7 @@ import json
 from datetime import datetime
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.logging_config import logger
+import getpass
 
 class Log:
     """
@@ -615,16 +616,48 @@ class Log:
             if self.config.log_http:
                 folder_path = Path(self.config.log_http, self.config.country, self.release, self.config.issue, self.config.execution_id, testsuite)
                 path = Path(folder_path, screenshot_file)
-                os.makedirs(Path(folder_path))
+                folder_path.mkdir(parents=True, exist_ok=True)
             else:
                 path = Path("/tmp/Log", self.station, screenshot_file) if sys.platform.lower() == "linux" else Path("Log", self.station, screenshot_file)
-                os.makedirs(path)
+                path.parent.mkdir(parents=True, exist_ok=True)
         except OSError:
             pass
 
         try:
-            driver.save_screenshot(str(path))
-            logger().debug(f"Screenshot file created successfully: {path}")
+            parent = path.parent
+            if not parent.exists():
+                parent.mkdir(parents=True, exist_ok=True)
+
+            # Complementary diagnostic
+            try:
+                diag = self.diagnostic_io(parent)
+                logger().debug(f"Diagnostic IO result: {diag}")
+            except Exception:
+                pass
+
+            # More reliable writability check: try creating a temporary file
+            try:
+                test_file = parent / f".write_test_{uuid.uuid4().hex}"
+                with open(test_file, "w") as tf:
+                    tf.write("")
+                test_file.unlink()
+            except Exception as write_err:
+                logger().warning(f"Screenshot directory not writable: {parent} - {write_err}")
+                # Fallback to system temp directory
+                try:
+                    import tempfile
+                    tmp_dir = Path(tempfile.gettempdir())
+                    path = Path(tmp_dir, screenshot_file)
+                    parent = path.parent
+                    parent.mkdir(parents=True, exist_ok=True)
+                    logger().debug(f"Falling back to temp dir for screenshot: {path}")
+                except Exception as fallback_err:
+                    logger().exception(f"Failed to fallback to temp dir for screenshots: {fallback_err}")
+
+            if driver.save_screenshot(str(path)):
+                logger().debug(f"Screenshot file created successfully: {path}")
+            else:
+                logger().debug(f"Screenshot file fail: {path}")
         except Exception as e:
             logger().exception(f"Warning Log Error save_screenshot exception {str(e)}")
 
@@ -699,3 +732,42 @@ class Log:
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
+
+    def diagnostic_io(self, target):
+        """
+        Diagnostic check for file/directory IO permissions.
+
+        :param target: Path or string to a file or directory to check
+        :return: dict with diagnostic info
+        """
+        try:
+            p = Path(target)
+            parent = p if p.is_dir() else p.parent
+
+            current_user = getpass.getuser()
+            current_domain = os.environ.get('USERDOMAIN', 'Unknown')
+
+            is_writable = os.access(str(parent), os.W_OK)
+            is_readable = os.access(str(parent), os.R_OK)
+            path_exists = parent.exists()
+
+            logger().info(
+                f"[DIAGNOSTIC] Write Attempt Details\n"
+                f" > User/Domain: {current_domain}\\{current_user}\n"
+                f" > Target Path: {parent}\n"
+                f" > Path Exists? {path_exists}\n"
+                f" > Has Read Permission? {is_readable}\n"
+                f" > Has Write Permission? {is_writable}"
+            )
+
+            return {
+                'user': current_user,
+                'domain': current_domain,
+                'target': str(parent),
+                'exists': path_exists,
+                'readable': is_readable,
+                'writable': is_writable,
+            }
+        except Exception as e:
+            logger().exception(f"Diagnostic IO check failed: {e}")
+            return {'error': str(e)}
