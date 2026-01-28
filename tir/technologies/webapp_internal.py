@@ -8102,7 +8102,7 @@ class WebappInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
 
-    def log_error(self, message, new_log_line=True, skip_restart=False):
+    def log_error(self, message, new_log_line=True, skip_restart=False, restart_counter_param=None):
         """
         [Internal]
 
@@ -8125,6 +8125,8 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             self.log.log_exec_file()
+
+        self.restart_counter = restart_counter_param if restart_counter_param else self.restart_counter
 
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")
