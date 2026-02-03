@@ -2025,78 +2025,24 @@ class PouiInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def _wait_processing_stable(self, itens, timeout, match_case=False, stable_time=5):
-        """
-        [Internal]
-        
-        Waits for a processing element to disappear with stability check.
-        Handles processes that "blink" (disappear and reappear).
-        
-        :param itens: Text of the processing element to wait for
-        :type itens: str
-        :param timeout: Maximum time to wait
-        :type timeout: int
-        :param match_case: Whether to match case - **Default:** False
-        :type match_case: bool
-        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
-        :type stable_time: int
-        
-        Usage:
-        
-        >>> # Calling the method:
-        >>> self._wait_processing_stable("Processing", 1200)
-        """
-        endtime = time.time() + timeout
-        
-        while time.time() < endtime:
-            element_hidden = self.WaitHide(itens, timeout=stable_time, throw_error=False, match_case=match_case)
-            
-            if element_hidden is not False:
-                element_reappeared = self.WaitShow(itens, timeout=stable_time, throw_error=False, match_case=match_case)
-                
-                if not element_reappeared:
-                    logger().info(f"Processing '{itens}' completed and stable")
-                    return
-                else:
-                    logger().debug(f"Processing '{itens}' reappeared, waiting again...")
-            else:
-                time.sleep(0.5)
-
-    def WaitProcessing(self, itens, timeout=None, match_case=False, check_stable=False, stable_time=5):
+    def WaitProcessing(self, itens, timeout=None):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
         :param itens: List of itens that will hold the wait.
         :type itens: str
-        :param timeout: Maximum time to wait in seconds - **Default:** 1200
-        :type timeout: int
-        :param match_case: Whether to match case - **Default:** False
-        :type match_case: bool
-        :param check_stable: If True, waits for the element to remain absent for a stable period to handle "blinking" processes - **Default:** False
-        :type check_stable: bool
-        :param stable_time: Time in seconds the element must remain absent when check_stable is True - **Default:** 5
-        :type stable_time: int
 
         Usage:
 
-        >>> # Calling the method (legacy behavior):
+        >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
-        >>> #--------------------------------------------------
-        >>> # Calling the method with stability check for processes that "blink":
-        >>> oHelper.WaitProcessing("Processing", check_stable=True)
-        >>> #--------------------------------------------------
-        >>> # Calling the method with custom stable time:
-        >>> oHelper.WaitProcessing("Processing", check_stable=True, stable_time=10)
         """
         if not timeout:
             timeout = 1200
 
-        self.WaitShow(itens, timeout, throw_error=False, match_case=match_case)
+        self.WaitShow(itens, timeout, throw_error = False)
 
-        if check_stable:
-            self._wait_processing_stable(itens, timeout, match_case=match_case, stable_time=stable_time)
-        else:
-            self.WaitHide(itens, timeout, throw_error=False, match_case=match_case)
+        self.WaitHide(itens, timeout, throw_error = False)
 
     def wait_element_is_blocked(self, parent_id):
         """
