@@ -5045,7 +5045,7 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def _wait_processing_stable(self, itens, timeout, match_case=False, stable_time=5):
+    def _wait_processing_stable(self, itens, timeout, match_case=False, stable_time=3):
         """
         [Internal]
         
@@ -5082,7 +5082,7 @@ class WebappInternal(Base):
             else:
                 time.sleep(0.5)
 
-    def WaitProcessing(self, itens, timeout=None, match_case=False, stable_time=5):
+    def WaitProcessing(self, itens, timeout=None, match_case=False, stable_time=3):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 

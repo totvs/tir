@@ -982,7 +982,7 @@ class Webapp():
         self.__webapp.WaitHide(string, timeout, throw_error, match_case)
 
 
-    def WaitProcessing(self, string, match_case=False, timeout=None, stable_time=5):
+    def WaitProcessing(self, string, match_case=False, timeout=None, stable_time=3):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
