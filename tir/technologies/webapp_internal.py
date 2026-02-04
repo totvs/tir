@@ -5082,7 +5082,7 @@ class WebappInternal(Base):
             else:
                 time.sleep(0.5)
 
-    def WaitProcessing(self, itens, timeout=None, match_case=False, check_stable=False, stable_time=5):
+    def WaitProcessing(self, itens, timeout=None, match_case=False, stable_time=5):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -5092,9 +5092,7 @@ class WebappInternal(Base):
         :type timeout: int
         :param match_case: Whether to match case - **Default:** False
         :type match_case: bool
-        :param check_stable: If True, waits for the element to remain absent for a stable period to handle "blinking" processes - **Default:** False
-        :type check_stable: bool
-        :param stable_time: Time in seconds the element must remain absent when check_stable is True - **Default:** 5
+        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
         :type stable_time: int
 
         Usage:
@@ -5102,21 +5100,15 @@ class WebappInternal(Base):
         >>> # Calling the method (legacy behavior):
         >>> oHelper.WaitProcessing("Processing")
         >>> #--------------------------------------------------
-        >>> # Calling the method with stability check for processes that "blink":
-        >>> oHelper.WaitProcessing("Processing", check_stable=True)
-        >>> #--------------------------------------------------
         >>> # Calling the method with custom stable time:
-        >>> oHelper.WaitProcessing("Processing", check_stable=True, stable_time=10)
+        >>> oHelper.WaitProcessing("Processing", stable_time=10)
         """
         if not timeout:
             timeout = 1200
 
         self.WaitShow(itens, timeout, throw_error=False, match_case=match_case)
 
-        if check_stable:
-            self._wait_processing_stable(itens, timeout, match_case=match_case, stable_time=stable_time)
-        else:
-            self.WaitHide(itens, timeout, throw_error=False, match_case=match_case)
+        self._wait_processing_stable(itens, timeout, match_case=match_case, stable_time=stable_time)
 
 
     def SetTabEDAPP(self, table):

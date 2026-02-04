@@ -982,7 +982,7 @@ class Webapp():
         self.__webapp.WaitHide(string, timeout, throw_error, match_case)
 
 
-    def WaitProcessing(self, string, match_case=False, timeout=None, check_stable=False, stable_time=5):
+    def WaitProcessing(self, string, match_case=False, timeout=None, stable_time=5):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
@@ -992,21 +992,17 @@ class Webapp():
         :type match_case: bool
         :param timeout: Maximum time to wait in seconds - **Default:** 1200
         :type timeout: int
-        :param check_stable: If True, waits for the element to remain absent for a stable period - **Default:** False
-        :type check_stable: bool
-        :param stable_time: Time in seconds the element must remain absent when check_stable is True - **Default:** 5
+        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
         :type stable_time: int
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
-        >>> # Calling the method with stability check:
-        >>> oHelper.WaitProcessing("Processing", check_stable=True)
         >>> # Calling the method with custom stable time:
-        >>> oHelper.WaitProcessing("Processing", check_stable=True, stable_time=10)
+        >>> oHelper.WaitProcessing("Processing", stable_time=10)
         """
-        self.__webapp.WaitProcessing(string, timeout, match_case, check_stable=check_stable, stable_time=stable_time)
+        self.__webapp.WaitProcessing(string, timeout, match_case, stable_time=stable_time)
 
     def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
