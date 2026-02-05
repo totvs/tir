@@ -5045,24 +5045,70 @@ class WebappInternal(Base):
         else:
             self.log_error(f"Element {string} not found")
 
-    def WaitProcessing(self, itens, timeout=None, match_case=False):
+    def _wait_processing_stable(self, itens, timeout, match_case=False, stable_time=3):
+        """
+        [Internal]
+        
+        Waits for a processing element to disappear with stability check.
+        Handles processes that "blink" (disappear and reappear).
+        
+        :param itens: Text of the processing element to wait for
+        :type itens: str
+        :param timeout: Maximum time to wait
+        :type timeout: int
+        :param match_case: Whether to match case - **Default:** False
+        :type match_case: bool
+        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
+        :type stable_time: int
+        
+        Usage:
+        
+        >>> # Calling the method:
+        >>> self._wait_processing_stable("Processing", 1200)
+        """
+        endtime = time.time() + timeout
+        
+        while time.time() < endtime:
+            element_hidden = self.WaitHide(itens, timeout=stable_time, throw_error=False, match_case=match_case)
+            
+            if element_hidden is not False:
+                element_reappeared = self.WaitShow(itens, timeout=stable_time, throw_error=False, match_case=match_case)
+                
+                if not element_reappeared:
+                    logger().info(f"Processing '{itens}' completed and stable")
+                    return
+                else:
+                    logger().debug(f"Processing '{itens}' reappeared, waiting again...")
+            else:
+                time.sleep(0.5)
+
+    def WaitProcessing(self, itens, timeout=None, match_case=False, stable_time=3):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
         :param itens: List of itens that will hold the wait.
         :type itens: str
+        :param timeout: Maximum time to wait in seconds - **Default:** 1200
+        :type timeout: int
+        :param match_case: Whether to match case - **Default:** False
+        :type match_case: bool
+        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
+        :type stable_time: int
 
         Usage:
 
-        >>> # Calling the method:
+        >>> # Calling the method (legacy behavior):
         >>> oHelper.WaitProcessing("Processing")
+        >>> #--------------------------------------------------
+        >>> # Calling the method with custom stable time:
+        >>> oHelper.WaitProcessing("Processing", stable_time=10)
         """
         if not timeout:
             timeout = 1200
 
-        self.WaitShow(itens, timeout, throw_error = False, match_case=match_case)
+        self.WaitShow(itens, timeout, throw_error=False, match_case=match_case)
 
-        self.WaitHide(itens, timeout, throw_error = False, match_case=match_case)
+        self._wait_processing_stable(itens, timeout, match_case=match_case, stable_time=stable_time)
 
 
     def SetTabEDAPP(self, table):
