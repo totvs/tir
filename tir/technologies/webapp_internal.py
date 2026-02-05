@@ -1859,15 +1859,14 @@ class WebappInternal(Base):
             logger().exception(str(e))
 
     def escape_to_main_menu(self):
-        """
+        """Try back to menu screen before Program execution
 
+        :return: 
         """
 
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and self.check_layers('wa-dialog') > 1:
-            if not self.webapp_shadowroot():
-                ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
-            elif self.check_layers('wa-dialog') > 1:
+            if self.check_layers('wa-dialog') > 1:
                 logger().info('Escape to menu')
                 ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
@@ -8352,6 +8351,7 @@ class WebappInternal(Base):
 
             if self.tmenu_screen is None:
                 self.tmenu_screen = self.check_tmenu_screen()
+                logger().debug(f"Menu on screen: {self.tmenu_screen}")
 
             value = self.parameter_url_value( self.config.language.lower(),
                 {'pt-br': portuguese_value, 'en-us': english_value, 'es-es': spanish_value})
@@ -8476,6 +8476,7 @@ class WebappInternal(Base):
 
 
         if not self.tmenu_screen:
+            logger().debug(f"Re-open menu on screen: {self.tmenu_screen}")
             if ">" in self.config.routine:
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
