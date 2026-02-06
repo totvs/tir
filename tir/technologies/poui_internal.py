@@ -1488,19 +1488,19 @@ class PouiInternal(Base):
 
         while((time.time() < endtime) and not user_icon):
             soup = get_soup()
-            user_icon = next(iter(soup.select('po-icon i.an.an-user')))
+            user_icon = next(iter(soup.select('li.po-header-nav-customer-container')), None)
         self.click(self.soup_to_selenium(user_icon), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
         while((time.time() < endtime) and not exit_button):
             soup = get_soup()
-            exit_button = next(iter(soup.select('po-icon i.an.an-sign-out')))
+            exit_button = next(iter(soup.select('po-item-list[data-item-list*="Sair"] span')), None)
         self.click(self.soup_to_selenium(exit_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
         while((time.time() < endtime) and not finish_button):
             soup = get_soup()
-            finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")))
+            finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")), None)
         self.click(self.soup_to_selenium(finish_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
@@ -1520,7 +1520,7 @@ class PouiInternal(Base):
             for iframe in iframes:
                 self.driver.switch_to.frame(self.find_shadow_element('iframe', iframe)[0])
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
-                if soup.select('po-icon i.an.an-user') and soup.select('po-icon i.an.an-bell') and soup.select('po-icon i.an.an-dots-nine'):
+                if soup.select('.po-header-nav'):
                     success = True
                     break
 
