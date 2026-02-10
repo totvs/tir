@@ -1155,6 +1155,8 @@ class WebappInternal(Base):
         if module:
             self.config.module = module
 
+        self.escape_to_main_menu()
+
         element = self.change_environment_element_home_screen()
         if element:
             if self.webapp_shadowroot():
