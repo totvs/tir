@@ -1155,6 +1155,8 @@ class WebappInternal(Base):
         if module:
             self.config.module = module
 
+        self.escape_to_main_menu()
+
         element = self.change_environment_element_home_screen()
         if element:
             if self.webapp_shadowroot():
@@ -6513,11 +6515,12 @@ class WebappInternal(Base):
                         if cell_opened:
                             self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
 
-                        # if modal/dialog still opened, do not check value
+                        # if modal/dialog still opened, skip check value
                         if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                position=initial_layers + 1, main_container="body"):
-                                logger().info(
-                                    "Check cell fill, consider use check_value = False, if you need to valid Help screen")
+                            logger().info(
+                                "Dialog open, skipping value check, Check cell fill")
+                            return
 
                         if check_value:
                             cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
