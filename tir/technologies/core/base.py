@@ -277,7 +277,6 @@ class Base(unittest.TestCase):
 
         except Exception as e:
             try:
-                logger().warning(f"Warning double_click method Exception: {str(e)}")
                 self.scroll_to_element(element)
                 actions = ActionChains(self.driver)
                 actions.move_to_element(element)

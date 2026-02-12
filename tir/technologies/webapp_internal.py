@@ -2432,7 +2432,7 @@ class WebappInternal(Base):
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
         self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
-        self.double_click(sel_browse_icon())
+        self.double_click(sel_browse_icon(), click_type=enum.ClickType.JS)
         return True
 
 
