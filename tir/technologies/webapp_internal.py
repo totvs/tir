@@ -6517,7 +6517,7 @@ class WebappInternal(Base):
 
                         # if modal/dialog still opened, skip check value
                         if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                               position=initial_layers + 1, main_container="body"):
+                                               position=initial_layers + 1, main_container="body", check_error=False):
                             logger().info(
                                 "Dialog open, skipping value check, Check cell fill")
                             return
