@@ -5518,7 +5518,7 @@ class WebappInternal(Base):
         success = lambda: 'focus' in sel_grid.get_attribute('class')
         while count < 3 and not success():
             self.wait_blocker()
-            sel_grid.click()
+            self.click(sel_grid, click_type=enum.ClickType.SELENIUM)
             count += 1
 
 
