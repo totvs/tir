@@ -38,9 +38,11 @@ class Webapp():
         from tir.technologies.core.events import subscribe
         subscribe('route.program', self.__router.Program)
         subscribe('route.set_program', self.__router.set_program)
+        subscribe('route.set_log_info', self.__router.set_log_info)
         
         subscribe('webapp.setup', self.__webapp.Setup)
         subscribe('webapp.log_error', self.__webapp.log_error)
+        subscribe('webapp.set_button', self.__webapp.SetButton)
 
         subscribe('webapp.close_warning_screen_after_routine', self.__webapp.close_warning_screen_after_routine)
         subscribe('webapp.close_coin_screen_after_routine', self.__webapp.close_coin_screen_after_routine)

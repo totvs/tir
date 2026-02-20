@@ -772,33 +772,52 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.set_log_info()
         """
-        self.SetLateralMenu(self.language.menu_about, save_input=False)
-        self.wait_element(term=".tmodaldialog", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
-        self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = ".tmodaldialog", locator= By.CSS_SELECTOR)
 
+        logger().info('Getting log info')
+
+        self.escape_to_main_menu("[class*='card-wrapper']")
+
+        logger().debug('Clicking on dots icon')
+        self.switch_to_header_iframe()
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        dots_icon = next(iter(soup.select('.an-dots-three-vertical')), None)
+        self.click(self.soup_to_selenium(dots_icon), click_type=enum.ClickType(2))
+        time.sleep(0.5)
+
+        logger().debug(f'Clicking on {self.language.new_home_menu_about}')
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        menu_about = next(iter(soup.select(f"po-item-list[data-item-list*='{self.language.new_home_menu_about}']")), None)
+        self.click(self.soup_to_selenium(menu_about.find_next('div')), click_type=enum.ClickType(2))
+        time.sleep(1)
+
+        self.driver.switch_to.default_content()        
         soup = self.get_current_DOM()
-        labels = list(soup.select(".tmodaldialog .tpanel .tsay"))
-
-        release_element = next(iter(filter(lambda x: x.text.startswith("Release"), labels)), None)
-        database_element = next(iter(filter(lambda x: x.text.startswith("Top DataBase"), labels)), None)
-        lib_element = next(iter(filter(lambda x: x.text.startswith("Versão da lib"), labels)), None)
-        build_element = next(iter(filter(lambda x: x.text.startswith("Build"), labels)), None)
+        labels = list(soup.select("wa-dialog .dict-tpanel .dict-tsay"))
+        release_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.release), labels)), None)
+        database_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.topdatabase), labels)), None)
+        lib_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.libversion), labels)), None)
+        build_element = next(iter(filter(lambda x: x.attrs['caption'].startswith(self.language.build), labels)), None)
 
         if release_element:
-            release = release_element.text.split(":")[1].strip()
+            release = release_element.text.split(":")[1].strip() if release_element.text else release_element.attrs['caption'].split(":")[1].strip()
             self.log.release = release
             self.log.version = release.split(".")[0]
 
         if database_element:
-            self.log.database = database_element.text.split(":")[1].strip()
+            self.log.database = database_element.text.split(":")[1].strip() if database_element.text else database_element.attrs['caption'].split(":")[1].strip()
 
         if build_element:
-            self.log.build_version = build_element.text.split(":")[1].strip()
+            self.log.build_version = build_element.text.split(":")[1].strip() if build_element.text else build_element.attrs['caption'].split(":")[1].strip()
 
         if lib_element:
-            self.log.lib_version = lib_element.text.split(":")[1].strip()
+            self.log.lib_version = lib_element.text.split(":")[1].strip() if lib_element.text else lib_element.attrs['caption'].split(":")[1].strip()
 
-        self.SetButton(self.language.close)
+        from tir.technologies.core.events import emit
+        emit('webapp.set_button', button=self.language.close)
+
+        self.wait_element(term=self.language.close, scrap_type=enum.ScrapType.MIXED,
+                        optional_term='wa-button, button, .thbutton', presence=False)
+
 
     def set_log_info_tss(self):
 
