@@ -301,7 +301,11 @@ class WebappInternal(Base):
             self.close_screen_before_menu()
 
             if save_input:
-                self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
+                if self.config.log_info_config:
+                    self.set_log_info_config() 
+                else:
+                    from tir.technologies.core.events import emit
+                    emit('route.set_log_info')
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
@@ -3488,7 +3492,11 @@ class WebappInternal(Base):
                 self.close_warning_screen()
                 self.close_modal()
 
-            self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
+            if self.config.log_info_config:
+                self.set_log_info_config() 
+            else:
+                from tir.technologies.core.events import emit
+                emit('route.set_log_info')
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
