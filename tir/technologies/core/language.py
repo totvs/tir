@@ -89,6 +89,7 @@ class LanguagePack:
         self.procedure_uninstall = languagepack["Procedure Uninstall"]
         self.schedule_menu = languagepack["Schedule Menu"]
         self.input_set_program = languagepack["Input Set Program"]
+        self.new_home_menu_about = languagepack["New Home Menu About"]
         
         self.messages = Messages(languagepack)
 
@@ -186,8 +187,8 @@ class LanguagePack:
             "Procedure Install": "Install selected processes",
             "Procedure Uninstall": "Remove selected processes",
             "Schedule Menu": "Settings > Schedule > Schedule",
-            "Input Set Program": "Search and execute"
-            
+            "Input Set Program": "Search and execute",
+            "New Home Menu About": "About"
         }
 
         brazilian_portuguese = {
@@ -282,7 +283,8 @@ class LanguagePack:
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
             "Schedule Menu": "Ambiente > Schedule > Schedule",
-            "Input Set Program": "Pesquisar e executar"
+            "Input Set Program": "Pesquisar e executar",
+            "New Home Menu About": "Sobre"
 
         }
         spanish = {
@@ -377,7 +379,8 @@ class LanguagePack:
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
             "Schedule Menu": "Entorno > Schedule > Schedule",
-            "Input Set Program": "Buscar y ejecutar"
+            "Input Set Program": "Buscar y ejecutar",
+            "New Home Menu About": "Sobre"
 
         }
         russian = {
@@ -474,7 +477,8 @@ class LanguagePack:
             "Procedure Install": "Установить выбранные процессы",
             "Procedure Uninstall": "Удалить выбранные процессы",
             "Schedule Menu": "Settings > Schedule > Schedule",
-            "Input Set Program": "Ищи и беги"
+            "Input Set Program": "Ищи и беги",
+            "New Home Menu About": "О программе…"
         }
 
         if language.lower() == "en-us":

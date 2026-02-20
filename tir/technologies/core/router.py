@@ -126,3 +126,9 @@ class Router:
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.Finish()
+
+    def set_log_info(self) -> None:
+        """Set Log Info using appropriate driver (POUI or WebApp)."""
+
+        drv = self._get_driver_instance(lambda: self.config.new_home)
+        drv.set_log_info()

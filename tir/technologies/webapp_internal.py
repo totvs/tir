@@ -301,7 +301,11 @@ class WebappInternal(Base):
             self.close_screen_before_menu()
 
             if save_input:
-                self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
+                if self.config.log_info_config:
+                    self.set_log_info_config() 
+                else:
+                    from tir.technologies.core.events import emit
+                    emit('route.set_log_info')
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
@@ -3488,7 +3492,11 @@ class WebappInternal(Base):
                 self.close_warning_screen()
                 self.close_modal()
 
-            self.set_log_info_config() if self.config.log_info_config else self.set_log_info()
+            if self.config.log_info_config:
+                self.set_log_info_config() 
+            else:
+                from tir.technologies.core.events import emit
+                emit('route.set_log_info')
 
             self.log.country = self.config.country
             self.log.execution_id = self.config.execution_id
@@ -10093,9 +10101,10 @@ class WebappInternal(Base):
             if text_extracted:
                 self.check_text_container(text, text_extracted, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                modal_is_closed = not self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
-                                                            optional_term=label_term, main_container=self.containers_selectors["AllContainers"],
-                                                            check_error=False)
+                modal_is_closed = not (self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
+                                                                optional_term=label_term, main_container=self.containers_selectors["AllContainers"],
+                                                                check_error=False) or
+                                    container.get('id') == self.get_current_container().get('id'))
 
         if not text_extracted or not modal_is_closed:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
