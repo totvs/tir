@@ -10040,92 +10040,60 @@ class WebappInternal(Base):
         text_help_extracted     = ""
         text_problem_extracted  = ""
         text_solution_extracted = ""
-        text_extracted = ""
-        regex = r"(<[^>]*>)"
-        modal_is_closed = False
-
-        if not button:
-            button = self.get_single_button().text
+        extracted_text = ""
+        expected_text = ""
+        help_is_closed = False    
+        container_text = ""    
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and (not text_extracted or not modal_is_closed)):
+        while(time.time() < endtime and not help_is_closed):
 
-            logger().info(f"Checking Help on screen: {text}")
-            # self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=".tsay", check_error=False)
-            if self.webapp_shadowroot():
-                label_term = ".dict-tsay"
-            else:
-                label_term = ".tsay"
-            self.wait_element_timeout(term=text_help, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5,
+            logger().info(f"Checking Help on screen: '{text or text_help or text_problem or text_solution}'")
+            
+            label_term = ".dict-tsay" if self.webapp_shadowroot() else ".tsay"
+            
+            self.wait_element_timeout(term=text or text_help or text_problem or text_solution, 
+                                      scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5,
                                       optional_term=label_term, check_error=False)
-            container = self.get_current_container()
-            container_filtered = container.select(label_term)
-            container_text = ''
-            for x in range(len(container_filtered)):
-                if self.webapp_shadowroot():
-                    container_text += re.sub(regex, ' ',container_filtered[x].get('caption')) + ' '
-                else:
-                    container_text += container_filtered[x].text + ' '
-
-            try:
-                if self.language.checkproblem in container_text:
-                    text_help_extracted = container_text[
-                                          container_text.index(self.language.checkhelp):container_text.index(
-                                              self.language.checkproblem)]
-                else:
-                    text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
-
-                if self.language.checksolution in container_text:
-                    text_problem_extracted = container_text[
-                                             container_text.index(self.language.checkproblem):container_text.index(
-                                                 self.language.checksolution)]
-                else:
-                    text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
-
-                text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
-            except:
-                pass
+            
+            
+            button = self._get_single_button().text if not button else button
+            
+            container_text = self._get_container_text(label_term)
+            container_id = self.get_current_container().get('id')
+            text_help_extracted, text_problem_extracted, text_solution_extracted = self._extract_help_text(container_text)
 
             if text_help:
-                text = text_help
-                text_extracted = text_help_extracted
+                expected_text = text_help
+                extracted_text = text_help_extracted
             elif text_problem:
-                text = text_problem
-                text_extracted = text_problem_extracted
+                expected_text = text_problem
+                extracted_text = text_problem_extracted
             elif text_solution:
-                text = text_solution
-                text_extracted = text_solution_extracted
+                expected_text = text_solution
+                extracted_text = text_solution_extracted
             else:
-                text_extracted = container_text
+                expected_text = text
+                extracted_text = container_text
 
-            if text_extracted:
-                self.check_text_container(text, text_extracted, container_text, verbosity)
+            if extracted_text:
+                # A condition is missing to check if the text is present. 
+                # However, adding it will cause errors in scripts that run without problems.
+                self._check_text_container(expected_text, extracted_text, container_text, verbosity)
                 self.SetButton(button, check_error=False)
-                modal_is_closed = not (self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2, step=0.5,
-                                                                optional_term=label_term, main_container=self.containers_selectors["AllContainers"],
-                                                                check_error=False) or
-                                    container.get('id') == self.get_current_container().get('id'))
+                help_is_closed = self._check_help_is_closed(container_id, label_term, expected_text)
 
-        if not text_extracted or not modal_is_closed:
+        if not help_is_closed:
             self.log_error(f"Couldn't find: '{text}', text on display window is: '{container_text}'")
 
-    def check_text_container(self, text_user, text_extracted, container_text, verbosity):
-        if verbosity == False:
-            if text_user.replace(" ","") in text_extracted.replace(" ",""):
-                logger().info(f"Help on screen Checked: {text_user}")
-                return
-            else:
-                logger().info(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-        else:
-            if text_user in text_extracted:
-                logger().info(f"Help on screen Checked: {text_user}")
-                return
-            else:
-                logger().info(f"Couldn't find: '{text_user}', text on display window is: '{container_text}'")
-
-    def get_single_button(self):
+    def _get_single_button(self):
         """
         [Internal]
+        
+        Finds and returns the first button with non-empty text in the current container.
+        
+        :return: The first button element with text.
+        :rtype: BeautifulSoup object
         """
         container = self.get_current_container()
         buttons = container.select("button")
@@ -10133,7 +10101,133 @@ class WebappInternal(Base):
         if not button_filtered:
             self.log_error(f"Couldn't find button")
         return button_filtered
+    
+    def _get_container_text(self, label_term:str) -> str:
+        """
+        [Internal]
+        
+        Extracts and concatenates all text from label elements in the current container.
+        
+        :param label_term: CSS selector for label elements.
+        :type label_term: str
+        :return: Concatenated text from all label elements.
+        :rtype: str
+        """
+        regex = r"(<[^>]*>)"
+        container = self.get_current_container()
+        elements = container.select(label_term)
+        container_text = ''
 
+        for x in range(len(elements)):
+            caption_text = elements[x].get('caption')
+            if self.webapp_shadowroot() and caption_text:
+                container_text += re.sub(regex, ' ', caption_text) + ' '
+            else:
+                container_text += elements[x].text + ' '
+
+        return container_text
+
+    def _extract_help_text(self, container_text:str) -> tuple[str, str, str]:
+        """
+        [Internal]
+        
+        Parses container text into help, problem, and solution sections using language markers.
+        
+        :param container_text: Full text from container.
+        :type container_text: str
+        :return: Tuple containing (help_text, problem_text, solution_text).
+        :rtype: tuple[str, str, str]
+        """
+        text_help_extracted = ''
+        text_problem_extracted = ''
+        text_solution_extracted = ''
+
+        try:
+            if self.language.checkproblem in container_text:
+                text_help_extracted = container_text[
+                                        container_text.index(self.language.checkhelp):container_text.index(
+                                            self.language.checkproblem)]
+            else:
+                text_help_extracted = container_text[container_text.index(self.language.checkhelp):]
+
+            if self.language.checksolution in container_text:
+                text_problem_extracted = container_text[
+                                            container_text.index(self.language.checkproblem):container_text.index(
+                                                self.language.checksolution)]
+            else:
+                text_problem_extracted = container_text[container_text.index(self.language.checkproblem):]
+
+            text_solution_extracted = container_text[container_text.index(self.language.checksolution):]
+
+        except:
+            pass
+
+        finally:
+            return text_help_extracted, text_problem_extracted, text_solution_extracted
+
+    def _check_text_container(self, expected_text, extracted_text, container_text, verbosity:bool = False):
+        """
+        [Internal]
+        
+        Validates if expected text is present in extracted text with optional space removal.
+        
+        :param expected_text: Expected text from user.
+        :type expected_text: str
+        :param extracted_text: Text extracted from container.
+        :type extracted_text: str
+        :param container_text: Full container text for logging.
+        :type container_text: str
+        :param verbosity: If False, removes spaces for comparison.
+        :type verbosity: bool
+        :return: True if text is found, False otherwise.
+        :rtype: bool
+        """
+        clean_expected_text = expected_text.replace(" ","") if verbosity == False else expected_text
+        clean_extracted_text = extracted_text.replace(" ","") if verbosity == False else extracted_text
+        success = False
+
+        if clean_expected_text in clean_extracted_text:
+            logger().info(f"Help on screen Checked!")
+            success = True
+        
+        if not success:
+            logger().debug(f"Couldn't find: '{expected_text}', text on display window is: '{container_text}'")
+
+        return success
+
+    def _check_help_is_closed(self, container_id:str, label_term:str, expected_text:str, timeout:int = 2) -> bool:
+        """
+        [Internal]
+        
+        Verifies if help modal was closed by checking container ID change or text disappearance.
+        
+        :param container_id: Original container ID before closing.
+        :type container_id: str
+        :param label_term: CSS selector for label elements.
+        :type label_term: str
+        :param expected_text: Expected text that should disappear.
+        :type expected_text: str
+        :param timeout: Time to wait for closure verification.
+        :type timeout: int
+        :return: True if help modal was closed, False otherwise.
+        :rtype: bool
+        """
+        time.sleep(1)
+
+        # Check if the container ID changed. If different, the help was closed.
+        if container_id != self.get_current_container().get('id'):
+            return True
+
+        # Check if the text disappeared from container. If not found, the help was closed.
+        container_text = self._get_container_text(label_term)
+        if not self._check_text_container(expected_text=expected_text,
+                                            extracted_text=container_text,
+                                            container_text=container_text):
+            return True
+
+        logger().info(f"Help isn't closed!")        
+        return False
+    
     def ClickMenuPopUpItem(self, label, right_click, position = 1):
         """
         Clicks on MenuPopUp Item based in a text
