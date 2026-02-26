@@ -2138,7 +2138,7 @@ class WebappInternal(Base):
                 search_key = re.sub(r"\.+$", '', search_key.strip()).lower()
 
             endtime = time.time() + self.config.time_out
-            while time.time() < endtime and not tradiobuttonitens:
+            while time.time() < endtime and not success:
                 soup = self.get_current_DOM()
                 radio_menu = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
 
