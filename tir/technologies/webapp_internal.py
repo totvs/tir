@@ -2127,8 +2127,15 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not tradiobuttonitens:
+                """
+                    TODO: Check whether "tradiobuttonitems" should be used as the loop condition.
+                    It only contains the divs found in radio_menu, not the elements matching "search_key".
+                    Suggestion: Use the "success" variable as the loop condition.
+                """
                 soup = self.get_current_DOM()
-                radio_menu = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
+                radio_menu_elements = soup.select(radio_term)
+                radio_menu_elements_filtered = list(filter(lambda x: self.element_is_displayed(x), radio_menu_elements))
+                radio_menu = next(iter(radio_menu_elements_filtered), None)
 
                 if radio_menu:
                     if self.webapp_shadowroot():
