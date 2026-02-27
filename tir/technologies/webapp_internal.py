@@ -368,7 +368,7 @@ class WebappInternal(Base):
             term = "[class*='card-wrapper']"
             twebview = True
         else:
-            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            term = '.dict-tmenu'
             twebview = False
 
         endtime = time.time() + self.config.time_out
@@ -1507,38 +1507,26 @@ class WebappInternal(Base):
         [internal]
         This method is responsible for closing the "warning screen" that opens after searching for the routine
         """
-        if self.webapp_shadowroot():
-            dialog_term = f'wa-dialog [title={self.language.warning}]'
-            title_term = f'wa-dialog [title={self.language.warning}]'
+        title_term = f'wa-dialog [title={self.language.warning}]'
 
-        else:
-            dialog_term = '.ui-dialog'
-            title_term = '.ui-dialog-titlebar'
+        self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+                                  optional_term=title_term, main_container="body", check_error=False, timeout=28)
 
-        uidialog_list = []
+        warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+            optional_term=title_term, main_container="body", check_error = False, check_help = False)
 
-        endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not uidialog_list):
-            try:
-                soup = self.get_current_DOM()
-                uidialog_list = soup.select(dialog_term)
+        if warning_screen:
+            warning_screen = next(iter(warning_screen), None)
+            opened = True
 
-                tmodal_warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=title_term, main_container="body", check_error = False, check_help = False)
-
-                if tmodal_warning_screen:
-                    tmodal_warning_screen = next(iter(tmodal_warning_screen), None)
-
-                if tmodal_warning_screen and tmodal_warning_screen in uidialog_list:
-                    uidialog_list.remove(tmodal_warning_screen.parent.parent)
-
+            timeout = min(30, self.config.time_out)
+            endtime = time.time() + timeout
+            while (time.time() < endtime and opened):
                 self.close_warning_screen()
 
-                if self.check_screen():
-                    return
+                opened = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+            optional_term=title_term, main_container="body", check_error = False, check_help = False)
 
-            except Exception as e:
-                logger().exception(str(e))
 
     def close_news_screen(self):
         """
