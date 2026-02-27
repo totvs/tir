@@ -368,7 +368,7 @@ class WebappInternal(Base):
             term = "[class*='card-wrapper']"
             twebview = True
         else:
-            term = '.dict-tmenu' if self.webapp_shadowroot() else '.tmenu'
+            term = '.dict-tmenu'
             twebview = False
 
         endtime = time.time() + self.config.time_out
@@ -1507,38 +1507,26 @@ class WebappInternal(Base):
         [internal]
         This method is responsible for closing the "warning screen" that opens after searching for the routine
         """
-        if self.webapp_shadowroot():
-            dialog_term = f'wa-dialog [title={self.language.warning}]'
-            title_term = f'wa-dialog [title={self.language.warning}]'
+        title_term = f'wa-dialog [title={self.language.warning}]'
 
-        else:
-            dialog_term = '.ui-dialog'
-            title_term = '.ui-dialog-titlebar'
+        self.wait_element_timeout(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+                                  optional_term=title_term, main_container="body", check_error=False, timeout=28)
 
-        uidialog_list = []
+        warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+            optional_term=title_term, main_container="body", check_error = False, check_help = False)
 
-        endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not uidialog_list):
-            try:
-                soup = self.get_current_DOM()
-                uidialog_list = soup.select(dialog_term)
+        if warning_screen:
+            warning_screen = next(iter(warning_screen), None)
+            opened = True
 
-                tmodal_warning_screen = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
-                    optional_term=title_term, main_container="body", check_error = False, check_help = False)
-
-                if tmodal_warning_screen:
-                    tmodal_warning_screen = next(iter(tmodal_warning_screen), None)
-
-                if tmodal_warning_screen and tmodal_warning_screen in uidialog_list:
-                    uidialog_list.remove(tmodal_warning_screen.parent.parent)
-
+            timeout = min(30, self.config.time_out)
+            endtime = time.time() + timeout
+            while (time.time() < endtime and opened):
                 self.close_warning_screen()
 
-                if self.check_screen():
-                    return
+                opened = self.web_scrap(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
+            optional_term=title_term, main_container="body", check_error = False, check_help = False)
 
-            except Exception as e:
-                logger().exception(str(e))
 
     def close_news_screen(self):
         """
@@ -2139,8 +2127,15 @@ class WebappInternal(Base):
 
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not tradiobuttonitens:
+                """
+                    TODO: Check whether "tradiobuttonitems" should be used as the loop condition.
+                    It only contains the divs found in radio_menu, not the elements matching "search_key".
+                    Suggestion: Use the "success" variable as the loop condition.
+                """
                 soup = self.get_current_DOM()
-                radio_menu = next(iter(soup.select(radio_term)), None) if self.webapp_shadowroot() else soup.select(radio_term)
+                radio_menu_elements = soup.select(radio_term)
+                radio_menu_elements_filtered = list(filter(lambda x: self.element_is_displayed(x), radio_menu_elements))
+                radio_menu = next(iter(radio_menu_elements_filtered), None)
 
                 if radio_menu:
                     if self.webapp_shadowroot():
@@ -8963,13 +8958,8 @@ class WebappInternal(Base):
                                                                 direction=None, input_selector='wa-checkbox')
             label_box = filtered_labels_boxs
 
-        if len(filtered_labels_boxs) == 1:
-            label_box = filtered_labels_boxs[0]
-        
-        elif position <= len(filtered_labels_boxs):
-            position -= 1
-            label_box = filtered_labels_boxs[position].parent if not self.webapp_shadowroot() else filtered_labels_boxs[
-                position]
+        if filtered_labels_boxs:
+            label_box = filtered_labels_boxs[0].parent if not self.webapp_shadowroot() else filtered_labels_boxs[0]
 
         return label_box
 
