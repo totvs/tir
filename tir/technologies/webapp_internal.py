@@ -7087,6 +7087,7 @@ class WebappInternal(Base):
                         break
 
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
                     self.wait_blocker()
 
@@ -9623,6 +9624,7 @@ class WebappInternal(Base):
                         if i not in before_texts:
                             before_texts.append(i)
 
+                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
                     self.wait_blocker()
