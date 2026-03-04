@@ -2305,69 +2305,49 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> self.search_browse_key("Filial*", search_elements)
         """
-        if self.webapp_shadowroot():
-            main_container = 'wa-dialog'
-            menupopup = 'wa-menu-popup.dict-tmenu'
-            checkbox_term = "wa-checkbox"
-        else:
-            main_container = '.tmodaldialog,.ui-dialog'
-            menupopup = '.tmenupopup.activationOwner'
-            checkbox_term = "span"
-
+        main_container = 'wa-dialog'
+        menupopup = 'wa-menu-popup.dict-tmenu'
+        checkbox_term = "wa-checkbox"
 
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
-        sel_browse_column = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[0]))
+
+        sel_browse_column = lambda: self.soup_to_selenium(search_elements[0])
+
         self.wait_element(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container=main_container)
         self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[0], locator = By.XPATH)
+
         self.set_element_focus(sel_browse_column())
         self.click(sel_browse_column())
 
-        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
-            self.tmenu_out_iframe = True
-
-        self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.1, presence=True, position=0)
+        self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, presence=True, position=0, main_container='body')
         tmenupopup = next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
         if not tmenupopup:
-            if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
-                self.tmenu_out_iframe = False
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
-        if self.webapp_shadowroot():
-            div_columns = tmenupopup.select('.dict-tfolder')[0]
-            column_button = self.find_child_element('wa-tab-button', div_columns)[1]
-        else:
-            column_button = self.soup_to_selenium(tmenupopup.select('a')[1])
-
-        self.click(column_button)
+        div_columns = tmenupopup.select_one('.dict-tfolder')
+        if div_columns:
+            column_button = div_columns.select('wa-tab-button')
+            if column_button:
+                sel_column_button = self.soup_to_selenium(column_button[-1])
+                self.click(sel_column_button)
+            else:
+                self.log_error("SearchBrowse - Column: couldn't find tab buttons in the columns folder")
 
         spans = tmenupopup.select(checkbox_term)
+        spans_not_hidden = list(filter(lambda x: 'hidden' not in x.attrs, spans))
 
         if ',' in search_column:
             search_column_itens = search_column.split(',')
-            filtered_column_itens = list(map(lambda x: x.strip(), search_column_itens))
+            filtered_column_itens = [x.strip() for x in search_column_itens]
             for item in filtered_column_itens:
-                if self.webapp_shadowroot():
-                    span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
-                    self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-                else:
-                    span = next(iter(list(filter(lambda x: x.text.lower().strip() == item.lower(),spans))), None)
-                    if not span:
-                        span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
-                    self.click(self.soup_to_selenium(span))
-        else:
-            if self.webapp_shadowroot():
-                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
+                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans_not_hidden))), None)
                 self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-            else:
-                span = next(iter(list(filter(lambda x: x.text.lower().strip() == search_column.lower().strip() ,spans))), None)
-                if not span:
-                    span = next(iter(list(filter(lambda x: x.text.lower().replace(" ","") == search_column.lower().replace(" ","") ,spans))), None)
-                self.click(self.soup_to_selenium(span))
+        else:
+            span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans_not_hidden))), None)
+            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
-        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
-            self.tmenu_out_iframe = False
 
 
     def fill_search_browse(self, term, search_elements):
