@@ -136,6 +136,10 @@ Additional Parameters
      - str
      - Country will be seted as main in log of execution.
      - BRA
+   * - IgnoreCertificateErrors
+     - bool
+     - Ignore certificate erros. **Default:** false
+     - true
 
 
 ********************************
