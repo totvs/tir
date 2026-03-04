@@ -2285,7 +2285,7 @@ class WebappInternal(Base):
         
         return True if 'selected' in element.get_attribute('class') else False
 
-    def search_browse_bcolumn(self, search_column, search_elements, index=False):
+    def search_browse_column(self, search_column, search_elements, index=False):
         """
         [Internal]
 
