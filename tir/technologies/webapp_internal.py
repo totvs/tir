@@ -7071,11 +7071,20 @@ class WebappInternal(Base):
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
             down_count = 0
+            last_line_selected = False
             logger().debug(f"Starting search for row {row_num+1}. Initial visible lines: {len(before_texts)}")
             if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
-                endtime = time.time() + self.config.time_out
-                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
+                first_line = lambda: next(iter(grid_lines()))
+                last_line = lambda: next(reversed(grid_lines()))
+
+                if not first_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
+                    self.send_action(action=self.click, element=lambda: first_line(), click_type=3)
+                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+                
+                endtime = time.time() + self.config.time_out                
+                while endtime > time.time() and \
+                        next(reversed(after_texts), None) != next(reversed(before_texts), None) and \
+                        not last_line_selected:
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
 
@@ -7090,11 +7099,11 @@ class WebappInternal(Base):
 
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
-                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                    down_count += 1
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
+                    if last_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
+                        last_line_selected = True
                 
                 logger().debug(f"Search completed. Total lines collected: {len(before_texts)}, down_count: {down_count}")
 
@@ -9618,12 +9627,20 @@ class WebappInternal(Base):
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
             down_count = 0
+            last_line_selected = False
             logger().debug(f"Starting line count. Initial visible lines: {len(before_texts)}")
             if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
+                first_line = lambda: next(iter(grid_lines()))
+                last_line = lambda: next(reversed(grid_lines()))
+
+                if not first_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
+                    self.send_action(action=self.click, element=lambda: first_line(), click_type=3)
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+
                 endtime = time.time() + self.config.time_out
-                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
+                while endtime > time.time() and \
+                        next(reversed(after_texts), None) != next(reversed(before_texts), None) and \
+                        not last_line_selected:
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
                     for i in after_texts:
@@ -9632,11 +9649,11 @@ class WebappInternal(Base):
 
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
-                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                    down_count += 1
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
+                    if last_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
+                        last_line_selected = True
 
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
@@ -10718,7 +10735,31 @@ class WebappInternal(Base):
             if self.config.smart_test or self.config.debug_log:
                 logger().exception(f"Warning Exception get_active_parent_class: {str(e)}")
 
-
+    def get_active_children_classes(self, element=None):
+        """
+        Returns class list of all descendants of an element
+        """
+        try:
+            if element:
+                from selenium.webdriver.common.by import By
+                # Pega todos os descendentes do elemento
+                descendants = element().find_elements(By.XPATH, ".//*")
+                # Coleta as classes de cada descendente
+                classes_list = []
+                for descendant in descendants:
+                    try:
+                        class_attr = descendant.get_attribute('class')
+                        if class_attr:
+                            classes_list.append(class_attr)
+                    except StaleElementReferenceException:
+                        continue
+                return classes_list
+            return []
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception get_active_children_classes {str(e)}")
+            return []
+        
     def image_compare(self, img1, img2):
         """
         Returns differences between 2 images in Gray Scale.
