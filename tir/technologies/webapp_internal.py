@@ -10652,6 +10652,9 @@ class WebappInternal(Base):
         soup_before_event = self.get_current_DOM(twebview=twebview)
         soup_after_event = soup_before_event
 
+        shadow_roots_before = self.get_shadow_roots_content()
+        shadow_roots_after = shadow_roots_before
+
         parent_classes_before = self.get_active_parent_class(element)
         parent_classes_after = parent_classes_before
 
@@ -10677,6 +10680,7 @@ class WebappInternal(Base):
         try:
             while ((time.time() < endtime) and \
                     (soup_before_event == soup_after_event) and \
+                    (shadow_roots_before == shadow_roots_after) and \
                     (parent_classes_before == parent_classes_after) and \
                     (children_classes_before == children_classes_after) and \
                     (classes_before == classes_after) ):
@@ -10703,6 +10707,7 @@ class WebappInternal(Base):
                 else:
                     soup_after_event = self.get_current_DOM(twebview=twebview)
 
+                shadow_roots_after = self.get_shadow_roots_content()
                 parent_classes_after = self.get_active_parent_class(element)
                 children_classes_after = self.get_active_children_classes(element)
 
@@ -10723,11 +10728,17 @@ class WebappInternal(Base):
             return False
 
         if self.config.smart_test or self.config.debug_log:
-            logger().debug(f"send_action soup = {soup_before_event != soup_after_event}")
+            logger().debug(f"send_action soup = {soup_before_event != soup_after_event}")            
+            logger().debug(f'send_action shadow_roots: {shadow_roots_before != shadow_roots_after}')
             logger().debug(f'send_action parent_classes: {parent_classes_before != parent_classes_after}')
             logger().debug(f'send_action children_classes: {children_classes_before != children_classes_after}')
             logger().debug(f'send_action classes: {classes_before == classes_after}')
-        return soup_before_event != soup_after_event
+        
+        return ((soup_before_event != soup_after_event) or \
+                (shadow_roots_before != shadow_roots_after) or \
+                (parent_classes_before != parent_classes_after) or \
+                (children_classes_before != children_classes_after) or \
+                (classes_before != classes_after))
 
     def get_selenium_attribute(self, element, attribute):
         try:
@@ -10735,6 +10746,51 @@ class WebappInternal(Base):
         except StaleElementReferenceException:
             return None
 
+    def get_shadow_roots_content(self):
+        """
+        [Internal]
+        Captures the content of all shadow roots in the current DOM.
+        Returns a dictionary with element identifiers and their shadow root HTML.
+        Cleans special characters like \n, \t, and multiple spaces.
+        """
+        try:
+            script = """
+            function getShadowRootsContent() {
+                const shadowElements = [];
+                const allElements = document.querySelectorAll('*');
+                
+                allElements.forEach((el, index) => {
+                    if (el.shadowRoot) {
+                        // Get innerHTML and clean special characters
+                        let innerHTML = el.shadowRoot.innerHTML;
+                        // Remove line breaks, tabs, and normalize spaces
+                        innerHTML = innerHTML
+                            .replace(/\\n/g, '')
+                            .replace(/\\t/g, '')
+                            .replace(/\\r/g, '')
+                            .replace(/\\s+/g, ' ')
+                            .trim();
+                        
+                        const elementInfo = {
+                            tagName: el.tagName,
+                            id: el.id || `shadow-${index}`,
+                            className: el.className,
+                            innerHTML: innerHTML
+                        };
+                        shadowElements.push(elementInfo);
+                    }
+                });
+                
+                return JSON.stringify(shadowElements);
+            }
+            return getShadowRootsContent();
+            """
+            result = self.driver.execute_script(script)
+            return result if result else '[]'
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception get_shadow_roots_content {str(e)}")
+            return '[]'
 
     def get_active_parent_class(self, element=None):
         """
