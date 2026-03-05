@@ -6913,6 +6913,16 @@ class WebappInternal(Base):
         """
         return element.get_attribute('class').lower().strip() == 'selected-cell'
 
+    def has_selected_cell(self, row_element):
+        """
+        [Internal]
+        Checks if a row element has any selected cell.
+        
+        :param element: Row element to check
+        :return: True if row has a selected cell, False otherwise
+        """
+        return bool(row_element.find_elements(By.CSS_SELECTOR, "td.selected-cell"))
+
     def get_selenium_column_element(self, xpath):
         """
         [Internal]
@@ -7072,14 +7082,18 @@ class WebappInternal(Base):
             after_texts = []
             down_count = 0
             last_line_selected = False
+
             logger().debug(f"Starting search for row {row_num+1}. Initial visible lines: {len(before_texts)}")
             if grid_lines():
                 first_line = lambda: next(iter(grid_lines()))
                 last_line = lambda: next(reversed(grid_lines()))
-
-                if not first_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
-                    self.send_action(action=self.click, element=lambda: first_line(), click_type=3)
-                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+                
+                endtime = time.time() + self.config.time_out  
+                success = False    
+                while endtime > time.time() and not success:
+                    self.click(element=first_line(), click_type=enum.ClickType(3))
+                    ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+                    success = self.has_selected_cell(row_element=first_line())
                 
                 endtime = time.time() + self.config.time_out                
                 while endtime > time.time() and \
@@ -7102,8 +7116,7 @@ class WebappInternal(Base):
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
-                    if last_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
-                        last_line_selected = True
+                    last_line_selected = self.has_selected_cell(row_element=last_line())
                 
                 logger().debug(f"Search completed. Total lines collected: {len(before_texts)}, down_count: {down_count}")
 
@@ -9628,15 +9641,19 @@ class WebappInternal(Base):
             after_texts = []
             down_count = 0
             last_line_selected = False
+
             logger().debug(f"Starting line count. Initial visible lines: {len(before_texts)}")
             if grid_lines():
                 first_line = lambda: next(iter(grid_lines()))
                 last_line = lambda: next(reversed(grid_lines()))
 
-                if not first_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
-                    self.send_action(action=self.click, element=lambda: first_line(), click_type=3)
-                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
-
+                endtime = time.time() + self.config.time_out  
+                success = False    
+                while endtime > time.time() and not success:
+                    self.click(element=first_line(), click_type=enum.ClickType(3))
+                    ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+                    success = self.has_selected_cell(row_element=first_line())
+                
                 endtime = time.time() + self.config.time_out
                 while endtime > time.time() and \
                         next(reversed(after_texts), None) != next(reversed(before_texts), None) and \
@@ -9652,8 +9669,7 @@ class WebappInternal(Base):
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
-                    if last_line().find_elements(By.CSS_SELECTOR, "td.selected-cell"):
-                        last_line_selected = True
+                    last_line_selected = self.has_selected_cell(row_element=last_line())
 
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
@@ -10742,9 +10758,7 @@ class WebappInternal(Base):
         try:
             if element:
                 from selenium.webdriver.common.by import By
-                # Pega todos os descendentes do elemento
                 descendants = element().find_elements(By.XPATH, ".//*")
-                # Coleta as classes de cada descendente
                 classes_list = []
                 for descendant in descendants:
                     try:
