@@ -7071,6 +7071,7 @@ class WebappInternal(Base):
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
             down_count = 0
+            logger().debug(f"Starting search for row {row_num+1}. Initial visible lines: {len(before_texts)}")
             if grid_lines():
                 self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
                 endtime = time.time() + self.config.time_out
@@ -7084,14 +7085,18 @@ class WebappInternal(Base):
 
                     if len(before_texts) > row_num:
                         row_list = list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))
+                        logger().debug(f"Row found, ending search")
                         break
 
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                    down_count += 1
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
+                
+                logger().debug(f"Search completed. Total lines collected: {len(before_texts)}, down_count: {down_count}")
 
             return next(iter(row_list), None), down_count
 
@@ -9613,6 +9618,7 @@ class WebappInternal(Base):
             before_texts = list(map(lambda x: x.text, before_texts))
             after_texts = []
             down_count = 0
+            logger().debug(f"Starting line count. Initial visible lines: {len(before_texts)}")
             if grid_lines():
                 self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
@@ -9625,6 +9631,7 @@ class WebappInternal(Base):
                             before_texts.append(i)
 
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                    down_count += 1
                     ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
                     down_count += 1
                     self.wait_blocker()
@@ -9633,6 +9640,7 @@ class WebappInternal(Base):
 
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
+                logger().debug(f"Count completed. Total lines: {len(before_texts)}, down_count: {down_count}")
                 return len(before_texts)
         else:
             return len(grid.select("tbody tr"))
@@ -10614,6 +10622,9 @@ class WebappInternal(Base):
         parent_classes_before = self.get_active_parent_class(element)
         parent_classes_after = parent_classes_before
 
+        children_classes_before = self.get_active_children_classes(element)
+        children_classes_after = children_classes_before
+
         classes_before = ''
         classes_after = classes_before
 
@@ -10631,7 +10642,11 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         try:
-            while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
+            while ((time.time() < endtime) and \
+                    (soup_before_event == soup_after_event) and \
+                    (parent_classes_before == parent_classes_after) and \
+                    (children_classes_before == children_classes_after) and \
+                    (classes_before == classes_after) ):
                 logger().debug(f"Trying to send action")
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
@@ -10656,6 +10671,7 @@ class WebappInternal(Base):
                     soup_after_event = self.get_current_DOM(twebview=twebview)
 
                 parent_classes_after = self.get_active_parent_class(element)
+                children_classes_after = self.get_active_children_classes(element)
 
                 if element:
                     classes_after = self.get_selenium_attribute(element(), 'class')
@@ -10674,10 +10690,11 @@ class WebappInternal(Base):
             return False
 
         if self.config.smart_test or self.config.debug_log:
-            logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
-            logger().debug(f'send_action selenium status: {parent_classes_before != parent_classes_after}')
+            logger().debug(f"send_action soup = {soup_before_event != soup_after_event}")
+            logger().debug(f'send_action parent_classes: {parent_classes_before != parent_classes_after}')
+            logger().debug(f'send_action children_classes: {children_classes_before != children_classes_after}')
+            logger().debug(f'send_action classes: {classes_before == classes_after}')
         return soup_before_event != soup_after_event
-
 
     def get_selenium_attribute(self, element, attribute):
         try:
