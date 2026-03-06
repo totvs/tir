@@ -7119,7 +7119,8 @@ class WebappInternal(Base):
                 after_texts = list(map(lambda x: x.text, grid_lines()))
                 last_line_selected = self.has_selected_cell(row_element=last_line())
 
-            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+            if row_num is None:
+                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
         return before_texts, row_element, down_count
 
