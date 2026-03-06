@@ -7108,15 +7108,7 @@ class WebappInternal(Base):
 
                 # If looking for specific row and found it, capture the element
                 if row_num is not None and len(before_texts) > row_num and row_element is None:
-                    logger().debug(f"[DEBUG] Target row_num: {row_num}, before_texts length: {len(before_texts)}")
-                    logger().debug(f"[DEBUG] Target text (before_texts[{row_num}]): '{before_texts[row_num]}'")
-                    logger().debug(f"[DEBUG] Current visible grid_lines count: {len(grid_lines())}")
-                    logger().debug(f"[DEBUG] Visible texts: {[x.text for x in grid_lines()]}")
                     row_element = next(iter(list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))), None)
-                    if row_element:
-                        logger().debug(f"[DEBUG] Row element captured! Element text: '{row_element.text}'")
-                    else:
-                        logger().debug(f"[DEBUG] Row element NOT found in visible lines!")
                     logger().debug(f"Row found during scroll")
                     break
 
@@ -7140,6 +7132,8 @@ class WebappInternal(Base):
         """
         logger().debug(f"Starting search for row {row_num+1}")
         before_texts, row_element, down_count = self._scroll_and_collect_grid_lines(grid, row_num)
+
+        logger().debug(f"Text row: {row_element.text}")
         
         msg_success = 'Search completed. ' if row_element else f"Row {row_num+1} doesn't found! "
         msg_success += f"Total lines collected: {len(before_texts)}, down_count: {down_count}"
