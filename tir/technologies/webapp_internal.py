@@ -7094,7 +7094,7 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
                 success = self.has_selected_cell(row_element=first_line())
             
-            # Scroll and collect all lines
+            # Scroll and collect all lines with PAGE_DOWN
             endtime = time.time() + self.config.time_out
             while endtime > time.time() and \
                     next(reversed(after_texts), None) != next(reversed(before_texts), None) and \
@@ -7118,6 +7118,34 @@ class WebappInternal(Base):
 
                 after_texts = list(map(lambda x: x.text, grid_lines()))
                 last_line_selected = self.has_selected_cell(row_element=last_line())
+
+            # After PAGE_DOWN reaches the end, try DOWN arrow to catch remaining lines
+            if not row_element:  # Only if we haven't found the target row yet
+                logger().debug("Checking for additional lines with DOWN arrow")
+                additional_lines_found = True
+                while additional_lines_found and endtime > time.time():
+                    ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                    self.wait_blocker()
+                    
+                    after_down = list(map(lambda x: x.text, grid_lines()))
+                    
+                    # Check if new lines appeared
+                    additional_lines_found = False
+                    for i in after_down:
+                        if i not in before_texts:
+                            before_texts.append(i)
+                            additional_lines_found = True
+                            logger().debug(f"Found additional line with DOWN: {i}")
+                    
+                    # If looking for specific row and found it
+                    if row_num is not None and len(before_texts) > row_num and row_element is None:
+                        row_element = next(iter(list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))), None)
+                        logger().debug(f"Target row found with DOWN arrow")
+                        break
+                    
+                    # Stop if no new lines were found
+                    if not additional_lines_found:
+                        break
 
             if row_num is None:
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
