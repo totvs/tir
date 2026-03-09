@@ -7050,12 +7050,14 @@ class WebappInternal(Base):
 
         if self.webapp_shadowroot():
             grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
-            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
-            before_texts = list(map(lambda x: x.text, before_texts))
-            after_texts = []
-            down_count = 0
             if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
+                self.select_tr(next(iter(grid_lines())))
+
+                before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+                before_texts = list(map(lambda x: x.text, before_texts))
+                after_texts = []
+                down_count = 0
+
                 endtime = time.time() + self.config.time_out
                 while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
 
@@ -7074,6 +7076,15 @@ class WebappInternal(Base):
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
+                
+                if self.get_selected_row(grid_lines()).text == after_texts[-1]:
+                    ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                    time.sleep(1)
+                    if self.get_selected_row(grid_lines()).text != after_texts[-1]:
+                        before_texts.append(self.get_selected_row(grid_lines()).text)
+                    down_count += 1
+                    if len(before_texts) > row_num:
+                        row_list = list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))
 
             return next(iter(row_list), None), down_count
 
@@ -9579,6 +9590,23 @@ class WebappInternal(Base):
             div = next(iter(list(filter(lambda x: (text.strip() == x.text.strip() and x.parent.parent.attrs['id'] != '0', div_list))), None))
             return div
 
+
+    def select_tr(self, tr_element):
+        """
+
+        :param tr_element:
+        :return:
+        """
+
+        selected = False
+
+        endtime = time.time() + self.config.time_out
+        while endtime > time.time() and not selected:
+            self.click(tr_element, enum.ClickType.ACTIONCHAINS)
+            time.sleep(0.5)
+            selected = self.execute_js_selector('td.selected-cell', tr_element, shadow_root=False)
+
+
     def lenght_grid_lines(self, grid):
         """
         [Internal]
@@ -9591,13 +9619,15 @@ class WebappInternal(Base):
         if self.webapp_shadowroot():
 
             grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
-            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
-            before_texts = list(map(lambda x: x.text, before_texts))
-            after_texts = []
-            down_count = 0
             if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+                self.select_tr(next(iter(grid_lines())))
+
+                before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+                before_texts = list(map(lambda x: x.text, before_texts))
+                after_texts = []
+                down_count = 0
+
                 endtime = time.time() + self.config.time_out
                 while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
 
@@ -9611,6 +9641,13 @@ class WebappInternal(Base):
                     self.wait_blocker()
 
                     after_texts = list(map(lambda x: x.text, grid_lines()))
+
+                if self.get_selected_row(grid_lines()).text == after_texts[-1]:
+                    ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                    time.sleep(1)
+                    if self.get_selected_row(grid_lines()).text != after_texts[-1]:
+                        before_texts.append(self.get_selected_row(grid_lines()).text)
+                    down_count += 1
 
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
