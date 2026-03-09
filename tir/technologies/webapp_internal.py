@@ -10670,20 +10670,20 @@ class WebappInternal(Base):
         classes_after = classes_before
 
         loop_check = lambda: ((soup_before_event == soup_after_event) and \
-                              (shadow_roots_before == shadow_roots_after) and \
+                              (sorted(shadow_roots_before) == sorted(shadow_roots_after)) and \
                               (parent_classes_before == parent_classes_after) and \
                               (children_classes_before == children_classes_after) and \
                               (classes_before == classes_after))
 
         return_check = lambda: ((soup_before_event != soup_after_event) or \
-                                (shadow_roots_before != shadow_roots_after) or \
+                                (sorted(shadow_roots_before) != sorted(shadow_roots_after)) or \
                                 (parent_classes_before != parent_classes_after) or \
                                 (children_classes_before != children_classes_after) or \
                                 (classes_before != classes_after))
         
         string_debug = lambda: f"Results send_action check:\n" + \
                                f"soup = {soup_before_event != soup_after_event}\n" + \
-                               f'shadow_roots: {shadow_roots_before != shadow_roots_after}\n' + \
+                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)}\n' + \
                                f'parent_classes: {parent_classes_before != parent_classes_after}\n' + \
                                f'children_classes: {children_classes_before != children_classes_after}\n' + \
                                f'classes: {classes_before != classes_after}'
@@ -10757,48 +10757,40 @@ class WebappInternal(Base):
     def get_shadow_roots_content(self):
         """
         [Internal]
-        Captures the content of all shadow roots in the current DOM.
-        Returns a dictionary with element identifiers and their shadow root HTML.
-        Cleans special characters like \n, \t, and multiple spaces.
+        Captures the innerHTML content of shadow roots from specific elements (wa-tab-page).
+        Returns a list of innerHTML strings for comparison.
+        Cleans special characters like \n, \t, \r and multiple spaces in Python.
         """
         try:
+            shadow_contents = []
+            term = self.grid_selectors["new_web_app"]
+            
+            elements = self.driver.find_elements(By.CSS_SELECTOR, term)
+
             script = """
-            function getShadowRootsContent() {
-                const shadowElements = [];
-                const allElements = document.querySelectorAll('*');
-                
-                allElements.forEach((el, index) => {
-                    if (el.shadowRoot) {
-                        // Get innerHTML and clean special characters
-                        let innerHTML = el.shadowRoot.innerHTML;
-                        // Remove line breaks, tabs, and normalize spaces
-                        innerHTML = innerHTML
-                            .replace(/\\n/g, '')
-                            .replace(/\\t/g, '')
-                            .replace(/\\r/g, '')
-                            .replace(/\\s+/g, ' ')
-                            .trim();
-                        
-                        const elementInfo = {
-                            tagName: el.tagName,
-                            id: el.id || `shadow-${index}`,
-                            className: el.className,
-                            innerHTML: innerHTML
-                        };
-                        shadowElements.push(elementInfo);
-                    }
-                });
-                
-                return JSON.stringify(shadowElements);
+            if (arguments[0].shadowRoot) {
+                return arguments[0].shadowRoot.innerHTML;
             }
-            return getShadowRootsContent();
+            return null;
             """
-            result = self.driver.execute_script(script)
-            return result if result else '[]'
+            
+            # Check each element individually
+            for element in elements:
+                try:
+                    content = self.driver.execute_script(script, element)
+                    if content and self.element_is_displayed(element):
+                        # Clean content
+                        cleaned_content = content.replace('\n', '').replace('\t', '').replace('\r', '').replace('<!---->', '')
+                        cleaned_content = re.sub(r'\s+', ' ', cleaned_content).strip()
+                        shadow_contents.append(cleaned_content)
+                except:
+                    continue
+            
+            return shadow_contents
         except Exception as e:
             if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"Warning Exception get_shadow_roots_content {str(e)}")
-            return '[]'
+            return []
 
     def get_active_parent_class(self, element=None):
         """
