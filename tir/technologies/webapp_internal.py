@@ -10663,29 +10663,18 @@ class WebappInternal(Base):
         parent_classes_before = self.get_active_parent_class(element)
         parent_classes_after = parent_classes_before
 
-        children_classes_before = self.get_active_children_classes(element)
-        children_classes_after = children_classes_before
-
         classes_before = self.get_selenium_attribute(element(), 'class') if element else ''
         classes_after = classes_before
 
-        loop_check = lambda: ((soup_before_event == soup_after_event) and \
-                              (sorted(shadow_roots_before) == sorted(shadow_roots_after)) and \
-                              (parent_classes_before == parent_classes_after) and \
-                              (children_classes_before == children_classes_after) and \
-                              (classes_before == classes_after))
-
-        return_check = lambda: ((soup_before_event != soup_after_event) or \
-                                (sorted(shadow_roots_before) != sorted(shadow_roots_after)) or \
-                                (parent_classes_before != parent_classes_after) or \
-                                (children_classes_before != children_classes_after) or \
-                                (classes_before != classes_after))
+        check_changed = lambda: ((soup_before_event != soup_after_event) or \
+                                 (sorted(shadow_roots_before) != sorted(shadow_roots_after)) or \
+                                 (parent_classes_before != parent_classes_after) or \
+                                 (classes_before != classes_after))
         
         string_debug = lambda: f"Results send_action check:\n" + \
                                f"soup = {soup_before_event != soup_after_event}\n" + \
                                f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)}\n' + \
                                f'parent_classes: {parent_classes_before != parent_classes_after}\n' + \
-                               f'children_classes: {children_classes_before != children_classes_after}\n' + \
                                f'classes: {classes_before != classes_after}'
 
         self.wait_blocker()
@@ -10698,7 +10687,7 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         try:
-            while ((time.time() < endtime) and loop_check()):
+            while ((time.time() < endtime) and not check_changed()):
                 logger().debug(f"Trying to send action")
 
                 if right_click:
@@ -10725,7 +10714,6 @@ class WebappInternal(Base):
 
                 shadow_roots_after = self.get_shadow_roots_content()
                 parent_classes_after = self.get_active_parent_class(element)
-                children_classes_after = self.get_active_children_classes(element)
 
                 if element:
                     classes_after = self.get_selenium_attribute(element(), 'class')
@@ -10746,7 +10734,7 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(string_debug())
         
-        return return_check()
+        return check_changed()
 
     def get_selenium_attribute(self, element, attribute):
         try:
