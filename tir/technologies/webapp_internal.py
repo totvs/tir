@@ -7085,7 +7085,8 @@ class WebappInternal(Base):
             last_line = lambda: next(reversed(grid_lines()))
             
             # Click first line
-            self.select_first_line(first_line())
+            self.select_tr(first_line())
+            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
             before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
             before_texts = list(map(lambda x: x.text, before_texts))
@@ -7149,7 +7150,7 @@ class WebappInternal(Base):
 
         return before_texts, row_element, down_count
 
-    def select_first_line(self, first_line):
+    def select_tr(self, first_line):
         """
         [Internal]
 
@@ -7163,8 +7164,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out        
         while endtime > time.time() and not success:
             self.click(element=first_line, click_type=enum.ClickType(3))
-            time.sleep(0.5)
-            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+            time.sleep(0.5)            
             success = self.has_selected_cell(row_element=first_line)
 
     def get_obscure_gridline(self, grid, row_num=0):
