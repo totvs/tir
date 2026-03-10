@@ -7073,14 +7073,12 @@ class WebappInternal(Base):
         Returns tuple: (before_texts, row_element, down_count)
         """
         grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
-        before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
-        before_texts = list(map(lambda x: x.text, before_texts))
         after_texts = []
         down_count = 0
         last_line_selected = False
         row_element = None
 
-        logger().debug(f"Initial visible lines: {len(before_texts)}")
+        time.sleep(0.5)        
 
         if grid_lines():
             first_line = lambda: next(iter(grid_lines()))
@@ -7093,6 +7091,10 @@ class WebappInternal(Base):
                 self.click(element=first_line(), click_type=enum.ClickType(3))
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
                 success = self.has_selected_cell(row_element=first_line())
+
+            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+            before_texts = list(map(lambda x: x.text, before_texts))
+            logger().debug(f"Initial visible lines: {len(before_texts)}")
             
             # Scroll and collect all lines with PAGE_DOWN
             endtime = time.time() + self.config.time_out
