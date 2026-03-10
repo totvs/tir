@@ -7085,12 +7085,7 @@ class WebappInternal(Base):
             last_line = lambda: next(reversed(grid_lines()))
             
             # Click first line
-            endtime = time.time() + self.config.time_out  
-            success = False    
-            while endtime > time.time() and not success:
-                self.click(element=first_line(), click_type=enum.ClickType(3))
-                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
-                success = self.has_selected_cell(row_element=first_line())
+            self.select_first_line(first_line())
 
             before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
             before_texts = list(map(lambda x: x.text, before_texts))
@@ -7153,6 +7148,24 @@ class WebappInternal(Base):
                 ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
 
         return before_texts, row_element, down_count
+
+    def select_first_line(self, first_line):
+        """
+        [Internal]
+
+        Selects the first visible row in the grid.
+
+        :param first_line: First row element of the grid.
+        :type first_line: Selenium object
+        """
+        success = False    
+
+        endtime = time.time() + self.config.time_out        
+        while endtime > time.time() and not success:
+            self.click(element=first_line, click_type=enum.ClickType(3))
+            time.sleep(0.5)
+            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+            success = self.has_selected_cell(row_element=first_line)
 
     def get_obscure_gridline(self, grid, row_num=0):
         """
