@@ -3892,6 +3892,23 @@ class WebappInternal(Base):
                         element = next(iter(list(filter(lambda x: term.lower() in x.get_attribute('textContent').lower().replace('\n', '').replace('\t',''), header))), None)
                     if element:
                         return [element]
+
+                multi_get = []
+                multi_get = container.select('wa-multi-get')
+                if not multi_get:
+                    multi_get = self.execute_js_selector('wa-multi-get', self.soup_to_selenium(container)) or []
+                else:
+                    multi_get = list(map(lambda x: self.soup_to_selenium(x), multi_get))
+
+                if multi_get:
+                    if match_case:
+                        element = next(iter(list(filter(
+                            lambda x: x and hasattr(x, 'get_attribute') and term.lower().replace('\n', '').replace('\t','').replace('\r','').replace(' ','') == (x.get_attribute('contexttext') or '').lower().replace('\n', '').replace('\t','').replace('\r','').replace(' ',''), 
+                            multi_get))), None)
+                    else:
+                        element = next(iter(list(filter(lambda x: x and hasattr(x, 'get_attribute') and term.lower().replace('\n', '').replace('\t','').replace('\r','').replace(' ','') in (x.get_attribute('contexttext') or '').lower().replace('\n', '').replace('\t','').replace('\r','').replace(' ',''), multi_get))), None)
+                    if element:
+                        return [element]
         except:
             return None
 
@@ -8064,7 +8081,7 @@ class WebappInternal(Base):
         if element_type == "message-box":
             logger().info(f"Checking text on screen: {text}")
 
-            term = 'wa-message-box'
+            term = 'wa-message-box, wa-dialog'
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
