@@ -59,9 +59,29 @@ class Base(unittest.TestCase):
     >>> def APWInternal(Base):
     """
 
-    driver = None
-    wait = None
+    _shared_driver = None
+    _shared_wait = None
     errors = []
+    
+    @property
+    def driver(self):
+        """Property to always get the current shared driver instance"""
+        return Base._shared_driver
+    
+    @driver.setter
+    def driver(self, value):
+        """Property to update the shared driver for all instances"""
+        Base._shared_driver = value
+    
+    @property
+    def wait(self):
+        """Property to always get the current shared wait instance"""
+        return Base._shared_wait
+    
+    @wait.setter
+    def wait(self, value):
+        """Property to update the shared wait for all instances"""
+        Base._shared_wait = value
     
     def __init__(self, config_path="", autostart=True):
         """
