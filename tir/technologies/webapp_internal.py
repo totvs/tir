@@ -6896,6 +6896,16 @@ class WebappInternal(Base):
         """
         return element.get_attribute('class').lower().strip() == 'selected-cell'
 
+    def has_selected_cell(self, row_element):
+        """
+        [Internal]
+        Checks if a row element has any selected cell.
+        
+        :param element: Row element to check
+        :return: True if row has a selected cell, False otherwise
+        """
+        return bool(row_element.find_elements(By.CSS_SELECTOR, "td.selected-cell"))
+
     def get_selenium_column_element(self, xpath):
         """
         [Internal]
@@ -7038,6 +7048,108 @@ class WebappInternal(Base):
             return colors[status]
 
 
+    def _scroll_and_collect_grid_lines(self, grid, row_num=None):
+        """
+        [Internal]
+        Scrolls through grid and collects all line texts.
+        If row_num is provided, captures the row element when found.
+        Returns tuple: (before_texts, row_element, down_count)
+        """
+        grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
+        after_texts = []
+        down_count = 0
+        last_line_selected = False
+        row_element = None
+
+        time.sleep(0.5)        
+
+        if grid_lines():
+            first_line = lambda: next(iter(grid_lines()))
+            last_line = lambda: next(reversed(grid_lines()))
+            
+            # Click first line
+            self.select_tr(first_line())
+            ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+
+            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
+            before_texts = list(map(lambda x: x.text, before_texts))
+            logger().debug(f"Initial visible lines: {len(before_texts)}")
+            
+            # Scroll and collect all lines with PAGE_DOWN
+            endtime = time.time() + self.config.time_out
+            while endtime > time.time() and \
+                    next(reversed(after_texts), None) != next(reversed(before_texts), None) and \
+                    not last_line_selected:
+
+                after_texts = list(map(lambda x: x.text, grid_lines()))
+
+                for i in after_texts:
+                    if i not in before_texts:
+                        before_texts.append(i)
+
+                # If looking for specific row and found it, capture the element
+                if row_num is not None and len(before_texts) > row_num and row_element is None:
+                    row_element = next(iter(list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))), None)
+                    logger().debug(f"Row found during scroll")
+                    break
+
+                ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+                down_count += 1
+                self.wait_blocker()
+
+                after_texts = list(map(lambda x: x.text, grid_lines()))
+                last_line_selected = self.has_selected_cell(row_element=last_line())
+
+            # After PAGE_DOWN reaches the end, try DOWN arrow to catch remaining lines
+            if not row_element:  # Only if we haven't found the target row yet
+                logger().debug("Checking for additional lines with DOWN arrow")
+                additional_lines_found = True
+                while additional_lines_found and endtime > time.time():
+                    ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                    self.wait_blocker()
+                    
+                    after_down = list(map(lambda x: x.text, grid_lines()))
+                    
+                    # Check if new lines appeared
+                    additional_lines_found = False
+                    for i in after_down:
+                        if i not in before_texts:
+                            before_texts.append(i)
+                            additional_lines_found = True
+                            logger().debug(f"Found additional line with DOWN: {i}")
+                    
+                    # If looking for specific row and found it
+                    if row_num is not None and len(before_texts) > row_num and row_element is None:
+                        row_element = next(iter(list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))), None)
+                        logger().debug(f"Target row found with DOWN arrow")
+                        break
+                    
+                    # Stop if no new lines were found
+                    if not additional_lines_found:
+                        break
+
+            if row_num is None:
+                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+
+        return before_texts, row_element, down_count
+
+    def select_tr(self, first_line):
+        """
+        [Internal]
+
+        Selects the first visible row in the grid.
+
+        :param first_line: First row element of the grid.
+        :type first_line: Selenium object
+        """
+        success = False    
+
+        endtime = time.time() + self.config.time_out        
+        while endtime > time.time() and not success:
+            self.click(element=first_line, click_type=enum.ClickType(3))
+            time.sleep(0.5)            
+            success = self.has_selected_cell(row_element=first_line)
+
     def get_obscure_gridline(self, grid, row_num=0):
         """
         [Internal]
@@ -7045,38 +7157,16 @@ class WebappInternal(Base):
         :param row_num:
         :return obscured row based in row number:
         """
-        grid_lines = None
-        row_list = []
+        logger().debug(f"Starting search for row {row_num+1}")
+        before_texts, row_element, down_count = self._scroll_and_collect_grid_lines(grid, row_num)
 
-        if self.webapp_shadowroot():
-            grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
-            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
-            before_texts = list(map(lambda x: x.text, before_texts))
-            after_texts = []
-            down_count = 0
-            if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
-                endtime = time.time() + self.config.time_out
-                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
-
-                    after_texts = list(map(lambda x: x.text, grid_lines()))
-
-                    for i in after_texts:
-                        if i not in before_texts:
-                            before_texts.append(i)
-
-                    if len(before_texts) > row_num:
-                        row_list = list(filter(lambda x: x.text == before_texts[row_num], grid_lines()))
-                        break
-
-                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                    down_count += 1
-                    self.wait_blocker()
-
-                    after_texts = list(map(lambda x: x.text, grid_lines()))
-
-            return next(iter(row_list), None), down_count
-
+        logger().debug(f"Text row: {row_element.text}")
+        
+        msg_success = 'Search completed. ' if row_element else f"Row {row_num+1} doesn't found! "
+        msg_success += f"Total lines collected: {len(before_texts)}, down_count: {down_count}"
+        
+        logger().debug(msg_success)
+        return row_element, down_count
 
     def check_grid_memo(self, element):
         """
@@ -9585,40 +9675,13 @@ class WebappInternal(Base):
         Returns the leght of grid.
 
         """
-
-        grid_lines = None
-
         if self.webapp_shadowroot():
-
-            grid_lines = lambda: self.execute_js_selector('tbody tr', self.soup_to_selenium(grid))
-            before_texts = list(filter(lambda x: hasattr(x, 'text'), grid_lines()))
-            before_texts = list(map(lambda x: x.text, before_texts))
-            after_texts = []
-            down_count = 0
-            if grid_lines():
-                self.send_action(action=self.click, element=lambda: next(iter(grid_lines())), click_type=3)
-                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
-                endtime = time.time() + self.config.time_out
-                while endtime > time.time() and next(reversed(after_texts), None) != next(reversed(before_texts), None):
-
-                    after_texts = list(map(lambda x: x.text, grid_lines()))
-                    for i in after_texts:
-                        if i not in before_texts:
-                            before_texts.append(i)
-
-                    ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                    down_count += 1
-                    self.wait_blocker()
-
-                    after_texts = list(map(lambda x: x.text, grid_lines()))
-
-                ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
-
-                return len(before_texts)
+            logger().debug(f"Starting line count")
+            before_texts, _, down_count = self._scroll_and_collect_grid_lines(grid, row_num=None)
+            logger().debug(f"Count completed. Total lines: {len(before_texts)}, down_count: {down_count}")
+            return len(before_texts)
         else:
             return len(grid.select("tbody tr"))
-
-        return len(grid_lines)
 
     def TearDown(self):
         """
@@ -10592,15 +10655,25 @@ class WebappInternal(Base):
         soup_before_event = self.get_current_DOM(twebview=twebview)
         soup_after_event = soup_before_event
 
+        shadow_roots_before = self.get_shadow_roots_content()
+        shadow_roots_after = shadow_roots_before
+
         parent_classes_before = self.get_active_parent_class(element)
         parent_classes_after = parent_classes_before
 
-        classes_before = ''
+        classes_before = self.get_selenium_attribute(element(), 'class') if element else ''
         classes_after = classes_before
 
-        if element:
-            classes_before = self.get_selenium_attribute(element(), 'class')
-            classes_after = classes_before
+        check_changed = lambda: ((soup_before_event != soup_after_event) or \
+                                 (sorted(shadow_roots_before) != sorted(shadow_roots_after)) or \
+                                 (parent_classes_before != parent_classes_after) or \
+                                 (classes_before != classes_after))
+        
+        string_debug = lambda: f"Results send_action check:\n" + \
+                               f"soup = {soup_before_event != soup_after_event}\n" + \
+                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)}\n' + \
+                               f'parent_classes: {parent_classes_before != parent_classes_after}\n' + \
+                               f'classes: {classes_before != classes_after}'
 
         self.wait_blocker()
 
@@ -10612,8 +10685,9 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         try:
-            while ((time.time() < endtime) and (soup_before_event == soup_after_event) and (parent_classes_before == parent_classes_after) and (classes_before == classes_after) ):
+            while ((time.time() < endtime) and not check_changed()):
                 logger().debug(f"Trying to send action")
+
                 if right_click:
                     soup_select = self.get_soup_select(".tmenupopupitem, wa-menu-popup-item")
                     if not soup_select:
@@ -10636,6 +10710,7 @@ class WebappInternal(Base):
                 else:
                     soup_after_event = self.get_current_DOM(twebview=twebview)
 
+                shadow_roots_after = self.get_shadow_roots_content()
                 parent_classes_after = self.get_active_parent_class(element)
 
                 if element:
@@ -10655,10 +10730,9 @@ class WebappInternal(Base):
             return False
 
         if self.config.smart_test or self.config.debug_log:
-            logger().debug(f"send_action method result = {soup_before_event != soup_after_event}")
-            logger().debug(f'send_action selenium status: {parent_classes_before != parent_classes_after}')
-        return soup_before_event != soup_after_event
-
+            logger().debug(string_debug())
+        
+        return check_changed()
 
     def get_selenium_attribute(self, element, attribute):
         try:
@@ -10666,6 +10740,43 @@ class WebappInternal(Base):
         except StaleElementReferenceException:
             return None
 
+    def get_shadow_roots_content(self):
+        """
+        [Internal]
+        Captures the innerHTML content of shadow roots from specific elements (wa-tab-page).
+        Returns a list of innerHTML strings for comparison.
+        Cleans special characters like \n, \t, \r and multiple spaces in Python.
+        """
+        try:
+            shadow_contents = []
+            term = self.grid_selectors["new_web_app"]
+            
+            elements = self.driver.find_elements(By.CSS_SELECTOR, term)
+
+            script = """
+            if (arguments[0].shadowRoot) {
+                return arguments[0].shadowRoot.innerHTML;
+            }
+            return null;
+            """
+            
+            # Check each element individually
+            for element in elements:
+                try:
+                    content = self.driver.execute_script(script, element)
+                    if content and self.element_is_displayed(element):
+                        # Clean content
+                        cleaned_content = content.replace('\n', '').replace('\t', '').replace('\r', '').replace('<!---->', '')
+                        cleaned_content = re.sub(r'\s+', ' ', cleaned_content).strip()
+                        shadow_contents.append(cleaned_content)
+                except:
+                    continue
+            
+            return shadow_contents
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception get_shadow_roots_content {str(e)}")
+            return []
 
     def get_active_parent_class(self, element=None):
         """
@@ -10682,7 +10793,29 @@ class WebappInternal(Base):
             if self.config.smart_test or self.config.debug_log:
                 logger().exception(f"Warning Exception get_active_parent_class: {str(e)}")
 
-
+    def get_active_children_classes(self, element=None):
+        """
+        Returns class list of all descendants of an element
+        """
+        try:
+            if element:
+                from selenium.webdriver.common.by import By
+                descendants = element().find_elements(By.XPATH, ".//*")
+                classes_list = []
+                for descendant in descendants:
+                    try:
+                        class_attr = descendant.get_attribute('class')
+                        if class_attr:
+                            classes_list.append(class_attr)
+                    except StaleElementReferenceException:
+                        continue
+                return classes_list
+            return []
+        except Exception as e:
+            if self.config.smart_test or self.config.debug_log:
+                logger().debug(f"Warning Exception get_active_children_classes {str(e)}")
+            return []
+        
     def image_compare(self, img1, img2):
         """
         Returns differences between 2 images in Gray Scale.
