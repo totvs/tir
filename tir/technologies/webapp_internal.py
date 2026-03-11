@@ -6500,6 +6500,7 @@ class WebappInternal(Base):
                     else:
                         if cell_opened:
                             self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
+                            self.wait_element_fill(selenium_column, field_one, value_type, timeout=10)
 
                         # if modal/dialog still opened, skip check value
                         if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6536,6 +6537,24 @@ class WebappInternal(Base):
                 match_field = self.compare_numeric_values(current_cell_value, user_value)
 
             return match_field
+
+    @count_time
+    def wait_element_fill(self, element, expected_value, value_type, timeout=None):
+        """
+
+        :param element: selenium element to get the value
+        :param timeout:
+        :return:
+        """
+        endtime = time.time() + (timeout if timeout else self.config.time_out)
+        text_is_correct = None
+        while time.time() < endtime and not text_is_correct:
+            try:
+                text_is_correct = self.compare_cell_value(element, expected_value, value_type)
+            except:
+                pass
+        logger().debug(f"Wait element fill: Expected value '{expected_value}' - Text is correct: {text_is_correct}")
+        return text_is_correct
 
 
     def compare_numeric_values(self, current_value, user_value):
@@ -6594,11 +6613,11 @@ class WebappInternal(Base):
         if memo_field:
             self.SetButton('Ok')
 
+        # ensure modal is closed. if True is closed
+        cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                position=initial_layers + 1, timeout=5,
+                                                presence=False, main_container='body', check_error=False)
         if lenfield > len_user_value:
-            # ensure modal is closed. if True is closed
-            cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                    position=initial_layers + 1, timeout=5,
-                                                    presence=False, main_container='body', check_error=False)
             # if cell is still opened, try close
             if not cell_is_closed:
                 current_layer = self.check_layers(layers_selector)
