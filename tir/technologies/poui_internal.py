@@ -524,7 +524,6 @@ class PouiInternal(Base):
                         self.switch_to_iframe()
 
                     logger().info(f'Filling Environment: "{self.config.module}"')
-                    self.wait_blocker()
                     self.click(env(), click_type=enum.ClickType(click_type))
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(
                         Keys.CONTROL).perform()
