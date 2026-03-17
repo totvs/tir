@@ -6680,7 +6680,7 @@ class WebappInternal(Base):
                 # get grids on the screen
                 grids = self.get_grid(grid_list=True)
                 filtered_grids = self.filter_grids_with_headers(grids)
-                if len(filtered_grids) >= grid_number:
+                if len(filtered_grids) > grid_number:
                     filtered_grid = filtered_grids[grid_number]
 
                     # get all rows from the grid
