@@ -1865,17 +1865,17 @@ class WebappInternal(Base):
             logger().info('Escape to menu')
             ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
+            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]) \
+                and self.check_layers(container_term) > 1:
+                logger().info('Found layers after Escape to menu')
+                self.close_screen_before_menu()
+
             menu_screen = self.check_tmenu_screen()
             container_layers = self.check_layers(container_term) == 1
             success = menu_screen and container_layers
 
             logger().info(f'Check Menu Screen: {menu_screen}')
-            logger().info(f'wa-dialog layers: {container_layers}')
-
-        if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]) \
-           and self.check_layers(container_term) > 1:
-            logger().info('Found layers after Escape to menu')
-            self.close_screen_before_menu()
+            logger().info(f'wa-dialog layers: {container_layers}')        
         
         # wait trasitions between screens to avoid errors in layers number
         self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
