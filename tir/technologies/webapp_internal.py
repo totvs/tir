@@ -4325,9 +4325,10 @@ class WebappInternal(Base):
 
                     clicked_menu = False
 
-                    while (time.time() < endtime and (
-                            (index != last_index and not expanded()) or
-                            ((index == last_index and item_exist() and not tmodal()) and not clicked_menu))):
+                    while time.time() < endtime and not clicked_menu and (
+                        (index != last_index and not expanded()) or 
+                        (index == last_index and item_exist() and not tmodal())
+                    ):
                         if click_menu_functional:
                             clicked_menu = True
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
