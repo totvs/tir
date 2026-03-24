@@ -4318,16 +4318,16 @@ class WebappInternal(Base):
                     expanded = lambda: 'expanded' in submenu().get_attribute('class')
                     item_exist = lambda: self.element_exists(term=menuitem, scrap_type=enum.ScrapType.MIXED,
                                                              optional_term=menu_itens_term,
-                                                             main_container="body, wa-dialog")
+                                                             main_container="body, wa-dialog") and self.check_tmenu_screen()
                     tmodal = lambda: self.get_current_DOM().select('.tmodaldialog')
 
                     endtime = time.time() + self.config.time_out
 
                     clicked_menu = False
 
-                    while (time.time() < endtime and not clicked_menu and (
+                    while (time.time() < endtime and (
                             (index != last_index and not expanded()) or
-                            (index == last_index and item_exist() and not tmodal()))):
+                            ((index == last_index and item_exist() and not tmodal()) and not clicked_menu))):
                         if click_menu_functional:
                             clicked_menu = True
                         ActionChains(self.driver).move_to_element(submenu()).click().perform()
