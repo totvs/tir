@@ -672,7 +672,7 @@ class Webapp():
 		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
         >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
-        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
+        self.__router.SetButton(button, sub_item, position, check_error=check_error)
 
     def SetFilePath(self, value, button = ""):
         """

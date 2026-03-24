@@ -5604,3 +5604,63 @@ class PouiInternal(Base):
             return 'open' if dropdown_status else 'closed'
         else:
             return None
+        
+    def check_new_search_browse(self):
+        tables = []
+
+        endtime = time.time() + 10
+        while (time.time() < endtime and not tables):
+            tables = self.web_scrap(term=self.grid_selectors["grid_containers"], 
+                                    scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')        
+            tables = list(filter(lambda x: self.element_is_displayed(x), tables))
+
+        return bool(tables)
+
+
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
+        """
+        Legacy webapp adaptation for POUI. Wraps click_button with specific button mapping rules.
+
+        :param button: Button name to click
+        :type button: str
+        :param sub_item: Subitem for specific button actions (e.g., 'Excluir' for 'Outras Ações') - **Default:** ""
+        :type sub_item: str
+        :param position: Position which element is located - **Default:** 1
+        :type position: int
+        :param check_error: Whether to check for errors - **Default:** True
+        :type check_error: bool
+        """
+
+        logger().info(f"Clicking on {button} using POUI")
+
+        button_dict = {
+            "Alterar":"Editar"
+        }
+        attr_row_selected_number = 'data-kendo-grid-item-index'
+
+        table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+        row_selected = table.select("tbody > tr[aria-selected='true']")
+        row_selected_number = 1
+
+        if row_selected:
+            row_selected = next(iter(row_selected))
+
+        else:
+            rows = table.select("tbody > tr")
+            row_selected = next(iter(rows)) 
+            self.click(self.soup_to_selenium(row_selected), enum.ClickType(3))
+        
+        row_selected_number = row_selected.get(attr_row_selected_number)
+        row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
+
+        if button == 'Visualizar':
+            self.click_icon(label='', class_name='an an-arrow-up-right ng-star-inserted', position=row_selected_number)
+
+        else:
+            if button == 'Outras Ações' and sub_item == 'Excluir':
+                button_text = 'Excluir'
+            else:
+                button_text = button_dict.get(button) if button in button_dict else button
+
+            self.click_button(button=button_text, position=position,
+                              selector="po-button", container=False)

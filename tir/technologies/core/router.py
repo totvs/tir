@@ -132,3 +132,15 @@ class Router:
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.set_log_info()
+
+    def SetButton(self, button, sub_item="", position=1, check_error=True) -> None:
+        """Click on button using appropriate driver (POUI or WebApp)."""
+
+        new_browse_buttons = ['Visualizar', 'Alterar', 'Outras Ações', 'Excluir', 'Incluir']
+
+        new_browse = self._ensure_poui().check_new_search_browse()
+        drv = self._get_driver_instance(lambda: new_browse and button in new_browse_buttons)
+        drv.SetButton(button, sub_item, position, check_error=check_error)
+
+
+        
