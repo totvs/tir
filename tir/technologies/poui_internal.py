@@ -5527,7 +5527,6 @@ class PouiInternal(Base):
         """
 
         position -= 1
-        element = None
         term = 'po-dropdown'
         subitems_list = self._normalize_to_list(subitems)
         success = False
@@ -5538,7 +5537,6 @@ class PouiInternal(Base):
 
         logger().info(f"Clicking on Dropdown: {label} -> {subitems}")
 
-
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
 
@@ -5547,12 +5545,18 @@ class PouiInternal(Base):
 
             if dropdown_button:
                 drowpdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
-                if self.get_dropdown_state(dropdown_button) == 'closed':
+                endtime_internal = time.time() + (self.config.time_out / 3)
+                while (time.time() < endtime_internal and \
+                       self.get_dropdown_state(dropdown_button) == 'closed'):
                     self.click(drowpdown_selenium, click_type=enum.ClickType(click_type))
+
                     time.sleep(1)
                     click_type += 1
 
-            if drowpdown_selenium:
+                    if click_type > 3:
+                        click_type = 1
+
+            if drowpdown_selenium and self.get_dropdown_state(dropdown_button) == 'open':
                 dropdown_options = drowpdown_selenium.find_elements(By.CSS_SELECTOR, 'po-item-list')
                 if dropdown_options:
                     for subitem in subitems_list:
@@ -5576,7 +5580,7 @@ class PouiInternal(Base):
 
         po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         if po_dropdown:
-            po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x),
+            po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x, position),
                                             po_dropdown))
         if po_dropdown_label:
             if len(po_dropdown_label) > position:
@@ -5631,10 +5635,11 @@ class PouiInternal(Base):
         :type check_error: bool
         """
 
-        logger().info(f"Clicking on {button} using POUI")
+        logger().info("Switching to the POUI button-click method")
 
         button_dict = {
-            "Alterar":"Editar"
+            # "Alterar":"Editar"
+            self.language.old_browse_edit : self.language.new_browse_edit
         }
         attr_row_selected_number = 'data-kendo-grid-item-index'
 
@@ -5652,13 +5657,14 @@ class PouiInternal(Base):
         
         row_selected_number = row_selected.get(attr_row_selected_number)
         row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
-
-        if button == 'Visualizar':
+        
+        if button == self.language.view:
             self.click_icon(label='', class_name='an an-arrow-up-right ng-star-inserted', position=row_selected_number)
 
         else:
-            if button == 'Outras Ações' and sub_item == 'Excluir':
-                button_text = 'Excluir'
+
+            if button == self.language.other_actions and sub_item == self.language.old_browse_delete:
+                button_text = sub_item
             else:
                 button_text = button_dict.get(button) if button in button_dict else button
 

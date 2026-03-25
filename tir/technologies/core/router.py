@@ -1,7 +1,6 @@
 
 from tir.technologies.core.config import ConfigLoader
-from tir.technologies.core.logging_config import logger
-import time
+from tir.technologies.core.language import LanguagePack
 
 class Router:
     """
@@ -32,6 +31,7 @@ class Router:
         self.__poui = None
         inst_webapp and self.set_webapp(inst_webapp)
         inst_poui and self.set_poui(inst_poui)
+        self.language = LanguagePack(self.config.language) if self.config.language else ""
 
     def set_webapp(self, inst):
         """Setter for WebappInternal instance."""
@@ -136,7 +136,13 @@ class Router:
     def SetButton(self, button, sub_item="", position=1, check_error=True) -> None:
         """Click on button using appropriate driver (POUI or WebApp)."""
 
-        new_browse_buttons = ['Visualizar', 'Alterar', 'Outras Ações', 'Excluir', 'Incluir']
+        view          = self.language.view
+        change        = self.language.old_browse_edit
+        other_actions = self.language.other_actions
+        delete        = self.language.old_browse_delete
+        add           = self.language.old_browse_insert
+
+        new_browse_buttons = [view, change, other_actions, delete, add]
 
         new_browse = self._ensure_poui().check_new_search_browse()
         drv = self._get_driver_instance(lambda: new_browse and button in new_browse_buttons)

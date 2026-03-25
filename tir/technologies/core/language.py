@@ -90,6 +90,15 @@ class LanguagePack:
         self.schedule_menu = languagepack["Schedule Menu"]
         self.input_set_program = languagepack["Input Set Program"]
         self.new_home_menu_about = languagepack["New Home Menu About"]
+
+        self.old_browse_edit = languagepack["Old Browse Edit"]
+        self.old_browse_delete = languagepack["Old Browse Delete"]
+        self.old_browse_insert = languagepack["Old Browse Insert"]
+
+        self.new_browse_edit = languagepack["New Browse Edit"]
+        self.new_browse_delete = languagepack["New Browse Delete"]
+        self.new_browse_insert = languagepack["New Browse Insert"]
+
         
         self.messages = Messages(languagepack)
 
@@ -188,7 +197,15 @@ class LanguagePack:
             "Procedure Uninstall": "Remove selected processes",
             "Schedule Menu": "Settings > Schedule > Schedule",
             "Input Set Program": "Search and execute",
-            "New Home Menu About": "About"
+            "New Home Menu About": "About",
+
+            "Old Browse Edit":"Edit",
+            "Old Browse Delete":"Delete",
+            "Old Browse Insert":"Insert",
+
+            "New Browse Edit":"Edit",
+            "New Browse Delete":"Delete",
+            "New Browse Insert":"Add"
         }
 
         brazilian_portuguese = {
@@ -284,8 +301,15 @@ class LanguagePack:
             "Procedure Uninstall": "Remover processos selecionados",
             "Schedule Menu": "Ambiente > Schedule > Schedule",
             "Input Set Program": "Pesquisar e executar",
-            "New Home Menu About": "Sobre"
+            "New Home Menu About": "Sobre",
 
+            "Old Browse Edit":"Alterar",
+            "Old Browse Delete":"Excluir",
+            "Old Browse Insert":"Incluir",
+
+            "New Browse Edit":"Editar",
+            "New Browse Delete":"Excluir",
+            "New Browse Insert":"Incluir"            
         }
         spanish = {
             "User": "Usuário",
@@ -380,8 +404,15 @@ class LanguagePack:
             "Procedure Uninstall": "Remover processos selecionados",
             "Schedule Menu": "Entorno > Schedule > Schedule",
             "Input Set Program": "Buscar y ejecutar",
-            "New Home Menu About": "Sobre"
+            "New Home Menu About": "Sobre",
 
+            "Old Browse Edit":"Modificar",
+            "Old Browse Delete":"Borrar",
+            "Old Browse Insert":"Incluir",
+            
+            "New Browse Edit":"Edit",
+            "New Browse Delete":"Eliminar",
+            "New Browse Insert":"Incluir"
         }
         russian = {
             "User": "Пользователь",
@@ -478,7 +509,15 @@ class LanguagePack:
             "Procedure Uninstall": "Удалить выбранные процессы",
             "Schedule Menu": "Settings > Schedule > Schedule",
             "Input Set Program": "Ищи и беги",
-            "New Home Menu About": "О программе…"
+            "New Home Menu About": "О программе…",
+
+            "Old Browse Edit":"Редактировать",
+            "Old Browse Delete":"Удалить",
+            "Old Browse Insert":"Включать",
+            
+            "New Browse Edit":"Редактировать",            
+            "New Browse Delete":"Удалить",
+            "New Browse Insert":"Включать"
         }
 
         if language.lower() == "en-us":
