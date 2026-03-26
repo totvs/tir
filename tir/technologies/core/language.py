@@ -94,10 +94,12 @@ class LanguagePack:
         self.old_browse_edit = languagepack["Old Browse Edit"]
         self.old_browse_delete = languagepack["Old Browse Delete"]
         self.old_browse_insert = languagepack["Old Browse Insert"]
+        self.old_browse_other_actions = languagepack["Old Browse Other Actions"]
 
         self.new_browse_edit = languagepack["New Browse Edit"]
         self.new_browse_delete = languagepack["New Browse Delete"]
         self.new_browse_insert = languagepack["New Browse Insert"]
+        self.new_browse_other_actions = languagepack["New Browse Other Actions"]
 
         
         self.messages = Messages(languagepack)
@@ -202,10 +204,12 @@ class LanguagePack:
             "Old Browse Edit":"Edit",
             "Old Browse Delete":"Delete",
             "Old Browse Insert":"Insert",
+            "Old Browse Other Actions":"Other Actions",
 
             "New Browse Edit":"Edit",
             "New Browse Delete":"Delete",
-            "New Browse Insert":"Add"
+            "New Browse Insert":"Add",
+            "New Browse Other Actions":"Line actions"
         }
 
         brazilian_portuguese = {
@@ -306,10 +310,12 @@ class LanguagePack:
             "Old Browse Edit":"Alterar",
             "Old Browse Delete":"Excluir",
             "Old Browse Insert":"Incluir",
+            "Old Browse Other Actions":"Outras Ações",
 
             "New Browse Edit":"Editar",
             "New Browse Delete":"Excluir",
-            "New Browse Insert":"Incluir"            
+            "New Browse Insert":"Incluir",
+            "New Browse Other Actions":"Ações de registro"         
         }
         spanish = {
             "User": "Usuário",
@@ -409,10 +415,12 @@ class LanguagePack:
             "Old Browse Edit":"Modificar",
             "Old Browse Delete":"Borrar",
             "Old Browse Insert":"Incluir",
+            "Old Browse Other Actions":"Otras acciones",
             
             "New Browse Edit":"Edit",
             "New Browse Delete":"Eliminar",
-            "New Browse Insert":"Incluir"
+            "New Browse Insert":"Incluir",
+            "New Browse Other Actions":"Acciones de registro"
         }
         russian = {
             "User": "Пользователь",
@@ -514,10 +522,12 @@ class LanguagePack:
             "Old Browse Edit":"Редактировать",
             "Old Browse Delete":"Удалить",
             "Old Browse Insert":"Включать",
+            "Old Browse Other Actions":"Другие действия",
             
             "New Browse Edit":"Редактировать",            
             "New Browse Delete":"Удалить",
-            "New Browse Insert":"Включать"
+            "New Browse Insert":"Включать",
+            "New Browse Other Actions":"Линейные действия"
         }
 
         if language.lower() == "en-us":
