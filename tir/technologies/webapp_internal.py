@@ -2012,10 +2012,10 @@ class WebappInternal(Base):
             self._search_browse_legacy(term, key, identifier, index, column, browse_div)
 
 
-    def is_new_browse(self):
-        browse_div = self._find_search_browse()
+    def is_new_browse(self, throw_error=True):
+        browse_div = self._find_search_browse(throw_error=throw_error)
 
-        return browse_div.name == 'thf-grid'
+        return browse_div.name == 'thf-grid' if browse_div else False
 
 
     def longest_word(self, string):
@@ -2082,7 +2082,7 @@ class WebappInternal(Base):
         return (browse_key, browse_input, browse_icon)
 
 
-    def _find_search_browse(self, panel_name=None):
+    def _find_search_browse(self, panel_name=None, throw_error=True):
 
         container_term = 'wa-tab-page > wa-dialog'
         container = None
@@ -2106,7 +2106,10 @@ class WebappInternal(Base):
                 browse_div = self._get_thf_grid()
 
         if not browse_div:
-            self.log_error("Couldn't find search browse.")
+            if throw_error:
+                self.log_error("Couldn't find search browse.")
+            else:
+                return None
 
         return browse_div
 

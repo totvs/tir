@@ -142,10 +142,11 @@ class Router:
         delete        = self.language.old_browse_delete
         add           = self.language.old_browse_insert
 
-        new_browse_buttons = [view, change, other_actions, delete, add]
+        new_browse_buttons = {view, change, other_actions, delete, add}
 
-        new_browse = self._ensure_poui().check_new_search_browse()
-        drv = self._get_driver_instance(lambda: new_browse and button in new_browse_buttons)
+        drv = self._get_driver_instance(
+            lambda: button in new_browse_buttons and self._ensure_webapp().is_new_browse(throw_error=False)
+        )
         drv.SetButton(button, sub_item, position, check_error=check_error)
 
 
