@@ -3813,6 +3813,8 @@ class PouiInternal(Base):
         """
         position -= 1
         element = None
+        button_element = None
+        clicktype = 1
 
         if not self.config.poui:
             self.twebview_context = True
@@ -3820,16 +3822,20 @@ class PouiInternal(Base):
         logger().info(f"Clicking on {button}")
         self.wait_element(term=button, optional_term=selector, scrap_type=enum.ScrapType.MIXED)
         endtime = time.time() + self.config.time_out
-        while (not element and time.time() < endtime):
+        while (time.time() < endtime and not (element and button_element)):
             element = self.return_main_element(button, position, selector=selector, container=container)
 
             if element:
                 button_element = next(iter(element.select('button')), None)
 
-        if not element:
+            if element and not button_element and element.name == 'po-dropdown':
+                button_element = element
+                clicktype = 2
+
+        if not element or not button_element:
             self.log_error("Couldn't find element")
 
-        self.poui_click(button_element)
+        self.poui_click(button_element, clicktype)
 
     def ClickWidget(self, title, action, position):
         """
@@ -5638,8 +5644,10 @@ class PouiInternal(Base):
         logger().info("Switching to the POUI button-click method")
 
         button_dict = {
-            # "Alterar":"Editar"
-            self.language.old_browse_edit : self.language.new_browse_edit
+            self.language.old_browse_edit : self.language.new_browse_edit,
+            self.language.old_browse_delete : self.language.new_browse_delete,
+            self.language.old_browse_insert : self.language.new_browse_insert,
+            self.language.old_browse_other_actions : self.language.new_browse_other_actions
         }
         attr_row_selected_number = 'data-kendo-grid-item-index'
 
@@ -5655,18 +5663,21 @@ class PouiInternal(Base):
             row_selected = next(iter(rows)) 
             self.click(self.soup_to_selenium(row_selected), enum.ClickType(3))
         
-        row_selected_number = row_selected.get(attr_row_selected_number)
-        row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
-        
         if button == self.language.view:
+            row_selected_number = row_selected.get(attr_row_selected_number)
+            row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
             self.click_icon(label='', class_name='an an-arrow-up-right ng-star-inserted', position=row_selected_number)
 
         else:
 
             if button == self.language.other_actions and sub_item == self.language.old_browse_delete:
                 button_text = sub_item
-            else:
-                button_text = button_dict.get(button) if button in button_dict else button
+            
+            button_text = button_dict.get(button) if button in button_dict else button
 
             self.click_button(button=button_text, position=position,
-                              selector="po-button", container=False)
+                              selector="po-button, po-dropdown", container=False)
+                              
+            if sub_item and sub_item != self.language.old_browse_delete:
+                for item in sub_item.split(','):
+                    self.click_popup(item)

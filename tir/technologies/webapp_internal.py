@@ -1874,8 +1874,8 @@ class WebappInternal(Base):
             container_layers = self.check_layers(container_term) == 1
             success = menu_screen and container_layers
 
-            logger().info(f'Check Menu Screen: {menu_screen}')
-            logger().info(f'wa-dialog layers: {container_layers}')        
+            logger().debug(f'Check Menu Screen: {menu_screen}')
+            logger().debug(f'wa-dialog layers: {container_layers}')        
         
         # wait trasitions between screens to avoid errors in layers number
         self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
