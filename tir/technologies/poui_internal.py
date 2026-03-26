@@ -5630,7 +5630,7 @@ class PouiInternal(Base):
             return browse_div
 
 
-    def set_browse_filters(self, filters):
+    def _set_browse_filters(self, filters):
         """This method open and apply filters to each field
         [Internal]
         Open and apply filters to each field in a THF Browse component.
@@ -5650,14 +5650,43 @@ class PouiInternal(Base):
 
         browse_div = self._find_search_browse()
 
-        self.click_button('Filtros')
+        self.click_button(self.language.filters)
 
         self.wait_element_timeout('po-page-slide', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body',
                                   timeout=10, twebview=True)
 
-        for filter in filters:
-            self.click(self.soup_to_selenium(filter_button))
+        for filter_dict in filters:
+            for field, value in filter_dict.items():
+                logger().info(f"Setting browse filter: '{field}' = '{value}'")
 
+                success = False
+
+                input_field = self.return_input_element(field, position=1, term="[class*='po-input']")
+
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+
+                    self.switch_to_iframe()
+
+                    input_field_element = lambda: self.soup_to_selenium(input_field)
+
+                    self.scroll_to_element(input_field_element())
+                    self.set_element_focus(input_field_element())
+                    self.click(input_field_element())
+                    input_field_element().clear()
+                    input_field_element().send_keys(value)
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.TAB).perform()
+                    time.sleep(1)
+
+                    success = self.get_web_value(input_field_element()).strip() == value
+
+                if not success:
+                    self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+
+        self.click_button(self.language.apply_filters)
 
     def _find_search_browse(self, panel_name=None):
         """

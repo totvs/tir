@@ -2005,14 +2005,14 @@ class WebappInternal(Base):
         logger().info(f"Searching: {term}")
         browse_div = self._find_search_browse()
 
-        if self.is_new_browse():
+        if self._is_new_browse():
             search_text = self.longest_word(term)
             self._simple_search_thf_browse(search_text, browse_element)
         else:
             self._search_browse_legacy(term, key, identifier, index, column, browse_div)
 
 
-    def is_new_browse(self, throw_error=True):
+    def _is_new_browse(self, throw_error=True):
         browse_div = self._find_search_browse(throw_error=throw_error)
 
         return browse_div.name == 'thf-grid' if browse_div else False
@@ -4208,7 +4208,7 @@ class WebappInternal(Base):
             try:
                 if twebview:
                     self.switch_to_iframe()
-                    return self.driver.find_element(By.CSS_SELECTOR, selector)
+                    element_list = list(filter(lambda x: x.is_displayed(), self.driver.find_elements(By.CSS_SELECTOR, selector)))
                 else:
                     element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
                     if not element_list:
