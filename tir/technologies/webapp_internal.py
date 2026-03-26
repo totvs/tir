@@ -1961,6 +1961,7 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+
     def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
         """
         Searchs a term on Protheus Webapp.
@@ -2002,17 +2003,57 @@ class WebappInternal(Base):
         self.wait_blocker()
 
         logger().info(f"Searching: {term}")
+        browse_div = self._find_search_browse()
+
+        if self.is_new_browse():
+            search_text = self.longest_word(term)
+            self._simple_search_thf_browse(search_text, browse_element)
+        else:
+            self._search_browse_legacy(term, key, identifier, index, column, browse_div)
+
+
+    def is_new_browse(self):
+        browse_div = self._find_search_browse()
+
+        return browse_div.name == 'thf-grid'
+
+
+    def longest_word(self, string):
+        words = text.split()
+
+        if not words:
+            return ""
+
+        return max(words, key=len)
+
+
+    def _search_browse_legacy(self, term, key, identifier, index, column, browse_div=None):
+        """This method fill SearchBrowse
+
+        :param term:
+        :param key:
+        :param identifier:
+        :param index:
+        :param column:
+        :return:
+        """
         if index and isinstance(key, int):
             key -= 1
-        browse_elements = self.get_search_browse_elements(identifier)
+
+        browse_elements = self.get_search_browse_elements(
+            panel_name=identifier,
+            browse_div=browse_div
+        )
+
         if key:
             self.search_browse_key(key, browse_elements, index)
         elif column:
             self.search_browse_column(column, browse_elements, index)
+
         self.fill_search_browse(term, browse_elements)
 
 
-    def get_search_browse_elements(self, panel_name=None):
+    def get_search_browse_elements(self, panel_name=None, browse_div=None):
         """
         [Internal]
 
@@ -2030,56 +2071,55 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> search_elements = self.get_search_browse_elements("Products")
         """
-        if self.webapp_shadowroot():
-            dialog_term = 'wa-tab-page > wa-dialog'
-        else:
-            dialog_term = '.tmodaldialog'
 
-        success = False
+        browse_div = browse_div or self._find_search_browse(panel_name=panel_name)
+
+        browse_tget = browse_div.select(".dict-tget")[0]
+        browse_key = browse_div.select(".dict-tbutton")[0]
+        browse_input = browse_tget
+        browse_icon = browse_tget.select(".button-image")[0]
+
+        return (browse_key, browse_input, browse_icon)
+
+
+    def _find_search_browse(self, panel_name=None):
+
+        container_term = 'wa-tab-page > wa-dialog'
         container = None
         elements_soup = None
+        browse_div = []
 
-        self.wait_element_timeout(term="[style*='fwskin_seekbar_ico']", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out)
         endtime = time.time() + self.config.time_out
-
-        while (time.time() < endtime and not success):
-            soup = self.get_current_DOM()
+        while (time.time() < endtime and not browse_div):
             search_index = self.get_panel_name_index(panel_name) if panel_name else 0
-            containers = self.zindex_sort(soup.select(dialog_term), reverse=True)
+            soup = self.get_current_DOM()
+            containers = self.zindex_sort(soup.select(container_term), reverse=True)
             container = next(iter(containers), None)
 
             if container:
                 elements_soup = container.select("[style*='fwskin_seekbar_ico']")
 
             if elements_soup:
-                if elements_soup and len(elements_soup) -1 >= search_index:
-                    if self.webapp_shadowroot():
-                        browse_div = elements_soup[search_index].find_parent()
-                    else:
-                        browse_div = elements_soup[search_index].find_parent().find_parent()
-                    success = True
+                if elements_soup and len(elements_soup) - 1 >= search_index:
+                    browse_div = elements_soup[search_index].find_parent()
+            else:
+                browse_div = self._get_thf_grid()
 
-        if not elements_soup:
+        if not browse_div:
             self.log_error("Couldn't find search browse.")
 
-        if not container:
-            self.log_error("Couldn't find container of element.")
+        return browse_div
 
-        if not success:
-            self.log_error("Get search browse elements couldn't find browser div")
 
-        if self.webapp_shadowroot():
-            browse_tget = browse_div.select(".dict-tget")[0]
-            browse_key = browse_div.select(".dict-tbutton")[0]
-            browse_input = browse_tget
-            browse_icon = browse_tget.select(".button-image")[0]
-        else:
-            browse_tget = browse_div.select(".tget")[0]
-            browse_key = browse_div.select(".tbutton button")[0]
-            browse_input = browse_tget.select("input")[0]
-            browse_icon = browse_tget.select("img")[0]
+    def _get_thf_grid(self):
+        elements_soup = []
 
-        return (browse_key, browse_input, browse_icon)
+        soup = self.get_current_DOM(twebview=True)
+        container = soup.select_one("body")
+        elements_soup = container.select_one("kendo-grid-toolbar")
+        if elements_soup:
+            browse_div = elements_soup.find_parent('thf-grid')
+            return browse_div
 
 
     def search_browse_key(self, search_key, search_elements, index=False):
@@ -10877,19 +10917,9 @@ class WebappInternal(Base):
         mse = err/(float(h*w))
         return mse, diff
 
-    def get_soup_select(self, selector):
-        """
-        Get a soup select object.
 
-        :param selector: Css selector
-        :return: Return a soup select object
-        """
 
-        twebview = True if self.config.poui_login else False
 
-        soup = self.get_current_DOM(twebview=twebview)
-
-        return soup.select(selector)
 
     def check_mot_exec(self):
         """
