@@ -2012,7 +2012,7 @@ class WebappInternal(Base):
             self._search_browse_legacy(term, key, identifier, index, column, browse_div)
 
 
-    def is_new_browse(self):
+    def _is_new_browse(self):
         browse_div = self._find_search_browse()
 
         return browse_div.name == 'thf-grid'

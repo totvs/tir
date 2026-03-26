@@ -1619,7 +1619,7 @@ class Webapp():
         """This method checks if the current browse is the new version with poui or the old one,
          returning a boolean value.
          """
-        return self.__webapp.is_new_browse()
+        return self.__webapp._is_new_browse()
 
 class Apw():
 
