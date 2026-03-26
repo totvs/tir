@@ -1906,7 +1906,9 @@ class PouiInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=None):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
+                  check_error=True, check_help=True, input_field=True, direction=None,
+                  position=1, twebview=None):
         """
         [Internal]
 
@@ -2108,7 +2110,8 @@ class PouiInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True, twebview=True):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="",
+                       main_container=".body", check_error=True, twebview=True, use_current_container=False):
         """
         [Internal]
 
@@ -2149,7 +2152,7 @@ class PouiInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM(twebview)
+                soup = self.get_current_container() if use_current_container else self.get_current_DOM(twebview)
 
                 if not soup:
                     return False
@@ -2190,9 +2193,9 @@ class PouiInternal(Base):
             try:
                 if twebview:
                     self.switch_to_iframe()
-                    return self.driver.find_element(By.CSS_SELECTOR, selector)
+                    element_list = list(filter(lambda x: x.is_displayed(), self.driver.find_elements(By.CSS_SELECTOR, selector)))
                 else:
-                    element_list = container_element.find_elements(by, selector)
+                    element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
             except:
                 return None
         else:
@@ -2488,7 +2491,7 @@ class PouiInternal(Base):
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True,
                              position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body",
-                             check_error=True, twebview=False):
+                             check_error=True, twebview=False, use_current_container=False):
         """
         [Internal]
 
@@ -2521,14 +2524,16 @@ class PouiInternal(Base):
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview):
+                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                       twebview, use_current_container):
                     success = True
                     break
         else:
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview):
+                if not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                           twebview, use_current_container):
                     success = True
                     break
 
@@ -3803,7 +3808,7 @@ class PouiInternal(Base):
         time.sleep(1)
         self.click(click_element(), click_type=enum.ClickType(click_type))
 
-    def click_button(self, button, position, selector, container):
+    def click_button(self, button, position=1, selector='po-button', container=False):
         """
 
         :param field: Button to be clicked.
@@ -5604,3 +5609,59 @@ class PouiInternal(Base):
             return 'open' if dropdown_status else 'closed'
         else:
             return None
+
+    def _get_thf_grid(self):
+        elements_soup = []
+        soup = self.get_current_DOM(twebview=True)
+        container = soup.select_one("body")
+        elements_soup = container.select_one("kendo-grid-toolbar")
+        if elements_soup:
+            browse_div = elements_soup.find_parent('thf-grid')
+            return browse_div
+
+
+    def set_browse_filters(self, filters):
+        """This method open and apply filters to each field
+        [Internal]
+        Open and apply filters to each field in a THF Browse component.
+
+        :param filters: Dictionary or list of filters to apply, where keys are field names and values are filter values.
+        :type filters: dict or list
+        :param browse_div: BeautifulSoup object representing the browse container element.
+        :type browse_div: bs4.element.Tag
+        :return: None
+        :rtype: None
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._filter_thf_browse(filters={'name': 'John'}, browse_div=browse_element)
+        """
+
+        browse_div = self._find_search_browse()
+
+        self.click_button('Filtros')
+
+        self.wait_element_timeout('po-page-slide', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body',
+                                  timeout=10, twebview=True)
+
+        for filter in filters:
+            self.click(self.soup_to_selenium(filter_button))
+
+
+    def _find_search_browse(self, panel_name=None):
+        """
+
+        :param panel_name:
+        :return:
+        """
+        browse_div = []
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not browse_div):
+            browse_div = self._get_thf_grid()
+
+        if not browse_div:
+            self.log_error("Couldn't find search browse.")
+
+        return browse_div

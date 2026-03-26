@@ -1614,6 +1614,13 @@ class Webapp():
         """
         return self.__webapp.rest_resgistry()
 
+
+    def IsNewBrowse(self):
+        """This method checks if the current browse is the new version with poui or the old one,
+         returning a boolean value.
+         """
+        return self.__webapp.is_new_browse()
+
 class Apw():
 
     def __init__(self, config_path=""):
