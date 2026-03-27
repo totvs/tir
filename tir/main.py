@@ -1162,15 +1162,6 @@ class Webapp():
         return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
 
 
-    def IsNewBrowse(self):
-        """This method checks if the current browse is the new version with poui or the old one,
-         returning a boolean value.
-
-        :return:
-        """
-        return self.__webapp._is_new_browse()
-
-
     def GetRelease(self):
         """
         Get the current release from Protheus.
