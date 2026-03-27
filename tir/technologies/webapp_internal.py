@@ -2011,6 +2011,49 @@ class WebappInternal(Base):
         else:
             self._search_browse_legacy(term, key, identifier, index, column, browse_div)
 
+    def _simple_search_thf_browse(self, search_text, browse_div):
+        search_input = browse_div.select_one('po-input[p-icon="ICON_SEARCH"] input')
+
+        if not search_input:
+            logger().warning("_simple_search_thf_browse: couldn't find po-input[p-icon='ICON_SEARCH'] input")
+            return
+
+        selenium_input = lambda: self.soup_to_selenium(search_input)
+
+        current_value = ''
+        try_counter = 1
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and current_value.strip() != search_text.strip():
+            try:
+                self.set_element_focus(selenium_input())
+                self.click(selenium_input())
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+
+                self.try_send_keys(selenium_input, search_text, try_counter)
+
+                current_value = self.get_web_value(selenium_input())
+                if not current_value:
+                    current_value = ''
+
+                try_counter += 1
+                if try_counter > 3:
+                    try_counter = 1
+
+                time.sleep(0.5)
+
+            except Exception as e:
+                logger().debug(f"_simple_search_thf_browse: exception filling input - {str(e)}")
+                try_counter += 1
+                if try_counter > 3:
+                    try_counter = 1
+
+        if current_value.strip() != search_text.strip():
+            self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
+            return
+
 
     def _is_new_browse(self, throw_error=True):
         browse_div = self._find_search_browse(throw_error=throw_error)
@@ -2019,7 +2062,7 @@ class WebappInternal(Base):
 
 
     def longest_word(self, string):
-        words = text.split()
+        words = string.split()
 
         if not words:
             return ""
