@@ -1906,7 +1906,9 @@ class PouiInternal(Base):
             return False
 
 
-    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None, check_error=True, check_help=True, input_field=True, direction=None, position=1, twebview=None):
+    def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
+                  check_error=True, check_help=True, input_field=True, direction=None,
+                  position=1, twebview=None):
         """
         [Internal]
 
@@ -2108,7 +2110,8 @@ class PouiInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
-    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container=".body", check_error=True, twebview=True):
+    def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="",
+                       main_container=".body", check_error=True, twebview=True, use_current_container=False):
         """
         [Internal]
 
@@ -2149,7 +2152,7 @@ class PouiInternal(Base):
                 selector = f"[name*='{term}']"
 
             if scrap_type != enum.ScrapType.XPATH:
-                soup = self.get_current_DOM(twebview)
+                soup = self.get_current_container() if use_current_container else self.get_current_DOM(twebview)
 
                 if not soup:
                     return False
@@ -2190,9 +2193,9 @@ class PouiInternal(Base):
             try:
                 if twebview:
                     self.switch_to_iframe()
-                    return self.driver.find_element(By.CSS_SELECTOR, selector)
+                    element_list = list(filter(lambda x: x.is_displayed(), self.driver.find_elements(By.CSS_SELECTOR, selector)))
                 else:
-                    element_list = container_element.find_elements(by, selector)
+                    element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
             except:
                 return None
         else:
@@ -2488,7 +2491,7 @@ class PouiInternal(Base):
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True,
                              position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, body",
-                             check_error=True, twebview=False):
+                             check_error=True, twebview=False, use_current_container=False):
         """
         [Internal]
 
@@ -2521,14 +2524,16 @@ class PouiInternal(Base):
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview):
+                if self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                       twebview, use_current_container):
                     success = True
                     break
         else:
             endtime = time.time() + timeout
             while time.time() < endtime:
                 time.sleep(step)
-                if not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview):
+                if not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error,
+                                           twebview, use_current_container):
                     success = True
                     break
 
@@ -3803,7 +3808,7 @@ class PouiInternal(Base):
         time.sleep(1)
         self.click(click_element(), click_type=enum.ClickType(click_type))
 
-    def click_button(self, button, position, selector, container):
+    def click_button(self, button, position=1, selector='po-button, po-dropdown', container=False):
         """
 
         :param field: Button to be clicked.
@@ -3813,6 +3818,8 @@ class PouiInternal(Base):
         """
         position -= 1
         element = None
+        button_element = None
+        clicktype = 1
 
         if not self.config.poui:
             self.twebview_context = True
@@ -3820,16 +3827,20 @@ class PouiInternal(Base):
         logger().info(f"Clicking on {button}")
         self.wait_element(term=button, optional_term=selector, scrap_type=enum.ScrapType.MIXED)
         endtime = time.time() + self.config.time_out
-        while (not element and time.time() < endtime):
+        while (time.time() < endtime and not (element and button_element)):
             element = self.return_main_element(button, position, selector=selector, container=container)
 
             if element:
                 button_element = next(iter(element.select('button')), None)
 
-        if not element:
+            if element and not button_element and element.name == 'po-dropdown':
+                button_element = element
+                clicktype = 2
+
+        if not element or not button_element:
             self.log_error("Couldn't find element")
 
-        self.poui_click(button_element)
+        self.poui_click(button_element, clicktype)
 
     def ClickWidget(self, title, action, position):
         """
@@ -5527,7 +5538,6 @@ class PouiInternal(Base):
         """
 
         position -= 1
-        element = None
         term = 'po-dropdown'
         subitems_list = self._normalize_to_list(subitems)
         success = False
@@ -5538,7 +5548,6 @@ class PouiInternal(Base):
 
         logger().info(f"Clicking on Dropdown: {label} -> {subitems}")
 
-
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
 
@@ -5547,12 +5556,18 @@ class PouiInternal(Base):
 
             if dropdown_button:
                 drowpdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
-                if self.get_dropdown_state(dropdown_button) == 'closed':
+                endtime_internal = time.time() + (self.config.time_out / 3)
+                while (time.time() < endtime_internal and \
+                       self.get_dropdown_state(dropdown_button) == 'closed'):
                     self.click(drowpdown_selenium, click_type=enum.ClickType(click_type))
+
                     time.sleep(1)
                     click_type += 1
 
-            if drowpdown_selenium:
+                    if click_type > 3:
+                        click_type = 1
+
+            if drowpdown_selenium and self.get_dropdown_state(dropdown_button) == 'open':
                 dropdown_options = drowpdown_selenium.find_elements(By.CSS_SELECTOR, 'po-item-list')
                 if dropdown_options:
                     for subitem in subitems_list:
@@ -5576,7 +5591,7 @@ class PouiInternal(Base):
 
         po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         if po_dropdown:
-            po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x),
+            po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x, position),
                                             po_dropdown))
         if po_dropdown_label:
             if len(po_dropdown_label) > position:
@@ -5604,3 +5619,175 @@ class PouiInternal(Base):
             return 'open' if dropdown_status else 'closed'
         else:
             return None
+
+    def _get_thf_grid(self):
+        elements_soup = []
+        soup = self.get_current_DOM(twebview=True)
+        container = soup.select_one("body")
+        elements_soup = container.select_one("kendo-grid-toolbar")
+        if elements_soup:
+            browse_div = elements_soup.find_parent('thf-grid')
+            return browse_div
+
+
+    def _set_browse_filters(self, filters):
+        """This method open and apply filters to each field
+        [Internal]
+        Open and apply filters to each field in a THF Browse component.
+
+        :param filters: Dictionary or list of filters to apply, where keys are field names and values are filter values.
+        :type filters: dict or list
+        :param browse_div: BeautifulSoup object representing the browse container element.
+        :type browse_div: bs4.element.Tag
+        :return: None
+        :rtype: None
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._filter_thf_browse(filters={'name': 'John'}, browse_div=browse_element)
+        """
+
+        browse_div = self._find_search_browse()
+
+        self.click_button(self.language.filters)
+
+        self.wait_element_timeout('po-page-slide', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body',
+                                  timeout=10, twebview=True)
+
+        for filter_dict in filters:
+            for field, value in filter_dict.items():
+                logger().info(f"Setting browse filter: '{field}' = '{value}'")
+
+                success = False
+
+                input_field = self.return_input_element(field, position=1, term="[class*='po-input']")
+
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not success:
+
+                    self.switch_to_iframe()
+
+                    input_field_element = lambda: self.soup_to_selenium(input_field)
+
+                    self.scroll_to_element(input_field_element())
+                    self.set_element_focus(input_field_element())
+                    self.click(input_field_element())
+                    input_field_element().clear()
+                    input_field_element().send_keys(value)
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.TAB).perform()
+                    time.sleep(1)
+
+                    success = self.get_web_value(input_field_element()).strip() == value
+
+                if not success:
+                    self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+
+        self.click_button(self.language.apply_filters)
+
+    def _find_search_browse(self, panel_name=None):
+        """
+
+        :param panel_name:
+        :return:
+        """
+        browse_div = []
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not browse_div):
+            browse_div = self._get_thf_grid()
+
+        if not browse_div:
+            self.log_error("Couldn't find search browse.")
+
+        return browse_div
+
+    def SetButton(self, button, sub_item="", position=1, check_error=True):
+        """
+        Legacy webapp adaptation for POUI. Wraps click_button with specific button mapping rules.
+
+        :param button: Button name to click
+        :type button: str
+        :param sub_item: Subitem for specific button actions (e.g., 'Excluir' for 'Outras Ações') - **Default:** ""
+        :type sub_item: str
+        :param position: Position which element is located - **Default:** 1
+        :type position: int
+        :param check_error: Whether to check for errors - **Default:** True
+        :type check_error: bool
+        """
+
+        logger().info("Switching to the POUI button-click method")
+
+        # Map legacy button names to their POUI equivalents.
+        button_dict = {
+            self.language.old_browse_edit : self.language.new_browse_edit,
+            self.language.old_browse_delete : self.language.new_browse_delete,
+            self.language.old_browse_insert : self.language.new_browse_insert,
+            self.language.old_browse_other_actions : self.language.new_browse_other_actions
+        }
+
+        attr_row_selected_number = 'data-kendo-grid-item-index'
+
+        # Insert does not require a selected row.
+        if button != self.language.old_browse_insert:
+
+            table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+            if not table:
+                self.log_error("Couldn't find the browse grid.")
+
+            row_selected = table.select("tbody > tr[aria-selected='true']")
+            row_selected_number = 1
+            
+            # Get the first selected row.
+            if row_selected:                
+                row_selected = next(iter(row_selected))
+            
+            # If no row is selected, select the first row in the grid.
+            else:
+                rows = table.select("tbody > tr")
+                if not rows:
+                    self.log_error("Couldn't find any rows in the browse grid.")
+                row_selected = next(iter(rows)) 
+                self.click(self.soup_to_selenium(row_selected), enum.ClickType(3))
+        
+        # In the new browse, the view action is available as an icon in each row.
+        if button == self.language.view:
+            row_selected_number = row_selected.get(attr_row_selected_number)
+            row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
+            self.click_icon(label='', class_name='an an-arrow-up-right ng-star-inserted', position=row_selected_number)
+
+        else:
+            
+            # In the new browse, delete is no longer nested under other actions.
+            if button == self.language.other_actions and sub_item == self.language.old_browse_delete:
+                button_text = sub_item
+            else:
+                button_text = button_dict.get(button, button)
+
+            self.click_button(button=button_text, position=position,
+                              selector="po-button, po-dropdown", container=False)
+
+            # Handle dropdown item clicks.
+            if sub_item and sub_item != self.language.old_browse_delete:
+                for item in map(str.strip, sub_item.split(',')):
+                    if item:
+                        self.click_popup(item)
+
+
+    def SearchBrowse(self, term="", key=None, identifier=None,
+                     index=False, column=None, filters=None) -> None:
+        """
+        Routes to FilterBrowse when filters parameter is provided.
+        Maintains interface compatibility with WebappInternal.SearchBrowse.
+
+        :param filters: Filters to apply on THF Browse. If provided, routes to FilterBrowse.
+        :type filters: dict or list
+
+        .. note::
+            Parameters key, identifier, index and column are not applicable in POUI context.
+            They exist only for interface compatibility with WebappInternal.SearchBrowse.
+        """
+        self._set_browse_filters(filters=filters)

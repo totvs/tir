@@ -1,4 +1,5 @@
 import os
+from typing import List, Dict, Any
 
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
@@ -576,7 +577,7 @@ class Webapp():
         """
         self.__webapp.SetupTSS(initial_program, environment)
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]):
         """
         Searchs a term on Protheus Webapp.
 
@@ -623,7 +624,8 @@ class Webapp():
         >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.SearchBrowse(term, key, identifier, index, column)
+        self.__router.SearchBrowse(term, key, identifier, index, column, filters)
+
 
     def SetBranch(self, branch):
         """
@@ -672,7 +674,7 @@ class Webapp():
 		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
         >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
-        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
+        self.__router.SetButton(button, sub_item, position, check_error=check_error)
 
     def SetFilePath(self, value, button = ""):
         """
@@ -1160,6 +1162,7 @@ class Webapp():
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
 
+
     def GetRelease(self):
         """
         Get the current release from Protheus.
@@ -1614,6 +1617,13 @@ class Webapp():
         """
         return self.__webapp.rest_resgistry()
 
+
+    def IsNewBrowse(self):
+        """This method checks if the current browse is the new version with poui or the old one,
+         returning a boolean value.
+         """
+        return self.__webapp._is_new_browse()
+
 class Apw():
 
     def __init__(self, config_path=""):
@@ -1776,7 +1786,7 @@ class Poui():
         >>> oHelper.ClickButton('Cancelar')
         :return:
         """
-        self.__poui.click_button(button, position, selector="po-button", container=False)
+        self.__poui.click_button(button, position, selector="po-button, po-dropdown", container=False)
 
     def AssertFalse(self, expected=False, script_message=''):
         """
@@ -2266,3 +2276,22 @@ class Poui():
         >>> oHelper.ClickDropdown(label='Ações de registro')
         """
         self.__poui._click_dropdown(label, subitems, position)
+
+
+    def FilterBrowse(self, filters: List[Dict[str, Any]]):
+        """
+        Fills out the POUI filter kendo-grid/browse component with the provided filters.
+
+        :param filters: A list of dictionaries, each containing 'field', 'value', and optional 'position' keys.
+        :type filters: list of dict
+
+        Usage:
+
+        >>> # Call the method:
+        >>> filters = [
+        ...     {'field': 'Código', 'value': '000001'},
+        ...     {'field': 'Descrição', 'value': 'Produto Teste', 'position': 2}
+        ... ]
+        >>> oHelper.FilterBrowse(filters)
+        """
+        self.__poui._set_browse_filters(filters)
