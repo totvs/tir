@@ -5775,3 +5775,19 @@ class PouiInternal(Base):
                 for item in map(str.strip, sub_item.split(',')):
                     if item:
                         self.click_popup(item)
+
+
+    def SearchBrowse(self, term="", key=None, identifier=None,
+                     index=False, column=None, filters=None) -> None:
+        """
+        Routes to FilterBrowse when filters parameter is provided.
+        Maintains interface compatibility with WebappInternal.SearchBrowse.
+
+        :param filters: Filters to apply on THF Browse. If provided, routes to FilterBrowse.
+        :type filters: dict or list
+
+        .. note::
+            Parameters key, identifier, index and column are not applicable in POUI context.
+            They exist only for interface compatibility with WebappInternal.SearchBrowse.
+        """
+        self._set_browse_filters(filters=filters)

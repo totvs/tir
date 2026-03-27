@@ -150,4 +150,9 @@ class Router:
         drv.SetButton(button, sub_item, position, check_error=check_error)
 
 
-        
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]) -> None:
+
+        drv = self._get_driver_instance(
+            lambda: filters and self._ensure_webapp()._is_new_browse(throw_error=False)
+        )
+        drv.SearchBrowse(term=term, key=key, identifier=identifier, index=index, column=column, filters=filters)

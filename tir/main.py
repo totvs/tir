@@ -577,7 +577,7 @@ class Webapp():
         """
         self.__webapp.SetupTSS(initial_program, environment)
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]):
         """
         Searchs a term on Protheus Webapp.
 
@@ -624,7 +624,8 @@ class Webapp():
         >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.SearchBrowse(term, key, identifier, index, column)
+        self.__router.SearchBrowse(term, key, identifier, index, column, filters)
+
 
     def SetBranch(self, branch):
         """

@@ -1962,7 +1962,7 @@ class WebappInternal(Base):
             logger().exception(str(e))
 
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None):
         """
         Searchs a term on Protheus Webapp.
 
