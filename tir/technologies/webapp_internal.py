@@ -2007,7 +2007,7 @@ class WebappInternal(Base):
 
         if self._is_new_browse():
             search_text = self.longest_word(term)
-            self._simple_search_thf_browse(search_text, browse_element)
+            self._simple_search_thf_browse(search_text, browse_div)
         else:
             self._search_browse_legacy(term, key, identifier, index, column, browse_div)
 
