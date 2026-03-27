@@ -91,6 +91,8 @@ class LanguagePack:
         self.input_set_program = languagepack["Input Set Program"]
         self.new_home_menu_about = languagepack["New Home Menu About"]
 
+        self.filters = languagepack["Filters"]
+        self.apply_filters = languagepack["Apply Filters"]
         self.old_browse_edit = languagepack["Old Browse Edit"]
         self.old_browse_delete = languagepack["Old Browse Delete"]
         self.old_browse_insert = languagepack["Old Browse Insert"]
@@ -200,6 +202,8 @@ class LanguagePack:
             "Schedule Menu": "Settings > Schedule > Schedule",
             "Input Set Program": "Search and execute",
             "New Home Menu About": "About",
+            "Filters": "Filters",
+            "Apply Filters": "Apply filters",
 
             "Old Browse Edit":"Edit",
             "Old Browse Delete":"Delete",
@@ -306,6 +310,8 @@ class LanguagePack:
             "Schedule Menu": "Ambiente > Schedule > Schedule",
             "Input Set Program": "Pesquisar e executar",
             "New Home Menu About": "Sobre",
+            "Filters": "Filtros",
+            "Apply Filters": "Aplicar Filtros",            
 
             "Old Browse Edit":"Alterar",
             "Old Browse Delete":"Excluir",
@@ -411,7 +417,8 @@ class LanguagePack:
             "Schedule Menu": "Entorno > Schedule > Schedule",
             "Input Set Program": "Buscar y ejecutar",
             "New Home Menu About": "Sobre",
-
+            "Filters": "Filtros",
+            "Apply Filters": "Aplicar Filtros",            
             "Old Browse Edit":"Modificar",
             "Old Browse Delete":"Borrar",
             "Old Browse Insert":"Incluir",

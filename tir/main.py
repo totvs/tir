@@ -1,4 +1,5 @@
 import os
+from typing import List, Dict, Any
 
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
@@ -1160,6 +1161,7 @@ class Webapp():
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
 
+
     def GetRelease(self):
         """
         Get the current release from Protheus.
@@ -1619,7 +1621,7 @@ class Webapp():
         """This method checks if the current browse is the new version with poui or the old one,
          returning a boolean value.
          """
-        return self.__webapp.is_new_browse()
+        return self.__webapp._is_new_browse()
 
 class Apw():
 
@@ -2273,3 +2275,22 @@ class Poui():
         >>> oHelper.ClickDropdown(label='Ações de registro')
         """
         self.__poui._click_dropdown(label, subitems, position)
+
+
+    def FilterBrowse(self, filters: List[Dict[str, Any]]):
+        """
+        Fills out the POUI filter kendo-grid/browse component with the provided filters.
+
+        :param filters: A list of dictionaries, each containing 'field', 'value', and optional 'position' keys.
+        :type filters: list of dict
+
+        Usage:
+
+        >>> # Call the method:
+        >>> filters = [
+        ...     {'field': 'Código', 'value': '000001'},
+        ...     {'field': 'Descrição', 'value': 'Produto Teste', 'position': 2}
+        ... ]
+        >>> oHelper.FilterBrowse(filters)
+        """
+        self.__poui._set_browse_filters(filters)
