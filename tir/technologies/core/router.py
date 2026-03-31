@@ -150,12 +150,8 @@ class Router:
 
     def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]) -> None:
 
-        if filters:
-            use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
-            self.config._flag_is_new_browse = use_poui
-        else:
-            use_poui = False
-            self.config._flag_is_new_browse = None
+        use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
+        self.config._flag_is_new_browse = use_poui
 
         drv = self._get_driver_instance(lambda: use_poui)
         drv.SearchBrowse(term=term, key=key, identifier=identifier, index=index, column=column, filters=filters)
