@@ -2055,8 +2055,8 @@ class WebappInternal(Base):
             return
 
 
-    def _is_new_browse(self, throw_error=True):
-        browse_div = self._find_search_browse(throw_error=throw_error, timeout=5)
+    def _is_new_browse(self, throw_error=True, timeout=None):
+        browse_div = self._find_search_browse(throw_error=throw_error, timeout=timeout)
 
         return browse_div.name == 'thf-grid' if browse_div else False
 
@@ -2129,7 +2129,7 @@ class WebappInternal(Base):
 
         container_term = 'wa-tab-page > wa-dialog'
         container = None
-        elements_soup = None
+        elements_soup = []
         browse_div = []
 
         endtime = time.time() + (timeout if timeout is not None else self.config.time_out)
@@ -2138,11 +2138,11 @@ class WebappInternal(Base):
             soup = self.get_current_DOM()
             containers = self.zindex_sort(soup.select(container_term), reverse=True)
             container = next(iter(containers), None)
+            elements_soup = []
 
             if container:
                 elements_soup = container.select("[style*='fwskin_seekbar_ico']")
-
-            elements_soup = list(filter(lambda x: self.element_is_displayed(x), elements_soup))
+                elements_soup = list(filter(lambda x: self.element_is_displayed(x), elements_soup)) if elements_soup else []
 
             if elements_soup:
                 if elements_soup and len(elements_soup) - 1 >= search_index:
