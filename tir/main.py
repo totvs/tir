@@ -30,6 +30,19 @@ class Webapp():
         self.coverage = self.config.coverage
         self._subscribe_routes()
 
+    def __getattribute__(self, name):
+        attr = object.__getattribute__(self, name)
+
+        if callable(attr) and not name.startswith('_'):
+            preserve_methods = {'SearchBrowse', 'SetButton'}
+            if name not in preserve_methods:
+                try:
+                    object.__getattribute__(self, 'config')._flag_is_new_browse = None
+                except AttributeError:
+                    pass
+
+        return attr
+
     def _subscribe_routes(self):
         """Registra handlers do Router no event bus para roteamento.
 
@@ -641,7 +654,7 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
-    def SetButton(self, button, sub_item="", position=1, check_error=True):
+    def SetButton(self, button, sub_item="", position=1, check_error=True, is_browse=False):
         """
         Method that clicks on a button on the screen.
 
@@ -674,7 +687,7 @@ class Webapp():
 		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
         >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
-        self.__router.SetButton(button, sub_item, position, check_error=check_error)
+        self.__router.SetButton(button, sub_item, position, check_error=check_error, is_browse=is_browse)
 
     def SetFilePath(self, value, button = ""):
         """
@@ -1702,6 +1715,19 @@ class Poui():
         self.__poui = PouiInternal(config_path, autostart)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+
+    def __getattribute__(self, name):
+        attr = object.__getattribute__(self, name)
+
+        if callable(attr) and not name.startswith('_'):
+            preserve_methods = {'SearchBrowse', 'SetButton'}
+            if name not in preserve_methods:
+                try:
+                    object.__getattribute__(self, 'config')._flag_is_new_browse = None
+                except AttributeError:
+                    pass
+
+        return attr
 
     def ClickMenu(self, menu_item):
         """

@@ -133,26 +133,29 @@ class Router:
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.set_log_info()
 
-    def SetButton(self, button, sub_item="", position=1, check_error=True) -> None:
+    def SetButton(self, button, sub_item="", position=1, check_error=True, is_browse=False) -> None:
         """Click on button using appropriate driver (POUI or WebApp)."""
 
-        view          = self.language.view
-        change        = self.language.old_browse_edit
-        other_actions = self.language.other_actions
-        delete        = self.language.old_browse_delete
-        add           = self.language.old_browse_insert
+        if is_browse:
+            use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
+        else:
+            use_poui = self.config._flag_is_new_browse if self.config._flag_is_new_browse is not None else False
 
-        new_browse_buttons = {view, change, other_actions, delete, add}
+        # Consume flag: only first SetButton after SearchBrowse uses it.
+        self.config._flag_is_new_browse = None
 
-        drv = self._get_driver_instance(
-            lambda: button in new_browse_buttons and self._ensure_webapp()._is_new_browse(throw_error=False)
-        )
+        drv = self._get_driver_instance(lambda: use_poui)
         drv.SetButton(button, sub_item, position, check_error=check_error)
 
 
     def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]) -> None:
 
-        drv = self._get_driver_instance(
-            lambda: filters and self._ensure_webapp()._is_new_browse(throw_error=False)
-        )
+        if filters:
+            use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
+            self.config._flag_is_new_browse = use_poui
+        else:
+            use_poui = False
+            self.config._flag_is_new_browse = None
+
+        drv = self._get_driver_instance(lambda: use_poui)
         drv.SearchBrowse(term=term, key=key, identifier=identifier, index=index, column=column, filters=filters)

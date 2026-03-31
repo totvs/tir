@@ -2055,8 +2055,8 @@ class WebappInternal(Base):
             return
 
 
-    def _is_new_browse(self, throw_error=True):
-        browse_div = self._find_search_browse(throw_error=throw_error, timeout=5)
+    def _is_new_browse(self, throw_error=True, timeout=None):
+        browse_div = self._find_search_browse(throw_error=throw_error, timeout=timeout)
 
         return browse_div.name == 'thf-grid' if browse_div else False
 
