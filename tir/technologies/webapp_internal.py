@@ -5146,6 +5146,7 @@ class WebappInternal(Base):
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
 
+            # Variable to search for the element with and without the twebview in each iteration of the loop.
             twebview = not twebview
 
         if not throw_error:
