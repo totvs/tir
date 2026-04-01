@@ -5128,6 +5128,7 @@ class WebappInternal(Base):
 
         optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title"
         main_container = self.containers_selectors["AllContainers"]
+        twebview = False
 
         endtime = time.time() + timeout
         while(time.time() < endtime):
@@ -5136,10 +5137,7 @@ class WebappInternal(Base):
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
                                      optional_term=optional_term, main_container=main_container,
-                                     check_help=False, match_case=match_case) or \
-                      self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=optional_term, main_container=main_container,
-                                     check_help=False, match_case=match_case, twebview=True)
+                                     check_help=False, match_case=match_case, twebview=twebview)
 
             if element:
                 logger().info(f"Text found! ")
@@ -5147,6 +5145,8 @@ class WebappInternal(Base):
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
+
+            twebview = not twebview
 
         if not throw_error:
             return False
