@@ -2110,6 +2110,7 @@ class PouiInternal(Base):
         else:
             return correctMessage.format(args[0], args[1])
 
+
     def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="",
                        main_container=".body", check_error=True, twebview=True, use_current_container=False):
         """
@@ -3685,6 +3686,7 @@ class PouiInternal(Base):
         input_field = ''
         self.twebview_context = True
         self.wait_element(term=term)
+
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
             po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
@@ -5648,8 +5650,6 @@ class PouiInternal(Base):
         >>> self._filter_thf_browse(filters={'name': 'John'}, browse_div=browse_element)
         """
 
-        browse_div = self._find_search_browse()
-
         self.click_button(self.language.filters)
 
         self.wait_element_timeout('po-page-slide', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body',
@@ -5659,34 +5659,165 @@ class PouiInternal(Base):
             for field, value in filter_dict.items():
                 logger().info(f"Setting browse filter: '{field}' = '{value}'")
 
-                success = False
+                field_type, input_element = self._identify_filter_field(field) 
 
-                input_field = self.return_input_element(field, position=1, term="[class*='po-input']")
+                if not input_element:
+                    self.log_error(f"Couldn't find field '{field}' in the filter panel.")
+                    continue
 
-                endtime = time.time() + self.config.time_out
-                while time.time() < endtime and not success:
+                logger().info(f"Field '{field}' identified as type: '{field_type}'")
 
-                    self.switch_to_iframe()
+                if field_type in ('po-input', 'po-datepicker'):
+                    self._fill_input(input_element, value)
 
-                    input_field_element = lambda: self.soup_to_selenium(input_field)
+                elif field_type == 'po-select':
+                    self.click_select(field, value)
 
-                    self.scroll_to_element(input_field_element())
-                    self.set_element_focus(input_field_element())
-                    self.click(input_field_element())
-                    input_field_element().clear()
-                    input_field_element().send_keys(value)
-                    time.sleep(1)
-                    ActionChains(self.driver).key_down(Keys.ENTER).perform()
-                    time.sleep(1)
-                    ActionChains(self.driver).key_down(Keys.TAB).perform()
-                    time.sleep(1)
+                elif field_type == 'thf-lookup':
+                    self._fill_lookup_input(input_element, value)
 
-                    success = self.get_web_value(input_field_element()).strip() == value
-
-                if not success:
-                    self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+                else:
+                    logger().warning(f"Unknown field type '{field_type}' for field '{field}'. Trying default input fill.")
+                    self._fill_filter_input(input_element, value)
 
         self.click_button(self.language.apply_filters)
+
+
+    def _fill_lookup_input(self, input_element, value: str) -> None:
+        """
+        [Internal]
+
+        Fills a thf-lookup field by typing the value, waiting for the suggestion list,
+        and clicking the first matching item.
+
+        :param input_element: BeautifulSoup input element inside the thf-lookup.
+        :type input_element: bs4.element.Tag
+        :param value: Value to search and select in the lookup.
+        :type value: str
+        :return: None
+        """
+        self._fill_input(input_element, value)
+        # Wait for the suggestion list to appear and select the matching item
+        self.wait_element_timeout(
+            term='thf-lookup-list',
+            scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout=10,
+            twebview=True
+        )
+
+        thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
+
+        if thf_item_list:
+            item_div = thf_item_list.find_next('div')
+            self.click(self.soup_to_selenium(item_div))
+            ActionChains(self.driver).key_down(Keys.TAB).perform()
+        else:
+            self.log_error(f"Lookup item '{value}' not found in suggestion list.")
+
+
+    def _fill_input(self, input_element, value: str) -> None:
+        """
+        [Internal]
+
+        Fills a standard text/date input field (po-input or po-datepicker).
+
+        :param input_element: BeautifulSoup input element.
+        :type input_element: bs4.element.Tag
+        :param value: Value to type into the input.
+        :type value: str
+        :return: None
+        """
+        success = False
+
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not success:
+            try:
+                self.switch_to_iframe()
+
+                input_field_element = lambda: self.soup_to_selenium(input_element)
+
+                self.scroll_to_element(input_field_element())
+                self.set_element_focus(input_field_element())
+                self.click(input_field_element())
+                input_field_element().clear()
+                input_field_element().send_keys(value)
+                ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                ActionChains(self.driver).key_down(Keys.TAB).perform()
+
+                success = self.get_web_value(input_field_element()).strip() == value.strip()
+            except Exception as e:
+                logger().debug(f"Error filling input field: {e}")
+                success = False
+
+        if not success:
+            self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+
+        return success
+
+
+    def _identify_filter_field(self, field_label: str):
+        """
+        [Internal]
+
+        Searches for a filter field by its label inside the filter panel (po-page-slide).
+        Returns a tuple with the component type and the matching BeautifulSoup element.
+
+        Supported types: 'po-input', 'po-datepicker', 'po-select', 'thf-lookup'
+
+        :param field_label: The field label text to search for.
+        :type field_label: str
+        :return: Tuple (component_type: str, element: Tag) or (None, None) if not found.
+        :rtype: tuple
+        """
+
+        SUPPORTED_COMPONENTS = ['po-input', 'po-datepicker', 'po-select', 'thf-lookup']
+        field_label_normalized = field_label.strip().lower()
+
+        filter_container = self.get_current_container()
+
+        if not filter_container:
+            logger().warning("Filter panel (po-page-slide) not found in DOM.")
+            return None, None
+
+        for component_type in SUPPORTED_COMPONENTS:
+            for component in filter_container.select(component_type):
+                label_el = component.select_one('label, span, .po-field-container-bottom-text')
+                if label_el and field_label_normalized in label_el.text.strip().lower():
+                    input_el = component.select_one('input, select')
+                    if input_el:
+                        return component_type, input_el
+
+        logger().warning(f"Field '{field_label}' not found in any supported component type.")
+        return None, None
+
+
+    def _get_lookup_list_item(self, value: str):
+        """
+        [Internal]
+
+        Searches for a matching item inside a thf-lookup-list by the given value.
+
+        :param value: The text value to search for in the list items.
+        :type value: str
+        :return: The matching BeautifulSoup <li> element or None if not found.
+        :rtype: bs4.element.Tag or None
+        """
+        value_normalized = value.strip().lower()
+
+        soup = self.get_current_container()
+        lookup_list = soup.select('thf-lookup-list')
+        lookup_list_displayed = next(iter(filter(lambda x: self.element_is_displayed(x), lookup_list)), None)
+
+        if not lookup_list_displayed:
+            logger().warning("thf-lookup-list not found in DOM.")
+            return None
+
+        items = lookup_list_displayed.select('li')
+        return next(
+            (item for item in items if value_normalized in item.text.strip().lower()),
+            None
+        )
+
 
     def _find_search_browse(self, panel_name=None):
         """
