@@ -366,6 +366,8 @@ class WebappInternal(Base):
         :return: The date string adjusted to match the format of base_date.
         :rtype: str
         """
+        d = self.config.data_delimiter
+
         pattern_1 = (r"\d{2}*\d{2}*\d{4}").replace("*", d)
         pattern_2 = (r"\d{2}*\d{2}*\d{2}").replace("*", d)
 
