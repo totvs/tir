@@ -5852,6 +5852,10 @@ class PouiInternal(Base):
 
         logger().info("Switching to the POUI button-click method")
 
+        if (button.lower().strip() == "x"):
+            self.set_button_x(position, check_error)
+            return
+
         # Map legacy button names to their POUI equivalents.
         button_dict = {
             self.language.old_browse_edit : self.language.new_browse_edit,
@@ -5907,6 +5911,15 @@ class PouiInternal(Base):
                     if item:
                         self.click_popup(item)
 
+    def set_button_webapp(self, button, sub_item="", position=1, check_error=True):
+        from tir.technologies.core.events import emit
+        emit('webapp.set_button', button=button, sub_item=sub_item, position=position, check_error=check_error)
+
+    def set_button_x(self, position=1, check_error=True):
+
+        self.click_icon(label='', class_name='an an-sign-out', position=1)
+        self.set_button_webapp(button=self.language.yes, position=position,
+                               check_error=check_error)
 
     def SearchBrowse(self, term="", key=None, identifier=None,
                      index=False, column=None, filters=None) -> None:
