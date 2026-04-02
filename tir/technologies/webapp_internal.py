@@ -5315,15 +5315,18 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
+        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title"
+        main_container = self.containers_selectors["AllContainers"]
+        twebview = False
+
         endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"],
-                                     check_help=False, match_case=match_case)
+                                     optional_term=optional_term, main_container=main_container,
+                                     check_help=False, match_case=match_case, twebview=twebview)
 
             if element:
                 logger().info(f"Text found! ")
@@ -5331,6 +5334,9 @@ class WebappInternal(Base):
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
+
+            # Variable to search for the element with and without the twebview in each iteration of the loop.
+            twebview = not twebview
 
         if not throw_error:
             return False
