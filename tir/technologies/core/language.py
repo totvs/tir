@@ -93,6 +93,7 @@ class LanguagePack:
 
         self.filters = languagepack["Filters"]
         self.apply_filters = languagepack["Apply Filters"]
+        self.remove_filters = languagepack["Remove Filters"]
         self.old_browse_edit = languagepack["Old Browse Edit"]
         self.old_browse_delete = languagepack["Old Browse Delete"]
         self.old_browse_insert = languagepack["Old Browse Insert"]
@@ -204,6 +205,7 @@ class LanguagePack:
             "New Home Menu About": "About",
             "Filters": "Filters",
             "Apply Filters": "Apply filters",
+            "Remove Filters": "Remove filters",
 
             "Old Browse Edit":"Edit",
             "Old Browse Delete":"Delete",
@@ -311,7 +313,8 @@ class LanguagePack:
             "Input Set Program": "Pesquisar e executar",
             "New Home Menu About": "Sobre",
             "Filters": "Filtros",
-            "Apply Filters": "Aplicar Filtros",            
+            "Apply Filters": "Aplicar Filtros",
+            "Remove Filters": "Remover filtros",
 
             "Old Browse Edit":"Alterar",
             "Old Browse Delete":"Excluir",
@@ -418,7 +421,8 @@ class LanguagePack:
             "Input Set Program": "Buscar y ejecutar",
             "New Home Menu About": "Sobre",
             "Filters": "Filtros",
-            "Apply Filters": "Aplicar Filtros",            
+            "Apply Filters": "Aplicar Filtros",
+            "Remove Filters": "Eliminar filtros",
             "Old Browse Edit":"Modificar",
             "Old Browse Delete":"Borrar",
             "Old Browse Insert":"Incluir",
@@ -525,6 +529,9 @@ class LanguagePack:
             "Schedule Menu": "Settings > Schedule > Schedule",
             "Input Set Program": "Ищи и беги",
             "New Home Menu About": "О программе…",
+            "Filters": "Фильтры",
+            "Apply Filters": "Применить фильтры",
+            "Remove Filters": "Удалить фильтры",
 
             "Old Browse Edit":"Редактировать",
             "Old Browse Delete":"Удалить",

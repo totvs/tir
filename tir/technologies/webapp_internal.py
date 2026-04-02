@@ -58,7 +58,7 @@ class WebappInternal(Base):
     :param config_path: The path to the config file. - **Default:** "" (empty string)
     :type config_path: str
     :param autostart: Sets whether TIR should open browser and execute from the start. - **Default:** True
-    :type: bool
+    :type autostart: bool
 
     Usage:
 
@@ -69,17 +69,15 @@ class WebappInternal(Base):
 
     def __init__(self, config_path="", autostart=True):
         """
-        Definition of each global variable:
+        [Internal]
 
-        base_container: A variable to contain the layer element to be used on all methods.
+        Initializes the WebappInternal instance and defines global variables.
 
-        grid_check: List with fields from a grid that must be checked in the next LoadGrid call.
-
-        grid_counters: A global counter of grids' last row to be filled.
-
-        grid_input: List with fields from a grid that must be filled in the next LoadGrid call.
-
-        used_ids: Dictionary of element ids and container already captured by a label search.
+        :ivar base_container: Layer element selector used on all methods.
+        :ivar grid_check: List with fields from a grid that must be checked in the next LoadGrid call.
+        :ivar grid_counters: Global counter of grids' last row to be filled.
+        :ivar grid_input: List with fields from a grid that must be filled in the next LoadGrid call.
+        :ivar used_ids: Dictionary of element ids and containers already captured by a label search.
         """
         webdriver_exception = None
 
@@ -143,13 +141,14 @@ class WebappInternal(Base):
     def SetupTSS( self, initial_program = "", enviroment = ""):
         """
         Prepare the Protheus Webapp TSS for the test case, filling the needed information to access the environment.
+
         .. note::
-            This method use the user and password from config.json.
+            This method uses the user and password from config.json.
 
         :param initial_program: The initial program to load.
         :type initial_program: str
-        :param environment: The initial environment to load.
-        :type environment: str
+        :param enviroment: The initial environment to load.
+        :type enviroment: str
 
         Usage:
 
@@ -199,12 +198,12 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        Fills the user login screen of Protheus with the user and password located on config.json.
+        Fills the TSS user login screen of Protheus with the user and password located on config.json.
 
         Usage:
 
         >>> # Calling the method
-        >>> self.user_screen()
+        >>> self.user_screen_tss()
         """
         logger().info("Fill user Screen")
         self.wait_element(term="[name='cUser']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
@@ -328,9 +327,16 @@ class WebappInternal(Base):
 
     def date_format(self, date):
         """
+        [Internal]
 
-        :param date:
-        :return:
+        Formats a date string to match the configured data delimiter.
+        Supports formats dd/mm/yyyy and dd/mm/yy.
+
+        :param date: The date string to be formatted.
+        :type date: str
+
+        :return: The formatted date string using the configured delimiter.
+        :rtype: str
         """
         pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
         pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
@@ -345,8 +351,23 @@ class WebappInternal(Base):
         return formatted_date
 
     def merge_date_mask(self, base_date, date):
+        """
+        [Internal]
 
+        Merges a date string with a base date format mask.
+        If the base_date uses a 4-digit year format (dd/mm/yyyy), returns date as-is.
+        If it uses a 2-digit year format (dd/mm/yy), truncates the year to 2 digits.
+
+        :param base_date: Reference date string used to determine the year format.
+        :type base_date: str
+        :param date: The full date string (dd/mm/yyyy) to be merged.
+        :type date: str
+
+        :return: The date string adjusted to match the format of base_date.
+        :rtype: str
+        """
         d = self.config.data_delimiter
+
         pattern_1 = (r"\d{2}*\d{2}*\d{4}").replace("*", d)
         pattern_2 = (r"\d{2}*\d{2}*\d{2}").replace("*", d)
 
@@ -361,8 +382,12 @@ class WebappInternal(Base):
             return f"{split_date[0]}{d}{split_date[1]}{d}{split_date[-1][-2:]}"
 
     def close_screen_before_menu(self):
+        """
+        [Internal]
 
-        logger().debug('Closing screen before the menu')
+        Closes any open screens (warning, coin, modal) before navigating the lateral menu.
+        Waits until the main menu or home screen element is visible.
+        """
 
         if self.config.new_home:
             term = "[class*='card-wrapper']"
@@ -441,6 +466,11 @@ class WebappInternal(Base):
     def filling_initial_program(self, initial_program):
         """
         [Internal]
+
+        Fills the initial program field on the program selection screen.
+
+        :param initial_program: The initial program name to be selected.
+        :type initial_program: str
         """
 
         if self.webapp_shadowroot():
@@ -455,6 +485,11 @@ class WebappInternal(Base):
     def filling_server_environment(self, environment):
         """
         [Internal]
+
+        Fills the server environment field on the program selection screen.
+
+        :param environment: The server environment name to be selected.
+        :type environment: str
         """
 
         if self.webapp_shadowroot():
@@ -467,8 +502,17 @@ class WebappInternal(Base):
         self.fill_select_element(term=input_environment, user_value=environment)
        
     def fill_select_element(self, term, user_value):
+        """
+        [Internal]
 
-        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
+        Finds and fills a select/input element identified by a CSS selector with the given value.
+        Retries until the value matches or the timeout is reached.
+
+        :param term: CSS selector of the element to fill.
+        :type term: str
+        :param user_value: The value to be entered into the element.
+        :type user_value: str
+        """
 
         element_value = ''
         try_counter = 0	
@@ -716,8 +760,11 @@ class WebappInternal(Base):
 
 
     def close_ballon_last_login(self):
+        """
+        [Internal]
 
-        bs4_close_button = lambda: next(iter(self.get_current_DOM().select('[style*=ballon_close]')), None)
+        Closes the balloon notification about the last login, if present.
+        """
 
         if bs4_close_button():
             endtime = time.time() + self.config.time_out
@@ -830,6 +877,14 @@ class WebappInternal(Base):
     def filling_date(self, shadow_root=None, container=None):
         """
         [Internal]
+
+        Fills the date field on the environment screen with the date configured in config.json.
+        If no date is configured, uses today's date. Retries until the value matches or the timeout is reached.
+
+        :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
+        :type shadow_root: bool
+        :param container: CSS selector of the container element. - **Default:** None
+        :type container: str
         """
         d = self.config.data_delimiter
         if not self.config.date:
@@ -934,6 +989,16 @@ class WebappInternal(Base):
     def filling_group(self, shadow_root=None, container=None, group_value=''):
         """
         [Internal]
+
+        Fills the group field on the environment screen with the value configured in config.json
+        or with the provided group_value. Retries until the value matches or the timeout is reached.
+
+        :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
+        :type shadow_root: bool
+        :param container: CSS selector of the container element. - **Default:** None
+        :type container: str
+        :param group_value: The group value to fill. If empty, uses config.group. - **Default:** '' (empty string)
+        :type group_value: str
         """
 
         click_type = 1
@@ -979,7 +1044,19 @@ class WebappInternal(Base):
                 self.log_error(f'Please, fill group parameter in Setup() method')
 
     def group_element(self, shadow_root, container):
+        """
+        [Internal]
 
+        Returns the group input element from the environment screen.
+
+        :param shadow_root: Indicates whether to use shadow root selectors.
+        :type shadow_root: bool
+        :param container: CSS selector of the container element.
+        :type container: str
+
+        :return: The group input BeautifulSoup element, or None if not found.
+        :rtype: BeautifulSoup object or None
+        """
         if self.config.poui_login:
             group_elements = self.web_scrap(term=self.language.group, main_container='body',
                                             scrap_type=enum.ScrapType.TEXT, twebview=True)
@@ -1008,6 +1085,14 @@ class WebappInternal(Base):
     def filling_branch(self, shadow_root=None, container=None):
         """
         [Internal]
+
+        Fills the branch field on the environment screen with the value configured in config.json.
+        Retries until the value matches or the timeout is reached.
+
+        :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
+        :type shadow_root: bool
+        :param container: CSS selector of the container element. - **Default:** None
+        :type container: str
         """
 
         click_type = 1
@@ -1065,6 +1150,14 @@ class WebappInternal(Base):
     def filling_environment(self, shadow_root=None, container=None):
         """
         [Internal]
+
+        Fills the module/environment field on the environment screen with the value configured in config.json.
+        Retries until the value matches or the timeout is reached. Skips filling if the field is disabled.
+
+        :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
+        :type shadow_root: bool
+        :param container: CSS selector of the container element. - **Default:** None
+        :type container: str
         """
 
         click_type = 1
@@ -1181,7 +1274,7 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        This method wait the element to perform ChangeEnvirionmentm return a soup element.
+        This method waits for the element to perform ChangeEnvironment and returns a soup element.
 
         Usage:
 
@@ -1215,14 +1308,20 @@ class WebappInternal(Base):
         """
         Change the user then init protheus on home page.
 
+        :param user: The new user to log in with.
+        :type user: str
+        :param password: The new password to log in with.
+        :type password: str
         :param initial_program: The initial program to load. - **Default:** "" (previous initial_program)
         :type initial_program: str
         :param date: The date to fill on the environment screen. - **Default:** "" (previous date)
         :type date: str
-        :param group: The group to fill on the environment screen. - **Default:** "previous date group"
+        :param group: The group to fill on the environment screen. - **Default:** "" (previous group)
         :type group: str
-        :param branch: The branch to fill on the environment screen. - **Default:** "previous branch"
+        :param branch: The branch to fill on the environment screen. - **Default:** "" (previous branch)
         :type branch: str
+        :param module: The module to fill on the environment screen. - **Default:** "" (previous module)
+        :type module: str
 
         Usage:
 
@@ -1660,8 +1759,11 @@ class WebappInternal(Base):
                             optional_term='wa-button, button, .thbutton', presence=False)
 
     def set_log_info_tss(self):
+        """
+        [Internal]
 
-        self.log.country = self.config.country
+        Fills the log information for TSS by opening the About screen and extracting version data.
+        """
         self.log.execution_id = self.config.execution_id
         self.log.issue = self.config.issue
 
@@ -1701,6 +1803,9 @@ class WebappInternal(Base):
     def set_log_info_config(self):
         """
         [Internal]
+
+        Fills the log information from the config.json file values (release, database, build version, lib version).
+        Used as an alternative to set_log_info when log_info_config is enabled.
         """
 
         if self.config.release:
@@ -1853,9 +1958,12 @@ class WebappInternal(Base):
             logger().exception(str(e))
 
     def escape_to_main_menu(self):
-        """Try back to menu screen before Program execution
+        """[Internal]
 
-        :return: 
+        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
+        Waits until the menu is visible and there is only one dialog layer.
+
+        :return: None
         """
         success = False
         container_term = 'wa-dialog'
@@ -1884,6 +1992,14 @@ class WebappInternal(Base):
     def check_layers(self, term):
         """
         [Internal]
+
+        Counts the number of visible elements matching the given CSS term on the current DOM.
+
+        :param term: The CSS selector to count visible elements.
+        :type term: str
+
+        :return: The count of displayed elements matching the term.
+        :rtype: int
         """
 
         soup = self.get_current_DOM()        
@@ -2400,7 +2516,7 @@ class WebappInternal(Base):
         >>> #Preparing the tuple:
         >>> search_elements = self.get_search_browse_elements("Products")
         >>> # Calling the method:
-        >>> self.search_browse_key("Filial*", search_elements)
+        >>> self.search_browse_column("Filial*", search_elements)
         """
         main_container = 'wa-dialog'
         menupopup = 'wa-menu-popup.dict-tmenu'
@@ -2830,16 +2946,33 @@ class WebappInternal(Base):
 
     def get_distance(self,label_pos,element_pos):
         """
-        [internal]
+        [Internal]
 
+        Calculates the Euclidean distance between two screen positions.
+
+        :param label_pos: Position of the label element (dict with 'x' and 'y' keys).
+        :type label_pos: dict
+        :param element_pos: Position of the input element (dict with 'x' and 'y' keys).
+        :type element_pos: dict
+
+        :return: Euclidean distance between the two positions.
+        :rtype: float
         """
         return sqrt((pow(element_pos['x'] - label_pos['x'], 2)) + pow(element_pos['y'] - label_pos['y'],2))
 
     def get_element_size(self, id=None, element=None):
         """
-        Internal
-        Return Height/Width
+        [Internal]
 
+        Returns the height and width of an element.
+
+        :param id: The HTML id of the element to measure. - **Default:** None
+        :type id: str
+        :param element: A Selenium element object to measure. Used when id is not provided. - **Default:** None
+        :type element: Selenium object
+
+        :return: Dictionary with 'height' and 'width' keys.
+        :rtype: dict
         """
         if id:
             script = f'return document.getElementById("{id}").offsetHeight;'
@@ -2856,6 +2989,15 @@ class WebappInternal(Base):
         """
         [Internal]
 
+        Calculates the horizontal distance between a label and an element.
+
+        :param x_label: Position dict of the label (with 'x' key).
+        :type x_label: dict
+        :param x_element: Position dict of the element (with 'x' key).
+        :type x_element: dict
+
+        :return: Horizontal distance (element.x - label.x).
+        :rtype: float
         """
 
         return (x_element['x'] - x_label['x'])
@@ -2864,6 +3006,15 @@ class WebappInternal(Base):
         """
         [Internal]
 
+        Calculates the vertical distance between a label and an element.
+
+        :param y_label: Position dict of the label (with 'y' key).
+        :type y_label: dict
+        :param y_element: Position dict of the element (with 'y' key).
+        :type y_element: dict
+
+        :return: Vertical distance (element.y - label.y).
+        :rtype: float
         """
 
         return (y_element['y'] - y_label['y'])
@@ -2927,14 +3078,14 @@ class WebappInternal(Base):
         :type grid_number: int
         :param ignore_case: Boolean if case should be ignored or not. - **Default:** True
         :type ignore_case: bool
-        :param check_value: Boolean ignore input check - **Default:** True
-        :type name_attr: bool
+        :param check_value: Boolean if the value must be checked after input. - **Default:** True
+        :type check_value: bool
         :param row: Row number that will be filled
         :type row: int
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
-        :param position: Position should be used to select an especific element when there is more than one of same
-        :type name_attr: int
+        :param position: Position should be used to select a specific element when there is more than one of the same.
+        :type position: int
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
         :param range_multiplier: Integer value that refers to the distance of the label from the input object. The safe value must be between 1 to 10.
@@ -3015,8 +3166,8 @@ class WebappInternal(Base):
         :type ignore_case: bool
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
-        :param check_value: Boolean ignore input check - **Default:** True
-        :type name_attr: bool
+        :param check_value: Boolean if the value must be checked after input. - **Default:** True
+        :type check_value: bool
         :returns: True if succeeded, False if it failed.
         :rtype: bool
 
@@ -3720,8 +3871,7 @@ class WebappInternal(Base):
         """
         [internal]
 
-        This method is reponsible to click on button finish
-
+        This method is responsible for clicking on the Finish button.
         """
         button = None
         listButtons = []
@@ -3773,8 +3923,7 @@ class WebappInternal(Base):
         """
         [internal]
 
-        This method is reponsible to click on button finish
-
+        This method is responsible for clicking on the LogOff button.
         """
         button = None
         listButtons = []
@@ -3907,10 +4056,14 @@ class WebappInternal(Base):
 
     def scroll_to_container(self, container, term):
         """
+        [Internal]
 
-        :param container:
-        :param term:
-        :return:
+        Scrolls to the first element matching the CSS selector within the container.
+
+        :param container: BeautifulSoup container element to search within.
+        :type container: BeautifulSoup object
+        :param term: CSS selector string used to find the target element.
+        :type term: str
         """
         scroll_container = container.select(term)
 
@@ -4489,6 +4642,14 @@ class WebappInternal(Base):
             self.restart_counter += 1
 
     def expanded_menu(self, element):
+        """
+        [Internal]
+
+        Collapses an expanded menu item by clicking its label until it is no longer expanded.
+
+        :param element: BeautifulSoup element representing the menu item to collapse.
+        :type element: BeautifulSoup object
+        """
         if self.webapp_shadowroot():
             tmenu_term = '.dict-tmenu'
         else:
@@ -4513,6 +4674,14 @@ class WebappInternal(Base):
 
 
     def tmenuitem_element(self, menu):
+        """
+        [Internal]
+
+        Returns the visible menu items within the given menu element.
+
+        :param menu: BeautifulSoup object representing the menu container.
+        :type menu: BeautifulSoup object
+        """
         subMenuElements = menu.select(".tmenuitem")
         subMenuElements = list(filter(lambda x: self.element_is_displayed(x), subMenuElements))
 
@@ -4859,6 +5028,16 @@ class WebappInternal(Base):
             self.click(element)
 
     def set_button_x(self, position=1, check_error=True):
+        """
+        [Internal]
+
+        Finds and clicks the close button ("X") of a modal dialog.
+
+        :param position: Position of the close button when multiple are present. - **Default:** 1
+        :type position: int
+        :param check_error: Whether to check for errors after clicking. - **Default:** True
+        :type check_error: bool
+        """
         endtime = self.config.time_out/2
         if self.webapp_shadowroot():
             term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
@@ -5079,6 +5258,12 @@ class WebappInternal(Base):
 
         :param string: String that will hold the wait.
         :type string: str
+        :param timeout: Maximum time in seconds to wait. - **Default:** 1200
+        :type timeout: int
+        :param throw_error: If True, raises an error when the element is not hidden within timeout. - **Default:** True
+        :type throw_error: bool
+        :param match_case: Whether to match case when searching the string. - **Default:** False
+        :type match_case: bool
 
         Usage:
 
@@ -5115,6 +5300,12 @@ class WebappInternal(Base):
 
         :param string: String that will hold the wait.
         :type string: str
+        :param timeout: Maximum time in seconds to wait. - **Default:** 1200
+        :type timeout: int
+        :param throw_error: If True, raises an error when the element is not shown within timeout. - **Default:** True
+        :type throw_error: bool
+        :param match_case: Whether to match case when searching the string. - **Default:** False
+        :type match_case: bool
 
         Usage:
 
@@ -5126,15 +5317,18 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
+        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title"
+        main_container = self.containers_selectors["AllContainers"]
+        twebview = False
+
         endtime = time.time() + timeout
         while(time.time() < endtime):
 
             element = None
 
             element = self.web_scrap(term=string, scrap_type=enum.ScrapType.MIXED,
-                                     optional_term=".tsay, .tgroupbox, wa-text-view",
-                                     main_container=self.containers_selectors["AllContainers"],
-                                     check_help=False, match_case=match_case)
+                                     optional_term=optional_term, main_container=main_container,
+                                     check_help=False, match_case=match_case, twebview=twebview)
 
             if element:
                 logger().info(f"Text found! ")
@@ -5142,6 +5336,9 @@ class WebappInternal(Base):
 
             if endtime - time.time() < 1180:
                 time.sleep(0.5)
+
+            # Variable to search for the element with and without the twebview in each iteration of the loop.
+            twebview = not twebview
 
         if not throw_error:
             return False
@@ -5324,8 +5521,16 @@ class WebappInternal(Base):
             self.log_error("Couldn't find panel item.")
 
     def displayed_label_on_screen(self, label, selector):
+        """
+        [Internal]
 
-        selector_list = self.get_container_selector(selector)
+        Checks if a label with the given text is displayed on screen and scrolls to it if necessary.
+
+        :param label: The label text to search for.
+        :type label: str
+        :param selector: CSS selector for the element type to search.
+        :type selector: str
+        """
         element_is_displayed = False
 
         filtered_label = self.filter_label_by_selector(label=label, selector=selector_list)
@@ -5339,7 +5544,19 @@ class WebappInternal(Base):
                 self.scroll_to_element(element=element())
             
     def filter_label_by_selector(self, label, selector):
+        """
+        [Internal]
 
+        Finds the first element in the selector list whose text or caption matches the given label.
+
+        :param label: The label text to search for.
+        :type label: str
+        :param selector: List of BeautifulSoup or Selenium elements to search within.
+        :type selector: list
+
+        :return: The first matching element, or None if not found.
+        :rtype: BeautifulSoup object or None
+        """
         label = label.lower().strip()
 
         return next(iter(list(filter(lambda x: x.text.lower().strip() == label or x.attrs.get('caption', '').lower().strip() == label, selector))), None)
@@ -5445,7 +5662,17 @@ class WebappInternal(Base):
                     self.log_error("Couldn't find ClickBox item")
 
     def performing_click(self, element_bs4, class_grid, click_type=1):
+        """
+        [Internal]
 
+        Performs a click action on a grid element using the specified click type.
+
+        :param element_bs4: BeautifulSoup or Selenium element to click.
+        :param class_grid: CSS class of the grid containing the element.
+        :type class_grid: str
+        :param click_type: Numeric value representing the click method (1=ActionChains+dblclick, 2=double_click, 3=click+ENTER, 4=send_action). - **Default:** 1
+        :type click_type: int
+        """
         if not self.webapp_shadowroot():
             self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4, locator=By.XPATH)
             element = lambda: self.soup_to_selenium(element_bs4)
@@ -5474,7 +5701,24 @@ class WebappInternal(Base):
             pass
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
+        """
+        [Internal]
 
+        Finds and checks a grid checkbox row based on column/content criteria using a DataFrame.
+
+        :param first_column: Name of the first column to filter by.
+        :type first_column: str
+        :param second_column: Name of the second column to filter by (optional).
+        :type second_column: str
+        :param first_content: Expected value in the first column.
+        :type first_content: str
+        :param second_content: Expected value in the second column (optional).
+        :type second_content: str
+        :param grid_number: Index of the grid to use. - **Default:** 0
+        :type grid_number: int
+        :param itens: If True, clicks all rows matching the criteria. - **Default:** False
+        :type itens: bool
+        """
         index_number = []
         count = 0
 
@@ -5553,6 +5797,21 @@ class WebappInternal(Base):
             self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
 
     def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
+        """
+        [Internal]
+
+        Retries clicking on a checkbox grid cell until its state changes, cycling through click types.
+
+        :param element_bs4: BeautifulSoup or Selenium element of the first cell in the target row.
+        :param tr: List of row elements in the grid.
+        :type tr: list
+        :param index: Zero-based row index of the target row.
+        :type index: int
+        :param class_grid: CSS class of the grid.
+        :type class_grid: str
+        :param grid_number: Index of the grid on screen.
+        :type grid_number: int
+        """
         try:
             if element_bs4:
                 success = False
@@ -5655,9 +5914,15 @@ class WebappInternal(Base):
 
     def wait_element_is_blocked(self, parent_id):
         """
+        [Internal]
 
-        :param parent_id:
-        :return:
+        Waits for a panel element to become blocked (readonly or hidden).
+
+        :param parent_id: The ID attribute of the parent panel element to check.
+        :type parent_id: str
+
+        :return: True if the element is blocked (readonly or hidden), False otherwise.
+        :rtype: bool
         """
 
         logger().debug("Wait for element to be blocked...")
@@ -5685,8 +5950,8 @@ class WebappInternal(Base):
         """
         Scrolls Grid until a matching column is found.
 
-        :param field: The column to be matched.
-        :type field: str
+        :param column: The column to be matched.
+        :type column: str
         :param match_value: The value to be matched in defined column.
         :type match_value: str
         :param grid_number: Which grid should be used when there are multiple grids on the same screen. - **Default:** 1
@@ -7455,7 +7720,19 @@ class WebappInternal(Base):
         self.select_grid_cell(grid_cell)
 
     def filter_non_obscured(self, elements, grid_number):
+        """
+        [Internal]
 
+        Filters overlapping elements, returning the topmost element by z-index when elements share the same position.
+
+        :param elements: List of BeautifulSoup elements to filter.
+        :type elements: list
+        :param grid_number: Index of the reference element in the list.
+        :type grid_number: int
+
+        :return: Filtered list of elements and a boolean indicating if overlap was detected.
+        :rtype: tuple(list, bool)
+        """
         same_position = []
 
         main_element = self.soup_to_selenium(elements[grid_number])
@@ -7477,9 +7754,14 @@ class WebappInternal(Base):
 
     def filter_active_tabs(self, object):
         """
+        [Internal]
 
-        :param object:
-        :return: return the object if parent wa-tab-page is active else []
+        Filters elements, returning only those whose parent `wa-tab-page` is currently active.
+
+        :param object: A single element or list of elements to filter.
+        :type object: BeautifulSoup object or list
+
+        :return: Filtered element(s) whose parent tab-page is active, or an empty list if none.
         """
         if not object:
             return []
@@ -7522,8 +7804,8 @@ class WebappInternal(Base):
 
         :param column: The column index that should be clicked.
         :type column: int
-        :param column_name: The column index that should be clicked.
-        :type row_number: str
+        :param column_name: The column name that should be clicked.
+        :type column_name: str
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen. - **Default:** 1
         :type grid_number: int
 
@@ -7816,8 +8098,15 @@ class WebappInternal(Base):
 
     def wait_element_is_focused(self, element_selenium = None, time_out = 5, step = 0.1):
         """
-        [ Internal ]
-        Wait element Lose focus
+        [Internal]
+
+        Waits until the element receives focus.
+
+        :param element_selenium: Lambda or callable returning the Selenium element to check.
+        :param time_out: Maximum time in seconds to wait. - **Default:** 5
+        :type time_out: float
+        :param step: Time in seconds between each check. - **Default:** 0.1
+        :type step: float
         """
         endtime = time.time() + time_out
         while( element_selenium and time.time() < endtime and self.switch_to_active_element() != element_selenium() ):
@@ -7825,8 +8114,15 @@ class WebappInternal(Base):
 
     def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
         """
-        [ Internal ]
-        Wait element Lose focus
+        [Internal]
+
+        Waits until the element loses focus.
+
+        :param element_selenium: Lambda or callable returning the Selenium element to check.
+        :param time_out: Maximum time in seconds to wait. - **Default:** 5
+        :type time_out: float
+        :param step: Time in seconds between each check. - **Default:** 0.1
+        :type step: float
         """
         endtime = time.time() + time_out
         while( element_selenium and time.time() < endtime and self.switch_to_active_element() == element_selenium() ):
@@ -9312,11 +9608,13 @@ class WebappInternal(Base):
         Clicks on TreeView component.
 
         :param treepath: String that contains the access path for the item separate by ">" .
-        :type string: str
+        :type treepath: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
-        :type string: bool
-        :param tree_number: Tree position for cases where there is more than one tree on exibits.
-        :type string: int
+        :type right_click: bool
+        :param position: Position of the element when multiple exist. - **Default:** 1
+        :type position: int
+        :param tree_number: Tree position for cases where there is more than one tree on screen.
+        :type tree_number: int
 
         Usage:
 
@@ -9619,8 +9917,15 @@ class WebappInternal(Base):
 
     def treenode(self, tree_number=0):
         """
+        [Internal]
 
-        :return: treenode bs4 object
+        Returns tree node elements from the current container.
+
+        :param tree_number: Index of the tree in the container when multiple trees are present. - **Default:** 0
+        :type tree_number: int
+
+        :return: List of tree node elements.
+        :rtype: list
         """
 
         container = self.get_current_container()
@@ -9638,9 +9943,17 @@ class WebappInternal(Base):
 
     def check_hierarchy(self, label, check_expanded=True):
         """
+        [Internal]
 
-        :param label:
-        :return: True or False
+        Checks if a tree node with the given label has child nodes (hierarchy), indicating it can be expanded.
+
+        :param label: The label of the tree node to check.
+        :type label: str
+        :param check_expanded: Whether to also check if node is expanded. - **Default:** True
+        :type check_expanded: bool
+
+        :return: True if hierarchy exists or node is expanded, False otherwise.
+        :rtype: bool
         """
 
         counter = 1
@@ -9673,10 +9986,12 @@ class WebappInternal(Base):
         """
         Clicks on Grid TreeView component.
 
-        :param treepath: String that contains the access path for the item separate by ">" .
-        :type string: str
+        :param column: The column that contains the tree path to navigate.
+        :type column: str
+        :param tree_path: String that contains the access path for the item separate by ">" .
+        :type tree_path: str
         :param right_click: Clicks with the right button of the mouse in the last element of the tree.
-        :type string: bool
+        :type right_click: bool
 
         Usage:
 
@@ -10080,9 +10395,18 @@ class WebappInternal(Base):
 
     def get_text(self, string_left, string_right):
         """
+        [Internal]
 
-        :param string:
-        :return:
+        Returns text content from a label element in the current container, optionally extracting
+        a substring using left and/or right boundary strings.
+
+        :param string_left: The left boundary string. Content to its right is returned.
+        :type string_left: str
+        :param string_right: The right boundary string. Content to its left is returned.
+        :type string_right: str
+
+        :return: The extracted text content.
+        :rtype: str
         """
 
         string = ""
@@ -10105,10 +10429,19 @@ class WebappInternal(Base):
 
     def get_text_position(self, text="", string_left="", string_right=""):
         """
+        [Internal]
 
-        :param string_left:
-        :param srting_right:
-        :return:
+        Returns the substring of text based on left and right boundary strings.
+
+        :param text: The full text from which to extract a substring.
+        :type text: str
+        :param string_left: Boundary on the left; text to the right of this string is returned.
+        :type string_left: str
+        :param string_right: Boundary on the right; text to the left of this string is returned.
+        :type string_right: str
+
+        :return: The extracted substring.
+        :rtype: str
         """
         if string_left and string_right:
             return text[len(string_left):text.index(string_right)].strip()
@@ -10401,13 +10734,13 @@ class WebappInternal(Base):
     
     def ClickMenuPopUpItem(self, label, right_click, position = 1):
         """
-        Clicks on MenuPopUp Item based in a text
+        Clicks on MenuPopUp Item based on a text label.
 
-        :param text: Text in MenuPopUp to be clicked.
-        :type text: str
-        :param right_click: Button to be clicked.
-        :type button: bool
-        :param position: index item text
+        :param label: Text of the menu item to be clicked.
+        :type label: str
+        :param right_click: If True, performs a right-click instead of a left-click.
+        :type right_click: bool
+        :param position: Index of the menu item when multiple items share the same label. - **Default:** 1
         :type position: int
 
         Usage:
@@ -10454,8 +10787,12 @@ class WebappInternal(Base):
 
     def tmenupopupitem(self):
         """
+        [Internal]
 
-        :return:
+        Returns all popup menu items from the page body.
+
+        :return: List of BeautifulSoup objects representing popup menu items.
+        :rtype: list
         """
 
         soup = self.get_current_DOM()
@@ -10469,7 +10806,7 @@ class WebappInternal(Base):
         Gets the current release of the Protheus.
 
         :return: The current release of the Protheus.
-        :type: str
+        :rtype: str
 
         Usage:
 
@@ -11235,10 +11572,17 @@ class WebappInternal(Base):
 
     def get_grid_content(self, grid_number, grid_element):
         """
+        [Internal]
 
-        :param grid_number:
-        :param grid_element:
-        :return:
+        Returns the rows of the specified grid.
+
+        :param grid_number: Index of the grid to retrieve. 0-based.
+        :type grid_number: int
+        :param grid_element: CSS selector string for the grid element type.
+        :type grid_element: str
+
+        :return: List of row elements in the grid.
+        :rtype: list
         """
 
         grid_number -= 1 if grid_number > 0 else 0
@@ -11257,8 +11601,15 @@ class WebappInternal(Base):
 
     def LengthGridLines(self, grid):
         """
-        Returns the length of the grid.
-        :return:
+        [Internal]
+
+        Returns the number of rows in the given grid.
+
+        :param grid: List of grid row elements.
+        :type grid: list
+
+        :return: Number of rows in the grid.
+        :rtype: int
         """
 
         return len(grid)
@@ -11391,11 +11742,19 @@ class WebappInternal(Base):
 
     def GetLineNumber(self, values=[], columns=[], grid_number=0):
         """
+        [Internal]
 
-        :param values: values composition expected in respective columns
-        :param columns: reference columns used to get line
-        :param grid_number:
-        :return:
+        Returns the zero-based index of the first grid row where all specified column values match.
+
+        :param values: List of expected values in the respective columns.
+        :type values: list
+        :param columns: List of column names used as reference for matching.
+        :type columns: list
+        :param grid_number: Index of the grid to use when multiple grids are on screen. - **Default:** 0
+        :type grid_number: int
+
+        :return: Zero-based row index of the matching row, or None if not found.
+        :rtype: int or None
         """
 
         grid_number = grid_number-1 if grid_number > 0 else 0
@@ -11462,12 +11821,12 @@ class WebappInternal(Base):
 
     def AddProcedure(self, procedure, group):
         """
-        Install/Desinstall a procedure in CFG to be set by SetProcedures method.
+        Install/Uninstall a procedure in CFG to be set by SetProcedures method.
 
-        :param procedure: The procedure to be clicked in edit screen.
-        :type branch: str
+        :param procedure: The procedure code to be clicked in the edit screen.
+        :type procedure: str
         :param group: The group name.
-        :type parameter: str
+        :type group: str
 
         Usage:
 
@@ -11504,14 +11863,15 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        Internal method of SetProcedures.
+        Internal method of SetProcedures. Navigates to CFG screen and installs or uninstalls the procedures in the queue.
 
-        :type restore_backup: bool
+        :param is_procedure_install: If True, installs the procedure. If False, uninstalls it.
+        :type is_procedure_install: bool
 
         Usage:
 
         >>> # Calling the method:
-        >>> self.parameter_screen(restore_backup=False)
+        >>> self.procedure_screen(is_procedure_install=True)
         """
         procedure_codes = []
         procedure_groups = []
@@ -11608,14 +11968,16 @@ class WebappInternal(Base):
 
     def SetCalendar(self, day='', month='', year='', position=0):
         """
-        Set date on Calendar without input field
+        Set date on Calendar without input field.
 
-        :param day: day disered
+        :param day: Desired day to set.
         :type day: str
-        :param month: month disered
+        :param month: Desired month to set.
         :type month: str
-        :param year: year disered
+        :param year: Desired year to set.
         :type year: str
+        :param position: Position of the calendar element when multiple calendars are present. - **Default:** 0
+        :type position: int
         """
 
         logger().info('Setting date on calendar')
@@ -11669,8 +12031,13 @@ class WebappInternal(Base):
 
 
     def set_schedule(self, schedule_status):
-        """Access de Schedule settings and Start run all itens
+        """
+        [Internal]
 
+        Accesses Schedule settings in CFG and starts or stops all schedule services.
+
+        :param schedule_status: If True, starts all services. If False, stops all services.
+        :type schedule_status: bool
         """
 
         exception = None
@@ -11743,7 +12110,29 @@ class WebappInternal(Base):
 
 
     def query_execute(self, query, database_driver, dbq_oracle_server, database_server, database_port, database_name, database_user, database_password):
-        """Execute a query in a database
+        """
+        [Internal]
+
+        Executes a SQL query against a database using the provided connection parameters.
+
+        :param query: The SQL query string to execute.
+        :type query: str
+        :param database_driver: The database driver name (e.g., 'oracle', 'mssql').
+        :type database_driver: str
+        :param dbq_oracle_server: Oracle DBQ connection string (used only for Oracle).
+        :type dbq_oracle_server: str
+        :param database_server: Hostname or IP address of the database server.
+        :type database_server: str
+        :param database_port: Port number of the database server.
+        :type database_port: int
+        :param database_name: Name of the database.
+        :type database_name: str
+        :param database_user: Username for database authentication.
+        :type database_user: str
+        :param database_password: Password for database authentication.
+        :type database_password: str
+
+        :return: Query result set.
         """
         base_database = BaseDatabase()
         try:
@@ -11753,7 +12142,17 @@ class WebappInternal(Base):
 
 
     def set_mock_route(self, route, sub_route, registry):
-        """Set up mock server ip on appserver.ini file
+        """
+        [Internal]
+
+        Sets up the mock server route and optionally updates the endpoint keys in the appserver.ini file.
+
+        :param route: The base route of the mock server.
+        :type route: str
+        :param sub_route: The sub-route to append to the base route.
+        :type sub_route: str
+        :param registry: If True, updates the registry endpoints in the appserver.ini file.
+        :type registry: bool
         """
         self.mock_route = route + sub_route
         logger().info(f'"{self.mock_route}" route Was seted')
@@ -11804,14 +12203,23 @@ class WebappInternal(Base):
 
 
     def get_route_mock(self):
-        """Set up mock server ip on appserver.ini file
+        """
+        [Internal]
+
+        Returns the full mock server URL by combining the server address and the current mock route.
+
+        :return: The full mock route URL.
+        :rtype: str
         """
         url = self.config.server_mock + self.mock_route
         return re.sub(r'(?<!:)//+', '/', url)
 
 
     def rest_resgistry(self):
-        """restore registry keys on appserver.ini file
+        """
+        [Internal]
+
+        Restores the original registry endpoint keys in the appserver.ini file after a mock session.
         """
 
         if self.platform_endpoint:

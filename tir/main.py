@@ -34,7 +34,7 @@ class Webapp():
         attr = object.__getattribute__(self, name)
 
         if callable(attr) and not name.startswith('_'):
-            preserve_methods = {'SearchBrowse', 'SetButton'}
+            preserve_methods = {'SearchBrowse', 'FilterBrowse', 'SetButton'}
             if name not in preserve_methods:
                 try:
                     object.__getattribute__(self, 'config')._flag_is_new_browse = None
@@ -1720,7 +1720,7 @@ class Poui():
         attr = object.__getattribute__(self, name)
 
         if callable(attr) and not name.startswith('_'):
-            preserve_methods = {'SearchBrowse', 'SetButton'}
+            preserve_methods = {'SearchBrowse', 'FilterBrowse', 'SetButton'}
             if name not in preserve_methods:
                 try:
                     object.__getattribute__(self, 'config')._flag_is_new_browse = None
@@ -2320,4 +2320,5 @@ class Poui():
         ... ]
         >>> oHelper.FilterBrowse(filters)
         """
+        self.config._flag_is_new_browse = True
         self.__poui._set_browse_filters(filters)
