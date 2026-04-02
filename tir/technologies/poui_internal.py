@@ -5637,8 +5637,8 @@ class PouiInternal(Base):
         [Internal]
         Open and apply filters to each field in a THF Browse component.
 
-        :param filters: Dictionary or list of filters to apply, where keys are field names and values are filter values.
-        :type filters: dict or list
+        :param filters: List of dictionaries representing filters to apply, where each dictionary's keys are field names and values are filter values.
+        :type filters: list
         :param browse_div: BeautifulSoup object representing the browse container element.
         :type browse_div: bs4.element.Tag
         :return: None
@@ -5647,8 +5647,10 @@ class PouiInternal(Base):
         Usage:
 
         >>> # Calling the method:
-        >>> self._filter_thf_browse(filters={'name': 'John'}, browse_div=browse_element)
+        >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
         """
+
+        self._remove_filters_from_browse()
 
         self.click_button(self.language.filters)
 
@@ -5681,6 +5683,67 @@ class PouiInternal(Base):
                     self._fill_filter_input(input_element, value)
 
         self.click_button(self.language.apply_filters)
+
+
+    def _remove_filters_from_browse(self):
+        """
+        [Internal]
+
+        Clicks the "Remove Filters" button in a THF Browse component to clear all applied filters.
+        Also checks for a po-tag element inside kendo-grid whose span text is
+        "Remover filtros" or "Remove filters", and clicks it when found.
+
+        :return: None
+        :rtype: None
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._remove_filters_from_browse()
+        """
+
+        po_tag_filter = self._get_po_tag(text=self.language.remove_filters, container_selector='kendo-grid')
+        if po_tag_filter:
+            logger().debug("Found applied filters, clicking to remove filters.")
+            clickable = po_tag_filter.select_one('.po-tag-wrapper.po-clickable')
+            target = clickable if clickable else po_tag_filter
+            self.poui_click(target)
+            self.po_loading(self.containers_selectors['GetCurrentContainer'])
+        else:
+            logger().debug("No 'Remove Filters' found; skipping filter removal.")
+
+
+    def _get_po_tag(self, text: str, container_selector: str):
+        """
+        [Internal]
+
+        Searches for a po-tag element inside a specified container whose span text matches
+        the given text (case-insensitive).
+
+        :param text: Text to match inside the po-tag span.
+        :type text: str
+        :param container_selector: CSS selector for the container to search within.
+        :type container_selector: str
+        :return: The matching po-tag BeautifulSoup element, or None if not found.
+        :rtype: bs4.element.Tag or None
+        """
+
+        soup = self.get_current_DOM(twebview=True)
+        if container_selector:
+            container = soup.select_one(container_selector)
+        else:
+            container = soup
+
+        if not container:
+            logger().debug(f"No container found in DOM when searching for po-tag filter with selector '{container_selector}'.")
+            return None
+
+        for po_tag in container.select('po-tag'):
+            span = po_tag.select_one('.po-tag-value span')
+            if span and span.text.strip().lower() == text.strip().lower():
+                return po_tag
+
+        return None
 
 
     def _fill_lookup_input(self, input_element, value: str) -> None:
