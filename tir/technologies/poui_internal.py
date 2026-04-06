@@ -4503,6 +4503,8 @@ class PouiInternal(Base):
 
         table_number -= 1
 
+        self.po_loading(selector='wa-dialog')
+
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -5683,6 +5685,14 @@ class PouiInternal(Base):
                     self._fill_filter_input(input_element, value)
 
         self.click_button(self.language.apply_filters)
+        
+        # Click on the first row to select it after filters are applied
+        table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+        if table:
+            rows = table.select("tbody > tr")
+            if rows:
+                first_row = next(iter(rows))
+                self.click(self.soup_to_selenium(first_row), enum.ClickType(3))
 
 
     def _remove_filters_from_browse(self):
@@ -5914,24 +5924,25 @@ class PouiInternal(Base):
         """
 
         logger().info("Switching to the POUI button-click method")
+        button_normalized = str(button).lower().strip() if button is not None else ""
+        sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
 
-        if (button.lower().strip() == "x"):
-            self.set_button_x(position, check_error)
+        if (button_normalized == "x"):
+            self.set_button_exit()
             return
 
         # Map legacy button names to their POUI equivalents.
         button_dict = {
-            self.language.old_browse_edit : self.language.new_browse_edit,
-            self.language.old_browse_delete : self.language.new_browse_delete,
-            self.language.old_browse_insert : self.language.new_browse_insert,
-            self.language.old_browse_other_actions : self.language.new_browse_other_actions
+            self.language.old_browse_edit.lower().strip() : self.language.new_browse_edit.lower().strip(),
+            self.language.old_browse_delete.lower().strip() : self.language.new_browse_delete.lower().strip(),
+            self.language.old_browse_insert.lower().strip() : self.language.new_browse_insert.lower().strip(),
+            self.language.old_browse_other_actions.lower().strip() : self.language.new_browse_other_actions.lower().strip()
         }
 
         attr_row_selected_number = 'data-kendo-grid-item-index'
 
-        # Insert does not require a selected row.
-        if button != self.language.old_browse_insert:
-
+        # In the new browse, the view action is available as an icon in each row.
+        if button_normalized == self.language.view.lower().strip():
             table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
             if not table:
                 self.log_error("Couldn't find the browse grid.")
@@ -5942,34 +5953,27 @@ class PouiInternal(Base):
             # Get the first selected row.
             if row_selected:                
                 row_selected = next(iter(row_selected))
-            
-            # If no row is selected, select the first row in the grid.
+                row_selected_number = row_selected.get(attr_row_selected_number)
+                row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
             else:
-                rows = table.select("tbody > tr")
-                if not rows:
-                    self.log_error("Couldn't find any rows in the browse grid.")
-                row_selected = next(iter(rows)) 
-                self.click(self.soup_to_selenium(row_selected), enum.ClickType(3))
-        
-        # In the new browse, the view action is available as an icon in each row.
-        if button == self.language.view:
-            row_selected_number = row_selected.get(attr_row_selected_number)
-            row_selected_number = int(row_selected_number)+1 if row_selected_number and row_selected_number.isnumeric() else 1
+                # If no row is selected, assume row_selected_number as 1
+                row_selected_number = 1
+            
             self.click_icon(label='', class_name='an an-arrow-up-right ng-star-inserted', position=row_selected_number)
 
         else:
             
             # In the new browse, delete is no longer nested under other actions.
-            if button == self.language.other_actions and sub_item == self.language.old_browse_delete:
+            if button_normalized == self.language.other_actions.lower().strip() and sub_item_normalized == self.language.old_browse_delete.lower().strip():
                 button_text = sub_item
             else:
-                button_text = button_dict.get(button, button)
+                button_text = button_dict.get(button_normalized, button)
 
             self.click_button(button=button_text, position=position,
                               selector="po-button, po-dropdown", container=False)
 
             # Handle dropdown item clicks.
-            if sub_item and sub_item != self.language.old_browse_delete:
+            if sub_item and sub_item_normalized != self.language.old_browse_delete.lower().strip():
                 for item in map(str.strip, sub_item.split(',')):
                     if item:
                         self.click_popup(item)
@@ -5978,11 +5982,11 @@ class PouiInternal(Base):
         from tir.technologies.core.events import emit
         emit('webapp.set_button', button=button, sub_item=sub_item, position=position, check_error=check_error)
 
-    def set_button_x(self, position=1, check_error=True):
+    def set_button_exit(self):
 
         self.click_icon(label='', class_name='an an-sign-out', position=1)
-        self.set_button_webapp(button=self.language.yes, position=position,
-                               check_error=check_error)
+        self.set_button_webapp(button=self.language.yes, position=1,
+                               check_error=False)
 
     def SearchBrowse(self, term="", key=None, identifier=None,
                      index=False, column=None, filters=None) -> None:
