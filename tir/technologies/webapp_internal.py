@@ -2338,15 +2338,23 @@ class WebappInternal(Base):
         spans = tmenupopup.select(checkbox_term)
         spans_not_hidden = list(filter(lambda x: 'hidden' not in x.attrs, spans))
 
-        if ',' in search_column:
+		if ',' in search_column:
             search_column_itens = search_column.split(',')
             filtered_column_itens = [x.strip() for x in search_column_itens]
             for item in filtered_column_itens:
                 span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans_not_hidden))), None)
-                self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
+                
+                if span:
+                    # Verifica se o atributo 'checked' NÃO está presente antes de clicar
+                    if 'checked' not in span.attrs:
+                        self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
         else:
             span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans_not_hidden))), None)
-            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
+            
+            if span:
+                # Verifica se o atributo 'checked' NÃO está presente antes de clicar
+                if 'checked' not in span.attrs:
+                    self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
 
 
