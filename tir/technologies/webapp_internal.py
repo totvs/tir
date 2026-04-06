@@ -766,6 +766,8 @@ class WebappInternal(Base):
         Closes the balloon notification about the last login, if present.
         """
 
+        bs4_close_button = lambda: next(iter(self.get_current_DOM().select('[style*=ballon_close]')), None)
+
         if bs4_close_button():
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and self.element_is_displayed(bs4_close_button()):
@@ -5532,6 +5534,8 @@ class WebappInternal(Base):
         :type selector: str
         """
         element_is_displayed = False
+
+        selector_list = self.get_container_selector(selector)
 
         filtered_label = self.filter_label_by_selector(label=label, selector=selector_list)
 
