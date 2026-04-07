@@ -1,10 +1,13 @@
 import os
+from typing import List, Dict, Any
 
 from tir.technologies.webapp_internal import WebappInternal
 from tir.technologies.apw_internal import ApwInternal
 from tir.technologies.poui_internal import PouiInternal
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.base_database import BaseDatabase
+from tir.technologies.core.router import Router
+
 """
 This file must contain the definition of all User Classes.
 
@@ -22,8 +25,48 @@ class Webapp():
     """
     def __init__(self, config_path="", autostart=True):
         self.__webapp = WebappInternal(config_path, autostart)
+        self.__router = Router(config_path, inst_webapp=self.__webapp)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+        self._subscribe_routes()
+
+    def __getattribute__(self, name):
+        attr = object.__getattribute__(self, name)
+
+        if callable(attr) and not name.startswith('_'):
+            preserve_methods = {'SearchBrowse', 'FilterBrowse', 'SetButton'}
+            if name not in preserve_methods:
+                try:
+                    object.__getattribute__(self, 'config')._flag_is_new_browse = None
+                except AttributeError:
+                    pass
+
+        return attr
+
+    def _subscribe_routes(self):
+        """Registra handlers do Router no event bus para roteamento.
+
+        Mantém scripts existentes e evita acoplamento do Router no
+        WebappInternal.
+        """
+        from tir.technologies.core.events import subscribe
+        subscribe('route.program', self.__router.Program)
+        subscribe('route.set_program', self.__router.set_program)
+        subscribe('route.set_log_info', self.__router.set_log_info)
+        
+        subscribe('webapp.setup', self.__webapp.Setup)
+        subscribe('webapp.log_error', self.__webapp.log_error)
+        subscribe('webapp.set_button', self.__webapp.SetButton)
+
+        subscribe('webapp.close_warning_screen_after_routine', self.__webapp.close_warning_screen_after_routine)
+        subscribe('webapp.close_coin_screen_after_routine', self.__webapp.close_coin_screen_after_routine)
+        subscribe('webapp.close_news_screen_after_routine', self.__webapp.close_news_screen_after_routine)
+        subscribe('webapp.close_modal', self.__webapp.close_modal)
+
+        subscribe('webapp.check_warning_screen', self.__webapp.check_warning_screen)
+        subscribe('webapp.check_coin_screen', self.__webapp.check_coin_screen)
+        subscribe('webapp.check_news_screen', self.__webapp.check_news_screen)
+        subscribe('webapp.close_screen_before_menu', self.__webapp.close_screen_before_menu)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -92,9 +135,9 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.ChangeEnvironment(date="13/11/2018", group="T1", branch="D MG 01 ")
         """
-        self.__webapp.ChangeEnvironment(date, group, branch, module)
+        self.__router.ChangeEnvironment(date, group, branch, module)
 
-    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01'):
+    def ChangeUser(self, user, password, initial_program = "", date='', group='99', branch='01', module=""):
         """
         Change the user.
 
@@ -116,7 +159,7 @@ class Webapp():
         >>> oHelper.ChangeUser(user="user08", password="8" )
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch)
+        self.__webapp.ChangeUser(user, password, initial_program, date, group, branch, module=module)
 
     def CheckResult(self, field, user_value, grid=False, line=1, grid_number=1, name_attr=False, input_field=True, direction=None, grid_memo_field=False, position=1, ignore_case=True):
         """
@@ -417,7 +460,7 @@ class Webapp():
         >>> # Calling the method.
         >>> oHelper.Finish()
         """
-        self.__webapp.Finish()
+        self.__router.Finish()
 
     def MessageBoxClick(self, button_text):
         """
@@ -448,7 +491,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__webapp.Program(program_name)
+        self.__router.Program(program_name)
 
     def RestoreParameters(self):
         """
@@ -547,7 +590,7 @@ class Webapp():
         """
         self.__webapp.SetupTSS(initial_program, environment)
 
-    def SearchBrowse(self, term, key=None, identifier=None, index=False, column=None):
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]):
         """
         Searchs a term on Protheus Webapp.
 
@@ -594,7 +637,8 @@ class Webapp():
         >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
         >>> #------------------------------------------------------------------------
         """
-        self.__webapp.SearchBrowse(term, key, identifier, index, column)
+        self.__router.SearchBrowse(term, key, identifier, index, column, filters)
+
 
     def SetBranch(self, branch):
         """
@@ -610,16 +654,20 @@ class Webapp():
         """
         self.__webapp.SetBranch(branch)
 
-    def SetButton(self, button, sub_item="", position=1, check_error=True):
+    def SetButton(self, button, sub_item="", position=1, check_error=True, is_browse=False):
         """
         Method that clicks on a button on the screen.
 
         :param button: Button to be clicked.
         :type button: str
-        :param sub_item: Sub item to be clicked inside the first button. - **Default:** "" (empty string)
+        :param sub_item: Sub item to be clicked inside the first button, if the sub_item is also a menu with sub items, separate sub items of the sub item with comma and spaces. - **Default:** "" (empty string)
         :type sub_item: str
         :param position: Position which element is located. - **Default:** 1
         :type position: int
+		
+        .. note::
+            If the `sub_item` is also a menu with other elements, it is necessary to add a comma and a space for each menu and item.
+			`self.oHelper.SetButton("Other Actions", sub_item="Delete, Residue")`
 
         > ⚠️ **Warning:**
         > If there are a sequence of similar buttons. Example:
@@ -635,8 +683,11 @@ class Webapp():
         >>> #-------------------------------------------------
         >>> # Calling the method to click on a sub item inside a button.
         >>> oHelper.SetButton("Other Actions", "Process")
+        >>> #-------------------------------------------------
+		>>> # Calling the method to click on a sub item in a sub item that is inside a button.
+        >>> oHelper.SetButton("Other Actions", "Delete, Delete")
         """
-        self.__webapp.SetButton(button, sub_item, position, check_error=check_error)
+        self.__router.SetButton(button, sub_item, position, check_error=check_error, is_browse=is_browse)
 
     def SetFilePath(self, value, button = ""):
         """
@@ -737,7 +788,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__webapp.SetLateralMenu(menuitens, save_input, click_menu_functional)
+        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional)
 
     def SetParameters(self):
         """
@@ -948,19 +999,27 @@ class Webapp():
         self.__webapp.WaitHide(string, timeout, throw_error, match_case)
 
 
-    def WaitProcessing(self, string, match_case=False, timeout=None):
+    def WaitProcessing(self, string, match_case=False, timeout=None, stable_time=3):
         """
         Uses WaitShow and WaitHide to Wait a Processing screen
 
         :param string: String that will hold the wait.
         :type string: str
+        :param match_case: Whether to match case - **Default:** False
+        :type match_case: bool
+        :param timeout: Maximum time to wait in seconds - **Default:** 1200
+        :type timeout: int
+        :param stable_time: Time in seconds the element must remain absent - **Default:** 5
+        :type stable_time: int
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.WaitProcessing("Processing")
+        >>> # Calling the method with custom stable time:
+        >>> oHelper.WaitProcessing("Processing", stable_time=10)
         """
-        self.__webapp.WaitProcessing(string, timeout, match_case)
+        self.__webapp.WaitProcessing(string, timeout, match_case, stable_time=stable_time)
 
     def WaitShow(self, string, timeout=None, throw_error=True, match_case=False):
         """
@@ -1115,6 +1174,7 @@ class Webapp():
         >>> oHelper.ClickMenuPopUpItem("Label", position = 2)
         """
         return self.__webapp.ClickMenuPopUpItem(text, right_click, position = position)
+
 
     def GetRelease(self):
         """
@@ -1570,6 +1630,13 @@ class Webapp():
         """
         return self.__webapp.rest_resgistry()
 
+
+    def IsNewBrowse(self):
+        """This method checks if the current browse is the new version with poui or the old one,
+         returning a boolean value.
+         """
+        return self.__webapp._is_new_browse()
+
 class Apw():
 
     def __init__(self, config_path=""):
@@ -1648,6 +1715,19 @@ class Poui():
         self.__poui = PouiInternal(config_path, autostart)
         self.config = ConfigLoader()
         self.coverage = self.config.coverage
+
+    def __getattribute__(self, name):
+        attr = object.__getattribute__(self, name)
+
+        if callable(attr) and not name.startswith('_'):
+            preserve_methods = {'SearchBrowse', 'FilterBrowse', 'SetButton'}
+            if name not in preserve_methods:
+                try:
+                    object.__getattribute__(self, 'config')._flag_is_new_browse = None
+                except AttributeError:
+                    pass
+
+        return attr
 
     def ClickMenu(self, menu_item):
         """
@@ -1732,7 +1812,7 @@ class Poui():
         >>> oHelper.ClickButton('Cancelar')
         :return:
         """
-        self.__poui.click_button(button, position, selector="po-button", container=False)
+        self.__poui.click_button(button, position, selector="po-button, po-dropdown", container=False)
 
     def AssertFalse(self, expected=False, script_message=''):
         """
@@ -1802,7 +1882,7 @@ class Poui():
         self.__poui.POSearch(content, placeholder)
 
     def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1,
-                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False):
+                   itens=False, click_cell=None, checkbox=None, radio_input=None, columns=None, values=None, match_all=False, icon_class=None):
         """
             Clicks on the Table of POUI component.
             https://po-ui.io/documentation/po-table
@@ -1847,6 +1927,9 @@ class Poui():
             :type values: str or list
             :param match_all: If True, performs action on all matching rows. If False, only first match - **Default:** False
             :type match_all: bool
+            :param icon_class: Icon class name to click within the row. Supports partial class name
+            matching (e.g., 'arrow-up-right', 'ph-arrow-up-right', 'an-arrow-up-right') - **Default:** None
+            :type icon_class: str
 
             Usage:
 
@@ -1863,6 +1946,10 @@ class Poui():
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
+            >>> # New syntax - Click icon in row:
+            >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='an an-arrow-up-right')
+            >>> # Click icon in specific column:
+            >>> oHelper.ClickTable(columns='Code', values='000001', click_cell='Actions', icon_class='an an-arrow-up-right')
 
             .. warning::
                 Do not mix legacy and new syntax in the same call.
@@ -1879,7 +1966,7 @@ class Poui():
             """
 
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
-                               click_cell, checkbox, radio_input, columns, values, match_all)
+                               click_cell, checkbox, radio_input, columns, values, match_all, icon_class)
 
 
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
@@ -2177,4 +2264,61 @@ class Poui():
         """
 
         self.__poui.click_switch(label=label, value=value, position=position)
+
+    def Program(self, program_name):
+        """
+        Method that sets the program in the initial menu search field.
+
+        .. note::
+            Only used when the Initial Program is the module Ex: SIGAFAT.
+
+        :param program_name: The program name
+        :type program_name: str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper.Program("MATA020")
+        """
+        self.__poui.Program(program_name)
     
+
+    def ClickDropdown(self, label='', subitems='', position=1):
+        """
+        Clicks on a POUI Dropdown component and optionally selects a subitem.
+        https://po-ui.io/documentation/po-dropdown
+
+        :param label: The dropdown button label
+        :type label: str
+        :param subitems: The subitem text to click after opening the dropdown - **Default:** ''
+        :type subitems: str
+        :param position: Position which element is located - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.ClickDropdown(label='Actions', subitems='Edit')
+        >>> oHelper.ClickDropdown(label='Ações de registro')
+        """
+        self.__poui._click_dropdown(label, subitems, position)
+
+
+    def FilterBrowse(self, filters: List[Dict[str, Any]]):
+        """
+        Fills out the POUI filter kendo-grid/browse component with the provided filters.
+
+        :param filters: A list of dictionaries, each containing 'field', 'value', and optional 'position' keys.
+        :type filters: list of dict
+
+        Usage:
+
+        >>> # Call the method:
+        >>> filters = [
+        ...     {'field': 'Código', 'value': '000001'},
+        ...     {'field': 'Descrição', 'value': 'Produto Teste', 'position': 2}
+        ... ]
+        >>> oHelper.FilterBrowse(filters)
+        """
+        self.config._flag_is_new_browse = True
+        self.__poui._set_browse_filters(filters)

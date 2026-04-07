@@ -1,0 +1,23 @@
+name: Google Chat Notify
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  notify_google_chat:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - id: 'notify_google_chat'
+        uses: 'google-github-actions/send-google-chat-webhook@v0.0.4'
+        with:
+          webhook_url: '${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}'
+          mention: "<users/all>"

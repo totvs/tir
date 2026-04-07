@@ -59,9 +59,29 @@ class Base(unittest.TestCase):
     >>> def APWInternal(Base):
     """
 
-    driver = None
-    wait = None
+    _shared_driver = None
+    _shared_wait = None
     errors = []
+    
+    @property
+    def driver(self):
+        """Property to always get the current shared driver instance"""
+        return Base._shared_driver
+    
+    @driver.setter
+    def driver(self, value):
+        """Property to update the shared driver for all instances"""
+        Base._shared_driver = value
+    
+    @property
+    def wait(self):
+        """Property to always get the current shared wait instance"""
+        return Base._shared_wait
+    
+    @wait.setter
+    def wait(self, value):
+        """Property to update the shared wait for all instances"""
+        Base._shared_wait = value
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -277,7 +297,6 @@ class Base(unittest.TestCase):
 
         except Exception as e:
             try:
-                logger().warning(f"Warning double_click method Exception: {str(e)}")
                 self.scroll_to_element(element)
                 actions = ActionChains(self.driver)
                 actions.move_to_element(element)
@@ -852,8 +871,12 @@ class Base(unittest.TestCase):
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
+        text_value = ""
 
-        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
+        if isinstance(element, Select):
+            combo = element
+        else:
+            combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
         if index:
             index_number = self.return_combo_index(combo, option)
@@ -869,19 +892,22 @@ class Base(unittest.TestCase):
                 text_value = value.text
                 combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+                return text_value
 
     def return_combo_object(self, element, shadow_root=True, locator=False):
         """
         [Internal]
         """
-
-        if locator:
-            combo = Select(element)
-        elif self.webapp_shadowroot(shadow_root=shadow_root):
-            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
-                                                      self.soup_to_selenium(element)))
-        else:
-            combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        try:
+            if locator:
+                combo = Select(element)
+            elif self.webapp_shadowroot(shadow_root=shadow_root):
+                combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                          self.soup_to_selenium(element)))
+            else:
+                combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        except:
+            return None
 
         return combo
 
@@ -1260,6 +1286,9 @@ class Base(unittest.TestCase):
             if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
                 logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
+        
+        Base.driver = self.driver
+        Base.wait = self.wait
 
         if not self.config.poui:
             if not self.config.skip_environment:
@@ -1562,4 +1591,18 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
-    
+
+    def get_soup_select(self, selector, twebview=None, select_one=False):
+        """
+        Get a soup select object.
+
+        :param selector: Css selector
+        :param twebview: Force twebview mode. If None, keeps legacy behavior.
+        :param select_one: When True, returns only the first match.
+        :return: Return a soup select object
+        """
+        if twebview is None:
+            twebview = self.config.poui_login
+
+        soup = self.get_current_DOM(twebview=twebview)
+        return soup.select_one(selector) if select_one else soup.select(selector)
