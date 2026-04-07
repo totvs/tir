@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webapp Internal &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -129,6 +129,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_tmenu_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_tmenu_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_toggler"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_toggler()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_toggler_shadow"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_toggler_shadow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_value_type"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_value_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_warning_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_warning_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.children_element_count"><code class="docutils literal notranslate"><span class="pre">WebappInternal.children_element_count()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.clear_grid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.clear_grid()</span></code></a></li>
@@ -139,6 +140,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.click_sub_menu"><code class="docutils literal notranslate"><span class="pre">WebappInternal.click_sub_menu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.click_tree"><code class="docutils literal notranslate"><span class="pre">WebappInternal.click_tree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.clicktree_status_selected"><code class="docutils literal notranslate"><span class="pre">WebappInternal.clicktree_status_selected()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_cell"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_coin_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_coin_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_coin_screen_after_routine"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_coin_screen_after_routine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_modal"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_modal()</span></code></a></li>
@@ -149,6 +151,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_warning_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_warning_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.close_warning_screen_after_routine"><code class="docutils literal notranslate"><span class="pre">WebappInternal.close_warning_screen_after_routine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.coin_screen_selectors"><code class="docutils literal notranslate"><span class="pre">WebappInternal.coin_screen_selectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.compare_cell_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.compare_cell_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.compare_numeric_values"><code class="docutils literal notranslate"><span class="pre">WebappInternal.compare_numeric_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.containers_filter"><code class="docutils literal notranslate"><span class="pre">WebappInternal.containers_filter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.create_auto_file"><code class="docutils literal notranslate"><span class="pre">WebappInternal.create_auto_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.create_message"><code class="docutils literal notranslate"><span class="pre">WebappInternal.create_message()</span></code></a></li>
@@ -163,7 +167,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.execute_js_selector"><code class="docutils literal notranslate"><span class="pre">WebappInternal.execute_js_selector()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.expand_treeGrid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.expand_treeGrid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.expand_tree_grid_line"><code class="docutils literal notranslate"><span class="pre">WebappInternal.expand_tree_grid_line()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.fill_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid_loop"><code class="docutils literal notranslate"><span class="pre">WebappInternal.fill_grid_loop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.fill_parameters"><code class="docutils literal notranslate"><span class="pre">WebappInternal.fill_parameters()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.fill_search_browse"><code class="docutils literal notranslate"><span class="pre">WebappInternal.fill_search_browse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filling_branch"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filling_branch()</span></code></a></li>
@@ -176,6 +180,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_by_direction"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_by_direction()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_by_tooltip_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_by_tooltip_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_dataframe"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_grids_with_headers"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_grids_with_headers()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_is_displayed"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_is_displayed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_label_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_label_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.filter_not_read_only"><code class="docutils literal notranslate"><span class="pre">WebappInternal.filter_not_read_only()</span></code></a></li>
@@ -185,11 +190,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.find_sub_menu_text"><code class="docutils literal notranslate"><span class="pre">WebappInternal.find_sub_menu_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.find_tree_bs"><code class="docutils literal notranslate"><span class="pre">WebappInternal.find_tree_bs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.generate_regex_by_prefixes"><code class="docutils literal notranslate"><span class="pre">WebappInternal.generate_regex_by_prefixes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_active_children_classes"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_active_children_classes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_active_parent_class"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_active_parent_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_all_containers"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_all_containers()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_checkbox_label"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_checkbox_label()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_checkbox_status"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_checkbox_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_column_index"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_column_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_config_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_config_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_container_selector"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_container_selector()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_shadow_root_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_shadow_root_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_distance"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_distance()</span></code></a></li>
@@ -200,7 +208,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_field"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_field()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_function_from_stack"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_function_from_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_cell"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_content"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_input_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid_input_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_headers_from_grids"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_headers_from_grids()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_ini_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_ini_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_language"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_language()</span></code></a></li>
@@ -214,13 +224,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_search_browse_elements"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_search_browse_elements()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_selected_row"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_selected_row()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_selenium_column_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_selenium_column_element()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_single_button"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_single_button()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_shadow_roots_content"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_shadow_roots_content()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_soup_select"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_soup_select()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_text"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_text_position"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_text_position()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_web_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_web_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_x3_dictionaries"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_x3_dictionaries()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.grid_dataframe"><code class="docutils literal notranslate"><span class="pre">WebappInternal.grid_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.has_selected_cell"><code class="docutils literal notranslate"><span class="pre">WebappInternal.has_selected_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.image_compare"><code class="docutils literal notranslate"><span class="pre">WebappInternal.image_compare()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.img_src_filtered"><code class="docutils literal notranslate"><span class="pre">WebappInternal.img_src_filtered()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender"><code class="docutils literal notranslate"><span class="pre">WebappInternal.input_grid_appender()</span></code></a></li>
@@ -240,6 +251,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.pop_dict_itens"><code class="docutils literal notranslate"><span class="pre">WebappInternal.pop_dict_itens()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.poui_datepicker_is_valid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.poui_datepicker_is_valid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.procedure_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.procedure_screen()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.process_input_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.process_input_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.program_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.program_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.query_execute"><code class="docutils literal notranslate"><span class="pre">WebappInternal.query_execute()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.reload_user_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.reload_user_screen()</span></code></a></li>
@@ -342,7 +354,7 @@
 <span id="webapp-internal"></span><h1>Webapp Internal<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.webapp_internal.</span></span><span class="sig-name descname"><span class="pre">WebappInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.technologies.webapp_internal.</span></span><span class="sig-name descname"><span class="pre">WebappInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Link to this definition"></a></dt>
 <dd><p>Internal implementation of Protheus Webapp class.</p>
 <p>This class contains all the methods defined to run Selenium Interface Tests on Protheus Webapp.</p>
 <p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
@@ -428,7 +440,7 @@ fills the environment screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.ChangeUser">
-<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ChangeUser" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ChangeUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_program</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.ChangeUser" title="Link to this definition"></a></dt>
 <dd><p>Change the user then init protheus on home page.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -924,7 +936,7 @@ of a grid. After running, the queues would be empty.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.Program">
-<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.Program" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.Program" title="Link to this definition"></a></dt>
 <dd><p>Method that sets the program in the initial menu search field.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1391,16 +1403,24 @@ Recommended for Trigger fields.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.WaitProcessing">
-<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitProcessing" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">WaitProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stable_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.WaitProcessing" title="Link to this definition"></a></dt>
 <dd><p>Uses WaitShow and WaitHide to Wait a Processing screen</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – List of itens that will hold the wait.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – List of itens that will hold the wait.</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum time to wait in seconds - <strong>Default:</strong> 1200</p></li>
+<li><p><strong>match_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to match case - <strong>Default:</strong> False</p></li>
+<li><p><strong>stable_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Time in seconds the element must remain absent - <strong>Default:</strong> 5</p></li>
+</ul>
 </dd>
 </dl>
 <p>Usage:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method (legacy behavior):</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitProcessing</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#--------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method with custom stable time:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">WaitProcessing</span><span class="p">(</span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span> <span class="n">stable_time</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1757,6 +1777,32 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_value_type">
+<span class="sig-name descname"><span class="pre">check_value_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_value_type" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Checks the value type and returns the value formatted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The value that must be checked.</p></li>
+<li><p><strong>valtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The type of the value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The formatted value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">formatted_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_value_type</span><span class="p">(</span><span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_warning_screen">
 <span class="sig-name descname"><span class="pre">check_warning_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_warning_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -1896,6 +1942,24 @@ Take treenode and label to filter and click in the toggler element to expand the
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.close_cell">
+<span class="sig-name descname"><span class="pre">close_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.close_cell" title="Link to this definition"></a></dt>
+<dd><p>Close opened grid cell</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> – grid field list item</p></li>
+<li><p><strong>layer</strong> – initial layers number</p></li>
+<li><p><strong>element</strong> – cell modal opened</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.close_coin_screen">
 <span class="sig-name descname"><span class="pre">close_coin_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.close_coin_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -1985,6 +2049,27 @@ This method is responsible for closing the “warning screen” that opens after
 <span class="sig-name descname"><span class="pre">coin_screen_selectors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.coin_screen_selectors" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>This method returns the selectors for the coin screen.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.compare_cell_value">
+<span class="sig-name descname"><span class="pre">compare_cell_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selenium_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.compare_cell_value" title="Link to this definition"></a></dt>
+<dd><p>Compares two values, ignoring formatting differences.</p>
+<p>[Internal]
+:param selenium_column: Selenium object of the grid cell.
+:param user_value: value to be compared.
+:param value_type: field value type attribute (N, C)
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.compare_numeric_values">
+<span class="sig-name descname"><span class="pre">compare_numeric_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.compare_numeric_values" title="Link to this definition"></a></dt>
+<dd><p>Compares two numeric values, ignoring formatting differences.
+[Internal]
+:param current_value:
+:param user_value:
+:return:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2144,7 +2229,13 @@ Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu">
 <span class="sig-name descname"><span class="pre">escape_to_main_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Try back to menu screen before Program execution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.execute_js_selector">
@@ -2181,24 +2272,23 @@ Click on a column and send the ENTER key</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.fill_grid">
-<span class="sig-name descname"><span class="pre">fill_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x3_dictionaries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.fill_grid_loop">
+<span class="sig-name descname"><span class="pre">fill_grid_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_to_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_to_valtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_one</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_grid_loop" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
-<p>Fills the grid cell with the passed parameters.</p>
+<p>Loops through the grid fields and fills them with the desired values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>field</strong> (<em>List</em><em> of </em><em>values</em>) – An item from the grid’s input queue</p></li>
-<li><p><strong>x3_dictionaries</strong> (<em>Tuple</em><em> of </em><em>dictionaries</em>) – Tuple of dictionaries containing information extracted from x3.</p></li>
-<li><p><strong>initial_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The initial layer of elements of Protheus Webapp</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – The field that must be filled.</p></li>
+<li><p><strong>field_to_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – A dictionary containing the field labels.</p></li>
+<li><p><strong>field_to_valtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – A dictionary containing the field valtypes.</p></li>
+<li><p><strong>field_one</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The first field of the grid.</p></li>
+<li><p><strong>user_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The value that must be filled.</p></li>
+<li><p><strong>layer_selector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The selector of the layer.</p></li>
+<li><p><strong>check_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Boolean if the value must be checked.</p></li>
 </ul>
 </dd>
 </dl>
-<p>Usage:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">fill_grid</span><span class="p">([</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">x3_dictionaries</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -2327,6 +2417,15 @@ is triggered.</p>
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.filter_dataframe">
 <span class="sig-name descname"><span class="pre">filter_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.filter_dataframe" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.filter_grids_with_headers">
+<span class="sig-name descname"><span class="pre">filter_grids_with_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.filter_grids_with_headers" title="Link to this definition"></a></dt>
+<dd><p>[Internal]
+Filters grids that have headers.
+:param grids: list of grid elements
+:return: list of grids with headers</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2475,6 +2574,12 @@ If none has children itens, it will be an empty list.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_active_children_classes">
+<span class="sig-name descname"><span class="pre">get_active_children_classes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_active_children_classes" title="Link to this definition"></a></dt>
+<dd><p>Returns class list of all descendants of an element</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_active_parent_class">
 <span class="sig-name descname"><span class="pre">get_active_parent_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_active_parent_class" title="Link to this definition"></a></dt>
 <dd><p>Returns class list of an element’s parent</p>
@@ -2540,6 +2645,34 @@ Returns the List of BeautifulSoup object that represents this containers or NONE
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_column_index">
+<span class="sig-name descname"><span class="pre">get_column_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_to_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_column_index" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Returns the index of the column in the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The field that must be found.</p></li>
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – The columns of the grid.</p></li>
+<li><p><strong>field_to_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – A dictionary containing the field labels.</p></li>
+<li><p><strong>duplicate_fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – A list of fields that have the same label.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index of the column in the grid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_column_index</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">field_to_label</span><span class="p">,</span> <span class="n">duplicate_fields</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_config_value">
 <span class="sig-name descname"><span class="pre">get_config_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_config_value" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -2550,6 +2683,15 @@ Returns the List of BeautifulSoup object that represents this containers or NONE
 <dd class="field-even"><p>Json Key item in config.json</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_container_selector">
+<span class="sig-name descname"><span class="pre">get_container_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_container_selector" title="Link to this definition"></a></dt>
+<dd><p>Get a soup select object from current container.
+:param selector: Css selector
+:param select_all: If true return a list of objects, if false return the first
+:return: Return a soup select object</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2614,7 +2756,7 @@ Returns the BeautifulSoup object that represents this container or NONE if nothi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_element_size">
-<span class="sig-name descname"><span class="pre">get_element_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_element_size" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_element_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_element_size" title="Link to this definition"></a></dt>
 <dd><p>Internal
 Return Height/Width</p>
 </dd></dl>
@@ -2716,6 +2858,25 @@ Gets a grid BeautifulSoup object from the screen.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_grid_cell">
+<span class="sig-name descname"><span class="pre">get_grid_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_to_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_cell" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Get a cell of the grid, based on the column and row informed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>column</strong> – The column that must be selected.</p></li>
+<li><p><strong>grid_number</strong> – Which grid should be used when there are multiple grids on the same screen. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>row</strong> – The row that must be selected  - <strong>Default:</strong> 1</p></li>
+<li><p><strong>field_to_label</strong> – A dictionary containing the field labels.</p></li>
+<li><p><strong>position</strong> – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>duplicate_fields</strong> – A list of fields that have the same label.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_grid_content">
 <span class="sig-name descname"><span class="pre">get_grid_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_content" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -2727,6 +2888,24 @@ Gets a grid BeautifulSoup object from the screen.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_grid_input_element">
+<span class="sig-name descname"><span class="pre">get_grid_input_element</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_input_element" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Returns the input element of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>Selenium object</em>) – The element that must be checked.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The input element of the grid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Selenium object</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2938,9 +3117,15 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_single_button">
-<span class="sig-name descname"><span class="pre">get_single_button</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_single_button" title="Link to this definition"></a></dt>
-<dd><p>[Internal]</p>
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_shadow_roots_content">
+<span class="sig-name descname"><span class="pre">get_shadow_roots_content</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_shadow_roots_content" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>[Internal]
+Captures the content of all shadow roots in the current DOM.
+Returns a dictionary with element identifiers and their shadow root HTML.
+Cleans special characters like</p>
+</div></blockquote>
+<p>,       , and multiple spaces.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3040,6 +3225,21 @@ Workaround method to be used instead of a lambda function on fill_grid method.</
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.has_selected_cell">
+<span class="sig-name descname"><span class="pre">has_selected_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.has_selected_cell" title="Link to this definition"></a></dt>
+<dd><p>[Internal]
+Checks if a row element has any selected cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> – Row element to check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if row has a selected cell, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.image_compare">
 <span class="sig-name descname"><span class="pre">image_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.image_compare" title="Link to this definition"></a></dt>
 <dd><p>Returns differences between 2 images in Gray Scale.</p>
@@ -3065,7 +3265,7 @@ Return an image source filtered.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.input_grid_appender">
-<span class="sig-name descname"><span class="pre">input_grid_appender</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">input_grid_appender</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_memo_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Adds a value to the input queue of a grid.</p>
 <dl class="field-list simple">
@@ -3146,7 +3346,7 @@ Returns the leght of grid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.log_error">
-<span class="sig-name descname"><span class="pre">log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_log_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_error" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_log_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_counter_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.log_error" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Finishes execution of test case with an error and creates the log information for that test.</p>
 <dl class="field-list simple">
@@ -3375,6 +3575,19 @@ Usage:
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_screen</span><span class="p">(</span><span class="n">restore_backup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.process_input_element">
+<span class="sig-name descname"><span class="pre">process_input_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selenium_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_layers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.process_input_element" title="Link to this definition"></a></dt>
+<dd><p>Inputs the value in opened grid cell.</p>
+<p>[Internal]
+:param field: Grid list item
+:param selenium_input: input element
+:param user_value: value to be inputted
+:param value_type: type of the value (N, C)
+:param initial_layers: initial number of layers on screen
+:return:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3796,12 +4009,12 @@ Fills the log information needed by opening the About page.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.set_program">
-<span class="sig-name descname"><span class="pre">set_program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.set_program" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.set_program" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
 <p>Method that sets the program in the initial menu search field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>program</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The program name</p>
+<dd class="field-odd"><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The program name</p>
 </dd>
 </dl>
 <p>Usage:</p>
