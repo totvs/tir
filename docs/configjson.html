@@ -1,21 +1,24 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Config.json &mdash; TIR 2.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,14 +99,14 @@
            <div itemprop="articleBody">
              
   <section id="config-json">
-<h1>Config.json<a class="headerlink" href="#config-json" title="Link to this heading"></a></h1>
+<h1>Config.json<a class="headerlink" href="#config-json" title="Permalink to this heading"></a></h1>
 <p>The environment must be configured through a <a class="reference external" href="https://github.com/totvs/tir/blob/main/config.json">config.json</a> file.</p>
 <p>You can find one to be used as a base in this repository. To select your file,
 you can either put it in your workspace or pass its path as a parameter of any of our classes’ initialization.
 The config.json file is where the configs of the tests are defined.</p>
 <p>These are the accepted config keys, and whether they are required or not:</p>
 <section id="structure-exemple">
-<h2>Structure (exemple):<a class="headerlink" href="#structure-exemple" title="Link to this heading"></a></h2>
+<h2>Structure (exemple):<a class="headerlink" href="#structure-exemple" title="Permalink to this heading"></a></h2>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;Url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:8080/&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;Browser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Firefox&quot;</span><span class="p">,</span>
@@ -116,11 +119,11 @@ The config.json file is where the configs of the tests are defined.</p>
 </div>
 </section>
 <section id="execution-parameters">
-<h2>Execution Parameters<a class="headerlink" href="#execution-parameters" title="Link to this heading"></a></h2>
+<h2>Execution Parameters<a class="headerlink" href="#execution-parameters" title="Permalink to this heading"></a></h2>
 <section id="required-parameters">
-<h3>Required Parameters<a class="headerlink" href="#required-parameters" title="Link to this heading"></a></h3>
+<h3>Required Parameters<a class="headerlink" href="#required-parameters" title="Permalink to this heading"></a></h3>
 <table class="docutils align-default" id="id1">
-<caption><span class="caption-text">Required Parameters</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Required Parameters</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -170,9 +173,9 @@ The config.json file is where the configs of the tests are defined.</p>
 </section>
 <hr class="docutils" />
 <section id="poui-interface">
-<h3>POUI Interface<a class="headerlink" href="#poui-interface" title="Link to this heading"></a></h3>
+<h3>POUI Interface<a class="headerlink" href="#poui-interface" title="Permalink to this heading"></a></h3>
 <table class="docutils align-default" id="id2">
-<caption><span class="caption-text">POUI &amp; UI Settings</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<caption><span class="caption-text">POUI &amp; UI Settings</span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -207,9 +210,9 @@ The config.json file is where the configs of the tests are defined.</p>
 </section>
 <hr class="docutils" />
 <section id="additional-parameters">
-<h3>Additional Parameters<a class="headerlink" href="#additional-parameters" title="Link to this heading"></a></h3>
+<h3>Additional Parameters<a class="headerlink" href="#additional-parameters" title="Permalink to this heading"></a></h3>
 <table class="docutils align-default" id="id3">
-<caption><span class="caption-text">General Settings</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<caption><span class="caption-text">General Settings</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -269,9 +272,9 @@ The config.json file is where the configs of the tests are defined.</p>
 </section>
 <hr class="docutils" />
 <section id="logging-monitoring">
-<h3>Logging &amp; Monitoring<a class="headerlink" href="#logging-monitoring" title="Link to this heading"></a></h3>
+<h3>Logging &amp; Monitoring<a class="headerlink" href="#logging-monitoring" title="Permalink to this heading"></a></h3>
 <table class="docutils align-default" id="id4">
-<caption><span class="caption-text">Log Configuration</span><a class="headerlink" href="#id4" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Log Configuration</span><a class="headerlink" href="#id4" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -336,13 +339,13 @@ The config.json file is where the configs of the tests are defined.</p>
 </section>
 <hr class="docutils" />
 <section id="database-configuration">
-<h3>Database Configuration<a class="headerlink" href="#database-configuration" title="Link to this heading"></a></h3>
+<h3>Database Configuration<a class="headerlink" href="#database-configuration" title="Permalink to this heading"></a></h3>
 <p>This section contains optional parameters used to configure the database connection for your tests.
 By specifying these settings in the config file, you avoid the need to
 provide connection details directly as parameters in the QueryExecute method.
 This approach simplifies test setup and centralizes database configuration management.</p>
 <table class="docutils align-default" id="id5">
-<caption><span class="caption-text">Database Settings</span><a class="headerlink" href="#id5" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Database Settings</span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -392,9 +395,9 @@ This approach simplifies test setup and centralizes database configuration manag
 </section>
 <hr class="docutils" />
 <section id="aditional-parameters">
-<h3>Aditional Parameters<a class="headerlink" href="#aditional-parameters" title="Link to this heading"></a></h3>
+<h3>Aditional Parameters<a class="headerlink" href="#aditional-parameters" title="Permalink to this heading"></a></h3>
 <table class="docutils align-default" id="id6">
-<caption><span class="caption-text">Advanced Settings</span><a class="headerlink" href="#id6" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Advanced Settings</span><a class="headerlink" href="#id6" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -444,10 +447,10 @@ This approach simplifies test setup and centralizes database configuration manag
 </section>
 <hr class="docutils" />
 <section id="chrome-parameters">
-<h3>Chrome Parameters<a class="headerlink" href="#chrome-parameters" title="Link to this heading"></a></h3>
+<h3>Chrome Parameters<a class="headerlink" href="#chrome-parameters" title="Permalink to this heading"></a></h3>
 <p>Only for Chrome browser.</p>
 <table class="docutils align-default" id="id7">
-<caption><span class="caption-text">Chrome Settings</span><a class="headerlink" href="#id7" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Chrome Settings</span><a class="headerlink" href="#id7" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
@@ -477,10 +480,10 @@ This approach simplifies test setup and centralizes database configuration manag
 </section>
 <hr class="docutils" />
 <section id="versioning-info">
-<h3>Versioning Info<a class="headerlink" href="#versioning-info" title="Link to this heading"></a></h3>
+<h3>Versioning Info<a class="headerlink" href="#versioning-info" title="Permalink to this heading"></a></h3>
 <p><em>This configuration can be used to skip the About menu.</em></p>
 <table class="docutils align-default" id="id8">
-<caption><span class="caption-text">Release &amp; Version Info</span><a class="headerlink" href="#id8" title="Link to this table"></a></caption>
+<caption><span class="caption-text">Release &amp; Version Info</span><a class="headerlink" href="#id8" title="Permalink to this table"></a></caption>
 <colgroup>
 <col style="width: 15.0%" />
 <col style="width: 10.0%" />
