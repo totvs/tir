@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSwitch"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSwitch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickWidget"><code class="docutils literal notranslate"><span class="pre">Poui.ClickWidget()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.FilterBrowse"><code class="docutils literal notranslate"><span class="pre">Poui.FilterBrowse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.GetUrl"><code class="docutils literal notranslate"><span class="pre">Poui.GetUrl()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.IfExists"><code class="docutils literal notranslate"><span class="pre">Poui.IfExists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.InputByLocator"><code class="docutils literal notranslate"><span class="pre">Poui.InputByLocator()</span></code></a></li>
@@ -578,6 +579,26 @@ Legacy parameters will be removed in a future release.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickWidget</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;LEad Time SC x PC&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Detalhes&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">:return:</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.FilterBrowse">
+<span class="sig-name descname"><span class="pre">FilterBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.FilterBrowse" title="Link to this definition"></a></dt>
+<dd><p>Fills out the POUI filter kendo-grid/browse component with the provided filters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – A list of dictionaries, each containing ‘field’, ‘value’, and optional ‘position’ keys.</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;Código&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;000001&#39;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;Descrição&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;Produto Teste&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">FilterBrowse</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

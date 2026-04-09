@@ -82,6 +82,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.GridTree"><code class="docutils literal notranslate"><span class="pre">Webapp.GridTree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.IfExists"><code class="docutils literal notranslate"><span class="pre">Webapp.IfExists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.InputByLocator"><code class="docutils literal notranslate"><span class="pre">Webapp.InputByLocator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.IsNewBrowse"><code class="docutils literal notranslate"><span class="pre">Webapp.IsNewBrowse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LengthGridLines"><code class="docutils literal notranslate"><span class="pre">Webapp.LengthGridLines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LoadGrid"><code class="docutils literal notranslate"><span class="pre">Webapp.LoadGrid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Webapp.LogOff"><code class="docutils literal notranslate"><span class="pre">Webapp.LogOff()</span></code></a></li>
@@ -962,6 +963,13 @@ before using these methods in the script.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Webapp.IsNewBrowse">
+<span class="sig-name descname"><span class="pre">IsNewBrowse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.IsNewBrowse" title="Link to this definition"></a></dt>
+<dd><p>This method checks if the current browse is the new version with poui or the old one,
+returning a boolean value.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.LengthGridLines">
 <span class="sig-name descname"><span class="pre">LengthGridLines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.LengthGridLines" title="Link to this definition"></a></dt>
 <dd><p>Returns the length of the grid.
@@ -1272,7 +1280,7 @@ Parameters:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SearchBrowse">
-<span class="sig-name descname"><span class="pre">SearchBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SearchBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SearchBrowse" title="Link to this definition"></a></dt>
 <dd><p>Searchs a term on Protheus Webapp.</p>
 <p>It will search using the default search key, but if a <strong>key</strong> is provided
 it will search using the chosen key.</p>
@@ -1335,7 +1343,7 @@ is provided, it will search on the chosen search box.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetButton">
-<span class="sig-name descname"><span class="pre">SetButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_browse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetButton" title="Link to this definition"></a></dt>
 <dd><p>Method that clicks on a button on the screen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
