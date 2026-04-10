@@ -642,10 +642,10 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using browse filters:
         >>> filters = [
-        ...     {'Código': '000001'},
-        ...     {'Descrição': 'Produto Teste'}
+        ...     {'Branch': 'D MG'},
+        ...     {'id': '001'}
         ... ]
-        >>> oHelper.SearchBrowse(filters=filters)
+        >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", filters=filters)
         >>> #------------------------------------------------------------------------
         """
         self.__router.SearchBrowse(term, key, identifier, index, column, filters)
