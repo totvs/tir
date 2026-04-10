@@ -610,6 +610,10 @@ class Webapp():
         :type index: bool
         :param column: The search column to be chosen on the search dropdown. - **Default:** None
         :type column: str
+        :param filters: List of dictionaries to apply browse filters before searching.
+         Each dictionary key must be the field label and its value must be the filter value.
+         - **Default:** []
+        :type filters: list[dict[str, str]]
 
         Usage:
 
@@ -635,6 +639,13 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using the first search box and a chosen columns:
         >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using browse filters:
+        >>> filters = [
+        ...     {'Código': '000001'},
+        ...     {'Descrição': 'Produto Teste'}
+        ... ]
+        >>> oHelper.SearchBrowse(filters=filters)
         >>> #------------------------------------------------------------------------
         """
         self.__router.SearchBrowse(term, key, identifier, index, column, filters)
@@ -2308,15 +2319,16 @@ class Poui():
         """
         Fills out the POUI filter kendo-grid/browse component with the provided filters.
 
-        :param filters: A list of dictionaries, each containing 'field', 'value', and optional 'position' keys.
-        :type filters: list of dict
+        :param filters: List of dictionaries representing filters to apply.
+         Each dictionary key must be the field label and its value must be the filter value.
+        :type filters: list[dict[str, str]]
 
         Usage:
 
         >>> # Call the method:
         >>> filters = [
-        ...     {'field': 'Código', 'value': '000001'},
-        ...     {'field': 'Descrição', 'value': 'Produto Teste', 'position': 2}
+        ...     {'Código': '000001'},
+        ...     {'Descrição': 'Produto Teste'}
         ... ]
         >>> oHelper.FilterBrowse(filters)
         """
