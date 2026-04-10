@@ -2172,12 +2172,20 @@ class WebappInternal(Base):
             self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
             return
 
-
     def _is_new_browse(self, throw_error=True, timeout=None):
+        
         browse_div = self._find_search_browse(throw_error=throw_error, timeout=timeout)
 
-        return browse_div.name == 'thf-grid' if browse_div else False
+        if browse_div and browse_div.name == 'thf-grid':
+            logger().info("Switching to the POUI method")
+            logger().info("Waiting loading...")
+            self.wait_element(term='po-loading', scrap_type=enum.ScrapType.CSS_SELECTOR, presence=False, main_container="body", twebview=True)
+            logger().info("Loading finished!")
 
+            return True
+        
+        else:
+            return False
 
     def longest_word(self, string):
         words = string.split()

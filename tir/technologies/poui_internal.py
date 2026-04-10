@@ -5923,7 +5923,6 @@ class PouiInternal(Base):
         :type check_error: bool
         """
 
-        logger().info("Switching to the POUI button-click method")
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
 
