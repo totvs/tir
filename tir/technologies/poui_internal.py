@@ -3745,6 +3745,9 @@ class PouiInternal(Base):
 
         :return:
         """
+
+        logger().info("Waiting loading...")
+
         loading = True
 
         endtime = time.time() + 300
@@ -3754,6 +3757,8 @@ class PouiInternal(Base):
 
             loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
 
+        logger().info("Loading finished!")
+        
     def click_select(self, field, value, position):
         """
         
