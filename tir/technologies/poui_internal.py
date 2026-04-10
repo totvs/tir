@@ -3740,7 +3740,7 @@ class PouiInternal(Base):
         if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
             return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
-    def po_loading(self, selector):
+    def po_loading(self, selector=''):
         """
 
         :return:
@@ -3752,9 +3752,13 @@ class PouiInternal(Base):
 
         endtime = time.time() + 300
         while loading and time.time() < endtime:
-            container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       main_container='body')
-
+            if selector:
+                container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                        main_container='body')
+            else:
+                container = self.get_current_DOM(twebview=True)
+                container = [container]
+                
             loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
 
         logger().info("Loading finished!")
@@ -4508,7 +4512,7 @@ class PouiInternal(Base):
 
         table_number -= 1
 
-        self.po_loading(selector='wa-dialog')
+        self.po_loading()
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -5657,7 +5661,7 @@ class PouiInternal(Base):
         >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
         """
 
-        self.po_loading(selector='wa-dialog')
+        self.po_loading()
 
         self._remove_filters_from_browse()
 
@@ -5930,7 +5934,7 @@ class PouiInternal(Base):
         :type check_error: bool
         """
 
-        self.po_loading(selector='wa-dialog')
+        self.po_loading()
 
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
