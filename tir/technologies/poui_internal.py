@@ -5657,6 +5657,8 @@ class PouiInternal(Base):
         >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
         """
 
+        self.po_loading(selector='wa-dialog')
+
         self._remove_filters_from_browse()
 
         self.click_button(self.language.filters)
@@ -5927,6 +5929,8 @@ class PouiInternal(Base):
         :param check_error: Whether to check for errors - **Default:** True
         :type check_error: bool
         """
+
+        self.po_loading(selector='wa-dialog')
 
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
