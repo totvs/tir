@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -64,6 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.collect_zindex"><code class="docutils literal notranslate"><span class="pre">Base.collect_zindex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.driver"><code class="docutils literal notranslate"><span class="pre">Base.driver</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_name"><code class="docutils literal notranslate"><span class="pre">Base.element_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
@@ -76,6 +77,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_current_DOM"><code class="docutils literal notranslate"><span class="pre">Base.get_current_DOM()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_text"><code class="docutils literal notranslate"><span class="pre">Base.get_element_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_value"><code class="docutils literal notranslate"><span class="pre">Base.get_element_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_soup_select"><code class="docutils literal notranslate"><span class="pre">Base.get_soup_select()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_url"><code class="docutils literal notranslate"><span class="pre">Base.get_url()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.log_error"><code class="docutils literal notranslate"><span class="pre">Base.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.move_to_element"><code class="docutils literal notranslate"><span class="pre">Base.move_to_element()</span></code></a></li>
@@ -97,6 +99,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.start_testcase"><code class="docutils literal notranslate"><span class="pre">Base.start_testcase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.switch_to_iframe"><code class="docutils literal notranslate"><span class="pre">Base.switch_to_iframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.take_screenshot"><code class="docutils literal notranslate"><span class="pre">Base.take_screenshot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.wait"><code class="docutils literal notranslate"><span class="pre">Base.wait</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.web_scrap"><code class="docutils literal notranslate"><span class="pre">Base.web_scrap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.webapp_shadowroot"><code class="docutils literal notranslate"><span class="pre">Base.webapp_shadowroot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.zindex_sort"><code class="docutils literal notranslate"><span class="pre">Base.zindex_sort()</span></code></a></li>
@@ -136,7 +139,7 @@
 <span id="base"></span><h1>Base<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base" title="Link to this definition"></a></dt>
 <dd><p>Base class for any technology to implement Selenium Interface Tests.</p>
 <p>This class instantiates the browser, reads the config file and prepares the log.</p>
 <p>If no config_path is passed, it will read the config.json file that exists in the same
@@ -327,6 +330,12 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">double_click</span><span class="p">(</span><span class="n">element</span><span class="p">())</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.driver">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">driver</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver" title="Link to this definition"></a></dt>
+<dd><p>Property to always get the current shared driver instance</p>
 </dd></dl>
 
 <dl class="py method">
@@ -566,6 +575,24 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element_value</span><span class="p">(</span><span class="n">element</span><span class="p">())</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.get_soup_select">
+<span class="sig-name descname"><span class="pre">get_soup_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_one</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.get_soup_select" title="Link to this definition"></a></dt>
+<dd><p>Get a soup select object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> – Css selector</p></li>
+<li><p><strong>twebview</strong> – Force twebview mode. If None, keeps legacy behavior.</p></li>
+<li><p><strong>select_one</strong> – When True, returns only the first match.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return a soup select object</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -913,6 +940,12 @@ It will try to find the iframe in current webdriver with the class “twebview�
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">take_screenshot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;myscreenshot&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.wait">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.wait" title="Link to this definition"></a></dt>
+<dd><p>Property to always get the current shared wait instance</p>
 </dd></dl>
 
 <dl class="py method">

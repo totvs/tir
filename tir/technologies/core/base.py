@@ -59,9 +59,29 @@ class Base(unittest.TestCase):
     >>> def APWInternal(Base):
     """
 
-    driver = None
-    wait = None
+    _shared_driver = None
+    _shared_wait = None
     errors = []
+    
+    @property
+    def driver(self):
+        """Property to always get the current shared driver instance"""
+        return Base._shared_driver
+    
+    @driver.setter
+    def driver(self, value):
+        """Property to update the shared driver for all instances"""
+        Base._shared_driver = value
+    
+    @property
+    def wait(self):
+        """Property to always get the current shared wait instance"""
+        return Base._shared_wait
+    
+    @wait.setter
+    def wait(self, value):
+        """Property to update the shared wait for all instances"""
+        Base._shared_wait = value
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -1571,4 +1591,18 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
-    
+
+    def get_soup_select(self, selector, twebview=None, select_one=False):
+        """
+        Get a soup select object.
+
+        :param selector: Css selector
+        :param twebview: Force twebview mode. If None, keeps legacy behavior.
+        :param select_one: When True, returns only the first match.
+        :return: Return a soup select object
+        """
+        if twebview is None:
+            twebview = self.config.poui_login
+
+        soup = self.get_current_DOM(twebview=twebview)
+        return soup.select_one(selector) if select_one else soup.select(selector)

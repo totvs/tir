@@ -1,7 +1,6 @@
 
 from tir.technologies.core.config import ConfigLoader
-from tir.technologies.core.logging_config import logger
-import time
+from tir.technologies.core.language import LanguagePack
 
 class Router:
     """
@@ -32,6 +31,7 @@ class Router:
         self.__poui = None
         inst_webapp and self.set_webapp(inst_webapp)
         inst_poui and self.set_poui(inst_poui)
+        self.language = LanguagePack(self.config.language) if self.config.language else ""
 
     def set_webapp(self, inst):
         """Setter for WebappInternal instance."""
@@ -132,3 +132,26 @@ class Router:
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.set_log_info()
+
+    def SetButton(self, button, sub_item="", position=1, check_error=True, is_browse=False) -> None:
+        """Click on button using appropriate driver (POUI or WebApp)."""
+
+        if is_browse:
+            use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
+        else:
+            use_poui = self.config._flag_is_new_browse if self.config._flag_is_new_browse is not None else False
+
+        # Consume flag: only first SetButton after SearchBrowse uses it.
+        self.config._flag_is_new_browse = None
+
+        drv = self._get_driver_instance(lambda: use_poui)
+        drv.SetButton(button, sub_item, position, check_error=check_error)
+
+
+    def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=[]) -> None:
+
+        use_poui = self._ensure_webapp()._is_new_browse(throw_error=False, timeout=self.config.time_out)
+        self.config._flag_is_new_browse = use_poui
+
+        drv = self._get_driver_instance(lambda: use_poui)
+        drv.SearchBrowse(term=term, key=key, identifier=identifier, index=index, column=column, filters=filters)
