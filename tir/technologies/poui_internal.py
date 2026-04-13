@@ -3748,18 +3748,10 @@ class PouiInternal(Base):
 
         logger().info("Waiting loading...")
 
-        loading = True
+        main_container = selector or 'body'
 
-        endtime = time.time() + 300
-        while loading and time.time() < endtime:
-            if selector:
-                container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                        main_container='body')
-            else:
-                container = self.get_current_DOM(twebview=True)
-                container = [container]
-                
-            loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
+        self.wait_element(term='po-loading', scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                          presence=False, main_container=main_container)
 
         logger().info("Loading finished!")
         
