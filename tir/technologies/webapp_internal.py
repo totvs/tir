@@ -2552,19 +2552,21 @@ class WebappInternal(Base):
 
         # Uncheck all checkbox inputs
         checkbox_selected = tmenupopup().select(checkbox_term)
-        checkbox_selected = list(filter(lambda x: 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected))
+        checkbox_selected = list(filter(lambda x: x.attrs and 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected))
 
         for checkbox in checkbox_selected:
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(checkbox), click_type=3)
 
         # Check checkbox inputs
         spans = tmenupopup().select(checkbox_term)
-        spans = list(filter(lambda x: 'hidden' not in x.attrs, spans))
+        spans = list(filter(lambda x: x.attrs and 'hidden' not in x.attrs, spans))
 
         search_column_itens = search_column.split(',')
         search_column_itens = [x.strip() for x in search_column_itens]
         for item in search_column_itens:
-            span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+            span = next(iter(list(filter(lambda x: x.attrs and x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+            if not span:
+                self.log_error(f"Couldn't search the column: {item} on screen.")
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
 
