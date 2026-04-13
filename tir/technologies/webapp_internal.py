@@ -2536,12 +2536,12 @@ class WebappInternal(Base):
         self.click(sel_browse_column())
 
         self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, presence=True, position=0, main_container='body')
-        tmenupopup = next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
+        tmenupopup = lambda: next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
-        if not tmenupopup:
+        if not tmenupopup():
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
-        div_columns = tmenupopup.select_one('.dict-tfolder')
+        div_columns = tmenupopup().select_one('.dict-tfolder')
         if div_columns:
             column_button = div_columns.select('wa-tab-button')
             if column_button:
@@ -2550,27 +2550,22 @@ class WebappInternal(Base):
             else:
                 self.log_error("SearchBrowse - Column: couldn't find tab buttons in the columns folder")
 
-        spans = tmenupopup.select(checkbox_term)
-        spans_not_hidden = list(filter(lambda x: 'hidden' not in x.attrs, spans))
+        # Uncheck all checkbox inputs
+        checkbox_selected = tmenupopup().select(checkbox_term)
+        checkbox_selected = list(filter(lambda x: 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected))
 
-		if ',' in search_column:
-            search_column_itens = search_column.split(',')
-            filtered_column_itens = [x.strip() for x in search_column_itens]
-            for item in filtered_column_itens:
-                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans_not_hidden))), None)
-                
-                if span:
-                    # Verifica se o atributo 'checked' NÃO está presente antes de clicar
-                    if 'checked' not in span.attrs:
-                        self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-        else:
-            span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans_not_hidden))), None)
-            
-            if span:
-                # Verifica se o atributo 'checked' NÃO está presente antes de clicar
-                if 'checked' not in span.attrs:
-                    self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
+        for checkbox in checkbox_selected:
+            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(checkbox), click_type=3)
 
+        # Check checkbox inputs
+        spans = tmenupopup().select(checkbox_term)
+        spans = list(filter(lambda x: 'hidden' not in x.attrs, spans))
+
+        search_column_itens = search_column.split(',')
+        search_column_itens = [x.strip() for x in search_column_itens]
+        for item in search_column_itens:
+            span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
 
     def fill_search_browse(self, term, search_elements):
