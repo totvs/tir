@@ -642,8 +642,10 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using browse filters:
         >>> filters = [
-        ...     {'Branch': 'D MG'},
-        ...     {'id': '001'}
+        ...     {
+        ...         'Filial': 'D MG 01',
+        ...         'Cod Grupo': 'SQA2'
+        ...     }
         ... ]
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", filters=filters)
         >>> #------------------------------------------------------------------------
@@ -2319,16 +2321,17 @@ class Poui():
         """
         Fills out the POUI filter kendo-grid/browse component with the provided filters.
 
-        :param filters: List of dictionaries representing filters to apply.
-         Each dictionary key must be the field label and its value must be the filter value.
+        :param filters: List containing a dictionary with field labels as keys and filter values as values.
         :type filters: list[dict[str, str]]
 
         Usage:
 
         >>> # Call the method:
         >>> filters = [
-        ...     {'Código': '000001'},
-        ...     {'Descrição': 'Produto Teste'}
+        ...     {
+        ...         'Filial': 'D MG 01',
+        ...         'Cod Grupo': 'SQA2'
+        ...     }
         ... ]
         >>> oHelper.FilterBrowse(filters)
         """
