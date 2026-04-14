@@ -3796,7 +3796,7 @@ class PouiInternal(Base):
             po_select_bs = self.web_scrap(term='po-select', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
             if po_select_bs:
-                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x), po_select_bs))), None)
+                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x, position), po_select_bs))), None)
                 if select_element_filtred:
                     self.switch_to_iframe()
                     select_bs = select_element_filtred.find_next('select')
