@@ -2172,12 +2172,10 @@ class WebappInternal(Base):
             self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
             return
 
-
     def _is_new_browse(self, throw_error=True, timeout=None):
         browse_div = self._find_search_browse(throw_error=throw_error, timeout=timeout)
 
         return browse_div.name == 'thf-grid' if browse_div else False
-
 
     def longest_word(self, string):
         words = string.split()
