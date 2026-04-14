@@ -3780,7 +3780,6 @@ class PouiInternal(Base):
         :param position: Position which element is located. - **Default:** 1
         """
 
-        position -= 1
         main_element = None
         trated_field = field.strip()
         select_bs = []
