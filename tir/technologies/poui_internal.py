@@ -2056,20 +2056,6 @@ class PouiInternal(Base):
         self.restart_counter += 1
         self.log_error(message)
 
-    def get_function_from_stack(self):
-        """
-        [Internal]
-
-        Gets the function name that called the Webapp class from the call stack.
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
-        """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
-
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
         [Internal]
