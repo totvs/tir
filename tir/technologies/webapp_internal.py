@@ -5723,6 +5723,7 @@ class WebappInternal(Base):
         """
         index_number = []
         count = 0
+        column_not_found = None
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and len(index_number) < 1 and count <= 3:
@@ -5740,10 +5741,17 @@ class WebappInternal(Base):
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
                     elif itens:
-                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                        matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column_itens:
+                            column_not_found = first_column
+                            break
+                        index_number = df.loc[(df[matched_column_itens] == first_content)].index.array
                     elif first_column and first_content:
-                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        first_column_values = df[first_column].values
+                        matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column:
+                            column_not_found = first_column
+                            break
+                        first_column_values = df[matched_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
                         if content:
@@ -5772,6 +5780,9 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(f"Content doesn't found on the screen! {str(e)}")
+
+        if column_not_found:
+            self.log_error(f"Column doesn't found on the screen! {column_not_found}")
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
