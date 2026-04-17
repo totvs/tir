@@ -21,6 +21,7 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from tir.technologies.core.utils import Utils
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOpt
@@ -116,6 +117,7 @@ class Base(unittest.TestCase):
         self.language = LanguagePack(self.config.language) if self.config.language else ""
         self.log = Log(folder=self.config.log_folder, config_path=self.config_path)
         self.log.station = socket.gethostname()
+        self.utils = Utils()
         self.test_case = []
         self.last_test_case = None
         self.message = ""

@@ -1985,7 +1985,10 @@ class WebappInternal(Base):
             success = menu_screen and container_layers
 
             logger().debug(f'Check Menu Screen: {menu_screen}')
-            logger().debug(f'wa-dialog layers: {container_layers}')        
+            logger().debug(f'wa-dialog layers: {container_layers}')
+
+        if not success:
+            self.log_error('Home screen not found!')     
         
         # wait trasitions between screens to avoid errors in layers number
         self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -2818,6 +2821,8 @@ class WebappInternal(Base):
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
 
+                labels_list_filtered = list(filter(lambda x: self.element_is_displayed(x), labels_list_filtered))
+                
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
@@ -4264,20 +4269,6 @@ class WebappInternal(Base):
         self.restart_counter += 1
         self.log_error(message)
 
-    def get_function_from_stack(self):
-        """
-        [Internal]
-
-        Gets the function name that called the Webapp class from the call stack.
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
-        """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
-
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
         [Internal]
@@ -5723,6 +5714,7 @@ class WebappInternal(Base):
         """
         index_number = []
         count = 0
+        column_not_found = None
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and len(index_number) < 1 and count <= 3:
@@ -5740,10 +5732,17 @@ class WebappInternal(Base):
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
                     elif itens:
-                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                        matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column_itens:
+                            column_not_found = first_column
+                            break
+                        index_number = df.loc[(df[matched_column_itens] == first_content)].index.array
                     elif first_column and first_content:
-                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        first_column_values = df[first_column].values
+                        matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column:
+                            column_not_found = first_column
+                            break
+                        first_column_values = df[matched_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
                         if content:
@@ -5772,6 +5771,9 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(f"Content doesn't found on the screen! {str(e)}")
+
+        if column_not_found:
+            self.log_error(f"Column doesn't found on the screen! {column_not_found}")
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
@@ -8693,8 +8695,10 @@ class WebappInternal(Base):
             system_info()
 
         stack_item = self.log.get_testcase_stack()
-        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
-        log_message = f"{test_number} {message}"
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+        test_number = f"{stack_item.split('_')[-1]} - " if stack_item else ""
+        log_message = f"{entrypoint_prefix}{test_number}{message}"
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
