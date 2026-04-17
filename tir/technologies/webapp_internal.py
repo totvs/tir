@@ -2821,6 +2821,8 @@ class WebappInternal(Base):
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
 
+                labels_list_filtered = list(filter(lambda x: self.element_is_displayed(x), labels_list_filtered))
+                
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
