@@ -2524,6 +2524,10 @@ class WebappInternal(Base):
         menupopup = 'wa-menu-popup.dict-tmenu'
         checkbox_term = "wa-checkbox"
 
+        # The columns to be searched
+        search_column_items: list[str] = search_column.split(',')
+        search_column_items = [x.strip().lower().replace(" ", "") for x in search_column_items]
+
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
 
@@ -2552,23 +2556,29 @@ class WebappInternal(Base):
 
         # Uncheck all checkbox inputs
         checkbox_selected = tmenupopup().select(checkbox_term)
-        checkbox_selected = list(filter(lambda x: x.attrs and 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected))
 
+        # Checkbox filtered if is checked, not hidden, and will be searched
+        checkbox_selected = list(filter(
+            lambda x: x.attrs and 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected)
+        )
+        
         for checkbox in checkbox_selected:
-            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(checkbox), click_type=3)
+            caption = checkbox.attrs["caption"].lower().replace(" ", "") 
+            if caption not in search_column_items: 
+                self.send_action(action=self.click, element=lambda: self.soup_to_selenium(checkbox), click_type=3)
+            else:
+                search_column_items = list(filter(lambda col: col != caption, search_column_items))
 
         # Check checkbox inputs
         spans = tmenupopup().select(checkbox_term)
         spans = list(filter(lambda x: x.attrs and 'hidden' not in x.attrs, spans))
 
-        search_column_itens = search_column.split(',')
-        search_column_itens = [x.strip() for x in search_column_itens]
-        for item in search_column_itens:
+        for item in search_column_items:
             span = next(iter(list(filter(lambda x: x.attrs and x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
             if not span:
                 self.log_error(f"Couldn't search the column: {item} on screen.")
+            
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-
 
     def fill_search_browse(self, term, search_elements):
         """
