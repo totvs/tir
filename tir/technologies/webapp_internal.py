@@ -1985,7 +1985,10 @@ class WebappInternal(Base):
             success = menu_screen and container_layers
 
             logger().debug(f'Check Menu Screen: {menu_screen}')
-            logger().debug(f'wa-dialog layers: {container_layers}')        
+            logger().debug(f'wa-dialog layers: {container_layers}')
+
+        if not success:
+            self.log_error('Home screen not found!')     
         
         # wait trasitions between screens to avoid errors in layers number
         self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -4263,20 +4266,6 @@ class WebappInternal(Base):
             time.sleep(1)
         self.restart_counter += 1
         self.log_error(message)
-
-    def get_function_from_stack(self):
-        """
-        [Internal]
-
-        Gets the function name that called the Webapp class from the call stack.
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
-        """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
 
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
@@ -8693,8 +8682,10 @@ class WebappInternal(Base):
             system_info()
 
         stack_item = self.log.get_testcase_stack()
-        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
-        log_message = f"{test_number} {message}"
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+        test_number = f"{stack_item.split('_')[-1]} - " if stack_item else ""
+        log_message = f"{entrypoint_prefix}{test_number}{message}"
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
