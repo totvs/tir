@@ -8698,7 +8698,7 @@ class WebappInternal(Base):
         entrypoint_function = self.utils.get_main_entrypoint_from_stack()
         entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
         test_number = f"{stack_item.split('_')[-1]} - " if stack_item else ""
-        log_message = f"{entrypoint_prefix}{test_number}{message}"
+        log_message = f"{test_number}{entrypoint_prefix}{message}"
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
