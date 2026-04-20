@@ -4300,14 +4300,17 @@ class WebappInternal(Base):
         disabledMessage = "{} Field \"{}\" is disabled."
         assertErrorMessage = "Failed: Value expected for field {}: \"{}\" is different from what was found \"{}\"."
 
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint = f" [{entrypoint_function}]" if entrypoint_function and entrypoint_function != "function_name" else ""
+
         if message_type == enum.MessageType.INCORRECT:
-            return incorrectMessage.format(args[0], args[1], args[2], args[3])
+            return entrypoint + incorrectMessage.format(args[0], args[1], args[2], args[3])
         elif message_type == enum.MessageType.DISABLED:
-            return disabledMessage.format(args[0], args[1])
+            return entrypoint + disabledMessage.format(args[0], args[1])
         elif message_type == enum.MessageType.ASSERTERROR:
-            return assertErrorMessage.format(args[0], args[1], args[2])
+            return entrypoint + assertErrorMessage.format(args[0], args[1], args[2])
         else:
-            return correctMessage.format(args[0], args[1])
+            return entrypoint + correctMessage.format(args[0], args[1])
 
     def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container="", check_error=True, twebview=False, second_term=None):
         """
@@ -8462,6 +8465,10 @@ class WebappInternal(Base):
         >>> oHelper.CheckView("Text",element_type=text-view)
         >>> #-----------------------------------------
         """
+
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
@@ -8472,10 +8479,10 @@ class WebappInternal(Base):
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if self.webapp_shadowroot():
                 if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
-                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                    self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
             else:
                 if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
-                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                    self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
         if element_type == "message-box":
             logger().info(f"Checking text on screen: {text}")
@@ -8484,7 +8491,7 @@ class WebappInternal(Base):
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
         if element_type == "text-view":
             logger().info(f"Checking text on screen: {text}")
@@ -8493,7 +8500,7 @@ class WebappInternal(Base):
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
 
     def try_send_keys(self, element_function, key, try_counter=1):
@@ -8698,7 +8705,7 @@ class WebappInternal(Base):
         entrypoint_function = self.utils.get_main_entrypoint_from_stack()
         entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
         test_number = f"{stack_item.split('_')[-1]} - " if stack_item else ""
-        log_message = f"{entrypoint_prefix}{test_number}{message}"
+        log_message = f"{test_number}{entrypoint_prefix}{message}"
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
