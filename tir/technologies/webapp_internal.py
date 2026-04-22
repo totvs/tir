@@ -5617,7 +5617,7 @@ class WebappInternal(Base):
                 element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)), None)
 
                 if element:
-                    box = lambda: self.get_element_size
+                    box = lambda: element
                     self.click(box())
 
             else:
@@ -5688,17 +5688,11 @@ class WebappInternal(Base):
             pass
 
     def move_to_next_grid_chunk(self, grid_local, previous_df, grid_number=0):
-        first_element_focus = next(iter(grid_local.select('tbody > tr > td')), None)
-        
-        if not first_element_focus:
-            first_element_focus = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('tbody tr td')", 
-                                                             self.soup_to_selenium(grid_local))
+        sel_grid = self.soup_to_selenium(grid_local)
+        first_element_focus = next(iter(self.execute_js_selector('tbody tr td', sel_grid)), None)
 
         if first_element_focus:
-            try:
-                first_element_focus.click()
-            except Exception:
-                pass
+            self.click(first_element_focus, click_type=enum.ClickType.SELENIUM)
 
         ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
         self.wait_blocker()
@@ -5748,9 +5742,21 @@ class WebappInternal(Base):
                 return matches
 
             if first_column and second_column:
+                if first_column not in df_local.columns:
+                    column_not_found = first_column
+                    return matches
+                if second_column not in df_local.columns:
+                    column_not_found = second_column
+                    return matches
                 return list(df_local.loc[(df_local[first_column] == first_content) & (df_local[second_column] == second_content)].index.array)
 
             if first_column and (first_content and second_content):
+                if not isinstance(first_column, list) or not first_column:
+                    column_not_found = first_column
+                    return matches
+                if first_column[0] not in df_local.columns:
+                    column_not_found = first_column[0]
+                    return matches
                 return list(df_local.loc[(df_local[first_column[0]] == first_content) | (df_local[first_column[0]] == second_content)].index.array)
 
             if itens:
@@ -5909,30 +5915,37 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = self.grid_selectors["new_web_app"]
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         grid = self.get_grid(grid_number=grid_number)
 
-        if self.webapp_shadowroot():
+        try:
             shadow_grid = self.soup_to_selenium(grid)
-            shadow_table = next(iter(self.execute_js_selector('table', shadow_grid)),None)
+            shadow_table = next(iter(self.execute_js_selector('table', shadow_grid)), None)
+
+            if not shadow_table:
+                return (pd.DataFrame(), grid)
+
             shadow_html = shadow_table.get_attribute('outerHTML')
-            df = (next(iter(pd.read_html(StringIO(shadow_html)))))
-        else:
-            df = (next(iter(pd.read_html(StringIO(grid)))))
+            df_raw = next(iter(pd.read_html(StringIO(shadow_html))), pd.DataFrame())
 
-        converters = {c: lambda x: str(x) for c in df.columns}
+            if df_raw is None or df_raw.empty:
+                return (pd.DataFrame(), grid)
 
-        if self.webapp_shadowroot():
-            df, grid = (next(iter(pd.read_html(StringIO(shadow_html), converters=converters)), None), grid)
-        else:
-            df, grid = (next(iter(pd.read_html(StringIO(grid), converters=converters)), None), grid)
+            converters = {c: lambda x: str(x) for c in df_raw.columns}
+            df = next(iter(pd.read_html(StringIO(shadow_html), converters=converters)), pd.DataFrame())
 
-        if not df.empty:
-            df = df.fillna('Not Value')
+            if df is None:
+                df = pd.DataFrame()
+
+            if not df.empty:
+                df = df.fillna('Not Value')
+
             return (df, grid)
+        except Exception:
+            return (pd.DataFrame(), grid)
 
     def wait_element_is_blocked(self, parent_id):
         """
