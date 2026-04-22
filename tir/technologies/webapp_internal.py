@@ -5710,10 +5710,10 @@ class WebappInternal(Base):
         sel_grid = self.soup_to_selenium(grid_local)
         tr_local = self.execute_js_selector('tbody > tr', sel_grid)
         if not tr_local or len(tr_local) - 1 < row_index:
-            return None, None, tr_local
+            return None, None
         row_local = tr_local[row_index]
         target_td = next(iter(row_local.find_elements(By.CSS_SELECTOR, 'td')), None)
-        return row_local, target_td, tr_local
+        return row_local, target_td
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
         """
@@ -5793,7 +5793,7 @@ class WebappInternal(Base):
             if index_number:
                 for idx in list(index_number):
                     index = int(idx)
-                    row_element, element_td, tr = self.get_row_target_element(grid, index)
+                    row_element, element_td = self.get_row_target_element(grid, index)
 
                     if not element_td:
                         continue
