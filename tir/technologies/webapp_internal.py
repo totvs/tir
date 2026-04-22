@@ -5707,7 +5707,7 @@ class WebappInternal(Base):
             return None, None
         row_local = tr_local[row_index]
         target_td = next(iter(row_local.find_elements(By.CSS_SELECTOR, 'td')), None)
-        return row_local, target_td
+        return target_td
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
         """
@@ -5732,7 +5732,6 @@ class WebappInternal(Base):
         clicked_any = False
         reached_end = False
         column_not_found = None
-        clicked_signatures = set()
 
         def find_matches_in_df(df_local):
             nonlocal column_not_found
@@ -5799,23 +5798,19 @@ class WebappInternal(Base):
             if index_number:
                 for idx in list(index_number):
                     index = int(idx)
-                    row_element, element_td = self.get_row_target_element(grid, index)
+                    element_td = self.get_row_target_element(grid, index)
 
                     if not element_td:
                         continue
 
-                    row_signature = row_element.text if hasattr(row_element, 'text') else f"row_{index}"
-                    if itens and row_signature in clicked_signatures:
-                        continue
-
                     self.set_grid_focus(grid_number)
                     self.click(element_td, click_type=enum.ClickType.SELENIUM)
-
+                    self.wait_blocker()
+                    
                     clicked_result = self.performing_additional_click(element_td, grid_number=grid_number)
 
                     if clicked_result:
                         clicked_any = True
-                        clicked_signatures.add(row_signature)
 
                     if not itens and clicked_result:
                         success = True
@@ -5870,19 +5865,16 @@ class WebappInternal(Base):
         logger().debug(f'Before: {last_box_state}')         
         
         while time.time() < endtime and not success:
-            soup = self.get_current_DOM()
-            term = "wa-dialog"
-            tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(term)))
-            tmodal_layer = len(tmodal_list) if tmodal_list else 0
+            term_layer = 'wa-dialog'
+            tmodal_layer = self.check_layers(term_layer)
 
             self.set_grid_focus(grid_number)
 
             ActionChains(self.driver).move_to_element(element_td).send_keys(Keys.ENTER).perform()
 
             self.wait_blocker()
-            time.sleep(1)
 
-            tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+            tmodal = self.element_exists(term=term_layer, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                             main_container="body", check_error=False,
                                             position=tmodal_layer + 1)
             if tmodal:
