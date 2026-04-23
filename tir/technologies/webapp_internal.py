@@ -9339,6 +9339,11 @@ class WebappInternal(Base):
 
             self.expected = not self.expected
 
+        if not self.errors and script_message:
+            entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+            entrypoint = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+            script_message = entrypoint + script_message
+
         if self.expected:
             self.message = "" if not self.errors else log_message
             self.log.new_line(True, self.message)
