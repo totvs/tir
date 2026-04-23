@@ -5689,7 +5689,7 @@ class WebappInternal(Base):
             elif click_type == 2:
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 3:
-                element().click()
+                self.click(element(), enum.ClickType.SELENIUM)
                 ActionChains(self.driver).move_to_element(element()).send_keys(Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
