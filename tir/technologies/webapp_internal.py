@@ -1985,7 +1985,10 @@ class WebappInternal(Base):
             success = menu_screen and container_layers
 
             logger().debug(f'Check Menu Screen: {menu_screen}')
-            logger().debug(f'wa-dialog layers: {container_layers}')        
+            logger().debug(f'wa-dialog layers: {container_layers}')
+
+        if not success:
+            self.log_error('Home screen not found!')     
         
         # wait trasitions between screens to avoid errors in layers number
         self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -2172,12 +2175,10 @@ class WebappInternal(Base):
             self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
             return
 
-
     def _is_new_browse(self, throw_error=True, timeout=None):
         browse_div = self._find_search_browse(throw_error=throw_error, timeout=timeout)
 
         return browse_div.name == 'thf-grid' if browse_div else False
-
 
     def longest_word(self, string):
         words = string.split()
@@ -2835,6 +2836,8 @@ class WebappInternal(Base):
                 else:
                     labels_list_filtered = list(filter(lambda x: 'th' not in self.element_name(x.parent.parent) , view_filtred))
 
+                labels_list_filtered = list(filter(lambda x: self.element_is_displayed(x), labels_list_filtered))
+                
                 if labels_list_filtered and len(labels_list_filtered) -1 >= position:
                     label = labels_list_filtered[position]
 
@@ -4281,20 +4284,6 @@ class WebappInternal(Base):
         self.restart_counter += 1
         self.log_error(message)
 
-    def get_function_from_stack(self):
-        """
-        [Internal]
-
-        Gets the function name that called the Webapp class from the call stack.
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
-        """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
-
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
         [Internal]
@@ -4326,14 +4315,17 @@ class WebappInternal(Base):
         disabledMessage = "{} Field \"{}\" is disabled."
         assertErrorMessage = "Failed: Value expected for field {}: \"{}\" is different from what was found \"{}\"."
 
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint = f" [{entrypoint_function}]" if entrypoint_function and entrypoint_function != "function_name" else ""
+
         if message_type == enum.MessageType.INCORRECT:
-            return incorrectMessage.format(args[0], args[1], args[2], args[3])
+            return entrypoint + incorrectMessage.format(args[0], args[1], args[2], args[3])
         elif message_type == enum.MessageType.DISABLED:
-            return disabledMessage.format(args[0], args[1])
+            return entrypoint + disabledMessage.format(args[0], args[1])
         elif message_type == enum.MessageType.ASSERTERROR:
-            return assertErrorMessage.format(args[0], args[1], args[2])
+            return entrypoint + assertErrorMessage.format(args[0], args[1], args[2])
         else:
-            return correctMessage.format(args[0], args[1])
+            return entrypoint + correctMessage.format(args[0], args[1])
 
     def element_exists(self, term, scrap_type=enum.ScrapType.TEXT, position=0, optional_term="", main_container="", check_error=True, twebview=False, second_term=None):
         """
@@ -5740,6 +5732,7 @@ class WebappInternal(Base):
         """
         index_number = []
         count = 0
+        column_not_found = None
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and len(index_number) < 1 and count <= 3:
@@ -5757,10 +5750,17 @@ class WebappInternal(Base):
                     elif first_column and (first_content and second_content):
                         index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
                     elif itens:
-                        index_number = df.loc[(df[first_column] == first_content)].index.array
+                        matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column_itens:
+                            column_not_found = first_column
+                            break
+                        index_number = df.loc[(df[matched_column_itens] == first_content)].index.array
                     elif first_column and first_content:
-                        first_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        first_column_values = df[first_column].values
+                        matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
+                        if not matched_column:
+                            column_not_found = first_column
+                            break
+                        first_column_values = df[matched_column].values
                         first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
                         content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
                         if content:
@@ -5789,6 +5789,9 @@ class WebappInternal(Base):
 
             except Exception as e:
                 logger().exception(f"Content doesn't found on the screen! {str(e)}")
+
+        if column_not_found:
+            self.log_error(f"Column doesn't found on the screen! {column_not_found}")
 
         if len(index_number) < 1:
             logger().exception(f"Content doesn't found on the screen! {first_content}")
@@ -8477,6 +8480,10 @@ class WebappInternal(Base):
         >>> oHelper.CheckView("Text",element_type=text-view)
         >>> #-----------------------------------------
         """
+
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+
         if element_type == "help":
             logger().info(f"Checking text on screen: {text}")
             if self.webapp_shadowroot():
@@ -8487,10 +8494,10 @@ class WebappInternal(Base):
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.MIXED, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if self.webapp_shadowroot():
                 if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=term, main_container="wa-text-view", check_error=False):
-                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                    self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
             else:
                 if not self.element_exists(term=text, scrap_type=enum.ScrapType.MIXED, optional_term=".tsay", check_error=False):
-                    self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                    self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
         if element_type == "message-box":
             logger().info(f"Checking text on screen: {text}")
@@ -8499,7 +8506,7 @@ class WebappInternal(Base):
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
         if element_type == "text-view":
             logger().info(f"Checking text on screen: {text}")
@@ -8508,7 +8515,7 @@ class WebappInternal(Base):
 
             self.wait_element_timeout(term=text, scrap_type=enum.ScrapType.TEXT, timeout=2.5, step=0.5, optional_term=term, check_error=False)
             if not self.element_exists(term=text, scrap_type=enum.ScrapType.TEXT, main_container=term, check_error=False):
-                self.errors.append(f"{self.language.messages.text_not_found}({text})")
+                self.errors.append(f"{entrypoint_prefix}{self.language.messages.text_not_found}({text})")
 
 
     def try_send_keys(self, element_function, key, try_counter=1):
@@ -8710,8 +8717,10 @@ class WebappInternal(Base):
             system_info()
 
         stack_item = self.log.get_testcase_stack()
-        test_number = f"{stack_item.split('_')[-1]} -" if stack_item else ""
-        log_message = f"{test_number} {message}"
+        entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+        entrypoint_prefix = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+        test_number = f"{stack_item.split('_')[-1]} - " if stack_item else ""
+        log_message = f"{test_number}{entrypoint_prefix}{message}"
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
@@ -9653,6 +9662,7 @@ class WebappInternal(Base):
         logger().info(f"Clicking on Tree: {treepath}")
 
         hierarchy = None
+        elements = []
 
         position -= 1
         tree_number = tree_number-1 if tree_number > 0 else 0
@@ -9687,36 +9697,36 @@ class WebappInternal(Base):
 
                 # Get tree node
                 tree_node = self.find_tree_bs(label_filtered, tree_number)
-                # Filter out hidden nodes
-                non_hidden_tree_nodes = list(filter(lambda x: not x.get_attribute('hidden'), tree_node))
 
-                # Filter node elements matching the label displayed
-                filtered_nodes = list(
-                    filter(lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and self.element_is_displayed(x),
-                           non_hidden_tree_nodes))
+                # Filter node elements matching the label and displayed and not hidden
+                filtered_nodes = list(filter(
+                                    lambda x: label_filtered in re.sub(r'[ ]{2,}', ' ', x.text).lower().strip() and 
+                                              self.element_is_displayed(x) and
+                                              not x.get_attribute('hidden')
+                                , tree_node))
 
                 if filtered_nodes:
                     if position:
                         elements = filtered_nodes[position] if len(filtered_nodes) >= position + 1 else next(iter(filtered_nodes))
-                        if hierarchy:
-                            elements = elements if elements.attrs['hierarchy'].startswith(hierarchy) and elements.attrs[
-                                'hierarchy'] != hierarchy else None
+                        elements = [elements]
                     else:
-                        elements = list(filter(lambda x: self.element_is_displayed(x), filtered_nodes))
+                        elements = filtered_nodes
 
-                        if hierarchy:
-                            if not self.webapp_shadowroot():
-                                elements = list(filter(lambda x: x.attrs['hierarchy'].startswith(hierarchy) and x.attrs[
-                                    'hierarchy'] != hierarchy, filtered_nodes))
+                    if hierarchy:
+                        elements = list(filter(                            
+                                lambda x: x.get_attribute('hierarchy') and 
+                                          x.get_attribute('hierarchy').startswith(hierarchy) and 
+                                          x.get_attribute('hierarchy') != hierarchy
+                            , elements))
 
                     for element in elements:
                         if not success:
                             # get node elements to click
-                            element_class = self.execute_js_selector('.toggler, .lastchild, .data, label',
-                                                                     element, get_all=True)
+                            element_class = self.execute_js_selector('.toggler, .lastchild, .data, label', element, get_all=True)
+                            
                             if not element_class:
-                                element_class = self.execute_js_selector('.icon',
-                                                                     element, get_all=True)
+                                element_class = self.execute_js_selector('.icon', element, get_all=True)
+                            
                             if not element_class:
                                 if element.get_attribute('icon') != None:
                                     element_class = [element]
@@ -9725,79 +9735,59 @@ class WebappInternal(Base):
                                 if not success:
                                     try:
                                         element_click = lambda: element_class_item
+                                        element_is_closed = lambda: (element.get_attribute('closed') or '').strip().lower() in ('', 'true')
+                                        element_is_selected = lambda: element == self.treenode_selected(label_filtered, tree_number)
 
                                         if last_item:
-                                            self.wait_blocker()
-                                            if self.webapp_shadowroot():
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == ''
-                                                treenode_selected = lambda: self.treenode_selected(label_filtered, tree_number)
-                                                click_try = 0
-                                                is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else treenode_selected()
+                                            # Last node: click the item itself.
+                                            self.wait_blocker()                                            
 
-                                                while click_try < 3 and not is_element_acessible():
-                                                    self.scroll_to_element(element_click())
-                                                    element_click().click()
-                                                    click_try += 1
+                                            is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else element_is_selected()
 
-                                                success = self.check_hierarchy(label_filtered, False)
+                                            click_try = 0
+                                            while click_try < 3 and not is_element_acessible():
+                                                self.scroll_to_element(element_click())
+                                                element_click().click()
+                                                click_try += 1
+
+                                            success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
+
+                                            # If dialog layers show up through last click
+                                            if not success and dialog_layers < self.check_layers('wa-dialog'):
+                                                success = True
+
+                                            if success and right_click:
+                                                last_zindex = self.return_last_zindex()
+                                                current_zindex = last_zindex
+                                                check_popup = lambda: self.element_exists(term=".tmenupopup, wa-menu-popup-item", 
+                                                                                          scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                                                          main_container="body", check_error=False)
                                                 
-                                                if not success:
-                                                    success = True if is_element_acessible() else False
-
-                                                    # If dialog layers show up through last click
-                                                    if not success and dialog_layers < self.check_layers('wa-dialog'):
-                                                        success = True
-
-                                                if success and right_click:
-                                                    last_zindex = self.return_last_zindex()
-                                                    current_zindex = last_zindex
-                                                    
-                                                    endtime_right_click = time.time() + self.config.time_out / 3
-                                                    while time.time() < endtime_right_click and last_zindex <= current_zindex:
-                                                        if self.webapp_shadowroot():
-                                                            self.click(element_click(), enum.ClickType.SELENIUM,
-                                                                    right_click)
-                                                            current_zindex = self.return_last_zindex()
-                                                        else:
-                                                            self.send_action(action=self.click, element=element_click, right_click=right_click)
-                                            else:
-                                                self.scroll_to_element(element_click())
-                                                element_click().click()
-                                                if self.check_toggler(label_filtered, element):
-                                                    success = self.check_hierarchy(label_filtered)
-                                                    if success and right_click:
-                                                        self.send_action(action=self.click, element=element_click, right_click=right_click)
-                                                else:
-                                                    if right_click:
-                                                        self.send_action(action=self.click, element=element_click,
-                                                                         right_click=right_click)
-                                                    success = self.clicktree_status_selected(label_filtered)
+                                                endtime_right_click = time.time() + self.config.time_out / 3
+                                                while time.time() < endtime_right_click and (last_zindex >= current_zindex and not check_popup()):
+                                                    self.click(element_click(), enum.ClickType.SELENIUM, right_click)
+                                                    current_zindex = self.return_last_zindex()
                                         else:
-                                            if self.webapp_shadowroot():
-                                                self.tree_base_element = label_filtered, element_class_item
-                                                element_is_closed = lambda: element.get_attribute('closed') == 'true' or element.get_attribute('closed') == '' or not self.treenode_selected(label_filtered, tree_number)
-                                                self.scroll_to_element(element_click())
+                                            # Intermediate node: expand to reach children.
+                                            self.tree_base_element = label_filtered, element_class_item
+                                            self.scroll_to_element(element_click())
 
-                                                click_try = 0
-                                                while click_try < 3 and element_is_closed():
-                                                    if (element.get_attribute('closed') == 'true' or
-                                                            element.get_attribute('closed') == ''):
-                                                        element_click().click()
+                                            click_try = 0
+                                            while click_try < 3 and (element_is_closed() or not element_is_selected()):
+                                                if element_is_closed():
+                                                    element_click().click()
 
-                                                    element_closed_click = self.execute_js_selector(".toggler, .lastchild, .data", element_click(), get_all=False)
+                                                element_closed_click = self.execute_js_selector(".toggler, .lastchild, .data", element_click(), get_all=False)
 
-                                                    if element_closed_click:
-                                                        element_closed_click.click()
+                                                if element_closed_click:
+                                                    element_closed_click.click()
 
-                                                    click_try += 1
-                                            else:
-                                                self.tree_base_element = label_filtered, self.soup_to_selenium(element_class_item)
-                                                self.scroll_to_element(element_click())
-                                                element_click().click()
+                                                click_try += 1
+                                            
                                             success = self.check_hierarchy(label_filtered)
 
                                         try_counter += 1
-                                    except:
+                                    except Exception as e:
                                         pass
 
                                 if not success:
@@ -9812,10 +9802,7 @@ class WebappInternal(Base):
             if not last_item:
                 treenode_selected = self.treenode_selected(label_filtered, tree_number)
                 if treenode_selected:
-                    if self.webapp_shadowroot():
-                        hierarchy = treenode_selected.get_attribute('hierarchy')
-                    else:
-                        hierarchy = treenode_selected.attrs['hierarchy']
+                    hierarchy = treenode_selected.get_attribute('hierarchy')
 
         if not success:
             self.log_error(f"Couldn't click on tree element {label}.")
@@ -9830,10 +9817,7 @@ class WebappInternal(Base):
 
         tree_node = ""
 
-        if self.webapp_shadowroot():
-            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".dict-ttree")
-        else:
-            self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".ttreenode, .data")
+        self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".dict-ttree")
 
         endtime = time.time() + self.config.time_out
 
@@ -9841,14 +9825,11 @@ class WebappInternal(Base):
 
             container = self.get_current_container()
 
-            if self.webapp_shadowroot():
-                tree = container.select("wa-tree")
-                if len(tree) >= tree_number:
-                    tree = tree[tree_number]
-                    tree_node = self.execute_js_selector('wa-tree-node',
-                                             self.soup_to_selenium(tree), get_all=True)
-            else:
-                tree_node = container.select(".ttreenode")
+            tree = container.select("wa-tree")
+            if len(tree) >= tree_number:
+                tree = tree[tree_number]
+                tree_node = self.execute_js_selector('wa-tree-node',
+                                            self.soup_to_selenium(tree), get_all=True)
 
         if not tree_node:
             self.log_error("Couldn't find tree element.")
@@ -9865,57 +9846,16 @@ class WebappInternal(Base):
         treenode_selected = self.treenode_selected(label_filtered)
 
         if not check_expanded:
-            if treenode_selected:
-                return True
-            else:
-                return False
+            return True if treenode_selected else False
         else:
-            if self.webapp_shadowroot():
-                tree_selected = self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False)
-                if tree_selected:
-                    return not treenode_selected.get_attribute('closed')
-            else:
-                tree_selected = next(iter(list(filter(lambda x: label_filtered == x.text.lower().strip(), treenode_selected))), None)
-                if tree_selected.find_all_next("span"):
-                    if "toggler" in next(iter(tree_selected.find_all_next("span"))).attrs['class']:
-                        return "expanded" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-                else:
-                    return False
+            tree_selected = self.execute_js_selector('span[class~=toggler]', treenode_selected, get_all=False)
+            if tree_selected:
+                return not treenode_selected.get_attribute('closed')
 
     def check_toggler(self, label_filtered, element):
         """
         [Internal]
         """
-
-        if self.webapp_shadowroot:
-            return self.check_toggler_shadow(element)
-
-        element_id = element.get_attribute_list('id')
-        tree_selected = self.treenode_selected(label_filtered)
-
-        if tree_selected:
-            if tree_selected.find_all_next("span"):
-                first_span = next(iter(tree_selected.find_all_next("span"))).find_parent('tr')
-                if first_span:
-                    if next(iter(element_id)) == next(iter(first_span.get_attribute_list('id'))):
-                        try:
-                            return "toggler" in next(iter(tree_selected.find_all_next("span")), None).attrs['class']
-                        except:
-                            return False
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-        
-    def check_toggler_shadow(self, element):
-        """
-        [Internal]
-        """
-
         return True if self.execute_js_selector('span[class~=toggler]', element, get_all=False) else False
 
 
@@ -9927,10 +9867,7 @@ class WebappInternal(Base):
 
         ttreenode = self.treenode(tree_number)
 
-        if self.webapp_shadowroot():
-            treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class') or x.get_attribute('selected'), ttreenode))
-        else:
-            treenode_selected = list(filter(lambda x: "selected" in x.attrs['class'], ttreenode))
+        treenode_selected = list(filter(lambda x: "selected" in x.get_attribute('class') or x.get_attribute('selected'), ttreenode))
 
         return next(iter(list(filter(lambda x: label_filtered == re.sub(r'[ ]{2,}', ' ', x.text).lower().strip(), treenode_selected))), None)
 
@@ -9950,15 +9887,10 @@ class WebappInternal(Base):
         container = self.get_current_container()
         tr = []
 
-        if self.webapp_shadowroot():
-            bs_tree_node = container.select('wa-tree')
-            if bs_tree_node and len(bs_tree_node) > tree_number:
-                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
-            return tr
-        else:
-            tr = container.select("tr")
-            tr_class = list(filter(lambda x: "class" in x.attrs, tr))
-            return list(filter(lambda x: "ttreenode" in x.attrs['class'], tr_class))
+        bs_tree_node = container.select('wa-tree')
+        if bs_tree_node and len(bs_tree_node) > tree_number:
+            tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+        return tr
 
     def check_hierarchy(self, label, check_expanded=True):
         """
@@ -9979,25 +9911,14 @@ class WebappInternal(Base):
 
         node_check = None
 
-        if self.webapp_shadowroot():
-            while (counter <= 3 and not node_check):
-                treenode_parent_id = self.treenode_selected(label)
-                if treenode_parent_id:
-                    treenode_parent_id = treenode_parent_id.get_attribute('id')
-                    treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
-                    node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.get_attribute('parentid'),
-                                                       treenode))), None)
-                counter += 1
-        else:
-            while (counter <= 3 and not node_check):
-
-                treenode_parent_id = self.treenode_selected(label).attrs['id']
-
+        while (counter <= 3 and not node_check):
+            treenode_parent_id = self.treenode_selected(label)
+            if treenode_parent_id:
+                treenode_parent_id = treenode_parent_id.get_attribute('id')
                 treenode = list(filter(lambda x: self.element_is_displayed(x), self.treenode()))
-
-                node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.attrs['parentid'], treenode))), None)
-
-                counter += 1
+                node_check = next(iter(list(filter(lambda x: treenode_parent_id == x.get_attribute('parentid'),
+                                                    treenode))), None)
+            counter += 1
 
         return True if node_check else self.clicktree_status_selected(label, check_expanded)
 

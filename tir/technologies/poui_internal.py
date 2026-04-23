@@ -2056,20 +2056,6 @@ class PouiInternal(Base):
         self.restart_counter += 1
         self.log_error(message)
 
-    def get_function_from_stack(self):
-        """
-        [Internal]
-
-        Gets the function name that called the Webapp class from the call stack.
-
-        Usage:
-
-        >>> # Calling the method:
-        >>> self.get_function_from_stack()
-        """
-        stack_item = next(iter(filter(lambda x: x.filename == self.config.routine, inspect.stack())), None)
-        return stack_item.function if stack_item and stack_item.function else "function_name"
-
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
         [Internal]
@@ -3740,20 +3726,38 @@ class PouiInternal(Base):
         if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
             return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
-    def po_loading(self, selector):
+    def _po_loading(self, selector: str = '') -> None:
+        """
+        [Internal]
+        
+        Waits for po-loading component to disappear, indicating that the page loading is complete.
+        
+        Searches within a specified container (or entire body if not specified) and waits for 
+        the po-loading element to be absent from the DOM.
+        
+        :param selector: CSS selector of the container to monitor. If empty, searches entire body. - **Default:** '' (empty string)
+        :type selector: str
+        
+        :return: None
+        :rtype: None
+        
+        Usage:
+        
+        >>> # Wait for loading to complete in entire page
+        >>> self._po_loading()
+        >>> # Wait for loading to complete within a specific dialog
+        >>> self._po_loading('wa-dialog')
         """
 
-        :return:
-        """
-        loading = True
+        logger().info("Waiting loading...")
 
-        endtime = time.time() + 300
-        while loading and time.time() < endtime:
-            container = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       main_container='body')
+        main_container = selector or 'body'
 
-            loading = True if list(filter(lambda x: x.select('po-loading'), container)) else False
+        self.wait_element(term='po-loading', scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                          presence=False, main_container=main_container)
 
+        logger().info("Loading finished!")
+        
     def click_select(self, field, value, position):
         """
         
@@ -3762,7 +3766,6 @@ class PouiInternal(Base):
         :param position: Position which element is located. - **Default:** 1
         """
 
-        position -= 1
         main_element = None
         trated_field = field.strip()
         select_bs = []
@@ -3778,7 +3781,7 @@ class PouiInternal(Base):
             po_select_bs = self.web_scrap(term='po-select', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
 
             if po_select_bs:
-                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x), po_select_bs))), None)
+                select_element_filtred = next(iter(list(filter(lambda x: self.filter_label_element(trated_field, x, position), po_select_bs))), None)
                 if select_element_filtred:
                     self.switch_to_iframe()
                     select_bs = select_element_filtred.find_next('select')
@@ -4503,7 +4506,7 @@ class PouiInternal(Base):
 
         table_number -= 1
 
-        self.po_loading(selector='wa-dialog')
+        self._po_loading()
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -5364,7 +5367,7 @@ class PouiInternal(Base):
                                                     main_container='body')), None)
             
             self.InputValue(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-            self.po_loading(self.containers_selectors['GetCurrentContainer'])
+            self._po_loading()
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
             self.click_po_list_box(value=program_desc, second_value=program_name, program_call=True)
@@ -5652,6 +5655,8 @@ class PouiInternal(Base):
         >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
         """
 
+        self._po_loading()
+
         self._remove_filters_from_browse()
 
         self.click_button(self.language.filters)
@@ -5718,7 +5723,7 @@ class PouiInternal(Base):
             clickable = po_tag_filter.select_one('.po-tag-wrapper.po-clickable')
             target = clickable if clickable else po_tag_filter
             self.poui_click(target)
-            self.po_loading(self.containers_selectors['GetCurrentContainer'])
+            self._po_loading()
         else:
             logger().debug("No 'Remove Filters' found; skipping filter removal.")
 
@@ -5923,7 +5928,8 @@ class PouiInternal(Base):
         :type check_error: bool
         """
 
-        logger().info("Switching to the POUI button-click method")
+        self._po_loading()
+
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
 
