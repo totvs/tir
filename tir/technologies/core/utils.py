@@ -1,7 +1,6 @@
+from typing import Iterable, Optional, Set
 import inspect
 import os
-from typing import Iterable, Optional, Set
-
 
 class Utils:
     """Shared utility methods for TIR technologies."""
