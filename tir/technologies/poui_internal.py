@@ -352,7 +352,7 @@ class PouiInternal(Base):
         self.driver_refresh()
 
         if self.config.coverage:
-            self.utils.driver_get(self, f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            self.driver_get(url=f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
@@ -3318,7 +3318,7 @@ class PouiInternal(Base):
         >>> # Call the method:  
         >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
         """
-        self.utils.driver_get(self, f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}") 
+        self.driver_get(url=f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}") 
         
     def returns_printable_string(self, string):
         """

@@ -1,8 +1,5 @@
-from tir.technologies.core.logging_config import logger
-from selenium.common.exceptions import TimeoutException
 from typing import Iterable, Optional, Set
 import inspect
-import time
 import os
 
 class Utils:
@@ -75,38 +72,3 @@ class Utils:
                 return stack_item.function
 
         return fallback
-    
-    def driver_get(self, inst, url: str) -> bool:
-        """Navigate the browser to the given URL with retry logic.
-
-        Attempts to load the URL repeatedly until success or timeout.
-        On ``TimeoutException`` the request is retried; any other exception
-        aborts immediately and logs the error.
-
-        Args:
-            inst: Test instance containing ``driver``, ``config`` and ``log_error``.
-            url: The URL to navigate to.
-
-        Returns:
-            bool: ``True`` if the page loaded successfully, ``False`` otherwise.
-        """
-        endtime = time.time() + inst.config.time_out
-        success = False
-
-        inst.driver.set_page_load_timeout(120)
-
-        while time.time() < endtime and not success:
-            try:
-                inst.driver.get(url)
-                success = True
-            except TimeoutException:
-                logger().info(f"Timeout while loading '{url}'. Retrying...")
-            except Exception as e:
-                logger().error(f"Unexpected error while loading '{url}': {e}")
-                success = False
-                break
-
-        if not success:
-            inst.log_error(f"Failed to load page '{url}' within {inst.config.time_out}s timeout.")
-
-        return success

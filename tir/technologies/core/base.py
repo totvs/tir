@@ -27,6 +27,7 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
@@ -1226,6 +1227,7 @@ class Base(unittest.TestCase):
                 firefox_options.add_argument('-headless')
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
+            self.driver.set_page_load_timeout(120)
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
             driver_path = None
@@ -1261,6 +1263,7 @@ class Base(unittest.TestCase):
 
             service = ChromeService(executable_path=driver_path)
             self.driver = webdriver.Chrome(options=chrome_options, service=service)
+            self.driver.set_page_load_timeout(120)
 
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
@@ -1313,7 +1316,7 @@ class Base(unittest.TestCase):
 
         num_of_trying = 1
         while not get_url and num_of_trying <= 3:
-            self.driver.get(url)
+            self.driver_get(url=url)
 
             if self.config.skip_environment:
                 return
@@ -1331,6 +1334,32 @@ class Base(unittest.TestCase):
             except:
                 num_of_trying += 1
                 logger().info(f"Loading took too much time! num_of_trying: {str(num_of_trying)}")
+
+    def driver_get(self, url: str) -> None:
+        """Navigate the browser to the given URL with retry logic.
+
+        Attempts to load the URL repeatedly until success or timeout.
+        On ``TimeoutException`` the request is retried; any other exception
+        aborts immediately and logs the error.
+
+        Args:
+            url: The URL to navigate to.
+        """
+        endtime = time.time() + self.config.time_out
+        success = False
+
+        while time.time() < endtime and not success:
+            try:
+                self.driver.get(url)
+                success = True
+            except TimeoutException:
+                logger().info(f"Timeout while loading '{url}'. Retrying...")
+            except Exception as e:
+                logger().error(f"Unexpected error while loading '{url}': {e}")
+                break
+
+        if not success:
+            self.log_error(f"Failed to load page '{url}' within {self.config.time_out}s timeout.")
 
     def TearDown(self):
         """
