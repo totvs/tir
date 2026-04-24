@@ -8988,12 +8988,8 @@ class WebappInternal(Base):
             return
 
         time.sleep(3)
-        try:
-            self.utils.driver_get(self, f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
-                    self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
-        except Exception as e:
-            print(e)
-            pass
+        self.utils.driver_get(self, f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
         while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
             scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
