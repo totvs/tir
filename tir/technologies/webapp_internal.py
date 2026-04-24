@@ -750,7 +750,7 @@ class WebappInternal(Base):
         self.restart_browser()
 
         if self.config.coverage:
-            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            self.utils.driver_get(self, f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program, environment=server_environment)
@@ -8896,8 +8896,11 @@ class WebappInternal(Base):
 
             logger().debug(f"Adding parameter url...")
 
-            self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
-                branch}&a={value}&Env={self.config.environment}""")
+            self.utils.driver_get(
+                inst = self,
+                url = f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                      branch}&a={value}&Env={self.config.environment}"""
+            )
 
             logger().debug(f"Parameter Url added")
 
@@ -8917,7 +8920,7 @@ class WebappInternal(Base):
                 if ( not tmessagebox and time.time() >= halftime):
                     halftime = time.time() + 30
                     logger().info(f"Enter if tmessagebox: {parameter}")
-                    self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                    self.utils.driver_get(self, f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                         branch}&a={value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
@@ -8985,8 +8988,12 @@ class WebappInternal(Base):
             return
 
         time.sleep(3)
-        self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
-                self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
+        try:
+            self.utils.driver_get(self, f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                    self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
+        except Exception as e:
+            print(e)
+            pass
 
         while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
             scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body', twebview=twebview)):
@@ -9001,14 +9008,14 @@ class WebappInternal(Base):
 
             if ( not tmessagebox and ((endtime) - time.time() < halftime) and not try_counter):
                 logger().info(f"parameter_url: {function_to_call} again")
-                self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                self.utils.driver_get(self, f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                         self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
                 try_counter = True
 
 
         time.sleep(3)
         logger().info(f"Finish parameter_url while")
-        self.driver.get(self.config.url)
+        self.utils.driver_get(self, self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, self.config.module, save_input=not self.config.autostart)
 
@@ -11024,7 +11031,7 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
         """
-        self.driver.get(f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}")
+        self.utils.driver_get(self, f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}")
 
     def returns_printable_string(self, string):
         """
@@ -12029,7 +12036,7 @@ class WebappInternal(Base):
             if not service_status:
                 self.log_error("Schedule culdn't start")
 
-            self.driver.get(self.config.url)
+            self.utils.driver_get(self, self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group,
                        self.config.branch, self.config.module, save_input=not self.config.autostart)
 
