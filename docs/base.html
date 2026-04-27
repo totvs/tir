@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.driver"><code class="docutils literal notranslate"><span class="pre">Base.driver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.driver_get"><code class="docutils literal notranslate"><span class="pre">Base.driver_get()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_name"><code class="docutils literal notranslate"><span class="pre">Base.element_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
@@ -336,6 +337,19 @@ than the ones defined at <strong>config.json</strong></p>
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.driver">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">driver</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver" title="Link to this definition"></a></dt>
 <dd><p>Property to always get the current shared driver instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.driver_get">
+<span class="sig-name descname"><span class="pre">driver_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver_get" title="Link to this definition"></a></dt>
+<dd><p>Navigate the browser to the given URL with retry logic.</p>
+<p>Attempts to load the URL repeatedly until success or timeout.
+On <code class="docutils literal notranslate"><span class="pre">TimeoutException</span></code> the request is retried; any other exception
+aborts immediately and logs the error.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>url: The URL to navigate to.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -128,7 +128,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_screen_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_screen_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_tmenu_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_tmenu_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_toggler"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_toggler()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_toggler_shadow"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_toggler_shadow()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_value_type"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_value_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_warning_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_warning_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.children_element_count"><code class="docutils literal notranslate"><span class="pre">WebappInternal.children_element_count()</span></code></a></li>
@@ -214,7 +213,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_element_size"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_element_size()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_enchoice_button_ids"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_enchoice_button_ids()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_field"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_field()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_function_from_stack"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_function_from_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_cell"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_grid_content"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_grid_content()</span></code></a></li>
@@ -1835,12 +1833,6 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_toggler_shadow">
-<span class="sig-name descname"><span class="pre">check_toggler_shadow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_toggler_shadow" title="Link to this definition"></a></dt>
-<dd><p>[Internal]</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_value_type">
 <span class="sig-name descname"><span class="pre">check_value_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_value_type" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -3113,18 +3105,6 @@ Internal method of input_value and CheckResult.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">element1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">element2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;Product&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_function_from_stack">
-<span class="sig-name descname"><span class="pre">get_function_from_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_function_from_stack" title="Link to this definition"></a></dt>
-<dd><p>[Internal]</p>
-<p>Gets the function name that called the Webapp class from the call stack.</p>
-<p>Usage:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_function_from_stack</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
