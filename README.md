@@ -140,7 +140,7 @@ Após a configuração do ambiente virtual iremos definir o interpretador do VSc
 
 ## Contact
 
-[Gitter](https://gitter.im/totvs-tir/General)
+[Gitter](https://app.element.io/#/room/#totvs-tir_General:gitter.im)
 
 ## Contributing
 
