@@ -5663,7 +5663,7 @@ class WebappInternal(Base):
                 if not success:
                     self.log_error("Couldn't find ClickBox item")
 
-    def performing_click(self, element_bs4, class_grid, click_type=1):
+    def performing_click(self, element_bs4, click_type=1):
         """
         [Internal]
 
@@ -5874,6 +5874,7 @@ class WebappInternal(Base):
             return False
 
         success = False
+        click_type = 1
         endtime = time.time() + self.config.time_out
 
         last_box_state = self.get_box_state(element_td)
@@ -5885,7 +5886,7 @@ class WebappInternal(Base):
 
             self.set_grid_focus(grid_number)
 
-            ActionChains(self.driver).move_to_element(element_td).send_keys(Keys.ENTER).perform()
+            self.performing_click(element_td, click_type)
 
             self.wait_blocker()
 
@@ -5901,6 +5902,10 @@ class WebappInternal(Base):
 
             if last_box_state is not None and new_box_state is not None:
                 success = (last_box_state != new_box_state)
+
+            click_type =  1
+            if click_type > 4:
+                click_type = 1
 
         return success
 
