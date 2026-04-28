@@ -2525,6 +2525,10 @@ class WebappInternal(Base):
         menupopup = 'wa-menu-popup.dict-tmenu'
         checkbox_term = "wa-checkbox"
 
+        # The columns to be searched
+        search_column_items: list[str] = search_column.split(',')
+        search_column_items = [x.strip().lower().replace(" ", "") for x in search_column_items]
+
         if index and not isinstance(search_column, int):
             self.log_error("If index parameter is True, column must be a number!")
 
@@ -2537,12 +2541,12 @@ class WebappInternal(Base):
         self.click(sel_browse_column())
 
         self.wait_element_timeout(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, presence=True, position=0, main_container='body')
-        tmenupopup = next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
+        tmenupopup = lambda: next(iter(self.web_scrap(menupopup, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container = "body")), None)
 
-        if not tmenupopup:
+        if not tmenupopup():
             self.log_error("SearchBrowse - Column: couldn't find the new menupopup")
 
-        div_columns = tmenupopup.select_one('.dict-tfolder')
+        div_columns = tmenupopup().select_one('.dict-tfolder')
         if div_columns:
             column_button = div_columns.select('wa-tab-button')
             if column_button:
@@ -2551,20 +2555,31 @@ class WebappInternal(Base):
             else:
                 self.log_error("SearchBrowse - Column: couldn't find tab buttons in the columns folder")
 
-        spans = tmenupopup.select(checkbox_term)
-        spans_not_hidden = list(filter(lambda x: 'hidden' not in x.attrs, spans))
+        # Uncheck all checkbox inputs
+        checkbox_selected = tmenupopup().select(checkbox_term)
 
-        if ',' in search_column:
-            search_column_itens = search_column.split(',')
-            filtered_column_itens = [x.strip() for x in search_column_itens]
-            for item in filtered_column_itens:
-                span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans_not_hidden))), None)
-                self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-        else:
-            span = next(iter(list(filter(lambda x: x.attrs['caption'].lower().replace(" ","") == search_column.lower().replace(" ","") ,spans_not_hidden))), None)
+        # Checkbox filtered if is checked, not hidden, and will be searched
+        checkbox_selected = list(filter(
+            lambda x: x.attrs and 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected)
+        )
+        
+        for checkbox in checkbox_selected:
+            caption = checkbox.attrs["caption"].lower().replace(" ", "") 
+            if caption not in search_column_items: 
+                self.send_action(action=self.click, element=lambda: self.soup_to_selenium(checkbox), click_type=3)
+            else:
+                search_column_items = list(filter(lambda col: col != caption, search_column_items))
+
+        # Check checkbox inputs
+        spans = tmenupopup().select(checkbox_term)
+        spans = list(filter(lambda x: x.attrs and 'hidden' not in x.attrs, spans))
+
+        for item in search_column_items:
+            span = next(iter(list(filter(lambda x: x.attrs and x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
+            if not span:
+                self.log_error(f"Couldn't search the column: {item} on screen.")
+            
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
-
-
 
     def fill_search_browse(self, term, search_elements):
         """
@@ -5680,7 +5695,7 @@ class WebappInternal(Base):
             elif click_type == 2:
                 self.double_click(element(), click_type=enum.ClickType.ACTIONCHAINS)
             elif click_type == 3:
-                element().click()
+                self.click(element(), enum.ClickType.SELENIUM)
                 ActionChains(self.driver).move_to_element(element()).send_keys(Keys.ENTER).perform()
             elif click_type == 4:
                 self.send_action(action=self.double_click, element=element, wait_change=False)
@@ -9358,6 +9373,11 @@ class WebappInternal(Base):
                 log_message = ""
 
             self.expected = not self.expected
+
+        if not self.errors and script_message:
+            entrypoint_function = self.utils.get_main_entrypoint_from_stack()
+            entrypoint = f"[{entrypoint_function}] " if entrypoint_function and entrypoint_function != "function_name" else ""
+            script_message = entrypoint + script_message
 
         if self.expected:
             self.message = "" if not self.errors else log_message
