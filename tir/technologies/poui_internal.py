@@ -352,7 +352,7 @@ class PouiInternal(Base):
         self.driver_refresh()
 
         if self.config.coverage:
-            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            self.driver_get(url=f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program)
@@ -1664,9 +1664,9 @@ class PouiInternal(Base):
             
             if self.config.routine:
                 if self.config.routine_type.lower() == 'setlateralmenu':
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    self.SetLateralMenu(self.config.routine)
                 elif self.config.routine_type.lower() == 'program':
-                    self.set_program(self.config.routine)
+                    self.set_program(self.config.routine, self.config.routine_module)
 
     def driver_refresh(self):
         """
@@ -3318,7 +3318,7 @@ class PouiInternal(Base):
         >>> # Call the method:  
         >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
         """
-        self.driver.get(f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}") 
+        self.driver_get(url=f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}") 
         
     def returns_printable_string(self, string):
         """
@@ -4736,7 +4736,7 @@ class PouiInternal(Base):
             self.log_error(f"CheckBox '{label}' doesn't found!")
 
 
-    def click_combo(self, field, value='', position=1, second_value=''):
+    def click_combo(self, field, value='', position=1, second_value='', match_case=True):
         '''Select a value for list combo inputs.
 
         :param field: label of field
@@ -4747,6 +4747,8 @@ class PouiInternal(Base):
         :type : int
         :param second_value: value below the principal value (after the ":")
         :type : str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match.
+        :type : bool
         :return:
         '''
 
@@ -4773,19 +4775,21 @@ class PouiInternal(Base):
                     main_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     self.open_input_combo(po_combo_filtred)
                     self.send_keys(po_input_sel, value if value else second_value)
-                    self.click_po_list_box(value, second_value)
+                    self.click_po_list_box(value, second_value, match_case=match_case)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     success = current_value.strip().lower() == main_value.strip().lower() if value else True
 
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
-    def click_po_list_box(self, value="", second_value="", program_call=False) -> None:
+    def click_po_list_box(self, value="", second_value="", program_call=False, match_case=True) -> None:
         '''
         :param value: Value to select on po-list-box
         :type str
         :param second_value: value below the principal value (after the ":")
         :type : str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match.
+        :type : bool
         :return:
         '''
         orig_value = value
@@ -4793,7 +4797,7 @@ class PouiInternal(Base):
         value = value.strip().lower()
         second_value = second_value.strip().lower()
 
-        po_item_list = self._get_po_item_list(value, second_value)
+        po_item_list = self._get_po_item_list(value, second_value, match_case=match_case)
 
         if not po_item_list:
             message = f"Item list '{orig_value or orig_second_value}' not found"
@@ -4807,7 +4811,7 @@ class PouiInternal(Base):
         self.click(self.soup_to_selenium(po_item_list_div, twebview=True))
             
 
-    def _get_po_item_list(self, value="", second_value="") -> Tag:
+    def _get_po_item_list(self, value="", second_value="", match_case=True) -> Tag:
         """
         [Internal]
         
@@ -4817,18 +4821,20 @@ class PouiInternal(Base):
         :type value: str
         :param second_value: Secondary value to search for (value field). - **Default:** ""
         :type second_value: str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match. - **Default:** True
+        :type match_case: bool
         :return: The BeautifulSoup Tag object of the matching list item, or None if not found
         :rtype: Tag or None
         """
         try:
             self.wait_element(term='po-listbox')
             po_items_list = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-            return next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value), po_items_list))), None)
+            return next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value, match_case=match_case), po_items_list))), None)
         
         except Exception as e:
             return None
     
-    def find_po_item_list(self, po_item_list, param_label, param_value):
+    def find_po_item_list(self, po_item_list, param_label, param_value, match_case=True):
         '''This method is used to filter the po-item-list elements based on the label and value match.
 
 
@@ -4845,14 +4851,16 @@ class PouiInternal(Base):
         elem_label = item_list_data.get('label')
         elem_value = item_list_data.get('value')
 
+        compare = lambda expected, current: expected == current if match_case else expected in current
+
         if param_label and param_value:
-            return param_label == elem_label and param_value == elem_value
+            return compare(param_label, elem_label) and compare(param_value, elem_value)
 
         elif param_label and not param_value:
-            return param_label == elem_label
+            return compare(param_label, elem_label)
 
         elif not param_label and param_value:
-            return param_value == elem_value
+            return compare(param_value, elem_value)
 
     def _get_item_list_data(self, po_item_list) -> dict:
         """
@@ -5251,7 +5259,7 @@ class PouiInternal(Base):
             self.config.routine = ''
             self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
         item_list_data = self._get_item_list_data(po_item_list)
-        return item_list_data.get('value').upper()
+        return item_list_data.get('value').split('-')[0].strip().upper()
     
     def set_log_info_config(self):
         """
@@ -5307,23 +5315,29 @@ class PouiInternal(Base):
         return len(list(soup.select(term)))
 
 
-    def Program(self, program_name: str = "", program_desc: str = ""):
+    def Program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         """
         [Internal]
 
         Method that sets the program in the initial menu search field on New Home.
 
-        :param program: The program name
-        :type program: str
+        :param program_name: Program code to search/execute. - **Default:** "" (empty string)
+        :type program_name: str
+        :param program_desc: Program description used as fallback when `program_name` is not provided. - **Default:** "" (empty string)
+        :type program_desc: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> self.set_program_new_home("MATA020")
+        >>> self.Program("MATA020")
+        >>> self.Program("CRDA200", module="CRD")
         """
 
         self.config.routine_type = 'Program'
         self.config.routine = program_name
+        self.config.routine_module = module
 
         if self.config.log_info_config:
             self.set_log_info_config()
@@ -5335,15 +5349,17 @@ class PouiInternal(Base):
         if not self.log.program:
             self.log.program = program_name
 
-        self.set_program(program_name, program_desc)
+        self.set_program(program_name, program_desc, module)
 
-    def set_program(self, program_name: str = "", program_desc: str = ""):
+    def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
 
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
 
         success = False
         search_term = "[class*='card-wrapper']"
+        confirm_term = f"wa-button[caption='{self.language.confirm}']"
         attempts = 1
+        program_with_module = f'{program_name} - {module}' if program_name and module else None
 
         self.escape_to_main_menu()
 
@@ -5370,11 +5386,12 @@ class PouiInternal(Base):
             self._po_loading()
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
-            self.click_po_list_box(value=program_desc, second_value=program_name, program_call=True)
+            self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+                                   program_call=True, match_case=False)
 
             # -- Trecho de código temporário --
-            time.sleep(1)
-            btn_confirmar = lambda: self.get_current_DOM().select("wa-button[caption='Confirmar']")
+            self.wait_element_timeout(term=confirm_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
             if btn_confirmar():
                 btn_confirmar_sel = lambda: self.soup_to_selenium(next(iter(btn_confirmar())))
                 self.click(btn_confirmar_sel())
@@ -5515,14 +5532,28 @@ class PouiInternal(Base):
         self.close_coin_screen()
 
 
-    def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False) -> None:
+    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
+        """Navigate through New Home menu context and open a routine.
 
-        logger().warning(f"\nSetLateralMenu is deprecated in the new Home; use Program instead. " +
-                        "The routine is defined using the text after the last '>' in the menu_items argument. " +
-                        "If multiple routines share the same description, the first is selected.\n")
+        :param menu_itens: Menu path used as fallback to derive the routine description.
+        :type menu_itens: str
+        :param program_name: Program code to execute when provided. - **Default:** "" (empty string)
+        :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
+        """
         
-        program_desc = menu_itens.split('>')[-1].strip()
-        self.Program(program_desc=program_desc)
+        if not program_name:
+            logger().warning(
+                "\nSetLateralMenu in the New Home should receive 'program_name' and 'module' parameters. "
+                "When these parameters are not provided, the routine is defined using the text after the last '>' in the 'menu_items' parameter. "
+                "If multiple routines share the same description, the first is selected.\n"
+            )
+            
+            program_desc = menu_itens.split('>')[-1].strip()
+            self.Program(program_desc=program_desc)
+        else:
+            self.Program(program_name=program_name, module=module)
 
 
     def _click_dropdown(self, label, subitems, position):

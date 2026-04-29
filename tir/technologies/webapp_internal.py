@@ -750,7 +750,7 @@ class WebappInternal(Base):
         self.restart_browser()
 
         if self.config.coverage:
-            self.driver.get(f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
+            self.driver_get(url=f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
             self.program_screen(self.config.initial_program, environment=server_environment)
@@ -8921,8 +8921,10 @@ class WebappInternal(Base):
 
             logger().debug(f"Adding parameter url...")
 
-            self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
-                branch}&a={value}&Env={self.config.environment}""")
+            self.driver_get(
+                url=f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                    branch}&a={value}&Env={self.config.environment}"""
+            )
 
             logger().debug(f"Parameter Url added")
 
@@ -8942,7 +8944,7 @@ class WebappInternal(Base):
                 if ( not tmessagebox and time.time() >= halftime):
                     halftime = time.time() + 30
                     logger().info(f"Enter if tmessagebox: {parameter}")
-                    self.driver.get(f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
+                    self.driver_get(url=f"""{self.config.url}/?StartProg=u_AddParameter&a={parameter}&a={
                         branch}&a={value}&Env={self.config.environment}""")
         else:
             self.parameters.append([parameter.strip(), branch, portuguese_value, english_value, spanish_value])
@@ -9010,7 +9012,7 @@ class WebappInternal(Base):
             return
 
         time.sleep(3)
-        self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+        self.driver_get(url=f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                 self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
 
         while ( time.time() < endtime and not self.wait_element_timeout(term="[name='cGetUser'] > input, [name='cGetUser'], [name='login']", timeout = 1,
@@ -9026,14 +9028,14 @@ class WebappInternal(Base):
 
             if ( not tmessagebox and ((endtime) - time.time() < halftime) and not try_counter):
                 logger().info(f"parameter_url: {function_to_call} again")
-                self.driver.get(f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
+                self.driver_get(url=f"""{self.config.url}/?StartProg={function_to_call}&a={self.config.group}&a={
                         self.config.branch}&a={self.config.user}&a={self.config.password}&Env={self.config.environment}""")
                 try_counter = True
 
 
         time.sleep(3)
         logger().info(f"Finish parameter_url while")
-        self.driver.get(self.config.url)
+        self.driver_get(url=self.config.url)
         self.Setup(self.config.initial_program, self.config.date, self.config.group,
             self.config.branch, self.config.module, save_input=not self.config.autostart)
 
@@ -9044,7 +9046,7 @@ class WebappInternal(Base):
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
                 from tir.technologies.core.events import emit
-                emit('route.program', self.config.routine)
+                emit('route.program', self.config.routine, self.config.routine_module)
 
         self.tmenu_screen = None
 
@@ -9145,7 +9147,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11049,7 +11051,7 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)
         """
-        self.driver.get(f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}")
+        self.driver_get(url=f"{url}/?StartProg=CASIGAADV&A={initial_program}&Env={environment}")
 
     def returns_printable_string(self, string):
         """
@@ -11928,7 +11930,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -12054,7 +12056,7 @@ class WebappInternal(Base):
             if not service_status:
                 self.log_error("Schedule culdn't start")
 
-            self.driver.get(self.config.url)
+            self.driver_get(url=self.config.url)
             self.Setup(self.config.initial_program, self.config.date, self.config.group,
                        self.config.branch, self.config.module, save_input=not self.config.autostart)
 

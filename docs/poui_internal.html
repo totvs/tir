@@ -130,7 +130,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_dropdown_state"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_dropdown_state()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_element_size"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_element_size()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_field"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_field()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_function_from_stack"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_function_from_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_grid_content"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_grid_content()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_headers_from_grids"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_headers_from_grids()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.get_iframe_size"><code class="docutils literal notranslate"><span class="pre">PouiInternal.get_iframe_size()</span></code></a></li>
@@ -150,7 +149,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_csv"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_csv()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_input_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_url_coverage()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.po_loading"><code class="docutils literal notranslate"><span class="pre">PouiInternal.po_loading()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.pop_dict_itens"><code class="docutils literal notranslate"><span class="pre">PouiInternal.pop_dict_itens()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.poui_click"><code class="docutils literal notranslate"><span class="pre">PouiInternal.poui_click()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.program_screen"><code class="docutils literal notranslate"><span class="pre">PouiInternal.program_screen()</span></code></a></li>
@@ -1480,18 +1478,6 @@ Internal method of input_value and CheckResult.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_function_from_stack">
-<span class="sig-name descname"><span class="pre">get_function_from_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_function_from_stack" title="Link to this definition"></a></dt>
-<dd><p>[Internal]</p>
-<p>Gets the function name that called the Webapp class from the call stack.</p>
-<p>Usage:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">get_function_from_stack</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.get_grid_content">
 <span class="sig-name descname"><span class="pre">get_grid_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.get_grid_content" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -1856,16 +1842,6 @@ Open a webapp url with line parameters
 Usage:
 &gt;&gt;&gt; # Call the method:  
 &gt;&gt;&gt; self.open_url_coverage(url=self.config.url, initial_program=initial_program, environment=self.config.environment)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.po_loading">
-<span class="sig-name descname"><span class="pre">po_loading</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.po_loading" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

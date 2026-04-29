@@ -476,7 +476,7 @@ class Webapp():
         """
         self.__webapp.MessageBoxClick(button_text)
 
-    def Program(self, program_name):
+    def Program(self, program_name: str, module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -485,13 +485,16 @@ class Webapp():
 
         :param program_name: The program name
         :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
+        >>> oHelper.Program("CRDA200", module="CRD")
         """
-        self.__router.Program(program_name)
+        self.__router.Program(program_name=program_name, module=module)
 
     def RestoreParameters(self):
         """
@@ -788,20 +791,31 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step, wait_change)
 
-    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False, 
+                       program_name:str = '', module: str = ''):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
 
-        :param menu_itens: String with the path to the menu.
-        :type menu_itens: str
+        :param menuitens: String with the path to the menu.
+        :type menuitens: str
+        :param save_input: Keeps compatibility with WebApp lateral menu behavior. - **Default:** True
+        :type save_input: bool
+        :param click_menu_functional: Uses functional menu click strategy in WebApp. - **Default:** False
+        :type click_menu_functional: bool
+        :param program_name: Program name to be used in New Home (POUI) when routine descriptions are duplicated. - **Default:** "" (empty string)
+        :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name in New Home (POUI). - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
+        >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups", program_name="CRDA200", module="CRD")
         """
-        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional)
+        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional, 
+                                     program_name=program_name, module=module)
 
     def SetParameters(self):
         """
@@ -1777,7 +1791,7 @@ class Poui():
         """
         self.__poui.InputValue(field, value, position)
 
-    def ClickCombo(self, field='', value='', position=1, second_value=''):
+    def ClickCombo(self, field='', value='', position=1, second_value='', match_case=True):
         """
         Clicks on the Combo of POUI component.
         https://po-ui.io/documentation/po-combo
@@ -1785,6 +1799,10 @@ class Poui():
         :param field: Combo text title that you want to click.
         :param value: Value that you want to select in Combo.
         :param position: Position which element is located. - **Default:** 1
+        :param second_value: Secondary value displayed below the main value. - **Default:** "" (empty string)
+        :type second_value: str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match. - **Default:** True
+        :type match_case: bool
 
         Usage:
 
@@ -1792,7 +1810,7 @@ class Poui():
         >>> oHelper.ClickCombo('Visão', 'Compras')
         :return:
         """
-        self.__poui.click_combo(field, value, position, second_value)
+        self.__poui.click_combo(field, value, position, second_value, match_case)
 
     def ClickSelect(self, field='', value='', position=1):
         """
@@ -2278,7 +2296,7 @@ class Poui():
 
         self.__poui.click_switch(label=label, value=value, position=position)
 
-    def Program(self, program_name):
+    def Program(self, program_name: str = '', module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -2287,13 +2305,16 @@ class Poui():
 
         :param program_name: The program name
         :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
+        >>> oHelper.Program("CRDA200", module="CRD")
         """
-        self.__poui.Program(program_name)
+        self.__poui.Program(program_name=program_name, module=module)
     
 
     def ClickDropdown(self, label='', subitems='', position=1):
