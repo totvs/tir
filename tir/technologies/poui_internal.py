@@ -1666,7 +1666,7 @@ class PouiInternal(Base):
                 if self.config.routine_type.lower() == 'setlateralmenu':
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 elif self.config.routine_type.lower() == 'program':
-                    self.set_program(self.config.routine)
+                    self.set_program(self.config.routine, self.config.routine_module)
 
     def driver_refresh(self):
         """
@@ -5259,7 +5259,7 @@ class PouiInternal(Base):
             self.config.routine = ''
             self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
         item_list_data = self._get_item_list_data(po_item_list)
-        return item_list_data.get('value').upper()
+        return item_list_data.get('value').split('-')[0].strip().upper()
     
     def set_log_info_config(self):
         """
@@ -5315,7 +5315,7 @@ class PouiInternal(Base):
         return len(list(soup.select(term)))
 
 
-    def Program(self, program_name: str = "", program_desc: str = ""):
+    def Program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         """
         [Internal]
 
@@ -5332,6 +5332,7 @@ class PouiInternal(Base):
 
         self.config.routine_type = 'Program'
         self.config.routine = program_name
+        self.config.routine_module = module
 
         if self.config.log_info_config:
             self.set_log_info_config()
@@ -5343,9 +5344,9 @@ class PouiInternal(Base):
         if not self.log.program:
             self.log.program = program_name
 
-        self.set_program(program_name, program_desc)
+        self.set_program(program_name, program_desc, module)
 
-    def set_program(self, program_name: str = "", program_desc: str = ""):
+    def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
 
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
 
@@ -5353,6 +5354,7 @@ class PouiInternal(Base):
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
         attempts = 1
+        program_with_module = f'{program_name} - {module}' if module else None
 
         self.escape_to_main_menu()
 
@@ -5379,7 +5381,8 @@ class PouiInternal(Base):
             self._po_loading()
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
-            self.click_po_list_box(value=program_desc, second_value=program_name, program_call=True, match_case=False)
+            self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+                                   program_call=True, match_case=False)
 
             # -- Trecho de código temporário --
             self.wait_element_timeout(term=confirm_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
@@ -5524,14 +5527,19 @@ class PouiInternal(Base):
         self.close_coin_screen()
 
 
-    def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False) -> None:
-
-        logger().warning(f"\nSetLateralMenu is deprecated in the new Home; use Program instead. " +
-                        "The routine is defined using the text after the last '>' in the menu_items argument. " +
-                        "If multiple routines share the same description, the first is selected.\n")
+    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
         
-        program_desc = menu_itens.split('>')[-1].strip()
-        self.Program(program_desc=program_desc)
+        if not program_name:
+            logger().warning(
+                "\nSetLateralMenu in the New Home should receive 'program_name' and 'module' parameters. "
+                "When these parameters are not provided, the routine is defined using the text after the last '>' in the 'menu_items' parameter. "
+                "If multiple routines share the same description, the first is selected.\n"
+            )
+            
+            program_desc = menu_itens.split('>')[-1].strip()
+            self.Program(program_desc=program_desc)
+        else:
+            self.Program(program_name=program_name, module=module)
 
 
     def _click_dropdown(self, label, subitems, position):

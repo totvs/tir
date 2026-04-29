@@ -9021,7 +9021,7 @@ class WebappInternal(Base):
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
                 from tir.technologies.core.events import emit
-                emit('route.program', self.config.routine)
+                emit('route.program', self.config.routine, self.config.routine_module)
 
         self.tmenu_screen = None
 
@@ -9122,7 +9122,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11905,7 +11905,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):

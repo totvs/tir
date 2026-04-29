@@ -476,7 +476,7 @@ class Webapp():
         """
         self.__webapp.MessageBoxClick(button_text)
 
-    def Program(self, program_name):
+    def Program(self, program_name: str, module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -491,7 +491,7 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__router.Program(program_name)
+        self.__router.Program(program_name=program_name, module=module)
 
     def RestoreParameters(self):
         """
@@ -788,7 +788,8 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step, wait_change)
 
-    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False, 
+                       program_name:str = '', module: str = ''):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
@@ -801,7 +802,8 @@ class Webapp():
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
         """
-        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional)
+        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional, 
+                                     program_name=program_name, module=module)
 
     def SetParameters(self):
         """
@@ -2282,7 +2284,7 @@ class Poui():
 
         self.__poui.click_switch(label=label, value=value, position=position)
 
-    def Program(self, program_name):
+    def Program(self, program_name, module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -2297,7 +2299,7 @@ class Poui():
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
         """
-        self.__poui.Program(program_name)
+        self.__poui.Program(program_name, module=module)
     
 
     def ClickDropdown(self, label='', subitems='', position=1):
