@@ -87,11 +87,16 @@ class Router:
 
         return self._ensure_poui() if condition_fn() else self._ensure_webapp()
 
-    def Program(self, program_name: str = "", program_desc: str = "") -> None:
+    def Program(self, program_name: str = "", module: str = '') -> None:
         """Execute program using appropriate driver (POUI or WebApp)."""
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
-        drv.Program(program_name=program_name, program_desc=program_desc)
+        if not self.config.new_home:
+            # webapp
+            drv.Program(program_name=program_name)
+        else:
+            # poui
+            drv.Program(program_name=program_name, module=module)
 
         """
         Sync POUI → WebApp program name (new_home):
@@ -109,11 +114,19 @@ class Router:
         drv = self._get_driver_instance(lambda: self.config.new_home)
         drv.set_program(program_name=program_name, program_desc=program_desc)
 
-    def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False) -> None:
+    def SetLateralMenu(self, menu_itens: str, save_input: bool = True, click_menu_functional: bool = False, 
+                       program_name:str = '', module: str = '') -> None:
         """Navigate through lateral menu."""
 
         drv = self._get_driver_instance(lambda: self.config.new_home)
-        drv.SetLateralMenu(menu_itens=menu_itens, save_input=save_input, click_menu_functional=click_menu_functional)
+        if not self.config.new_home:
+            # webapp
+            drv.SetLateralMenu(menu_itens=menu_itens, save_input=save_input, 
+                               click_menu_functional=click_menu_functional)
+        else:
+            # poui
+            drv.SetLateralMenu(menu_itens=menu_itens, program_name=program_name, 
+                               module=module)
 
     def ChangeEnvironment(self, date: str = "", group: str = "", branch: str = "", module: str = "") -> None:
         """Change environment settings."""
