@@ -1664,7 +1664,7 @@ class PouiInternal(Base):
             
             if self.config.routine:
                 if self.config.routine_type.lower() == 'setlateralmenu':
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    self.SetLateralMenu(self.config.routine)
                 elif self.config.routine_type.lower() == 'program':
                     self.set_program(self.config.routine, self.config.routine_module)
 
@@ -5321,13 +5321,18 @@ class PouiInternal(Base):
 
         Method that sets the program in the initial menu search field on New Home.
 
-        :param program: The program name
-        :type program: str
+        :param program_name: Program code to search/execute. - **Default:** "" (empty string)
+        :type program_name: str
+        :param program_desc: Program description used as fallback when `program_name` is not provided. - **Default:** "" (empty string)
+        :type program_desc: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
-        >>> self.set_program_new_home("MATA020")
+        >>> self.Program("MATA020")
+        >>> self.Program("CRDA200", module="CRD")
         """
 
         self.config.routine_type = 'Program'
@@ -5354,7 +5359,7 @@ class PouiInternal(Base):
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
         attempts = 1
-        program_with_module = f'{program_name} - {module}' if module else None
+        program_with_module = f'{program_name} - {module}' if program_name and module else None
 
         self.escape_to_main_menu()
 
@@ -5528,6 +5533,15 @@ class PouiInternal(Base):
 
 
     def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
+        """Navigate through New Home menu context and open a routine.
+
+        :param menu_itens: Menu path used as fallback to derive the routine description.
+        :type menu_itens: str
+        :param program_name: Program code to execute when provided. - **Default:** "" (empty string)
+        :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :type module: str
+        """
         
         if not program_name:
             logger().warning(
