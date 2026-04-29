@@ -1777,7 +1777,7 @@ class Poui():
         """
         self.__poui.InputValue(field, value, position)
 
-    def ClickCombo(self, field='', value='', position=1, second_value=''):
+    def ClickCombo(self, field='', value='', position=1, second_value='', match_case=True):
         """
         Clicks on the Combo of POUI component.
         https://po-ui.io/documentation/po-combo
@@ -1785,6 +1785,10 @@ class Poui():
         :param field: Combo text title that you want to click.
         :param value: Value that you want to select in Combo.
         :param position: Position which element is located. - **Default:** 1
+        :param second_value: Secondary value displayed below the main value. - **Default:** "" (empty string)
+        :type second_value: str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match. - **Default:** True
+        :type match_case: bool
 
         Usage:
 
@@ -1792,7 +1796,7 @@ class Poui():
         >>> oHelper.ClickCombo('Visão', 'Compras')
         :return:
         """
-        self.__poui.click_combo(field, value, position, second_value)
+        self.__poui.click_combo(field, value, position, second_value, match_case)
 
     def ClickSelect(self, field='', value='', position=1):
         """
