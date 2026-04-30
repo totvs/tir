@@ -5715,7 +5715,7 @@ class WebappInternal(Base):
         sel_grid = self.soup_to_selenium(grid_local)
         tr_local = self.execute_js_selector('tbody > tr', sel_grid)
         if not tr_local or len(tr_local) - 1 < row_index:
-            return None, None
+            return None
         row_local = tr_local[row_index]
         target_td = next(iter(row_local.find_elements(By.CSS_SELECTOR, 'td')), None)
         return target_td
