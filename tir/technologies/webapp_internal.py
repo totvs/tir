@@ -5675,11 +5675,7 @@ class WebappInternal(Base):
         :param click_type: Numeric value representing the click method (1=ActionChains+dblclick, 2=double_click, 3=click+ENTER, 4=send_action). - **Default:** 1
         :type click_type: int
         """
-        if not self.webapp_shadowroot():
-            self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4, locator=By.XPATH)
-            element = lambda: self.soup_to_selenium(element_bs4)
-        else:
-            element = lambda: element_bs4
+        element = lambda: element_bs4
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
@@ -5797,6 +5793,8 @@ class WebappInternal(Base):
 
             return [0]
 
+        ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
+        
         endtime = time.time() + self.config.time_out
         df, grid = self.grid_dataframe(grid_number=grid_number)
 
@@ -5813,10 +5811,26 @@ class WebappInternal(Base):
             if index_number:
                 for idx in list(index_number):
                     index = int(idx)
+                    last_row_index = len(df) - 1
+
                     element_td = self.get_row_target_element(grid, index)
 
                     if not element_td:
                         continue
+
+                    if index == last_row_index:
+                        self.set_grid_focus(grid_number)
+                        self.click(element_td, click_type=enum.ClickType.SELENIUM)
+                        ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                        self.wait_blocker()
+                        df, grid = self.grid_dataframe(grid_number=grid_number)
+                        index_number = find_matches_in_df(df)
+                        if not index_number:
+                            continue
+                        index = int(index_number[0])
+                        element_td = self.get_row_target_element(grid, index)
+                        if not element_td:
+                            continue
 
                     self.set_grid_focus(grid_number)
                     self.click(element_td, click_type=enum.ClickType.SELENIUM)
@@ -5903,7 +5917,7 @@ class WebappInternal(Base):
             if last_box_state is not None and new_box_state is not None:
                 success = (last_box_state != new_box_state)
 
-            click_type =  1
+            click_type +=  1
             if click_type > 4:
                 click_type = 1
 
