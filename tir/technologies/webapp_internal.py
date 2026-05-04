@@ -6545,7 +6545,9 @@ class WebappInternal(Base):
                     self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
-                if self.switch_to_active_element() != element:
+                active_element = self.switch_to_active_element()
+                input_active_element = next(iter(self.execute_js_selector('input', self.switch_to_active_element())), None)
+                if active_element != element and input_active_element != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
