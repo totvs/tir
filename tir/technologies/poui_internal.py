@@ -5381,7 +5381,7 @@ class PouiInternal(Base):
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
         attempts = 1
-        match_mode = 1 if module else 3
+        match_mode = 1 if module or program_desc else 3
         program_with_module = f'{program_name} - {module}' if program_name and module else None
 
         self.escape_to_main_menu()
