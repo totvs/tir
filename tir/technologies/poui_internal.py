@@ -1761,13 +1761,17 @@ class PouiInternal(Base):
         while((time.time() < endtime) and not user_icon):
             soup = get_soup()
             user_icon = next(iter(soup.select('li.po-header-nav-customer-container')), None)
+        if not user_icon:
+            self.log_error("Couldn't find element user_icon")
         self.click(self.soup_to_selenium(user_icon), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
         logger().debug('Clicking on exit button.')
         while((time.time() < endtime) and not exit_button):
             soup = get_soup()
-            exit_button = next(iter(soup.select('po-item-list[data-item-list*="Sair"] span')), None)
+            exit_button = next(iter(soup.select(f'po-item-list[data-item-list*="{self.language.exit}"] span')), None)
+        if not exit_button:
+            self.log_error("Couldn't find element exit_button")
         self.click(self.soup_to_selenium(exit_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
@@ -1775,6 +1779,13 @@ class PouiInternal(Base):
         while((time.time() < endtime) and not finish_button):
             soup = get_soup()
             finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")), None)
+
+            if not finish_button:
+                buttons = soup.select(f"po-button")
+                finish_button = next(iter(list(filter(lambda x: x.text == self.language.finish, buttons))), None)
+        
+        if not finish_button:
+            self.log_error("Couldn't find element finish_button")
         self.click(self.soup_to_selenium(finish_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
