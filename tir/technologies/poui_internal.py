@@ -5771,15 +5771,44 @@ class PouiInternal(Base):
         >>> self._remove_filters_from_browse()
         """
 
-        po_tag_filter = self._get_po_tag(text=self.language.remove_filters, container_selector='kendo-grid')
-        if po_tag_filter:
-            logger().debug("Found applied filters, clicking to remove filters.")
-            clickable = po_tag_filter.select_one('.po-tag-wrapper.po-clickable')
-            target = clickable if clickable else po_tag_filter
+        soup = self.get_current_DOM(twebview=True)
+        kendo_grid = soup.select_one('kendo-grid')
+        if not kendo_grid:
+            logger().debug("No kendo-grid found; skipping filter removal.")
+            return
+
+        # Scenario 1: "Remove filters" or "Remove all" tag (multiple filters applied)
+        remove_tag = self._get_po_tag(text=self.language.remove_filters, container_selector='kendo-grid') or \
+                     self._get_po_tag(text=self.language.remove_all_filters, container_selector='kendo-grid')
+
+        if remove_tag:
+            logger().debug("Found 'Remove all filters' tag, clicking.")
+            clickable = remove_tag.select_one('.po-tag-wrapper.po-clickable')
+            target = clickable if clickable else remove_tag
             self.poui_click(target)
             self._po_loading()
+            return
+
+        # Scenario 2: individual tags with "x" icon (single filter applied)
+        # Refresh DOM to capture the updated state after any previous click
+        soup = self.get_current_DOM(twebview=True)
+        kendo_grid = soup.select_one('kendo-grid')
+        if not kendo_grid:
+            logger().debug("No kendo-grid found after DOM refresh; skipping filter removal.")
+            return
+
+        individual_tags = [
+            tag for tag in kendo_grid.select('po-tag')
+            if tag.select_one('.po-tag-remove')
+        ]
+        if individual_tags:
+            logger().debug(f"Found {len(individual_tags)} individual filter tag(s), removing each.")
+            for tag in individual_tags:
+                clickable = tag.select_one('.po-tag-remove')
+                self.poui_click(clickable)
+                self._po_loading()
         else:
-            logger().debug("No 'Remove Filters' found; skipping filter removal.")
+            logger().debug("No active filter tags found; skipping filter removal.")
 
 
     def _get_po_tag(self, text: str, container_selector: str):
