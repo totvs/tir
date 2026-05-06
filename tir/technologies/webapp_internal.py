@@ -5326,7 +5326,7 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
-        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title"
+        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title, po-tag"
         main_container = self.containers_selectors["AllContainers"]
         twebview = False
 
