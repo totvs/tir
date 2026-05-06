@@ -94,6 +94,7 @@ class LanguagePack:
         self.filters = languagepack["Filters"]
         self.apply_filters = languagepack["Apply Filters"]
         self.remove_filters = languagepack["Remove Filters"]
+        self.remove_all_filters = languagepack["Remove All Filters"]
         self.old_browse_edit = languagepack["Old Browse Edit"]
         self.old_browse_delete = languagepack["Old Browse Delete"]
         self.old_browse_insert = languagepack["Old Browse Insert"]
@@ -206,6 +207,7 @@ class LanguagePack:
             "Filters": "Filters",
             "Apply Filters": "Apply filters",
             "Remove Filters": "Remove filters",
+            "Remove All Filters": "Remove all",
 
             "Old Browse Edit":"Edit",
             "Old Browse Delete":"Delete",
@@ -315,6 +317,7 @@ class LanguagePack:
             "Filters": "Filtros",
             "Apply Filters": "Aplicar Filtros",
             "Remove Filters": "Remover filtros",
+            "Remove All Filters": "Remover todos",
 
             "Old Browse Edit":"Alterar",
             "Old Browse Delete":"Excluir",
@@ -423,6 +426,7 @@ class LanguagePack:
             "Filters": "Filtros",
             "Apply Filters": "Aplicar Filtros",
             "Remove Filters": "Eliminar filtros",
+            "Remove All Filters": "Eliminar todos",
             "Old Browse Edit":"Modificar",
             "Old Browse Delete":"Borrar",
             "Old Browse Insert":"Incluir",
@@ -532,6 +536,7 @@ class LanguagePack:
             "Filters": "Фильтры",
             "Apply Filters": "Применить фильтры",
             "Remove Filters": "Удалить фильтры",
+            "Remove All Filters": "Удалить все",
 
             "Old Browse Edit":"Редактировать",
             "Old Browse Delete":"Удалить",
