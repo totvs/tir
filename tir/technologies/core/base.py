@@ -229,10 +229,10 @@ class Base(unittest.TestCase):
             return True
 
         except StaleElementReferenceException:
-            logger().exception("********Element Stale click*********")
+            logger().debug("********Element Stale click*********")
             return False
         except Exception as e:
-            logger().exception(f"Warning click method Exception: {str(e)}")
+            logger().debug(f"Warning click method Exception: {str(e)}")
             return False
 
     def compare_field_values(self, field, user_value, captured_value, message):

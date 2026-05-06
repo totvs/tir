@@ -1761,13 +1761,17 @@ class PouiInternal(Base):
         while((time.time() < endtime) and not user_icon):
             soup = get_soup()
             user_icon = next(iter(soup.select('li.po-header-nav-customer-container')), None)
+        if not user_icon:
+            self.log_error("Couldn't find element user_icon")
         self.click(self.soup_to_selenium(user_icon), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
         logger().debug('Clicking on exit button.')
         while((time.time() < endtime) and not exit_button):
             soup = get_soup()
-            exit_button = next(iter(soup.select('po-item-list[data-item-list*="Sair"] span')), None)
+            exit_button = next(iter(soup.select(f'po-item-list[data-item-list*="{self.language.exit}"] span')), None)
+        if not exit_button:
+            self.log_error("Couldn't find element exit_button")
         self.click(self.soup_to_selenium(exit_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
@@ -1775,6 +1779,13 @@ class PouiInternal(Base):
         while((time.time() < endtime) and not finish_button):
             soup = get_soup()
             finish_button = next(iter(soup.select(f"po-button[p-label='{self.language.finish}']")), None)
+
+            if not finish_button:
+                buttons = soup.select(f"po-button")
+                finish_button = next(iter(list(filter(lambda x: x.text == self.language.finish, buttons))), None)
+        
+        if not finish_button:
+            self.log_error("Couldn't find element finish_button")
         self.click(self.soup_to_selenium(finish_button), click_type=enum.ClickType(2))
         time.sleep(0.5)
 
@@ -4771,33 +4782,34 @@ class PouiInternal(Base):
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
                     po_input_sel = self.soup_to_selenium(po_input, twebview=True)
+                    match_mode = 1 if match_case else 2
 
                     main_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     self.open_input_combo(po_combo_filtred)
                     self.send_keys(po_input_sel, value if value else second_value)
-                    self.click_po_list_box(value, second_value, match_case=match_case)
+                    self.click_po_list_box(value, second_value, match_mode=match_mode)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     success = current_value.strip().lower() == main_value.strip().lower() if value else True
 
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
 
-    def click_po_list_box(self, value="", second_value="", program_call=False, match_case=True) -> None:
+    def click_po_list_box(self, value="", second_value="", program_call=False, match_mode=1) -> None:
         '''
         :param value: Value to select on po-list-box
         :type str
         :param second_value: value below the principal value (after the ":")
         :type : str
-        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match.
-        :type : bool
+        :param match_mode: Matching strategy used to find the item. 1 = exact match, 2 = contains, 3 = program code match.
+        :type : int
         :return:
         '''
         orig_value = value
         orig_second_value = second_value
-        value = value.strip().lower()
-        second_value = second_value.strip().lower()
+        value = str(value or '').strip().lower()
+        second_value = str(second_value or '').strip().lower()
 
-        po_item_list = self._get_po_item_list(value, second_value, match_case=match_case)
+        po_item_list = self._get_po_item_list(value, second_value, match_mode=match_mode)
 
         if not po_item_list:
             message = f"Item list '{orig_value or orig_second_value}' not found"
@@ -4811,7 +4823,7 @@ class PouiInternal(Base):
         self.click(self.soup_to_selenium(po_item_list_div, twebview=True))
             
 
-    def _get_po_item_list(self, value="", second_value="", match_case=True) -> Tag:
+    def _get_po_item_list(self, value="", second_value="", match_mode=1) -> Tag:
         """
         [Internal]
         
@@ -4821,20 +4833,40 @@ class PouiInternal(Base):
         :type value: str
         :param second_value: Secondary value to search for (value field). - **Default:** ""
         :type second_value: str
-        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match. - **Default:** True
-        :type match_case: bool
+        :param match_mode: Matching strategy used to find the item. 1 = exact match, 2 = contains, 3 = program code match. - **Default:** 1
+        :type match_mode: int
         :return: The BeautifulSoup Tag object of the matching list item, or None if not found
         :rtype: Tag or None
         """
         try:
             self.wait_element(term='po-listbox')
             po_items_list = self.web_scrap(term='po-item-list', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-            return next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value, match_case=match_case), po_items_list))), None)
+            return next(iter(list(filter(lambda x: self.find_po_item_list(x, value, second_value, match_mode=match_mode), po_items_list))), None)
         
         except Exception as e:
             return None
+
+    def _match_po_item_value(self, expected, current, match_mode=1):
+        """
+        [Internal]
+
+        Compare expected and current PO item values using the chosen match mode.
+        """
+        expected = str(expected or '').strip().lower()
+        current = str(current or '').strip().lower()
+        match_mode = match_mode if match_mode in [1, 2, 3] else 1
+
+        if match_mode == 2:
+            return expected in current
+
+        if match_mode == 3:
+            expected_program = expected.split('-', 1)[0].strip()
+            current_program = current.split('-', 1)[0].strip()
+            return expected_program == current_program
+
+        return expected == current
     
-    def find_po_item_list(self, po_item_list, param_label, param_value, match_case=True):
+    def find_po_item_list(self, po_item_list, param_label, param_value, match_mode=1):
         '''This method is used to filter the po-item-list elements based on the label and value match.
 
 
@@ -4851,16 +4883,17 @@ class PouiInternal(Base):
         elem_label = item_list_data.get('label')
         elem_value = item_list_data.get('value')
 
-        compare = lambda expected, current: expected == current if match_case else expected in current
+        compare_label = lambda expected, current: self._match_po_item_value(expected, current, 1 if match_mode == 3 else match_mode)
+        compare_value = lambda expected, current: self._match_po_item_value(expected, current, match_mode)
 
         if param_label and param_value:
-            return compare(param_label, elem_label) and compare(param_value, elem_value)
+            return compare_label(param_label, elem_label) and compare_value(param_value, elem_value)
 
         elif param_label and not param_value:
-            return compare(param_label, elem_label)
+            return compare_label(param_label, elem_label)
 
         elif not param_label and param_value:
-            return compare(param_value, elem_value)
+            return compare_value(param_value, elem_value)
 
     def _get_item_list_data(self, po_item_list) -> dict:
         """
@@ -5359,6 +5392,7 @@ class PouiInternal(Base):
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
         attempts = 1
+        match_mode = 1 if module or program_desc else 3
         program_with_module = f'{program_name} - {module}' if program_name and module else None
 
         self.escape_to_main_menu()
@@ -5387,7 +5421,7 @@ class PouiInternal(Base):
             if not program_name and program_desc:
                 self.config.routine = self._get_program_by_desc(program_desc)
             self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
-                                   program_call=True, match_case=False)
+                                   program_call=True, match_mode=match_mode)
 
             # -- Trecho de código temporário --
             self.wait_element_timeout(term=confirm_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
@@ -5748,15 +5782,44 @@ class PouiInternal(Base):
         >>> self._remove_filters_from_browse()
         """
 
-        po_tag_filter = self._get_po_tag(text=self.language.remove_filters, container_selector='kendo-grid')
-        if po_tag_filter:
-            logger().debug("Found applied filters, clicking to remove filters.")
-            clickable = po_tag_filter.select_one('.po-tag-wrapper.po-clickable')
-            target = clickable if clickable else po_tag_filter
+        soup = self.get_current_DOM(twebview=True)
+        kendo_grid = soup.select_one('kendo-grid')
+        if not kendo_grid:
+            logger().debug("No kendo-grid found; skipping filter removal.")
+            return
+
+        # Scenario 1: "Remove filters" or "Remove all" tag (multiple filters applied)
+        remove_tag = self._get_po_tag(text=self.language.remove_filters, container_selector='kendo-grid') or \
+                     self._get_po_tag(text=self.language.remove_all_filters, container_selector='kendo-grid')
+
+        if remove_tag:
+            logger().debug("Found 'Remove all filters' tag, clicking.")
+            clickable = remove_tag.select_one('.po-tag-wrapper.po-clickable')
+            target = clickable if clickable else remove_tag
             self.poui_click(target)
             self._po_loading()
+            return
+
+        # Scenario 2: individual tags with "x" icon (single filter applied)
+        # Refresh DOM to capture the updated state after any previous click
+        soup = self.get_current_DOM(twebview=True)
+        kendo_grid = soup.select_one('kendo-grid')
+        if not kendo_grid:
+            logger().debug("No kendo-grid found after DOM refresh; skipping filter removal.")
+            return
+
+        individual_tags = [
+            tag for tag in kendo_grid.select('po-tag')
+            if tag.select_one('.po-tag-remove')
+        ]
+        if individual_tags:
+            logger().debug(f"Found {len(individual_tags)} individual filter tag(s), removing each.")
+            for tag in individual_tags:
+                clickable = tag.select_one('.po-tag-remove')
+                self.poui_click(clickable)
+                self._po_loading()
         else:
-            logger().debug("No 'Remove Filters' found; skipping filter removal.")
+            logger().debug("No active filter tags found; skipping filter removal.")
 
 
     def _get_po_tag(self, text: str, container_selector: str):
