@@ -1028,7 +1028,7 @@ class PouiInternal(Base):
 
         logger().info('Getting log info')
 
-        self.escape_to_main_menu("[class*='card-wrapper']")
+        self.utils.escape_to_main_menu(caller=self)
 
         logger().debug('Clicking on dots icon')
         self.switch_to_header_iframe()
@@ -5316,28 +5316,6 @@ class PouiInternal(Base):
         self.log_error('Please check config.json key "Release".It is necessary to generate the log on the dashboard. ex: "Release": "12.1.2310" ')
 
 
-    def escape_to_main_menu(self):
-        """
-
-        """
-        term = "[class*='card-wrapper']"
-
-        endtime = time.time() + self.config.time_out /2
-        while time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                main_container="body", check_error=False):
-
-            logger().info('Escape to menu')
-            ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-
-            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
-                logger().info('Found layers after Escape to menu')
-                self.close_screen_before_menu()
-
-            # wait trasitions between screens to avoid errors in layers number
-            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      timeout=6, main_container='body')
-
-
     def check_layers(self, term):
         """
         [Internal]
@@ -5395,7 +5373,7 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3
         program_with_module = f'{program_name} - {module}' if program_name and module else None
 
-        self.escape_to_main_menu()
+        self.utils.escape_to_main_menu(caller=self)
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -5548,7 +5526,7 @@ class PouiInternal(Base):
         if module:
             self.config.module = module
 
-        self.escape_to_main_menu()
+        self.utils.escape_to_main_menu(caller=self)
 
         element = self.change_environment_element_home_screen()
         if element:
