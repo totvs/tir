@@ -1254,10 +1254,7 @@ class WebappInternal(Base):
         if module:
             self.config.module = module
 
-        self.utils.escape_to_main_menu(
-            caller=self,
-            container_term="wa-dialog"
-        )
+        self.escape_to_main_menu()
 
         element = self.change_environment_element_home_screen()
         if element:
@@ -1893,10 +1890,7 @@ class WebappInternal(Base):
         try:
             logger().info(f"Setting program: {program_name}")
 
-            self.utils.escape_to_main_menu(
-                caller=self,
-                container_term="wa-dialog"
-            )
+            self.escape_to_main_menu()
 
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
@@ -1964,6 +1958,41 @@ class WebappInternal(Base):
             raise error
         except Exception as e:
             logger().exception(str(e))
+
+    def escape_to_main_menu(self):
+        """[Internal]
+
+        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
+        Waits until the menu is visible and there is only one dialog layer.
+
+        :return: None
+        """
+        success = False
+        container_term = 'wa-dialog'
+
+        endtime = time.time() + self.config.time_out /2
+        while time.time() < endtime and not success:
+            logger().info('Escape to menu')
+            ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+
+            if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]) \
+                and self.check_layers(container_term) > 1:
+                logger().info('Found layers after Escape to menu')
+                self.close_screen_before_menu()
+
+            menu_screen = self.check_tmenu_screen()
+            container_layers = self.check_layers(container_term) == 1
+            success = menu_screen and container_layers
+
+            logger().debug(f'Check Menu Screen: {menu_screen}')
+            logger().debug(f'wa-dialog layers: {container_layers}')
+
+        if not success:
+            self.log_error('Home screen not found!')     
+        
+        # wait trasitions between screens to avoid errors in layers number
+        self.wait_element_timeout(term=container_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                    position=2, timeout=6, main_container='body')
 
     def check_layers(self, term):
         """
@@ -4461,10 +4490,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
-        self.utils.escape_to_main_menu(
-            caller=self,
-            container_term="wa-dialog"
-        )
+        self.escape_to_main_menu()
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 

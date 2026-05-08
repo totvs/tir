@@ -1,11 +1,6 @@
 from typing import Iterable, Optional, Set
 import inspect
 import os
-import time
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from tir.technologies.core.logging_config import logger
-from tir.technologies.core import enum
 
 class Utils:
     """Shared utility methods for TIR technologies."""
@@ -77,66 +72,3 @@ class Utils:
                 return stack_item.function
 
         return fallback
-
-    def check_tmenu_screen(self, caller) -> bool:
-        """[Internal]
-        
-        Checks if the main menu screen (tmenu) is currently displayed.
-        
-        Args:
-            caller: The technology instance with config, web_scrap, and element_is_displayed methods.
-        
-        Returns:
-            bool: True if menu screen is displayed, False otherwise.
-        """
-        
-        
-        try:
-            twebview = True if caller.config.new_home else False
-            return caller.element_is_displayed(
-                next(iter(caller.web_scrap(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)),
-                     None))
-        except:
-            return False
-
-    def escape_to_main_menu(
-        self,
-        caller,
-        container_term: Optional[str] = None
-    ) -> None:
-        """Navigate back to the main menu by sending ESC keys and closing open dialogs.
-
-        Waits until the main menu screen is visible and, when `container_term` is provided,
-        verifies that only one dialog layer remains before declaring success.
-
-        Args:
-            caller: The technology instance (WebappInternal or PouiInternal) that owns
-                    the driver, config, and helper methods.
-            container_term: CSS selector used to count dialog layers and confirm only
-                            one remains before declaring success.
-                        Default: None (no layer check). Webapp should pass
-                        "wa-dialog".
-        """
-        
-        success = False
-
-        endtime = time.time() + caller.config.time_out / 2
-        while time.time() < endtime and not success:
-            logger().info('Escape to menu')
-            ActionChains(caller.driver).send_keys(Keys.ESCAPE).perform()
-
-            if any([caller.check_warning_screen(), caller.check_coin_screen(), caller.check_news_screen()]) \
-                    and (not container_term or caller.check_layers(container_term) > 1):
-                logger().info('Found layers after Escape to menu')
-                caller.close_screen_before_menu()
-
-            menu_screen = self.check_tmenu_screen(caller)
-            container_layers = (caller.check_layers(container_term) == 1) if container_term else True
-            success = menu_screen and container_layers
-
-            logger().debug(f'Check Menu Screen: {menu_screen}')
-            if container_term:
-                logger().debug(f'{container_term} layers: {container_layers}')
-
-        if not success:
-            caller.log_error('Home screen not found!')

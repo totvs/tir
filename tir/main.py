@@ -618,11 +618,6 @@ class Webapp():
          - **Default:** []
         :type filters: list[dict[str, str]]
 
-        .. note::
-            When used with the **New Browse** (kendo-grid), this method automatically removes all
-            active filters before performing the search, ensuring the results are not affected by
-            previously applied filter conditions.
-
         Usage:
 
         >>> # To search using the first search box and default search key:
@@ -2363,14 +2358,3 @@ class Poui():
         """
         self.config._flag_is_new_browse = True
         self.__poui._set_browse_filters(filters)
-
-    def RemoveBrowseFilters(self):
-        """
-        Removes all active filters from the THF Browse (kendo-grid) component.
-
-        Usage:
-
-        >>> # Call the method:
-        >>> oHelper.RemoveBrowseFilters()
-        """
-        self.__poui._remove_filters_from_browse()
