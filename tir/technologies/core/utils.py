@@ -5,7 +5,7 @@ import time
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from tir.technologies.core.logging_config import logger
-import tir.technologies.core.enumerations as enum
+from tir.technologies.core import enum
 
 class Utils:
     """Shared utility methods for TIR technologies."""
