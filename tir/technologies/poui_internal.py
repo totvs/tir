@@ -5420,7 +5420,7 @@ class PouiInternal(Base):
         
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + 30
+        endtime = time.time() + 120
         while time.time() < endtime:
             logger().debug(f'Waiting for the confirm button.')
 
