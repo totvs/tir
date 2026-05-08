@@ -7738,10 +7738,8 @@ class WebappInternal(Base):
 
                     term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
                     endtime = time.time() + self.config.time_out
-                    while (time.time() < endtime and not (
-                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows) + 1, main_container=self.containers_selectors["GetCurrentContainer"]) or len(shadowroot_tr()) > 1)):
-                        if self.config.debug_log:
-                            logger().debug("Waiting for the new line to show")
+                    while (time.time() < endtime and not (len(shadowroot_tr()) > len(rows))):
+                        logger().debug("Waiting for the new line to show")
                         time.sleep(1)
 
                     if (add_grid_line_counter):
