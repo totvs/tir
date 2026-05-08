@@ -5386,71 +5386,66 @@ class PouiInternal(Base):
 
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
 
+        self.escape_to_main_menu()
+
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
 
         success = False
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
-        attempts = 1
         match_mode = 1 if module or program_desc else 3
-        program_with_module = f'{program_name} - {module}' if program_name and module else None
-
-        self.escape_to_main_menu()
+        program_with_module = f'{program_name} - {module}' if program_name and module else None        
+        ele_hidden = None
+        wtb_after = None    
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
         get_wtb = lambda: len(self.get_current_DOM().select('wa-tab-button'))
         wtb_before = get_wtb()
 
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not success:
-            logger().debug(f'Attempt {attempts} to set the program. Tabs count before: {wtb_before}')
+        hide_element = next(iter(self.web_scrap(term=search_term, 
+                                                scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                main_container='body')), None)
+        
+        self.InputValue(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
+        self._po_loading()
 
-            if attempts > 1:
-                time.sleep(0.5)
+        if not program_name and program_desc:
+            self.config.routine = self._get_program_by_desc(program_desc)
+        
+        logger().debug(f'Selecting the routine')
 
-            ele_hidden = None
-            wtb_after = None
+        self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+                                program_call=True, match_mode=match_mode)
+        
+        # -- Trecho de código temporário --
+        btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
+        endtime = time.time() + 30
+        while time.time() < endtime:
+            logger().debug(f'Waiting for the confirm button.')
 
-            hide_element = next(iter(self.web_scrap(term=search_term, 
-                                                    scrap_type=enum.ScrapType.CSS_SELECTOR, 
-                                                    main_container='body')), None)
-            
-            self.InputValue(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-            self._po_loading()
-            if not program_name and program_desc:
-                self.config.routine = self._get_program_by_desc(program_desc)
-            self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
-                                   program_call=True, match_mode=match_mode)
-
-            # -- Trecho de código temporário --
-            self.wait_element_timeout(term=confirm_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
-            btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
             if btn_confirmar():
                 btn_confirmar_sel = lambda: self.soup_to_selenium(next(iter(btn_confirmar())))
                 self.click(btn_confirmar_sel())
-            # -- --
+                logger().debug(f'Confirm button clicked.')
+                break
+            time.sleep(1)
+        # -- --
 
-            logger().debug(f'Waiting for the new home to disappear.')
-            self.wait_element_is_not_displayed(hide_element, timeout=60)
-            ele_hidden = not self.element_is_displayed(hide_element)
-            logger().debug(f'New home disappeared.')
+        self.wait_element_is_not_displayed(hide_element, timeout=60)
+        ele_hidden = not self.element_is_displayed(hide_element)
+        logger().debug(f'New home disappeared.')
 
-            endtime_routine = time.time() + (self.config.time_out / 2)
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime:
+            logger().debug(f'Waiting for a new tab to open.')
 
-            while time.time() < endtime_routine:
-                logger().debug(f'Waiting for a new tab to open.')
+            wtb_after = get_wtb()
+            if wtb_before != wtb_after:
+                break
+            time.sleep(1)
 
-                wtb_after = get_wtb()
-
-                if wtb_before != wtb_after:
-                    break
-
-                time.sleep(1)
-
-            success = (ele_hidden) and (wtb_before != wtb_after)
-
-            attempts += 1
+        success = (ele_hidden) and (wtb_before != wtb_after)
 
         self.close_after_routine(program_name)
 
