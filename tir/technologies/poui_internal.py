@@ -5450,7 +5450,7 @@ class PouiInternal(Base):
         self.close_after_routine(program_name)
 
         if not success:
-            message = "Couldn't find Program field."
+            message = "Couldn't set the program."
             self.config.routine_type = ''
             self.config.routine = ''
             self.log_error()
