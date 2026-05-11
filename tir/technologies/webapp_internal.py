@@ -5826,11 +5826,14 @@ class WebappInternal(Base):
             "itens":itens
         }
         column_not_found = None
+        term_layer = 'wa-dialog'
         
         ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
         
         endtime = time.time() + self.config.time_out
         df, grid = self.grid_dataframe(grid_number=grid_number)
+
+        tmodal_layer = self.check_layers(term_layer)
 
         while time.time() < endtime and not success and not reached_end:
             if df is None or df.empty:
@@ -5878,6 +5881,11 @@ class WebappInternal(Base):
                     self.set_grid_focus(grid_number)
                     self.click(element_td, click_type=enum.ClickType.SELENIUM)
                     self.wait_blocker()
+                    
+                    # For cases that open a help
+                    if self.check_layers(term_layer) > tmodal_layer:
+                        success = True
+                        break
                     
                     clicked_result = self.performing_additional_click(element_td, grid_number=grid_number,
                                                                       matches_values=matches_values)
@@ -5954,10 +5962,7 @@ class WebappInternal(Base):
             if not element_td:
                 continue
 
-            tmodal = self.element_exists(term=term_layer, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                            main_container="body", check_error=False,
-                                            position=tmodal_layer + 1)
-            if tmodal:
+            if self.check_layers(term_layer) > tmodal_layer:
                 return True
 
             new_box_state = self.get_box_state(element_td)
