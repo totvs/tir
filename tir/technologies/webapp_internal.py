@@ -5719,6 +5719,82 @@ class WebappInternal(Base):
         row_local = tr_local[row_index]
         target_td = next(iter(row_local.find_elements(By.CSS_SELECTOR, 'td')), None)
         return target_td
+    
+    def find_matches_in_df(self, df_local, values):
+
+        matches = []
+        if df_local is None or df_local.empty:
+            return matches
+        
+        first_column = values.get('first_column')
+        second_column = values.get('second_column')
+        first_content = values.get('first_content')
+        second_content = values.get('second_content')
+        itens = values.get('itens', False)
+
+        if first_column and second_column:
+            if first_column not in df_local.columns:
+                return matches
+            
+            if second_column not in df_local.columns:
+                return matches
+            
+            return list(df_local.loc[(df_local[first_column] == first_content) & (df_local[second_column] == second_content)].index.array)
+
+        if first_column and (first_content and second_content):
+            if not isinstance(first_column, list) or not first_column:
+                return matches
+            
+            if first_column[0] not in df_local.columns:
+                return matches
+            
+            return list(df_local.loc[(df_local[first_column[0]] == first_content) | (df_local[first_column[0]] == second_content)].index.array)
+
+        if itens:
+            matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
+            if not matched_column_itens:
+                return matches
+            
+            return list(df_local.loc[(df_local[matched_column_itens] == first_content)].index.array)
+
+        if first_column and first_content:
+            matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
+            if not matched_column:
+                return matches
+
+            first_column_values = df_local[matched_column].values
+            first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
+            content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
+            if content:
+                matches.append(first_column_formatted_values.index(content))
+                return [matches[0]]
+
+            return matches
+
+        return [0]
+
+    def _refresh_element_td(self, element_td=None, grid_number=0, matches_values=None):
+
+        self.wait_blocker()
+
+        if element_td:
+            try:
+                if element_td.is_enabled():
+                    return element_td
+            except StaleElementReferenceException:
+                pass
+            except Exception:
+                pass
+                
+        df, grid = self.grid_dataframe(grid_number=grid_number)
+        index_number = self.find_matches_in_df(df, matches_values)
+        if not index_number:
+            return None
+        index = int(index_number[0])
+        element_refreshed = self.get_row_target_element(grid, index)
+        if not element_refreshed:
+            return None
+        return element_refreshed
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
         """
@@ -5742,57 +5818,15 @@ class WebappInternal(Base):
         success = False
         clicked_any = False
         reached_end = False
+        matches_values = {
+            "first_column":first_column,
+            "second_column":second_column,
+            "first_content":first_content,
+            "second_content":second_content,
+            "itens":itens
+        }
         column_not_found = None
-
-        def find_matches_in_df(df_local):
-            nonlocal column_not_found
-
-            matches = []
-            if df_local is None or df_local.empty:
-                return matches
-
-            if first_column and second_column:
-                if first_column not in df_local.columns:
-                    column_not_found = first_column
-                    return matches
-                if second_column not in df_local.columns:
-                    column_not_found = second_column
-                    return matches
-                return list(df_local.loc[(df_local[first_column] == first_content) & (df_local[second_column] == second_content)].index.array)
-
-            if first_column and (first_content and second_content):
-                if not isinstance(first_column, list) or not first_column:
-                    column_not_found = first_column
-                    return matches
-                if first_column[0] not in df_local.columns:
-                    column_not_found = first_column[0]
-                    return matches
-                return list(df_local.loc[(df_local[first_column[0]] == first_content) | (df_local[first_column[0]] == second_content)].index.array)
-
-            if itens:
-                matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
-                if not matched_column_itens:
-                    column_not_found = first_column
-                    return matches
-                return list(df_local.loc[(df_local[matched_column_itens] == first_content)].index.array)
-
-            if first_column and first_content:
-                matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
-                if not matched_column:
-                    column_not_found = first_column
-                    return matches
-
-                first_column_values = df_local[matched_column].values
-                first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
-                content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
-                if content:
-                    matches.append(first_column_formatted_values.index(content))
-                    return [matches[0]]
-
-                return matches
-
-            return [0]
-
+        
         ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
         
         endtime = time.time() + self.config.time_out
@@ -5803,10 +5837,21 @@ class WebappInternal(Base):
                 reached_end = True
                 break
 
-            index_number = find_matches_in_df(df)
+            missing_columns = []
+            if first_column:
+                cols_to_check = first_column if isinstance(first_column, list) else [first_column]
+                for col in cols_to_check:
+                    if col not in df.columns:
+                        missing_columns.append(col)
 
-            if column_not_found:
+            if second_column and second_column not in df.columns:
+                missing_columns.append(second_column)
+
+            if missing_columns:
+                column_not_found = ', '.join(missing_columns)
                 break
+
+            index_number = self.find_matches_in_df(df, matches_values)
 
             if index_number:
                 for idx in list(index_number):
@@ -5822,13 +5867,11 @@ class WebappInternal(Base):
                         self.set_grid_focus(grid_number)
                         self.click(element_td, click_type=enum.ClickType.SELENIUM)
                         ActionChains(self.driver).key_down(Keys.DOWN).perform()
-                        self.wait_blocker()
-                        df, grid = self.grid_dataframe(grid_number=grid_number)
-                        index_number = find_matches_in_df(df)
-                        if not index_number:
-                            continue
-                        index = int(index_number[0])
-                        element_td = self.get_row_target_element(grid, index)
+                        element_td = self._refresh_element_td(
+                            element_td,
+                            grid_number=grid_number,
+                            matches_values=matches_values
+                        )
                         if not element_td:
                             continue
 
@@ -5836,7 +5879,8 @@ class WebappInternal(Base):
                     self.click(element_td, click_type=enum.ClickType.SELENIUM)
                     self.wait_blocker()
                     
-                    clicked_result = self.performing_additional_click(element_td, grid_number=grid_number)
+                    clicked_result = self.performing_additional_click(element_td, grid_number=grid_number,
+                                                                      matches_values=matches_values)
 
                     if clicked_result:
                         clicked_any = True
@@ -5871,7 +5915,7 @@ class WebappInternal(Base):
         except Exception:
             return None
                 
-    def performing_additional_click(self, element_td, grid_number=0):
+    def performing_additional_click(self, element_td, grid_number=0, matches_values=None):
         """
         [Internal]
 
@@ -5902,7 +5946,13 @@ class WebappInternal(Base):
 
             self.performing_click(element_td, click_type)
 
-            self.wait_blocker()
+            element_td = self._refresh_element_td(
+                element_td,
+                grid_number=grid_number,
+                matches_values=matches_values
+            )
+            if not element_td:
+                continue
 
             tmodal = self.element_exists(term=term_layer, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                             main_container="body", check_error=False,
