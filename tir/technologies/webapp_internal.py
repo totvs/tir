@@ -5773,11 +5773,11 @@ class WebappInternal(Base):
 
         return [0]
 
-    def _refresh_element_td(self, element_td=None, grid_number=0, matches_values=None):
+    def _refresh_element_td(self, element_td=None, grid_number=0, matches_values=None, force_refresh=False):
 
         self.wait_blocker()
 
-        if element_td:
+        if element_td and not force_refresh:
             try:
                 if element_td.is_enabled():
                     return element_td
@@ -5943,6 +5943,8 @@ class WebappInternal(Base):
         success = False
         click_type = 1
         endtime = time.time() + self.config.time_out
+        force_refresh = False
+        text_parent_before = None
 
         last_box_state = self.get_box_state(element_td)
         logger().debug(f'Before: {last_box_state}')         
@@ -5952,16 +5954,31 @@ class WebappInternal(Base):
             tmodal_layer = self.check_layers(term_layer)
 
             self.set_grid_focus(grid_number)
+            
+            try:
+                text_parent_before = element_td.find_element(By.XPATH, "./..").text
+            except Exception:
+                force_refresh = True
 
             self.performing_click(element_td, click_type)
+
+            if not force_refresh:
+                try:
+                    text_parent_after = element_td.find_element(By.XPATH, "./..").text
+                    force_refresh = text_parent_before != text_parent_after
+                except Exception:
+                    force_refresh = True
 
             element_td = self._refresh_element_td(
                 element_td,
                 grid_number=grid_number,
-                matches_values=matches_values
+                matches_values=matches_values,
+                force_refresh=force_refresh
             )
             if not element_td:
-                continue
+                break
+
+            force_refresh = False
 
             if self.check_layers(term_layer) > tmodal_layer:
                 logger().debug('A new layer has been identified.')
