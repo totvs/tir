@@ -5884,6 +5884,7 @@ class WebappInternal(Base):
                     
                     # For cases that open a help
                     if self.check_layers(term_layer) > tmodal_layer:
+                        logger().debug('A new layer has been identified.')
                         success = True
                         break
                     
@@ -5963,6 +5964,7 @@ class WebappInternal(Base):
                 continue
 
             if self.check_layers(term_layer) > tmodal_layer:
+                logger().debug('A new layer has been identified.')
                 return True
 
             new_box_state = self.get_box_state(element_td)
