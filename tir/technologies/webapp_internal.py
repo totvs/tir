@@ -5715,10 +5715,14 @@ class WebappInternal(Base):
         sel_grid = self.soup_to_selenium(grid_local)
         tr_local = self.execute_js_selector('tbody > tr', sel_grid)
         if not tr_local or len(tr_local) - 1 < row_index:
-            return None
+            return None, None
         row_local = tr_local[row_index]
-        target_td = next(iter(row_local.find_elements(By.CSS_SELECTOR, 'td')), None)
-        return target_td
+        elements_td = row_local.find_elements(By.CSS_SELECTOR, 'td')
+        if not elements_td:
+            return None, None
+        target_td = next(iter(elements_td), None)
+        second_td = elements_td[1] if len(elements_td) > 1 else target_td
+        return target_td, second_td
     
     def find_matches_in_df(self, df_local, values):
 
@@ -5773,28 +5777,19 @@ class WebappInternal(Base):
 
         return [0]
 
-    def _refresh_element_td(self, element_td=None, grid_number=0, matches_values=None, force_refresh=False):
+    def _refresh_element_td(self, grid_number=0, matches_values=None):
 
         self.wait_blocker()
-
-        if element_td and not force_refresh:
-            try:
-                if element_td.is_enabled():
-                    return element_td
-            except StaleElementReferenceException:
-                pass
-            except Exception:
-                pass
                 
         df, grid = self.grid_dataframe(grid_number=grid_number)
         index_number = self.find_matches_in_df(df, matches_values)
         if not index_number:
-            return None
+            return None, None
         index = int(index_number[0])
-        element_refreshed = self.get_row_target_element(grid, index)
+        element_refreshed, second_td = self.get_row_target_element(grid, index)
         if not element_refreshed:
-            return None
-        return element_refreshed
+            return None, None
+        return element_refreshed, second_td
 
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
         """
@@ -5828,6 +5823,7 @@ class WebappInternal(Base):
         column_not_found = None
         term_layer = 'wa-dialog'
         
+        self.set_grid_focus(grid_number)
         ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
         
         endtime = time.time() + self.config.time_out
@@ -5861,25 +5857,22 @@ class WebappInternal(Base):
                     index = int(idx)
                     last_row_index = len(df) - 1
 
-                    element_td = self.get_row_target_element(grid, index)
+                    element_td, second_td = self.get_row_target_element(grid, index)
 
                     if not element_td:
                         continue
 
                     if index == last_row_index:
                         self.set_grid_focus(grid_number)
-                        self.click(element_td, click_type=enum.ClickType.SELENIUM)
+                        self.click(second_td, click_type=enum.ClickType.SELENIUM)
                         ActionChains(self.driver).key_down(Keys.DOWN).perform()
-                        element_td = self._refresh_element_td(
-                            element_td,
-                            grid_number=grid_number,
-                            matches_values=matches_values
-                        )
+                        element_td, second_td = self._refresh_element_td(grid_number=grid_number,
+                                                                         matches_values=matches_values)
                         if not element_td:
                             continue
 
                     self.set_grid_focus(grid_number)
-                    self.click(element_td, click_type=enum.ClickType.SELENIUM)
+                    self.click(second_td, click_type=enum.ClickType.SELENIUM)
                     self.wait_blocker()
                     
                     # For cases that open a help
@@ -5943,8 +5936,6 @@ class WebappInternal(Base):
         success = False
         click_type = 1
         endtime = time.time() + self.config.time_out
-        force_refresh = False
-        text_parent_before = None
 
         last_box_state = self.get_box_state(element_td)
         logger().debug(f'Before: {last_box_state}')         
@@ -5954,31 +5945,13 @@ class WebappInternal(Base):
             tmodal_layer = self.check_layers(term_layer)
 
             self.set_grid_focus(grid_number)
-            
-            try:
-                text_parent_before = element_td.find_element(By.XPATH, "./..").text
-            except Exception:
-                force_refresh = True
 
             self.performing_click(element_td, click_type)
 
-            if not force_refresh:
-                try:
-                    text_parent_after = element_td.find_element(By.XPATH, "./..").text
-                    force_refresh = text_parent_before != text_parent_after
-                except Exception:
-                    force_refresh = True
-
-            element_td = self._refresh_element_td(
-                element_td,
-                grid_number=grid_number,
-                matches_values=matches_values,
-                force_refresh=force_refresh
-            )
+            element_td, _ = self._refresh_element_td(grid_number=grid_number,
+                                                     matches_values=matches_values)
             if not element_td:
                 break
-
-            force_refresh = False
 
             if self.check_layers(term_layer) > tmodal_layer:
                 logger().debug('A new layer has been identified.')
