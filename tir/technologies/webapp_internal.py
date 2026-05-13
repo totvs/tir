@@ -5697,8 +5697,6 @@ class WebappInternal(Base):
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
-        finally:
-            self.wait_blocker()
 
     def move_to_next_grid_chunk(self, grid_local, previous_df, grid_number=0):
         sel_grid = self.soup_to_selenium(grid_local)
@@ -5957,6 +5955,8 @@ class WebappInternal(Base):
             self.set_grid_focus(grid_number)
 
             self.performing_click(element_td, click_type)
+
+            time.sleep(2)
 
             # For cases that open a help
             if self.check_layers(term_layer) > tmodal_layer:
