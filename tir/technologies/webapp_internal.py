@@ -2065,12 +2065,12 @@ class WebappInternal(Base):
                 self.click(icon_s)
 
             container_end = self.get_current_container()
-            if (container['id']  == container_end['id']):
+            if (container.get('id') == container_end.get('id')):
                 input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
 
-            while( time.time() < endtime and container['id']  == container_end['id']):
+            while( time.time() < endtime and container.get('id') == container_end.get('id')):
                 container_end = self.get_current_container()
                 time.sleep(0.01)
 
