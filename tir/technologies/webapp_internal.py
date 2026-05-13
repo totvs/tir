@@ -5697,6 +5697,8 @@ class WebappInternal(Base):
                 self.send_action(action=self.double_click, element=element, wait_change=False)
         except:
             pass
+        finally:
+            self.wait_blocker()
 
     def move_to_next_grid_chunk(self, grid_local, previous_df, grid_number=0):
         sel_grid = self.soup_to_selenium(grid_local)
@@ -5830,6 +5832,7 @@ class WebappInternal(Base):
         df, grid = self.grid_dataframe(grid_number=grid_number)
 
         tmodal_layer = self.check_layers(term_layer)
+        container_id_before = self.get_current_container().get('id')
 
         while time.time() < endtime and not success and not reached_end:
             if df is None or df.empty:
@@ -5878,6 +5881,12 @@ class WebappInternal(Base):
                     # For cases that open a help
                     if self.check_layers(term_layer) > tmodal_layer:
                         logger().debug('A new layer has been identified.')
+                        success = True
+                        break
+
+                    # For cases that close the current container
+                    if self.get_current_container().get('id') != container_id_before:
+                        logger().debug('The container has been changed.')
                         success = True
                         break
                     
@@ -5938,6 +5947,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
 
         last_box_state = self.get_box_state(element_td)
+        container_id_before = self.get_current_container().get('id')
         logger().debug(f'Before: {last_box_state}')         
         
         while time.time() < endtime and not success:
@@ -5948,14 +5958,20 @@ class WebappInternal(Base):
 
             self.performing_click(element_td, click_type)
 
+            # For cases that open a help
+            if self.check_layers(term_layer) > tmodal_layer:
+                logger().debug('A new layer has been identified.')
+                return True
+
+            # For cases that close the current container
+            if self.get_current_container().get('id') != container_id_before:
+                logger().debug('The container has been changed.')
+                return True
+
             element_td, _ = self._refresh_element_td(grid_number=grid_number,
                                                      matches_values=matches_values)
             if not element_td:
                 break
-
-            if self.check_layers(term_layer) > tmodal_layer:
-                logger().debug('A new layer has been identified.')
-                return True
 
             new_box_state = self.get_box_state(element_td)
 
