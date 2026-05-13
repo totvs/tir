@@ -5824,7 +5824,6 @@ class WebappInternal(Base):
         term_layer = 'wa-dialog'
         
         self.set_grid_focus(grid_number)
-        ActionChains(self.driver).key_down(Keys.SHIFT).key_down(Keys.HOME).perform()
         
         endtime = time.time() + self.config.time_out
         df, grid = self.grid_dataframe(grid_number=grid_number)
