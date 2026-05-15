@@ -6023,7 +6023,7 @@ class PouiInternal(Base):
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
 
         if (button_normalized == "x"):
-            self.set_button_exit()
+            self.set_button_x()
             return
 
         # Map legacy button names to their POUI equivalents.
