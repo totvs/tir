@@ -5317,15 +5317,17 @@ class PouiInternal(Base):
 
 
     def escape_to_main_menu(self):
-        """
+        """[Internal]
 
+        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
+        Waits until the menu is visible.
+
+        :return: None
         """
-        term = "[class*='card-wrapper']"
+        success = False
 
         endtime = time.time() + self.config.time_out /2
-        while time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                main_container="body", check_error=False):
-
+        while time.time() < endtime and not success:
             logger().info('Escape to menu')
             ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
@@ -5333,10 +5335,25 @@ class PouiInternal(Base):
                 logger().info('Found layers after Escape to menu')
                 self.close_screen_before_menu()
 
-            # wait trasitions between screens to avoid errors in layers number
-            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      timeout=6, main_container='body')
+            success = self.check_tmenu_screen()
+            logger().debug(f'Check Menu Screen: {success}')
 
+        if not success:
+            self.log_error('Home screen not found!')
+
+
+    def check_tmenu_screen(self):
+        """
+        [Internal]
+        """
+        try:
+            term = "[class*='card-wrapper']"
+            return self.element_is_displayed(
+                next(iter(self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                         main_container="body", twebview=True)),
+                     None))
+        except:
+            return False
 
     def check_layers(self, term):
         """
