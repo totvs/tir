@@ -2065,12 +2065,12 @@ class WebappInternal(Base):
                 self.click(icon_s)
 
             container_end = self.get_current_container()
-            if (container['id']  == container_end['id']):
+            if (container.get('id') == container_end.get('id')):
                 input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
 
-            while( time.time() < endtime and container['id']  == container_end['id']):
+            while( time.time() < endtime and container.get('id') == container_end.get('id')):
                 container_end = self.get_current_container()
                 time.sleep(0.01)
 
@@ -5326,7 +5326,7 @@ class WebappInternal(Base):
         if not timeout:
             timeout = 1200
 
-        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title"
+        optional_term = ".tsay, .tgroupbox, wa-text-view, .po-page-header-title, po-tag"
         main_container = self.containers_selectors["AllContainers"]
         twebview = False
 
@@ -5612,13 +5612,12 @@ class WebappInternal(Base):
             fields = list(map(lambda x: x.strip(), fields.split(',')))
             content_list = list(map(lambda x: x.strip(), content_list.split(',')))
 
-            if len(fields) == 2 and len(content_list) == 2 and not select_all:
+            if len(fields) == 2 and len(content_list) == 2:
                 self.click_box_dataframe(*fields, *content_list, grid_number=grid_number)
-            elif len(fields) == 1 and len(content_list) == 2 and not select_all:
+            elif len(fields) == 1 and len(content_list) == 2:
                 self.click_box_dataframe(first_column=fields, first_content=content_list[0], second_content=content_list[1], grid_number=grid_number)
-            elif len(fields) == 1 and not select_all:
+            elif len(fields) == 1:
                 self.click_box_dataframe(first_column=fields[0], first_content=content_list[0], grid_number=grid_number, itens=itens)
-
 
         if select_all:
             optional_term = "wa-button" if self.webapp_shadowroot() else "label span"
@@ -5628,18 +5627,15 @@ class WebappInternal(Base):
 
             is_select_all_button = self.element_exists(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
 
-            if select_all and is_select_all_button:
+            if is_select_all_button:
                 self.wait_element(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)
-                if self.webapp_shadowroot():
-                    element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)), None)
-                else:
-                    element = next(iter(self.web_scrap(term="label.tcheckbox input", scrap_type=enum.ScrapType.CSS_SELECTOR)), None)
+                element = next(iter(self.web_scrap(term=self.language.invert_selection, scrap_type=enum.ScrapType.MIXED, optional_term=optional_term)), None)
 
                 if element:
-                    box = lambda: element if self.webapp_shadowroot() else lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
+                    box = lambda: element
                     self.click(box())
 
-            elif select_all and not is_select_all_button:
+            else:
                 success = False
                 endtime = time.time() + self.config.time_out
                 while time.time() < endtime and not success:
@@ -5648,23 +5644,18 @@ class WebappInternal(Base):
                             iter(grid.select('th')))
 
                         if th:
-                            if self.webapp_shadowroot():
-                                first_cell = self.execute_js_selector('tr td div', self.soup_to_selenium(grid))
-                                if first_cell:
-                                    current_box = lambda: next(iter(first_cell)).get_attribute('style')
-                                    before_box = current_box()
-                                    endtime = time.time() + self.config.time_out
-                                    while time.time() < endtime and current_box() == before_box:
-                                        th_element = next(iter(th))
-                                        th_element.click()
-                                        success = current_box() != before_box
-                                else:
-                                    logger().debug('ClickBox not first_cell condition')
+                            first_cell = self.execute_js_selector('tr td div', self.soup_to_selenium(grid))
+                            if first_cell:
+                                current_box = lambda: next(iter(first_cell)).get_attribute('style')
+                                before_box = current_box()
+                                endtime = time.time() + self.config.time_out
+                                while time.time() < endtime and current_box() == before_box:
                                     th_element = next(iter(th))
                                     th_element.click()
-                                    success = True # not maped yet
+                                    success = current_box() != before_box
                             else:
-                                th_element = self.soup_to_selenium(th)
+                                logger().debug('ClickBox not first_cell condition')
+                                th_element = next(iter(th))
                                 th_element.click()
                                 success = True # not maped yet
                     except:
@@ -5672,7 +5663,7 @@ class WebappInternal(Base):
                 if not success:
                     self.log_error("Couldn't find ClickBox item")
 
-    def performing_click(self, element_bs4, class_grid, click_type=1):
+    def performing_click(self, element_bs4, click_type=1):
         """
         [Internal]
 
@@ -5684,11 +5675,7 @@ class WebappInternal(Base):
         :param click_type: Numeric value representing the click method (1=ActionChains+dblclick, 2=double_click, 3=click+ENTER, 4=send_action). - **Default:** 1
         :type click_type: int
         """
-        if not self.webapp_shadowroot():
-            self.wait_until_to(expected_condition="element_to_be_clickable", element=element_bs4, locator=By.XPATH)
-            element = lambda: self.soup_to_selenium(element_bs4)
-        else:
-            element = lambda: element_bs4
+        element = lambda: element_bs4
 
         self.set_element_focus(element())
         self.scroll_to_element(element())
@@ -5711,6 +5698,99 @@ class WebappInternal(Base):
         except:
             pass
 
+    def move_to_next_grid_chunk(self, grid_local, previous_df, grid_number=0):
+        sel_grid = self.soup_to_selenium(grid_local)
+        first_element_focus = next(iter(self.execute_js_selector('tbody tr td', sel_grid)), None)
+
+        if first_element_focus:
+            self.click(first_element_focus, click_type=enum.ClickType.SELENIUM)
+
+        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
+        self.wait_blocker()
+        new_df, new_grid = self.grid_dataframe(grid_number=grid_number)
+        changed = not new_df.equals(previous_df)
+        return new_df, new_grid, changed
+    
+    def get_row_target_element(self, grid_local, row_index):
+        sel_grid = self.soup_to_selenium(grid_local)
+        tr_local = self.execute_js_selector('tbody > tr', sel_grid)
+        if not tr_local or len(tr_local) - 1 < row_index:
+            return None, None
+        row_local = tr_local[row_index]
+        elements_td = row_local.find_elements(By.CSS_SELECTOR, 'td')
+        if not elements_td:
+            return None, None
+        target_td = next(iter(elements_td), None)
+        second_td = elements_td[1] if len(elements_td) > 1 else target_td
+        return target_td, second_td
+    
+    def find_matches_in_df(self, df_local, values):
+
+        matches = []
+        if df_local is None or df_local.empty:
+            return matches
+        
+        first_column = values.get('first_column')
+        second_column = values.get('second_column')
+        first_content = values.get('first_content')
+        second_content = values.get('second_content')
+        itens = values.get('itens', False)
+
+        if first_column and second_column:
+            if first_column not in df_local.columns:
+                return matches
+            
+            if second_column not in df_local.columns:
+                return matches
+            
+            return list(df_local.loc[(df_local[first_column] == first_content) & (df_local[second_column] == second_content)].index.array)
+
+        if first_column and (first_content and second_content):
+            if not isinstance(first_column, list) or not first_column:
+                return matches
+            
+            if first_column[0] not in df_local.columns:
+                return matches
+            
+            return list(df_local.loc[(df_local[first_column[0]] == first_content) | (df_local[first_column[0]] == second_content)].index.array)
+
+        if itens:
+            matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
+            if not matched_column_itens:
+                return matches
+            
+            return list(df_local.loc[(df_local[matched_column_itens] == first_content)].index.array)
+
+        if first_column and first_content:
+            matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df_local.columns))), None)
+            if not matched_column:
+                return matches
+
+            first_column_values = df_local[matched_column].values
+            first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
+            content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
+            if content:
+                matches.append(first_column_formatted_values.index(content))
+                return [matches[0]]
+
+            return matches
+
+        return [0]
+
+    def _refresh_element_td(self, grid_number=0, matches_values=None):
+
+        self.wait_blocker()
+                
+        df, grid = self.grid_dataframe(grid_number=grid_number)
+        index_number = self.find_matches_in_df(df, matches_values)
+        if not index_number:
+            return None, None
+        index = int(index_number[0])
+        element_refreshed, second_td = self.get_row_target_element(grid, index)
+        if not element_refreshed:
+            return None, None
+        return element_refreshed, second_td
+
     def click_box_dataframe(self, first_column=None, second_column=None, first_content=None, second_content=None, grid_number=0, itens=False):
         """
         [Internal]
@@ -5730,166 +5810,182 @@ class WebappInternal(Base):
         :param itens: If True, clicks all rows matching the criteria. - **Default:** False
         :type itens: bool
         """
-        index_number = []
-        count = 0
+        success = False
+        clicked_any = False
+        reached_end = False
+        matches_values = {
+            "first_column":first_column,
+            "second_column":second_column,
+            "first_content":first_content,
+            "second_content":second_content,
+            "itens":itens
+        }
         column_not_found = None
-
+        term_layer = 'wa-dialog'
+        
+        self.set_grid_focus(grid_number)
+        
         endtime = time.time() + self.config.time_out
-        while time.time() < endtime and len(index_number) < 1 and count <= 3:
+        df, grid = self.grid_dataframe(grid_number=grid_number)
 
-            try:
-                df, grid = self.grid_dataframe(grid_number=grid_number)
+        tmodal_layer = self.check_layers(term_layer)
+        container_id_before = self.get_current_container().get('id')
 
-                last_df = df
+        while time.time() < endtime and not success and not reached_end:
+            if df is None or df.empty:
+                reached_end = True
+                break
+            
+            columns_normalized = list(map(lambda x: str(x).strip().lower(), df.columns))
+            missing_columns = []
+            if first_column:
+                cols_to_check = first_column if isinstance(first_column, list) else [first_column]
 
-                class_grid = next(iter(grid.attrs['class']))
+                for col in cols_to_check:
+                    if str(col).strip().lower() not in columns_normalized:
+                        missing_columns.append(col)
 
-                if not df.empty:
-                    if first_column and second_column:
-                        index_number = df.loc[(df[first_column] == first_content) & (df[second_column] == second_content)].index.array
-                    elif first_column and (first_content and second_content):
-                        index_number = df.loc[(df[first_column[0]] == first_content) | (df[first_column[0]] == second_content)].index.array
-                    elif itens:
-                        matched_column_itens = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        if not matched_column_itens:
-                            column_not_found = first_column
-                            break
-                        index_number = df.loc[(df[matched_column_itens] == first_content)].index.array
-                    elif first_column and first_content:
-                        matched_column = next(iter(list(filter(lambda x: first_column.lower().strip() in x.lower().strip(), df.columns))), None)
-                        if not matched_column:
-                            column_not_found = first_column
-                            break
-                        first_column_values = df[matched_column].values
-                        first_column_formatted_values = list(map(lambda x: x.replace(' ', ''), first_column_values))
-                        content = next(iter(list(filter(lambda x: x == first_content.replace(' ', ''), first_column_formatted_values))), None)
-                        if content:
-                            index_number.append(first_column_formatted_values.index(content))
-                            if len(index_number) > 0:
-                                index_number = [index_number[0]]
-                    else:
-                        index_number.append(0)
+            if second_column and str(second_column).strip().lower() not in columns_normalized:
+                missing_columns.append(second_column)
 
-                    if len(index_number) < 1 and count <= 3:
-                        first_element_focus = next(iter(grid.select('tbody > tr > td')), None)
-                        if self.webapp_shadowroot():
-                            if not first_element_focus:
-                                first_element_focus = self.driver.execute_script("return arguments[0].shadowRoot.querySelector('tbody tr td')", self.soup_to_selenium(grid))
-                        if first_element_focus:
-                            if self.webapp_shadowroot():
-                                first_element_focus.click()
-                            else:
-                                self.wait_until_to(expected_condition="element_to_be_clickable", element=first_element_focus, locator=By.XPATH)
-                                self.soup_to_selenium(first_element_focus).click()
-                        ActionChains(self.driver).key_down(Keys.PAGE_DOWN).perform()
-                        self.wait_blocker()
-                        df, grid = self.grid_dataframe(grid_number=grid_number)
-                        if df.equals(last_df):
-                            count +=1
+            if missing_columns:
+                column_not_found = ', '.join(missing_columns)
+                break
 
-            except Exception as e:
-                logger().exception(f"Content doesn't found on the screen! {str(e)}")
+            index_number = self.find_matches_in_df(df, matches_values)
+
+            if index_number:
+                for idx in list(index_number):
+                    index = int(idx)
+                    last_row_index = len(df) - 1
+
+                    element_td, second_td = self.get_row_target_element(grid, index)
+
+                    if not element_td:
+                        continue
+
+                    if index == last_row_index:
+                        self.set_grid_focus(grid_number)
+                        self.click(second_td, click_type=enum.ClickType.SELENIUM)
+                        ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                        element_td, second_td = self._refresh_element_td(grid_number=grid_number,
+                                                                         matches_values=matches_values)
+                        if not element_td:
+                            continue
+
+                    self.set_grid_focus(grid_number)
+                    self.click(second_td, click_type=enum.ClickType.SELENIUM)
+                    self.wait_blocker()
+                    
+                    # For cases that open a help
+                    if self.check_layers(term_layer) > tmodal_layer:
+                        logger().debug('A new layer has been identified.')
+                        success = True
+                        break
+
+                    # For cases that close the current container
+                    if self.get_current_container().get('id') != container_id_before:
+                        logger().debug('The container has been changed.')
+                        success = True
+                        break
+                    
+                    clicked_result = self.performing_additional_click(element_td, grid_number=grid_number,
+                                                                      matches_values=matches_values)
+
+                    if clicked_result:
+                        clicked_any = True
+
+                    if not itens and clicked_result:
+                        success = True
+                        break
+
+                if success:
+                    break
+
+            last_df = df
+            df, grid, changed = self.move_to_next_grid_chunk(grid, last_df, grid_number=grid_number)
+            if not changed:
+                reached_end = True
 
         if column_not_found:
             self.log_error(f"Column doesn't found on the screen! {column_not_found}")
 
-        if len(index_number) < 1:
-            logger().exception(f"Content doesn't found on the screen! {first_content}")
+        if itens:
+            success = clicked_any
+
+        if not success:
             self.log_error(f"Content doesn't found on the screen! {first_content}")
 
-        if self.webapp_shadowroot():
-            sel_grid  = self.soup_to_selenium(grid)
-            tr = self.execute_js_selector('tbody > tr', sel_grid)
-        else:
-            tr = grid.select('tbody > tr')
-
-        if hasattr(index_number, '__iter__'):
-            for index in index_number:
-
-                if len(tr) < index:
-                    self.log_error(f"Couldn't check box element in line: {index+1}")
-
-                element_td = next(iter(tr[index].find_elements(By.CSS_SELECTOR, 'td'))) if self.webapp_shadowroot() else next(iter(tr[index].select('td')))
-                self.wait_blocker()
-                self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
-        else:
-            index = index_number
-            element_td = next(iter(tr[index].select('td')))
-            self.wait_blocker()
-            self.performing_additional_click(element_td, tr, index, class_grid, grid_number)
-
-    def performing_additional_click(self, element_bs4, tr, index, class_grid, grid_number):
+    def get_box_state(self, current_element):
+        try:
+            inner_div = next(iter(current_element.find_elements(By.CSS_SELECTOR, 'div')), None)
+            if inner_div:
+                return inner_div.get_attribute('style')
+            return current_element.get_attribute('style')
+        except Exception:
+            return None
+                
+    def performing_additional_click(self, element_td, grid_number=0, matches_values=None):
         """
         [Internal]
 
-        Retries clicking on a checkbox grid cell until its state changes, cycling through click types.
+        Retries clicking on a grid element, cycling through click strategies until success.
 
-        :param element_bs4: BeautifulSoup or Selenium element of the first cell in the target row.
-        :param tr: List of row elements in the grid.
-        :type tr: list
-        :param index: Zero-based row index of the target row.
-        :type index: int
-        :param class_grid: CSS class of the grid.
-        :type class_grid: str
+        :param element_td: Selenium element to click.
         :param grid_number: Index of the grid on screen.
         :type grid_number: int
+        :return: True if click is considered successful; otherwise False.
+        :rtype: bool
         """
-        try:
-            if element_bs4:
-                success = False
-                td = next(
-                    iter(tr[index].find_elements(By.CSS_SELECTOR, 'td > div'))) if self.webapp_shadowroot() else next(
-                    iter(tr[index].select('td')))
+        
+        if not element_td:
+            return False
 
-                if hasattr(td, 'style') or self.webapp_shadowroot():
-                    last_box_state = td.get_attribute('style') if self.webapp_shadowroot() else td.attrs['style']
-                    logger().debug(f'Before: {last_box_state}')
-                    click_type = 1
-                    endtime = time.time() + self.config.time_out
-                    while time.time() < endtime and not success:
+        success = False
+        click_type = 1
+        endtime = time.time() + self.config.time_out
 
-                        soup = self.get_current_DOM()
+        last_box_state = self.get_box_state(element_td)
+        container_id_before = self.get_current_container().get('id')
+        logger().debug(f'Before: {last_box_state}')         
+        
+        while time.time() < endtime and not success:
+            term_layer = 'wa-dialog'
+            tmodal_layer = self.check_layers(term_layer)
 
-                        term = "wa-dialog" if self.webapp_shadowroot() else ".tmodaldialog"
-                        tmodal_list = list(filter(lambda x: self.element_is_displayed(x), soup.select(term)))
-                        tmodal_layer = len(tmodal_list) if tmodal_list else 0
+            self.set_grid_focus(grid_number)
 
-                        self.set_grid_focus(grid_number)
-                        self.performing_click(element_bs4, class_grid, click_type)
-                        self.wait_blocker()
-                        time.sleep(2)
+            self.performing_click(element_td, click_type)
 
-                        tmodal = self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                     main_container="body", check_error=False,
-                                                     position=tmodal_layer + 1)
-                        if tmodal:
-                            return
+            time.sleep(2)
 
-                        grid = self.get_grid(grid_number=grid_number)
+            # For cases that open a help
+            if self.check_layers(term_layer) > tmodal_layer:
+                logger().debug('A new layer has been identified.')
+                return True
 
-                        if self.webapp_shadowroot():
-                            sel_grid = self.soup_to_selenium(grid)
-                            tr = self.execute_js_selector('tbody > tr', sel_grid)
+            # For cases that close the current container
+            if self.get_current_container().get('id') != container_id_before:
+                logger().debug('The container has been changed.')
+                return True
 
-                            if len(tr) - 1 >= index:
-                                td = next(iter(tr[index].find_elements(By.CSS_SELECTOR, 'td > div')))
-                            else:
-                                tr = next(iter(tr))
-                                td = next(iter(tr.find_elements(By.CSS_SELECTOR, 'td > div')))
-                            new_box_state = td.get_attribute('style')
-                        else:
-                            tr = grid.select('tbody > tr')
-                            td = next(iter(tr[index].select('td')))
-                            new_box_state = td.attrs['style']
-                        logger().debug(f'After: {new_box_state}')
-                        success = last_box_state != new_box_state
-                        click_type += 1
-                        if click_type > 4:
-                            click_type = 1
-                else:
-                    logger().debug(f"Couldn't check box element td: {str(td)}")
-        except Exception as error:
-            self.log_error(f"Couldn't check box element: {str(error)}")
+            element_td, _ = self._refresh_element_td(grid_number=grid_number,
+                                                     matches_values=matches_values)
+            if not element_td:
+                break
+
+            new_box_state = self.get_box_state(element_td)
+
+            logger().debug(f'After: {new_box_state}')
+
+            if last_box_state is not None and new_box_state is not None:
+                success = (last_box_state != new_box_state)
+
+            click_type +=  1
+            if click_type > 4:
+                click_type = 1
+
+        return success
 
     def set_grid_focus(self, grid_number=0):
         """
@@ -5909,30 +6005,37 @@ class WebappInternal(Base):
         """
         [Internal]
         """
-        term = self.grid_selectors["new_web_app"] if self.webapp_shadowroot() else ".tgetdados,.tgrid,.tcbrowse,.tmsselbr"
+        term = self.grid_selectors["new_web_app"]
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         grid = self.get_grid(grid_number=grid_number)
 
-        if self.webapp_shadowroot():
+        try:
             shadow_grid = self.soup_to_selenium(grid)
-            shadow_table = next(iter(self.execute_js_selector('table', shadow_grid)),None)
+            shadow_table = next(iter(self.execute_js_selector('table', shadow_grid)), None)
+
+            if not shadow_table:
+                return (pd.DataFrame(), grid)
+
             shadow_html = shadow_table.get_attribute('outerHTML')
-            df = (next(iter(pd.read_html(StringIO(shadow_html)))))
-        else:
-            df = (next(iter(pd.read_html(StringIO(grid)))))
+            df_raw = next(iter(pd.read_html(StringIO(shadow_html))), pd.DataFrame())
 
-        converters = {c: lambda x: str(x) for c in df.columns}
+            if df_raw is None or df_raw.empty:
+                return (pd.DataFrame(), grid)
 
-        if self.webapp_shadowroot():
-            df, grid = (next(iter(pd.read_html(StringIO(shadow_html), converters=converters)), None), grid)
-        else:
-            df, grid = (next(iter(pd.read_html(StringIO(grid), converters=converters)), None), grid)
+            converters = {c: lambda x: str(x) for c in df_raw.columns}
+            df = next(iter(pd.read_html(StringIO(shadow_html), converters=converters)), pd.DataFrame())
 
-        if not df.empty:
-            df = df.fillna('Not Value')
+            if df is None:
+                df = pd.DataFrame()
+
+            if not df.empty:
+                df = df.fillna('Not Value')
+
             return (df, grid)
+        except Exception:
+            return (pd.DataFrame(), grid)
 
     def wait_element_is_blocked(self, parent_id):
         """
@@ -6545,7 +6648,9 @@ class WebappInternal(Base):
                     self.scroll_to_element(element)
             try:
                 self.set_element_focus(element)
-                if self.switch_to_active_element() != element:
+                active_element = self.switch_to_active_element()
+                input_active_element = next(iter(self.execute_js_selector('input', self.switch_to_active_element())), None)
+                if active_element != element and input_active_element != element:
                     self.click(element, click_type=enum.ClickType.SELENIUM)
             except Exception as e:
                 logger().exception(f"Warning: SetFocus: '{field}' - Exception {str(e)}")
@@ -9021,7 +9126,7 @@ class WebappInternal(Base):
                 self.SetLateralMenu(self.config.routine, save_input=False)
             else:
                 from tir.technologies.core.events import emit
-                emit('route.program', self.config.routine)
+                emit('route.program', self.config.routine, self.config.routine_module)
 
         self.tmenu_screen = None
 
@@ -9122,7 +9227,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
@@ -11905,7 +12010,7 @@ class WebappInternal(Base):
                     self.SetLateralMenu(self.config.routine, save_input=False)
                 else:
                     from tir.technologies.core.events import emit
-                    emit('route.program', self.config.routine)
+                    emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
             if(stack and not stack.lower()  == "teardownclass"):
