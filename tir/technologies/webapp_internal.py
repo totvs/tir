@@ -7129,7 +7129,7 @@ class WebappInternal(Base):
             # if cell is still opened, try close
             if not cell_is_closed:
                 current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input())
+                self.close_cell(field, current_layer, element=selenium_input)
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7382,20 +7382,20 @@ class WebappInternal(Base):
         :return:
         """
 
-        current_layer = layer
+        success = False
 
         endtime = time.time() + self.config.time_out / 3
-        while (time.time() < endtime and current_layer == layer):
+        while (time.time() < endtime and not success):
             logger().debug('Trying close cell in grid!')
 
-            self.toggle_cell(element)
+            self.toggle_cell(element())
 
             if(field[1] == True):
                 break
 
-            time.sleep(1)
-
-            current_layer = self.check_layers('wa-dialog')
+            success = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                position=layer, timeout=5, presence=False,
+                                                main_container='body', check_error=False)
 
     def toggle_cell(self, element):
         try:
