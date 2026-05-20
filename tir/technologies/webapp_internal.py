@@ -7378,24 +7378,43 @@ class WebappInternal(Base):
 
         :param field: grid field list item
         :param layer: initial layers number
-        :param element: cell modal opened
+        :param element: callable that returns the grid input element to be toggled.
+                        It should be passed as a method/lambda (e.g. selenium_input).
         :return:
         """
 
         success = False
+        attempt = 0
 
         endtime = time.time() + self.config.time_out / 3
         while (time.time() < endtime and not success):
-            logger().debug('Trying close cell in grid!')
+            attempt += 1
+            logger().debug(f'Trying close cell in grid! Attempt: {attempt} | Layer: {layer}')
 
-            self.toggle_cell(element())
+            target_element = element() if callable(element) else element
+            if not target_element:
+                logger().debug('Could not resolve target element to close grid cell. Retrying...')
+                continue
+
+            self.toggle_cell(target_element)
 
             if(field[1] == True):
+                logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
 
             success = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 position=layer, timeout=5, presence=False,
                                                 main_container='body', check_error=False)
+
+            logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
+
+        if success:
+            logger().debug('Grid cell closed successfully.')
+        else:
+            logger().debug(
+                f"Couldn't close grid cell after {attempt} attempt(s). "
+                f"Expected layer {layer} (wa-dialog) to be closed, but it is still present."
+            )
 
     def toggle_cell(self, element):
         try:
