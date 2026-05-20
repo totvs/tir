@@ -49,6 +49,11 @@ Crie (ou atualize) um arquivo chamado `pr_description.md` na raiz do repositóri
 
 A descrição deve refletir fielmente os pontos levantados no review.
 
+### Regra para o título do PR
+- O **título sugerido do PR** deve ser escrito **em inglês**.
+- O título deve ser **curto e direto** (preferencialmente até ~60 caracteres).
+- Evite títulos longos com múltiplas cláusulas.
+
 ## Regras de qualidade
 - Seja objetivo e técnico.
 - Aponte evidências no diff sempre que possível.
