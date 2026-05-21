@@ -946,6 +946,11 @@ class PouiInternal(Base):
             self.set_button_x()
 
     def set_button_x(self, position=1, check_error=True):
+        
+        from tir.technologies.core.events import emit
+        emit('webapp.set_button_x')
+        return
+    
         position -= 1
         term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
         wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
@@ -6023,7 +6028,7 @@ class PouiInternal(Base):
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
 
         if (button_normalized == "x"):
-            self.set_button_exit()
+            self.set_button_x()
             return
 
         # Map legacy button names to their POUI equivalents.
