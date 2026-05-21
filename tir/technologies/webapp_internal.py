@@ -1156,6 +1156,10 @@ class WebappInternal(Base):
         Fills the module/environment field on the environment screen with the value configured in config.json.
         Retries until the value matches or the timeout is reached. Skips filling if the field is disabled.
 
+        When ``initial_program`` is ``sigaadv`` and the environment field is not present on the screen
+        (e.g. Protheus release >= 2610 with the new home screen), the loop exits immediately to avoid
+        running until timeout.
+
         :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
         :type shadow_root: bool
         :param container: CSS selector of the container element. - **Default:** None
@@ -1177,7 +1181,8 @@ class WebappInternal(Base):
                     environment_element = next(iter(environment_elements))
                     environment_element = environment_element.find_parent('pro-system-module-lookup')
                     environment_element = next(iter(environment_element.select('input')), None)
-                elif not environment_elements and self.config.initial_program.lower().strip() == 'sigaadv':
+                elif not environment_elements and (self.config.initial_program or '').lower().strip() == 'sigaadv':
+                    logger().debug('Skipping environment fill: initial_program is sigaadv and no environment field found (release >= 2610).')
                     enable = False
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
