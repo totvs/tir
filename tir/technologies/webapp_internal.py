@@ -1177,6 +1177,8 @@ class WebappInternal(Base):
                     environment_element = next(iter(environment_elements))
                     environment_element = environment_element.find_parent('pro-system-module-lookup')
                     environment_element = next(iter(environment_element.select('input')), None)
+                elif not environment_elements and self.config.initial_program.lower().strip() == 'sigaadv':
+                    enable = False
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     environment_elements = self.web_scrap(term="[name='cAmb']", scrap_type=enum.ScrapType.CSS_SELECTOR,
