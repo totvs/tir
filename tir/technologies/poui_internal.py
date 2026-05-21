@@ -1028,7 +1028,7 @@ class PouiInternal(Base):
 
         logger().info('Getting log info')
 
-        self.escape_to_main_menu("[class*='card-wrapper']")
+        self.escape_to_main_menu()
 
         logger().debug('Clicking on dots icon')
         self.switch_to_header_iframe()
