@@ -5470,7 +5470,7 @@ class PouiInternal(Base):
             message = "Couldn't set the program."
             self.config.routine_type = ''
             self.config.routine = ''
-            self.log_error()
+            self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
 
