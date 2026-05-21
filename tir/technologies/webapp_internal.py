@@ -5835,15 +5835,17 @@ class WebappInternal(Base):
             if df is None or df.empty:
                 reached_end = True
                 break
-
+            
+            columns_normalized = list(map(lambda x: str(x).strip().lower(), df.columns))
             missing_columns = []
             if first_column:
                 cols_to_check = first_column if isinstance(first_column, list) else [first_column]
+
                 for col in cols_to_check:
-                    if col not in df.columns:
+                    if str(col).strip().lower() not in columns_normalized:
                         missing_columns.append(col)
 
-            if second_column and second_column not in df.columns:
+            if second_column and str(second_column).strip().lower() not in columns_normalized:
                 missing_columns.append(second_column)
 
             if missing_columns:
