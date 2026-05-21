@@ -5324,7 +5324,7 @@ class PouiInternal(Base):
 
         :return: None
         """
-        success = False
+        success = self.check_tmenu_screen()
 
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and not success:
