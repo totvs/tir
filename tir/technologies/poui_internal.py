@@ -946,7 +946,7 @@ class PouiInternal(Base):
             self.set_button_x()
 
     def set_button_x(self, position=1, check_error=True):
-        
+
         from tir.technologies.core.events import emit
         emit('webapp.set_button_x')
         return
@@ -3837,6 +3837,13 @@ class PouiInternal(Base):
 
 
         """
+
+        logger().info(f"Clicking on {button}")
+
+        if (button.lower().strip() == "x"):
+            self.set_button_x()
+            return
+        
         position -= 1
         element = None
         button_element = None
@@ -3844,8 +3851,7 @@ class PouiInternal(Base):
 
         if not self.config.poui:
             self.twebview_context = True
-
-        logger().info(f"Clicking on {button}")
+                
         self.wait_element(term=button, optional_term=selector, scrap_type=enum.ScrapType.MIXED)
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not (element and button_element)):
@@ -6026,10 +6032,6 @@ class PouiInternal(Base):
 
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
-
-        if (button_normalized == "x"):
-            self.set_button_x()
-            return
 
         # Map legacy button names to their POUI equivalents.
         button_dict = {
