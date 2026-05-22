@@ -5785,7 +5785,18 @@ class PouiInternal(Base):
             rows = table.select("tbody > tr")
             if rows:
                 first_row = next(iter(rows))
-                self.click(self.soup_to_selenium(first_row), enum.ClickType(3))
+                first_row_sel = lambda: self.soup_to_selenium(first_row)
+
+                endtime = time.time() + self.config.time_out / 3
+                success = False
+                while time.time() < endtime and not success:
+                    self.click(first_row_sel(), enum.ClickType(3))
+
+                    if first_row_sel().get_attribute('aria-selected') != 'false':
+                        success = True
+
+                if not success:
+                    logger().debug("Couldn't click on the first line of the browse.")
 
 
     def _remove_filters_from_browse(self):
