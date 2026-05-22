@@ -1163,7 +1163,7 @@ class PouiInternal(Base):
                                                  main_container='body', twebview=True)
 
             nearest_element = self.get_closest_element(label, elements_candidates,
-                                                       direction, input_field, twebview=True)
+                                                       direction, input_field, twebview=True, field=field)
 
             return nearest_element
             
@@ -1174,7 +1174,7 @@ class PouiInternal(Base):
             self.log_error(str(error))
 
 
-    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True):
+    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True, field: str = ''):
         """Find the closest element by term from a reference element using euclidean distance (location x,y).
 
         :param ref_element: The reference element to calculate the distance from.
@@ -4972,7 +4972,7 @@ class PouiInternal(Base):
                 # find search po-icon component in lookup window
                 search_icon = lookup_filtered.select_one('po-icon')
                 if search_icon:
-                    selenium_icon = self.wait_soup_to_selenium(search_icon, twebview=True)
+                    selenium_icon = self.wait_soup_to_selenium(search_icon, twebview=True, element='po-icon')
                     self.scroll_to_element(selenium_icon)
                     self.set_element_focus(selenium_icon)
                     self.click(selenium_icon)
@@ -4992,14 +4992,14 @@ class PouiInternal(Base):
                             if search_input_field:
                                 # Click on component and send search_value keys
                                 self.switch_to_iframe()
-                                selenium_input_field = self.wait_soup_to_selenium(search_input_field, twebview=True)
+                                selenium_input_field = self.wait_soup_to_selenium(search_input_field, twebview=True, element='.po-input')
                                 self.set_element_focus(selenium_input_field)
                                 self.click(selenium_input_field, click_type=enum.ClickType.SELENIUM)
                                 self.send_keys(selenium_input_field, search_value)
 
                                 # Click on search icon to filter inputed value
                                 po_search_icon = search_field.select_one('po-icon')
-                                selenium_search_icon = self.wait_soup_to_selenium(po_search_icon, twebview=True)
+                                selenium_search_icon = self.wait_soup_to_selenium(po_search_icon, twebview=True, element='po-icon')
                                 self.click(selenium_search_icon, click_type=enum.ClickType.SELENIUM)
 
                         if not search_field:
@@ -5011,7 +5011,7 @@ class PouiInternal(Base):
         except Exception as e:
             self.log_error(f"Error clicking the search icon for the '{label}' field: {e}")
 
-    def wait_soup_to_selenium(self, soup_object, twebview=False, timeout=60):
+    def wait_soup_to_selenium(self, soup_object, twebview=False, timeout=60, element: str = ''):
 
         success = False
         endtime = time.time() + timeout
@@ -5737,13 +5737,13 @@ class PouiInternal(Base):
                 logger().info(f"Field '{field}' identified as type: '{field_type}'")
 
                 if field_type in ('po-input', 'po-datepicker'):
-                    self._fill_input(input_element, value)
+                    self._fill_input(input_element, value, field)
 
                 elif field_type == 'po-select':
                     self.click_select(field, value)
 
                 elif field_type == 'thf-lookup':
-                    self._fill_lookup_input(input_element, value)
+                    self._fill_lookup_input(input_element, value, field)
 
                 else:
                     logger().warning(f"Unknown field type '{field_type}' for field '{field}'. Trying default input fill.")
@@ -5850,7 +5850,7 @@ class PouiInternal(Base):
         return None
 
 
-    def _fill_lookup_input(self, input_element, value: str) -> None:
+    def _fill_lookup_input(self, input_element, value: str, field: str = '') -> None:
         """
         [Internal]
 
@@ -5863,7 +5863,7 @@ class PouiInternal(Base):
         :type value: str
         :return: None
         """
-        self._fill_input(input_element, value)
+        self._fill_input(input_element, value, field)
         # Wait for the suggestion list to appear and select the matching item
         self.wait_element_timeout(
             term='thf-lookup-list',
@@ -5882,7 +5882,7 @@ class PouiInternal(Base):
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
 
-    def _fill_input(self, input_element, value: str) -> None:
+    def _fill_input(self, input_element, value: str, field: str = '') -> None:
         """
         [Internal]
 
