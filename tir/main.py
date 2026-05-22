@@ -57,6 +57,7 @@ class Webapp():
         subscribe('webapp.setup', self.__webapp.Setup)
         subscribe('webapp.log_error', self.__webapp.log_error)
         subscribe('webapp.set_button', self.__webapp.SetButton)
+        subscribe('webapp.set_button_x', self.__webapp.set_button_x)
 
         subscribe('webapp.close_warning_screen_after_routine', self.__webapp.close_warning_screen_after_routine)
         subscribe('webapp.close_coin_screen_after_routine', self.__webapp.close_coin_screen_after_routine)
