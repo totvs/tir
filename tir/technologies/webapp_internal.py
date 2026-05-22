@@ -1156,6 +1156,10 @@ class WebappInternal(Base):
         Fills the module/environment field on the environment screen with the value configured in config.json.
         Retries until the value matches or the timeout is reached. Skips filling if the field is disabled.
 
+        When ``initial_program`` is ``sigaadv`` and the environment field is not present on the screen
+        (e.g. Protheus release >= 2610 with the new home screen), the loop exits immediately to avoid
+        running until timeout.
+
         :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
         :type shadow_root: bool
         :param container: CSS selector of the container element. - **Default:** None
@@ -1177,6 +1181,9 @@ class WebappInternal(Base):
                     environment_element = next(iter(environment_elements))
                     environment_element = environment_element.find_parent('pro-system-module-lookup')
                     environment_element = next(iter(environment_element.select('input')), None)
+                elif not environment_elements and (self.config.initial_program or '').lower().strip() == 'sigaadv':
+                    logger().debug('Skipping environment fill: initial_program is sigaadv and no environment field found (release >= 2610).')
+                    enable = False
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     environment_elements = self.web_scrap(term="[name='cAmb']", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -7129,7 +7136,7 @@ class WebappInternal(Base):
             # if cell is still opened, try close
             if not cell_is_closed:
                 current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input())
+                self.close_cell(field, current_layer, element=selenium_input)
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7378,24 +7385,43 @@ class WebappInternal(Base):
 
         :param field: grid field list item
         :param layer: initial layers number
-        :param element: cell modal opened
+        :param element: callable that returns the grid input element to be toggled.
+                        It should be passed as a method/lambda (e.g. selenium_input).
         :return:
         """
 
-        current_layer = layer
+        success = False
+        attempt = 0
 
         endtime = time.time() + self.config.time_out / 3
-        while (time.time() < endtime and current_layer == layer):
-            logger().debug('Trying close cell in grid!')
+        while (time.time() < endtime and not success):
+            attempt += 1
+            logger().debug(f'Trying close cell in grid! Attempt: {attempt} | Layer: {layer}')
 
-            self.toggle_cell(element)
+            target_element = element() if callable(element) else element
+            if not target_element:
+                logger().debug('Could not resolve target element to close grid cell. Retrying...')
+                continue
+
+            self.toggle_cell(target_element)
 
             if(field[1] == True):
+                logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
 
-            time.sleep(1)
+            success = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                position=layer, timeout=5, presence=False,
+                                                main_container='body', check_error=False)
 
-            current_layer = self.check_layers('wa-dialog')
+            logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
+
+        if success:
+            logger().debug('Grid cell closed successfully.')
+        else:
+            logger().debug(
+                f"Couldn't close grid cell after {attempt} attempt(s). "
+                f"Expected layer {layer} (wa-dialog) to be closed, but it is still present."
+            )
 
     def toggle_cell(self, element):
         try:
@@ -7800,13 +7826,11 @@ class WebappInternal(Base):
                     except MoveTargetOutOfBoundsException:
                         ActionChains(self.driver).send_keys(Keys.DOWN).perform()
 
-                    term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
-                    endtime = time.time() + self.config.time_out
-                    while (time.time() < endtime and not (
-                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows) + 1, main_container=self.containers_selectors["GetCurrentContainer"]) or len(shadowroot_tr()) > 1)):
-                        if self.config.debug_log:
+                    if self.webapp_shadowroot():
+                        endtime = time.time() + self.config.time_out
+                        while (time.time() < endtime and not (len(shadowroot_tr()) > len(rows))):
                             logger().debug("Waiting for the new line to show")
-                        time.sleep(1)
+                            time.sleep(1)
 
                     if (add_grid_line_counter):
                         self.add_grid_row_counter(grids[field[2]])
