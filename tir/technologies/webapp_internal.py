@@ -338,8 +338,8 @@ class WebappInternal(Base):
         :return: The formatted date string using the configured delimiter.
         :rtype: str
         """
-        pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
-        pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
+        pattern_1 = r'([\d]{2}).?([\d]{2}).?([\d]{4})'
+        pattern_2 = r'([\d]{2}).?([\d]{2}).?([\d]{2})'
 
         d = self.config.data_delimiter
 
@@ -3325,7 +3325,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
+                                if re.sub(r'[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub(r'[\s,\.:]', '', main_value).strip():
                                     break
                                 tries += 1
                                 try_counter += 1
@@ -4603,7 +4603,7 @@ class WebappInternal(Base):
 
             used_ids = []
             if not self.webapp_shadowroot():
-                if not re.search("\([0-9]\)$", child.text):
+                if not re.search(r"\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
                 start_time = time.time()
@@ -4634,7 +4634,7 @@ class WebappInternal(Base):
                                     if elapsed_time >= 20 and not click_menu_functional:
                                         start_time = time.time()
                                         logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
-                                        if not re.search("\([0-9]\)$", child.text):
+                                        if not re.search(r"\([0-9]\)$", child.text):
                                             self.slm_click_last_item(f"#{child.attrs['id']} > label")
                             else:
                                 counter_child += 1
@@ -7136,7 +7136,7 @@ class WebappInternal(Base):
             # if cell is still opened, try close
             if not cell_is_closed:
                 current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input)
+                self.close_cell(field, current_layer, element=selenium_input())
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7398,22 +7398,24 @@ class WebappInternal(Base):
             attempt += 1
             logger().debug(f'Trying close cell in grid! Attempt: {attempt} | Layer: {layer}')
 
-            target_element = element() if callable(element) else element
-            if not target_element:
-                logger().debug('Could not resolve target element to close grid cell. Retrying...')
-                continue
-
-            self.toggle_cell(target_element)
+            self.toggle_cell(element)
 
             if(field[1] == True):
                 logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
 
-            success = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                position=layer, timeout=5, presence=False,
-                                                main_container='body', check_error=False)
+            layers_are_different = self.check_layers('wa-dialog') != layer
 
-            logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
+            if not layers_are_different:
+                logger().debug(f"Layers not changed after toggle attempt. Waiting for to be closed. Attempt: {attempt}")
+                self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    position=layer, timeout=5, presence=False,
+                                                    main_container='body', check_error=False)
+            else:
+                success = True
+
+
+        logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
 
         if success:
             logger().debug('Grid cell closed successfully.')
@@ -11048,7 +11050,7 @@ class WebappInternal(Base):
         """
 
         img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
-        return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
+        return next(iter(re.findall(r'[\w\_\-]+\.', img_src_string)), None).replace('.','')
 
     def try_element_to_be_clickable(self, element):
         """
