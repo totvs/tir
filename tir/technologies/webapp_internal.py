@@ -7103,6 +7103,7 @@ class WebappInternal(Base):
         type_input_key = 2
         memo_field = field[9]
         layers_selector = self.get_layer_selector(field)
+        container_id_before = self.get_current_container().get('id')
 
         #get text input container
         container_input = self.get_container_selector('wa-text-input', select_all=False)
@@ -7128,15 +7129,12 @@ class WebappInternal(Base):
         if memo_field:
             self.SetButton('Ok')
 
-        # ensure modal is closed. if True is closed
-        cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                position=initial_layers + 1, timeout=5,
-                                                presence=False, main_container='body', check_error=False)
         if lenfield > len_user_value:
             # if cell is still opened, try close
-            if not cell_is_closed:
-                current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input())
+            current_layer = self.check_layers(layers_selector)
+            if initial_layers != current_layer:                
+                self.close_cell(field, current_layer, element=selenium_input(),
+                                container_id=container_id_before)
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7380,7 +7378,7 @@ class WebappInternal(Base):
         if cell_opened:
             return True
 
-    def close_cell(self, field, layer, element):
+    def close_cell(self, field, layer, element, container_id: str = ''):
         """Close opened grid cell
 
         :param field: grid field list item
@@ -7403,27 +7401,20 @@ class WebappInternal(Base):
             if(field[1] == True):
                 logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
-
-            layers_are_different = self.check_layers('wa-dialog') != layer
-
-            if not layers_are_different:
-                logger().debug(f"Layers not changed after toggle attempt. Waiting for to be closed. Attempt: {attempt}")
-                self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                    position=layer, timeout=5, presence=False,
-                                                    main_container='body', check_error=False)
-            else:
-                success = True
-
-
-        logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
+            
+            endtime_internal = time.time() + 5
+            while time.time() < endtime_internal:
+                logger().debug('Waiting layers change.')
+                if self.check_layers('wa-dialog') != layer and \
+                   self.get_current_container().get('id') != container_id:
+                    success = True
+                    break
+                time.sleep(0.5)
 
         if success:
-            logger().debug('Grid cell closed successfully.')
+            logger().debug(f'Grid cell closed successfully after {attempt} attempt(s).')
         else:
-            logger().debug(
-                f"Couldn't close grid cell after {attempt} attempt(s). "
-                f"Expected layer {layer} (wa-dialog) to be closed, but it is still present."
-            )
+            logger().debug(f"The number of layers (wa-dialog) should have been changed, but it wasn't after {attempt} attempt(s).")
 
     def toggle_cell(self, element):
         try:
