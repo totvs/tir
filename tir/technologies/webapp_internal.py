@@ -1728,7 +1728,8 @@ class WebappInternal(Base):
         else:
             term_dialog = '.tmodaldialog'
 
-        self.SetLateralMenu(self.language.menu_about, save_input=False)
+        from tir.technologies.core.events import emit
+        emit('route.set_lateral_menu', self.language.menu_about, save_input=False)
         self.wait_element(term=term_dialog, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = term_dialog, locator= By.CSS_SELECTOR)
 
@@ -3757,10 +3758,10 @@ class WebappInternal(Base):
 
 
             if self.config.routine:
+                from tir.technologies.core.events import emit
                 if self.config.routine_type == 'SetLateralMenu':
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
-                    from tir.technologies.core.events import emit
                     emit('route.set_program', self.config.routine)
 
     def wait_user_screen(self):
@@ -9148,10 +9149,10 @@ class WebappInternal(Base):
 
         if not self.tmenu_screen:
             logger().debug(f"Re-open menu on screen: {self.tmenu_screen}")
+            from tir.technologies.core.events import emit
             if ">" in self.config.routine:
-                self.SetLateralMenu(self.config.routine, save_input=False)
+                emit('route.set_lateral_menu', self.config.routine, save_input=False)
             else:
-                from tir.technologies.core.events import emit
                 emit('route.program', self.config.routine, self.config.routine_module)
 
         self.tmenu_screen = None
@@ -9191,7 +9192,9 @@ class WebappInternal(Base):
                     pass
 
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False,
+                 program_name='CFGX017')
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
             self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
@@ -9249,10 +9252,10 @@ class WebappInternal(Base):
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
@@ -11976,7 +11979,8 @@ class WebappInternal(Base):
                     pass
 
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
             
@@ -12032,10 +12036,10 @@ class WebappInternal(Base):
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
@@ -12139,7 +12143,8 @@ class WebappInternal(Base):
 
             #Access Schedule environment
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.language.schedule_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.language.schedule_menu, save_input=False)
 
             #Wait show grid
             self.wait_element_timeout(term=self.grid_selectors["new_web_app"], scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -12167,10 +12172,10 @@ class WebappInternal(Base):
                        self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.set_program', self.config.routine)
 
             self.tmenu_screen = None

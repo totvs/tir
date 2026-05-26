@@ -5376,7 +5376,7 @@ class PouiInternal(Base):
         return len(list(soup.select(term)))
 
 
-    def Program(self, program_name: str = "", program_desc: str = "", module: str = ""):
+    def Program(self, program_name: str = "", program_desc: str = "", module: str = "", save_input: bool = True):
         """
         [Internal]
 
@@ -5396,9 +5396,10 @@ class PouiInternal(Base):
         >>> self.Program("CRDA200", module="CRD")
         """
 
-        self.config.routine_type = 'Program'
-        self.config.routine = program_name
-        self.config.routine_module = module
+        if save_input:
+            self.config.routine_type = 'Program'
+            self.config.routine = program_name
+            self.config.routine_module = module
 
         if self.config.log_info_config:
             self.set_log_info_config()
@@ -5407,7 +5408,7 @@ class PouiInternal(Base):
             if not self.log.release:
                 self.log_error_newlog()
 
-        if not self.log.program:
+        if not self.log.program and save_input:
             self.log.program = program_name
 
         self.set_program(program_name, program_desc, module)
@@ -5589,7 +5590,7 @@ class PouiInternal(Base):
         self.close_coin_screen()
 
 
-    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
+    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '', save_input: bool = True) -> None:        
         """Navigate through New Home menu context and open a routine.
 
         :param menu_itens: Menu path used as fallback to derive the routine description.
@@ -5608,9 +5609,9 @@ class PouiInternal(Base):
             )
             
             program_desc = menu_itens.split('>')[-1].strip()
-            self.Program(program_desc=program_desc)
+            self.Program(program_desc=program_desc, save_input=save_input)
         else:
-            self.Program(program_name=program_name, module=module)
+            self.Program(program_name=program_name, module=module, save_input=save_input)
 
 
     def _click_dropdown(self, label, subitems, position):
