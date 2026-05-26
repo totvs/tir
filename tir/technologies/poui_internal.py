@@ -5388,12 +5388,17 @@ class PouiInternal(Base):
         :type program_desc: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Controls whether routine metadata should be persisted in `config`/`log`.
+                   Set to **False** for internal navigations that must not overwrite the current execution context.
+                   - **Default:** True
+        :type save_input: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> self.Program("MATA020")
         >>> self.Program("CRDA200", module="CRD")
+        >>> self.Program(program_desc="About", save_input=False)
         """
 
         if save_input:
@@ -5599,6 +5604,10 @@ class PouiInternal(Base):
         :type program_name: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Forwarded to `Program()` to control if the navigation should persist routine metadata in `config`/`log`.
+                   Use **False** for temporary/internal menu navigation.
+                   - **Default:** True
+        :type save_input: bool
         """
         
         if not program_name:
