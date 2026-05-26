@@ -5376,7 +5376,7 @@ class PouiInternal(Base):
         return len(list(soup.select(term)))
 
 
-    def Program(self, program_name: str = "", program_desc: str = "", module: str = ""):
+    def Program(self, program_name: str = "", program_desc: str = "", module: str = "", save_input: bool = True):
         """
         [Internal]
 
@@ -5388,17 +5388,23 @@ class PouiInternal(Base):
         :type program_desc: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Controls whether routine metadata should be persisted in `config`/`log`.
+                   Set to **False** for internal navigations that must not overwrite the current execution context.
+                   - **Default:** True
+        :type save_input: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> self.Program("MATA020")
         >>> self.Program("CRDA200", module="CRD")
+        >>> self.Program(program_desc="About", save_input=False)
         """
 
-        self.config.routine_type = 'Program'
-        self.config.routine = program_name
-        self.config.routine_module = module
+        if save_input:
+            self.config.routine_type = 'Program'
+            self.config.routine = program_name
+            self.config.routine_module = module
 
         if self.config.log_info_config:
             self.set_log_info_config()
@@ -5407,7 +5413,7 @@ class PouiInternal(Base):
             if not self.log.release:
                 self.log_error_newlog()
 
-        if not self.log.program:
+        if not self.log.program and save_input:
             self.log.program = program_name
 
         self.set_program(program_name, program_desc, module)
@@ -5589,7 +5595,7 @@ class PouiInternal(Base):
         self.close_coin_screen()
 
 
-    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
+    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '', save_input: bool = True) -> None:        
         """Navigate through New Home menu context and open a routine.
 
         :param menu_itens: Menu path used as fallback to derive the routine description.
@@ -5598,6 +5604,10 @@ class PouiInternal(Base):
         :type program_name: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Forwarded to `Program()` to control if the navigation should persist routine metadata in `config`/`log`.
+                   Use **False** for temporary/internal menu navigation.
+                   - **Default:** True
+        :type save_input: bool
         """
         
         if not program_name:
@@ -5608,9 +5618,9 @@ class PouiInternal(Base):
             )
             
             program_desc = menu_itens.split('>')[-1].strip()
-            self.Program(program_desc=program_desc)
+            self.Program(program_desc=program_desc, save_input=save_input)
         else:
-            self.Program(program_name=program_name, module=module)
+            self.Program(program_name=program_name, module=module, save_input=save_input)
 
 
     def _click_dropdown(self, label, subitems, position):
