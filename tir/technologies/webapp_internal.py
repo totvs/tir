@@ -7405,7 +7405,7 @@ class WebappInternal(Base):
             endtime_internal = time.time() + 5
             while time.time() < endtime_internal:
                 logger().debug('Waiting layers change.')
-                if self.check_layers('wa-dialog') != layer and \
+                if self.check_layers('wa-dialog') != layer or \
                    self.get_current_container().get('id') != container_id:
                     success = True
                     break
