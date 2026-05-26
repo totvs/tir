@@ -126,7 +126,7 @@ class Router:
         else:
             # poui
             drv.SetLateralMenu(menu_itens=menu_itens, program_name=program_name, 
-                               module=module)
+                               module=module, save_input=save_input)
 
     def ChangeEnvironment(self, date: str = "", group: str = "", branch: str = "", module: str = "") -> None:
         """Change environment settings."""
