@@ -7132,7 +7132,9 @@ class WebappInternal(Base):
         if lenfield > len_user_value:
             # if cell is still opened, try close
             current_layer = self.check_layers(layers_selector)
-            if initial_layers != current_layer:                
+            cell_is_open = current_layer > initial_layers
+            same_container = self.get_current_container().get('id') == container_id_before
+            if cell_is_open and same_container:
                 self.close_cell(field, current_layer, element=selenium_input(),
                                 container_id=container_id_before)
 
@@ -7405,7 +7407,7 @@ class WebappInternal(Base):
             endtime_internal = time.time() + 5
             while time.time() < endtime_internal:
                 logger().debug('Waiting layers change.')
-                if self.check_layers('wa-dialog') != layer or \
+                if self.check_layers('wa-dialog') != layer and \
                    self.get_current_container().get('id') != container_id:
                     success = True
                     break
