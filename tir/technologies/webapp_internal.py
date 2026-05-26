@@ -7120,6 +7120,7 @@ class WebappInternal(Base):
         #get length of field before input
         lenfield = len(self.get_element_value(selenium_input()))
         len_user_value = len(user_value)
+        input_container_id = self.get_current_container().get("id")
 
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
@@ -7131,12 +7132,16 @@ class WebappInternal(Base):
         # ensure modal is closed. if True is closed
         cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 position=initial_layers + 1, timeout=5,
-                                                presence=False, main_container='body', check_error=False)
+                                                presence=False, main_container='body', check_error=False) or \
+                        self.get_current_container().get("id") != input_container_id
+
         if lenfield > len_user_value:
             # if cell is still opened, try close
             if not cell_is_closed:
+                logger().debug("Cell is still opened, trying to close it.")
                 current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input())
+                self.close_cell(field, current_layer, element=selenium_input(), initial_container_id=input_container_id)
+
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7380,13 +7385,16 @@ class WebappInternal(Base):
         if cell_opened:
             return True
 
-    def close_cell(self, field, layer, element):
+
+    def close_cell(self, field, layer, element, initial_container_id=None):
         """Close opened grid cell
 
         :param field: grid field list item
         :param layer: initial layers number
         :param element: callable that returns the grid input element to be toggled.
                         It should be passed as a method/lambda (e.g. selenium_input).
+        :param initial_container_id: id of the opened container that had the input element before trying to close the cell.
+                                    Used to check if the cell was closed by verifying if the input element's container changed.
         :return:
         """
 
@@ -7396,7 +7404,6 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 3
         while (time.time() < endtime and not success):
             attempt += 1
-            logger().debug(f'Trying close cell in grid! Attempt: {attempt} | Layer: {layer}')
 
             self.toggle_cell(element)
 
@@ -7404,16 +7411,22 @@ class WebappInternal(Base):
                 logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
 
+            time.sleep(1)
             layers_are_different = self.check_layers('wa-dialog') != layer
 
             if not layers_are_different:
                 logger().debug(f"Layers not changed after toggle attempt. Waiting for to be closed. Attempt: {attempt}")
+
                 self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                     position=layer, timeout=5, presence=False,
                                                     main_container='body', check_error=False)
+
+                if initial_container_id and self.get_current_container().get('id') != initial_container_id:
+                    logger().debug("Container changed from initial. Assuming cell is already closed.")
+                    success = True
+                    break
             else:
                 success = True
-
 
         logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
 
@@ -7425,14 +7438,17 @@ class WebappInternal(Base):
                 f"Expected layer {layer} (wa-dialog) to be closed, but it is still present."
             )
 
+
     def toggle_cell(self, element):
         try:
+            logger().debug("Trying to toggle cell in grid.")
             ActionChains(self.driver).move_to_element(element).send_keys(Keys.ENTER).perform()
         except Exception:
             try:
                 self.send_keys(element, Keys.ENTER)
             except Exception as e:
                 logger().debug(f"Couldn't send ENTER key to close grid cell. Exception: {e}")
+
 
     def select_cell(self, element):
 
