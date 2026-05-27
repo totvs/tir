@@ -53,6 +53,7 @@ class Webapp():
         subscribe('route.program', self.__router.Program)
         subscribe('route.set_program', self.__router.set_program)
         subscribe('route.set_log_info', self.__router.set_log_info)
+        subscribe('route.set_lateral_menu', self.__router.SetLateralMenu)
         
         subscribe('webapp.setup', self.__webapp.Setup)
         subscribe('webapp.log_error', self.__webapp.log_error)
