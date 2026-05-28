@@ -1796,7 +1796,7 @@ class Poui():
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
-        self.__poui.InputValue(field, value, position)
+        self.__poui.input_value(field, value, position)
 
     def ClickCombo(self, field='', value='', position=1, second_value='', match_case=True):
         """
@@ -2376,3 +2376,7 @@ class Poui():
         >>> oHelper.RemoveBrowseFilters()
         """
         self.__poui._remove_filters_from_browse()
+
+    def ClickLookUpThf(self, label: str, search_value: str, search_column: str = '', position: int = 1):
+
+        self.__poui.click_look_up_thf(label, search_value, search_column, position)

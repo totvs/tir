@@ -82,7 +82,7 @@ class PouiInternal(Base):
 
         self.containers_selectors = {
             "SetButton" : ".tmodaldialog,.ui-dialog",
-            "GetCurrentContainer": "po-page-default, po-page-detail, po-page-edit ,po-page-list ,po-page-slide",
+            "GetCurrentContainer": "body, po-page-default, po-page-detail, po-page-edit ,po-page-list ,po-page-slide, po-modal",
             "AllContainers": "body, .tmodaldialog, .ui-dialog, wa-dialog",
             "ClickImage": ".tmodaldialog",
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
@@ -109,6 +109,10 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
+
+        self.elements_terms = {
+            "input":"[class*='po-input'], thf-lookup, .po-search-input"
+        }
         
         if not Base.driver:
             Base.driver = self.driver
@@ -1924,7 +1928,7 @@ class PouiInternal(Base):
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
                   check_error=True, check_help=True, input_field=True, direction=None,
-                  position=1, twebview=None):
+                  position=1, twebview=True):
         """
         [Internal]
 
@@ -1960,32 +1964,14 @@ class PouiInternal(Base):
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
 
-        if twebview == None:
-            twebview = True if not self.config.poui else False
-
         try:
-            endtime = time.time() + self.config.time_out
-            container =  None
-            while(time.time() < endtime and container is None):
-                soup = self.get_current_DOM(twebview)
+            if check_error:
+                self.search_for_errors(check_help)
 
-                if check_error:
-                    self.search_for_errors(check_help)
-
-                if self.config.log_file:
-                    with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
-                        text_file.write(f" HTML CONTENT: {str(soup)}")
-
-                container_selector = self.base_container
-                if (main_container is not None):
-                    container_selector = main_container
-
-                containers = self.zindex_sort(soup.select(container_selector), reverse=True) 
-
-                if self.base_container in container_selector:
-                    container = self.containers_filter(containers)
-
-                container = next(iter(containers), None) if isinstance(containers, list) else container
+            container = self.get_current_container(
+                container_term=main_container,
+                twebview=twebview
+            )
 
             if container is None:
                 raise Exception(f"Web Scrap couldn't find container - term: {term}")
@@ -2209,6 +2195,7 @@ class PouiInternal(Base):
 
         if not element_list:
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, position=position)
+            element_list = list(filter(lambda x: self.element_is_displayed(x), element_list))
             if not element_list:
                 return None
 
@@ -3627,7 +3614,7 @@ class PouiInternal(Base):
 
         self.poui_click(menu)
 
-    def InputValue(self, field, value, position, exec_enter_tab: bool = True):
+    def input_value(self, field: str, value: str, position: int, exec_enter_tab: bool = True):
         """
         Filling input component of POUI
         https://po-ui.io/documentation/po-input
@@ -3644,7 +3631,7 @@ class PouiInternal(Base):
         Usage:
 
         >>> # Call the method:
-        >>> oHelper.InputValue('Name', 'Test')
+        >>> oHelper.input_value('Name', 'Test')
         :return: None
         """
 
@@ -3655,17 +3642,13 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
 
-            input_field = self.return_input_element(field, position, term="[class*='po-input']")
+            input_field = self.return_input_element(field, position, term=self.elements_terms.get('input'))
 
             self.switch_to_iframe()
 
             input_field_element = lambda: self.soup_to_selenium(input_field)
 
-            self.scroll_to_element(input_field_element())
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-            self.set_element_focus(input_field_element())
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = input_field, locator = By.XPATH )
-            self.click(input_field_element())
+            self._click_input(input_field)
             input_field_element().clear()
             input_field_element().send_keys(value)
 
@@ -3677,6 +3660,26 @@ class PouiInternal(Base):
 
             time.sleep(2)
             success = self.get_web_value(input_field_element()).strip() != ''
+
+    def _click_input(self, input_element):
+
+        is_input_element_tag = type(input_element) == Tag
+
+        if is_input_element_tag:
+            element_selenium = self.soup_to_selenium(input_element, twebview=True)
+        else:
+            element_selenium = input_element
+
+        endtime = time.time() + (self.config.time_out / 3)
+        while time.time() < endtime and not element_selenium == self.switch_to_active_element():
+
+            self.scroll_to_element(element_selenium)
+            if is_input_element_tag:
+                self.wait_until_to(expected_condition="element_to_be_clickable", element = input_element, locator = By.XPATH )
+            self.set_element_focus(element_selenium)
+            if is_input_element_tag:
+                self.wait_until_to(expected_condition="element_to_be_clickable", element = input_element, locator = By.XPATH )
+            self.click(element_selenium)
 
     def return_input_element(self, field=None, position=1, term=None):
         """
@@ -3691,22 +3694,36 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
             if po_input:
-                po_input_filtered = list(filter(lambda x: x.find_parent('po-field-container') is not None, po_input))
-                po_input_filtered = list(
-                    filter(lambda x: x.find_parent('po-field-container').select('span, label'), po_input_filtered))
-                po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), list(
-                    map(lambda x: x.find_parent('po-field-container').select('span, label')[0],
-                        po_input_filtered))))
+                # 1 - By text container
+                inputs_with_container = list(filter(lambda x: x.find_parent('po-field-container') and \
+                                                             x.find_parent('po-field-container').select('span, label')
+                                                  , po_input))
                 
+                field_containers = list(map(lambda x: x.find_parent('po-field-container').select('span, label')[0]
+                                           , inputs_with_container))
+                
+                field_containers = list(filter(lambda x: self.element_is_displayed(x)
+                                               , field_containers))
+                
+                po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), field_containers))
+
+                # 2 - By element text
+                if not po_input_text:
+                    po_input_text = list(filter(lambda x: field.lower() in x.text.lower(), po_input))
+                
+                # 3- by placeholder
                 if not po_input_text:
                     po_input_text = list(filter(lambda x: field.lower() in x.get('placeholder').lower()
                                                     if x.get('placeholder') else None, po_input))
                 if po_input_text:
                     if len(po_input_text) >= position:
                         po_input_text = po_input_text[position]
-                        input_field = next(iter(po_input_text.find_parent('po-field-container').select('input')), None)
+                        if po_input_text.name != 'input' and po_input_text.find_parent('po-field-container'):
+                            input_field = next(iter(po_input_text.find_parent('po-field-container').select('input')), None)
+                        else:
+                            input_field = po_input_text
 
         if not input_field:
             self.log_error("Couldn't find any labels.")
@@ -4019,8 +4036,8 @@ class PouiInternal(Base):
         ActionChains(self.driver).move_to_element(action()).click().perform()
 
 
-    def ClickTable(self, first_column, second_column, first_content, second_content, table_number, itens, click_cell,
-                   checkbox, radio_input, columns=None, values=None, match_all=False, icon_class=None):
+    def ClickTable(self, first_column=None, second_column=None, first_content=None, second_content=None, table_number=1, itens=False, click_cell=None,
+                   checkbox=None, radio_input=None, columns=None, values=None, match_all=False, icon_class=None):
         """
             Clicks on the Table of POUI component.
             https://po-ui.io/documentation/po-table
@@ -4175,7 +4192,7 @@ class PouiInternal(Base):
                 if checkbox is not None:
                     self.click_table_checkbox(table_number, row_index=index, checkbox_value=checkbox)
                 elif radio_input:
-                    row_radio_component = tr[index].select_one('po-radio')
+                    row_radio_component = tr[index].select_one('po-radio, input[type="radio"]')
                     if row_radio_component:
                         self.toggle_radio(row_radio_component, radio_input)
                 elif icon_class:
@@ -4462,7 +4479,7 @@ class PouiInternal(Base):
         if radio_tr:
             self.switch_to_iframe()
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
-            return 'active' in radio_selenium.get_attribute('class')
+            return 'active' in radio_selenium.get_attribute('class') or 'k-selected' in radio_selenium.get_attribute('class')
 
         return False
 
@@ -4532,8 +4549,7 @@ class PouiInternal(Base):
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                               main_container='body')
+        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
         
         tables = list(filter(lambda x: self.element_is_displayed(x), tables))
         
@@ -4622,7 +4638,7 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
@@ -5236,7 +5252,7 @@ class PouiInternal(Base):
         return None
 
 
-    def get_current_container(self):
+    def get_current_container(self, container_term: str = '', twebview: bool = True):
         """
         [Internal]
 
@@ -5251,11 +5267,30 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> container = self.get_current_container()
         """
-        soup = self.get_current_DOM(twebview=True)
-        containers = soup.select(self.containers_selectors["GetCurrentContainer"])
+
+        if not container_term:
+            container_term = self.containers_selectors["GetCurrentContainer"]
+
+        containers = []
+
+        endtime = time.time() + self.config.time_out
+        while (time.time() < endtime and not containers):
+            soup = self.get_current_DOM(twebview=twebview)
+
+            if self.config.log_file:
+                with open(f"get_current_container_{str(container_term)}_{str(twebview)}_{str(random.randint(1, 101))}.txt", "w") as text_file:
+                    text_file.write(f" HTML CONTENT: {str(soup)}")
+
+            containers = soup.select(container_term)
+
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
-        return next(iter(sorted_containers), None)
+        container = next(iter(sorted_containers), None)
+
+        if container is None:
+            self.log_error(f"Couldn't find container using selector: {container_term}")
+
+        return container
 
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
@@ -5441,7 +5476,7 @@ class PouiInternal(Base):
                                                 scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                 main_container='body')), None)
         
-        self.InputValue(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
+        self.input_value(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
         self._po_loading()
 
         if not program_name and program_desc:
@@ -5623,7 +5658,7 @@ class PouiInternal(Base):
             self.Program(program_name=program_name, module=module, save_input=save_input)
 
 
-    def _click_dropdown(self, label, subitems, position):
+    def _click_dropdown(self, label: str = '', subitems: str = '', position: int = 1):
         """
         Click on the POUI Dropdown by label and subitems.
         https://po-ui.io/documentation/po-dropdown
@@ -5657,14 +5692,18 @@ class PouiInternal(Base):
         while time.time() < endtime and not success:
 
             if not po_dropdown:
-                dropdown_button = self.get_component_by_label(label, term, position)
+                if label:
+                    dropdown_button = self.get_component_by_label(label, term, position)
+                else:
+                    dropdown_button = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+                    dropdown_button = next(iter(dropdown_button))
 
             if dropdown_button:
-                drowpdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
+                dropdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
                 endtime_internal = time.time() + (self.config.time_out / 3)
                 while (time.time() < endtime_internal and \
-                       self.get_dropdown_state(dropdown_button) == 'closed'):
-                    self.click(drowpdown_selenium, click_type=enum.ClickType(click_type))
+                       self.get_dropdown_state(dropdown_selenium) == 'closed'):
+                    self.click(dropdown_selenium, click_type=enum.ClickType(click_type))
 
                     time.sleep(1)
                     click_type += 1
@@ -5672,8 +5711,8 @@ class PouiInternal(Base):
                     if click_type > 3:
                         click_type = 1
 
-            if drowpdown_selenium and self.get_dropdown_state(dropdown_button) == 'open':
-                dropdown_options = drowpdown_selenium.find_elements(By.CSS_SELECTOR, 'po-item-list')
+            if dropdown_selenium and self.get_dropdown_state(dropdown_selenium) == 'open':
+                dropdown_options = dropdown_selenium.find_elements(By.CSS_SELECTOR, 'po-item-list')
                 if dropdown_options:
                     for subitem in subitems_list:
                         self.click_popup(subitem)
@@ -5708,8 +5747,8 @@ class PouiInternal(Base):
         Get the current state of a POUI Dropdown component
         https://po-ui.io/documentation/po-dropdown
 
-        :param dropdown_element: BeautifulSoup object representing the dropdown component
-        :type dropdown_element: BeautifulSoup object
+        :param dropdown_element: Selenium object representing the dropdown component
+        :type dropdown_element: Selenium object
         :return: Current state of the dropdown (open/closed)
         :rtype: str
 
@@ -5718,10 +5757,14 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> dropdown_state = self.get_dropdown_state(dropdown_element)
         """
-        dropdown_selenium = self.soup_to_selenium(dropdown_element, twebview=True)
-        if dropdown_selenium:
-            dropdown_status = dropdown_selenium.find_elements(By.CLASS_NAME, 'po-dropdown-button-open')
-            return 'open' if dropdown_status else 'closed'
+
+        if dropdown_element:
+            dropdown_status = dropdown_element.find_elements(By.CLASS_NAME, 'po-dropdown-button-open')
+            
+            if dropdown_status:
+                return 'open'
+            
+            return 'closed'
         else:
             return None
 
@@ -5913,20 +5956,16 @@ class PouiInternal(Base):
         :return: None
         """
         self._fill_input(input_element, value, field)
-        # Wait for the suggestion list to appear and select the matching item
-        self.wait_element_timeout(
-            term='thf-lookup-list',
-            scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout=10,
-            twebview=True
-        )
 
+        self._click_lookup_item(value)        
+
+    def _click_lookup_item(self, value):
         thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
 
         if thf_item_list:
             item_div = thf_item_list.find_next('div')
             self.click(self.soup_to_selenium(item_div))
-            ActionChains(self.driver).key_down(Keys.TAB).perform()
+            # ActionChains(self.driver).key_down(Keys.TAB).perform()
         else:
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
@@ -6019,9 +6058,13 @@ class PouiInternal(Base):
         :rtype: bs4.element.Tag or None
         """
         value_normalized = value.strip().lower()
+        term = 'thf-lookup-list'
+
+        self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                  timeout=10, twebview=True)
 
         soup = self.get_current_container()
-        lookup_list = soup.select('thf-lookup-list')
+        lookup_list = soup.select(term)
         lookup_list_displayed = next(iter(filter(lambda x: self.element_is_displayed(x), lookup_list)), None)
 
         if not lookup_list_displayed:
@@ -6142,3 +6185,29 @@ class PouiInternal(Base):
             They exist only for interface compatibility with WebappInternal.SearchBrowse.
         """
         self._set_browse_filters(filters=filters)
+
+    def click_look_up_thf(self, label: str, search_value: str, search_column: str = '', position: int = 1):
+
+        # Click on input
+        input_field = self.return_input_element(label, position, term=self.elements_terms.get('input'))
+        self._click_input(input_field)
+        
+        self._click_lookup_item(self.language.perform_advanced_search)
+        self._po_loading()
+
+        # select colum to filter
+        if search_column:
+            self._click_dropdown(subitems=search_column)
+
+        # fill input
+        self.input_value(self.language.search2, search_value, position=1, exec_enter_tab=False)
+
+        # click on search icon
+        self.click_icon(label='', class_name='an an-magnifying-glass po-fonts-icon ng-star-inserted', position=1)
+
+        # select first row
+        self.ClickTable(columns=search_column or None, values=search_value, radio_input=True)
+
+        # click on select button
+        self.click_button(self.language.select)
+        
