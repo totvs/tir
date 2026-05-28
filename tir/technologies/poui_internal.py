@@ -946,6 +946,11 @@ class PouiInternal(Base):
             self.set_button_x()
 
     def set_button_x(self, position=1, check_error=True):
+
+        from tir.technologies.core.events import emit
+        emit('webapp.set_button_x')
+        return
+    
         position -= 1
         term_button = ".ui-button.ui-dialog-titlebar-close[title='Close'], img[src*='fwskin_delete_ico.png'], img[src*='fwskin_modal_close.png']"
         wait_button = self.wait_element(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, position=position, check_error=check_error)
@@ -1028,7 +1033,7 @@ class PouiInternal(Base):
 
         logger().info('Getting log info')
 
-        self.escape_to_main_menu("[class*='card-wrapper']")
+        self.escape_to_main_menu()
 
         logger().debug('Clicking on dots icon')
         self.switch_to_header_iframe()
@@ -1163,7 +1168,7 @@ class PouiInternal(Base):
                                                  main_container='body', twebview=True)
 
             nearest_element = self.get_closest_element(label, elements_candidates,
-                                                       direction, input_field, twebview=True)
+                                                       direction, input_field, twebview=True, field=field)
 
             return nearest_element
             
@@ -1174,7 +1179,7 @@ class PouiInternal(Base):
             self.log_error(str(error))
 
 
-    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True):
+    def get_closest_element(self, ref_element, element_list, direction=None, input_field=True, twebview=True, field: str = ''):
         """Find the closest element by term from a reference element using euclidean distance (location x,y).
 
         :param ref_element: The reference element to calculate the distance from.
@@ -3832,6 +3837,13 @@ class PouiInternal(Base):
 
 
         """
+
+        logger().info(f"Clicking on {button}")
+
+        if (button.lower().strip() == "x"):
+            self.set_button_x()
+            return
+        
         position -= 1
         element = None
         button_element = None
@@ -3839,8 +3851,7 @@ class PouiInternal(Base):
 
         if not self.config.poui:
             self.twebview_context = True
-
-        logger().info(f"Clicking on {button}")
+                
         self.wait_element(term=button, optional_term=selector, scrap_type=enum.ScrapType.MIXED)
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not (element and button_element)):
@@ -4972,7 +4983,7 @@ class PouiInternal(Base):
                 # find search po-icon component in lookup window
                 search_icon = lookup_filtered.select_one('po-icon')
                 if search_icon:
-                    selenium_icon = self.wait_soup_to_selenium(search_icon, twebview=True)
+                    selenium_icon = self.wait_soup_to_selenium(search_icon, twebview=True, element='po-icon')
                     self.scroll_to_element(selenium_icon)
                     self.set_element_focus(selenium_icon)
                     self.click(selenium_icon)
@@ -4992,14 +5003,14 @@ class PouiInternal(Base):
                             if search_input_field:
                                 # Click on component and send search_value keys
                                 self.switch_to_iframe()
-                                selenium_input_field = self.wait_soup_to_selenium(search_input_field, twebview=True)
+                                selenium_input_field = self.wait_soup_to_selenium(search_input_field, twebview=True, element='.po-input')
                                 self.set_element_focus(selenium_input_field)
                                 self.click(selenium_input_field, click_type=enum.ClickType.SELENIUM)
                                 self.send_keys(selenium_input_field, search_value)
 
                                 # Click on search icon to filter inputed value
                                 po_search_icon = search_field.select_one('po-icon')
-                                selenium_search_icon = self.wait_soup_to_selenium(po_search_icon, twebview=True)
+                                selenium_search_icon = self.wait_soup_to_selenium(po_search_icon, twebview=True, element='po-icon')
                                 self.click(selenium_search_icon, click_type=enum.ClickType.SELENIUM)
 
                         if not search_field:
@@ -5011,7 +5022,7 @@ class PouiInternal(Base):
         except Exception as e:
             self.log_error(f"Error clicking the search icon for the '{label}' field: {e}")
 
-    def wait_soup_to_selenium(self, soup_object, twebview=False, timeout=60):
+    def wait_soup_to_selenium(self, soup_object, twebview=False, timeout=60, element: str = ''):
 
         success = False
         endtime = time.time() + timeout
@@ -5317,15 +5328,17 @@ class PouiInternal(Base):
 
 
     def escape_to_main_menu(self):
-        """
+        """[Internal]
 
+        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
+        Waits until the menu is visible.
+
+        :return: None
         """
-        term = "[class*='card-wrapper']"
+        success = self.check_tmenu_screen()
 
         endtime = time.time() + self.config.time_out /2
-        while time.time() < endtime and not self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                                main_container="body", check_error=False):
-
+        while time.time() < endtime and not success:
             logger().info('Escape to menu')
             ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
 
@@ -5333,10 +5346,25 @@ class PouiInternal(Base):
                 logger().info('Found layers after Escape to menu')
                 self.close_screen_before_menu()
 
-            # wait trasitions between screens to avoid errors in layers number
-            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      timeout=6, main_container='body')
+            success = self.check_tmenu_screen()
+            logger().debug(f'Check Menu Screen: {success}')
 
+        if not success:
+            self.log_error('Home screen not found!')
+
+
+    def check_tmenu_screen(self):
+        """
+        [Internal]
+        """
+        try:
+            term = "[class*='card-wrapper']"
+            return self.element_is_displayed(
+                next(iter(self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                         main_container="body", twebview=True)),
+                     None))
+        except:
+            return False
 
     def check_layers(self, term):
         """
@@ -5348,7 +5376,7 @@ class PouiInternal(Base):
         return len(list(soup.select(term)))
 
 
-    def Program(self, program_name: str = "", program_desc: str = "", module: str = ""):
+    def Program(self, program_name: str = "", program_desc: str = "", module: str = "", save_input: bool = True):
         """
         [Internal]
 
@@ -5360,17 +5388,23 @@ class PouiInternal(Base):
         :type program_desc: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Controls whether routine metadata should be persisted in `config`/`log`.
+                   Set to **False** for internal navigations that must not overwrite the current execution context.
+                   - **Default:** True
+        :type save_input: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> self.Program("MATA020")
         >>> self.Program("CRDA200", module="CRD")
+        >>> self.Program(program_desc="About", save_input=False)
         """
 
-        self.config.routine_type = 'Program'
-        self.config.routine = program_name
-        self.config.routine_module = module
+        if save_input:
+            self.config.routine_type = 'Program'
+            self.config.routine = program_name
+            self.config.routine_module = module
 
         if self.config.log_info_config:
             self.set_log_info_config()
@@ -5379,7 +5413,7 @@ class PouiInternal(Base):
             if not self.log.release:
                 self.log_error_newlog()
 
-        if not self.log.program:
+        if not self.log.program and save_input:
             self.log.program = program_name
 
         self.set_program(program_name, program_desc, module)
@@ -5453,7 +5487,7 @@ class PouiInternal(Base):
             message = "Couldn't set the program."
             self.config.routine_type = ''
             self.config.routine = ''
-            self.log_error()
+            self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
 
@@ -5561,7 +5595,7 @@ class PouiInternal(Base):
         self.close_coin_screen()
 
 
-    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '') -> None:        
+    def SetLateralMenu(self, menu_itens: str, program_name:str = '', module: str = '', save_input: bool = True) -> None:        
         """Navigate through New Home menu context and open a routine.
 
         :param menu_itens: Menu path used as fallback to derive the routine description.
@@ -5570,6 +5604,10 @@ class PouiInternal(Base):
         :type program_name: str
         :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
         :type module: str
+        :param save_input: Forwarded to `Program()` to control if the navigation should persist routine metadata in `config`/`log`.
+                   Use **False** for temporary/internal menu navigation.
+                   - **Default:** True
+        :type save_input: bool
         """
         
         if not program_name:
@@ -5580,9 +5618,9 @@ class PouiInternal(Base):
             )
             
             program_desc = menu_itens.split('>')[-1].strip()
-            self.Program(program_desc=program_desc)
+            self.Program(program_desc=program_desc, save_input=save_input)
         else:
-            self.Program(program_name=program_name, module=module)
+            self.Program(program_name=program_name, module=module, save_input=save_input)
 
 
     def _click_dropdown(self, label, subitems, position):
@@ -5737,13 +5775,13 @@ class PouiInternal(Base):
                 logger().info(f"Field '{field}' identified as type: '{field_type}'")
 
                 if field_type in ('po-input', 'po-datepicker'):
-                    self._fill_input(input_element, value)
+                    self._fill_input(input_element, value, field)
 
                 elif field_type == 'po-select':
                     self.click_select(field, value)
 
                 elif field_type == 'thf-lookup':
-                    self._fill_lookup_input(input_element, value)
+                    self._fill_lookup_input(input_element, value, field)
 
                 else:
                     logger().warning(f"Unknown field type '{field_type}' for field '{field}'. Trying default input fill.")
@@ -5757,7 +5795,18 @@ class PouiInternal(Base):
             rows = table.select("tbody > tr")
             if rows:
                 first_row = next(iter(rows))
-                self.click(self.soup_to_selenium(first_row), enum.ClickType(3))
+                first_row_sel = lambda: self.soup_to_selenium(first_row)
+
+                endtime = time.time() + self.config.time_out / 3
+                success = False
+                while time.time() < endtime and not success:
+                    self.click(first_row_sel(), enum.ClickType(3))
+
+                    if first_row_sel().get_attribute('aria-selected') != 'false':
+                        success = True
+
+                if not success:
+                    logger().debug("Couldn't click on the first line of the browse.")
 
 
     def _remove_filters_from_browse(self):
@@ -5850,7 +5899,7 @@ class PouiInternal(Base):
         return None
 
 
-    def _fill_lookup_input(self, input_element, value: str) -> None:
+    def _fill_lookup_input(self, input_element, value: str, field: str = '') -> None:
         """
         [Internal]
 
@@ -5863,7 +5912,7 @@ class PouiInternal(Base):
         :type value: str
         :return: None
         """
-        self._fill_input(input_element, value)
+        self._fill_input(input_element, value, field)
         # Wait for the suggestion list to appear and select the matching item
         self.wait_element_timeout(
             term='thf-lookup-list',
@@ -5882,7 +5931,7 @@ class PouiInternal(Base):
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
 
-    def _fill_input(self, input_element, value: str) -> None:
+    def _fill_input(self, input_element, value: str, field: str = '') -> None:
         """
         [Internal]
 
@@ -6021,10 +6070,6 @@ class PouiInternal(Base):
 
         button_normalized = str(button).lower().strip() if button is not None else ""
         sub_item_normalized = str(sub_item).lower().strip() if sub_item is not None else ""
-
-        if (button_normalized == "x"):
-            self.set_button_exit()
-            return
 
         # Map legacy button names to their POUI equivalents.
         button_dict = {

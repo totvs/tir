@@ -338,8 +338,8 @@ class WebappInternal(Base):
         :return: The formatted date string using the configured delimiter.
         :rtype: str
         """
-        pattern_1 = '([\d]{2}).?([\d]{2}).?([\d]{4})'
-        pattern_2 = '([\d]{2}).?([\d]{2}).?([\d]{2})'
+        pattern_1 = r'([\d]{2}).?([\d]{2}).?([\d]{4})'
+        pattern_2 = r'([\d]{2}).?([\d]{2}).?([\d]{2})'
 
         d = self.config.data_delimiter
 
@@ -1156,6 +1156,10 @@ class WebappInternal(Base):
         Fills the module/environment field on the environment screen with the value configured in config.json.
         Retries until the value matches or the timeout is reached. Skips filling if the field is disabled.
 
+        When ``initial_program`` is ``sigaadv`` and the environment field is not present on the screen
+        (e.g. Protheus release >= 2610 with the new home screen), the loop exits immediately to avoid
+        running until timeout.
+
         :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
         :type shadow_root: bool
         :param container: CSS selector of the container element. - **Default:** None
@@ -1177,6 +1181,9 @@ class WebappInternal(Base):
                     environment_element = next(iter(environment_elements))
                     environment_element = environment_element.find_parent('pro-system-module-lookup')
                     environment_element = next(iter(environment_element.select('input')), None)
+                elif not environment_elements and (self.config.initial_program or '').lower().strip() == 'sigaadv':
+                    logger().debug('Skipping environment fill: initial_program is sigaadv and no environment field found (release >= 2610).')
+                    enable = False
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     environment_elements = self.web_scrap(term="[name='cAmb']", scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -1721,7 +1728,8 @@ class WebappInternal(Base):
         else:
             term_dialog = '.tmodaldialog'
 
-        self.SetLateralMenu(self.language.menu_about, save_input=False)
+        from tir.technologies.core.events import emit
+        emit('route.set_lateral_menu', self.language.menu_about, save_input=False)
         self.wait_element(term=term_dialog, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
         self.wait_until_to(expected_condition = "presence_of_all_elements_located", element = term_dialog, locator= By.CSS_SELECTOR)
 
@@ -3318,7 +3326,7 @@ class WebappInternal(Base):
                                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = element, locator = By.XPATH, timeout=True)
                                 self.try_send_keys(input_field, main_value, try_counter)
                                 current_number_value = self.get_web_value(input_field())
-                                if re.sub('[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub('[\s,\.:]', '', main_value).strip():
+                                if re.sub(r'[\s,\.:]', '', self.remove_mask(current_number_value, valtype)).strip() == re.sub(r'[\s,\.:]', '', main_value).strip():
                                     break
                                 tries += 1
                                 try_counter += 1
@@ -3750,10 +3758,10 @@ class WebappInternal(Base):
 
 
             if self.config.routine:
+                from tir.technologies.core.events import emit
                 if self.config.routine_type == 'SetLateralMenu':
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
-                    from tir.technologies.core.events import emit
                     emit('route.set_program', self.config.routine)
 
     def wait_user_screen(self):
@@ -4596,7 +4604,7 @@ class WebappInternal(Base):
 
             used_ids = []
             if not self.webapp_shadowroot():
-                if not re.search("\([0-9]\)$", child.text):
+                if not re.search(r"\([0-9]\)$", child.text):
                     self.slm_click_last_item(f"#{child.attrs['id']} > label")
 
                 start_time = time.time()
@@ -4627,7 +4635,7 @@ class WebappInternal(Base):
                                     if elapsed_time >= 20 and not click_menu_functional:
                                         start_time = time.time()
                                         logger().info(f'Trying an additional click in last menu item: "{menuitem}"')
-                                        if not re.search("\([0-9]\)$", child.text):
+                                        if not re.search(r"\([0-9]\)$", child.text):
                                             self.slm_click_last_item(f"#{child.attrs['id']} > label")
                             else:
                                 counter_child += 1
@@ -7113,6 +7121,7 @@ class WebappInternal(Base):
         #get length of field before input
         lenfield = len(self.get_element_value(selenium_input()))
         len_user_value = len(user_value)
+        input_container_id = self.get_current_container().get("id")
 
         self.try_send_keys(selenium_input, user_value, type_input_key)
         self.wait_blocker()
@@ -7124,12 +7133,16 @@ class WebappInternal(Base):
         # ensure modal is closed. if True is closed
         cell_is_closed = self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                 position=initial_layers + 1, timeout=5,
-                                                presence=False, main_container='body', check_error=False)
+                                                presence=False, main_container='body', check_error=False) or \
+                        self.get_current_container().get("id") != input_container_id
+
         if lenfield > len_user_value:
             # if cell is still opened, try close
             if not cell_is_closed:
+                logger().debug("Cell is still opened, trying to close it.")
                 current_layer = self.check_layers(layers_selector)
-                self.close_cell(field, current_layer, element=selenium_input())
+                self.close_cell(field, current_layer, element=selenium_input(), initial_container_id=input_container_id)
+
 
     def get_grid_cell(self, column=None, grid_number=1, row=1, field_to_label=None, position=1, duplicate_fields=[]):
         """
@@ -7373,32 +7386,63 @@ class WebappInternal(Base):
         if cell_opened:
             return True
 
-    def close_cell(self, field, layer, element):
+
+    def close_cell(self, field, layer, element, initial_container_id=None):
         """Close opened grid cell
 
         :param field: grid field list item
         :param layer: initial layers number
-        :param element: cell modal opened
+        :param element: callable that returns the grid input element to be toggled.
+                        It should be passed as a method/lambda (e.g. selenium_input).
+        :param initial_container_id: id of the container that had the input element before trying to close the cell.
+                                    Used to check if the cell was closed by verifying if the input element's container changed.
         :return:
         """
 
-        current_layer = layer
+        success = False
+        attempt = 0
 
         endtime = time.time() + self.config.time_out / 3
-        while (time.time() < endtime and current_layer == layer):
-            logger().debug('Trying close cell in grid!')
+        while (time.time() < endtime and not success):
+            attempt += 1
 
             self.toggle_cell(element)
 
             if(field[1] == True):
+                logger().debug('Skipping close-cell validation because field value is boolean True.')
                 break
 
             time.sleep(1)
+            layers_are_different = self.check_layers('wa-dialog') != layer
 
-            current_layer = self.check_layers('wa-dialog')
+            if not layers_are_different:
+                logger().debug(f"Layers not changed after toggle attempt. Waiting for to be closed. Attempt: {attempt}")
+
+                self.wait_element_timeout(term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    position=layer, timeout=5, presence=False,
+                                                    main_container='body', check_error=False)
+
+                if initial_container_id and self.get_current_container().get('id') != initial_container_id:
+                    logger().debug("Container changed from initial. Assuming cell is already closed.")
+                    success = True
+                    break
+            else:
+                success = True
+
+        logger().debug(f'Close cell validation result after attempt {attempt}: {success}')
+
+        if success:
+            logger().debug('Grid cell closed successfully.')
+        else:
+            logger().debug(
+                f"Couldn't close grid cell after {attempt} attempt(s). "
+                f"Expected layer {layer} (wa-dialog) to be closed, but it is still present."
+            )
+
 
     def toggle_cell(self, element):
         try:
+            logger().debug("Trying to toggle cell in grid.")
             ActionChains(self.driver).move_to_element(element).send_keys(Keys.ENTER).perform()
         except Exception:
             try:
@@ -7800,13 +7844,11 @@ class WebappInternal(Base):
                     except MoveTargetOutOfBoundsException:
                         ActionChains(self.driver).send_keys(Keys.DOWN).perform()
 
-                    term = self.grid_selectors['new_web_app'] if self.webapp_shadowroot() else ".tgetdados tbody tr, .tgrid tbody tr"
-                    endtime = time.time() + self.config.time_out
-                    while (time.time() < endtime and not (
-                    self.element_exists(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, position=len(rows) + 1, main_container=self.containers_selectors["GetCurrentContainer"]) or len(shadowroot_tr()) > 1)):
-                        if self.config.debug_log:
+                    if self.webapp_shadowroot():
+                        endtime = time.time() + self.config.time_out
+                        while (time.time() < endtime and not (len(shadowroot_tr()) > len(rows))):
                             logger().debug("Waiting for the new line to show")
-                        time.sleep(1)
+                            time.sleep(1)
 
                     if (add_grid_line_counter):
                         self.add_grid_row_counter(grids[field[2]])
@@ -9122,10 +9164,10 @@ class WebappInternal(Base):
 
         if not self.tmenu_screen:
             logger().debug(f"Re-open menu on screen: {self.tmenu_screen}")
+            from tir.technologies.core.events import emit
             if ">" in self.config.routine:
-                self.SetLateralMenu(self.config.routine, save_input=False)
+                emit('route.set_lateral_menu', self.config.routine, save_input=False)
             else:
-                from tir.technologies.core.events import emit
                 emit('route.program', self.config.routine, self.config.routine_module)
 
         self.tmenu_screen = None
@@ -9165,7 +9207,9 @@ class WebappInternal(Base):
                     pass
 
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.config.parameter_menu if self.config.parameter_menu else self.language.parameter_menu, save_input=False,
+                 program_name='CFGX017')
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel", scrap_type=enum.ScrapType.CSS_SELECTOR)
             self.wait_element_timeout(term="img[src*=bmpserv1]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
@@ -9223,10 +9267,10 @@ class WebappInternal(Base):
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
@@ -11024,7 +11068,7 @@ class WebappInternal(Base):
         """
 
         img_src_string = self.soup_to_selenium(img_soup).get_attribute("src")
-        return next(iter(re.findall('[\w\_\-]+\.', img_src_string)), None).replace('.','')
+        return next(iter(re.findall(r'[\w\_\-]+\.', img_src_string)), None).replace('.','')
 
     def try_element_to_be_clickable(self, element):
         """
@@ -11950,7 +11994,8 @@ class WebappInternal(Base):
                     pass
 
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.config.procedure_menu if self.config.procedure_menu else self.language.procedure_menu, save_input=False)
 
             self.wait_element(term=".ttoolbar, wa-toolbar, wa-panel, wa-tgrid", scrap_type=enum.ScrapType.CSS_SELECTOR)
             
@@ -12006,10 +12051,10 @@ class WebappInternal(Base):
             self.Setup(self.config.initial_program, self.config.date, self.config.group, self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.program', self.config.routine, self.config.routine_module)
         else:
             stack = next(iter(list(map(lambda x: x.function, filter(lambda x: re.search('tearDownClass', x.function), inspect.stack())))), None)
@@ -12113,7 +12158,8 @@ class WebappInternal(Base):
 
             #Access Schedule environment
             self.Setup("SIGACFG", self.config.date, self.config.group, self.config.branch, self.config.module, save_input=False)
-            self.SetLateralMenu(self.language.schedule_menu, save_input=False)
+            from tir.technologies.core.events import emit
+            emit('route.set_lateral_menu', self.language.schedule_menu, save_input=False)
 
             #Wait show grid
             self.wait_element_timeout(term=self.grid_selectors["new_web_app"], scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -12141,10 +12187,10 @@ class WebappInternal(Base):
                        self.config.branch, self.config.module, save_input=not self.config.autostart)
 
             if not self.tmenu_screen:
+                from tir.technologies.core.events import emit
                 if ">" in self.config.routine:
-                    self.SetLateralMenu(self.config.routine, save_input=False)
+                    emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 else:
-                    from tir.technologies.core.events import emit
                     emit('route.set_program', self.config.routine)
 
             self.tmenu_screen = None
