@@ -2114,9 +2114,17 @@ class PouiInternal(Base):
         :type position: int
         :param optional_term: Second term to use on a search of element. Used in MIXED search. - **Default:** "" (empty string)
         :type optional_term: str
+        :param main_container: CSS selector of the main container to search within. - **Default:** ".body"
+        :type main_container: str
+        :param check_error: Whether to search for and report errors on the screen. - **Default:** True
+        :type check_error: bool
+        :param twebview: Whether to switch to iframe/twebview context before searching. - **Default:** True
+        :type twebview: bool
+        :param use_current_container: If True, uses get_current_container() instead of get_current_DOM(). - **Default:** False
+        :type use_current_container: bool
 
-        :return: True if element is present. False if element is not present.
-        :rtype: bool
+        :return: True if element is present. False if element is not present. Returns None if unexpected error occurs during web scraping.
+        :rtype: bool or None
 
         Usage:
 
@@ -2175,7 +2183,8 @@ class PouiInternal(Base):
 
                 try:
                     container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
-                except:
+                except Exception as e:
+                    logger().debug(f"Container element not found: {str(e)}")
                     return False
             else:
                 container_element = self.driver
@@ -2185,7 +2194,8 @@ class PouiInternal(Base):
                     element_list = list(filter(lambda x: x.is_displayed(), self.driver.find_elements(By.CSS_SELECTOR, selector)))
                 else:
                     element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
-            except:
+            except Exception as e:
+                logger().debug(f"Error finding elements: {str(e)}")
                 return None
         else:
             if scrap_type == enum.ScrapType.MIXED:
@@ -3662,8 +3672,26 @@ class PouiInternal(Base):
             success = self.get_web_value(input_field_element()).strip() != ''
 
     def _click_input(self, input_element):
-
-        is_input_element_tag = type(input_element) == Tag
+        """
+        [Internal]
+        
+        Clicks on an input element with retry logic and focus management.
+        Handles both BeautifulSoup Tag objects and Selenium WebElement objects.
+        
+        :param input_element: The input element to click. Can be BeautifulSoup Tag or Selenium WebElement
+        :type input_element: Union[bs4.element.Tag, WebElement]
+        
+        :return: None
+        :rtype: None
+        
+        Usage:
+        
+        >>> # Click on input element
+        >>> input_element = self.return_input_element('Name', 1, term='input')
+        >>> self._click_input(input_element)
+        """
+        
+        is_input_element_tag = isinstance(input_element, Tag)
 
         if is_input_element_tag:
             element_selenium = self.soup_to_selenium(input_element, twebview=True)
@@ -3672,14 +3700,17 @@ class PouiInternal(Base):
 
         endtime = time.time() + (self.config.time_out / 3)
         while time.time() < endtime and not element_selenium == self.switch_to_active_element():
-
-            self.scroll_to_element(element_selenium)
-            if is_input_element_tag:
-                self.wait_until_to(expected_condition="element_to_be_clickable", element = input_element, locator = By.XPATH )
-            self.set_element_focus(element_selenium)
-            if is_input_element_tag:
-                self.wait_until_to(expected_condition="element_to_be_clickable", element = input_element, locator = By.XPATH )
-            self.click(element_selenium)
+            try:
+                self.scroll_to_element(element_selenium)
+                if is_input_element_tag:
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=input_element, locator=By.XPATH)
+                self.set_element_focus(element_selenium)
+                if is_input_element_tag:
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=input_element, locator=By.XPATH)
+                self.click(element_selenium)
+            except Exception as e:
+                logger().debug(f"Error clicking input element: {str(e)}")
+                time.sleep(0.5)
 
     def return_input_element(self, field=None, position=1, term=None):
         """
@@ -3848,11 +3879,22 @@ class PouiInternal(Base):
 
     def click_button(self, button, position=1, selector='po-button, po-dropdown', container=False):
         """
-
-        :param field: Button to be clicked.
+        [Internal]
+        
+        Clicks on a POUI button component.
+        https://po-ui.io/documentation/po-button
+        
+        :param button: Button text/label to be clicked.
+        :type button: str
         :param position: Position which element is located. - **Default:** 1
-
-
+        :type position: int
+        :param selector: CSS selector for button component types. - **Default:** 'po-button, po-dropdown'
+        :type selector: str
+        :param container: Whether to search within a specific container. - **Default:** False
+        :type container: bool
+        
+        :return: None
+        :rtype: None
         """
 
         logger().info(f"Clicking on {button}")
@@ -4603,15 +4645,16 @@ class PouiInternal(Base):
 
     def click_icon(self, label, class_name, position):
         """
-
+        [Internal]
+        
         Click on the POUI Icon by label, class_name or both.
         https://po-ui.io/guides/icons
 
-        :param label: The tooltip name for icon
+        :param label: The tooltip name for icon. If empty, only class_name is used for filtering. - **Default:** ""
         :type label: str
-        :param class_name: The POUI class name for icon
+        :param class_name: The POUI class name for icon. Can be single class or space-separated classes.
         :type class_name: str
-        :param position:
+        :param position: Position of the icon element when multiple matches exist. - **Default:** 1
         :type position: int
         :return: None
 
@@ -5271,17 +5314,13 @@ class PouiInternal(Base):
         if not container_term:
             container_term = self.containers_selectors["GetCurrentContainer"]
 
-        containers = []
+        soup = self.get_current_DOM(twebview=twebview)
 
-        endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and not containers):
-            soup = self.get_current_DOM(twebview=twebview)
+        if self.config.log_file:
+            with open(f"get_current_container_{str(container_term)}_{str(twebview)}_{str(random.randint(1, 101))}.txt", "w") as text_file:
+                text_file.write(f" HTML CONTENT: {str(soup)}")
 
-            if self.config.log_file:
-                with open(f"get_current_container_{str(container_term)}_{str(twebview)}_{str(random.randint(1, 101))}.txt", "w") as text_file:
-                    text_file.write(f" HTML CONTENT: {str(soup)}")
-
-            containers = soup.select(container_term)
+        containers = soup.select(container_term)
 
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
@@ -6186,28 +6225,46 @@ class PouiInternal(Base):
         """
         self._set_browse_filters(filters=filters)
 
-    def click_look_up_thf(self, label: str, search_value: str, search_column: str = '', position: int = 1):
-
-        # Click on input
-        input_field = self.return_input_element(label, position, term=self.elements_terms.get('input'))
-        self._click_input(input_field)
+    def click_look_up_thf(self, label: str, search_value: str, search_column: str = '', position: int = 1) -> None:
+        """
+        [Internal]
         
-        self._click_lookup_item(self.language.perform_advanced_search)
-        self._po_loading()
-
-        # select colum to filter
-        if search_column:
-            self._click_dropdown(subitems=search_column)
-
-        # fill input
-        self.input_value(self.language.search2, search_value, position=1, exec_enter_tab=False)
-
-        # click on search icon
-        self.click_icon(label='', class_name='an an-magnifying-glass po-fonts-icon ng-star-inserted', position=1)
-
-        # select first row
-        self.ClickTable(columns=search_column or None, values=search_value, radio_input=True)
-
-        # click on select button
-        self.click_button(self.language.select)
+        Interacts with THF (Totvs Lookup Field) advanced lookup to select a value.
         
+        :param label: The label/name of the lookup field to interact with
+        :type label: str
+        :param search_value: The value to search for in the advanced search
+        :type search_value: str
+        :param search_column: Optional column name to filter the search. If empty, no column filter is applied. - **Default:** '' (empty string)
+        :type search_column: str
+        :param position: Position of the field element if multiple fields with same label exist. - **Default:** 1
+        :type position: int
+        
+        :return: None
+        :rtype: None
+        """
+        try:
+            # Click on input
+            input_field = self.return_input_element(label, position, term=self.elements_terms.get('input'))
+            self._click_input(input_field)
+            
+            self._click_lookup_item(self.language.perform_advanced_search)
+            self._po_loading()
+
+            # select column to filter
+            if search_column:
+                self._click_dropdown(subitems=search_column)
+
+            # fill input
+            self.input_value(self.language.search2, search_value, position=1, exec_enter_tab=False)
+
+            # click on search icon
+            self.click_icon(label='', class_name='an an-magnifying-glass po-fonts-icon ng-star-inserted', position=1)
+
+            # select first row
+            self.ClickTable(columns=search_column or None, values=search_value, radio_input=True)
+
+            # click on select button
+            self.click_button(self.language.select)
+        except Exception as e:
+            self.log_error(f"Failed to interact with THF lookup field '{label}': {str(e)}")
