@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webapp &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -167,7 +167,7 @@
 <span id="webapp"></span><h1>Webapp<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.main.Webapp">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Webapp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Webapp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp" title="Link to this definition"></a></dt>
 <dd><p>Instantiates the Webapp automated interface testing class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1083,7 +1083,7 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.Program">
-<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Program" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.Program" title="Link to this definition"></a></dt>
 <dd><p>Method that sets the program in the initial menu search field.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1091,16 +1091,12 @@ The folder must be entered in the CSVPath parameter in the config.json.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The program name</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Module abbreviation used to differentiate routines with the same name. - <strong>Default:</strong> “” (empty string)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The program name</p>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="s2">&quot;MATA020&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="s2">&quot;CRDA200&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;CRD&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1298,18 +1294,9 @@ is provided, it will search on the chosen search box.</p>
 <li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</p></li>
 <li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether the key is an index or not. - <strong>Default:</strong> False</p></li>
 <li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The search column to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
-<li><p><strong>filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>]</em>) – List of dictionaries to apply browse filters before searching.
-Each dictionary key must be the field label and its value must be the filter value.
-- <strong>Default:</strong> []</p></li>
 </ul>
 </dd>
 </dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>When used with the <strong>New Browse</strong> (kendo-grid), this method automatically removes all
-active filters before performing the search, ensuring the results are not affected by
-previously applied filter conditions.</p>
-</div>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and default search key:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">)</span>
@@ -1333,15 +1320,6 @@ previously applied filter conditions.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen columns:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Nome, Filial*, ColumnX, AnotherColumnY&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using browse filters:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="p">{</span>
-<span class="gp">... </span>        <span class="s1">&#39;Filial&#39;</span><span class="p">:</span> <span class="s1">&#39;D MG 01&#39;</span><span class="p">,</span>
-<span class="gp">... </span>        <span class="s1">&#39;Cod Grupo&#39;</span><span class="p">:</span> <span class="s1">&#39;SQA2&#39;</span>
-<span class="gp">... </span>    <span class="p">}</span>
-<span class="gp">... </span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 </pre></div>
 </div>
@@ -1509,24 +1487,17 @@ This way you ensure the correct element be selected in correct screen.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.SetLateralMenu">
-<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_menu_functional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">SetLateralMenu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">menuitens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_menu_functional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.SetLateralMenu" title="Link to this definition"></a></dt>
 <dd><p>Navigates through the lateral menu using provided menu path.
 e.g. “MenuItem1 &gt; MenuItem2 &gt; MenuItem3”</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>menuitens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – String with the path to the menu.</p></li>
-<li><p><strong>save_input</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Keeps compatibility with WebApp lateral menu behavior. - <strong>Default:</strong> True</p></li>
-<li><p><strong>click_menu_functional</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Uses functional menu click strategy in WebApp. - <strong>Default:</strong> False</p></li>
-<li><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Program name to be used in New Home (POUI) when routine descriptions are duplicated. - <strong>Default:</strong> “” (empty string)</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Module abbreviation used to differentiate routines with the same name in New Home (POUI). - <strong>Default:</strong> “” (empty string)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>menu_itens</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – String with the path to the menu.</p>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetLateralMenu</span><span class="p">(</span><span class="s2">&quot;Updates &gt; Registers &gt; Products &gt; Groups&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetLateralMenu</span><span class="p">(</span><span class="s2">&quot;Updates &gt; Registers &gt; Products &gt; Groups&quot;</span><span class="p">,</span> <span class="n">program_name</span><span class="o">=</span><span class="s2">&quot;CRDA200&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;CRD&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
