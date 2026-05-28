@@ -6243,6 +6243,9 @@ class PouiInternal(Base):
         :return: None
         :rtype: None
         """
+
+        logger().info(f"Clicking on LookUp: {label}")
+
         try:
             # Click on input
             input_field = self.return_input_element(label, position, term=self.elements_terms.get('input'))
