@@ -1796,7 +1796,7 @@ class Poui():
         >>> oHelper.InputValue('Name', 'Test')
         :return: None
         """
-        self.__poui.InputValue(field, value, position)
+        self.__poui.input_value(field, value, position)
 
     def ClickCombo(self, field='', value='', position=1, second_value='', match_case=True):
         """
@@ -1957,7 +1957,7 @@ class Poui():
             :type click_cell: str
             :param checkbox: If True/False, toggles checkbox to that state - **Default:** None
             :type checkbox: bool
-            :param radio_input: Click radio button - **Default:** False
+            :param radio_input: Desired radio button state (True/False). The method clicks until this state is reached - **Default:** None
             :type radio_input: bool
             :param columns: Column name(s) to filter. Can be a string, or list
             :type columns: str or list
@@ -1982,6 +1982,10 @@ class Poui():
             >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Actions')
             >>> # New syntax - Toggle checkbox:
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
+            >>> # New syntax - Toggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=True)
+            >>> # New syntax - Untoggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=False)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
             >>> # New syntax - Click icon in row:
@@ -2376,3 +2380,50 @@ class Poui():
         >>> oHelper.RemoveBrowseFilters()
         """
         self.__poui._remove_filters_from_browse()
+
+    def ClickLookUpThf(self, label: str, search_value: str, search_column: str = '', position: int = 1) -> None:
+        """
+        Click on THF (Totvs Lookup Field) advanced lookup to search and select a value.
+        
+        This method automates the complete THF lookup workflow: opening the advanced search dialog,
+        optionally filtering by column, entering search criteria, executing the search, and selecting
+        the desired record from the results.
+        
+        Workflow:
+        1. Clicks on the lookup input field
+        2. Triggers the advanced search dialog
+        3. Optionally filters by column (if search_column is provided)
+        4. Fills the search input with search_value
+        5. Clicks the search icon
+        6. Selects the first matching row from results
+        7. Confirms the selection by clicking the Select button
+        
+        :param label: The label or name of the lookup field to interact with. Must match the field label visible on the screen.
+        :type label: str
+        :param search_value: The value to search for in the advanced search dialog. Will be entered in the search input field.
+        :type search_value: str
+        :param search_column: Optional column name to apply filter before searching. If empty, no column filter is applied. Use when you need to restrict search to a specific column. - **Default:** '' (empty string)
+        :type search_column: str
+        :param position: Position of the field when multiple fields with the same label exist on the same screen. 1-based indexing. - **Default:** 1
+        :type position: int
+        
+        :return: None
+        :rtype: None
+        
+        Usage:
+        
+        >>> # Simple lookup - search by value only
+        >>> oHelper.ClickLookUpThf(label='Supplier', search_value='ABC123')
+        
+        >>> # Lookup with column filter - search in specific column
+        >>> oHelper.ClickLookUpThf(label='Product', search_value='Widget', search_column='Code')
+        
+        >>> # Lookup at specific position - when multiple fields have same label
+        >>> oHelper.ClickLookUpThf(label='Item', search_value='Item1', position=2)
+        
+        >>> # Complex example - filtered search at specific position
+        >>> oHelper.ClickLookUpThf(label='Customer', search_value='Acme Corp', search_column='Name', position=1)
+        
+        :raises Exception: If the lookup field is not found or interaction fails. Error details will be logged.
+        """
+        self.__poui.click_look_up_thf(label, search_value, search_column, position)
