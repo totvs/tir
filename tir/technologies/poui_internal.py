@@ -88,7 +88,7 @@ class PouiInternal(Base):
             "BlockerContainers": ".tmodaldialog,.ui-dialog",
             "Containers": ".tmodaldialog,.ui-dialog"
         }
-        self.base_container = ".tmodaldialog"
+        self.base_container = 'body'
 
         self.grid_check = []
         self.grid_counters = {}
@@ -1928,7 +1928,7 @@ class PouiInternal(Base):
 
     def web_scrap(self, term, scrap_type=enum.ScrapType.TEXT, optional_term=None, label=False, main_container=None,
                   check_error=True, check_help=True, input_field=True, direction=None,
-                  position=1, twebview=True):
+                  position=1, twebview=None):
         """
         [Internal]
 
@@ -1964,14 +1964,33 @@ class PouiInternal(Base):
         >>> elements = self.web_scrap(term="my_text", scrap_type=ScrapType.MIXED, optional_term=".my_class")
         """
 
-        try:
-            if check_error:
-                self.search_for_errors(check_help)
+        if twebview == None:
+            twebview = True if not self.config.poui else False
 
-            container = self.get_current_container(
-                container_term=main_container,
-                twebview=twebview
-            )
+        try:
+            endtime = time.time() + self.config.time_out
+            container =  None
+            while(time.time() < endtime and container is None):
+                soup = self.get_current_DOM(twebview)
+
+                if check_error:
+                    self.search_for_errors(check_help)
+
+                if self.config.log_file:
+                    with open(f"{term + str(scrap_type) + str(optional_term) + str(label) + str(main_container) + str(random.randint(1, 101)) }.txt", "w") as text_file:
+                        text_file.write(f" HTML CONTENT: {str(soup)}")
+
+                container_selector = self.base_container
+                if (main_container is not None):
+                    container_selector = main_container
+
+                containers = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))
+                containers = self.zindex_sort(containers, reverse=True) 
+
+                if self.base_container in container_selector:
+                    container = self.containers_filter(containers)
+
+                container = next(iter(containers), None) if isinstance(containers, list) else container
 
             if container is None:
                 raise Exception(f"Web Scrap couldn't find container - term: {term}")
@@ -2000,7 +2019,6 @@ class PouiInternal(Base):
             raise
         except Exception as e:
             self.log_error(str(e))
-
 
     def search_for_errors(self, check_help=True):
         """
@@ -3737,7 +3755,8 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                      main_container=self.containers_selectors["GetCurrentContainer"])
             if po_input:
                 # 1 - By text container
                 inputs_with_container = list(filter(lambda x: x.find_parent('po-field-container') and \
@@ -3779,7 +3798,7 @@ class PouiInternal(Base):
         :return:
         """
         po_component = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                  main_container='body')
+                                  main_container=self.containers_selectors["GetCurrentContainer"])
         if po_component:
             po_component = list(filter(lambda x: self.element_is_displayed(x), po_component))
             if container:
@@ -4603,7 +4622,8 @@ class PouiInternal(Base):
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
+        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                    main_container=self.containers_selectors["GetCurrentContainer"])
         
         tables = list(filter(lambda x: self.element_is_displayed(x), tables))
         
@@ -4693,7 +4713,8 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                     main_container=self.containers_selectors["GetCurrentContainer"])
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
@@ -4786,7 +4807,8 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-            po_list_item = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+            po_list_item = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                          main_container=self.containers_selectors["GetCurrentContainer"])
             if po_list_item:
                 po_item = list(filter(lambda x: x.text.lower().strip() == label, po_list_item))
                 element = next(iter(po_item), None)
@@ -5306,8 +5328,7 @@ class PouiInternal(Base):
             return switch_status.lower() == 'true'
         return None
 
-
-    def get_current_container(self, container_term: str = '', twebview: bool = True):
+    def get_current_container(self):
         """
         [Internal]
 
@@ -5322,24 +5343,11 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> container = self.get_current_container()
         """
-
-        if not container_term:
-            container_term = self.containers_selectors["GetCurrentContainer"]
-
-        soup = self.get_current_DOM(twebview=twebview)
-
-        if self.config.log_file:
-            with open(f"get_current_container_{str(container_term)}_{str(twebview)}_{str(random.randint(1, 101))}.txt", "w") as text_file:
-                text_file.write(f" HTML CONTENT: {str(soup)}")
-
-        containers = soup.select(container_term)
-
+        soup = self.get_current_DOM(twebview=True)
+        containers = soup.select(self.containers_selectors["GetCurrentContainer"])
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
-        container = next(iter(sorted_containers), None)
-
-        return container
-
+        return next(iter(sorted_containers), None)
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
             """
@@ -5743,7 +5751,8 @@ class PouiInternal(Base):
                 if label:
                     dropdown_button = self.get_component_by_label(label, term, position)
                 else:
-                    dropdown_button = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+                    dropdown_button = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                     main_container=self.containers_selectors["GetCurrentContainer"])
                     dropdown_button = next(iter(dropdown_button))
 
             if dropdown_button:
@@ -5781,7 +5790,8 @@ class PouiInternal(Base):
 
         po_dropdown_label = None
 
-        po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
+        po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                     main_container=self.containers_selectors["GetCurrentContainer"])
         if po_dropdown:
             po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x, position),
                                             po_dropdown))
