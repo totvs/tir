@@ -5326,9 +5326,6 @@ class PouiInternal(Base):
         sorted_containers = self.zindex_sort(displayeds_containers, True)
         container = next(iter(sorted_containers), None)
 
-        if container is None:
-            self.log_error(f"Couldn't find container using selector: {container_term}")
-
         return container
 
 
