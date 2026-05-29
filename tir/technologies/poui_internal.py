@@ -3692,22 +3692,26 @@ class PouiInternal(Base):
         """
         
         is_input_element_tag = isinstance(input_element, Tag)
+        success = False
 
         if is_input_element_tag:
-            element_selenium = self.soup_to_selenium(input_element, twebview=True)
+            element_selenium = lambda: self.soup_to_selenium(input_element, twebview=True)
         else:
-            element_selenium = input_element
+            element_selenium = lambda: input_element
 
         endtime = time.time() + (self.config.time_out / 3)
-        while time.time() < endtime and not element_selenium == self.switch_to_active_element():
+        while time.time() < endtime and not success:
             try:
-                self.scroll_to_element(element_selenium)
+                self.scroll_to_element(element_selenium())
                 if is_input_element_tag:
                     self.wait_until_to(expected_condition="element_to_be_clickable", element=input_element, locator=By.XPATH)
-                self.set_element_focus(element_selenium)
+                self.set_element_focus(element_selenium())
                 if is_input_element_tag:
                     self.wait_until_to(expected_condition="element_to_be_clickable", element=input_element, locator=By.XPATH)
-                self.click(element_selenium)
+                self.click(element_selenium())
+
+                if element_selenium() == self.switch_to_active_element():
+                    success = True
             except Exception as e:
                 logger().debug(f"Error clicking input element: {str(e)}")
                 time.sleep(0.5)
