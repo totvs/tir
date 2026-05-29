@@ -3716,6 +3716,9 @@ class PouiInternal(Base):
                 logger().debug(f"Error clicking input element: {str(e)}")
                 time.sleep(0.5)
 
+        if not success:
+            logger().debug(f"Couldn’t click the input element.")
+
     def return_input_element(self, field=None, position=1, term=None):
         """
         [Internal]
