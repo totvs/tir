@@ -105,6 +105,8 @@ class LanguagePack:
         self.new_browse_insert = languagepack["New Browse Insert"]
         self.new_browse_other_actions = languagepack["New Browse Other Actions"]
 
+        self.perform_advanced_search = languagepack["Perform Advanced Search"]
+        self.select = languagepack["Select"]
         
         self.messages = Messages(languagepack)
 
@@ -217,7 +219,10 @@ class LanguagePack:
             "New Browse Edit":"Edit",
             "New Browse Delete":"Delete",
             "New Browse Insert":"Add",
-            "New Browse Other Actions":"Line actions"
+            "New Browse Other Actions":"Line actions",
+
+            "Perform Advanced Search":"Perform Advanced Search.",
+            "Select":"Select"
         }
 
         brazilian_portuguese = {
@@ -327,7 +332,10 @@ class LanguagePack:
             "New Browse Edit":"Editar",
             "New Browse Delete":"Excluir",
             "New Browse Insert":"Incluir",
-            "New Browse Other Actions":"Ações de registro"         
+            "New Browse Other Actions":"Ações de registro",
+
+            "Perform Advanced Search":"Fazer busca avançada.",
+            "Select":"Selecionar"  
         }
         spanish = {
             "User": "Usuário",
@@ -435,7 +443,10 @@ class LanguagePack:
             "New Browse Edit":"Edit",
             "New Browse Delete":"Eliminar",
             "New Browse Insert":"Incluir",
-            "New Browse Other Actions":"Acciones de registro"
+            "New Browse Other Actions":"Acciones de registro",
+
+            "Perform Advanced Search":"Realizar búsqueda avanzada.",
+            "Select":"Seleccionar"
         }
         russian = {
             "User": "Пользователь",
@@ -546,7 +557,10 @@ class LanguagePack:
             "New Browse Edit":"Редактировать",            
             "New Browse Delete":"Удалить",
             "New Browse Insert":"Включать",
-            "New Browse Other Actions":"Линейные действия"
+            "New Browse Other Actions":"Линейные действия",
+
+            "Perform Advanced Search":"Выполните расширенный поиск.",
+            "Select":"Выбирать"
         }
 
         if language.lower() == "en-us":
