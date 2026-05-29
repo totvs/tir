@@ -1957,7 +1957,7 @@ class Poui():
             :type click_cell: str
             :param checkbox: If True/False, toggles checkbox to that state - **Default:** None
             :type checkbox: bool
-            :param radio_input: Click radio button - **Default:** False
+            :param radio_input: Desired radio button state (True/False). The method clicks until this state is reached - **Default:** None
             :type radio_input: bool
             :param columns: Column name(s) to filter. Can be a string, or list
             :type columns: str or list
@@ -1982,6 +1982,10 @@ class Poui():
             >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Actions')
             >>> # New syntax - Toggle checkbox:
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
+            >>> # New syntax - Toggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=True)
+            >>> # New syntax - Untoggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=False)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
             >>> # New syntax - Click icon in row:

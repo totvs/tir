@@ -4142,7 +4142,7 @@ class PouiInternal(Base):
             :type click_cell: str
             :param checkbox: Click checkbox - **Default:** False
             :type checkbox: bool
-            :param radio_input: Click radio button - **Default:** False
+            :param radio_input: Desired radio button state (True/False). Clicks until the informed state is reached - **Default:** None
             :type radio_input: bool
             :param columns: [NEW] List of column names or comma-separated string - **Default:** None
             :type columns: list or str
@@ -4162,9 +4162,12 @@ class PouiInternal(Base):
             >>> oHelper.ClickTable(columns='Branch', values='D MG 01', click_cell='Edit')
             >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'])
             >>> oHelper.ClickTable(columns='Status', values=True, match_all=True, checkbox=True)
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=True)
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=False)
             >>> # Click icon in row:
             >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='arrow-up-right')
             >>> oHelper.ClickTable(columns='Code', values='000001', icon_class='ph-arrow-up-right')
+            
 
             :return: None
             """
@@ -4267,7 +4270,10 @@ class PouiInternal(Base):
                 elif radio_input:
                     row_radio_component = tr[index].select_one('po-radio, input[type="radio"]')
                     if row_radio_component:
+                        logger().info(f"Clicking on radio button in row {index + 1}")
                         self.toggle_radio(row_radio_component, radio_input)
+                    else:
+                        self.log_error("Couldn't find radio button in the table row.")
                 elif icon_class:
                     # Click on icon within the row
                     self._click_table_icon(tr[index], icon_class)
@@ -4290,6 +4296,7 @@ class PouiInternal(Base):
             index = row_index_number
             element_bs4 = next(iter(tr[index].select('td')))
             self.poui_click(element_bs4)
+
 
     def _click_table_icon(self, row_element, icon_class, column_index=None):
         """
@@ -4516,41 +4523,58 @@ class PouiInternal(Base):
         return headers
 
 
-    def toggle_radio(self, po_radio, active=True):
-        '''Set input Radio from a tr Tag element
+    def toggle_radio(self, radio_element, active=True):
+        '''Set input Radio from a tr Tag element (POUI or Kendo Grid)
 
-        :param po_radio: BeautifulSoup4
-        :return:
+        :param radio_element: BeautifulSoup4 element (po-radio or input[type="radio"])
+        :param active: Boolean to set radio state (True=checked, False=unchecked)
+        :return: None
         '''
-        # method prepared only to radios in tr(rows) until this moment
-        # it still be changed to another cases
-
-        radio_input = po_radio.select_one('input')
-
-        if radio_input:
-            selenium_radio = self.soup_to_selenium(radio_input, twebview=True)
+        
+        logger().debug("Toggling radio button to %s", "active" if active else "inactive")
+        # Se é um input direto (Kendo Grid)
+        if radio_element.name == 'input' and radio_element.get('type') == 'radio':
+            radio_input = radio_element
+            element_to_check = radio_element
         else:
-            selenium_radio = self.soup_to_selenium(po_radio, twebview=True)
+            # Se é um po-radio (POUI) ou precisa buscar dentro
+            radio_input = radio_element.select_one('input')
+            element_to_check = radio_element
 
-        radio_status = lambda: self.radio_is_active(po_radio)
+        if not radio_input:
+            self.log_error("Couldn't find radio input element")
+            return
 
+        selenium_radio = self.soup_to_selenium(radio_input, twebview=True)
+
+        radio_status = lambda: self.radio_is_active(element_to_check)
         success = lambda: radio_status() == active
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
             self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
 
+
     def radio_is_active(self, radio):
         '''Check if radio is active
 
-        :param radio: BeautifulSoup4
+        :param radio: BeautifulSoup4 (po-radio or input[type="radio"])
         :return: Boolean
         '''
 
-        # check if po-radio is active in tr
+        self.switch_to_iframe()
+
+        # Se é um input direto (Kendo Grid)
+        if radio.name == 'input' and radio.get('type') == 'radio':
+            radio_td = radio.find_parent('td')
+            if radio_td:
+                # Usa Selenium para capturar o estado atualizado do DOM
+                radio_td_selenium = self.soup_to_selenium(radio_td, twebview=True)
+                return 'true' in radio_td_selenium.get_attribute('aria-selected')
+
+        # Verifica se é po-radio (POUI) ou está dentro de um tr
         radio_tr = radio.find_parent('tr')
         if radio_tr:
-            self.switch_to_iframe()
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
             return 'active' in radio_selenium.get_attribute('class') or 'k-selected' in radio_selenium.get_attribute('class')
 
