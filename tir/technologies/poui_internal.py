@@ -3699,9 +3699,12 @@ class PouiInternal(Base):
         else:
             element_selenium = lambda: input_element
 
-        endtime = time.time() + (self.config.time_out / 3)
-        while time.time() < endtime and not success:
+        max_attempts = 4
+        click_attempts = 1
+        while click_attempts <= max_attempts and not success:
             try:
+                logger().debug(f"Trying to click input element. Attempt {click_attempts}/{max_attempts}.")
+
                 self.scroll_to_element(element_selenium())
                 if is_input_element_tag:
                     self.wait_until_to(expected_condition="element_to_be_clickable", element=input_element, locator=By.XPATH)
@@ -3715,9 +3718,11 @@ class PouiInternal(Base):
             except Exception as e:
                 logger().debug(f"Error clicking input element: {str(e)}")
                 time.sleep(0.5)
+            finally:
+                click_attempts += 1
 
         if not success:
-            logger().debug(f"Couldn’t click the input element.")
+            logger().debug(f"Couldn't click the input element.")
 
     def return_input_element(self, field=None, position=1, term=None):
         """
