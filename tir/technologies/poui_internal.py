@@ -3753,8 +3753,7 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      main_container=self.containers_selectors["GetCurrentContainer"])
+            po_input = self.get_container_elements(selector=term, select_all=True)
             if po_input:
                 # 1 - By text container
                 inputs_with_container = list(filter(lambda x: x.find_parent('po-field-container') and \
@@ -3786,7 +3785,7 @@ class PouiInternal(Base):
                             input_field = po_input_text
 
         if not input_field:
-            self.log_error("Couldn't find any labels.")
+            self.log_error("Couldn't find input.")
 
         return input_field
 
@@ -3795,8 +3794,7 @@ class PouiInternal(Base):
 
         :return:
         """
-        po_component = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                  main_container=self.containers_selectors["GetCurrentContainer"])
+        po_component = self.get_container_elements(selector)
         if po_component:
             po_component = list(filter(lambda x: self.element_is_displayed(x), po_component))
             if container:
@@ -4644,8 +4642,7 @@ class PouiInternal(Base):
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                    main_container=self.containers_selectors["GetCurrentContainer"])
+        tables = self.get_container_elements(selector)
         
         tables = list(filter(lambda x: self.element_is_displayed(x), tables))
         
@@ -4735,8 +4732,7 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container=self.containers_selectors["GetCurrentContainer"])
+            po_icon = self.get_container_elements(term)
 
             if po_icon:
                 po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
@@ -4829,8 +4825,7 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-            po_list_item = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                          main_container=self.containers_selectors["GetCurrentContainer"])
+            po_list_item = self.get_container_elements(term)
             if po_list_item:
                 po_item = list(filter(lambda x: x.text.lower().strip() == label, po_list_item))
                 element = next(iter(po_item), None)
@@ -5370,6 +5365,16 @@ class PouiInternal(Base):
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
         return next(iter(sorted_containers), None)
+    
+    def get_container_elements(self, selector, select_all=True):
+        """Get a soup select object from current container.
+        :param selector: Css selector
+        :param select_all: If true return a list of objects, if false return the first
+        :return: Return a soup select object
+        """
+        container = self.get_current_container()
+
+        return container.select(selector) if select_all else container.select_one(selector)
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
             """
@@ -5773,9 +5778,7 @@ class PouiInternal(Base):
                 if label:
                     dropdown_button = self.get_component_by_label(label, term, position)
                 else:
-                    dropdown_button = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                     main_container=self.containers_selectors["GetCurrentContainer"])
-                    dropdown_button = next(iter(dropdown_button))
+                    dropdown_button = self.get_container_elements(term, select_all=False)
 
             if dropdown_button:
                 dropdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
@@ -6143,8 +6146,7 @@ class PouiInternal(Base):
         self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                   timeout=10, twebview=True)
 
-        soup = self.get_current_container()
-        lookup_list = soup.select(term)
+        lookup_list = self.get_container_elements(term)
         lookup_list_displayed = next(iter(filter(lambda x: self.element_is_displayed(x), lookup_list)), None)
 
         if not lookup_list_displayed:
