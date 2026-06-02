@@ -1984,8 +1984,7 @@ class PouiInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))
-                containers = self.zindex_sort(containers, reverse=True) 
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
@@ -2223,7 +2222,6 @@ class PouiInternal(Base):
 
         if not element_list:
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, position=position)
-            element_list = list(filter(lambda x: self.element_is_displayed(x), element_list))
             if not element_list:
                 return None
 
@@ -3755,8 +3753,7 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(not input_field and time.time() < endtime):
-            po_input = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                      main_container=self.containers_selectors["GetCurrentContainer"])
+            po_input = self.get_container_elements(selector=term, select_all=True, filter_displayeds=True)
             if po_input:
                 # 1 - By text container
                 inputs_with_container = list(filter(lambda x: x.find_parent('po-field-container') and \
@@ -3788,7 +3785,7 @@ class PouiInternal(Base):
                             input_field = po_input_text
 
         if not input_field:
-            self.log_error("Couldn't find any labels.")
+            self.log_error("Couldn't find input.")
 
         return input_field
 
@@ -3797,10 +3794,8 @@ class PouiInternal(Base):
 
         :return:
         """
-        po_component = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                  main_container=self.containers_selectors["GetCurrentContainer"])
+        po_component = self.get_container_elements(selector, filter_displayeds=True)
         if po_component:
-            po_component = list(filter(lambda x: self.element_is_displayed(x), po_component))
             if container:
                 po_component_filtered = list(
                     filter(lambda x: x.find('po-field-container').select('span, label') != [], po_component))
@@ -4646,10 +4641,7 @@ class PouiInternal(Base):
 
         self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        tables = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                    main_container=self.containers_selectors["GetCurrentContainer"])
-        
-        tables = list(filter(lambda x: self.element_is_displayed(x), tables))
+        tables = self.get_container_elements(selector, filter_displayeds=True)
         
         if tables:
             if len(tables) - 1 >= table_number:
@@ -4737,17 +4729,14 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
 
-            po_icon = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container=self.containers_selectors["GetCurrentContainer"])
+            po_icon = self.get_container_elements(term, filter_displayeds=True)
 
             if po_icon:
-                po_icon_filtered = list(filter(lambda x: self.element_is_displayed(x), po_icon))
-
                 if label:
-                    po_icon_filtered = self.filter_by_tooltip_value(po_icon_filtered, label)
+                    po_icon = self.filter_by_tooltip_value(po_icon, label)
 
-                if po_icon_filtered:
-                    element = po_icon_filtered[position]
+                if po_icon:
+                    element = po_icon[position]
                     self.poui_click(element)
 
         if not element:
@@ -4831,8 +4820,7 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-            po_list_item = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                          main_container=self.containers_selectors["GetCurrentContainer"])
+            po_list_item = self.get_container_elements(term, filter_displayeds=True)
             if po_list_item:
                 po_item = list(filter(lambda x: x.text.lower().strip() == label, po_list_item))
                 element = next(iter(po_item), None)
@@ -5372,6 +5360,44 @@ class PouiInternal(Base):
         displayeds_containers = list(filter(lambda x: self.element_is_displayed(x), containers))
         sorted_containers = self.zindex_sort(displayeds_containers, True)
         return next(iter(sorted_containers), None)
+    
+    def get_container_elements(self, selector: str, select_all: bool = True, filter_displayeds: bool = False):
+        """
+        [Internal]
+
+        Gets element(s) from the current container using a CSS selector.
+
+        :param selector: CSS selector used to find elements inside the current container.
+        :type selector: str
+        :param select_all: If True, returns all matched elements as a list. If False, returns only the first matched element.
+        :type select_all: bool
+        :param filter_displayeds: If True, filters results keeping only displayed elements.
+        :type filter_displayeds: bool
+
+        :return: Returns a list of BeautifulSoup elements when `select_all=True`; returns a single BeautifulSoup element
+                 when `select_all=False`; returns `None` when `select_all=False` and no element is found.
+        :rtype: list[bs4.element.Tag] or bs4.element.Tag or None
+
+        Usage:
+
+        >>> # Return all elements (list)
+        >>> elements = self.get_container_elements('po-button')
+        >>> # Return first element only
+        >>> element = self.get_container_elements('po-button', select_all=False)
+        >>> # Return displayed elements only
+        >>> displayed_elements = self.get_container_elements('po-button', filter_displayeds=True)
+        """
+        container = self.get_current_container()
+
+        if container is None:
+            self.log_error(f"Couldn't find current container for selector: {selector}")
+
+        elements = container.select(selector)
+
+        if filter_displayeds:
+            elements = list(filter(lambda x: self.element_is_displayed(x), elements))
+
+        return elements if select_all else next(iter(elements), None)
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
             """
@@ -5761,7 +5787,8 @@ class PouiInternal(Base):
         term = 'po-dropdown'
         subitems_list = self._normalize_to_list(subitems)
         success = False
-        po_dropdown = None
+        dropdown_button = None
+        dropdown_selenium = None
         click_type = 1
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5771,13 +5798,10 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
 
-            if not po_dropdown:
-                if label:
-                    dropdown_button = self.get_component_by_label(label, term, position)
-                else:
-                    dropdown_button = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                                     main_container=self.containers_selectors["GetCurrentContainer"])
-                    dropdown_button = next(iter(dropdown_button))
+            if label:
+                dropdown_button = self.get_component_by_label(label, term, position)
+            else:
+                dropdown_button = self.get_container_elements(term, select_all=False, filter_displayeds=True)
 
             if dropdown_button:
                 dropdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
@@ -6145,15 +6169,13 @@ class PouiInternal(Base):
         self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
                                   timeout=10, twebview=True)
 
-        soup = self.get_current_container()
-        lookup_list = soup.select(term)
-        lookup_list_displayed = next(iter(filter(lambda x: self.element_is_displayed(x), lookup_list)), None)
+        lookup_list = self.get_container_elements(term, select_all=False, filter_displayeds=True)
 
-        if not lookup_list_displayed:
+        if not lookup_list:
             logger().warning("thf-lookup-list not found in DOM.")
             return None
 
-        items = lookup_list_displayed.select('li')
+        items = lookup_list.select('li')
         return next(
             (item for item in items if value_normalized in item.text.strip().lower()),
             None
