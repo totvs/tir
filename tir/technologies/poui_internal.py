@@ -5362,10 +5362,30 @@ class PouiInternal(Base):
         return next(iter(sorted_containers), None)
     
     def get_container_elements(self, selector: str, select_all: bool = True, filter_displayeds: bool = False):
-        """Get a soup select object from current container.
-        :param selector: Css selector
-        :param select_all: If true return a list of objects, if false return the first
-        :return: Return a soup select object
+        """
+        [Internal]
+
+        Gets element(s) from the current container using a CSS selector.
+
+        :param selector: CSS selector used to find elements inside the current container.
+        :type selector: str
+        :param select_all: If True, returns all matched elements as a list. If False, returns only the first matched element.
+        :type select_all: bool
+        :param filter_displayeds: If True, filters results keeping only displayed elements.
+        :type filter_displayeds: bool
+
+        :return: Returns a list of BeautifulSoup elements when `select_all=True`; returns a single BeautifulSoup element
+                 when `select_all=False`; returns `None` when `select_all=False` and no element is found.
+        :rtype: list[bs4.element.Tag] or bs4.element.Tag or None
+
+        Usage:
+
+        >>> # Return all elements (list)
+        >>> elements = self.get_container_elements('po-button')
+        >>> # Return first element only
+        >>> element = self.get_container_elements('po-button', select_all=False)
+        >>> # Return displayed elements only
+        >>> displayed_elements = self.get_container_elements('po-button', filter_displayeds=True)
         """
         container = self.get_current_container()
 
