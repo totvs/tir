@@ -4820,7 +4820,7 @@ class PouiInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not element:
-            po_list_item = self.get_container_elements(term)
+            po_list_item = self.get_container_elements(term, filter_displayeds=True)
             if po_list_item:
                 po_item = list(filter(lambda x: x.text.lower().strip() == label, po_list_item))
                 element = next(iter(po_item), None)
