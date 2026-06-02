@@ -5374,6 +5374,9 @@ class PouiInternal(Base):
         """
         container = self.get_current_container()
 
+        if container is None:
+            self.log_error(f"Couldn't find current container for selector: {selector}")
+
         return container.select(selector) if select_all else container.select_one(selector)
 
     def execute_js_selector(self, term, objects, get_all=True, shadow_root=True):
