@@ -5787,7 +5787,8 @@ class PouiInternal(Base):
         term = 'po-dropdown'
         subitems_list = self._normalize_to_list(subitems)
         success = False
-        po_dropdown = None
+        dropdown_button = None
+        dropdown_selenium = None
         click_type = 1
 
         self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
@@ -5797,11 +5798,10 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
 
-            if not po_dropdown:
-                if label:
-                    dropdown_button = self.get_component_by_label(label, term, position)
-                else:
-                    dropdown_button = self.get_container_elements(term, select_all=False, filter_displayeds=True)
+            if label:
+                dropdown_button = self.get_component_by_label(label, term, position)
+            else:
+                dropdown_button = self.get_container_elements(term, select_all=False, filter_displayeds=True)
 
             if dropdown_button:
                 dropdown_selenium = self.soup_to_selenium(dropdown_button, twebview=True)
