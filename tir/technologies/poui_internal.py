@@ -1984,8 +1984,7 @@ class PouiInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                containers = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))
-                containers = self.zindex_sort(containers, reverse=True) 
+                containers = self.zindex_sort(soup.select(container_selector), reverse=True)
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
@@ -2223,7 +2222,6 @@ class PouiInternal(Base):
 
         if not element_list:
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, position=position)
-            element_list = list(filter(lambda x: self.element_is_displayed(x), element_list))
             if not element_list:
                 return None
 
