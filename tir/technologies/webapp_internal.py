@@ -4056,7 +4056,7 @@ class WebappInternal(Base):
             if container is None:
                 raise Exception(f"Web Scrap couldn't find container - term: {term}")
 
-            _cid = getattr(container, 'attrs', {}).get('id', '') if hasattr(container, 'attrs') else ''
+            _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
             logger().debug(f"web_scrap | container='{container_selector}' resolved_id='{_cid}' term='{term}'")
 
             if (scrap_type == enum.ScrapType.TEXT):
@@ -4417,7 +4417,7 @@ class WebappInternal(Base):
                 if not container:
                     return False
 
-                _cid = getattr(container, 'attrs', {}).get('id', '') if hasattr(container, 'attrs') else ''
+                _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
                 logger().debug(f"element_exists | container='{container_selector}' resolved_id='{_cid}' term='{term}'")
 
                 try:
@@ -8382,7 +8382,7 @@ class WebappInternal(Base):
             if element is not None:
 
                 _tag = getattr(element, 'name', None) or type(element).__name__
-                _eid = getattr(element, 'attrs', {}).get('id', '') if hasattr(element, 'attrs') else ''
+                _eid = element.attrs.get('id', '') if hasattr(element, 'attrs') else ''
                 logger().debug(f"wait_element | element found tag='{_tag}' id='{_eid}'")
 
                 sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
