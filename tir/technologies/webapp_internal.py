@@ -4016,6 +4016,7 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out
             container =  None
+            container_selector = ''
             while(time.time() < endtime and container is None):
                 soup = self.get_current_DOM(twebview=twebview)
 
