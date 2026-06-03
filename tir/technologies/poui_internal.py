@@ -5390,7 +5390,7 @@ class PouiInternal(Base):
         container = self.get_current_container()
 
         if container is None:
-            self.log_error(f"Couldn't find current container for selector: {selector}")
+            return [] if select_all else None
 
         elements = container.select(selector)
 
