@@ -4057,9 +4057,6 @@ class WebappInternal(Base):
             if container is None:
                 raise Exception(f"Web Scrap couldn't find container - term: {term}")
 
-            _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
-            logger().debug(f"web_scrap | container='{container_selector}' resolved_id='{_cid}' term='{term}'")
-
             if (scrap_type == enum.ScrapType.TEXT):
                 if label:
                     return self.find_label_element(term, container, input_field=input_field, direction=direction, position=position)
@@ -4418,9 +4415,6 @@ class WebappInternal(Base):
                 if not container:
                     return False
 
-                _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
-                logger().debug(f"element_exists | container='{container_selector}' resolved_id='{_cid}' term='{term}'")
-
                 try:
                     container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
@@ -4445,7 +4439,6 @@ class WebappInternal(Base):
                 selector = "div"
 
         if not element_list:
-            logger().debug(f"element_exists | fallback web_scrap term='{term}' container='{main_container}'")
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term, twebview=twebview)
             if not element_list and f"wa-dialog[title*={self.language.warning}]" in term:
                 return container_element.get_attribute('title') == self.language.warning
@@ -8382,10 +8375,6 @@ class WebappInternal(Base):
 
             if element is not None:
 
-                _tag = element.name if hasattr(element, 'name') else ''
-                _eid = element.attrs.get('id', '') if hasattr(element, 'attrs') else ''
-                logger().debug(f"wait_element | element found tag='{_tag}' id='{_eid}'")
-
                 sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
                 if self.webapp_shadowroot():
                     self.scroll_to_element(sel_element())
@@ -11248,10 +11237,10 @@ class WebappInternal(Base):
                                  (parent_classes_before != parent_classes_after) or \
                                  (classes_before != classes_after))
         
-        string_debug = lambda: f"Results send_action check:\n" + \
-                               f"soup = {soup_before_event != soup_after_event}\n" + \
-                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)}\n' + \
-                               f'parent_classes: {parent_classes_before != parent_classes_after}\n' + \
+        string_debug = lambda: f"Results send_action check: " + \
+                               f"soup = {soup_before_event != soup_after_event} | " + \
+                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)} | ' + \
+                               f'parent_classes: {parent_classes_before != parent_classes_after} | ' + \
                                f'classes: {classes_before != classes_after}'
 
         self.wait_blocker()
