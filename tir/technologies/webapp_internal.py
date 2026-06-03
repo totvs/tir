@@ -8381,7 +8381,7 @@ class WebappInternal(Base):
 
             if element is not None:
 
-                _tag = getattr(element, 'name', None) or type(element).__name__
+                _tag = element.name if hasattr(element, 'name') else ''
                 _eid = element.attrs.get('id', '') if hasattr(element, 'attrs') else ''
                 logger().debug(f"wait_element | element found tag='{_tag}' id='{_eid}'")
 
