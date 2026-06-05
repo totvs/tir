@@ -4576,6 +4576,19 @@ class PouiInternal(Base):
         return False
 
 
+    def is_row_selected(self, row_element):
+        '''Check if a table row is selected (for both POUI and Kendo Grid)
+
+        :param row_element: BeautifulSoup4 element of the table row (tr)
+        :return: Boolean indicating if the row is selected
+        '''
+
+        self.switch_to_iframe()
+
+        row_selenium = self.soup_to_selenium(row_element, twebview=True)
+        return 'selected' in row_selenium.get_attribute('class') or 'k-selected' in row_selenium.get_attribute('class') or row_element.get('aria-selected', '').lower() == 'true'
+
+
     def click_table_checkbox(self, table_position, row_index, checkbox_value=True, checkbox_position=1):
 
         checkbox_position -= 1
@@ -4599,6 +4612,114 @@ class PouiInternal(Base):
                         logger().debug(f"Clicking checkbox at row {row_index + 1}.")
                         self.poui_click(check_icon)
                         time.sleep(1)
+
+    @count_time
+    def _clear_table_selection(self, table_number=1, selection_type='all'):
+        """
+        Remove selection from all selected rows in THF/Kendo grids.
+
+        Supports row selection controlled by checkbox or radio input inside
+        the grid selection column.
+
+        :param table_number: Grid position when multiple grids exist on screen. - **Default:** 1
+        :type table_number: int
+        :param selection_type: Selection type to clear. Available values: 'checkbox', 'radio', 'all'. - **Default:** 'all'
+        :type selection_type: str
+
+        :return: True if selection was cleared before timeout, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> oHelper._clear_table_selection()
+        >>> oHelper._clear_table_selection(table_number=2)
+        >>> oHelper._clear_table_selection(selection_type='radio')
+        >>> oHelper._clear_table_selection(selection_type='checkbox')
+        """
+
+        selection_type = str(selection_type).strip().lower()
+        valid_selection_types = ['checkbox', 'radio', 'all']
+        if selection_type not in valid_selection_types:
+            self.log_error(
+                f"Invalid selection_type '{selection_type}'. Use one of: {valid_selection_types}")
+            return False
+
+        logger().info(
+            f"Clearing selected rows from table {table_number} using selection_type '{selection_type}'")
+
+        selector = self.grid_selectors["grid_containers"]
+
+        table = self.return_table(selector=selector, table_number=table_number)
+        if not table:
+            logger().debug(f"Table {table_number} was not found.")
+            return False
+
+        rows = table.select('tbody > tr')
+        if not rows:
+            logger().debug(f"Table {table_number} has no rows.")
+            return True
+
+        # Busca direta na tabela para reduzir iterações e custo de parsing.
+        checkbox_component = bool(
+            table.select_one('tbody td po-checkbox, tbody td kendo-checkbox, tbody td input[type="checkbox"]')
+        )
+        radio_component = bool(
+            table.select_one('tbody td po-radio, tbody td input[type="radio"]')
+        )
+
+        if not checkbox_component and not radio_component:
+            logger().debug(
+                f"No checkbox or radio components found in table {table_number}. Cannot clear selection.")
+            return True
+
+        
+        selected_row_indices = [idx for idx, row in enumerate(rows) if self.is_row_selected(row)]
+
+        if not selected_row_indices:
+            logger().debug("No selected rows found in table.")
+            return True
+
+        checkbox_selectors = 'po-checkbox, kendo-checkbox, input[type="checkbox"]'
+        radio_selectors = 'po-radio, input[type="radio"]'
+        allow_checkbox = selection_type in ['checkbox', 'all'] and checkbox_component
+        allow_radio = selection_type in ['radio', 'all'] and radio_component
+        handled_count = 0
+
+        # Itera sobre as linhas selecionadas e tenta desmarcar usando o tipo de seleção identificado
+        for row_index in selected_row_indices:
+
+            row = rows[row_index]
+
+            row_handled = False
+            row_checkbox = row.select_one(checkbox_selectors) if allow_checkbox else None
+            row_radio = row.select_one(radio_selectors) if allow_radio else None
+
+            if row_checkbox:
+                self.click_table_checkbox(table_number, row_index=row_index, checkbox_value=False)
+                row_handled = True
+            elif row_radio:
+                self.toggle_radio(row_radio, active=False)
+                row_handled = True
+            elif selection_type == 'all':
+                selection_click_target = next(iter(row.select('td')), None)
+                if selection_click_target:
+                    self.poui_click(selection_click_target)
+                    row_handled = True
+                else:
+                    logger().debug(f"No selectable cell found in selected row {row_index + 1}.")
+            elif selection_type == 'radio' and allow_radio:
+                logger().debug(f"No radio input found in selected row {row_index + 1}.")
+            elif selection_type == 'checkbox' and allow_checkbox:
+                logger().debug(f"No checkbox found in selected row {row_index + 1}.")
+
+            if row_handled:
+                handled_count += 1
+
+        if handled_count < 1:
+            logger().debug(
+                f"No selected rows matched selection_type '{selection_type}'.")
+            return True
 
 
     def checkbox_is_checked(self, checkbox_element):
@@ -5909,6 +6030,9 @@ class PouiInternal(Base):
 
         self._remove_filters_from_browse()
 
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+
         self.click_button(self.language.filters)
 
         self.wait_element_timeout('po-page-slide', scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body',
@@ -5959,6 +6083,32 @@ class PouiInternal(Base):
 
                 if not success:
                     logger().debug("Couldn't click on the first line of the browse.")
+
+
+    def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
+        """
+        [Internal]
+
+        Checks whether a po-button with the informed text is inside a kendo-grid.
+
+        :param button_text: Label text to match in po-button.
+        :type button_text: str
+        :return: True when the matching po-button is inside kendo-grid, otherwise False.
+        :rtype: bool
+        """
+
+        if not button_text:
+            return False
+
+        normalized_button_text = str(button_text).strip().lower()
+        soup = self.get_container_elements(selector='kendo-grid', select_all=False, filter_displayeds=True)
+
+        for po_button in soup.select('po-button'):
+            button_label = po_button.get_text(' ', strip=True).lower()
+            if button_label == normalized_button_text and po_button.find_parent('kendo-grid'):
+                return True
+
+        return False
 
 
     def _remove_filters_from_browse(self):
