@@ -5476,7 +5476,11 @@ class PouiInternal(Base):
 
         :return: None
         """
-        success = self.check_tmenu_screen()
+
+        term = "[class*='card-wrapper']"
+
+        success = self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                            timeout=10, main_container="body", twebview=True)
 
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and not success:
