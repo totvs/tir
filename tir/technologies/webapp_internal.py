@@ -8339,7 +8339,7 @@ class WebappInternal(Base):
         self.twebview_context = twebview
 
         endtime = time.time() + self.config.time_out
-        logger().debug(f"Waiting for element | term='{term}' presence={presence} container='{main_container}'")
+        logger().debug(f"Waiting for element | term='{term}'")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview, second_term) and time.time() < endtime):
@@ -8368,8 +8368,7 @@ class WebappInternal(Base):
         presence_endtime = time.time() + 10
         if presence:
 
-            if self.config.debug_log:
-                logger().debug("Element found! Waiting for element to be displayed.")
+            logger().debug("Element found! Waiting for element to be displayed.")
 
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
 
