@@ -5476,7 +5476,11 @@ class PouiInternal(Base):
 
         :return: None
         """
-        success = self.check_tmenu_screen()
+
+        term = "[class*='card-wrapper']"
+
+        success = self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                            timeout=10, main_container="body", twebview=True)
 
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and not success:
@@ -5838,8 +5842,7 @@ class PouiInternal(Base):
 
         po_dropdown_label = None
 
-        po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                     main_container=self.containers_selectors["GetCurrentContainer"])
+        po_dropdown = self.get_container_elements(selector, filter_displayeds=True)
         if po_dropdown:
             po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x, position),
                                             po_dropdown))
