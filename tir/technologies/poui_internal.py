@@ -5842,7 +5842,8 @@ class PouiInternal(Base):
 
         po_dropdown_label = None
 
-        po_dropdown = self.get_container_elements(selector, filter_displayeds=True)
+        po_dropdown = self.web_scrap(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                     main_container=self.containers_selectors["GetCurrentContainer"])
         if po_dropdown:
             po_dropdown_label = list(filter(lambda x: self.filter_label_element(label.strip(), x, position),
                                             po_dropdown))
