@@ -6026,6 +6026,7 @@ class PouiInternal(Base):
         self._po_loading()
 
         self._remove_filters_from_browse()
+        self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
@@ -6099,11 +6100,11 @@ class PouiInternal(Base):
 
         normalized_button_text = str(button_text).strip().lower()
         soup = self.get_container_elements(selector='kendo-grid', select_all=False, filter_displayeds=True)
-
-        for po_button in soup.select('po-button'):
-            button_label = po_button.get_text(' ', strip=True).lower()
-            if button_label == normalized_button_text and po_button.find_parent('kendo-grid'):
-                return True
+        if soup:
+            for po_button in soup.select('po-button'):
+                button_label = po_button.get_text(' ', strip=True).lower()
+                if button_label == normalized_button_text and po_button.find_parent('kendo-grid'):
+                    return True
 
         return False
 
