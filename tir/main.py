@@ -2010,6 +2010,27 @@ class Poui():
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
                                click_cell, checkbox, radio_input, columns, values, match_all, icon_class)
 
+    def ClearTableSelection(self, table_number=1, selection_type='all'):
+        """
+        Removes selected rows from THF/Kendo table selection.
+
+        :param table_number: Table position when multiple tables exist on screen. - **Default:** 1
+        :type table_number: int
+        :param selection_type: Selection type to clear. Available values: 'checkbox', 'radio', 'all'. - **Default:** 'all'
+        :type selection_type: str
+
+        :return: True if selection was cleared before timeout, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> oHelper.ClearTableSelection()
+        >>> oHelper.ClearTableSelection(table_number=2)
+        >>> oHelper.ClearTableSelection(selection_type='radio')
+        >>> oHelper.ClearTableSelection(selection_type='checkbox')
+        """
+        return self.__poui._clear_table_selection(table_number=table_number, selection_type=selection_type)
+
 
     def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
         """
