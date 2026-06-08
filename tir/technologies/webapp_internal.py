@@ -4391,6 +4391,12 @@ class WebappInternal(Base):
                 if not soup:
                     return False
 
+                logger().debug(
+                    f"element_exists | start term='{term}' scrap_type='{scrap_type}' position={position} "
+                    f"optional_term='{optional_term}' main_container='{main_container}' twebview={twebview} "
+                    f"dom_found={bool(soup)}"
+                )
+
                 if check_error:
                     self.search_for_errors()
 
@@ -4398,13 +4404,27 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
+                logger().debug(
+                    f"element_exists | container_selector='{container_selector}' base_container='{self.base_container}'"
+                )
+
                 try:
                     containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))                    
 
+                    logger().debug(
+                        f"element_exists | containers_soup_count={len(containers_soup)} selector='{container_selector}'"
+                    )
+
                     if not containers_soup:
+                        logger().debug(
+                            f"element_exists | no displayed containers selector='{container_selector}' term='{term}'"
+                        )
                         return False
 
                     containers = self.zindex_sort(containers_soup, reverse=True)
+                    logger().debug(
+                        f"element_exists | containers_after_zindex={len(containers) if isinstance(containers, list) else (1 if containers else 0)}"
+                    )
 
                 except Exception as e:
                     logger().exception(f"Warning element_exists containers exception:\n {str(e)}")
@@ -4413,9 +4433,16 @@ class WebappInternal(Base):
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
+                logger().debug(
+                    f"element_exists | container_filter_applied={self.base_container in container_selector}"
+                )
+
                 container = next(iter(containers), None) if isinstance(containers, list) else containers
 
                 if not container:
+                    logger().debug(
+                        f"element_exists | no container resolved term='{term}' selector='{container_selector}'"
+                    )
                     return False
 
                 _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
@@ -4424,6 +4451,9 @@ class WebappInternal(Base):
                 try:
                     container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
+                    logger().debug(
+                        f"element_exists | driver could not resolve container xpath term='{term}' resolved_id='{_cid}'"
+                    )
                     return False
             else:
                 container_element = self.driver
@@ -4434,9 +4464,18 @@ class WebappInternal(Base):
                 else:
                     element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
                     if not element_list:
+                        logger().debug(
+                            f"element_exists | no selenium matches on first search term='{term}' selector='{selector}' container_id='{_cid if '_cid' in locals() else ''}'"
+                        )
                         self.driver.execute_script("return arguments[0].scrollIntoView(true);", self.soup_to_selenium(container))
                         element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
+                logger().debug(
+                    f"element_exists | selenium_matches_count={len(element_list)} term='{term}' selector='{selector}' container_id='{_cid if '_cid' in locals() else ''}'"
+                )
             except:
+                logger().debug(
+                    f"element_exists | exception while querying selenium matches term='{term}' selector='{selector}'"
+                )
                 pass
         else:
             if scrap_type == enum.ScrapType.MIXED:
@@ -4447,9 +4486,18 @@ class WebappInternal(Base):
         if not element_list:
             logger().debug(f"element_exists | fallback web_scrap term='{term}' container='{main_container}'")
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term, twebview=twebview)
+            logger().debug(
+                f"element_exists | fallback web_scrap result_count={len(element_list) if element_list else 0} term='{term}'"
+            )
             if not element_list and f"wa-dialog[title*={self.language.warning}]" in term:
+                logger().debug(
+                    f"element_exists | warning-title fallback check term='{term}'"
+                )
                 return container_element.get_attribute('title') == self.language.warning
             if not element_list:
+                logger().debug(
+                    f"element_exists | returning None term='{term}' selector='{selector}' container='{main_container}'"
+                )
                 return None
 
         if position == 0:
