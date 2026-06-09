@@ -4408,12 +4408,49 @@ class WebappInternal(Base):
                     f"element_exists | container_selector='{container_selector}' base_container='{self.base_container}'"
                 )
 
+                target_selector = "wa-text-input[name*='NT4_CAJURI']"
+
+                def _log_container_diagnostics(container_list, stage):
+                    try:
+                        if not isinstance(container_list, list):
+                            return
+
+                        blocked_count = 0
+                        for index, container_item in enumerate(container_list, start=1):
+                            attrs = container_item.attrs if hasattr(container_item, 'attrs') else {}
+                            blocked = 'blocked' in attrs
+                            if blocked:
+                                blocked_count += 1
+
+                            container_id = attrs.get('id', '') if isinstance(attrs, dict) else ''
+                            container_title = attrs.get('title', '') if isinstance(attrs, dict) else ''
+
+                            has_target_field = False
+                            try:
+                                has_target_field = bool(container_item.select(target_selector))
+                            except Exception:
+                                pass
+
+                            logger().debug(
+                                f"element_exists | {stage} | container[{index}] id='{container_id}' title='{container_title}' "
+                                f"blocked={blocked} has_target_selector={has_target_field} selector='{target_selector}'"
+                            )
+
+                        logger().debug(
+                            f"element_exists | {stage} summary | visible_containers={len(container_list)} "
+                            f"blocked_containers={blocked_count} non_blocked_containers={len(container_list) - blocked_count}"
+                        )
+                    except Exception as diag_error:
+                        logger().debug(f"element_exists | {stage} diagnostics_exception='{str(diag_error)}'")
+
                 try:
                     containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))                    
 
                     logger().debug(
                         f"element_exists | containers_soup_count={len(containers_soup)} selector='{container_selector}'"
                     )
+
+                    _log_container_diagnostics(containers_soup, "before_zindex")
 
                     if not containers_soup:
                         logger().debug(
@@ -4425,6 +4462,16 @@ class WebappInternal(Base):
                     logger().debug(
                         f"element_exists | containers_after_zindex={len(containers) if isinstance(containers, list) else (1 if containers else 0)}"
                     )
+
+                    if isinstance(containers, list):
+                        _log_container_diagnostics(containers, "after_zindex")
+
+                    if containers_soup and (not containers or (isinstance(containers, list) and len(containers) == 0)):
+                        logger().debug(
+                            "element_exists | all visible containers were filtered after zindex_sort "
+                            "(before_zindex>0 and after_zindex=0). Possible cause: blocked containers."
+                        )
+                        _log_container_diagnostics(containers_soup, "before_zindex_all_filtered_dump")
 
                 except Exception as e:
                     logger().exception(f"Warning element_exists containers exception:\n {str(e)}")
