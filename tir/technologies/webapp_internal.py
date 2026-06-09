@@ -107,7 +107,6 @@ class WebappInternal(Base):
         self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
-        self.restart_coverage = True
         self.blocker = None
         self.parameters = []
         self.procedures = []
@@ -319,11 +318,6 @@ class WebappInternal(Base):
             if not self.num_exec.post_exec(self.config.url_set_start_exec, 'ErrorSetIniExec'):
                 self.restart_counter = 3
                 self.log_error(f"WARNING: Couldn't possible send num_exec to server please check log.")
-
-        if self.config.smart_test and self.config.coverage and self.search_stack(
-                "setUpClass") and self.restart_coverage:
-            self.restart()
-            self.restart_coverage = False
 
     def date_format(self, date):
         """
@@ -7678,6 +7672,7 @@ class WebappInternal(Base):
                 additional_lines_found = True
                 while additional_lines_found and endtime > time.time():
                     ActionChains(self.driver).key_down(Keys.DOWN).perform()
+                    down_count += 1
                     self.wait_blocker()
                     
                     after_down = list(map(lambda x: x.text, grid_lines()))
@@ -7688,7 +7683,7 @@ class WebappInternal(Base):
                         if i not in before_texts:
                             before_texts.append(i)
                             additional_lines_found = True
-                            logger().debug(f"Found additional line with DOWN: {i}")
+                            logger().debug(f"Found additional line with DOWN: {down_count}")
                     
                     # If looking for specific row and found it
                     if row_num is not None and len(before_texts) > row_num and row_element is None:
