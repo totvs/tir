@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Base &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -65,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.driver"><code class="docutils literal notranslate"><span class="pre">Base.driver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.driver_get"><code class="docutils literal notranslate"><span class="pre">Base.driver_get()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_exists"><code class="docutils literal notranslate"><span class="pre">Base.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.element_name"><code class="docutils literal notranslate"><span class="pre">Base.element_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
@@ -139,7 +140,7 @@
 <span id="base"></span><h1>Base<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.technologies.core.base.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base" title="Link to this definition"></a></dt>
 <dd><p>Base class for any technology to implement Selenium Interface Tests.</p>
 <p>This class instantiates the browser, reads the config file and prepares the log.</p>
 <p>If no config_path is passed, it will read the config.json file that exists in the same
@@ -334,8 +335,21 @@ than the ones defined at <strong>config.json</strong></p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.driver">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">driver</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">driver</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver" title="Link to this definition"></a></dt>
 <dd><p>Property to always get the current shared driver instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.driver_get">
+<span class="sig-name descname"><span class="pre">driver_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#tir.technologies.core.base.Base.driver_get" title="Link to this definition"></a></dt>
+<dd><p>Navigate the browser to the given URL with retry logic.</p>
+<p>Attempts to load the URL repeatedly until success or timeout.
+On <code class="docutils literal notranslate"><span class="pre">TimeoutException</span></code> the request is retried; any other exception
+aborts immediately and logs the error.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>url: The URL to navigate to.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -944,7 +958,7 @@ It will try to find the iframe in current webdriver with the class “twebview�
 
 <dl class="py property">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.wait">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.wait" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait</span></span><a class="headerlink" href="#tir.technologies.core.base.Base.wait" title="Link to this definition"></a></dt>
 <dd><p>Property to always get the current shared wait instance</p>
 </dd></dl>
 
