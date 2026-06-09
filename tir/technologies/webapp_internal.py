@@ -4421,8 +4421,10 @@ class WebappInternal(Base):
 
                             if has_target_field:
                                 container_id = container_item.attrs.get('id', '') if hasattr(container_item, 'attrs') else ''
-                                logger().debug(f"Aguardando container ficar não blocked, id: {container_id}")
-                                break
+                                container_title = container_item.attrs.get('title', '') if hasattr(container_item, 'attrs') else ''
+                                if container_id != 'COMP3000':
+                                    logger().debug(f"Aguardando container ficar não blocked / id: {container_id} / title: {container_title}")
+                                    break
 
                     if not containers_soup:
                         return False
