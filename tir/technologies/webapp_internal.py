@@ -1,25 +1,32 @@
 import re
-import time
-import pandas as pd
-import inspect
 import os
-import random
+import sys
+import cv2
+import time
 import uuid
 import glob
+import random
 import shutil
-import cv2
 import socket
+import inspect
 import pathlib
-import sys
-import tir.technologies.core.enumerations as enum
 import configparser
+import pandas as pd
+from io import StringIO
+from math import sqrt, pow
 from functools import reduce
-from selenium.webdriver.common.keys import Keys
+from datetime import datetime
 from bs4 import BeautifulSoup, Tag
-from selenium.webdriver.support import expected_conditions as EC
+from difflib import SequenceMatcher
+
+from selenium.common.exceptions import *
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+
+import tir.technologies.core.enumerations as enum
 from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
 from tir.technologies.core.config import ConfigLoader
@@ -28,12 +35,9 @@ from tir.technologies.core.third_party.xpath_soup import xpath_soup
 from tir.technologies.core.psutil_info import system_info
 from tir.technologies.core.base import Base
 from tir.technologies.core.numexec import NumExec
-from math import sqrt, pow
-from selenium.common.exceptions import *
-from datetime import datetime
 from tir.technologies.core.logging_config import logger
-from io import StringIO
 from tir.technologies.core.base_database import BaseDatabase
+
 
 def count_time(func):
     """
@@ -2508,7 +2512,7 @@ class WebappInternal(Base):
         """
         
         return True if 'selected' in element.get_attribute('class') else False
-
+    
     def search_browse_column(self, search_column, search_elements, index=False):
         """
         [Internal]
@@ -2570,7 +2574,7 @@ class WebappInternal(Base):
         checkbox_selected = list(filter(
             lambda x: x.attrs and 'checked' in x.attrs and 'hidden' not in x.attrs, checkbox_selected)
         )
-        
+
         for checkbox in checkbox_selected:
             caption = checkbox.attrs["caption"].lower().replace(" ", "") 
             if caption not in search_column_items: 
@@ -2583,12 +2587,37 @@ class WebappInternal(Base):
         spans = list(filter(lambda x: x.attrs and 'hidden' not in x.attrs, spans))
 
         for item in search_column_items:
-            span = next(iter(list(filter(lambda x: x.attrs and x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), spans))), None)
-            if not span:
-                self.log_error(f"Couldn't search the column: {item} on screen.")
-            
-            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
+            # Tenta encontrar correspondência exata
+            span = next(iter(list(filter(
+                lambda x: x.attrs and x.attrs['caption'].lower().replace(" ","") == item.lower().replace(" ",""), 
+                spans))), 
+            None)
 
+            # Se não encontrar, tenta fuzzy match com difflib
+            if not span:
+                best_match = None
+                best_score = 0.0
+
+                for s in spans:
+                    if s.attrs:
+                        caption_clean = s.attrs['caption'].lower().replace(" ", "")
+                        # Calcula similaridade entre as strings
+                        similarity = SequenceMatcher(None, item, caption_clean).ratio()
+
+                        if similarity > best_score:
+                            best_score = similarity
+                            best_match = s
+
+                # Threshold de 0.6 (60%) para aceitar o match
+                if best_match and best_score >= 0.6:
+                    span = best_match
+                    self.log_warn(f"Column '{item}' not found exactly. Using fuzzy match: '{best_match.attrs['caption']}' (similarity: {best_score:.0%})")
+                else:
+                    self.log_error(f"Couldn't search the column: {item} on screen.")
+                    continue
+                
+            self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
+    
     def fill_search_browse(self, term, search_elements):
         """
         [Internal]
