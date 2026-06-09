@@ -4391,12 +4391,6 @@ class WebappInternal(Base):
                 if not soup:
                     return False
 
-                logger().debug(
-                    f"element_exists | start term='{term}' scrap_type='{scrap_type}' position={position} "
-                    f"optional_term='{optional_term}' main_container='{main_container}' twebview={twebview} "
-                    f"dom_found={bool(soup)}"
-                )
-
                 if check_error:
                     self.search_for_errors()
 
@@ -4404,103 +4398,53 @@ class WebappInternal(Base):
                 if (main_container is not None):
                     container_selector = main_container
 
-                logger().debug(
-                    f"element_exists | container_selector='{container_selector}' base_container='{self.base_container}'"
-                )
+                def _container_is_blocked(container_item):
+                    if not hasattr(container_item, 'attrs'):
+                        return False
 
-                target_selector = "wa-text-input[name*='NT4_CAJURI']"
+                    attrs = container_item.attrs
+                    classes = attrs.get('class', []) if isinstance(attrs, dict) else []
+                    if isinstance(classes, str):
+                        classes = classes.split()
 
-                def _log_container_diagnostics(container_list, stage):
-                    try:
-                        if not isinstance(container_list, list):
-                            return
-
-                        blocked_count = 0
-                        for index, container_item in enumerate(container_list, start=1):
-                            attrs = container_item.attrs if hasattr(container_item, 'attrs') else {}
-                            blocked = 'blocked' in attrs
-                            if blocked:
-                                blocked_count += 1
-
-                            container_id = attrs.get('id', '') if isinstance(attrs, dict) else ''
-                            container_title = attrs.get('title', '') if isinstance(attrs, dict) else ''
-
-                            has_target_field = False
-                            try:
-                                has_target_field = bool(container_item.select(target_selector))
-                            except Exception:
-                                pass
-
-                            logger().debug(
-                                f"element_exists | {stage} | container[{index}] id='{container_id}' title='{container_title}' "
-                                f"blocked={blocked} has_target_selector={has_target_field} selector='{target_selector}'"
-                            )
-
-                        logger().debug(
-                            f"element_exists | {stage} summary | visible_containers={len(container_list)} "
-                            f"blocked_containers={blocked_count} non_blocked_containers={len(container_list) - blocked_count}"
-                        )
-                    except Exception as diag_error:
-                        logger().debug(f"element_exists | {stage} diagnostics_exception='{str(diag_error)}'")
+                    return ('blocked' in attrs) or ('blocked' in classes)
 
                 try:
-                    containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))                    
+                    containers_soup = list(filter(lambda x: self.element_is_displayed(x), soup.select(container_selector)))
 
-                    logger().debug(
-                        f"element_exists | containers_soup_count={len(containers_soup)} selector='{container_selector}'"
-                    )
+                    for container_item in containers_soup:
+                        if _container_is_blocked(container_item):
+                            try:
+                                has_target_field = bool(container_item.select(selector))
+                            except Exception:
+                                has_target_field = False
 
-                    _log_container_diagnostics(containers_soup, "before_zindex")
+                            if has_target_field:
+                                container_id = container_item.attrs.get('id', '') if hasattr(container_item, 'attrs') else ''
+                                logger().debug(f"Aguardando container ficar não blocked, id: {container_id}")
+                                break
 
                     if not containers_soup:
-                        logger().debug(
-                            f"element_exists | no displayed containers selector='{container_selector}' term='{term}'"
-                        )
                         return False
 
                     containers = self.zindex_sort(containers_soup, reverse=True)
-                    logger().debug(
-                        f"element_exists | containers_after_zindex={len(containers) if isinstance(containers, list) else (1 if containers else 0)}"
-                    )
 
-                    if isinstance(containers, list):
-                        _log_container_diagnostics(containers, "after_zindex")
-
-                    if containers_soup and (not containers or (isinstance(containers, list) and len(containers) == 0)):
-                        logger().debug(
-                            "element_exists | all visible containers were filtered after zindex_sort "
-                            "(before_zindex>0 and after_zindex=0). Possible cause: blocked containers."
-                        )
-                        _log_container_diagnostics(containers_soup, "before_zindex_all_filtered_dump")
-
-                except Exception as e:
-                    logger().exception(f"Warning element_exists containers exception:\n {str(e)}")
+                except Exception:
                     pass
 
                 if self.base_container in container_selector:
                     container = self.containers_filter(containers)
 
-                logger().debug(
-                    f"element_exists | container_filter_applied={self.base_container in container_selector}"
-                )
-
                 container = next(iter(containers), None) if isinstance(containers, list) else containers
 
                 if not container:
-                    logger().debug(
-                        f"element_exists | no container resolved term='{term}' selector='{container_selector}'"
-                    )
                     return False
 
                 _cid = container.attrs.get('id', '') if hasattr(container, 'attrs') else ''
-                logger().debug(f"element_exists | container='{container_selector}' resolved_id='{_cid}' term='{term}'")
 
                 try:
                     container_element = self.driver.find_element(By.XPATH, xpath_soup(container))
                 except:
-                    logger().debug(
-                        f"element_exists | driver could not resolve container xpath term='{term}' resolved_id='{_cid}'"
-                    )
                     return False
             else:
                 container_element = self.driver
@@ -4511,18 +4455,9 @@ class WebappInternal(Base):
                 else:
                     element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
                     if not element_list:
-                        logger().debug(
-                            f"element_exists | no selenium matches on first search term='{term}' selector='{selector}' container_id='{_cid if '_cid' in locals() else ''}'"
-                        )
                         self.driver.execute_script("return arguments[0].scrollIntoView(true);", self.soup_to_selenium(container))
                         element_list = list(filter(lambda x: x.is_displayed(), container_element.find_elements(by, selector)))
-                logger().debug(
-                    f"element_exists | selenium_matches_count={len(element_list)} term='{term}' selector='{selector}' container_id='{_cid if '_cid' in locals() else ''}'"
-                )
             except:
-                logger().debug(
-                    f"element_exists | exception while querying selenium matches term='{term}' selector='{selector}'"
-                )
                 pass
         else:
             if scrap_type == enum.ScrapType.MIXED:
@@ -4531,20 +4466,10 @@ class WebappInternal(Base):
                 selector = "div"
 
         if not element_list:
-            logger().debug(f"element_exists | fallback web_scrap term='{term}' container='{main_container}'")
             element_list = self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, second_term=second_term, twebview=twebview)
-            logger().debug(
-                f"element_exists | fallback web_scrap result_count={len(element_list) if element_list else 0} term='{term}'"
-            )
             if not element_list and f"wa-dialog[title*={self.language.warning}]" in term:
-                logger().debug(
-                    f"element_exists | warning-title fallback check term='{term}'"
-                )
                 return container_element.get_attribute('title') == self.language.warning
             if not element_list:
-                logger().debug(
-                    f"element_exists | returning None term='{term}' selector='{selector}' container='{main_container}'"
-                )
                 return None
 
         if position == 0:
@@ -8461,7 +8386,6 @@ class WebappInternal(Base):
                 if  class_term in term:
                     return False
                 self.restart_counter += 1
-                logger().debug(f'wait_element doesn\'t found term: {term}')
                 if presence:
                     self.log_error(f"Element '{term}' not found!")
                 else:
@@ -8470,16 +8394,9 @@ class WebappInternal(Base):
         presence_endtime = time.time() + 10
         if presence:
 
-            if self.config.debug_log:
-                logger().debug("Element found! Waiting for element to be displayed.")
-
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
 
             if element is not None:
-
-                _tag = element.name if hasattr(element, 'name') else ''
-                _eid = element.attrs.get('id', '') if hasattr(element, 'attrs') else ''
-                logger().debug(f"wait_element | element found tag='{_tag}' id='{_eid}'")
 
                 sel_element = lambda: self.soup_to_selenium(element) if type(element) == Tag else element
                 if self.webapp_shadowroot():
