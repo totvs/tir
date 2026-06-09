@@ -4016,6 +4016,7 @@ class WebappInternal(Base):
         try:
             endtime = time.time() + self.config.time_out
             container =  None
+            container_selector = ''
             while(time.time() < endtime and container is None):
                 soup = self.get_current_DOM(twebview=twebview)
 
@@ -8338,8 +8339,7 @@ class WebappInternal(Base):
         self.twebview_context = twebview
 
         endtime = time.time() + self.config.time_out
-        if self.config.debug_log:
-            logger().debug("Waiting for element")
+        logger().debug(f"Waiting for element | term='{term}'")
 
         if presence:
             while (not self.element_exists(term, scrap_type, position, optional_term, main_container, check_error, twebview, second_term) and time.time() < endtime):
@@ -8368,8 +8368,7 @@ class WebappInternal(Base):
         presence_endtime = time.time() + 10
         if presence:
 
-            if self.config.debug_log:
-                logger().debug("Element found! Waiting for element to be displayed.")
+            logger().debug("Element found! Waiting for element to be displayed.")
 
             element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
 
@@ -11237,10 +11236,10 @@ class WebappInternal(Base):
                                  (parent_classes_before != parent_classes_after) or \
                                  (classes_before != classes_after))
         
-        string_debug = lambda: f"Results send_action check:\n" + \
-                               f"soup = {soup_before_event != soup_after_event}\n" + \
-                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)}\n' + \
-                               f'parent_classes: {parent_classes_before != parent_classes_after}\n' + \
+        string_debug = lambda: f"Results send_action check: " + \
+                               f"soup = {soup_before_event != soup_after_event} | " + \
+                               f'shadow_roots: {sorted(shadow_roots_before) != sorted(shadow_roots_after)} | ' + \
+                               f'parent_classes: {parent_classes_before != parent_classes_after} | ' + \
                                f'classes: {classes_before != classes_after}'
 
         self.wait_blocker()
