@@ -2583,16 +2583,20 @@ class WebappInternal(Base):
             
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
-    def fill_search_browse(self, term, search_elements):
+    def fill_search_browse(self, term: str, search_elements: tuple[Tag, Tag, Tag]) -> bool:
         """
         [Internal]
 
-        Fills search input method and presses the search button.
+        Fills the browse search input and triggers the search action.
+        Sends ENTER only when the input is successfully filled.
 
-        :param term: The term to be searched
+        :param term: Search term.
         :type term: str
-        :param search_elements: Tuple of Search elements
-        :type search_elements: Tuple of Beautiful Soup objects
+        :param search_elements: Search elements tuple (key, input, icon).
+        :type search_elements: tuple[Tag, Tag, Tag]
+
+        :return: True when method flow finishes.
+        :rtype: bool
 
         Usage:
 
@@ -2643,7 +2647,9 @@ class WebappInternal(Base):
             except:
                 pass
         if current_value.rstrip() != term.strip():
-            self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
+            self.log_error(
+                f"Couldn't fill browse search input. expected='{term.strip()}' current='{current_value.rstrip()}'"
+            )
         if sel_browse_input_filled:
             self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
