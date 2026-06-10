@@ -2605,6 +2605,7 @@ class WebappInternal(Base):
 
         sel_browse_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[2]))
+        sel_browse_input_filled = False
 
         if self.webapp_shadowroot():
             input_lenght = ''
@@ -2636,13 +2637,15 @@ class WebappInternal(Base):
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
                 time.sleep(1)
+                sel_browse_input_filled = True
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
             except:
                 pass
         if current_value.rstrip() != term.strip():
             self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
-        self.send_keys(sel_browse_input(), Keys.ENTER)
+        if sel_browse_input_filled:
+            self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
         # ensure click on search icon
         self.double_click(sel_browse_icon(), click_type=enum.ClickType.JS)
