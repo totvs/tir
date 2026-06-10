@@ -2611,7 +2611,7 @@ class WebappInternal(Base):
                 # Threshold de 0.6 (60%) para aceitar o match
                 if best_match and best_score >= 0.6:
                     span = best_match
-                    self.log_warn(f"Column '{item}' not found exactly. Using fuzzy match: '{best_match.attrs['caption']}' (similarity: {best_score:.0%})")
+                    logger().warning(f"Column '{item}' not found exactly. Using fuzzy match: '{best_match.attrs['caption']}' (similarity: {best_score:.0%})")
                 else:
                     self.log_error(f"Couldn't search the column: {item} on screen.")
                     continue
