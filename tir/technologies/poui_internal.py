@@ -6126,6 +6126,10 @@ class PouiInternal(Base):
                 logger().debug("Close button not found, re-checking modal...")
                 success = wait_element(False, 5)
                 continue
+            elif not self.element_is_displayed(button_close):
+                logger().debug("Close button disappeared, re-checking modal...")
+                success = wait_element(False, 5)
+                continue
 
             self.poui_click(button_close)
 
