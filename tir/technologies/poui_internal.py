@@ -5685,7 +5685,7 @@ class PouiInternal(Base):
         self.set_program(program_name, program_desc, module)
 
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
-
+        
         self.escape_to_main_menu()
 
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
@@ -5756,6 +5756,8 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
+
+        self._close_user_guide()
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6029,6 +6031,7 @@ class PouiInternal(Base):
         self._po_loading()
 
         self._remove_filters_from_browse()
+
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
@@ -6085,6 +6088,33 @@ class PouiInternal(Base):
                 if not success:
                     logger().debug("Couldn't click on the first line of the browse.")
 
+    def _close_user_guide(self):
+        term_modal = '.po-user-guide-popover'
+        term_button_close = '.po-user-guide-button-close'
+
+        wait_element = lambda presence: self.wait_element_timeout(term=term_modal, timeout=self.config.time_out / 3,
+                                                                  scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                                  main_container='body', twebview=True,
+                                                                  presence=presence)
+
+        success = not wait_element(True)
+
+        endtime = time.time() + self.config.time_out / 3
+        while time.time() < endtime and not success:
+
+            logger().info("Closing user guide.")
+
+            button_close = self.web_scrap(term=term_button_close, 
+                                          scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                          main_container='body')
+            button_close = next(iter(button_close), None)
+            button_close_sel = self.soup_to_selenium(button_close, twebview=True)
+
+            self.scroll_to_element(button_close_sel)
+            self.set_element_focus(button_close_sel)
+            self.click(button_close_sel)
+
+            success = wait_element(False)
 
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
