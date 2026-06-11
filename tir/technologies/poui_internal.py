@@ -109,10 +109,10 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-
         self.elements_terms = {
             "input":"[class*='po-input'], thf-lookup, .po-search-input"
         }
+        self.closed_user_guide_routines = []
         
         if not Base.driver:
             Base.driver = self.driver
@@ -5757,7 +5757,10 @@ class PouiInternal(Base):
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
 
-        self._close_user_guide()
+        if not program_name in self.closed_user_guide_routines:
+            closed_user_guide = self._close_user_guide()
+            if closed_user_guide:
+                self.closed_user_guide_routines.append(program_name)
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6127,6 +6130,8 @@ class PouiInternal(Base):
             self.poui_click(button_close)
 
             success = wait_element(False, 5)
+
+        return success
 
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
