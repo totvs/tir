@@ -4575,8 +4575,7 @@ class PouiInternal(Base):
         while time.time() < endtime and not success():
             self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
         
-        if success():
-            logger().info("radio button is now: %s", "active" if active else "inactive")
+        logger().debug("Radio button is now %s", "active" if radio_status() else "inactive")
 
 
     def radio_is_active(self, radio):
