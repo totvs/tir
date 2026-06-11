@@ -2474,7 +2474,10 @@ class PouiInternal(Base):
                 if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                     return False
                 self.restart_counter += 1
-                self.log_error(f"Element {term} not found!")
+                if presence:
+                    self.log_error(f"Element '{term}' not found!")
+                else:
+                    self.log_error(f"Unexpected element '{term}' found!")
 
         presence_endtime = time.time() + 10
         if presence:
