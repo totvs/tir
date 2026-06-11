@@ -3829,7 +3829,7 @@ class PouiInternal(Base):
         the po-loading element to be absent from the DOM.
         
         Behavior:
-        - Waits up to 5 seconds for po-loading to appear
+        - Waits up to 15 seconds for po-loading to appear
         - If found: waits for it to disappear (using config.timeout)
         - If not found: continues without error
         
@@ -6059,15 +6059,13 @@ class PouiInternal(Base):
 
         :param filters: List of dictionaries representing filters to apply, where each dictionary's keys are field names and values are filter values.
         :type filters: list
-        :param browse_div: BeautifulSoup object representing the browse container element.
-        :type browse_div: bs4.element.Tag
         :return: None
         :rtype: None
 
         Usage:
 
         >>> # Calling the method:
-        >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
+        >>> self._set_browse_filters(filters=[{'name': 'John'}])
         """
 
         self._po_loading()
@@ -6493,8 +6491,20 @@ class PouiInternal(Base):
         When ``filters`` is not informed, performs simple search in the browse input
         using the longest token from ``term`` (same behavior as WebappInternal).
 
+        :param term: The term that must be searched.
+        :type term: str
+        :param key: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type key: str
+        :param identifier: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type identifier: str
+        :param index: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type index: bool
+        :param column: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type column: str
         :param filters: Filters to apply on THF Browse. If provided, routes to filter flow.
         :type filters: dict or list
+        :return: None
+        :rtype: None
 
         .. note::
             Parameters key, identifier, index and column are not applicable in POUI context.
@@ -6513,15 +6523,32 @@ class PouiInternal(Base):
             return
 
 
-    def _simple_search_thf_browse(self, search_text, browse_div=None):
+    def _simple_search_thf_browse(self, search_text: str, browse_div=None) -> bool:
+        """
+        [Internal]
+
+        Fills the THF browse search input with a text and submits Enter.
+
+        :param search_text: Text to search in the THF browse input.
+        :type search_text: str
+        :param browse_div: Optional browse container element. If not informed, the first grid is used.
+        :type browse_div: bs4.element.Tag
+        :return: True when the input is filled successfully, otherwise False.
+        :rtype: bool
+        """
         if browse_div is None:
             browse_div = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+
+        if not browse_div:
+            logger().warning("_simple_search_thf_browse: couldn't find browse grid")
+            return False
+
 
         search_input = browse_div.select_one('po-input[p-icon="ICON_SEARCH"] input')
 
         if not search_input:
             logger().warning("_simple_search_thf_browse: couldn't find po-input[p-icon='ICON_SEARCH'] input")
-            return
+            return False
 
         selenium_input = lambda: self.soup_to_selenium(search_input, twebview=True)
 
@@ -6546,23 +6573,35 @@ class PouiInternal(Base):
 
         if current_value.strip() != search_text.strip():
             self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
-            return
+            return False
+
+        return True
 
 
-    def _clear_browse_input(self, browse_div=None):
+    def _clear_browse_input(self, browse_div=None) -> bool:
+        """
+        [Internal]
+
+        Clears the THF browse search input when it contains text.
+
+        :param browse_div: Optional browse container element. If not informed, the first grid is used.
+        :type browse_div: bs4.element.Tag
+        :return: True when the input is empty (or already empty), otherwise False.
+        :rtype: bool
+        """
         logger().info("Clearing browse search input.")
         if browse_div is None:
             browse_div = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
 
         if not browse_div:
             logger().warning("_clear_browse_input: couldn't find browse grid")
-            return
+            return False
 
         search_input = browse_div.select_one('po-input[p-icon="ICON_SEARCH"] input')
 
         if not search_input:
             logger().warning("_clear_browse_input: couldn't find input search")
-            return
+            return False
 
         selenium_input = lambda: self.soup_to_selenium(search_input, twebview=True)
 
@@ -6574,7 +6613,7 @@ class PouiInternal(Base):
 
         if not current_value.strip():
             logger().debug("_clear_browse_input: search input already empty, skipping clear action")
-            return
+            return True
 
         endtime = time.time() + self.config.time_out
 
@@ -6585,19 +6624,29 @@ class PouiInternal(Base):
                 self.click(selenium_input())
                 selenium_input().clear()
                 self.send_keys(selenium_input(), Keys.ENTER)
+                self._po_loading()
 
                 current_value = self.get_web_value(selenium_input())
                 if not current_value or not current_value.strip():
-                    self._po_loading()
-                    return
+                    return True
             except Exception as e:
                 logger().debug(f"_clear_browse_input: exception clearing input - {str(e)}")
 
         self.log_error("_clear_browse_input: couldn't clear browse search input")
-        return
+        return False
 
 
-    def longest_word(self, string):
+    def longest_word(self, string: str) -> str:
+        """
+        [Internal]
+
+        Returns the longest word from a given string.
+
+        :param string: Input text to inspect.
+        :type string: str
+        :return: Longest token in the text. Returns empty string for empty input.
+        :rtype: str
+        """
         words = string.split()
 
         if not words:
