@@ -1666,9 +1666,22 @@ class Webapp():
 
 
     def IsNewBrowse(self):
-        """This method checks if the current browse is the new version with poui or the old one,
-         returning a boolean value.
-         """
+        """
+        This method checks if the current browse is the new version with poui or the old one,
+        returning a boolean value.
+
+        >>> # Example using Browse
+        >>> if not self.oHelper.IsNewBrowse():
+        >>>     self.oHelper.SearchBrowse("D MG 01")
+        >>> else:
+        >>>     self.oHelperPoui.FilterBrowse(filters=[{"Filial": "D MG 01"}])
+        >>> 
+        >>> # Example using Button
+        >>> if not self.oHelper.IsNewBrowse():
+        >>>     self.oHelper.SetButton("Incluir")
+        >>> else:
+        >>>     self.oHelperPoui.ClickButton("Adicionar")
+        """
         return self.__webapp._is_new_browse()
 
 class Apw():
