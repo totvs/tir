@@ -6088,16 +6088,25 @@ class PouiInternal(Base):
                 if not success:
                     logger().debug("Couldn't click on the first line of the browse.")
 
-    def _close_user_guide(self):
+    def _close_user_guide(self) -> None:
+        """
+        [Internal]
+        
+        Closes the POUI user guide popover modal if it is currently displayed on the screen.
+        
+        :return: None
+        :rtype: None
+        """
+        
         term_modal = '.po-user-guide-popover'
         term_button_close = '.po-user-guide-button-close'
 
-        wait_element = lambda presence: self.wait_element_timeout(term=term_modal, timeout=self.config.time_out / 3,
-                                                                  scrap_type=enum.ScrapType.CSS_SELECTOR, 
-                                                                  main_container='body', twebview=True,
-                                                                  presence=presence)
+        wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
+                                                                           scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                                           main_container='body', twebview=True,
+                                                                           presence=presence)
 
-        success = not wait_element(True)
+        success = not wait_element(True, self.config.time_out / 3)
 
         endtime = time.time() + self.config.time_out / 3
         while time.time() < endtime and not success:
@@ -6114,7 +6123,7 @@ class PouiInternal(Base):
             self.set_element_focus(button_close_sel)
             self.click(button_close_sel)
 
-            success = wait_element(False)
+            success = wait_element(False, 5)
 
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
