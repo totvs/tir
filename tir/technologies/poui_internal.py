@@ -6108,20 +6108,23 @@ class PouiInternal(Base):
 
         success = not wait_element(True, self.config.time_out / 3)
 
+        if not success:
+            logger().info("Closing user guide.")
+
         endtime = time.time() + self.config.time_out / 3
         while time.time() < endtime and not success:
-
-            logger().info("Closing user guide.")
 
             button_close = self.web_scrap(term=term_button_close, 
                                           scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                           main_container='body')
             button_close = next(iter(button_close), None)
-            button_close_sel = self.soup_to_selenium(button_close, twebview=True)
 
-            self.scroll_to_element(button_close_sel)
-            self.set_element_focus(button_close_sel)
-            self.click(button_close_sel)
+            if not button_close:
+                logger().debug("Close button not found, re-checking modal...")
+                success = wait_element(False, 5)
+                continue
+
+            self.poui_click(button_close)
 
             success = wait_element(False, 5)
 
