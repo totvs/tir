@@ -3851,11 +3851,11 @@ class PouiInternal(Base):
 
         main_container = selector or 'body'
         
-        # Wait up to 5 seconds for po-loading to appear
+        # Wait up to 15 seconds for po-loading to appear
         loading_found = self.wait_element_timeout(
             term='po-loading',
             scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout=5.0,
+            timeout=15,
             main_container=main_container,
         )
         
