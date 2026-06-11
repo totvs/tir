@@ -6091,14 +6091,14 @@ class PouiInternal(Base):
                 if not success:
                     logger().debug("Couldn't click on the first line of the browse.")
 
-    def _close_user_guide(self) -> None:
+    def _close_user_guide(self) -> bool:
         """
         [Internal]
         
         Closes the POUI user guide popover modal if it is currently displayed on the screen.
         
-        :return: None
-        :rtype: None
+        :return: True if the modal was successfully closed or was not present, False otherwise.
+        :rtype: bool
         """
         
         term_modal = '.po-user-guide-popover'
