@@ -2474,7 +2474,10 @@ class PouiInternal(Base):
                 if ".ui-button.ui-dialog-titlebar-close[title='Close']" in term:
                     return False
                 self.restart_counter += 1
-                self.log_error(f"Element {term} not found!")
+                if presence:
+                    self.log_error(f"Element '{term}' not found!")
+                else:
+                    self.log_error(f"Unexpected element '{term}' found!")
 
         presence_endtime = time.time() + 10
         if presence:
@@ -3825,6 +3828,11 @@ class PouiInternal(Base):
         Searches within a specified container (or entire body if not specified) and waits for 
         the po-loading element to be absent from the DOM.
         
+        Behavior:
+        - Waits up to 15 seconds for po-loading to appear
+        - If found: waits for it to disappear (using config.timeout)
+        - If not found: continues without error
+        
         :param selector: CSS selector of the container to monitor. If empty, searches entire body. - **Default:** '' (empty string)
         :type selector: str
         
@@ -3842,9 +3850,27 @@ class PouiInternal(Base):
         logger().info("Waiting loading...")
 
         main_container = selector or 'body'
-
-        self.wait_element(term='po-loading', scrap_type=enum.ScrapType.CSS_SELECTOR, 
-                          presence=False, main_container=main_container)
+        
+        # Wait up to 15 seconds for po-loading to appear
+        loading_found = self.wait_element_timeout(
+            term='po-loading',
+            scrap_type=enum.ScrapType.CSS_SELECTOR,
+            timeout=15,
+            main_container=main_container,
+        )
+        
+        # If po-loading was found, wait for it to disappear
+        if loading_found:
+            logger().info("Po-loading found. Waiting for it to disappear...")
+            self.wait_element(
+                term='po-loading',
+                scrap_type=enum.ScrapType.CSS_SELECTOR,
+                presence=False,
+                main_container=main_container,
+                check_error=False
+            )
+        else:
+            logger().info("Po-loading not found, continuing without waiting...")
 
         logger().info("Loading finished!")
         
@@ -4548,6 +4574,8 @@ class PouiInternal(Base):
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
             self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
+        
+        logger().debug("Radio button is now %s", "active" if radio_status() else "inactive")
 
 
     def radio_is_active(self, radio):
@@ -4565,13 +4593,18 @@ class PouiInternal(Base):
             if radio_td:
                 # Usa Selenium para capturar o estado atualizado do DOM
                 radio_td_selenium = self.soup_to_selenium(radio_td, twebview=True)
-                return 'true' in radio_td_selenium.get_attribute('aria-selected')
+                radio_td_selected = radio_td_selenium.get_attribute('aria-selected') or ''
+                return 'true' in radio_td_selected
+
+        if radio.name == 'tr':
+            return self.is_row_selected(radio)
 
         # Verifica se é po-radio (POUI) ou está dentro de um tr
         radio_tr = radio.find_parent('tr')
         if radio_tr:
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
-            return 'active' in radio_selenium.get_attribute('class') or 'k-selected' in radio_selenium.get_attribute('class')
+            radio_class = radio_selenium.get_attribute('class') or ''
+            return 'active' in radio_class or 'k-selected' in radio_class
 
         return False
 
@@ -4586,7 +4619,8 @@ class PouiInternal(Base):
         self.switch_to_iframe()
 
         row_selenium = self.soup_to_selenium(row_element, twebview=True)
-        return 'selected' in row_selenium.get_attribute('class') or 'k-selected' in row_selenium.get_attribute('class') or row_element.get('aria-selected', '').lower() == 'true'
+        row_class = row_selenium.get_attribute('class') or ''
+        return 'selected' in row_class or 'k-selected' in row_class or row_element.get('aria-selected', '').lower() == 'true'
 
 
     def click_table_checkbox(self, table_position, row_index, checkbox_value=True, checkbox_position=1):
@@ -4759,15 +4793,25 @@ class PouiInternal(Base):
         table_number -= 1
 
         self._po_loading()
+        tables = []
 
-        self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
+        logger().debug(f"Locating tables with selector '{selector}' for table number {table_number + 1}")
+        endtime = time.time() + self.config.time_out
+        while time.time() < endtime and not tables:
+            tables = self.get_container_elements(selector, filter_displayeds=True)
+            time.sleep(0.1)
 
-        tables = self.get_container_elements(selector, filter_displayeds=True)
-        
         if tables:
             if len(tables) - 1 >= table_number:
                 self.scroll_to_element(self.soup_to_selenium(tables[table_number], twebview=True))
                 return tables[table_number]
+            logger().debug(
+                f"Requested table number {table_number + 1} out of range. Total tables found: {len(tables)}"
+            )
+            return []
+        if not tables:
+            logger().debug(f"No tables found with selector '{selector}'")
+            return tables
 
 
     def data_frame(self, object):
@@ -6022,21 +6066,21 @@ class PouiInternal(Base):
 
         :param filters: List of dictionaries representing filters to apply, where each dictionary's keys are field names and values are filter values.
         :type filters: list
-        :param browse_div: BeautifulSoup object representing the browse container element.
-        :type browse_div: bs4.element.Tag
         :return: None
         :rtype: None
 
         Usage:
 
         >>> # Calling the method:
-        >>> self._filter_thf_browse(filters=[{'name': 'John'}], browse_div=browse_element)
+        >>> self._set_browse_filters(filters=[{'name': 'John'}])
         """
 
         self._po_loading()
 
         self._remove_filters_from_browse()
-
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+        self._clear_browse_input()
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
@@ -6073,25 +6117,35 @@ class PouiInternal(Base):
                     self._fill_filter_input(input_element, value)
 
         self.click_button(self.language.apply_filters)
-        
-        # Click on the first row to select it after filters are applied
-        table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
-        if table:
-            rows = table.select("tbody > tr")
-            if rows:
-                first_row = next(iter(rows))
-                first_row_sel = lambda: self.soup_to_selenium(first_row)
 
-                endtime = time.time() + self.config.time_out / 3
-                success = False
-                while time.time() < endtime and not success:
-                    self.click(first_row_sel(), enum.ClickType(3))
+        self._select_first_grid_row()
 
-                    if first_row_sel().get_attribute('aria-selected') != 'false':
-                        success = True
 
-                if not success:
-                    logger().debug("Couldn't click on the first line of the browse.")
+    def _select_first_grid_row(self, table_number: int = 1) -> bool:
+        """
+        [Internal]
+
+        Selects the first row of the grid by clicking on it.
+
+        :param table_number: Grid position when multiple grids exist on screen. - **Default:** 1
+        :type table_number: int
+        :return: True if the first row was selected successfully, False otherwise.
+        :rtype: bool
+        """
+        self._po_loading()
+        table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=table_number)
+        if not table:
+            logger().debug("_select_first_grid_row: table not found.")
+            return False
+
+        rows = table.select("tbody > tr")
+        if not rows:
+            logger().debug("_select_first_grid_row: no rows found in the grid.")
+            return False
+
+        first_row = next(iter(rows))
+
+        self.toggle_radio(first_row)
 
     def _close_user_guide(self) -> bool:
         """
@@ -6491,17 +6545,172 @@ class PouiInternal(Base):
     def SearchBrowse(self, term="", key=None, identifier=None,
                      index=False, column=None, filters=None) -> None:
         """
-        Routes to FilterBrowse when filters parameter is provided.
-        Maintains interface compatibility with WebappInternal.SearchBrowse.
+        Applies THF browse filters when ``filters`` is informed.
+        When ``filters`` is not informed, performs simple search in the browse input
+        using the longest token from ``term`` (same behavior as WebappInternal).
 
-        :param filters: Filters to apply on THF Browse. If provided, routes to FilterBrowse.
+        :param term: The term that must be searched.
+        :type term: str
+        :param key: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type key: str
+        :param identifier: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type identifier: str
+        :param index: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type index: bool
+        :param column: Maintained for interface compatibility with WebappInternal.SearchBrowse.
+        :type column: str
+        :param filters: Filters to apply on THF Browse. If provided, routes to filter flow.
         :type filters: dict or list
+        :return: None
+        :rtype: None
 
         .. note::
             Parameters key, identifier, index and column are not applicable in POUI context.
             They exist only for interface compatibility with WebappInternal.SearchBrowse.
         """
-        self._set_browse_filters(filters=filters)
+        self._po_loading()
+
+        if filters:
+            self._set_browse_filters(filters=filters)
+            return
+        elif term:
+            search_text = self.longest_word(term)
+            logger().info("Filters not provided for SearchBrowse, performing simple search with the longest word in the term: " + search_text)
+            self._simple_search_thf_browse(search_text)
+            self._select_first_grid_row()
+            return
+
+
+    def _simple_search_thf_browse(self, search_text: str, browse_div=None) -> bool:
+        """
+        [Internal]
+
+        Fills the THF browse search input with a text and submits Enter.
+
+        :param search_text: Text to search in the THF browse input.
+        :type search_text: str
+        :param browse_div: Optional browse container element. If not informed, the first grid is used.
+        :type browse_div: bs4.element.Tag
+        :return: True when the input is filled successfully, otherwise False.
+        :rtype: bool
+        """
+        if browse_div is None:
+            browse_div = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+
+        if not browse_div:
+            logger().warning("_simple_search_thf_browse: couldn't find browse grid")
+            return False
+
+
+        search_input = browse_div.select_one('po-input[p-icon="ICON_SEARCH"] input')
+
+        if not search_input:
+            logger().warning("_simple_search_thf_browse: couldn't find po-input[p-icon='ICON_SEARCH'] input")
+            return False
+
+        selenium_input = lambda: self.soup_to_selenium(search_input, twebview=True)
+
+        current_value = ''
+        try_counter = 1
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and current_value.strip() != search_text.strip():
+            try:
+                self.scroll_to_element(selenium_input())
+                self.set_element_focus(selenium_input())
+                self.click(selenium_input())
+                selenium_input().clear()
+                selenium_input().send_keys(search_text)
+                self.send_keys(selenium_input(), Keys.ENTER)
+
+
+                current_value = self.get_web_value(selenium_input())
+            except Exception as e:
+                logger().debug(str(e))
+                try_counter += 1
+
+        if current_value.strip() != search_text.strip():
+            self.log_error(f"_simple_search_thf_browse: couldn't fill search input with value '{search_text}'")
+            return False
+
+        return True
+
+
+    def _clear_browse_input(self, browse_div=None) -> bool:
+        """
+        [Internal]
+
+        Clears the THF browse search input when it contains text.
+
+        :param browse_div: Optional browse container element. If not informed, the first grid is used.
+        :type browse_div: bs4.element.Tag
+        :return: True when the input is empty (or already empty), otherwise False.
+        :rtype: bool
+        """
+        logger().info("Clearing browse search input.")
+        if browse_div is None:
+            browse_div = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
+
+        if not browse_div:
+            logger().warning("_clear_browse_input: couldn't find browse grid")
+            return False
+
+        search_input = browse_div.select_one('po-input[p-icon="ICON_SEARCH"] input')
+
+        if not search_input:
+            logger().warning("_clear_browse_input: couldn't find input search")
+            return False
+
+        selenium_input = lambda: self.soup_to_selenium(search_input, twebview=True)
+
+        current_value = ''
+        try:
+            current_value = self.get_web_value(selenium_input()) or ''
+        except Exception as e:
+            logger().debug(f"_clear_browse_input: exception getting current input value - {str(e)}")
+
+        if not current_value.strip():
+            logger().debug("_clear_browse_input: search input already empty, skipping clear action")
+            return True
+
+        endtime = time.time() + self.config.time_out
+
+        while time.time() < endtime and current_value.strip():
+            try:
+                self.scroll_to_element(selenium_input())
+                self.set_element_focus(selenium_input())
+                self.click(selenium_input())
+                selenium_input().clear()
+                self.send_keys(selenium_input(), Keys.ENTER)
+                self._po_loading()
+
+                current_value = self.get_web_value(selenium_input())
+                if not current_value or not current_value.strip():
+                    return True
+            except Exception as e:
+                logger().debug(f"_clear_browse_input: exception clearing input - {str(e)}")
+
+        self.log_error("_clear_browse_input: couldn't clear browse search input")
+        return False
+
+
+    def longest_word(self, string: str) -> str:
+        """
+        [Internal]
+
+        Returns the longest word from a given string.
+
+        :param string: Input text to inspect.
+        :type string: str
+        :return: Longest token in the text. Returns empty string for empty input.
+        :rtype: str
+        """
+        words = string.split()
+
+        if not words:
+            return ""
+
+        return max(words, key=len)
 
     def click_look_up_thf(self, label: str, search_value: str, search_column: str = '', position: int = 1) -> None:
         """
