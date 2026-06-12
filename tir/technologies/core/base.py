@@ -1298,8 +1298,17 @@ class Base(unittest.TestCase):
         if not self.config.poui:
             if not self.config.skip_environment:
                 self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
-
-            self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+            try:
+                self.driver.execute_script(
+                "if (typeof app !== 'undefined' && app.resourceManager && "
+                "typeof app.resourceManager.storeValue === 'function') {"
+                " app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1);"
+                "} else if (typeof window !== 'undefined' && window.localStorage) {"
+                " window.localStorage.setItem('x:\\\\automation.ini.general.tir', 1);"
+                "}"
+            )
+            except Exception as e:
+                logger().debug(f"app resource store Value Error: {e}")
 
     def get_url(self, url=None):
         """This method loads the URL in the browser and waits for the page to be ready.
@@ -1452,12 +1461,13 @@ class Base(unittest.TestCase):
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not current_ver:
                 try:
-                    current_ver = self.driver.execute_script("return app.VERSION")
-                    if current_ver:
-                        logger().info(f'Webapp: {current_ver}')
-                        current_ver = re.sub(r'\.(.*)', '', current_ver)
-                        self.webapp_version = int(current_ver) >= 8
-                        return self.webapp_version
+                    current_ver = self.driver.execute_script(
+                            "return (typeof app !== 'undefined' && app && app.VERSION)"
+                            " ? app.VERSION"
+                            " : ((typeof window !== 'undefined' && typeof window.getApplicationVersion === 'function')"
+                            " ? window.getApplicationVersion()"
+                            " : null)"
+                        )
                 except:
                     current_ver = None
 

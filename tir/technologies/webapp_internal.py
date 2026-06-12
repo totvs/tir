@@ -276,7 +276,13 @@ class WebappInternal(Base):
             if not self.config.skip_environment and not self.config.coverage:
                 self.program_screen(initial_program=initial_program, environment=server_environment, poui=self.config.poui_login)
 
-            self.log.webapp_version = self.driver.execute_script("return app.VERSION")
+            self.log.webapp_version = self.driver.execute_script(
+                        "return (typeof app !== 'undefined' && app && app.VERSION)"
+                        " ? app.VERSION"
+                        " : ((typeof window !== 'undefined' && typeof window.getApplicationVersion === 'function')"
+                        " ? window.getApplicationVersion()"
+                        " : null)"
+                    )
 
             if not self.config.sso_login:    
                 self.user_screen(True) if initial_program.lower() == "sigacfg" else self.user_screen()
@@ -2280,6 +2286,21 @@ class WebappInternal(Base):
         return browse_div
 
 
+    def _get_webapp_version(self):
+        try:
+            script = self.driver.execute_script(
+                        "return (typeof app !== 'undefined' && app && app.VERSION)"
+                        " ? app.VERSION"
+                        " : ((typeof window !== 'undefined' && typeof window.getApplicationVersion === 'function')"
+                        " ? window.getApplicationVersion()"
+                        " : null)"
+                    )
+            return script
+        except Exception as e:
+            logger().debug(f"_get_webapp_version: exception while trying to get webapp version: {e}")
+            return None
+
+
     def _get_thf_grid(self):
         elements_soup = []
 
@@ -2405,7 +2426,7 @@ class WebappInternal(Base):
 
                             if success:
                                 break
-                            elif self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                            elif self._get_webapp_version() and self._get_webapp_version().split('-')[0] >= "4.6.4":
                                 self.driver.switch_to.default_content()
                                 soup = self.get_current_DOM()
                                 if self.webapp_shadowroot():
@@ -4911,7 +4932,7 @@ class WebappInternal(Base):
 
             if sub_item and ',' not in sub_item:
                 logger().info(f"Clicking on {sub_item}")
-                if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+                if self._get_webapp_version() and self._get_webapp_version().split('-')[0] >= "4.6.4":
                     self.tmenu_out_iframe = True
 
                 soup_objects_filtered = None
@@ -5115,7 +5136,7 @@ class WebappInternal(Base):
 
 
         selector = '.dict-tmenuitem' if self.webapp_shadowroot() else '.tmenupopup.active'
-        if self.driver.execute_script("return app.VERSION").split('-')[0] >= "4.6.4":
+        if self._get_webapp_version() and self._get_webapp_version().split('-')[0] >= "4.6.4":
             self.driver.switch_to.default_content()
 
         content = self.driver.page_source
