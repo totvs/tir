@@ -5756,7 +5756,7 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
-
+        self.po_loading()
         if not program_name in self.closed_user_guide_routines:
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
