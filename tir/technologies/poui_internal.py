@@ -109,10 +109,10 @@ class PouiInternal(Base):
         self.tmenu_screen = None
         self.grid_memo_field = False
         self.range_multiplier = None
-
         self.elements_terms = {
             "input":"[class*='po-input'], thf-lookup, .po-search-input"
         }
+        self.closed_user_guide_routines = []
         
         if not Base.driver:
             Base.driver = self.driver
@@ -5729,7 +5729,7 @@ class PouiInternal(Base):
         self.set_program(program_name, program_desc, module)
 
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
-
+        
         self.escape_to_main_menu()
 
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
@@ -5800,6 +5800,13 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
+
+        self._po_loading()
+
+        if not program_name in self.closed_user_guide_routines:
+            closed_user_guide = self._close_user_guide()
+            if closed_user_guide:
+                self.closed_user_guide_routines.append(program_name)
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6140,6 +6147,51 @@ class PouiInternal(Base):
 
         self.toggle_radio(first_row)
 
+    def _close_user_guide(self) -> bool:
+        """
+        [Internal]
+        
+        Closes the POUI user guide popover modal if it is currently displayed on the screen.
+        
+        :return: True if the modal was successfully closed or was not present, False otherwise.
+        :rtype: bool
+        """
+        
+        term_modal = '.po-user-guide-popover'
+        term_button_close = '.po-user-guide-button-close'
+
+        wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
+                                                                           scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                                                           main_container='body', twebview=True,
+                                                                           presence=presence)
+
+        success = not wait_element(True, 20)
+
+        if not success:
+            logger().info("Closing user guide.")
+
+        endtime = time.time() + self.config.time_out / 3
+        while time.time() < endtime and not success:
+
+            button_close = self.web_scrap(term=term_button_close, 
+                                          scrap_type=enum.ScrapType.CSS_SELECTOR, 
+                                          main_container='body')
+            button_close = next(iter(button_close), None)
+
+            if not button_close:
+                logger().debug("Close button not found, re-checking modal...")
+                success = wait_element(False, 5)
+                continue
+            elif not self.element_is_displayed(button_close):
+                logger().debug("Close button disappeared, re-checking modal...")
+                success = wait_element(False, 5)
+                continue
+
+            self.poui_click(button_close)
+
+            success = wait_element(False, 5)
+
+        return success
 
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
@@ -6442,6 +6494,12 @@ class PouiInternal(Base):
             table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
             if not table:
                 self.log_error("Couldn't find the browse grid.")
+                return
+
+            rows = table.select("tbody > tr")
+            if not rows:
+                self.log_error("Couldn't find any data in the browse grid.")
+                return
 
             row_selected = table.select("tbody > tr[aria-selected='true']")
             row_selected_number = 1

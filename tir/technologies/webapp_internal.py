@@ -2103,6 +2103,17 @@ class WebappInternal(Base):
         :type identifier: str
         :param index: Whether the key is an index or not. - **Default:** False
         :type index: bool
+        :param column: The search column to be chosen on the search dropdown. - **Default:** None
+        :type column: str
+        :param filters: List of dictionaries to apply browse filters before searching.
+         Each dictionary key must be the field label and its value must be the filter value.
+         - **Default:** None
+        :type filters: list[dict[str, str]]
+
+        .. note::
+            When used with the **New Browse** (kendo-grid), this method automatically removes all
+            active filters before performing the search, ensuring the results are not affected by
+            previously applied filter conditions.
 
         Usage:
 
@@ -2118,8 +2129,23 @@ class WebappInternal(Base):
         >>> # To search using a chosen search box and a chosen search key:
         >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", identifier="Products")
         >>> #------------------------------------------------------------------------
+        >>> # To search using an index instead of name for the search key:
+        >>> oHelper.SearchBrowse("D MG 001", key=2, index=True)
+        >>> #------------------------------------------------------------------------
         >>> # To search using the first search box and a chosen column:
-        >>> oHelper.SearchBrowse("D MG 001", column="Branch+id")
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using the first search box and chosen columns:
+        >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using browse filters:
+        >>> filters = [
+        ...     {
+        ...         'Filial': 'D MG 01',
+        ...         'Cod Grupo': 'SQA2'
+        ...     }
+        ... ]
+        >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", filters=filters)
         >>> #------------------------------------------------------------------------
         """
 
@@ -2583,16 +2609,20 @@ class WebappInternal(Base):
             
             self.send_action(action=self.click, element=lambda: self.soup_to_selenium(span), click_type=3)
 
-    def fill_search_browse(self, term, search_elements):
+    def fill_search_browse(self, term: str, search_elements: tuple[Tag, Tag, Tag]) -> bool:
         """
         [Internal]
 
-        Fills search input method and presses the search button.
+        Fills the browse search input and triggers the search action.
+        Sends ENTER only when the input is successfully filled.
 
-        :param term: The term to be searched
+        :param term: Search term.
         :type term: str
-        :param search_elements: Tuple of Search elements
-        :type search_elements: Tuple of Beautiful Soup objects
+        :param search_elements: Search elements tuple (key, input, icon).
+        :type search_elements: tuple[Tag, Tag, Tag]
+
+        :return: True when method flow finishes.
+        :rtype: bool
 
         Usage:
 
@@ -2605,6 +2635,7 @@ class WebappInternal(Base):
 
         sel_browse_input = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[1]))
         sel_browse_icon = lambda: self.driver.find_element(By.XPATH, xpath_soup(search_elements[2]))
+        sel_browse_input_filled = False
 
         if self.webapp_shadowroot():
             input_lenght = ''
@@ -2636,13 +2667,17 @@ class WebappInternal(Base):
                 sel_browse_input().send_keys(term.strip())
                 current_value = self.get_element_value(sel_browse_input())
                 time.sleep(1)
+                sel_browse_input_filled = True
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
             except:
                 pass
         if current_value.rstrip() != term.strip():
-            self.log_error(f"Couldn't search f{search_elements}  current value is {current_value.rstrip()}")
-        self.send_keys(sel_browse_input(), Keys.ENTER)
+            self.log_error(
+                f"Couldn't fill browse search input. expected='{term.strip()}' current='{current_value.rstrip()}'"
+            )
+        if sel_browse_input_filled:
+            self.send_keys(sel_browse_input(), Keys.ENTER)
         self.wait_blocker()
         # ensure click on search icon
         self.double_click(sel_browse_icon(), click_type=enum.ClickType.JS)
