@@ -6387,6 +6387,12 @@ class PouiInternal(Base):
             table = self.return_table(selector=self.grid_selectors["grid_containers"], table_number=1)
             if not table:
                 self.log_error("Couldn't find the browse grid.")
+                return
+
+            rows = table.select("tbody > tr")
+            if not rows:
+                self.log_error("Couldn't find any data in the browse grid.")
+                return
 
             row_selected = table.select("tbody > tr[aria-selected='true']")
             row_selected_number = 1
