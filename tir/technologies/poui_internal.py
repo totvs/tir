@@ -3942,12 +3942,17 @@ class PouiInternal(Base):
         while (time.time() < endtime and not (element and button_element)):
             element = self.return_main_element(button, position, selector=selector, container=container)
 
-            if element:
+            if not element:
+                continue
+            
+            if element.name == 'po-button':
                 button_element = next(iter(element.select('button')), None)
 
-            if element and not button_element and element.name == 'po-dropdown':
+            elif element.name == 'po-dropdown':
+                button_element = next(iter(element.select('div')), None)
+
+            else:
                 button_element = element
-                clicktype = 2
 
         if not element or not button_element:
             self.log_error("Couldn't find element")
