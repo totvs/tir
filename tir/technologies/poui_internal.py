@@ -5756,7 +5756,9 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
-        self.po_loading()
+
+        self._po_loading()
+
         if not program_name in self.closed_user_guide_routines:
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
@@ -6109,7 +6111,7 @@ class PouiInternal(Base):
                                                                            main_container='body', twebview=True,
                                                                            presence=presence)
 
-        success = not wait_element(True, self.config.time_out / 3)
+        success = not wait_element(True, 20)
 
         if not success:
             logger().info("Closing user guide.")
