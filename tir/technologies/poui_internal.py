@@ -3968,12 +3968,17 @@ class PouiInternal(Base):
         while (time.time() < endtime and not (element and button_element)):
             element = self.return_main_element(button, position, selector=selector, container=container)
 
-            if element:
+            if not element:
+                continue
+            
+            if element.name == 'po-button':
                 button_element = next(iter(element.select('button')), None)
 
-            if element and not button_element and element.name == 'po-dropdown':
+            elif element.name == 'po-dropdown':
+                button_element = next(iter(element.select('div')), None)
+
+            else:
                 button_element = element
-                clicktype = 2
 
         if not element or not button_element:
             self.log_error("Couldn't find element")
@@ -6488,6 +6493,8 @@ class PouiInternal(Base):
         }
 
         attr_row_selected_number = 'data-kendo-grid-item-index'
+        has_other_actions_button = lambda: bool(self.return_main_element(self.language.old_browse_other_actions.lower().strip(), 0, 
+                                                                         selector='po-button, po-dropdown', container=False))
 
         # In the new browse, the view action is available as an icon in each row.
         if button_normalized == self.language.view.lower().strip():
@@ -6520,6 +6527,11 @@ class PouiInternal(Base):
             # In the new browse, delete is no longer nested under other actions.
             if button_normalized == self.language.other_actions.lower().strip() and sub_item_normalized == self.language.old_browse_delete.lower().strip():
                 button_text = sub_item
+
+            # Preserve the original "Other Actions" label when that button already exists in the screen.
+            elif button_normalized == self.language.other_actions.lower().strip() and has_other_actions_button():
+                button_text = button
+
             else:
                 button_text = button_dict.get(button_normalized, button)
 
