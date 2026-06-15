@@ -7649,6 +7649,7 @@ class WebappInternal(Base):
 
         for i in range(down_loop):
             ActionChains(self.driver).key_down(Keys.PAGE_UP).perform()
+            time.sleep(0.5)
 
         if ignore_case:
             self.log_result(field_name, value.lower(), text.lower())
