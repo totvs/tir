@@ -881,15 +881,27 @@ class Base(unittest.TestCase):
         else:
             combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
+        if combo is None:
+            logger().warning("Combo object not found while trying to select value")
+            return False
+
+        if option is None:
+            logger().warning("Combo option is None, skipping selection")
+            return False
+
+        if not hasattr(combo, "options"):
+            logger().warning("Combo object has no options attribute")
+            return False
+
         if index:
             index_number = self.return_combo_index(combo, option)
             if index_number:
                 time.sleep(1)
                 combo.select_by_index(str(index_number))
         else:
-            value = next(iter(filter(lambda x: x.text.lower().strip() == option.lower().strip() , combo.options)), None)
+            value = next(iter(filter(lambda x: x.text.lower().strip() == str(option).lower().strip() , combo.options)), None)
             if not value:
-                value = next(iter(filter(lambda x: x.text[0:len(option)].lower().strip()  == option.lower().strip() , combo.options)), None)
+                value = next(iter(filter(lambda x: x.text[0:len(str(option))].lower().strip()  == str(option).lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
                 text_value = value.text
