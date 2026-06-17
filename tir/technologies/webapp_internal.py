@@ -7053,7 +7053,6 @@ class WebappInternal(Base):
                 current_container_id = current_container.get("id")
 
             if selenium_column:
-                self.select_grid_cell(selenium_column)
                 cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
                 selenium_input = lambda: self.get_grid_input_element()
 
@@ -7422,6 +7421,7 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out / 3
         while (time.time() < endtime and not cell_opened):
             logger().debug('Trying open cell in grid!')
+            self.select_grid_cell(element)
 
             self.toggle_cell(element)
 
