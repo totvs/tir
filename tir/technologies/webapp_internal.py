@@ -3286,9 +3286,19 @@ class WebappInternal(Base):
 
             logger().info(f"Filling element: {field}")
 
-            if self.filter_blocked_containers:
-                if not element or not self.element_is_displayed(element):
-                    continue
+            if not element:
+                continue
+
+            blocked_container = element.find_parent(
+                lambda tag: (
+                    tag.name == 'wa-dialog'
+                    or ('class' in tag.attrs and ('tmodaldialog' in tag['class'] or 'ui-dialog' in tag['class']))
+                ) if hasattr(tag, 'attrs') else False
+            )
+            container_is_blocked = hasattr(blocked_container, 'attrs') and 'blocked' in blocked_container.attrs
+
+            if self.filter_blocked_containers and not container_is_blocked and not self.element_is_displayed(element):
+                continue
 
 
             self.filter_blocked_containers = True
@@ -3526,6 +3536,8 @@ class WebappInternal(Base):
             
             elif time.time() > endtime and try_containers_blocked:
                 break
+
+        self.filter_blocked_containers = True
 
         if element:
             if not self.webapp_shadowroot():
