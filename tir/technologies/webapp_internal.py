@@ -3286,8 +3286,12 @@ class WebappInternal(Base):
 
             logger().info(f"Filling element: {field}")
 
-            if not element or not self.element_is_displayed(element):
-                continue
+            if self.filter_blocked_containers:
+                if not element or not self.element_is_displayed(element):
+                    continue
+
+
+            self.filter_blocked_containers = True
 
             main_element = element
             multiget = "dict-tmultiget"
@@ -3522,8 +3526,6 @@ class WebappInternal(Base):
             
             elif time.time() > endtime and try_containers_blocked:
                 break
-
-        self.filter_blocked_containers = True
 
         if element:
             if not self.webapp_shadowroot():
