@@ -8424,13 +8424,13 @@ class WebappInternal(Base):
                 if  class_term in term:
                     return False
                 
-                # Fallback: Tenta encontrar sem filtrar os containers (apenas uma vez)
+                # Fallback: retry once without filtering blocked containers.
                 self.filter_blocked_containers = False
                 ele_without_filter = self.element_exists(term, scrap_type, position, optional_term, 
                                                           main_container, check_error, twebview, second_term)
 
                 if (presence and ele_without_filter) or (not presence and not ele_without_filter):
-                    logger().debug(f'Element finded with out blocked filters')
+                    logger().debug("Element found without blocked-container filtering.")
                 else:
                     self.filter_blocked_containers = True
                     self.restart_counter += 1
