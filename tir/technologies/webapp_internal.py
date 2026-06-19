@@ -3286,8 +3286,22 @@ class WebappInternal(Base):
 
             logger().info(f"Filling element: {field}")
 
-            if not element or not self.element_is_displayed(element):
+            if not element:
                 continue
+
+            blocked_container = element.find_parent(
+                lambda tag: (
+                    tag.name == 'wa-dialog'
+                    or ('class' in tag.attrs and ('tmodaldialog' in tag['class'] or 'ui-dialog' in tag['class']))
+                ) if hasattr(tag, 'attrs') else False
+            )
+            container_is_blocked = hasattr(blocked_container, 'attrs') and 'blocked' in blocked_container.attrs
+
+            if self.filter_blocked_containers and not container_is_blocked and not self.element_is_displayed(element):
+                continue
+
+
+            self.filter_blocked_containers = True
 
             main_element = element
             multiget = "dict-tmultiget"
@@ -3497,11 +3511,12 @@ class WebappInternal(Base):
         """
         endtime = time.time() + self.config.time_out
         element =  None
+        try_containers_blocked = False
 
         if re.match(r"\w+(_)", field) or name_attr:
             position -= 1
 
-        while(time.time() < endtime and not element):
+        while(not element):
             if re.match(r"\w+(_)", field) or name_attr:
                 element_list = self.web_scrap(f"[name$='{field}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
                 if element_list and len(element_list) -1 >= position:
@@ -3511,6 +3526,18 @@ class WebappInternal(Base):
                     element = self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)
                 else:
                     element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
+
+            if element:
+                break
+            
+            if time.time() > endtime and not try_containers_blocked:
+                self.filter_blocked_containers = False
+                try_containers_blocked = True
+            
+            elif time.time() > endtime and try_containers_blocked:
+                break
+
+        self.filter_blocked_containers = True
 
         if element:
             if not self.webapp_shadowroot():
@@ -8410,12 +8437,22 @@ class WebappInternal(Base):
                     class_term = ".ui-button.ui-dialog-titlebar-close[title='Close']"
                 if  class_term in term:
                     return False
-                self.restart_counter += 1
-                logger().debug(f'wait_element doesn\'t found term: {term}')
-                if presence:
-                    self.log_error(f"Element '{term}' not found!")
+                
+                # Fallback: retry once without filtering blocked containers.
+                self.filter_blocked_containers = False
+                ele_without_filter = self.element_exists(term, scrap_type, position, optional_term, 
+                                                          main_container, check_error, twebview, second_term)
+
+                if (presence and ele_without_filter) or (not presence and not ele_without_filter):
+                    logger().debug("Element found without blocked-container filtering.")
                 else:
-                    self.log_error(f"Unexpected element '{term}' found!")
+                    self.filter_blocked_containers = True
+                    self.restart_counter += 1
+                    logger().debug(f'wait_element doesn\'t found term: {term}')
+                    if presence:
+                        self.log_error(f"Element '{term}' not found!")
+                    else:
+                        self.log_error(f"Unexpected element '{term}' found!")
 
         presence_endtime = time.time() + 10
         if presence:
@@ -8442,6 +8479,8 @@ class WebappInternal(Base):
                         pass
                     except StaleElementReferenceException:
                         pass
+                    
+        self.filter_blocked_containers = True
 
 
     def wait_element_timeout(self, term, scrap_type=enum.ScrapType.TEXT, timeout=5.0, step=0.1, presence=True, position=0, optional_term=None, main_container=".tmodaldialog,.ui-dialog, wa-dialog, body", check_error=True, twebview=False):
