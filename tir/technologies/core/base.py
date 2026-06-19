@@ -139,6 +139,7 @@ class Base(unittest.TestCase):
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False
+        self.filter_blocked_containers = True
 
         if autostart:
             self.Start()
@@ -1630,7 +1631,7 @@ class Base(unittest.TestCase):
         non_blocked_elements = elements
 
         # Only filter out blocked elements if 'WaitProcessing' is not in the stack
-        if not self.search_stack('WaitProcessing'):
+        if not self.search_stack('WaitProcessing') and self.filter_blocked_containers:
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
