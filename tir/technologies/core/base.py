@@ -139,6 +139,7 @@ class Base(unittest.TestCase):
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False
+        self.filter_blocked_containers = True
 
         if autostart:
             self.Start()
@@ -881,15 +882,27 @@ class Base(unittest.TestCase):
         else:
             combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
 
+        if combo is None:
+            logger().warning("Combo object not found while trying to select value")
+            return False
+
+        if option is None:
+            logger().warning("Combo option is None, skipping selection")
+            return False
+
+        if not hasattr(combo, "options"):
+            logger().warning("Combo object has no options attribute")
+            return False
+
         if index:
             index_number = self.return_combo_index(combo, option)
             if index_number:
                 time.sleep(1)
                 combo.select_by_index(str(index_number))
         else:
-            value = next(iter(filter(lambda x: x.text.lower().strip() == option.lower().strip() , combo.options)), None)
+            value = next(iter(filter(lambda x: x.text.lower().strip() == str(option).lower().strip() , combo.options)), None)
             if not value:
-                value = next(iter(filter(lambda x: x.text[0:len(option)].lower().strip()  == option.lower().strip() , combo.options)), None)
+                value = next(iter(filter(lambda x: x.text[0:len(str(option))].lower().strip()  == str(option).lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
                 text_value = value.text
@@ -1617,8 +1630,9 @@ class Base(unittest.TestCase):
 
         non_blocked_elements = elements
 
-        # Only filter out blocked elements if 'WaitProcessing' is not in the stack
-        if not self.search_stack('WaitProcessing'):
+        # Filter blocked elements only when WaitProcessing is not in the stack
+        # and blocked-container filtering is enabled.
+        if not self.search_stack('WaitProcessing') and self.filter_blocked_containers:
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
