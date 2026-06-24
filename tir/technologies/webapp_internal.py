@@ -3295,14 +3295,13 @@ class WebappInternal(Base):
                     or ('class' in tag.attrs and ('tmodaldialog' in tag['class'] or 'ui-dialog' in tag['class']))
                 ) if hasattr(tag, 'attrs') else False
             )
-
             container_is_blocked = hasattr(blocked_container, 'attrs') and 'blocked' in blocked_container.attrs
 
-            if container_is_blocked:
-                logger().info(f"Container blocked! Element is displayed?: {self.element_is_displayed(element)}")
-
-            if not container_is_blocked and not self.element_is_displayed(element):
+            if self.filter_blocked_containers and not container_is_blocked and not self.element_is_displayed(element):
                 continue
+
+
+            self.filter_blocked_containers = True
 
             main_element = element
             multiget = "dict-tmultiget"
@@ -3529,8 +3528,6 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
             if element:
-                if try_containers_blocked:
-                    logger().debug("Element found without blocked-container filtering.")
                 break
             
             if time.time() > endtime and not try_containers_blocked:
@@ -4958,22 +4955,6 @@ class WebappInternal(Base):
 
             if self.config.smart_test:
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
-
-            if not soup_element:
-                try:
-                    logger().info("Trying to find element without blocked-container filtering.")
-                    self.filter_blocked_containers = False
-                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
-
-                    if soup_objects and len(soup_objects) - 1 >= position:
-                        logger().info(f"Element found without blocked-container filtering.")
-                        next_button = soup_objects[position]
-                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
-                        logger().debug(f"Found button '{button}' in blocked container")
-                except Exception as e:
-                    logger().debug(f"Fallback search without blocked-container filtering failed: {e}")
-                finally:
-                    self.filter_blocked_containers = True
 
             if not soup_element:
                 other_action = self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, check_error=check_error)
@@ -9859,30 +9840,28 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
-        logger().info(f"Clicking on {label_name}")
-
         bs_label = ''
         label = ''
         filtered_labels = []
-        try_containers_blocked = False
-
         self.wait_blocker()
         self.wait_element(label_name)
-        
+        logger().info(f"Clicking on {label_name}")
         endtime = time.time() + self.config.time_out
-        while(not label):
-
+        while(not label and time.time() < endtime):
             container = self.get_current_container()
+            if not container:
+                self.log_error("Couldn't locate container.")
 
-            if container:
+            if self.webapp_shadowroot():
+
                 labels = container.select("wa-text-view, wa-checkbox, .dict-tradmenu")
                 for element in labels:
                     if "class" in element.attrs and 'dict-tradmenu' in element['class']:
                         radio_labels = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('label')",
-                                                    self.soup_to_selenium(element))
+                                                   self.soup_to_selenium(element))
                         filtered_radio = list(
                             filter(lambda x: label_name.lower().strip() == x.text.lower().strip(),
-                                    radio_labels))
+                                   radio_labels))
                         if filtered_radio:
                             [filtered_labels.append(i) for i in filtered_radio]
 
@@ -9901,17 +9880,11 @@ class WebappInternal(Base):
                 if position > len(filtered_labels):
                     return self.log_error(f"Element position not found")
 
-            if label:
-                if try_containers_blocked:
-                    logger().debug("Element found without blocked-container filtering.")
-                break
-            
-            if time.time() > endtime and not try_containers_blocked:
-                self.filter_blocked_containers = False
-                try_containers_blocked = True
-
-            elif time.time() > endtime and try_containers_blocked:
-                break
+            else:
+                labels = container.select("label")
+                filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
+                filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
+                label = next(iter(filtered_labels), None)
 
         if not label:
             return self.log_error("Couldn't find any labels.")
@@ -9919,11 +9892,20 @@ class WebappInternal(Base):
         if type(label) == Tag:
             bs_label = self.soup_to_selenium(label)
 
-        label_element = bs_label if bs_label else label
-        time.sleep(2)
-        self.scroll_to_element(label_element)
-        self.set_element_focus(label_element)
-        self.send_action(action=self.click, element=lambda: label_element)
+        if self.webapp_shadowroot():
+            label_element = bs_label if bs_label else label
+            time.sleep(2)
+            self.scroll_to_element(label_element)
+            self.set_element_focus(label_element)
+            self.send_action(action=self.click, element=lambda: label_element)
+        else:
+            time.sleep(2)
+            label_element = bs_label if bs_label else label
+            self.scroll_to_element(label_element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
+            self.set_element_focus(label_element)
+            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
+            self.click(label_element)
 
     def get_current_container(self):
         """
