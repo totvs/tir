@@ -4961,9 +4961,7 @@ class WebappInternal(Base):
                 self.filter_blocked_containers = False
                 soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
                 
-                if soup_objects:
-                    
-                    if soup_objects and len(soup_objects) - 1 >= position:
+                if soup_objects and len(soup_objects) - 1 >= position:
                         next_button = soup_objects[position]
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         logger().debug(f"Found button '{button}' in blocked container")
