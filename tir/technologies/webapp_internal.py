@@ -4961,15 +4961,14 @@ class WebappInternal(Base):
 
             if not soup_element:
                 try:
-                    logger().info("Trying to find element without blocked-container filtering.")
+                    logger().debug("Trying to find element without blocked-container filtering.")
                     self.filter_blocked_containers = False
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
 
                     if soup_objects and len(soup_objects) - 1 >= position:
-                        logger().info(f"Element found without blocked-container filtering.")
+                        logger().debug(f"Element found without blocked-container filtering.")
                         next_button = soup_objects[position]
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
-                        logger().debug(f"Found button '{button}' in blocked container")
                 except Exception as e:
                     logger().debug(f"Fallback search without blocked-container filtering failed: {e}")
                 finally:
@@ -9912,6 +9911,8 @@ class WebappInternal(Base):
 
             elif time.time() > endtime and try_containers_blocked:
                 break
+
+        self.filter_blocked_containers = True
 
         if not label:
             return self.log_error("Couldn't find any labels.")
