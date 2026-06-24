@@ -7352,7 +7352,7 @@ class WebappInternal(Base):
                     filtered_grid = filtered_grids[grid_number]
 
                     # get all rows from the grid
-                    rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(filtered_grid))
+                    rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(filtered_grid)) or []
 
                 if rows:
                     if row is not None:
@@ -7389,7 +7389,7 @@ class WebappInternal(Base):
                 self.log_error(f'couldn\'t find grid number {grid_number + 1} on the screen.')
 
             if (row is not None) and (row > len(rows) - 1 or row < 0) and not column_cell:
-                self.log_error("Couldn't select the specified row: {row + 1}")
+                self.log_error(f"Couldn't select the specified row: {row + 1}")
 
             if column_index is None:
                 self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
