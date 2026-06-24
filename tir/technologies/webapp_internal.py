@@ -4957,6 +4957,20 @@ class WebappInternal(Base):
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
 
             if not soup_element:
+                # Fallback: retry without filtering blocked containers
+                self.filter_blocked_containers = False
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
+                
+                if soup_objects:
+                    
+                    if soup_objects and len(soup_objects) - 1 >= position:
+                        next_button = soup_objects[position]
+                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        logger().debug(f"Found button '{button}' in blocked container")
+                
+                self.filter_blocked_containers = True
+
+            if not soup_element:
                 other_action = self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, check_error=check_error)
                 if (other_action is None or not hasattr(other_action, "name") and not hasattr(other_action, "parent")):
                     self.log_error(f"Couldn't find element: {button}")
