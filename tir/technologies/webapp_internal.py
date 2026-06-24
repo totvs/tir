@@ -9898,6 +9898,7 @@ class WebappInternal(Base):
                     label = next(iter(self.web_scrap(term=label_name)))
 
                 if position > len(filtered_labels):
+                    self.filter_blocked_containers = True
                     return self.log_error(f"Element position not found")
 
             if label:
