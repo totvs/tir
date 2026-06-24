@@ -967,6 +967,19 @@ before using these methods in the script.</p>
 <span class="sig-name descname"><span class="pre">IsNewBrowse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.IsNewBrowse" title="Link to this definition"></a></dt>
 <dd><p>This method checks if the current browse is the new version with poui or the old one,
 returning a boolean value.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using Browse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">IsNewBrowse</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 01&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">oHelperPoui</span><span class="o">.</span><span class="n">FilterBrowse</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;Filial&quot;</span><span class="p">:</span> <span class="s2">&quot;D MG 01&quot;</span><span class="p">}])</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example using Button</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">IsNewBrowse</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">oHelper</span><span class="o">.</span><span class="n">SetButton</span><span class="p">(</span><span class="s2">&quot;Incluir&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="bp">self</span><span class="o">.</span><span class="n">oHelperPoui</span><span class="o">.</span><span class="n">ClickButton</span><span class="p">(</span><span class="s2">&quot;Adicionar&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

@@ -1036,9 +1036,19 @@ is provided, it will search on the chosen search box.</p>
 <li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The search key to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
 <li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The identifier of the search box. If none is provided, it defaults to the first of the screen. - <strong>Default:</strong> None</p></li>
 <li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether the key is an index or not. - <strong>Default:</strong> False</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The search column to be chosen on the search dropdown. - <strong>Default:</strong> None</p></li>
+<li><p><strong>filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>]</em>) – List of dictionaries to apply browse filters before searching.
+Each dictionary key must be the field label and its value must be the filter value.
+- <strong>Default:</strong> None</p></li>
 </ul>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When used with the <strong>New Browse</strong> (kendo-grid), this method automatically removes all
+active filters before performing the search, ensuring the results are not affected by
+previously applied filter conditions.</p>
+</div>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and default search key:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">)</span>
@@ -1052,8 +1062,23 @@ is provided, it will search on the chosen search box.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a chosen search box and a chosen search key:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;Products&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using an index instead of name for the search key:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and a chosen column:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Nome&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the first search box and chosen columns:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s2">&quot;Nome, Filial*, ColumnX, AnotherColumnY&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using browse filters:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filters</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s1">&#39;Filial&#39;</span><span class="p">:</span> <span class="s1">&#39;D MG 01&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;Cod Grupo&#39;</span><span class="p">:</span> <span class="s1">&#39;SQA2&#39;</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">SearchBrowse</span><span class="p">(</span><span class="s2">&quot;D MG 001&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;Branch+id&quot;</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
 </pre></div>
 </div>
@@ -1088,7 +1113,11 @@ is provided, it will search on the chosen search box.</p>
 </ul>
 </dd>
 </dl>
-<p>&gt; ⚠️ <strong>Warning:</strong>
+<p>&gt; ️ <strong>Warning:</strong>
+&gt; SetButton now applies an internal click verification with automatic retry
+&gt; (up to 3 attempts with progressive strategies) when no click effect is detected.
+&gt; This behavior is internal and does not change the method signature.
+&gt;
 &gt; If there are a sequence of similar buttons. Example:
 <cite>self.oHelper.SetButton(“Salvar”)</cite>
 <cite>self.oHelper.SetButton(“Salvar”)</cite>
@@ -2439,15 +2468,22 @@ Searches and edits all parameters in the queue.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.fill_search_browse">
-<span class="sig-name descname"><span class="pre">fill_search_browse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_search_browse" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fill_search_browse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Tag</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tag</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tag</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.fill_search_browse" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
-<p>Fills search input method and presses the search button.</p>
+<p>Fills the browse search input and triggers the search action.
+Sends ENTER only when the input is successfully filled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The term to be searched</p></li>
-<li><p><strong>search_elements</strong> (<em>Tuple</em><em> of </em><em>Beautiful Soup objects</em>) – Tuple of Search elements</p></li>
+<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Search term.</p></li>
+<li><p><strong>search_elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><em>Tag</em><em>, </em><em>Tag</em><em>, </em><em>Tag</em><em>]</em>) – Search elements tuple (key, input, icon).</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True when method flow finishes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
 </dd>
 </dl>
 <p>Usage:</p>

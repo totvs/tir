@@ -151,6 +151,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.is_row_selected"><code class="docutils literal notranslate"><span class="pre">PouiInternal.is_row_selected()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_error"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.log_result"><code class="docutils literal notranslate"><span class="pre">PouiInternal.log_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.longest_word"><code class="docutils literal notranslate"><span class="pre">PouiInternal.longest_word()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_csv"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_csv()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_input_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_input_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.open_url_coverage"><code class="docutils literal notranslate"><span class="pre">PouiInternal.open_url_coverage()</span></code></a></li>
@@ -548,11 +549,25 @@ Set to <strong>False</strong> for internal navigations that must not overwrite t
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.SearchBrowse">
 <span class="sig-name descname"><span class="pre">SearchBrowse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.SearchBrowse" title="Link to this definition"></a></dt>
-<dd><p>Routes to FilterBrowse when filters parameter is provided.
-Maintains interface compatibility with WebappInternal.SearchBrowse.</p>
+<dd><p>Applies THF browse filters when <code class="docutils literal notranslate"><span class="pre">filters</span></code> is informed.
+When <code class="docutils literal notranslate"><span class="pre">filters</span></code> is not informed, performs simple search in the browse input
+using the longest token from <code class="docutils literal notranslate"><span class="pre">term</span></code> (same behavior as WebappInternal).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Filters to apply on THF Browse. If provided, routes to FilterBrowse.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The term that must be searched.</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Maintained for interface compatibility with WebappInternal.SearchBrowse.</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Maintained for interface compatibility with WebappInternal.SearchBrowse.</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Maintained for interface compatibility with WebappInternal.SearchBrowse.</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Maintained for interface compatibility with WebappInternal.SearchBrowse.</p></li>
+<li><p><strong>filters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – Filters to apply on THF Browse. If provided, routes to filter flow.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -811,7 +826,7 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 <dd><p>Verifica se o checkbox está marcado em componentes POUI ou Kendo Grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>checkbox_element</strong> (<a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.element.Tag" title="(in Beautiful Soup)"><em>bs4.element.Tag</em></a>) – Elemento BeautifulSoup4 do checkbox</p>
+<dd class="field-odd"><p><strong>checkbox_element</strong> (<em>bs4.element.Tag</em>) – Elemento BeautifulSoup4 do checkbox</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True se o checkbox estiver marcado, False caso contrário</p>
@@ -1414,7 +1429,7 @@ Filter and remove a specified character with regex, return only displayed elemen
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ref_element</strong> (<a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.element.Tag" title="(in Beautiful Soup)"><em>bs4.element.Tag</em></a>) – The reference element to calculate the distance from.</p></li>
+<li><p><strong>ref_element</strong> (<em>bs4.element.Tag</em>) – The reference element to calculate the distance from.</p></li>
 <li><p><strong>direction</strong> – The direction to filter the elements. Options are ‘right’, ‘down</p></li>
 </ul>
 </dd>
@@ -1466,7 +1481,7 @@ Usage:
 when <cite>select_all=False</cite>; returns <cite>None</cite> when <cite>select_all=False</cite> and no element is found.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.element.Tag" title="(in Beautiful Soup)">bs4.element.Tag</a>] or <a class="reference external" href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/api/bs4.html#bs4.element.Tag" title="(in Beautiful Soup)">bs4.element.Tag</a> or None</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[bs4.element.Tag] or bs4.element.Tag or None</p>
 </dd>
 </dl>
 <p>Usage:</p>
@@ -1892,6 +1907,24 @@ Gets the size of the current iframe when no container ID is available.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">log_result</span><span class="p">(</span><span class="s2">&quot;A1_COD&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">,</span> <span class="s2">&quot;000001&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.longest_word">
+<span class="sig-name descname"><span class="pre">longest_word</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.longest_word" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Returns the longest word from a given string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Input text to inspect.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Longest token in the text. Returns empty string for empty input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
