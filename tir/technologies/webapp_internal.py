@@ -4989,8 +4989,7 @@ class WebappInternal(Base):
                     click_attempt += 1
                     current_clicked_element = None
 
-                    if self.config.smart_test or self.config.debug_log:
-                        logger().debug(f"Click attempt {click_attempt}/{max_click_attempts} on '{button}'")
+                    logger().debug(f"Click attempt {click_attempt}/{max_click_attempts} on '{button}' in container: {initial_container_id}")
 
                     if self.webapp_shadowroot():
                         self.scroll_to_element(soup_element)
@@ -5033,16 +5032,14 @@ class WebappInternal(Base):
                                 current_container_id = current_container.attrs['id']
                                 if initial_container_id and initial_container_id != current_container_id:
                                     click_verified = True
-                                    if self.config.smart_test or self.config.debug_log:
-                                        logger().debug("  [OK] Click verified: container changed")
+                                    logger().debug("  [OK] Click verified: container changed")
                                     break
 
                             # Check 2: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
-                                if self.config.smart_test or self.config.debug_log:
-                                    logger().debug("  [OK] Click verified: DOM modified")
+                                logger().debug("  [OK] Click verified: DOM modified")
                                 break
 
                             # Check 3: Did a new modal/dialog appear?
@@ -5051,8 +5048,7 @@ class WebappInternal(Base):
                             for elem in new_elements:
                                 if self.element_is_displayed(elem):
                                     click_verified = True
-                                    if self.config.smart_test or self.config.debug_log:
-                                        logger().debug("  [OK] Click verified: new element appeared")
+                                    logger().debug("  [OK] Click verified: new element appeared")
                                     break
                             if click_verified:
                                 break
@@ -5061,20 +5057,22 @@ class WebappInternal(Base):
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
-                                if self.config.smart_test or self.config.debug_log:
-                                    logger().debug("  [OK] Click verified: element lost focus")
+                                logger().debug("  [OK] Click verified: element lost focus")
                                 break
 
                         except Exception:
                             # Element may have disappeared (also indicates success)
-                            if self.config.smart_test or self.config.debug_log:
-                                logger().debug("  [OK] Click verified: element no longer exists")
+                            logger().debug("  [OK] Click verified: element no longer exists")
                             click_verified = True
                             break
 
                     if not click_verified and click_attempt < max_click_attempts:
                         logger().warning(f"  [WARN] Click on '{button}' had no detectable effect on attempt {click_attempt}")
                         time.sleep(0.5)
+
+                current_container = self.get_current_container()
+                current_container_id = current_container.attrs.get('id') if current_container and 'id' in current_container.attrs else 'unknown'
+                logger().debug(f"Container after click '{button}': {current_container_id}")
 
                 if not click_verified:
                     logger().warning(f"  [WARN] Click on '{button}' may not have been effective after {max_click_attempts} attempts. Continuing execution...")
