@@ -5742,8 +5742,7 @@ class PouiInternal(Base):
         success = False
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
-        match_mode = 1 if module or program_desc else 3
-        program_with_module = f'{program_name} - {module}' if program_name and module else None        
+        match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
 
@@ -5764,7 +5763,7 @@ class PouiInternal(Base):
         
         logger().debug(f'Selecting the routine')
 
-        self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+        self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
         # Code block for "Change module"
