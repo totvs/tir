@@ -107,6 +107,9 @@ class LanguagePack:
 
         self.perform_advanced_search = languagepack["Perform Advanced Search"]
         self.select = languagepack["Select"]
+
+        self.module = languagepack["Module"]
+        self.change_module = languagepack["Change Module"]
         
         self.messages = Messages(languagepack)
 
@@ -222,7 +225,9 @@ class LanguagePack:
             "New Browse Other Actions":"Line actions",
 
             "Perform Advanced Search":"Perform Advanced Search.",
-            "Select":"Select"
+            "Select":"Select",
+            "Module":"Module",
+            "Change Module":"Change module"
         }
 
         brazilian_portuguese = {
@@ -335,7 +340,9 @@ class LanguagePack:
             "New Browse Other Actions":"Ações de registro",
 
             "Perform Advanced Search":"Fazer busca avançada.",
-            "Select":"Selecionar"  
+            "Select":"Selecionar",
+            "Module":"Módulo",
+            "Change Module":"Alterar módulo"
         }
         spanish = {
             "User": "Usuário",
@@ -446,7 +453,9 @@ class LanguagePack:
             "New Browse Other Actions":"Acciones de registro",
 
             "Perform Advanced Search":"Realizar búsqueda avanzada.",
-            "Select":"Seleccionar"
+            "Select":"Seleccionar",
+            "Module":"Módulo",
+            "Change Module":"Cambiar módulo"
         }
         russian = {
             "User": "Пользователь",
@@ -560,7 +569,9 @@ class LanguagePack:
             "New Browse Other Actions":"Линейные действия",
 
             "Perform Advanced Search":"Выполните расширенный поиск.",
-            "Select":"Выбирать"
+            "Select":"Выбирать",
+            "Module":"Модуль",
+            "Change Module":"Модуль изменений"
         }
 
         if language.lower() == "en-us":
