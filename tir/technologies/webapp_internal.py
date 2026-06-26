@@ -2255,11 +2255,16 @@ class WebappInternal(Base):
 
         Returns a tuple with the search browse elements in this order:
         Key Dropdown, Input, Icon.
+        
+        Retry logic is applied with timeout of (time_out / 3) seconds.
 
         :param panel_name: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
         :type panel_name: str
+        
+        :param browse_div: Pre-fetched browse div element. If None, _find_search_browse() is called. - **Default:** None
+        :type browse_div: BeautifulSoup.Tag or None
 
-        :return: Tuple with the Key Dropdown, Input and Icon elements of a search box
+        :return: Tuple with the Key Dropdown, Input and Icon elements of a search box.
         :rtype: Tuple of Beautiful Soup objects.
 
         Usage:
