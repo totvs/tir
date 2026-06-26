@@ -2313,7 +2313,7 @@ class WebappInternal(Base):
             success = True
 
         if not (browse_key and browse_input and browse_icon):
-            self.log_error('Search Browse elements doesn''t found!')
+            self.log_error("Search Browse elements doesn''t found!")
 
         return (browse_key, browse_input, browse_icon)
 
@@ -12516,7 +12516,7 @@ class WebappInternal(Base):
             time.sleep(1)
 
         if not container:
-            self.log_error('Container doesn''t found!')
+            self.log_error("Container doesn''t found!")
 
         return container.select(selector) if select_all else container.select_one(selector)
 
