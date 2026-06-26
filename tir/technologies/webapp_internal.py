@@ -7174,7 +7174,8 @@ class WebappInternal(Base):
             if selenium_column:
                 # Handle checkbox input elements when the value is a boolean
                 if isinstance(user_value, bool) and checkbox_grid:
-                    cell_filled = self.performing_additional_click(checkbox_grid, grid_number)
+                    click_success = self.performing_additional_click(checkbox_grid, grid_number)
+                    cell_filled = click_success if check_value else True
 
                 else:
                     cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
