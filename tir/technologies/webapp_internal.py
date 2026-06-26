@@ -2268,15 +2268,48 @@ class WebappInternal(Base):
         >>> search_elements = self.get_search_browse_elements("Products")
         """
 
-        browse_div = browse_div or self._find_search_browse(panel_name=panel_name)
+        success = False
+        browse_tget = None
+        browse_key = None
+        browse_input = None
+        browse_icon = None
 
-        browse_tget = browse_div.select(".dict-tget")[0]
-        browse_key = browse_div.select(".dict-tbutton")[0]
-        browse_input = browse_tget
-        browse_icon = browse_tget.select(".button-image")[0]
+        endtime = time.time() + self.config.time_out / 3
+        while (time.time() < endtime and not success):
+
+            search_browse = browse_div or self._find_search_browse(panel_name=panel_name)
+
+            if not search_browse:
+                logger().debug("search_browse not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if  len(search_browse.select(".dict-tget")) < 1:
+                logger().debug("'.dict-tget' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if len(search_browse.select(".dict-tbutton")) < 1:
+                logger().debug("'.dict-tbutton' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if len(search_browse.select(".dict-tget")[0].select(".button-image")) < 1:
+                logger().debug("'.button-image' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            browse_tget = search_browse.select(".dict-tget")[0]
+            browse_key = search_browse.select(".dict-tbutton")[0]
+            browse_input = browse_tget
+            browse_icon = browse_tget.select(".button-image")[0]
+
+            success = True
+
+        if not (browse_key and browse_input and browse_icon):
+            self.log_error('Search Browse elements doesn''t found!')
 
         return (browse_key, browse_input, browse_icon)
-
 
     def _find_search_browse(self, panel_name=None, throw_error=True, timeout=None):
 
