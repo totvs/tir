@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 from tir.technologies.core import base
 from tir.technologies.core.log import Log, nump
@@ -7171,7 +7172,7 @@ class WebappInternal(Base):
                 checkbox_grid = self._return_checkbox_grid(selenium_column)
 
             if selenium_column:
-                # Tratamento para quando o clique for para inputs do tipo checkbox
+                # Handle checkbox input elements when the value is a boolean
                 if isinstance(user_value, bool) and checkbox_grid:
                     cell_filled = self.performing_additional_click(checkbox_grid, grid_number)
 
@@ -7205,7 +7206,20 @@ class WebappInternal(Base):
                             else:
                                 cell_filled = True
     
-    def _return_checkbox_grid(self, element):
+    def _return_checkbox_grid(self, element: WebElement) -> WebElement | None:
+        """
+        [Internal]
+
+        Finds and returns a checkbox element within a grid cell if present.
+
+        Searches for checkbox elements using CSS selectors that match checkbox icon styles
+        in the grid cell. Returns the first checkbox element found or None if no checkbox exists.
+
+        :param element: Selenium element (grid cell) to search for a checkbox element.
+        :type element: WebElement
+        :return: The first checkbox element found, or None if no checkbox element exists.
+        :rtype: WebElement or None
+        """
 
         try:
             term = "div[style*='wfunchk_mdi.png'], div[style*='wfchk_mdi.png']"
@@ -12393,10 +12407,20 @@ class WebappInternal(Base):
 
 
     def get_container_selector(self, selector, select_all=True):
-        """Get a soup select object from current container.
-        :param selector: Css selector
-        :param select_all: If true return a list of objects, if false return the first
-        :return: Return a soup select object
+        """
+        [Internal]
+
+        Retrieves elements from the current container using a CSS selector with retry logic.
+
+        Attempts to retrieve the current container with a timeout, retrying every second.
+        If the container is not found after timeout, logs an error and attempts selection anyway.
+
+        :param selector: CSS selector to query within the container.
+        :type selector: str
+        :param select_all: If True, returns a list of all matching elements; if False, returns only the first match. - **Default:** True
+        :type select_all: bool
+        :return: A list of matching elements if select_all is True, or the first matching element if select_all is False.
+        :rtype: list or BeautifulSoup element
         """
 
         container = None
