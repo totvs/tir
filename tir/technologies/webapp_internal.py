@@ -6142,8 +6142,10 @@ class WebappInternal(Base):
                 logger().debug('The container has been changed.')
                 return True
 
-            element_td, _ = self._refresh_element_td(grid_number=grid_number,
-                                                     matches_values=matches_values)
+            if matches_values:
+                element_td, _ = self._refresh_element_td(grid_number=grid_number,
+                                                        matches_values=matches_values)
+            
             if not element_td:
                 break
 
@@ -7155,6 +7157,7 @@ class WebappInternal(Base):
 
         cell_filled = False
         selenium_column = None
+        checkbox_grid = None
         current_layers = lambda : self.check_layers(layer_selector)
         initial_layers = current_layers()
 
@@ -7165,37 +7168,53 @@ class WebappInternal(Base):
                 selenium_column, _ = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
                 current_container = self.get_current_container()
                 current_container_id = current_container.get("id")
+                checkbox_grid = self._return_checkbox_grid(selenium_column)
 
             if selenium_column:
-                cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
-                selenium_input = lambda: self.get_grid_input_element()
+                # Tratamento para quando o clique for para inputs do tipo checkbox
+                if isinstance(user_value, bool) and checkbox_grid:
+                    cell_filled = self.performing_additional_click(checkbox_grid, grid_number)
 
-                if selenium_input():
-                    if isinstance(selenium_input(), Select):
-                        cell_filled = self.select_combo(selenium_input(), user_value)
-                        time.sleep(1)
-                        # if modal opened close it
-                        if current_layers() > initial_layers:
-                            self.send_keys(selenium_column, Keys.TAB)
-                    else:
-                        if cell_opened:
-                            self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
-                            self.wait_element_fill(selenium_column, field_one, value_type, timeout=10)
+                else:
+                    cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
+                    selenium_input = lambda: self.get_grid_input_element()
 
-                        # if modal/dialog still opened, skip check value
-                        if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                               position=initial_layers + 1, main_container="body", check_error=False):
-                            logger().info(
-                                "Dialog open, skipping value check, Check cell fill")
-                            return
-
-                        if check_value:
-                            cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
-                            if not cell_filled:
-                                self.search_for_errors()
+                    if selenium_input():
+                        if isinstance(selenium_input(), Select):
+                            cell_filled = self.select_combo(selenium_input(), user_value)
+                            time.sleep(1)
+                            # if modal opened close it
+                            if current_layers() > initial_layers:
+                                self.send_keys(selenium_column, Keys.TAB)
                         else:
-                            cell_filled = True
+                            if cell_opened:
+                                self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
+                                self.wait_element_fill(selenium_column, field_one, value_type, timeout=10)
 
+                            # if modal/dialog still opened, skip check value
+                            if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                position=initial_layers + 1, main_container="body", check_error=False):
+                                logger().info(
+                                    "Dialog open, skipping value check, Check cell fill")
+                                return
+
+                            if check_value:
+                                cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
+                                if not cell_filled:
+                                    self.search_for_errors()
+                            else:
+                                cell_filled = True
+    
+    def _return_checkbox_grid(self, element):
+
+        try:
+            term = "div[style*='wfunchk_mdi.png'], div[style*='wfchk_mdi.png']"
+            checkbox_div = element.find_elements(By.CSS_SELECTOR, term)
+
+            return next(iter(checkbox_div), None)
+        except:
+            return None
+    
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
         """Compares two values, ignoring formatting differences.
 
@@ -12379,7 +12398,17 @@ class WebappInternal(Base):
         :param select_all: If true return a list of objects, if false return the first
         :return: Return a soup select object
         """
-        container = self.get_current_container()
+
+        container = None
+
+        endtime = time.time() + self.config.time_out / 2
+        while time.time() < endtime and not container:
+            logger().debug('Looking for container')
+            container = self.get_current_container()
+            time.sleep(1)
+
+        if not container:
+            self.log_error('Container doesn''t found!')
 
         return container.select(selector) if select_all else container.select_one(selector)
 
