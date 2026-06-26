@@ -5066,6 +5066,33 @@ class WebappInternal(Base):
                             click_verified = True
                             break
 
+                    # Check 5: False-positive guard — if a previous check "verified" the
+                    # click but the container ID is still the same as before AND the button
+                    # still carries the 'focus' CSS class (meaning it was only focused /
+                    # selected, not actually pressed), downgrade the verification so the
+                    # outer retry loop will attempt the click again.
+                    if click_verified and initial_container_id:
+                        try:
+                            current_container_guard = self.get_current_container()
+                            current_id_guard = (
+                                current_container_guard.attrs.get('id')
+                                if current_container_guard and 'id' in current_container_guard.attrs
+                                else None
+                            )
+                            if current_id_guard == initial_container_id:
+                                btn_element = soup_element() if callable(soup_element) else soup_element
+                                if btn_element is not None:
+                                    btn_class = btn_element.get_attribute('class') or ''
+                                    if 'focus' in btn_class.split():
+                                        click_verified = False
+                                        logger().debug(
+                                            f"  [WARN] Button '{button}' still has 'focus' class and "
+                                            f"container ID unchanged ({initial_container_id}) — "
+                                            f"false-positive detected on attempt {click_attempt}, retrying..."
+                                        )
+                        except Exception:
+                            pass
+
                     if not click_verified and click_attempt < max_click_attempts:
                         logger().warning(f"  [WARN] Click on '{button}' had no detectable effect on attempt {click_attempt}")
                         time.sleep(0.5)
