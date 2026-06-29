@@ -5036,6 +5036,9 @@ class WebappInternal(Base):
                     initial_container_id = container.attrs['id']
 
                 initial_dom_hash = hash(str(self.get_current_DOM()))
+                button_text_before = soup_element.text.strip()
+                skip_focus_retry = True
+                container_text_before = self.get_current_container().text.strip()
 
                 # Configurações de retry (fixas, sem novos parâmetros)
                 max_click_attempts = 3
@@ -5092,11 +5095,9 @@ class WebappInternal(Base):
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
 
-                            # Check 2: Was the DOM modified?
-                            current_dom_hash = hash(str(self.get_current_DOM()))
-                            if initial_dom_hash != current_dom_hash:
+                            if container_text_before != self.get_current_DOM().text.strip():
                                 click_verified = True
-                                logger().debug("  [OK] Click verified: DOM modified")
+                                logger().debug("  [OK] Click verified: container text changed")
                                 break
 
                             # Check 3: Did a new modal/dialog appear?
@@ -5107,6 +5108,15 @@ class WebappInternal(Base):
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: new element appeared")
                                     break
+
+                            # Check 2: Was the DOM modified?
+                            current_dom_hash = hash(str(self.get_current_DOM()))
+                            if initial_dom_hash != current_dom_hash:
+                                click_verified = True
+                                skip_focus_retry = False
+                                logger().debug("  [OK] Click verified: DOM modified")
+                                break
+                            
                             if click_verified:
                                 break
 
@@ -5114,6 +5124,7 @@ class WebappInternal(Base):
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
+                                skip_focus_retry = False
                                 logger().debug("  [OK] Click verified: element lost focus")
                                 break
 
@@ -5128,7 +5139,7 @@ class WebappInternal(Base):
                     # still carries the 'focus' CSS class (meaning it was only focused /
                     # selected, not actually pressed), downgrade the verification so the
                     # outer retry loop will attempt the click again.
-                    if click_verified and initial_container_id:
+                    if click_verified and initial_container_id and not skip_focus_retry:
                         try:
                             current_container_guard = self.get_current_container()
                             current_id_guard = (
@@ -5140,7 +5151,8 @@ class WebappInternal(Base):
                                 btn_element = soup_element() if callable(soup_element) else soup_element
                                 if btn_element is not None:
                                     btn_class = btn_element.get_attribute('class') or ''
-                                    if 'focus' in btn_class.split():
+                                    button_text_after = soup_element.text.strip()
+                                    if 'focus' in btn_class.split() and button_text_before == button_text_after:
                                         click_verified = False
                                         logger().debug(
                                             f"  [WARN] Button '{button}' still has 'focus' class and "
