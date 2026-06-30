@@ -5742,8 +5742,7 @@ class PouiInternal(Base):
         success = False
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
-        match_mode = 1 if module or program_desc else 3
-        program_with_module = f'{program_name} - {module}' if program_name and module else None        
+        match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
 
@@ -5764,9 +5763,31 @@ class PouiInternal(Base):
         
         logger().debug(f'Selecting the routine')
 
-        self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+        self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
+        # Code block for "Change module"
+        endtime = time.time() + 30
+        while time.time() < endtime:
+
+            if self.language.change_module in self.get_current_container().text:
+                logger().info(f'Changing module. Module: {module}')
+                po_select = self.get_container_elements("po-select")
+                if not (po_select and len(po_select) >= 1):
+                    self.log_error("po select doesn't found")
+                po_select_element = po_select[0].find_next('select')
+                combo = self.return_combo_object(po_select_element, shadow_root=False)
+                combo_options = list(filter(lambda x: not(x.get_attribute('disabled') or x.get_attribute('hidden')), combo.options))
+                if module:
+                    value = next(iter(filter(lambda x: x.get_attribute('value').lower().strip() == str(module).lower().strip() , combo_options)), None).text
+                else:
+                    value = next(iter(combo_options), None).text
+                self.click_select(self.language.module, value, 1)
+                self.click_button(self.language.confirm)
+                break
+            
+            time.sleep(1)
+
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
         endtime = time.time() + 120
@@ -5779,7 +5800,7 @@ class PouiInternal(Base):
                 logger().debug(f'Confirm button clicked.')
                 break
             time.sleep(1)
-        # -- --
+        # -- --        
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
