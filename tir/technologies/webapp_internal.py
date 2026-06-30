@@ -5095,7 +5095,7 @@ class WebappInternal(Base):
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
 
-                            if container_text_before != self.get_current_DOM().text.strip():
+                            if container_text_before != self.get_current_container().text.strip():
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
@@ -5109,15 +5109,15 @@ class WebappInternal(Base):
                                     logger().debug("  [OK] Click verified: new element appeared")
                                     break
 
+                            if click_verified:
+                                break
+
                             # Check 2: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
                                 skip_focus_retry = False
                                 logger().debug("  [OK] Click verified: DOM modified")
-                                break
-                            
-                            if click_verified:
                                 break
 
                             # Check 4: Did the element lose focus?
@@ -5151,7 +5151,7 @@ class WebappInternal(Base):
                                 btn_element = soup_element() if callable(soup_element) else soup_element
                                 if btn_element is not None:
                                     btn_class = btn_element.get_attribute('class') or ''
-                                    button_text_after = soup_element.text.strip()
+                                    button_text_after = btn_element.text.strip()
                                     if 'focus' in btn_class.split() and button_text_before == button_text_after:
                                         click_verified = False
                                         logger().debug(
