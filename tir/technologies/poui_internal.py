@@ -3696,13 +3696,8 @@ class PouiInternal(Base):
                 success = self.get_web_value(input_field_element()).strip() != ''
 
             except Exception as e:
-                logger().debug(
-                    f"input_value: exception during field interaction - "
-                    f"field='{field}', value='{value}', position={position}, "
-                    f"input_field type={type(input_field).__name__}, "
-                    f"input_field value={repr(input_field)}, "
-                    f"error={str(e)}"
-                )
+                logger().debug(f"input_value: exception during field interaction -  field='{field}', value='{value}', position={position}, input_field type={type(input_field).__name__}")
+                logger().debug(f'Exception: {str(e)}')
 
     def _click_input(self, input_element):
         """
