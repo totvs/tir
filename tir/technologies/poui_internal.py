@@ -3673,22 +3673,31 @@ class PouiInternal(Base):
 
             input_field = self.return_input_element(field, position, term=self.elements_terms.get('input'))
 
-            self.switch_to_iframe()
+            if not input_field:
+                logger().debug(f"input_value: return_input_element returned empty for field='{field}', retrying...")
+                continue
 
-            input_field_element = lambda: self.soup_to_selenium(input_field)
+            try:
+                self.switch_to_iframe()
 
-            self._click_input(input_field)
-            input_field_element().clear()
-            input_field_element().send_keys(value)
+                input_field_element = lambda: self.soup_to_selenium(input_field)
 
-            if self.switch_to_active_element() == input_field_element() and exec_enter_tab:
-                time.sleep(1)
-                ActionChains(self.driver).key_down(Keys.ENTER).perform()
-                time.sleep(1)
-                ActionChains(self.driver).key_down(Keys.TAB).perform()
+                self._click_input(input_field)
+                input_field_element().clear()
+                input_field_element().send_keys(value)
 
-            time.sleep(2)
-            success = self.get_web_value(input_field_element()).strip() != ''
+                if self.switch_to_active_element() == input_field_element() and exec_enter_tab:
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.TAB).perform()
+
+                time.sleep(2)
+                success = self.get_web_value(input_field_element()).strip() != ''
+
+            except Exception as e:
+                logger().debug(f"input_value: exception during field interaction -  field='{field}', value='{value}', position={position}, input_field type={type(input_field).__name__}")
+                logger().debug(f'Exception: {str(e)}')
 
     def _click_input(self, input_element):
         """
