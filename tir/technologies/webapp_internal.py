@@ -4900,13 +4900,13 @@ class WebappInternal(Base):
         initial_program = ['sigaadv', 'sigamdi']
 
         self.wait_blocker()
-        container = self.get_current_container()
 
         if self.webapp_shadowroot():
             term_button="wa-button"
         else:
             term_button="button, .thbutton"
 
+        container = self.get_current_container()
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
@@ -5035,10 +5035,14 @@ class WebappInternal(Base):
                 if container and 'id' in container.attrs:
                     initial_container_id = container.attrs['id']
 
+                button_element_id = None
+                button_element_id = soup_element.get_attribute('id') or 'unknow'
+
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_text_before = self.get_current_container().text.strip()
+                initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
 
                 # Configurações de retry (fixas, sem novos parâmetros)
                 max_click_attempts = 3
@@ -5049,7 +5053,7 @@ class WebappInternal(Base):
                     click_attempt += 1
                     current_clicked_element = None
 
-                    logger().debug(f"Click attempt {click_attempt}/{max_click_attempts} on '{button}' in container: {initial_container_id}")
+                    logger().debug(f"Click attempt {click_attempt}/{max_click_attempts} on '{button}' (id: {button_element_id} in container: {initial_container_id})")
 
                     if self.webapp_shadowroot():
                         self.scroll_to_element(soup_element)
@@ -5100,19 +5104,17 @@ class WebappInternal(Base):
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
 
-                            # Check 3: Did a new modal/dialog appear?
-                            new_elements = self.driver.find_elements(By.CSS_SELECTOR,
-                                ".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
-                            for elem in new_elements:
-                                if self.element_is_displayed(elem):
-                                    click_verified = True
-                                    logger().debug("  [OK] Click verified: new element appeared")
-                                    break
+                            # Check 2: Did a new modal/dialog appear?
+                            current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                            if current_layers != initial_layers:
+                                click_verified = True
+                                logger().debug(f"  [OK] Click verified: new modal/dialog appeared (layers changed from {initial_layers} to {current_layers})")
+                                break
 
                             if click_verified:
                                 break
 
-                            # Check 2: Was the DOM modified?
+                            # Check 3: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
