@@ -5032,8 +5032,9 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
-                if container and 'id' in container.attrs:
-                    initial_container_id = container.attrs['id']
+                container_before_click = self.get_current_container()
+                if container_before_click and 'id' in container_before_click.attrs:
+                    initial_container_id = container_before_click.attrs['id']
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
