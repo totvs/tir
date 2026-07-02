@@ -5776,7 +5776,7 @@ class PouiInternal(Base):
                                 program_call=True, match_mode=match_mode)
         
         # Code block for "Change module"
-        endtime = time.time() + 30
+        endtime = time.time() + (30 if program_name != 'CFGX017' else 5)
         while time.time() < endtime:
 
             if self.language.change_module in self.get_current_container().text:
@@ -5799,7 +5799,7 @@ class PouiInternal(Base):
 
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + 120
+        endtime = time.time() + (120 if program_name != 'CFGX017' else 5)
         while time.time() < endtime:
             logger().debug(f'Waiting for the confirm button.')
 
@@ -5826,7 +5826,8 @@ class PouiInternal(Base):
 
         success = (ele_hidden) and (wtb_before != wtb_after)
 
-        self.close_after_routine(program_name)
+        if program_name != 'CFGX017':
+            self.close_after_routine(program_name)
 
         if not success:
             message = "Couldn't set the program."
