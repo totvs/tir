@@ -5823,7 +5823,17 @@ class PouiInternal(Base):
             if closed_user_guide:
                 self.closed_user_guide_routines.append(program_name)
 
-    def _select_routine_module(self, module: str) -> None:
+    def _select_routine_module(self, module: str = None) -> None:
+        """
+        [Internal]
+        
+        Waits for the "Change module" modal to appear and selects the appropriate module.
+        If a module is provided, it matches the option by its value attribute and selects the corresponding text.
+        If no module is provided, the first available option is selected.
+        
+        :param module: The module value to select. If empty, selects the first available option. - **Default:** ""
+        :type module: str
+        """
 
         logger().info(f'Waiting for change module modal')
 
