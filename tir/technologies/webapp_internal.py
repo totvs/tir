@@ -5279,7 +5279,6 @@ class WebappInternal(Base):
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
         """
-        text_tags = 'wa-text-view'
         current_container = self.get_current_container()
         if current_container:
             return [x.get('caption') for x in current_container.find_all(caption=True)]
