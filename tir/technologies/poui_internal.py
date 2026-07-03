@@ -5776,27 +5776,8 @@ class PouiInternal(Base):
         self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
-        # Code block for "Change module"
-        endtime = time.time() + (30 if program_name != parameter_routine else 5)
-        while time.time() < endtime:
-
-            if self.language.change_module in self.get_current_container().text:
-                logger().info(f'Changing module. Module: {module}')
-                po_select = self.get_container_elements("po-select")
-                if not (po_select and len(po_select) >= 1):
-                    self.log_error("po select doesn't found")
-                po_select_element = po_select[0].find_next('select')
-                combo = self.return_combo_object(po_select_element, shadow_root=False)
-                combo_options = list(filter(lambda x: not(x.get_attribute('disabled') or x.get_attribute('hidden')), combo.options))
-                if module:
-                    value = next(iter(filter(lambda x: x.get_attribute('value').lower().strip() == str(module).lower().strip() , combo_options)), None).text
-                else:
-                    value = next(iter(combo_options), None).text
-                self.click_select(self.language.module, value, 1)
-                self.click_button(self.language.confirm)
-                break
-            
-            time.sleep(1)
+        if program_name != parameter_routine:
+            self._select_routine_module(module)
 
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
@@ -5844,6 +5825,52 @@ class PouiInternal(Base):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
                 self.closed_user_guide_routines.append(program_name)
+
+    def _select_routine_module(self, module: str = None) -> None:
+        """
+        [Internal]
+
+        Waits for the "Change module" modal to appear and selects the appropriate module.
+
+        If ``module`` is provided, it is used directly as the visible text to be selected
+        in the combo. If not provided, the first available option in the combo is selected.
+
+        :param module: The visible text of the module to select in the "Change module" dialog.
+                       If empty, the first available option will be selected. - **Default:** ""
+        :type module: str
+        :return: None
+        """
+
+        logger().info(f'Waiting for change module modal')
+
+        endtime = time.time() + 30
+        while time.time() < endtime:
+
+            if self.language.change_module in self.get_current_container().text:
+                logger().info(f'Changing module. Module: {module}')
+
+                if not module:
+                    po_select = self.get_container_elements("po-select")
+                    if not (po_select and len(po_select) >= 1):
+                        self.log_error("po select doesn't found")
+                    po_select_element = po_select[0].find_next('select')
+                    combo = self.return_combo_object(po_select_element, shadow_root=False)
+                    combo_options = list(filter(lambda x: not(x.get_attribute('disabled') or x.get_attribute('hidden')), combo.options))
+                    first_option = next(iter(combo_options), None)
+                    if not first_option:
+                        self.log_error("first option doesn't found")
+                    value = first_option.text
+
+                else:
+                    value = module
+                
+                self.click_select(self.language.module, value, 1)
+                self.click_button(self.language.confirm)
+
+                break
+            
+            time.sleep(1)
+
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
