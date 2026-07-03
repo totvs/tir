@@ -487,14 +487,14 @@ class Webapp():
 
         :param program_name: The program name
         :type program_name: str
-        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. Only applies to New Home (POUI). - **Default:** "" (empty string)
         :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
-        >>> oHelper.Program("CRDA200", module="CRD")
+        >>> oHelper.Program("FINA410", module="Controle de Lojas")
         """
         self.__router.Program(program_name=program_name, module=module)
 
@@ -2350,7 +2350,7 @@ class Poui():
 
         :param program_name: The program name
         :type program_name: str
-        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. - **Default:** "" (empty string)
         :type module: str
 
         Usage:
