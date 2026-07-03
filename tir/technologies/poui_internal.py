@@ -5776,7 +5776,8 @@ class PouiInternal(Base):
         self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
-        self._select_routine_module(module)
+        if program_name != parameter_routine:
+            self._select_routine_module(module)
 
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
