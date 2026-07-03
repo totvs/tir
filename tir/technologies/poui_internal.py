@@ -5829,13 +5829,16 @@ class PouiInternal(Base):
     def _select_routine_module(self, module: str = None) -> None:
         """
         [Internal]
-        
+
         Waits for the "Change module" modal to appear and selects the appropriate module.
-        If a module is provided, it matches the option by its value attribute and selects the corresponding text.
-        If no module is provided, the first available option is selected.
-        
-        :param module: The module value to select. If empty, selects the first available option. - **Default:** ""
+
+        If ``module`` is provided, it is used directly as the visible text to be selected
+        in the combo. If not provided, the first available option in the combo is selected.
+
+        :param module: The visible text of the module to select in the "Change module" dialog.
+                       If empty, the first available option will be selected. - **Default:** ""
         :type module: str
+        :return: None
         """
 
         logger().info(f'Waiting for change module modal')
