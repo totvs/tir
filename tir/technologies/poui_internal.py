@@ -5754,6 +5754,7 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
+        parameter_routine = 'CFGX017'
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -5779,7 +5780,7 @@ class PouiInternal(Base):
 
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + 120
+        endtime = time.time() + (120 if program_name != parameter_routine else 5)
         while time.time() < endtime:
             logger().debug(f'Waiting for the confirm button.')
 
@@ -5806,7 +5807,8 @@ class PouiInternal(Base):
 
         success = (ele_hidden) and (wtb_before != wtb_after)
 
-        self.close_after_routine(program_name)
+        if program_name != parameter_routine:
+            self.close_after_routine(program_name)
 
         if not success:
             message = "Couldn't set the program."

@@ -5032,8 +5032,9 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
-                if container and 'id' in container.attrs:
-                    initial_container_id = container.attrs['id']
+                container_before_click = self.get_current_container()
+                if container_before_click and 'id' in container_before_click.attrs:
+                    initial_container_id = container_before_click.attrs['id']
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
@@ -5041,7 +5042,7 @@ class WebappInternal(Base):
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
-                container_text_before = self.get_current_container().text.strip()
+                container_texts_before = self.get_current_container_texts()
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
 
                 # Configurações de retry (fixas, sem novos parâmetros)
@@ -5099,7 +5100,7 @@ class WebappInternal(Base):
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
 
-                            if container_text_before != self.get_current_container().text.strip():
+                            if container_texts_before != self.get_current_container_texts():
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
@@ -5273,7 +5274,16 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
-    
+
+
+    def get_current_container_texts(self):
+        """This method returns a list of all texts from current container descendents
+        """
+        current_container = self.get_current_container()
+        if current_container:
+            return [x.get('caption') for x in current_container.find_all(caption=True)]
+
+
     def set_button_character(self, term, position=1, check_error=True):
         """
         [Internal]
