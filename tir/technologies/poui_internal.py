@@ -4584,10 +4584,16 @@ class PouiInternal(Base):
 
         radio_status = lambda: self.radio_is_active(element_to_check)
         success = lambda: radio_status() == active
+        click_type = 1
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
-            self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
+            self.click(selenium_radio, click_type=enum.ClickType(click_type))
+
+            click_type += 1
+
+            if click_type > 3:
+                click_type = 1
         
         logger().debug("Radio button is now %s", "active" if radio_status() else "inactive")
 
@@ -4619,6 +4625,11 @@ class PouiInternal(Base):
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
             radio_class = radio_selenium.get_attribute('class') or ''
             return 'active' in radio_class or 'k-selected' in radio_class
+
+        radio_input = next(iter(radio.select('input')), None)
+        if radio and radio.name == 'po-radio' and radio_input:
+            selenium_input = self.soup_to_selenium(radio_input, twebview=True)
+            return selenium_input.get_property('checked')
 
         return False
 
@@ -6800,3 +6811,51 @@ class PouiInternal(Base):
             self.click_button(self.language.select)
         except Exception as e:
             self.log_error(f"Failed to interact with THF lookup field '{label}': {str(e)}")
+
+    def click_radio(self, label: str, active: bool = True, position: int = 1):
+        """
+        [Internal]
+
+        Locates a po-radio element by its label and toggles it to the desired state.
+
+        :param label: Visible label text of the radio button.
+        :type label: str
+        :param active: Target state. True = selected, False = not selected. - **Default:** True
+        :type active: bool
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        """
+        logger().info(f"Clicking on radio input {label}")
+
+        radio = self.find_radio_by_label(label=label, position=position)
+
+        self.toggle_radio(radio, active)
+
+    def find_radio_by_label(self, label: str, position: int = 1):
+        """
+        [Internal]
+
+        Finds a po-radio or input[type='radio'] element by its visible label text.
+
+        :param label: Visible label text to match (case-insensitive).
+        :type label: str
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        :return: The matching BeautifulSoup element.
+        :rtype: bs4.element.Tag
+        """
+        logger().debug(f"Finding radio input by label {label}...")
+
+        term = "po-radio, input[type='radio']"
+        position -= 1
+
+        radios = self.get_container_elements(term, filter_displayeds=True)
+
+        radios = list(filter(lambda x: x.text.lower().strip() == label.lower().strip(), radios))
+
+        if not (radios and len(radios) -1 >= position):
+            self.log_error(f"Couldn't find radio element with label: {label}.")
+
+        logger().debug(f"Radio input found.")
+
+        return radios[position]
