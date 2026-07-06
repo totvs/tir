@@ -8281,6 +8281,7 @@ class WebappInternal(Base):
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
                     return [filtered_object]
+                return object
 
         elif isinstance(object, Tag):
             if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
