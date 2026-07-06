@@ -5043,7 +5043,7 @@ class WebappInternal(Base):
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_texts_before = self.get_current_container_texts()
-                grids_on_screen_before = self.get_grid(grid_list=False, wait=False)
+                grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False)
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
 
                 # Configurações de retry (fixas, sem novos parâmetros)
@@ -6542,7 +6542,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6572,9 +6572,9 @@ class WebappInternal(Base):
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
             if not grid_element:
-                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)
             else:
-                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
+                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)
 
             if grids:
                 grids = self.filter_active_tabs(grids)
