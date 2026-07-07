@@ -2016,7 +2016,7 @@ class WebappInternal(Base):
         :rtype: int
         """
 
-        soup = self.get_current_DOM()        
+        soup = self.get_current_DOM()
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
@@ -5045,6 +5045,7 @@ class WebappInternal(Base):
                 container_texts_before = self.get_current_container_texts()
                 grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False)
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
                 # Configurações de retry (fixas, sem novos parâmetros)
                 max_click_attempts = 3
@@ -5123,7 +5124,14 @@ class WebappInternal(Base):
                             if click_verified:
                                 break
 
-                            # Check 5: Was the DOM modified?
+                            # Check 5: Did a new popup appear?
+                            popup_after = self.check_layers(".tmenupopupitem, wa-menu-popup")
+                            if popup_before != popup_after:
+                                click_verified = True
+                                logger().debug(f"  [OK] Click verified: popup appeared (popup changed from {popup_before} to {popup_after})")
+                                break
+
+                            # Check 6: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
@@ -5131,7 +5139,7 @@ class WebappInternal(Base):
                                 logger().debug("  [OK] Click verified: DOM modified")
                                 break
 
-                            # Check 6: Did the element lose focus?
+                            # Check 7: Did the element lose focus?
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
@@ -5283,6 +5291,7 @@ class WebappInternal(Base):
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
 
+        self.reset_container_position()
 
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
