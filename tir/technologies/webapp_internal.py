@@ -6589,11 +6589,10 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
-            if not grid_element:
-                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)
-            else:
-                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR, check_error=check_error)
-
+            
+            container = self.get_current_container()
+            grids = container.select(grid_element or term)
+            
             if grids:
                 grids = self.filter_active_tabs(grids)
                 grids = list(filter(lambda x: self.element_is_displayed(x), grids))
