@@ -5287,12 +5287,21 @@ class WebappInternal(Base):
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
         """
+        self.reset_container_position()
         current_container = self.get_current_container()
         if current_container:
             caption_elements = current_container.find_all(caption=True)
             elements_displayed = self.filter_is_displayed(caption_elements)
             return [x.get('caption') for x in elements_displayed]
 
+
+    def reset_container_position(self):
+        current_container = self.get_current_container()
+        panels = current_container.select('wa-panel')
+        displayeds_panels = list(filter(lambda x: self.element_is_displayed(x), panels))
+        if displayeds_panels:
+            panel_filtred = next(iter(displayeds_panels),None)
+            self.scroll_to_element(self.soup_to_selenium(panel_filtred))
 
 
     def set_button_character(self, term, position=1, check_error=True):
