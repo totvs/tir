@@ -5043,7 +5043,7 @@ class WebappInternal(Base):
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_texts_before = self.get_current_container_texts()
-                grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False)
+                grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True)
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                 popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
@@ -5109,7 +5109,7 @@ class WebappInternal(Base):
                                 break
                             
                             # Check 3: Did the grids changed?
-                            if grids_on_screen_before != self.get_grid(grid_list=False, wait=False):
+                            if grids_on_screen_before != self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True):
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: Grids changed")
                                 break
@@ -6560,7 +6560,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True, current_container=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6574,6 +6574,8 @@ class WebappInternal(Base):
         :param grid_list: Return all grids.
         :type grid_list: bool
         :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
+        :type wait: bool
+        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
         :type wait: bool
 
         Usage:
@@ -6589,9 +6591,13 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
-            
-            container = self.get_current_container()
-            grids = container.select(grid_element or term)
+
+            if not current_container:
+                grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       check_error=check_error)
+            else:
+                container = self.get_current_container()
+                grids = container.select(grid_element or term)
             
             if grids:
                 grids = self.filter_active_tabs(grids)
