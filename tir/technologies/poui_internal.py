@@ -1434,7 +1434,7 @@ class PouiInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position)
+            self.click_radio(field, value, position)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
@@ -3645,24 +3645,39 @@ class PouiInternal(Base):
 
     def input_value(self, field: str, value: str, position: int, exec_enter_tab: bool = True):
         """
-        Filling input component of POUI
+        Filling input component of POUI.
         https://po-ui.io/documentation/po-input
 
-        :param field: Input text title that you want to fill
+        When ``value`` is a **boolean**, the method automatically redirects to
+        :meth:`click_radio`, toggling the po-radio element that matches ``field``
+        to the desired state (``True`` = selected, ``False`` = deselected).
+        In this case the ``exec_enter_tab`` parameter is ignored.
+
+        :param field: Input text title that you want to fill, or the visible label
+            of the radio button when ``value`` is a boolean.
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value to fill in the input. If a **bool** is passed, the method
+            delegates to :meth:`click_radio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-        :param exec_enter_tab: Defines whether the enter and tab commands will be executed after filling in the field. - **Default:** True
+        :param exec_enter_tab: Defines whether the ENTER and TAB keys will be sent
+            after filling in the field. Ignored when ``value`` is a boolean. - **Default:** True
         :type exec_enter_tab: bool
 
         Usage:
 
-        >>> # Call the method:
+        >>> # Fill a regular text input:
         >>> oHelper.input_value('Name', 'Test')
+        >>> # Toggle a radio button (delegates to click_radio):
+        >>> oHelper.input_value('Status', True)
+        >>> oHelper.input_value('Status', False)
         :return: None
         """
+
+        if isinstance(value, bool):
+            self.click_radio(field, value, position)
+            return
 
         logger().info(f"Input Value in:'{field}'")
 
@@ -4584,10 +4599,16 @@ class PouiInternal(Base):
 
         radio_status = lambda: self.radio_is_active(element_to_check)
         success = lambda: radio_status() == active
+        click_type = 1
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
-            self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
+            self.click(selenium_radio, click_type=enum.ClickType(click_type))
+
+            click_type += 1
+
+            if click_type > 3:
+                click_type = 1
         
         logger().debug("Radio button is now %s", "active" if radio_status() else "inactive")
 
@@ -4619,6 +4640,11 @@ class PouiInternal(Base):
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
             radio_class = radio_selenium.get_attribute('class') or ''
             return 'active' in radio_class or 'k-selected' in radio_class
+
+        radio_input = next(iter(radio.select('input')), None)
+        if radio and radio.name == 'po-radio' and radio_input:
+            selenium_input = self.soup_to_selenium(radio_input, twebview=True)
+            return selenium_input.get_property('checked')
 
         return False
 
@@ -6829,3 +6855,54 @@ class PouiInternal(Base):
             self.click_button(self.language.select)
         except Exception as e:
             self.log_error(f"Failed to interact with THF lookup field '{label}': {str(e)}")
+
+    def click_radio(self, label: str, active: bool = True, position: int = 1):
+        """
+        [Internal]
+
+        Locates a po-radio element by its label and toggles it to the desired state.
+
+        :param label: Visible label text of the radio button.
+        :type label: str
+        :param active: Target state. True = selected, False = not selected. - **Default:** True
+        :type active: bool
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        """
+        logger().info(f"Clicking on radio input {label}")
+
+        radio = self.find_radio_by_label(label=label, position=position)
+
+        self.toggle_radio(radio, active)
+
+    def find_radio_by_label(self, label: str, position: int = 1):
+        """
+        [Internal]
+
+        Finds a po-radio or input[type='radio'] element by its visible label text.
+
+        :param label: Visible label text to match (case-insensitive).
+        :type label: str
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        :return: The matching BeautifulSoup element.
+        :rtype: bs4.element.Tag
+        """
+        logger().debug(f"Finding radio input by label {label}...")
+
+        term = "po-radio, input[type='radio']"
+        position -= 1
+
+        radios = self.get_container_elements(term, filter_displayeds=True)
+
+        if not radios:
+            self.log_error("Couldn't find any radio element")
+
+        radios = list(filter(lambda x: x.text.lower().strip() == label.lower().strip(), radios))
+
+        if not (radios and len(radios) -1 >= position):
+            self.log_error(f"Couldn't find radio element with label: {label}.")
+
+        logger().debug(f"Radio input found.")
+
+        return radios[position]

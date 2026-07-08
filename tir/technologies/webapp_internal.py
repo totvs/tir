@@ -5043,7 +5043,7 @@ class WebappInternal(Base):
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_texts_before = self.get_current_container_texts()
-                grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True)
+                df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                 popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
@@ -5109,10 +5109,15 @@ class WebappInternal(Base):
                                 break
                             
                             # Check 3: Did the grids changed?
-                            if grids_on_screen_before != self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True):
-                                click_verified = True
-                                logger().debug("  [OK] Click verified: Grids changed")
-                                break
+                            df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
+                                                                                  current_container=True, throw_error=False)
+                            if grids_on_screen_before or grids_on_screen_after:
+                                grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
+                                df_content_changed = not df_before.equals(df_after)
+                                if grid_structure_changed or df_content_changed:
+                                    click_verified = True
+                                    logger().debug("  [OK] Click verified: Grids changed")
+                                    break
 
                             # Check 4: Did a new modal/dialog appear?
                             current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
@@ -5147,7 +5152,7 @@ class WebappInternal(Base):
                                 logger().debug("  [OK] Click verified: element lost focus")
                                 break
 
-                        except Exception:
+                        except Exception as e:
                             # Element may have disappeared (also indicates success)
                             logger().debug("  [OK] Click verified: element no longer exists")
                             click_verified = True
@@ -6311,15 +6316,23 @@ class WebappInternal(Base):
             count += 1
 
 
-    def grid_dataframe(self, grid_number=0):
+    def grid_dataframe(self, grid_number=0, wait=True, check_error=True, current_container=False, throw_error=True):
         """
         [Internal]
         """
         term = self.grid_selectors["new_web_app"]
 
-        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+        if wait:
+            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        grid = self.get_grid(grid_number=grid_number)
+        grid = self.get_grid(grid_number=grid_number, wait=wait, check_error=check_error,
+                            current_container=current_container)
+
+        if not grid:
+            if throw_error:
+                self.log_error("Couldn't find grid")
+            else:
+                return (pd.DataFrame(), None)
 
         try:
             shadow_grid = self.soup_to_selenium(grid)
