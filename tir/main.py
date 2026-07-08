@@ -1798,8 +1798,9 @@ class Poui():
 
         :param field: Input text title that you want to fill
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value that fill in input. If a **bool** is passed, the method
+            delegates to :meth:`ClickRadio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
@@ -1807,6 +1808,10 @@ class Poui():
 
         >>> # Call the method:
         >>> oHelper.InputValue('Name', 'Test')
+        >>> # Select a radio button (delegates to click_radio):
+        >>> oHelper.InputValue('Status', True)
+        >>> # Deselect a radio button:
+        >>> oHelper.InputValue('Status', False)
         :return: None
         """
         self.__poui.input_value(field, value, position)
