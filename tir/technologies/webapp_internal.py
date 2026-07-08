@@ -5109,14 +5109,12 @@ class WebappInternal(Base):
                                 break
                             
                             # Check 3: Did the grids changed?
-                            if grids_on_screen_before and not df_before.empty:
-                                df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
-                                                                                      current_container=True, throw_error=False)
-                                if grids_on_screen_after and not df_before.empty:                                                  
-                                    if grids_on_screen_before != grids_on_screen_after and not df_before.equals(df_after):
-                                        click_verified = True
-                                        logger().debug("  [OK] Click verified: Grids changed")
-                                        break
+                            df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
+                                                                                  current_container=True, throw_error=False)                                              
+                            if grids_on_screen_before != grids_on_screen_after and not df_before.equals(df_after):
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: Grids changed")
+                                break
 
                             # Check 4: Did a new modal/dialog appear?
                             current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
