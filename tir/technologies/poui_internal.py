@@ -3645,24 +3645,39 @@ class PouiInternal(Base):
 
     def input_value(self, field: str, value: str, position: int, exec_enter_tab: bool = True):
         """
-        Filling input component of POUI
+        Filling input component of POUI.
         https://po-ui.io/documentation/po-input
 
-        :param field: Input text title that you want to fill
+        When ``value`` is a **boolean**, the method automatically redirects to
+        :meth:`click_radio`, toggling the po-radio element that matches ``field``
+        to the desired state (``True`` = selected, ``False`` = deselected).
+        In this case the ``exec_enter_tab`` parameter is ignored.
+
+        :param field: Input text title that you want to fill, or the visible label
+            of the radio button when ``value`` is a boolean.
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value to fill in the input. If a **bool** is passed, the method
+            delegates to :meth:`click_radio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-        :param exec_enter_tab: Defines whether the enter and tab commands will be executed after filling in the field. - **Default:** True
+        :param exec_enter_tab: Defines whether the ENTER and TAB keys will be sent
+            after filling in the field. Ignored when ``value`` is a boolean. - **Default:** True
         :type exec_enter_tab: bool
 
         Usage:
 
-        >>> # Call the method:
+        >>> # Fill a regular text input:
         >>> oHelper.input_value('Name', 'Test')
+        >>> # Toggle a radio button (delegates to click_radio):
+        >>> oHelper.input_value('Status', True)
+        >>> oHelper.input_value('Status', False)
         :return: None
         """
+
+        if isinstance(value, bool):
+            self.click_radio(field, value, position)
+            return
 
         logger().info(f"Input Value in:'{field}'")
 
