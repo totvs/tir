@@ -2016,7 +2016,7 @@ class WebappInternal(Base):
         :rtype: int
         """
 
-        soup = self.get_current_DOM()        
+        soup = self.get_current_DOM()
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
@@ -5032,8 +5032,9 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
-                if container and 'id' in container.attrs:
-                    initial_container_id = container.attrs['id']
+                container_before_click = self.get_current_container()
+                if container_before_click and 'id' in container_before_click.attrs:
+                    initial_container_id = container_before_click.attrs['id']
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
@@ -5041,8 +5042,10 @@ class WebappInternal(Base):
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
-                container_text_before = self.get_current_container().text.strip()
+                container_texts_before = self.get_current_container_texts()
+                grids_on_screen_before = self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True)
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
                 # Configurações de retry (fixas, sem novos parâmetros)
                 max_click_attempts = 3
@@ -5099,12 +5102,19 @@ class WebappInternal(Base):
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
 
-                            if container_text_before != self.get_current_container().text.strip():
+                            # Check 2: Did the container texts changed?
+                            if container_texts_before != self.get_current_container_texts():
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
+                            
+                            # Check 3: Did the grids changed?
+                            if grids_on_screen_before != self.get_grid(grid_list=False, wait=False, check_error=False, current_container=True):
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: Grids changed")
+                                break
 
-                            # Check 2: Did a new modal/dialog appear?
+                            # Check 4: Did a new modal/dialog appear?
                             current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                             if current_layers != initial_layers:
                                 click_verified = True
@@ -5114,7 +5124,14 @@ class WebappInternal(Base):
                             if click_verified:
                                 break
 
-                            # Check 3: Was the DOM modified?
+                            # Check 5: Did a new popup appear?
+                            popup_after = self.check_layers(".tmenupopupitem, wa-menu-popup")
+                            if popup_before != popup_after:
+                                click_verified = True
+                                logger().debug(f"  [OK] Click verified: popup appeared (popup changed from {popup_before} to {popup_after})")
+                                break
+
+                            # Check 6: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
@@ -5122,7 +5139,7 @@ class WebappInternal(Base):
                                 logger().debug("  [OK] Click verified: DOM modified")
                                 break
 
-                            # Check 4: Did the element lose focus?
+                            # Check 7: Did the element lose focus?
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
@@ -5273,7 +5290,29 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
-    
+
+        self.reset_container_position()
+
+    def get_current_container_texts(self):
+        """This method returns a list of all texts from current container descendents
+        """
+        self.reset_container_position()
+        current_container = self.get_current_container()
+        if current_container:
+            caption_elements = current_container.find_all(caption=True)
+            elements_displayed = self.filter_is_displayed(caption_elements)
+            return [x.get('caption') for x in elements_displayed]
+
+
+    def reset_container_position(self):
+        current_container = self.get_current_container()
+        panels = current_container.select('wa-panel')
+        displayeds_panels = list(filter(lambda x: self.element_is_displayed(x), panels))
+        if displayeds_panels:
+            panel_filtred = next(iter(displayeds_panels),None)
+            self.scroll_to_element(self.soup_to_selenium(panel_filtred))
+
+
     def set_button_character(self, term, position=1, check_error=True):
         """
         [Internal]
@@ -6521,7 +6560,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None, grid_list=False):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True, current_container=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6534,11 +6573,17 @@ class WebappInternal(Base):
         :rtype: BeautifulSoup object
         :param grid_list: Return all grids.
         :type grid_list: bool
+        :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
+        :type wait: bool
+        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
+        :type wait: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> # Calling without waiting for the grid:
+        >>> my_grid = self.get_grid(wait=False)
         """
         success = None
         grids = None
@@ -6546,11 +6591,14 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
-            if not grid_element:
-                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
+            if not current_container:
+                grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       check_error=check_error)
+            else:
+                container = self.get_current_container()
+                grids = container.select(grid_element or term)
+            
             if grids:
                 grids = self.filter_active_tabs(grids)
                 grids = list(filter(lambda x: self.element_is_displayed(x), grids))
@@ -6560,8 +6608,13 @@ class WebappInternal(Base):
                     elif len(grids) - 1 >= grid_number:
                         success = grids[grid_number]
 
+            if not wait:
+                break
+
         if success:
             return success
+        elif not wait:
+            return grids
         else:
             self.log_error("Couldn't find grid.")
 
@@ -8251,6 +8304,7 @@ class WebappInternal(Base):
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
                     return [filtered_object]
+                return object
 
         elif isinstance(object, Tag):
             if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
