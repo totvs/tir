@@ -1434,7 +1434,7 @@ class PouiInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position)
+            self.click_radio(field, value, position)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
@@ -6879,6 +6879,9 @@ class PouiInternal(Base):
         position -= 1
 
         radios = self.get_container_elements(term, filter_displayeds=True)
+
+        if not radios:
+            self.log_error("Couldn't find any radio element")
 
         radios = list(filter(lambda x: x.text.lower().strip() == label.lower().strip(), radios))
 
