@@ -5311,6 +5311,9 @@ class WebappInternal(Base):
 
     def reset_container_position(self):
         current_container = self.get_current_container()
+        if not current_container:
+            logger().debug("reset_container_position: Current container not found.")
+            return
         panels = current_container.select('wa-panel')
         displayeds_panels = list(filter(lambda x: self.element_is_displayed(x), panels))
         if displayeds_panels:
