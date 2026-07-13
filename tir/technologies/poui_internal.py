@@ -4599,7 +4599,7 @@ class PouiInternal(Base):
 
         radio_status = lambda: self.radio_is_active(element_to_check)
         success = lambda: radio_status() == active
-        click_type = 1
+        click_type = 2
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
