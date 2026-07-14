@@ -5116,7 +5116,14 @@ class WebappInternal(Base):
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
-                            
+
+                            # Check exceptions
+                            button_exception = button.strip().lower() == self.language.copy.lower()
+                            if button_exception:
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: exceptions")
+                                break
+
                             # Check 3: Did the grids changed?
                             df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
                                                                                   current_container=True, throw_error=False)
