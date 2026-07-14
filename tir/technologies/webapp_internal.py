@@ -5039,11 +5039,20 @@ class WebappInternal(Base):
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
 
+                rows_box_state_before = []
+                rows = []
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_texts_before = self.get_current_container_texts()
                 df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
+                if grids_on_screen_before:
+                    # get grid rows
+                    rows = self.execute_js_selector('tr', self.soup_to_selenium(grids_on_screen_before))
+                    if rows:
+                        # get box state
+                        rows_box_state_before = list(map(lambda x: self.get_row_divs_style(x), rows))
+
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                 popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
@@ -5107,14 +5116,23 @@ class WebappInternal(Base):
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
-                            
+
+                            # Check exceptions
+                            button_exception = button.strip().lower() == self.language.copy.lower()
+                            if button_exception:
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: exceptions")
+                                break
+
                             # Check 3: Did the grids changed?
                             df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
                                                                                   current_container=True, throw_error=False)
                             if grids_on_screen_before or grids_on_screen_after:
                                 grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
                                 df_content_changed = not df_before.equals(df_after)
-                                if grid_structure_changed or df_content_changed:
+                                rows_box_state_after = list(map(lambda x: self.get_row_divs_style(x), rows))
+                                rows_state_changed = rows_box_state_after != rows_box_state_before
+                                if grid_structure_changed or df_content_changed or rows_state_changed:
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: Grids changed")
                                     break
@@ -5297,6 +5315,7 @@ class WebappInternal(Base):
             system_info()
 
         self.reset_container_position()
+
 
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
@@ -6231,6 +6250,38 @@ class WebappInternal(Base):
 
         if not success:
             self.log_error(f"Content doesn't found on the screen! {first_content}")
+
+    def get_row_divs_style(self, tr_element):
+        """
+        [Internal]
+
+        Gets the "style" attribute of the inner div of every column (td) inside
+        the given row (tr). Columns without an inner div will have None in their
+        respective position.
+
+        :param tr_element: The row (tr) Selenium WebElement to extract the columns' divs style from.
+        :type tr_element: Selenium object
+
+        :return: A list with the style attribute string of each column's div, in order.
+        :rtype: list of str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> tr = self.execute_js_selector('tbody > tr', sel_grid)[0]
+        >>> styles = self.get_row_divs_style(tr)
+        """
+        if tr_element is None:
+            return []
+
+        columns = tr_element.find_elements(By.CSS_SELECTOR, 'td')
+        styles = []
+
+        for column in columns:
+            inner_div = next(iter(column.find_elements(By.CSS_SELECTOR, 'div')), None)
+            styles.append(inner_div.get_attribute('style') if inner_div else None)
+
+        return styles
 
     def get_box_state(self, current_element):
         try:
