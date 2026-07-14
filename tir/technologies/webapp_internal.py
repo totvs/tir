@@ -5039,11 +5039,20 @@ class WebappInternal(Base):
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
 
+                rows_box_state_before = []
+                rows = []
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
                 skip_focus_retry = True
                 container_texts_before = self.get_current_container_texts()
                 df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
+                if grids_on_screen_before:
+                    # get grid rows
+                    rows = self.execute_js_selector('tr', self.soup_to_selenium(grids_on_screen_before))
+                    if rows:
+                        # get box state
+                        rows_box_state_before = list(map(lambda x: self.get_row_divs_style(x), rows))
+
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                 popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
@@ -5107,14 +5116,23 @@ class WebappInternal(Base):
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
-                            
+
+                            # Check exceptions
+                            button_exception = button.strip().lower() == self.language.copy.lower()
+                            if button_exception:
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: exceptions")
+                                break
+
                             # Check 3: Did the grids changed?
                             df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
                                                                                   current_container=True, throw_error=False)
                             if grids_on_screen_before or grids_on_screen_after:
                                 grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
                                 df_content_changed = not df_before.equals(df_after)
-                                if grid_structure_changed or df_content_changed:
+                                rows_box_state_after = list(map(lambda x: self.get_row_divs_style(x), rows))
+                                rows_state_changed = rows_box_state_after != rows_box_state_before
+                                if grid_structure_changed or df_content_changed or rows_state_changed:
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: Grids changed")
                                     break
@@ -5297,6 +5315,7 @@ class WebappInternal(Base):
             system_info()
 
         self.reset_container_position()
+
 
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
@@ -6231,6 +6250,38 @@ class WebappInternal(Base):
 
         if not success:
             self.log_error(f"Content doesn't found on the screen! {first_content}")
+
+    def get_row_divs_style(self, tr_element):
+        """
+        [Internal]
+
+        Gets the "style" attribute of the inner div of every column (td) inside
+        the given row (tr). Columns without an inner div will have None in their
+        respective position.
+
+        :param tr_element: The row (tr) Selenium WebElement to extract the columns' divs style from.
+        :type tr_element: Selenium object
+
+        :return: A list with the style attribute string of each column's div, in order.
+        :rtype: list of str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> tr = self.execute_js_selector('tbody > tr', sel_grid)[0]
+        >>> styles = self.get_row_divs_style(tr)
+        """
+        if tr_element is None:
+            return []
+
+        columns = tr_element.find_elements(By.CSS_SELECTOR, 'td')
+        styles = []
+
+        for column in columns:
+            inner_div = next(iter(column.find_elements(By.CSS_SELECTOR, 'div')), None)
+            styles.append(inner_div.get_attribute('style') if inner_div else None)
+
+        return styles
 
     def get_box_state(self, current_element):
         try:
@@ -9607,7 +9658,7 @@ class WebappInternal(Base):
                     label_serv1 = next(iter(img_serv1.parent.select('label')), None)
 
                 if label_serv1:
-                    self.ClickTree(label_serv1.text.strip())
+                    self.ClickTree(label_serv1.text.strip(), try_double_click=True)
                     self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
                     container = self.get_current_container()
 
@@ -9623,7 +9674,7 @@ class WebappInternal(Base):
                     if img_param:
                         label_param = img_param if self.webapp_shadowroot() else next(iter(img_param.parent.select('label')), None)
 
-                        self.ClickTree(label_param.text.strip())
+                        self.ClickTree(label_param.text.strip(), try_double_click=True)
 
             if not label_param:
                 self.log_error(f"Couldn't find Icon")
@@ -10165,7 +10216,7 @@ class WebappInternal(Base):
         containers = soup.select(self.containers_selectors["AllContainers"])
         return containers
 
-    def ClickTree(self, treepath, right_click=False, position=1, tree_number=0):
+    def ClickTree(self, treepath, right_click=False, position=1, tree_number=0, try_double_click: bool = False):
         """
         Clicks on TreeView component.
 
@@ -10177,6 +10228,8 @@ class WebappInternal(Base):
         :type position: int
         :param tree_number: Tree position for cases where there is more than one tree on screen.
         :type tree_number: int
+        :param try_double_click: If True, after 3 single click attempts, tries 3 additional double click attempts using all ClickType variations. - **Default:** False
+        :type try_double_click: bool
 
         Usage:
 
@@ -10185,9 +10238,9 @@ class WebappInternal(Base):
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """
-        self.click_tree(treepath, right_click, position, tree_number)
+        self.click_tree(treepath, right_click, position, tree_number, try_double_click=try_double_click)
 
-    def click_tree(self, treepath, right_click, position, tree_number):
+    def click_tree(self, treepath, right_click, position, tree_number, try_double_click: bool = False):
         """
         [Internal]
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
@@ -10277,11 +10330,20 @@ class WebappInternal(Base):
                                             self.wait_blocker()                                            
 
                                             is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else element_is_selected()
-
                                             click_try = 0
-                                            while click_try < 3 and not is_element_acessible():
+                                            click_type = 1
+                                            max_tries = 6 if try_double_click else 3
+                                            while click_try < max_tries and not is_element_acessible():                                                
                                                 self.scroll_to_element(element_click())
-                                                element_click().click()
+                                                if click_try < 3:
+                                                    logger().debug('Trying to open with one click')
+                                                    self.click(element_click(), enum.ClickType.SELENIUM)
+                                                elif try_double_click:
+                                                    logger().debug(f'Trying to open with double click. ClickType: {click_type}')
+                                                    self.double_click(element_click(), enum.ClickType(click_type))
+                                                    click_type += 1
+                                                    if click_type > 3:
+                                                        click_type = 1
                                                 click_try += 1
 
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
@@ -10309,12 +10371,12 @@ class WebappInternal(Base):
                                             click_try = 0
                                             while click_try < 3 and (element_is_closed() or not element_is_selected()):
                                                 if element_is_closed():
-                                                    element_click().click()
+                                                    self.click(element_click(), enum.ClickType.SELENIUM)
 
                                                 element_closed_click = self.execute_js_selector(".toggler, .lastchild, .data", element_click(), get_all=False)
 
                                                 if element_closed_click:
-                                                    element_closed_click.click()
+                                                    self.click(element_closed_click(), enum.ClickType.SELENIUM)
 
                                                 click_try += 1
                                             
@@ -10328,7 +10390,7 @@ class WebappInternal(Base):
                                     try:
                                         element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                         self.scroll_to_element(element_click())
-                                        element_click().click()
+                                        self.click(element_click(), enum.ClickType.SELENIUM)
                                         success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered, element_click()) else self.check_hierarchy(label_filtered)
                                     except:
                                         pass
