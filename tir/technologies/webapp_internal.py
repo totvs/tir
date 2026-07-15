@@ -5323,9 +5323,17 @@ class WebappInternal(Base):
         self.reset_container_position()
         current_container = self.get_current_container()
         if current_container:
+            # get caption text elements
             caption_elements = current_container.find_all(caption=True)
             elements_displayed = self.filter_is_displayed(caption_elements)
-            return [x.get('caption') for x in elements_displayed]
+            texts = [x.get('caption') for x in elements_displayed]
+
+            # get multiget text elements
+            contexttext_elements = current_container.find_all(contexttext=True)
+            contexttext_displayed = self.filter_is_displayed(contexttext_elements)
+            texts += [x.get('contexttext') for x in contexttext_displayed]
+
+            return texts
 
 
     def reset_container_position(self):
