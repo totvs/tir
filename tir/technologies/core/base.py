@@ -1632,7 +1632,7 @@ class Base(unittest.TestCase):
 
         # Filter blocked elements only when WaitProcessing is not in the stack
         # and blocked-container filtering is enabled.
-        if not self.search_stack('WaitProcessing') and self.filter_blocked_containers:
+        if not self.search_stack('WaitProcessing') and not self.search_stack('IfExists') and self.filter_blocked_containers:
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
