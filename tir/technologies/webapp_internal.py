@@ -1997,6 +1997,7 @@ class WebappInternal(Base):
             logger().debug(f'wa-dialog layers: {container_layers}')
 
         if not success:
+            self.restart_counter += 1
             self.log_error('Home screen not found!')     
         
         # wait trasitions between screens to avoid errors in layers number
