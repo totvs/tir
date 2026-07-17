@@ -7409,7 +7409,7 @@ class WebappInternal(Base):
                             cell_filled = self.select_combo(selenium_input(), user_value)
                             time.sleep(1)
                             # if modal opened close it
-                            if current_layers() > initial_layers:
+                            if current_layers() == initial_layers + 1:
                                 self.send_keys(selenium_column, Keys.TAB)
                         else:
                             if cell_opened:
