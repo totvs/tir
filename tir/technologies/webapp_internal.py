@@ -5073,7 +5073,7 @@ class WebappInternal(Base):
                         current_clicked_element = soup_element
 
                         # Small delay to ensure stability (avoids clicking during transitions)
-                        time.sleep(0.2)
+                        time.sleep(0.5)
 
                         if click_attempt == 1:
                             self.send_action(action=self.click, element=lambda: soup_element)
@@ -5100,7 +5100,7 @@ class WebappInternal(Base):
                     # Verification: waits up to 3s to detect click effect
                     verification_timeout = time.time() + 3
                     while time.time() < verification_timeout and not click_verified:
-                        time.sleep(0.1)
+                        time.sleep(0.5)
                         try:
                             # Check 1: Did the container change?
                             current_container = self.get_current_container()
