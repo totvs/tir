@@ -586,7 +586,14 @@ class Base(unittest.TestCase):
                 tries += 1
 
             if filtered_iframe:
-                self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+                if self.webapp_shadowroot():
+                    shadow_iframe = self.find_shadow_element('iframe', filtered_iframe)
+                    if shadow_iframe:
+                        self.driver.switch_to.frame(shadow_iframe[0])
+                    else:
+                        self.driver.switch_to.frame(filtered_iframe)
+                else:
+                    self.driver.switch_to.frame(filtered_iframe)
 
 
     def filter_active_iframe(self, iframes):
