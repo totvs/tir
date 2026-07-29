@@ -4960,8 +4960,6 @@ class WebappInternal(Base):
         """
         logger().info(f"Clicking on {button}")
 
-        initial_program = ['sigaadv', 'sigamdi']
-
         self.wait_blocker()
 
         if self.webapp_shadowroot():
@@ -4969,6 +4967,7 @@ class WebappInternal(Base):
         else:
             term_button="button, .thbutton"
 
+        id_container = None
         container = self.get_current_container()
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
@@ -4976,6 +4975,7 @@ class WebappInternal(Base):
         try:
             restore_zoom = False
             soup_element  = ""
+            id_parent_element = None
             if (button.lower().strip() == "x"):
                 self.set_button_x(position, check_error)
                 return
@@ -4993,6 +4993,7 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
+            halftime = time.time() + (self.config.time_out / 2)
 
             if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
@@ -5000,6 +5001,10 @@ class WebappInternal(Base):
 
             next_button = None
             while(time.time() < endtime and not soup_element):
+                # During the first half of the timeout, also require the element to be the
+                # topmost one at its center point (not intercepted by an overlay). After that,
+                # fall back to the legacy behavior (element_is_displayed only).
+                enforce_on_top = time.time() < halftime
                 if self.webapp_shadowroot():
                     next_button = self.get_shadowroot_button(button, term_button, position, check_error)
 
@@ -5007,11 +5012,11 @@ class WebappInternal(Base):
                         id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         self.scroll_to_element(soup_element)
-                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                        soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
                         if soup_element == None:
                             bodySoup = self.get_current_DOM().select('body')
                             self.driver.execute_script("arguments[0].style.cssText+='transform: scale(0.8)';", self.soup_to_selenium(bodySoup[0]))
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                            soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
                             restore_zoom = True
 
                 else:
@@ -5069,6 +5074,7 @@ class WebappInternal(Base):
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
+                current_clicked_element = soup_element() if callable(soup_element) else soup_element
 
                 rows_box_state_before = []
                 rows = []
@@ -5087,7 +5093,6 @@ class WebappInternal(Base):
                 initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
                 popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
-                max_click_attempts = 3
                 click_attempt = 0
                 click_verified = False
                 recaptured = False
@@ -5095,7 +5100,7 @@ class WebappInternal(Base):
                 # verificado até aqui, recaptura o botão (container já atualizado após a
                 # transição) e usa a metade restante.
                 half_time = starttime + (self.config.time_out / 2)
-                while not click_verified and (click_attempt < max_click_attempts or time.time() < endtime):
+                while not click_verified and ( time.time() < endtime):
                     # Recaptura única, no meio do time_out, quando o clique ainda não foi
                     # verificado — evita reutilizar um soup_element obsoleto capturado da
                     # tela anterior durante uma transição.
@@ -5112,6 +5117,7 @@ class WebappInternal(Base):
                                 button_element_id = soup_element.get_attribute('id') or 'unknow'
                             except Exception:
                                 button_element_id = 'unknow'
+                            current_clicked_element = soup_element() if callable(soup_element) else soup_element
                             logger().debug(f"  [RECAPTURE] New element captured (id: {button_element_id})")
                         else:
                             logger().warning(f"  [RECAPTURE] Could not recapture '{button}'; keeping previously captured element")
@@ -5136,45 +5142,41 @@ class WebappInternal(Base):
                         popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
                     click_attempt += 1
-                    # Estratégia progressiva: avança ao longo das iterações do laço e NÃO
-                    # reinicia na recaptura; após a última, mantém a mais robusta (JS).
-                    strategy_index = min(click_attempt - 1, max_click_attempts - 1)
-                    current_clicked_element = None
 
                     logger().debug(
-                        f"Click attempt {click_attempt} (strategy {strategy_index}, recaptured={recaptured}) "
+                        f"Click attempt {click_attempt} (recaptured={recaptured}) "
                         f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
                     )
 
-                    if self.webapp_shadowroot():
-                        self.scroll_to_element(soup_element)
-                        self.set_element_focus(soup_element)
-                        current_clicked_element = soup_element
+                    self.scroll_to_element(soup_element)
+                    self.set_element_focus(soup_element)
 
-                        # Small delay to ensure stability (avoids clicking during transitions)
-                        time.sleep(0.5)
+                    # Small delay to ensure stability (avoids clicking during transitions)
+                    time.sleep(0.5)
 
-                        if strategy_index == 0:
-                            self.send_action(action=self.click, element=lambda: soup_element)
-                        elif strategy_index == 1:
-                            logger().debug("  |-- Using ActionChains for greater robustness")
-                            self.click(soup_element, click_type=enum.ClickType.ACTIONCHAINS)
-                        else:
-                            logger().debug("  |-- Using JavaScript click as last resort")
-                            self.click(soup_element, click_type=enum.ClickType.JS)
+                    # O send_action já cicla internamente entre JS, ActionChains e
+                    # Selenium, então uma única chamada cobre as técnicas de clique.
+                    # Limitamos o tempo para que o controle retorne a este laço e a
+                    # verificação/recaptura possam atuar: antes da recaptura, até o
+                    # half_time; depois, até o endtime restante (piso mínimo para
+                    # permitir ao menos um ciclo completo de tipos de clique).
+                    if not recaptured:
+                        send_action_timeout = half_time - time.time()
+                    else:
+                        send_action_timeout = endtime - time.time()
+                    if send_action_timeout < 10:
+                        send_action_timeout = 10
+                    self.send_action(action=self.click, element=lambda: soup_element, timeout=send_action_timeout)
 
-                        if button.lower() == self.language.other_actions.lower():
-                            popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
-                            while time.time() < endtime and not popup_item():
-                                self.click(soup_element)
+                    if button.lower() == self.language.other_actions.lower():
+                        popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+                        while time.time() < endtime and not popup_item():
+                            self.click(soup_element)
 
-                        if restore_zoom:
-                            bodySoup = self.get_current_DOM().select('body')
-                            self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
-
-                    if current_clicked_element is not None:
-                        self.wait_element_is_not_focused(lambda: current_clicked_element)
+                    if restore_zoom:
+                        bodySoup = self.get_current_DOM().select('body')
+                        self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
 
                     # Verification: waits up to 3s to detect click effect
                     verification_timeout = time.time() + 3
@@ -8833,22 +8835,6 @@ class WebappInternal(Base):
         while( element_selenium and time.time() < endtime and self.switch_to_active_element() != element_selenium() ):
             time.sleep(step)
 
-    def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
-        """
-        [Internal]
-
-        Waits until the element loses focus.
-
-        :param element_selenium: Lambda or callable returning the Selenium element to check.
-        :param time_out: Maximum time in seconds to wait. - **Default:** 5
-        :type time_out: float
-        :param step: Time in seconds between each check. - **Default:** 0.1
-        :type step: float
-        """
-        endtime = time.time() + time_out
-        while( element_selenium and time.time() < endtime and self.switch_to_active_element() == element_selenium() ):
-            time.sleep(step)
-
     def switch_to_active_element(self):
         """
         [Internal]
@@ -10989,6 +10975,41 @@ class WebappInternal(Base):
             return False
 
 
+    def element_is_on_top(self, element=None, twebview=False):
+        """
+        [Internal]
+
+        Checks whether the element is actually the topmost element at its center
+        point, i.e. it is not covered/intercepted by another element (which would
+        cause an ElementClickInterceptedException). Uses document.elementFromPoint
+        via JavaScript, since is_displayed() may return false positives.
+        """
+        if type(element) == Tag:
+            element_selenium = self.soup_to_selenium(element, twebview)
+        elif isinstance(element, list):
+            element_selenium = next(iter(element), None)
+        else:
+            element_selenium = element
+
+        if not element_selenium:
+            return False
+
+        try:
+            is_on_top = bool(self.driver.execute_script("""
+                const el = arguments[0];
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                if (r.width === 0 || r.height === 0) return false;
+                const topo = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+                return topo === el || el.contains(topo);
+            """, element_selenium))
+            logger().debug(f"element_is_on_top return: {is_on_top}")
+            return is_on_top
+        except Exception as e:
+            logger().debug(f"element_is_on_top Error: {str(e)}")
+            return False
+
+
     def search_text(self, selector, text):
         """
         [Internal]
@@ -11777,7 +11798,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, timeout=None):
         """
 
         Sends an action to element and compare it object state change.
@@ -11788,6 +11809,12 @@ class WebappInternal(Base):
         :param right_click: True if you want a right click
         :param click_type: ClickType enum. 1-3 types- **Default:** None
         :type click_type: int
+        :param timeout: Optional upper bound (in seconds) for the internal retry loop.
+                        When ``None`` (default) the full ``self.config.time_out`` is used,
+                        preserving the original behavior. Callers such as ``SetButton`` pass
+                        a bounded value so control returns to their own retry/recapture loop
+                        instead of blocking here for the entire ``time_out``.
+        :type timeout: float
         :return: True if there was a change in the object
         """
 
@@ -11826,7 +11853,8 @@ class WebappInternal(Base):
 
         click_type = 1 if not main_click_type else click_type
 
-        endtime = time.time() + self.config.time_out
+        action_timeout = timeout if timeout is not None else self.config.time_out
+        endtime = time.time() + action_timeout
         try:
             while ((time.time() < endtime) and not check_changed()):
                 logger().debug(f"Trying to send action")
@@ -11843,7 +11871,7 @@ class WebappInternal(Base):
                     action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
-                    
+
                 time.sleep(1)
 
                 if soup_select:
