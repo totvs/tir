@@ -5768,6 +5768,90 @@ class PouiInternal(Base):
 
         self.set_program(program_name, program_desc, module)
 
+    def ensure_load_after_program(self, timeout: int = None) -> None:
+        """
+        [Internal]
+
+        Ensures the routine screen finished loading after ``set_program``.
+
+        After confirming the program there is a slow transition while the
+        elements load. On some routines the po-loading component takes longer
+        than the 15s handled by :func:`_po_loading` to even appear, so relying
+        only on it is not reliable.
+
+        This method loops until one of the *expected* landing screens is rendered
+        (the **browse** grid, a **wizard** dialog or the **parameters** dialog)
+        and no po-loading is active on top of it. While po-loading is present
+        (even if it shows up late) the screen is not considered ready and the
+        method keeps waiting for the transition to finish.
+
+        :param timeout: Maximum time, in seconds, to wait for an expected screen.
+            If ``None``, uses ``config.time_out``. - **Default:** None
+        :type timeout: int
+        :return: None
+        :rtype: None
+
+        Usage:
+
+        >>> self.ensure_load_after_program()
+        >>> self.ensure_load_after_program(timeout=90)
+        """
+
+        if timeout is None:
+            timeout = self.config.time_out
+
+        # CSS selectors that identify each expected landing screen after opening
+        # a routine. Adjust here if a new landing screen needs to be supported.
+        expected_screens = {
+            "browse": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
+                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
+                       ".dict-brgetddb, .dict-msselbr, thf-grid"),
+            "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard",
+            "parameters": ("wa-dialog wa-text-input, wa-dialog .dict-tget, "
+                           ".tmodaldialog .tget"),
+        }
+
+        logger().info("Ensuring the routine screen finished loading...")
+
+        endtime = time.time() + timeout
+        loaded_screen = None
+
+        while time.time() < endtime:
+            # Find which expected screen is currently rendered (if any).
+            loaded_screen = None
+            for screen_name, selector in expected_screens.items():
+                if self.element_exists(term=selector,
+                                       scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       main_container='body',
+                                       check_error=False):
+                    loaded_screen = screen_name
+                    break
+
+            # Small delay so a late po-loading has time to appear on top of the
+            # screen before we check for it, avoiding a false "ready" result.
+            time.sleep(0.5)
+
+            loading = self.element_exists(term='po-loading',
+                                          scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                          main_container='body',
+                                          check_error=False)
+
+            # Ready only when an expected screen is rendered and nothing is
+            # loading on top of it. While po-loading is present (even if it shows
+            # up late) we keep waiting for the transition to finish.
+            if loaded_screen and not loading:
+                break
+
+            loaded_screen = None
+            time.sleep(1)
+
+        if loaded_screen:
+            logger().info(f"Expected screen loaded: '{loaded_screen}'.")
+        else:
+            logger().warning("None of the expected screens (browse, wizard, "
+                             "parameters) finished loading within the timeout of "
+                             f"{timeout}s.")
+
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         
         self.escape_to_main_menu()
@@ -5844,8 +5928,8 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
-
-        self._po_loading()
+        
+        self.ensure_load_after_program()
 
         if not program_name in self.closed_user_guide_routines:
             closed_user_guide = self._close_user_guide()
