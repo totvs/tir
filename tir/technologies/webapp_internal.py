@@ -1968,6 +1968,7 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+
     def escape_to_main_menu(self):
         """[Internal]
 
@@ -4960,6 +4961,11 @@ class WebappInternal(Base):
         """
         logger().info(f"Clicking on {button}")
 
+        # Only the first SetButton usage in the session ignores the
+        # element_is_on_top filter. Subsequent calls keep the normal behavior.
+        first_setbutton_use = not getattr(self, "_setbutton_used", False)
+        self._setbutton_used = True
+
         self.wait_blocker()
 
         if self.webapp_shadowroot():
@@ -4974,6 +4980,7 @@ class WebappInternal(Base):
 
         try:
             restore_zoom = False
+            restore_zoom_recaptured = False
             soup_element  = ""
             id_parent_element = None
             if (button.lower().strip() == "x"):
@@ -5004,7 +5011,8 @@ class WebappInternal(Base):
                 # During the first half of the timeout, also require the element to be the
                 # topmost one at its center point (not intercepted by an overlay). After that,
                 # fall back to the legacy behavior (element_is_displayed only).
-                enforce_on_top = time.time() < halftime
+                # The very first SetButton usage always skips this on_top check.
+                enforce_on_top = (not first_setbutton_use) and (time.time() < halftime)
                 if self.webapp_shadowroot():
                     next_button = self.get_shadowroot_button(button, term_button, position, check_error)
 
@@ -5112,7 +5120,7 @@ class WebappInternal(Base):
                         new_element, new_restore_zoom = self.recapture_setbutton_element(button, term_button, position, check_error)
                         if new_element is not None:
                             soup_element = new_element
-                            restore_zoom = new_restore_zoom
+                            restore_zoom_recaptured = new_restore_zoom
                             try:
                                 button_element_id = soup_element.get_attribute('id') or 'unknow'
                             except Exception:
@@ -5173,7 +5181,7 @@ class WebappInternal(Base):
                         while time.time() < endtime and not popup_item():
                             self.click(soup_element)
 
-                    if restore_zoom:
+                    if restore_zoom or restore_zoom_recaptured:
                         bodySoup = self.get_current_DOM().select('body')
                         self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
@@ -10959,19 +10967,23 @@ class WebappInternal(Base):
         [Internal]
 
         """
-        if type(element) == Tag:
-            element_selenium = self.soup_to_selenium(element, twebview)
-        else:
-            element_selenium = element
+        try:
+            if type(element) == Tag:
+                element_selenium = self.soup_to_selenium(element, twebview)
+            else:
+                element_selenium = element
 
-        if isinstance(element, list):
-            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
-            for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
-            element_selenium = next(iter(element),None)
+            if isinstance(element, list):
+                call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
+                for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
+                element_selenium = next(iter(element),None)
 
-        if element_selenium:
-            return element_selenium.is_displayed()
-        else:
+            if element_selenium:
+                return element_selenium.is_displayed()
+            else:
+                return False
+        except Exception as e:
+            logger().debug(f'element_is_displayed exception: {str(e)}')
             return False
 
 
