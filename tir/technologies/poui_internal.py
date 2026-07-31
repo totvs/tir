@@ -5798,7 +5798,7 @@ class PouiInternal(Base):
         """
 
         if timeout is None:
-            timeout = self.config.time_out
+            timeout = self.config.time_out / 2
 
         # CSS selectors that identify each expected landing screen after opening
         # a routine. Adjust here if a new landing screen needs to be supported.
@@ -5806,7 +5806,7 @@ class PouiInternal(Base):
             "browse": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
                        ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
                        ".dict-brgetddb, .dict-msselbr, thf-grid"),
-            "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard",
+            "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard, .dict-msdialog",
             "parameters": ("wa-dialog wa-text-input, wa-dialog .dict-tget, "
                            ".tmodaldialog .tget"),
         }
@@ -5818,12 +5818,15 @@ class PouiInternal(Base):
 
         while time.time() < endtime:
             # Find which expected screen is currently rendered (if any).
+            # The screen may be inside the twebview iframe or main document
             loaded_screen = None
             for screen_name, selector in expected_screens.items():
-                if self.element_exists(term=selector,
-                                       scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                       main_container='body',
-                                       check_error=False):
+                if any(self.element_exists(term=selector,
+                                           scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                           main_container='body',
+                                           check_error=False,
+                                           twebview=twebview)
+                       for twebview in (True, False)):
                     loaded_screen = screen_name
                     break
 
@@ -5889,18 +5892,23 @@ class PouiInternal(Base):
         if program_name != parameter_routine:
             self._select_routine_module(module)
 
-        # -- Trecho de código temporário --
-        btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
+        # -- Temporary code block --
+        confirm_button = lambda: self.get_current_DOM().select(confirm_term)
         endtime = time.time() + (120 if program_name != parameter_routine else 5)
+        confirm_button_found = False
         while time.time() < endtime:
             logger().debug(f'Waiting for the confirm button.')
 
-            if btn_confirmar():
-                btn_confirmar_sel = lambda: self.soup_to_selenium(next(iter(btn_confirmar())))
-                self.click(btn_confirmar_sel())
+            if confirm_button():
+                confirm_button_sel = lambda: self.soup_to_selenium(next(iter(confirm_button())))
+                self.click(confirm_button_sel())
                 logger().debug(f'Confirm button clicked.')
+                confirm_button_found = True
                 break
             time.sleep(1)
+
+        if not confirm_button_found:
+            logger().debug(f'Confirm button not found within 30 seconds. Skipping.')
         # -- --        
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
