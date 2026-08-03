@@ -232,6 +232,8 @@ class Base(unittest.TestCase):
         except StaleElementReferenceException:
             logger().debug("********Element Stale click*********")
             return False
+        except ElementClickInterceptedException as e:
+            logger().debug(e.msg)
         except Exception as e:
             logger().debug(f"Warning click method Exception: {str(e)}")
             return False
