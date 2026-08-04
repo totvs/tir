@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Poui &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -63,6 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickLookUpThf"><code class="docutils literal notranslate"><span class="pre">Poui.ClickLookUpThf()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickMenu"><code class="docutils literal notranslate"><span class="pre">Poui.ClickMenu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickPopup"><code class="docutils literal notranslate"><span class="pre">Poui.ClickPopup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickRadio"><code class="docutils literal notranslate"><span class="pre">Poui.ClickRadio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSelect"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSelect()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickSwitch"><code class="docutils literal notranslate"><span class="pre">Poui.ClickSwitch()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.main.Poui.ClickTable"><code class="docutils literal notranslate"><span class="pre">Poui.ClickTable()</span></code></a></li>
@@ -122,7 +123,7 @@
 <span id="poui"></span><h1>Poui<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.main.Poui">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Poui</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.main.</span></span><span class="sig-name descname"><span class="pre">Poui</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.AssertFalse">
 <span class="sig-name descname"><span class="pre">AssertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.AssertFalse" title="Link to this definition"></a></dt>
@@ -516,6 +517,36 @@ the desired record from the results.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.main.Poui.ClickRadio">
+<span class="sig-name descname"><span class="pre">ClickRadio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickRadio" title="Link to this definition"></a></dt>
+<dd><p>Clicks on a POUI radio button (po-radio) until it reaches the desired state.</p>
+<p>The method locates the radio element by its visible label text and interacts
+with it until the element matches the expected active/inactive state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The visible label text of the radio button to interact with.</p></li>
+<li><p><strong>active</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Desired state of the radio button.
+<code class="docutils literal notranslate"><span class="pre">True</span></code> succeeds when the radio is selected.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> succeeds when the radio is not selected. - <strong>Default:</strong> True</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – 1-based position when multiple radio buttons share the same label. - <strong>Default:</strong> 1</p></li>
+</ul>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Select a radio button by label:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickRadio</span><span class="p">(</span><span class="s2">&quot;Ativo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Deselect a radio button:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickRadio</span><span class="p">(</span><span class="s2">&quot;Ativo&quot;</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#-----------------------------------------</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Select the second radio button with the same label:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickRadio</span><span class="p">(</span><span class="s2">&quot;Tipo&quot;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickSelect">
 <span class="sig-name descname"><span class="pre">ClickSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickSelect" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the Select of POUI component.
@@ -762,7 +793,8 @@ before using these methods in the script.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Input text title that you want to fill</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Value that fill in input</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Value that fill in input. If a <strong>bool</strong> is passed, the method
+delegates to <a class="reference internal" href="#tir.main.Poui.ClickRadio" title="tir.main.Poui.ClickRadio"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ClickRadio()</span></code></a> using the boolean as the desired state.</p></li>
 <li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Position which element is located. - <strong>Default:</strong> 1</p></li>
 </ul>
 </dd>
@@ -770,6 +802,10 @@ before using these methods in the script.</p>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">InputValue</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Test&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Select a radio button (delegates to click_radio):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">InputValue</span><span class="p">(</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Deselect a radio button:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">InputValue</span><span class="p">(</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 <span class="go">:return: None</span>
 </pre></div>
 </div>
@@ -822,7 +858,7 @@ before using these methods in the script.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>program_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The program name</p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Module abbreviation used to differentiate routines with the same name. - <strong>Default:</strong> “” (empty string)</p></li>
+<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Module name that will be selected in the “Change module” dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. - <strong>Default:</strong> “” (empty string)</p></li>
 </ul>
 </dd>
 </dl>

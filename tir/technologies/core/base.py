@@ -232,6 +232,8 @@ class Base(unittest.TestCase):
         except StaleElementReferenceException:
             logger().debug("********Element Stale click*********")
             return False
+        except ElementClickInterceptedException as e:
+            logger().debug(e.msg)
         except Exception as e:
             logger().debug(f"Warning click method Exception: {str(e)}")
             return False
@@ -586,7 +588,14 @@ class Base(unittest.TestCase):
                 tries += 1
 
             if filtered_iframe:
-                self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+                if self.webapp_shadowroot():
+                    shadow_iframe = self.find_shadow_element('iframe', filtered_iframe)
+                    if shadow_iframe:
+                        self.driver.switch_to.frame(shadow_iframe[0])
+                    else:
+                        self.driver.switch_to.frame(filtered_iframe)
+                else:
+                    self.driver.switch_to.frame(filtered_iframe)
 
 
     def filter_active_iframe(self, iframes):
@@ -1632,7 +1641,7 @@ class Base(unittest.TestCase):
 
         # Filter blocked elements only when WaitProcessing is not in the stack
         # and blocked-container filtering is enabled.
-        if not self.search_stack('WaitProcessing') and self.filter_blocked_containers:
+        if not self.search_stack('WaitProcessing') and not self.search_stack('IfExists') and self.filter_blocked_containers:
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):

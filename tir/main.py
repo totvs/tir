@@ -487,14 +487,14 @@ class Webapp():
 
         :param program_name: The program name
         :type program_name: str
-        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. Only applies to New Home (POUI). - **Default:** "" (empty string)
         :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
-        >>> oHelper.Program("CRDA200", module="CRD")
+        >>> oHelper.Program("FINA410", module="Controle de Lojas")
         """
         self.__router.Program(program_name=program_name, module=module)
 
@@ -1798,8 +1798,9 @@ class Poui():
 
         :param field: Input text title that you want to fill
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value that fill in input. If a **bool** is passed, the method
+            delegates to :meth:`ClickRadio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
@@ -1807,6 +1808,10 @@ class Poui():
 
         >>> # Call the method:
         >>> oHelper.InputValue('Name', 'Test')
+        >>> # Select a radio button (delegates to click_radio):
+        >>> oHelper.InputValue('Status', True)
+        >>> # Deselect a radio button:
+        >>> oHelper.InputValue('Status', False)
         :return: None
         """
         self.__poui.input_value(field, value, position)
@@ -2350,7 +2355,7 @@ class Poui():
 
         :param program_name: The program name
         :type program_name: str
-        :param module: Module abbreviation used to differentiate routines with the same name. - **Default:** "" (empty string)
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. - **Default:** "" (empty string)
         :type module: str
 
         Usage:
@@ -2461,3 +2466,32 @@ class Poui():
         :raises Exception: If the lookup field is not found or interaction fails. Error details will be logged.
         """
         self.__poui.click_look_up_thf(label, search_value, search_column, position)
+
+    def ClickRadio(self, label: str, active: bool = True, position: int = 1):
+        """
+        Clicks on a POUI radio button (po-radio) until it reaches the desired state.
+
+        The method locates the radio element by its visible label text and interacts
+        with it until the element matches the expected active/inactive state.
+
+        :param label: The visible label text of the radio button to interact with.
+        :type label: str
+        :param active: Desired state of the radio button.
+                       ``True`` succeeds when the radio is selected.
+                       ``False`` succeeds when the radio is not selected. - **Default:** True
+        :type active: bool
+        :param position: 1-based position when multiple radio buttons share the same label. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Select a radio button by label:
+        >>> oHelper.ClickRadio("Ativo")
+        >>> #-----------------------------------------
+        >>> # Deselect a radio button:
+        >>> oHelper.ClickRadio("Ativo", active=False)
+        >>> #-----------------------------------------
+        >>> # Select the second radio button with the same label:
+        >>> oHelper.ClickRadio("Tipo", position=2)
+        """
+        self.__poui.click_radio(label=label, active=active, position=position)

@@ -1434,7 +1434,7 @@ class PouiInternal(Base):
         if grid:
             self.input_grid_appender(field, value, grid_number - 1, row = row, check_value = check_value)
         elif isinstance(value, bool):
-            self.click_check_radio_button(field, value, name_attr, position)
+            self.click_radio(field, value, position)
         else:
             self.input_value(field, value, ignore_case, name_attr, position, check_value, direction)
 
@@ -3645,24 +3645,39 @@ class PouiInternal(Base):
 
     def input_value(self, field: str, value: str, position: int, exec_enter_tab: bool = True):
         """
-        Filling input component of POUI
+        Filling input component of POUI.
         https://po-ui.io/documentation/po-input
 
-        :param field: Input text title that you want to fill
+        When ``value`` is a **boolean**, the method automatically redirects to
+        :meth:`click_radio`, toggling the po-radio element that matches ``field``
+        to the desired state (``True`` = selected, ``False`` = deselected).
+        In this case the ``exec_enter_tab`` parameter is ignored.
+
+        :param field: Input text title that you want to fill, or the visible label
+            of the radio button when ``value`` is a boolean.
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value to fill in the input. If a **bool** is passed, the method
+            delegates to :meth:`click_radio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
-        :param exec_enter_tab: Defines whether the enter and tab commands will be executed after filling in the field. - **Default:** True
+        :param exec_enter_tab: Defines whether the ENTER and TAB keys will be sent
+            after filling in the field. Ignored when ``value`` is a boolean. - **Default:** True
         :type exec_enter_tab: bool
 
         Usage:
 
-        >>> # Call the method:
+        >>> # Fill a regular text input:
         >>> oHelper.input_value('Name', 'Test')
+        >>> # Toggle a radio button (delegates to click_radio):
+        >>> oHelper.input_value('Status', True)
+        >>> oHelper.input_value('Status', False)
         :return: None
         """
+
+        if isinstance(value, bool):
+            self.click_radio(field, value, position)
+            return
 
         logger().info(f"Input Value in:'{field}'")
 
@@ -3673,22 +3688,31 @@ class PouiInternal(Base):
 
             input_field = self.return_input_element(field, position, term=self.elements_terms.get('input'))
 
-            self.switch_to_iframe()
+            if not input_field:
+                logger().debug(f"input_value: return_input_element returned empty for field='{field}', retrying...")
+                continue
 
-            input_field_element = lambda: self.soup_to_selenium(input_field)
+            try:
+                self.switch_to_iframe()
 
-            self._click_input(input_field)
-            input_field_element().clear()
-            input_field_element().send_keys(value)
+                input_field_element = lambda: self.soup_to_selenium(input_field)
 
-            if self.switch_to_active_element() == input_field_element() and exec_enter_tab:
-                time.sleep(1)
-                ActionChains(self.driver).key_down(Keys.ENTER).perform()
-                time.sleep(1)
-                ActionChains(self.driver).key_down(Keys.TAB).perform()
+                self._click_input(input_field)
+                input_field_element().clear()
+                input_field_element().send_keys(value)
 
-            time.sleep(2)
-            success = self.get_web_value(input_field_element()).strip() != ''
+                if self.switch_to_active_element() == input_field_element() and exec_enter_tab:
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.ENTER).perform()
+                    time.sleep(1)
+                    ActionChains(self.driver).key_down(Keys.TAB).perform()
+
+                time.sleep(2)
+                success = self.get_web_value(input_field_element()).strip() != ''
+
+            except Exception as e:
+                logger().debug(f"input_value: exception during field interaction -  field='{field}', value='{value}', position={position}, input_field type={type(input_field).__name__}")
+                logger().debug(f'Exception: {str(e)}')
 
     def _click_input(self, input_element):
         """
@@ -4575,10 +4599,16 @@ class PouiInternal(Base):
 
         radio_status = lambda: self.radio_is_active(element_to_check)
         success = lambda: radio_status() == active
+        click_type = 2
 
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success():
-            self.click(selenium_radio, click_type=enum.ClickType.SELENIUM)
+            self.click(selenium_radio, click_type=enum.ClickType(click_type))
+
+            click_type += 1
+
+            if click_type > 3:
+                click_type = 1
         
         logger().debug("Radio button is now %s", "active" if radio_status() else "inactive")
 
@@ -4610,6 +4640,11 @@ class PouiInternal(Base):
             radio_selenium = self.soup_to_selenium(radio_tr, twebview=True)
             radio_class = radio_selenium.get_attribute('class') or ''
             return 'active' in radio_class or 'k-selected' in radio_class
+
+        radio_input = next(iter(radio.select('input')), None)
+        if radio and radio.name == 'po-radio' and radio_input:
+            selenium_input = self.soup_to_selenium(radio_input, twebview=True)
+            return selenium_input.get_property('checked')
 
         return False
 
@@ -5733,6 +5768,90 @@ class PouiInternal(Base):
 
         self.set_program(program_name, program_desc, module)
 
+    def ensure_load_after_program(self, timeout: int = None) -> None:
+        """
+        [Internal]
+
+        Ensures the routine screen finished loading after ``set_program``.
+
+        After confirming the program there is a slow transition while the
+        elements load. On some routines the po-loading component takes longer
+        than the 15s handled by :func:`_po_loading` to even appear, so relying
+        only on it is not reliable.
+
+        This method loops until one of the *expected* landing screens is rendered
+        (the **browse** grid, a **wizard** dialog or the **parameters** dialog)
+        and no po-loading is active on top of it. While po-loading is present
+        (even if it shows up late) the screen is not considered ready and the
+        method keeps waiting for the transition to finish.
+
+        :param timeout: Maximum time, in seconds, to wait for an expected screen.
+            If ``None``, uses ``config.time_out``. - **Default:** None
+        :type timeout: int
+        :return: None
+        :rtype: None
+
+        Usage:
+
+        >>> self.ensure_load_after_program()
+        >>> self.ensure_load_after_program(timeout=90)
+        """
+
+        if timeout is None:
+            timeout = self.config.time_out
+
+        # CSS selectors that identify each expected landing screen after opening
+        # a routine. Adjust here if a new landing screen needs to be supported.
+        expected_screens = {
+            "browse": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
+                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
+                       ".dict-brgetddb, .dict-msselbr, thf-grid"),
+            "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard",
+            "parameters": ("wa-dialog wa-text-input, wa-dialog .dict-tget, "
+                           ".tmodaldialog .tget"),
+        }
+
+        logger().info("Ensuring the routine screen finished loading...")
+
+        endtime = time.time() + timeout
+        loaded_screen = None
+
+        while time.time() < endtime:
+            # Find which expected screen is currently rendered (if any).
+            loaded_screen = None
+            for screen_name, selector in expected_screens.items():
+                if self.element_exists(term=selector,
+                                       scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       main_container='body',
+                                       check_error=False):
+                    loaded_screen = screen_name
+                    break
+
+            # Small delay so a late po-loading has time to appear on top of the
+            # screen before we check for it, avoiding a false "ready" result.
+            time.sleep(0.5)
+
+            loading = self.element_exists(term='po-loading',
+                                          scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                          main_container='body',
+                                          check_error=False)
+
+            # Ready only when an expected screen is rendered and nothing is
+            # loading on top of it. While po-loading is present (even if it shows
+            # up late) we keep waiting for the transition to finish.
+            if loaded_screen and not loading:
+                break
+
+            loaded_screen = None
+            time.sleep(1)
+
+        if loaded_screen:
+            logger().info(f"Expected screen loaded: '{loaded_screen}'.")
+        else:
+            logger().warning("None of the expected screens (browse, wizard, "
+                             "parameters) finished loading within the timeout of "
+                             f"{timeout}s.")
+
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         
         self.escape_to_main_menu()
@@ -5742,10 +5861,10 @@ class PouiInternal(Base):
         success = False
         search_term = "[class*='card-wrapper']"
         confirm_term = f"wa-button[caption='{self.language.confirm}']"
-        match_mode = 1 if module or program_desc else 3
-        program_with_module = f'{program_name} - {module}' if program_name and module else None        
+        match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
+        parameter_routine = 'CFGX017'
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -5764,12 +5883,15 @@ class PouiInternal(Base):
         
         logger().debug(f'Selecting the routine')
 
-        self.click_po_list_box(value=program_desc, second_value=program_with_module or program_name, 
+        self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
+        if program_name != parameter_routine:
+            self._select_routine_module(module)
+
         # -- Trecho de código temporário --
         btn_confirmar = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + 120
+        endtime = time.time() + (120 if program_name != parameter_routine else 5)
         while time.time() < endtime:
             logger().debug(f'Waiting for the confirm button.')
 
@@ -5779,7 +5901,7 @@ class PouiInternal(Base):
                 logger().debug(f'Confirm button clicked.')
                 break
             time.sleep(1)
-        # -- --
+        # -- --        
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
@@ -5796,7 +5918,8 @@ class PouiInternal(Base):
 
         success = (ele_hidden) and (wtb_before != wtb_after)
 
-        self.close_after_routine(program_name)
+        if program_name != parameter_routine:
+            self.close_after_routine(program_name)
 
         if not success:
             message = "Couldn't set the program."
@@ -5805,13 +5928,59 @@ class PouiInternal(Base):
             self.log_error(message)
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
-
-        self._po_loading()
+        
+        self.ensure_load_after_program()
 
         if not program_name in self.closed_user_guide_routines:
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
                 self.closed_user_guide_routines.append(program_name)
+
+    def _select_routine_module(self, module: str = None) -> None:
+        """
+        [Internal]
+
+        Waits for the "Change module" modal to appear and selects the appropriate module.
+
+        If ``module`` is provided, it is used directly as the visible text to be selected
+        in the combo. If not provided, the first available option in the combo is selected.
+
+        :param module: The visible text of the module to select in the "Change module" dialog.
+                       If empty, the first available option will be selected. - **Default:** ""
+        :type module: str
+        :return: None
+        """
+
+        logger().info(f'Waiting for change module modal')
+
+        endtime = time.time() + 30
+        while time.time() < endtime:
+
+            if self.language.change_module in self.get_current_container().text:
+                logger().info(f'Changing module. Module: {module}')
+
+                if not module:
+                    po_select = self.get_container_elements("po-select")
+                    if not (po_select and len(po_select) >= 1):
+                        self.log_error("po select doesn't found")
+                    po_select_element = po_select[0].find_next('select')
+                    combo = self.return_combo_object(po_select_element, shadow_root=False)
+                    combo_options = list(filter(lambda x: not(x.get_attribute('disabled') or x.get_attribute('hidden')), combo.options))
+                    first_option = next(iter(combo_options), None)
+                    if not first_option:
+                        self.log_error("first option doesn't found")
+                    value = first_option.text
+
+                else:
+                    value = module
+                
+                self.click_select(self.language.module, value, 1)
+                self.click_button(self.language.confirm)
+
+                break
+            
+            time.sleep(1)
+
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6770,3 +6939,54 @@ class PouiInternal(Base):
             self.click_button(self.language.select)
         except Exception as e:
             self.log_error(f"Failed to interact with THF lookup field '{label}': {str(e)}")
+
+    def click_radio(self, label: str, active: bool = True, position: int = 1):
+        """
+        [Internal]
+
+        Locates a po-radio element by its label and toggles it to the desired state.
+
+        :param label: Visible label text of the radio button.
+        :type label: str
+        :param active: Target state. True = selected, False = not selected. - **Default:** True
+        :type active: bool
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        """
+        logger().info(f"Clicking on radio input {label}")
+
+        radio = self.find_radio_by_label(label=label, position=position)
+
+        self.toggle_radio(radio, active)
+
+    def find_radio_by_label(self, label: str, position: int = 1):
+        """
+        [Internal]
+
+        Finds a po-radio or input[type='radio'] element by its visible label text.
+
+        :param label: Visible label text to match (case-insensitive).
+        :type label: str
+        :param position: 1-based index when multiple radios share the same label. - **Default:** 1
+        :type position: int
+        :return: The matching BeautifulSoup element.
+        :rtype: bs4.element.Tag
+        """
+        logger().debug(f"Finding radio input by label {label}...")
+
+        term = "po-radio, input[type='radio']"
+        position -= 1
+
+        radios = self.get_container_elements(term, filter_displayeds=True)
+
+        if not radios:
+            self.log_error("Couldn't find any radio element")
+
+        radios = list(filter(lambda x: x.text.lower().strip() == label.lower().strip(), radios))
+
+        if not (radios and len(radios) -1 >= position):
+            self.log_error(f"Couldn't find radio element with label: {label}.")
+
+        logger().debug(f"Radio input found.")
+
+        return radios[position]

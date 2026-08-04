@@ -1971,6 +1971,7 @@ class WebappInternal(Base):
         except Exception as e:
             logger().exception(str(e))
 
+
     def escape_to_main_menu(self):
         """[Internal]
 
@@ -2000,6 +2001,7 @@ class WebappInternal(Base):
             logger().debug(f'wa-dialog layers: {container_layers}')
 
         if not success:
+            self.restart_counter += 1
             self.log_error('Home screen not found!')     
         
         # wait trasitions between screens to avoid errors in layers number
@@ -2019,7 +2021,7 @@ class WebappInternal(Base):
         :rtype: int
         """
 
-        soup = self.get_current_DOM()        
+        soup = self.get_current_DOM()
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
@@ -2259,11 +2261,16 @@ class WebappInternal(Base):
 
         Returns a tuple with the search browse elements in this order:
         Key Dropdown, Input, Icon.
+        
+        Retry logic is applied with timeout of (time_out / 3) seconds.
 
         :param panel_name: The identifier of the search box. If none is provided, it defaults to the first of the screen. - **Default:** None
         :type panel_name: str
+        
+        :param browse_div: Pre-fetched browse div element. If None, _find_search_browse() is called. - **Default:** None
+        :type browse_div: BeautifulSoup.Tag or None
 
-        :return: Tuple with the Key Dropdown, Input and Icon elements of a search box
+        :return: Tuple with the Key Dropdown, Input and Icon elements of a search box.
         :rtype: Tuple of Beautiful Soup objects.
 
         Usage:
@@ -2272,15 +2279,48 @@ class WebappInternal(Base):
         >>> search_elements = self.get_search_browse_elements("Products")
         """
 
-        browse_div = browse_div or self._find_search_browse(panel_name=panel_name)
+        success = False
+        browse_tget = None
+        browse_key = None
+        browse_input = None
+        browse_icon = None
 
-        browse_tget = browse_div.select(".dict-tget")[0]
-        browse_key = browse_div.select(".dict-tbutton")[0]
-        browse_input = browse_tget
-        browse_icon = browse_tget.select(".button-image")[0]
+        endtime = time.time() + self.config.time_out / 3
+        while (time.time() < endtime and not success):
+
+            search_browse = browse_div or self._find_search_browse(panel_name=panel_name)
+
+            if not search_browse:
+                logger().debug("search_browse not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if  len(search_browse.select(".dict-tget")) < 1:
+                logger().debug("'.dict-tget' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if len(search_browse.select(".dict-tbutton")) < 1:
+                logger().debug("'.dict-tbutton' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            if len(search_browse.select(".dict-tget")[0].select(".button-image")) < 1:
+                logger().debug("'.button-image' element not found, trying again...")
+                time.sleep(1)
+                continue
+
+            browse_tget = search_browse.select(".dict-tget")[0]
+            browse_key = search_browse.select(".dict-tbutton")[0]
+            browse_input = browse_tget
+            browse_icon = browse_tget.select(".button-image")[0]
+
+            success = True
+
+        if not (browse_key and browse_input and browse_icon):
+            self.log_error("Search Browse elements doesn''t found!")
 
         return (browse_key, browse_input, browse_icon)
-
 
     def _find_search_browse(self, panel_name=None, throw_error=True, timeout=None):
 
@@ -3324,13 +3364,14 @@ class WebappInternal(Base):
                     or ('class' in tag.attrs and ('tmodaldialog' in tag['class'] or 'ui-dialog' in tag['class']))
                 ) if hasattr(tag, 'attrs') else False
             )
+
             container_is_blocked = hasattr(blocked_container, 'attrs') and 'blocked' in blocked_container.attrs
 
-            if self.filter_blocked_containers and not container_is_blocked and not self.element_is_displayed(element):
+            if container_is_blocked:
+                logger().info(f"Container blocked! Element is displayed?: {self.element_is_displayed(element)}")
+
+            if not container_is_blocked and not self.element_is_displayed(element):
                 continue
-
-
-            self.filter_blocked_containers = True
 
             main_element = element
             multiget = "dict-tmultiget"
@@ -3557,6 +3598,8 @@ class WebappInternal(Base):
                     element = next(iter(self.web_scrap(field, scrap_type=enum.ScrapType.TEXT, label=True, input_field=input_field, direction=direction, position=position)), None)
 
             if element:
+                if try_containers_blocked:
+                    logger().debug("Element found without blocked-container filtering.")
                 break
             
             if time.time() > endtime and not try_containers_blocked:
@@ -4849,6 +4892,68 @@ class WebappInternal(Base):
                 logger().warning(f"Warning SetLateralMenu click last item method exception: {str(e)} ")
 
 
+    def get_shadowroot_button(self, button, term_button, position, check_error=True):
+        """
+        [Internal]
+
+        Captures the button element inside a shadowroot container.
+
+        :param button: Button caption to be located.
+        :type button: str
+        :param term_button: CSS selector used to locate the button candidates.
+        :type term_button: str
+        :param position: Index of the button among the filtered candidates.
+        :type position: int
+        :param check_error: Whether errors should be checked while waiting. - **Default:** True
+        :type check_error: bool
+
+        :return: The located button element (Tag or Selenium element) or None if not found.
+
+        Usage:
+
+        >>> next_button = self.get_shadowroot_button(button, term_button, position, check_error)
+        """
+        regex = r"(<[^>]*>)?"
+        next_button = None
+        filtered_buttons = []
+
+        self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
+        self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
+        container = self.get_current_container()
+        button_candidates = container.select(term_button)
+
+        if button_candidates:
+            filtered_buttons = list(filter(lambda x: hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower()) and self.element_is_displayed(x), button_candidates))
+
+            if not filtered_buttons:
+                filtered_buttons = self.return_soup_by_selenium(elements=button_candidates, term=button, selectors='label, span')
+        else:
+            footer = self.execute_js_selector('footer', self.soup_to_selenium(container), get_all=False)
+            if footer:
+                footer_buttons = self.execute_js_selector("wa-button", footer)
+                if not footer_buttons:
+                    footer_buttons = footer.find_elements(By.CSS_SELECTOR, "wa-button")
+                if footer_buttons:
+                    filtered_buttons = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), footer_buttons))
+
+        # Fallback: botao em foco entre os candidatos
+        if not (filtered_buttons and len(filtered_buttons) - 1 >= position):
+            focus_buttons = list(filter(lambda x: (hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower())) and 'focus' in x.get('class'), button_candidates))
+            if focus_buttons:
+                filtered_buttons = focus_buttons
+
+        # Fallback: busca ampla via web_scrap
+        if not filtered_buttons:
+            filtered_buttons = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container=self.containers_selectors["SetButton"])
+
+        if filtered_buttons and len(filtered_buttons) - 1 >= position:
+            parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_buttons))
+            if parents_actives:
+                filtered_buttons = parents_actives
+            next_button = filtered_buttons[position]
+
+        return next_button
+
     def SetButton(self, button, sub_item="", position=1, check_error=True):
         """
         Method that clicks on a button on the screen.
@@ -4884,22 +4989,28 @@ class WebappInternal(Base):
         """
         logger().info(f"Clicking on {button}")
 
-        initial_program = ['sigaadv', 'sigamdi']
+        # Only the first SetButton usage in the session ignores the
+        # element_is_on_top filter. Subsequent calls keep the normal behavior.
+        first_setbutton_use = not getattr(self, "_setbutton_used", False)
+        self._setbutton_used = True
 
         self.wait_blocker()
-        container = self.get_current_container()
 
         if self.webapp_shadowroot():
             term_button="wa-button"
         else:
             term_button="button, .thbutton"
 
+        id_container = None
+        container = self.get_current_container()
         if container  and 'id' in container.attrs:
             id_container = container.attrs['id']
 
         try:
             restore_zoom = False
+            restore_zoom_recaptured = False
             soup_element  = ""
+            id_parent_element = None
             if (button.lower().strip() == "x"):
                 self.set_button_x(position, check_error)
                 return
@@ -4917,57 +5028,31 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
+            halftime = time.time() + (self.config.time_out / 2)
 
             if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
                 system_info()
 
-            regex = r"(<[^>]*>)?"
-            filtered_button = []
             next_button = None
             while(time.time() < endtime and not soup_element):
+                # During the first half of the timeout, also require the element to be the
+                # topmost one at its center point (not intercepted by an overlay). After that,
+                # fall back to the legacy behavior (element_is_displayed only).
+                # The very first SetButton usage always skips this on_top check.
+                enforce_on_top = (not first_setbutton_use) and (time.time() < halftime)
                 if self.webapp_shadowroot():
-                    self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
-                    self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
-                    soup = self.get_current_container()
-                    soup_objects = soup.select(term_button)
-
-                    if soup_objects and not filtered_button:
-                        filtered_button = list(filter(lambda x: hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower()) and self.element_is_displayed(x), soup_objects ))
-
-                        if not filtered_button:
-                            filtered_button = self.return_soup_by_selenium(elements=soup_objects, term=button, selectors='label, span')
-
-                    if self.webapp_shadowroot():
-                        if not soup_objects:
-                            footer = self.execute_js_selector('footer', self.soup_to_selenium(soup), get_all=False)
-                            if footer:
-                                buttons = self.execute_js_selector("wa-button", footer)
-                                if not buttons:
-                                    buttons = footer.find_elements(By.CSS_SELECTOR, "wa-button")
-                                if buttons:
-                                    filtered_button = list(filter(lambda x: x.text.strip().replace('\n', '') == button.strip().replace(' \n ', ''), buttons))
-
-                    if filtered_button and len(filtered_button) - 1 >= position:
-                        parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_button ))
-                        if parents_actives:
-                            filtered_button = parents_actives
-                        next_button = filtered_button[position]
-                    else:
-                        filtered_button = list(filter(lambda x: (hasattr(x,'caption') and button.lower() in re.sub(regex,'',x['caption'].lower())) and 'focus' in x.get('class'), soup_objects ))
-
-                    if not filtered_button:
-                        filtered_button = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container = self.containers_selectors["SetButton"])
+                    next_button = self.get_shadowroot_button(button, term_button, position, check_error)
 
                     if next_button:
                         id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
                         self.scroll_to_element(soup_element)
-                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                        soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
                         if soup_element == None:
                             bodySoup = self.get_current_DOM().select('body')
                             self.driver.execute_script("arguments[0].style.cssText+='transform: scale(0.8)';", self.soup_to_selenium(bodySoup[0]))
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                            soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
                             restore_zoom = True
 
                 else:
@@ -4984,6 +5069,21 @@ class WebappInternal(Base):
 
             if self.config.smart_test:
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+
+            if not soup_element:
+                try:
+                    logger().debug("Trying to find element without blocked-container filtering.")
+                    self.filter_blocked_containers = False
+                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
+
+                    if soup_objects and len(soup_objects) - 1 >= position:
+                        logger().debug(f"Element found without blocked-container filtering.")
+                        next_button = soup_objects[position]
+                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                except Exception as e:
+                    logger().debug(f"Fallback search without blocked-container filtering failed: {e}")
+                finally:
+                    self.filter_blocked_containers = True
 
             if not soup_element:
                 other_action = self.web_scrap(term=self.language.other_actions, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, check_error=check_error)
@@ -5004,57 +5104,120 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
-                if container and 'id' in container.attrs:
-                    initial_container_id = container.attrs['id']
+                container_before_click = self.get_current_container()
+                if container_before_click and 'id' in container_before_click.attrs:
+                    initial_container_id = container_before_click.attrs['id']
 
+                button_element_id = None
+                button_element_id = soup_element.get_attribute('id') or 'unknow'
+                current_clicked_element = soup_element() if callable(soup_element) else soup_element
+
+                rows_box_state_before = []
+                rows = []
                 initial_dom_hash = hash(str(self.get_current_DOM()))
+                button_text_before = soup_element.text.strip()
+                skip_focus_retry = True
+                container_texts_before = self.get_current_container_texts()
+                df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
+                if grids_on_screen_before:
+                    # get grid rows
+                    rows = self.execute_js_selector('tr', self.soup_to_selenium(grids_on_screen_before))
+                    if rows:
+                        # get box state
+                        rows_box_state_before = list(map(lambda x: self.get_row_divs_style(x), rows))
 
-                # Configurações de retry (fixas, sem novos parâmetros)
-                max_click_attempts = 3
+                initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
+
                 click_attempt = 0
                 click_verified = False
-
-                while click_attempt < max_click_attempts and not click_verified:
-                    click_attempt += 1
-                    current_clicked_element = None
-
-                    if self.config.smart_test or self.config.debug_log:
-                        logger().debug(f"Click attempt {click_attempt}/{max_click_attempts} on '{button}'")
-
-                    if self.webapp_shadowroot():
-                        self.scroll_to_element(soup_element)
-                        self.set_element_focus(soup_element)
-                        current_clicked_element = soup_element
-
-                        # Small delay to ensure stability (avoids clicking during transitions)
-                        time.sleep(0.2)
-
-                        if click_attempt == 1:
-                            self.send_action(action=self.click, element=lambda: soup_element)
-                        elif click_attempt == 2:
-                            logger().debug("  |-- Using ActionChains for greater robustness")
-                            self.click(soup_element, click_type=enum.ClickType.ACTIONCHAINS)
+                recaptured = False
+                # Primeira metade do time_out para a captura inicial; se o clique não for
+                # verificado até aqui, recaptura o botão (container já atualizado após a
+                # transição) e usa a metade restante.
+                half_time = starttime + (self.config.time_out / 2)
+                while not click_verified and ( time.time() < endtime):
+                    # Recaptura única, no meio do time_out, quando o clique ainda não foi
+                    # verificado — evita reutilizar um soup_element obsoleto capturado da
+                    # tela anterior durante uma transição.
+                    if not recaptured and time.time() >= half_time:
+                        logger().debug(
+                            f"  [RECAPTURE] Click on '{button}' not verified within first half of time_out; "
+                            f"recapturing element (container may have changed after transition)"
+                        )
+                        new_element, new_restore_zoom = self.recapture_setbutton_element(button, term_button, position, check_error)
+                        if new_element is not None:
+                            soup_element = new_element
+                            restore_zoom_recaptured = new_restore_zoom
+                            try:
+                                button_element_id = soup_element.get_attribute('id') or 'unknow'
+                            except Exception:
+                                button_element_id = 'unknow'
+                            current_clicked_element = soup_element() if callable(soup_element) else soup_element
+                            logger().debug(f"  [RECAPTURE] New element captured (id: {button_element_id})")
                         else:
-                            logger().debug("  |-- Using JavaScript click as last resort")
-                            self.click(soup_element, click_type=enum.ClickType.JS)
+                            logger().warning(f"  [RECAPTURE] Could not recapture '{button}'; keeping previously captured element")
+                        recaptured = True
 
-                        if button.lower() == self.language.other_actions.lower():
-                            popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
-                            while time.time() < endtime and not popup_item():
-                                self.click(soup_element)
+                        # Rebaseline do estado pré-clique após a transição, para que os
+                        # checks de verificação existentes comparem contra o estado correto.
+                        container_before_click = self.get_current_container()
+                        if container_before_click and 'id' in container_before_click.attrs:
+                            initial_container_id = container_before_click.attrs['id']
+                        initial_dom_hash = hash(str(self.get_current_DOM()))
+                        skip_focus_retry = True
+                        container_texts_before = self.get_current_container_texts()
+                        df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
+                        rows = []
+                        rows_box_state_before = []
+                        if grids_on_screen_before:
+                            rows = self.execute_js_selector('tr', self.soup_to_selenium(grids_on_screen_before))
+                            if rows:
+                                rows_box_state_before = list(map(lambda x: self.get_row_divs_style(x), rows))
+                        initial_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                        popup_before = self.check_layers(".tmenupopupitem, wa-menu-popup")
 
-                        if restore_zoom:
-                            bodySoup = self.get_current_DOM().select('body')
-                            self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
-                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                    click_attempt += 1
 
-                    if current_clicked_element is not None:
-                        self.wait_element_is_not_focused(lambda: current_clicked_element)
+                    logger().debug(
+                        f"Click attempt {click_attempt} (recaptured={recaptured}) "
+                        f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
+                    )
+
+                    self.scroll_to_element(soup_element)
+                    self.set_element_focus(soup_element)
+
+                    # Small delay to ensure stability (avoids clicking during transitions)
+                    time.sleep(0.5)
+
+                    # O send_action já cicla internamente entre JS, ActionChains e
+                    # Selenium, então uma única chamada cobre as técnicas de clique.
+                    # Limitamos o tempo para que o controle retorne a este laço e a
+                    # verificação/recaptura possam atuar: antes da recaptura, até o
+                    # half_time; depois, até o endtime restante (piso mínimo para
+                    # permitir ao menos um ciclo completo de tipos de clique).
+                    if not recaptured:
+                        send_action_timeout = half_time - time.time()
+                    else:
+                        send_action_timeout = endtime - time.time()
+                    if send_action_timeout < 10:
+                        send_action_timeout = 10
+                    self.send_action(action=self.click, element=lambda: soup_element, timeout=send_action_timeout)
+
+                    if button.lower() == self.language.other_actions.lower():
+                        popup_item = lambda: self.wait_element_timeout(term=".tmenupopupitem, wa-menu-popup", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", check_error=False)
+                        while time.time() < endtime and not popup_item():
+                            self.click(soup_element)
+
+                    if restore_zoom or restore_zoom_recaptured:
+                        bodySoup = self.get_current_DOM().select('body')
+                        self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
 
                     # Verification: waits up to 3s to detect click effect
                     verification_timeout = time.time() + 3
                     while time.time() < verification_timeout and not click_verified:
-                        time.sleep(0.1)
+                        time.sleep(0.5)
                         try:
                             # Check 1: Did the container change?
                             current_container = self.get_current_container()
@@ -5062,51 +5225,112 @@ class WebappInternal(Base):
                                 current_container_id = current_container.attrs['id']
                                 if initial_container_id and initial_container_id != current_container_id:
                                     click_verified = True
-                                    if self.config.smart_test or self.config.debug_log:
-                                        logger().debug("  [OK] Click verified: container changed")
+                                    logger().debug("  [OK] Click verified: container changed")
                                     break
 
-                            # Check 2: Was the DOM modified?
-                            current_dom_hash = hash(str(self.get_current_DOM()))
-                            if initial_dom_hash != current_dom_hash:
+                            # Check 2: Did the container texts changed?
+                            if container_texts_before != self.get_current_container_texts():
                                 click_verified = True
-                                if self.config.smart_test or self.config.debug_log:
-                                    logger().debug("  [OK] Click verified: DOM modified")
+                                logger().debug("  [OK] Click verified: container text changed")
                                 break
 
-                            # Check 3: Did a new modal/dialog appear?
-                            new_elements = self.driver.find_elements(By.CSS_SELECTOR,
-                                ".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
-                            for elem in new_elements:
-                                if self.element_is_displayed(elem):
+                            # Check exceptions
+                            button_exception = button.strip().lower() == self.language.copy.lower()
+                            if button_exception:
+                                click_verified = True
+                                logger().debug("  [OK] Click verified: exceptions")
+                                break
+
+                            # Check 3: Did the grids changed?
+                            df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
+                                                                                  current_container=True, throw_error=False)
+                            if grids_on_screen_before or grids_on_screen_after:
+                                grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
+                                df_content_changed = not df_before.equals(df_after)
+                                rows_box_state_after = list(map(lambda x: self.get_row_divs_style(x), rows))
+                                rows_state_changed = rows_box_state_after != rows_box_state_before
+                                if grid_structure_changed or df_content_changed or rows_state_changed:
                                     click_verified = True
-                                    if self.config.smart_test or self.config.debug_log:
-                                        logger().debug("  [OK] Click verified: new element appeared")
+                                    logger().debug("  [OK] Click verified: Grids changed")
                                     break
+
+                            # Check 4: Did a new modal/dialog appear?
+                            current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
+                            if current_layers != initial_layers:
+                                click_verified = True
+                                logger().debug(f"  [OK] Click verified: new modal/dialog appeared (layers changed from {initial_layers} to {current_layers})")
+                                break
+
                             if click_verified:
                                 break
 
-                            # Check 4: Did the element lose focus?
+                            # Check 5: Did a new popup appear?
+                            popup_after = self.check_layers(".tmenupopupitem, wa-menu-popup")
+                            if popup_before != popup_after:
+                                click_verified = True
+                                logger().debug(f"  [OK] Click verified: popup appeared (popup changed from {popup_before} to {popup_after})")
+                                break
+
+                            # Check 6: Was the DOM modified?
+                            current_dom_hash = hash(str(self.get_current_DOM()))
+                            if initial_dom_hash != current_dom_hash:
+                                click_verified = True
+                                skip_focus_retry = False
+                                logger().debug("  [OK] Click verified: DOM modified")
+                                break
+
+                            # Check 7: Did the element lose focus?
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
-                                if self.config.smart_test or self.config.debug_log:
-                                    logger().debug("  [OK] Click verified: element lost focus")
+                                skip_focus_retry = False
+                                logger().debug("  [OK] Click verified: element lost focus")
                                 break
 
-                        except Exception:
+                        except Exception as e:
                             # Element may have disappeared (also indicates success)
-                            if self.config.smart_test or self.config.debug_log:
-                                logger().debug("  [OK] Click verified: element no longer exists")
+                            logger().debug("  [OK] Click verified: element no longer exists")
                             click_verified = True
                             break
 
-                    if not click_verified and click_attempt < max_click_attempts:
+                    # Check 5: False-positive guard — if a previous check "verified" the
+                    # click but the container ID is still the same as before AND the button
+                    # still carries the 'focus' CSS class (meaning it was only focused /
+                    # selected, not actually pressed), downgrade the verification so the
+                    # outer retry loop will attempt the click again.
+                    if click_verified and initial_container_id and not skip_focus_retry:
+                        try:
+                            current_container_guard = self.get_current_container()
+                            current_id_guard = (
+                                current_container_guard.attrs.get('id')
+                                if current_container_guard and 'id' in current_container_guard.attrs
+                                else None
+                            )
+                            if current_id_guard == initial_container_id:
+                                btn_element = soup_element() if callable(soup_element) else soup_element
+                                if btn_element is not None:
+                                    btn_class = btn_element.get_attribute('class') or ''
+                                    button_text_after = btn_element.text.strip()
+                                    if 'focus' in btn_class.split() and button_text_before == button_text_after:
+                                        click_verified = False
+                                        logger().debug(
+                                            f"  [WARN] Button '{button}' still has 'focus' class and "
+                                            f"container ID unchanged ({initial_container_id}) — "
+                                            f"false-positive detected on attempt {click_attempt}, retrying..."
+                                        )
+                        except Exception:
+                            pass
+
+                    if not click_verified:
                         logger().warning(f"  [WARN] Click on '{button}' had no detectable effect on attempt {click_attempt}")
                         time.sleep(0.5)
 
+                current_container = self.get_current_container()
+                current_container_id = current_container.attrs.get('id') if current_container and 'id' in current_container.attrs else 'unknown'
+                logger().debug(f"Container after click '{button}': {current_container_id}")
+
                 if not click_verified:
-                    logger().warning(f"  [WARN] Click on '{button}' may not have been effective after {max_click_attempts} attempts. Continuing execution...")
+                    logger().warning(f"  [WARN] Click on '{button}' may not have been effective after {click_attempt} attempts (recaptured={recaptured}). Continuing execution...")
 
             if sub_item and ',' not in sub_item:
                 logger().info(f"Clicking on {sub_item}")
@@ -5206,7 +5430,89 @@ class WebappInternal(Base):
         if self.config.smart_test or self.config.debug_log:
             logger().debug(f"***System Info*** After Clicking on button:")
             system_info()
-    
+
+        self.reset_container_position()
+
+
+    def recapture_setbutton_element(self, button, term_button, position, check_error=True):
+        """
+        [Internal]
+
+        Re-captures the SetButton target element using the same capture logic as the
+        initial capture in :meth:`SetButton` (respecting ``webapp_shadowroot()``,
+        ``restore_zoom``, ``position`` and ``element_is_displayed`` filtering, with the
+        fallback without ``filter_blocked_containers``).
+
+        This is used by ``SetButton`` when the initial single capture may have grabbed a
+        stale element from the previous container during a screen transition. After the
+        transition completes the container is already updated, so recapturing returns the
+        correct element.
+
+        :return: Tuple ``(soup_element, restore_zoom)``. ``soup_element`` is a Selenium
+                 element (or ``None`` when not found) and ``restore_zoom`` indicates that a
+                 zoom-out was applied to make the element visible.
+        :rtype: tuple
+        """
+        soup_element = None
+        restore_zoom = False
+        try:
+            if self.webapp_shadowroot():
+                next_button = self.get_shadowroot_button(button, term_button, position, check_error)
+                if next_button:
+                    soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                    if soup_element is not None:
+                        self.scroll_to_element(soup_element)
+                        soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                        if soup_element is None and next_button is not None:
+                            bodySoup = self.get_current_DOM().select('body')
+                            self.driver.execute_script("arguments[0].style.cssText+='transform: scale(0.8)';", self.soup_to_selenium(bodySoup[0]))
+                            soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                            soup_element = soup_element if self.element_is_displayed(soup_element) else None
+                            restore_zoom = True
+            else:
+                soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container=self.containers_selectors["SetButton"], check_error=check_error)
+                if isinstance(soup_objects, list):
+                    soup_objects = list(filter(lambda x: self.element_is_displayed(x), soup_objects))
+                if soup_objects and len(soup_objects) - 1 >= position:
+                    self.wait_until_to(expected_condition="element_to_be_clickable", element=soup_objects[position], locator=By.XPATH, timeout=True)
+                    soup_element = self.soup_to_selenium(soup_objects[position])
+        except Exception as e:
+            logger().debug(f"Recapture of button '{button}' failed: {e}")
+            soup_element = None
+        return soup_element, restore_zoom
+
+
+    def get_current_container_texts(self):
+        """This method returns a list of all texts from current container descendents
+        """
+        self.reset_container_position()
+        current_container = self.get_current_container()
+        if current_container:
+            # get caption text elements
+            caption_elements = current_container.find_all(caption=True)
+            elements_displayed = self.filter_is_displayed(caption_elements)
+            texts = [x.get('caption') for x in elements_displayed]
+
+            # get multiget text elements
+            contexttext_elements = current_container.find_all(contexttext=True)
+            contexttext_displayed = self.filter_is_displayed(contexttext_elements)
+            texts += [x.get('contexttext') for x in contexttext_displayed]
+
+            return texts
+
+
+    def reset_container_position(self):
+        current_container = self.get_current_container()
+        if not current_container:
+            logger().debug("reset_container_position: Current container not found.")
+            return
+        panels = current_container.select('wa-panel')
+        displayeds_panels = list(filter(lambda x: self.element_is_displayed(x), panels))
+        if displayeds_panels:
+            panel_filtred = next(iter(displayeds_panels),None)
+            self.scroll_to_element(self.soup_to_selenium(panel_filtred))
+
+
     def set_button_character(self, term, position=1, check_error=True):
         """
         [Internal]
@@ -6118,6 +6424,38 @@ class WebappInternal(Base):
         if not success:
             self.log_error(f"Content doesn't found on the screen! {first_content}")
 
+    def get_row_divs_style(self, tr_element):
+        """
+        [Internal]
+
+        Gets the "style" attribute of the inner div of every column (td) inside
+        the given row (tr). Columns without an inner div will have None in their
+        respective position.
+
+        :param tr_element: The row (tr) Selenium WebElement to extract the columns' divs style from.
+        :type tr_element: Selenium object
+
+        :return: A list with the style attribute string of each column's div, in order.
+        :rtype: list of str
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> tr = self.execute_js_selector('tbody > tr', sel_grid)[0]
+        >>> styles = self.get_row_divs_style(tr)
+        """
+        if tr_element is None:
+            return []
+
+        columns = tr_element.find_elements(By.CSS_SELECTOR, 'td')
+        styles = []
+
+        for column in columns:
+            inner_div = next(iter(column.find_elements(By.CSS_SELECTOR, 'div')), None)
+            styles.append(inner_div.get_attribute('style') if inner_div else None)
+
+        return styles
+
     def get_box_state(self, current_element):
         try:
             inner_div = next(iter(current_element.find_elements(By.CSS_SELECTOR, 'div')), None)
@@ -6171,8 +6509,10 @@ class WebappInternal(Base):
                 logger().debug('The container has been changed.')
                 return True
 
-            element_td, _ = self._refresh_element_td(grid_number=grid_number,
-                                                     matches_values=matches_values)
+            if matches_values:
+                element_td, _ = self._refresh_element_td(grid_number=grid_number,
+                                                        matches_values=matches_values)
+            
             if not element_td:
                 break
 
@@ -6203,15 +6543,23 @@ class WebappInternal(Base):
             count += 1
 
 
-    def grid_dataframe(self, grid_number=0):
+    def grid_dataframe(self, grid_number=0, wait=True, check_error=True, current_container=False, throw_error=True):
         """
         [Internal]
         """
         term = self.grid_selectors["new_web_app"]
 
-        self.wait_element(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
+        if wait:
+            self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
-        grid = self.get_grid(grid_number=grid_number)
+        grid = self.get_grid(grid_number=grid_number, wait=wait, check_error=check_error,
+                            current_container=current_container)
+
+        if not grid:
+            if throw_error:
+                self.log_error("Couldn't find grid")
+            else:
+                return (pd.DataFrame(), None)
 
         try:
             shadow_grid = self.soup_to_selenium(grid)
@@ -6452,7 +6800,7 @@ class WebappInternal(Base):
             td = next(iter(current.select(f"td[id='{column_index}']")), None)
             success = td.text in text
 
-    def get_grid(self, grid_number=0, grid_element = None, grid_list=False):
+    def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True, current_container=False):
         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
@@ -6465,11 +6813,17 @@ class WebappInternal(Base):
         :rtype: BeautifulSoup object
         :param grid_list: Return all grids.
         :type grid_list: bool
+        :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
+        :type wait: bool
+        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
+        :type wait: bool
 
         Usage:
 
         >>> # Calling the method:
         >>> my_grid = self.get_grid()
+        >>> # Calling without waiting for the grid:
+        >>> my_grid = self.get_grid(wait=False)
         """
         success = None
         grids = None
@@ -6477,11 +6831,14 @@ class WebappInternal(Base):
 
         endtime = time.time() + self.config.time_out
         while(time.time() < endtime and not success):
-            if not grid_element:
-                grids = self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                grids = self.web_scrap(term= grid_element, scrap_type=enum.ScrapType.CSS_SELECTOR)
 
+            if not current_container:
+                grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                       check_error=check_error)
+            else:
+                container = self.get_current_container()
+                grids = container.select(grid_element or term)
+            
             if grids:
                 grids = self.filter_active_tabs(grids)
                 grids = list(filter(lambda x: self.element_is_displayed(x), grids))
@@ -6491,8 +6848,13 @@ class WebappInternal(Base):
                     elif len(grids) - 1 >= grid_number:
                         success = grids[grid_number]
 
+            if not wait:
+                break
+
         if success:
             return success
+        elif not wait:
+            return grids
         else:
             self.log_error("Couldn't find grid.")
 
@@ -7184,6 +7546,7 @@ class WebappInternal(Base):
 
         cell_filled = False
         selenium_column = None
+        checkbox_grid = None
         current_layers = lambda : self.check_layers(layer_selector)
         initial_layers = current_layers()
 
@@ -7194,37 +7557,67 @@ class WebappInternal(Base):
                 selenium_column, _ = self.get_grid_cell(column=column, grid_number=grid_number, row=row, field_to_label=field_to_label, position=column_position, duplicate_fields=duplicate_fields)
                 current_container = self.get_current_container()
                 current_container_id = current_container.get("id")
+                checkbox_grid = self._return_checkbox_grid(selenium_column)
 
             if selenium_column:
-                cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
-                selenium_input = lambda: self.get_grid_input_element()
+                # Handle checkbox input elements when the value is a boolean
+                if isinstance(user_value, bool) and checkbox_grid:
+                    click_success = self.performing_additional_click(checkbox_grid, grid_number)
+                    cell_filled = click_success if check_value else True
 
-                if selenium_input():
-                    if isinstance(selenium_input(), Select):
-                        cell_filled = self.select_combo(selenium_input(), user_value)
-                        time.sleep(1)
-                        # if modal opened close it
-                        if current_layers() > initial_layers:
-                            self.send_keys(selenium_column, Keys.TAB)
-                    else:
-                        if cell_opened:
-                            self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
-                            self.wait_element_fill(selenium_column, field_one, value_type, timeout=10)
+                else:
+                    cell_opened = self.open_cell(field, initial_layers, element=selenium_column)
+                    selenium_input = lambda: self.get_grid_input_element()
 
-                        # if modal/dialog still opened, skip check value
-                        if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                               position=initial_layers + 1, main_container="body", check_error=False):
-                            logger().info(
-                                "Dialog open, skipping value check, Check cell fill")
-                            return
-
-                        if check_value:
-                            cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
-                            if not cell_filled:
-                                self.search_for_errors()
+                    if selenium_input():
+                        if isinstance(selenium_input(), Select):
+                            cell_filled = self.select_combo(selenium_input(), user_value)
+                            time.sleep(1)
+                            # if modal opened close it
+                            if current_layers() == initial_layers + 1:
+                                self.send_keys(selenium_column, Keys.TAB)
                         else:
-                            cell_filled = True
+                            if cell_opened:
+                                self.process_input_element(field, selenium_input, user_value, value_type, initial_layers)
+                                self.wait_element_fill(selenium_column, field_one, value_type, timeout=10)
 
+                            # if modal/dialog still opened, skip check value
+                            if self.element_exists(term="wa-dialog", scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                position=initial_layers + 1, main_container="body", check_error=False):
+                                logger().info(
+                                    "Dialog open, skipping value check, Check cell fill")
+                                return
+
+                            if check_value:
+                                cell_filled = self.compare_cell_value(selenium_column, field_one, value_type)
+                                if not cell_filled:
+                                    self.search_for_errors()
+                            else:
+                                cell_filled = True
+    
+    def _return_checkbox_grid(self, element: WebElement) -> WebElement | None:
+        """
+        [Internal]
+
+        Finds and returns a checkbox element within a grid cell if present.
+
+        Searches for checkbox elements using CSS selectors that match checkbox icon styles
+        in the grid cell. Returns the first checkbox element found or None if no checkbox exists.
+
+        :param element: Selenium element (grid cell) to search for a checkbox element.
+        :type element: WebElement
+        :return: The first checkbox element found, or None if no checkbox element exists.
+        :rtype: WebElement or None
+        """
+
+        try:
+            term = "div[style*='wfunchk_mdi.png'], div[style*='wfchk_mdi.png']"
+            checkbox_div = element.find_elements(By.CSS_SELECTOR, term)
+
+            return next(iter(checkbox_div), None)
+        except:
+            return None
+    
     def compare_cell_value(self, selenium_column, user_value, value_type=None):
         """Compares two values, ignoring formatting differences.
 
@@ -7381,7 +7774,7 @@ class WebappInternal(Base):
                     filtered_grid = filtered_grids[grid_number]
 
                     # get all rows from the grid
-                    rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(filtered_grid))
+                    rows = self.execute_js_selector('tbody tr', self.soup_to_selenium(filtered_grid)) or []
 
                 if rows:
                     if row is not None:
@@ -7418,7 +7811,7 @@ class WebappInternal(Base):
                 self.log_error(f'couldn\'t find grid number {grid_number + 1} on the screen.')
 
             if (row is not None) and (row > len(rows) - 1 or row < 0) and not column_cell:
-                self.log_error("Couldn't select the specified row: {row + 1}")
+                self.log_error(f"Couldn't select the specified row: {row + 1}")
 
             if column_index is None:
                 self.log_error(f"Couldn't find column '{column}' in grid {grid_number + 1}")
@@ -8151,6 +8544,7 @@ class WebappInternal(Base):
                 filtered_object = next(iter(object))
                 if filtered_object.name == 'wa-tgrid':
                     return [filtered_object]
+                return object
 
         elif isinstance(object, Tag):
             if hasattr(object.find_parent('wa-tab-page'), 'attrs'):
@@ -8475,22 +8869,6 @@ class WebappInternal(Base):
         """
         endtime = time.time() + time_out
         while( element_selenium and time.time() < endtime and self.switch_to_active_element() != element_selenium() ):
-            time.sleep(step)
-
-    def wait_element_is_not_focused(self, element_selenium = None, time_out = 5, step = 0.1):
-        """
-        [Internal]
-
-        Waits until the element loses focus.
-
-        :param element_selenium: Lambda or callable returning the Selenium element to check.
-        :param time_out: Maximum time in seconds to wait. - **Default:** 5
-        :type time_out: float
-        :param step: Time in seconds between each check. - **Default:** 0.1
-        :type step: float
-        """
-        endtime = time.time() + time_out
-        while( element_selenium and time.time() < endtime and self.switch_to_active_element() == element_selenium() ):
             time.sleep(step)
 
     def switch_to_active_element(self):
@@ -9437,7 +9815,7 @@ class WebappInternal(Base):
                     label_serv1 = next(iter(img_serv1.parent.select('label')), None)
 
                 if label_serv1:
-                    self.ClickTree(label_serv1.text.strip())
+                    self.ClickTree(label_serv1.text.strip(), try_double_click=True)
                     self.wait_element_timeout(term="img[src*=bmpparam]", scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=5.0, step=0.5)
                     container = self.get_current_container()
 
@@ -9453,7 +9831,7 @@ class WebappInternal(Base):
                     if img_param:
                         label_param = img_param if self.webapp_shadowroot() else next(iter(img_param.parent.select('label')), None)
 
-                        self.ClickTree(label_param.text.strip())
+                        self.ClickTree(label_param.text.strip(), try_double_click=True)
 
             if not label_param:
                 self.log_error(f"Couldn't find Icon")
@@ -9869,28 +10247,30 @@ class WebappInternal(Base):
         >>> # Call the method:
         >>> oHelper.ClickLabel("Search")
         """
+        logger().info(f"Clicking on {label_name}")
+
         bs_label = ''
         label = ''
         filtered_labels = []
+        try_containers_blocked = False
+
         self.wait_blocker()
         self.wait_element(label_name)
-        logger().info(f"Clicking on {label_name}")
+        
         endtime = time.time() + self.config.time_out
-        while(not label and time.time() < endtime):
+        while(not label):
+
             container = self.get_current_container()
-            if not container:
-                self.log_error("Couldn't locate container.")
 
-            if self.webapp_shadowroot():
-
+            if container:
                 labels = container.select("wa-text-view, wa-checkbox, .dict-tradmenu")
                 for element in labels:
                     if "class" in element.attrs and 'dict-tradmenu' in element['class']:
                         radio_labels = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('label')",
-                                                   self.soup_to_selenium(element))
+                                                    self.soup_to_selenium(element))
                         filtered_radio = list(
                             filter(lambda x: label_name.lower().strip() == x.text.lower().strip(),
-                                   radio_labels))
+                                    radio_labels))
                         if filtered_radio:
                             [filtered_labels.append(i) for i in filtered_radio]
 
@@ -9907,13 +10287,22 @@ class WebappInternal(Base):
                     label = next(iter(self.web_scrap(term=label_name)))
 
                 if position > len(filtered_labels):
+                    self.filter_blocked_containers = True
                     return self.log_error(f"Element position not found")
 
-            else:
-                labels = container.select("label")
-                filtered_labels = list(filter(lambda x: label_name.lower() in x.text.lower(), labels))
-                filtered_labels = list(filter(lambda x: EC.element_to_be_clickable((By.XPATH, xpath_soup(x))), filtered_labels))
-                label = next(iter(filtered_labels), None)
+            if label:
+                if try_containers_blocked:
+                    logger().debug("Element found without blocked-container filtering.")
+                break
+            
+            if time.time() > endtime and not try_containers_blocked:
+                self.filter_blocked_containers = False
+                try_containers_blocked = True
+
+            elif time.time() > endtime and try_containers_blocked:
+                break
+
+        self.filter_blocked_containers = True
 
         if not label:
             return self.log_error("Couldn't find any labels.")
@@ -9921,20 +10310,11 @@ class WebappInternal(Base):
         if type(label) == Tag:
             bs_label = self.soup_to_selenium(label)
 
-        if self.webapp_shadowroot():
-            label_element = bs_label if bs_label else label
-            time.sleep(2)
-            self.scroll_to_element(label_element)
-            self.set_element_focus(label_element)
-            self.send_action(action=self.click, element=lambda: label_element)
-        else:
-            time.sleep(2)
-            label_element = bs_label if bs_label else label
-            self.scroll_to_element(label_element)
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-            self.set_element_focus(label_element)
-            self.wait_until_to(expected_condition="element_to_be_clickable", element = label, locator = By.XPATH )
-            self.click(label_element)
+        label_element = bs_label if bs_label else label
+        time.sleep(2)
+        self.scroll_to_element(label_element)
+        self.set_element_focus(label_element)
+        self.send_action(action=self.click, element=lambda: label_element)
 
     def get_current_container(self):
         """
@@ -9993,7 +10373,7 @@ class WebappInternal(Base):
         containers = soup.select(self.containers_selectors["AllContainers"])
         return containers
 
-    def ClickTree(self, treepath, right_click=False, position=1, tree_number=0):
+    def ClickTree(self, treepath, right_click=False, position=1, tree_number=0, try_double_click: bool = False):
         """
         Clicks on TreeView component.
 
@@ -10005,6 +10385,8 @@ class WebappInternal(Base):
         :type position: int
         :param tree_number: Tree position for cases where there is more than one tree on screen.
         :type tree_number: int
+        :param try_double_click: If True, after 3 single click attempts, tries 3 additional double click attempts using all ClickType variations. - **Default:** False
+        :type try_double_click: bool
 
         Usage:
 
@@ -10013,9 +10395,9 @@ class WebappInternal(Base):
         >>> # Right Click example:
         >>> oHelper.ClickTree("element 1 > element 2 > element 3", right_click=True)
         """
-        self.click_tree(treepath, right_click, position, tree_number)
+        self.click_tree(treepath, right_click, position, tree_number, try_double_click=try_double_click)
 
-    def click_tree(self, treepath, right_click, position, tree_number):
+    def click_tree(self, treepath, right_click, position, tree_number, try_double_click: bool = False):
         """
         [Internal]
         Take treenode and label to filter and click in the toggler element to expand the TreeView.
@@ -10105,11 +10487,20 @@ class WebappInternal(Base):
                                             self.wait_blocker()                                            
 
                                             is_element_acessible = lambda: not element_is_closed() if self.check_toggler(label_filtered, element) else element_is_selected()
-
                                             click_try = 0
-                                            while click_try < 3 and not is_element_acessible():
+                                            click_type = 1
+                                            max_tries = 6 if try_double_click else 3
+                                            while click_try < max_tries and not is_element_acessible():                                                
                                                 self.scroll_to_element(element_click())
-                                                element_click().click()
+                                                if click_try < 3:
+                                                    logger().debug('Trying to open with one click')
+                                                    self.click(element_click(), enum.ClickType.SELENIUM)
+                                                elif try_double_click:
+                                                    logger().debug(f'Trying to open with double click. ClickType: {click_type}')
+                                                    self.double_click(element_click(), enum.ClickType(click_type))
+                                                    click_type += 1
+                                                    if click_type > 3:
+                                                        click_type = 1
                                                 click_try += 1
 
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
@@ -10137,12 +10528,12 @@ class WebappInternal(Base):
                                             click_try = 0
                                             while click_try < 3 and (element_is_closed() or not element_is_selected()):
                                                 if element_is_closed():
-                                                    element_click().click()
+                                                    self.click(element_click(), enum.ClickType.SELENIUM)
 
                                                 element_closed_click = self.execute_js_selector(".toggler, .lastchild, .data", element_click(), get_all=False)
 
                                                 if element_closed_click:
-                                                    element_closed_click.click()
+                                                    self.click(element_closed_click(), enum.ClickType.SELENIUM)
 
                                                 click_try += 1
                                             
@@ -10156,7 +10547,7 @@ class WebappInternal(Base):
                                     try:
                                         element_click = lambda: self.soup_to_selenium(element_class_item.parent)
                                         self.scroll_to_element(element_click())
-                                        element_click().click()
+                                        self.click(element_click(), enum.ClickType.SELENIUM)
                                         success = self.clicktree_status_selected(label_filtered) if last_item and not self.check_toggler(label_filtered, element_click()) else self.check_hierarchy(label_filtered)
                                     except:
                                         pass
@@ -10604,19 +10995,58 @@ class WebappInternal(Base):
         [Internal]
 
         """
+        try:
+            if type(element) == Tag:
+                element_selenium = self.soup_to_selenium(element, twebview)
+            else:
+                element_selenium = element
+
+            if isinstance(element, list):
+                call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
+                for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
+                element_selenium = next(iter(element),None)
+
+            if element_selenium:
+                return element_selenium.is_displayed()
+            else:
+                return False
+        except Exception as e:
+            logger().debug(f'element_is_displayed exception: {str(e)}')
+            return False
+
+
+    def element_is_on_top(self, element=None, twebview=False):
+        """
+        [Internal]
+
+        Checks whether the element is actually the topmost element at its center
+        point, i.e. it is not covered/intercepted by another element (which would
+        cause an ElementClickInterceptedException). Uses document.elementFromPoint
+        via JavaScript, since is_displayed() may return false positives.
+        """
         if type(element) == Tag:
             element_selenium = self.soup_to_selenium(element, twebview)
+        elif isinstance(element, list):
+            element_selenium = next(iter(element), None)
         else:
             element_selenium = element
 
-        if isinstance(element, list):
-            call_stack = list(filter(lambda x: 'webapp_internal.py' == x.filename.split(self.replace_slash('\\'))[-1], inspect.stack()))
-            for n in call_stack: logger().debug(f'element_is_displayed Error: {str(n.function)}')
-            element_selenium = next(iter(element),None)
+        if not element_selenium:
+            return False
 
-        if element_selenium:
-            return element_selenium.is_displayed()
-        else:
+        try:
+            is_on_top = bool(self.driver.execute_script("""
+                const el = arguments[0];
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                if (r.width === 0 || r.height === 0) return false;
+                const topo = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+                return topo === el || el.contains(topo);
+            """, element_selenium))
+            logger().debug(f"element_is_on_top return: {is_on_top}")
+            return is_on_top
+        except Exception as e:
+            logger().debug(f"element_is_on_top Error: {str(e)}")
             return False
 
 
@@ -11408,7 +11838,7 @@ class WebappInternal(Base):
         else:
             self.log_error("Doesn't contain that key in json object")
 
-    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True):
+    def send_action(self, action = None, element = None, value = None, right_click=False, click_type=None, wait_change=True, timeout=None):
         """
 
         Sends an action to element and compare it object state change.
@@ -11419,6 +11849,12 @@ class WebappInternal(Base):
         :param right_click: True if you want a right click
         :param click_type: ClickType enum. 1-3 types- **Default:** None
         :type click_type: int
+        :param timeout: Optional upper bound (in seconds) for the internal retry loop.
+                        When ``None`` (default) the full ``self.config.time_out`` is used,
+                        preserving the original behavior. Callers such as ``SetButton`` pass
+                        a bounded value so control returns to their own retry/recapture loop
+                        instead of blocking here for the entire ``time_out``.
+        :type timeout: float
         :return: True if there was a change in the object
         """
 
@@ -11457,7 +11893,8 @@ class WebappInternal(Base):
 
         click_type = 1 if not main_click_type else click_type
 
-        endtime = time.time() + self.config.time_out
+        action_timeout = timeout if timeout is not None else self.config.time_out
+        endtime = time.time() + action_timeout
         try:
             while ((time.time() < endtime) and not check_changed()):
                 logger().debug(f"Trying to send action")
@@ -11474,7 +11911,7 @@ class WebappInternal(Base):
                     action(click_type=enum.ClickType(click_type), element=element())
                 elif action:
                     action()
-                    
+
                 time.sleep(1)
 
                 if soup_select:
@@ -12403,12 +12840,32 @@ class WebappInternal(Base):
 
 
     def get_container_selector(self, selector, select_all=True):
-        """Get a soup select object from current container.
-        :param selector: Css selector
-        :param select_all: If true return a list of objects, if false return the first
-        :return: Return a soup select object
         """
-        container = self.get_current_container()
+        [Internal]
+
+        Retrieves elements from the current container using a CSS selector with retry logic.
+
+        Attempts to retrieve the current container with a timeout, retrying every second.
+        If the container is not found after timeout, logs an error and attempts selection anyway.
+
+        :param selector: CSS selector to query within the container.
+        :type selector: str
+        :param select_all: If True, returns a list of all matching elements; if False, returns only the first match. - **Default:** True
+        :type select_all: bool
+        :return: A list of matching elements if select_all is True, or the first matching element if select_all is False.
+        :rtype: list or BeautifulSoup element
+        """
+
+        container = None
+
+        endtime = time.time() + self.config.time_out / 2
+        while time.time() < endtime and not container:
+            logger().debug('Looking for container')
+            container = self.get_current_container()
+            time.sleep(1)
+
+        if not container:
+            self.log_error("Container doesn''t found!")
 
         return container.select(selector) if select_all else container.select_one(selector)
 
