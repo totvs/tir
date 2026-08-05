@@ -1901,6 +1901,13 @@ class WebappInternal(Base):
 
             self.escape_to_main_menu()
 
+            # If restart() already handled set_program via emit, skip the rest.
+            # The flag is consumed (reset) here so it only triggers once.
+            if getattr(self, '_program_set_by_restart', False):
+                self._program_set_by_restart = False
+                logger().info(f"Program '{program_name}' already set by restart, skipping.")
+                return
+
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
             soup = self.get_current_DOM()
@@ -3884,6 +3891,7 @@ class WebappInternal(Base):
                     emit('route.set_lateral_menu', self.config.routine, save_input=False)
                 elif self.config.routine_type == 'Program':
                     emit('route.set_program', self.config.routine)
+                    self._program_set_by_restart = True
 
     def wait_user_screen(self):
 
