@@ -10983,7 +10983,10 @@ class WebappInternal(Base):
             else:
                 return False
         except Exception as e:
-            logger().debug(f'element_is_displayed exception: {str(e)}')
+            # Usa apenas a mensagem (sem o stacktrace) quando disponivel.
+            error_message = getattr(e, "msg", None) or str(e)
+            error_message = error_message.split("Stacktrace:")[0].strip()
+            logger().debug(f'element_is_displayed exception: {error_message}')
             return False
 
 
