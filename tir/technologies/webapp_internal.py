@@ -4635,7 +4635,7 @@ class WebappInternal(Base):
         # A flag é consumida (resetada) aqui para não interferir em chamadas futuras.
         if getattr(self, '_lateral_menu_set_by_restart', False):
             self._lateral_menu_set_by_restart = False
-            logger().info(f"Lateral menu '{menu_itens}' already set by restart, skipping.")
+            logger().debug(f"Lateral menu '{menu_itens}' already set by restart, skipping.")
             return
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
