@@ -788,7 +788,10 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except Exception as e:
-            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
+            # Usa apenas a mensagem (sem o stacktrace) quando disponivel.
+            error_message = getattr(e, "msg", None) or str(e)
+            error_message = error_message.split("Stacktrace:")[0].strip()
+            logger().debug(f"********Warining scroll_to_element exception: {error_message}*********")
             pass
 
     def scroll_into_view(self, element):
