@@ -11013,7 +11013,7 @@ class WebappInternal(Base):
             is_on_top = bool(self.driver.execute_script("""
                 const el = arguments[0];
                 if (!el) return false;
-const r = el.getBoundingClientRect();
+                const r = el.getBoundingClientRect();
                                 if (r.width === 0 || r.height === 0) return false;
                 const topo = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
                 return topo === el || el.contains(topo);
