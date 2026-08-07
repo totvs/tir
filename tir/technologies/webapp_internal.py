@@ -730,7 +730,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot(shadow_root=shadow_root):
             button = lambda: button_element
         else:
-            button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
+            button = lambda: self.soup_to_selenium(button_element, twebview=self.config.poui_login)
 
         if self.config.poui_login:
             self.switch_to_iframe()
@@ -5000,7 +5000,6 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
-            halftime = time.time() + (self.config.time_out / 2)
 
             if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
@@ -5008,11 +5007,11 @@ class WebappInternal(Base):
 
             next_button = None
             while(time.time() < endtime and not soup_element):
-                # During the first half of the timeout, also require the element to be the
-                # topmost one at its center point (not intercepted by an overlay). After that,
-                # fall back to the legacy behavior (element_is_displayed only).
+                # Throughout the whole timeout, also require the element to be the topmost one
+                # at its center point (not intercepted by an overlay). The separate on_top
+                # filter is now enforced for the entire time_out instead of only the first half.
                 # The very first SetButton usage always skips this on_top check.
-                enforce_on_top = (not first_setbutton_use) and (time.time() < halftime)
+                enforce_on_top = (not first_setbutton_use) and (time.time() < endtime)
                 if self.webapp_shadowroot():
                     next_button = self.get_shadowroot_button(button, term_button, position, check_error)
 
