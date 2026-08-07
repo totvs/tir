@@ -1901,6 +1901,13 @@ class WebappInternal(Base):
 
             self.escape_to_main_menu()
 
+            # If restart() already handled set_program via emit, skip the rest.
+            # The flag is consumed (reset) here so it only triggers once.
+            if getattr(self, '_program_set_by_restart', False):
+                self._program_set_by_restart = False
+                logger().debug(f"Program '{program_name}' already set by restart, skipping.")
+                return
+
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
             soup = self.get_current_DOM()
@@ -3882,8 +3889,10 @@ class WebappInternal(Base):
                 from tir.technologies.core.events import emit
                 if self.config.routine_type == 'SetLateralMenu':
                     emit('route.set_lateral_menu', self.config.routine, save_input=False)
+                    self._lateral_menu_set_by_restart = True
                 elif self.config.routine_type == 'Program':
                     emit('route.set_program', self.config.routine)
+                    self._program_set_by_restart = True
 
     def wait_user_screen(self):
 
@@ -4621,6 +4630,13 @@ class WebappInternal(Base):
         menu_itens = list(map(str.strip, menu_itens.split(">")))
 
         self.escape_to_main_menu()
+
+        # Se o restart() já navegou o menu lateral via emit, pula o restante.
+        # A flag é consumida (resetada) aqui para não interferir em chamadas futuras.
+        if getattr(self, '_lateral_menu_set_by_restart', False):
+            self._lateral_menu_set_by_restart = False
+            logger().debug(f"Lateral menu '{menu_itens}' already set by restart, skipping.")
+            return
 
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
