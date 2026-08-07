@@ -6510,12 +6510,10 @@ class WebappInternal(Base):
         df, grid = self.grid_dataframe(grid_number=grid_number)
         sel_grid  = self.soup_to_selenium(grid)
         success = lambda: 'focus' in sel_grid.get_attribute('class')
-        clicked = None
 
         while count < 4 and not success():
             self.wait_blocker()
-            clicked = self.click(sel_grid, click_type=enum.ClickType(click_type))  
-
+            self.click(sel_grid, click_type=enum.ClickType(click_type))  
             count += 1
 
             if count == 3:
