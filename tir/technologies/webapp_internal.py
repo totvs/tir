@@ -6522,14 +6522,18 @@ class WebappInternal(Base):
         [Internal]
         """
         count = 0
+        click_type = 2
         df, grid = self.grid_dataframe(grid_number=grid_number)
         sel_grid  = self.soup_to_selenium(grid)
         success = lambda: 'focus' in sel_grid.get_attribute('class')
-        while count < 3 and not success():
+
+        while count < 4 and not success():
             self.wait_blocker()
-            self.click(sel_grid, click_type=enum.ClickType.SELENIUM)
+            self.click(sel_grid, click_type=enum.ClickType(click_type))  
             count += 1
 
+            if count == 3:
+                click_type = 3
 
     def grid_dataframe(self, grid_number=0, wait=True, check_error=True, current_container=False, throw_error=True):
         """
@@ -8463,6 +8467,7 @@ class WebappInternal(Base):
         logger().info(f"Clicking on grid cell: {column}")
 
         grid_cell, _ = self.get_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)
+        self.set_grid_focus(grid_number)
         self.select_grid_cell(grid_cell)
 
     def filter_non_obscured(self, elements, grid_number):

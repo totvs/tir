@@ -235,6 +235,7 @@ class Base(unittest.TestCase):
             return False
         except ElementClickInterceptedException as e:
             logger().debug(e.msg)
+            return False
         except Exception as e:
             logger().debug(f"Warning click method Exception: {str(e)}")
             return False
