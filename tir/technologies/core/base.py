@@ -29,6 +29,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import ElementClickInterceptedException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
@@ -234,6 +235,7 @@ class Base(unittest.TestCase):
             return False
         except ElementClickInterceptedException as e:
             logger().debug(e.msg)
+            return False
         except Exception as e:
             logger().debug(f"Warning click method Exception: {str(e)}")
             return False

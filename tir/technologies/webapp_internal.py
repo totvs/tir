@@ -730,7 +730,7 @@ class WebappInternal(Base):
         if self.webapp_shadowroot(shadow_root=shadow_root):
             button = lambda: button_element
         else:
-            button = lambda: self.driver.find_element(By.XPATH, xpath_soup(button_element))
+            button = lambda: self.soup_to_selenium(button_element, twebview=self.config.poui_login)
 
         if self.config.poui_login:
             self.switch_to_iframe()
@@ -1901,6 +1901,13 @@ class WebappInternal(Base):
 
             self.escape_to_main_menu()
 
+            # If restart() already handled set_program via emit, skip the rest.
+            # The flag is consumed (reset) here so it only triggers once.
+            if getattr(self, '_program_set_by_restart', False):
+                self._program_set_by_restart = False
+                logger().debug(f"Program '{program_name}' already set by restart, skipping.")
+                return
+
             self.wait_element(term=cget_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
             soup = self.get_current_DOM()
@@ -2923,7 +2930,7 @@ class WebappInternal(Base):
                 regex = r"(<[^>]*>)?([\?\*\.\:]+)?"
                 labels = container.select(label_term)
                 labels_displayed = list(filter(lambda x: self.element_is_displayed(x) ,labels))
-                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text) ,labels_displayed))
+                view_filtred = list(filter(lambda x: re.search(r"^{}([^a-zA-Z0-9]+)?$".format(re.escape(field)),x.text, re.IGNORECASE) ,labels_displayed))
 
                 if self.webapp_shadowroot():
                     if not view_filtred:
@@ -3882,8 +3889,10 @@ class WebappInternal(Base):
                 from tir.technologies.core.events import emit
                 if self.config.routine_type == 'SetLateralMenu':
                     emit('route.set_lateral_menu', self.config.routine, save_input=False)
+                    self._lateral_menu_set_by_restart = True
                 elif self.config.routine_type == 'Program':
                     emit('route.set_program', self.config.routine)
+                    self._program_set_by_restart = True
 
     def wait_user_screen(self):
 
@@ -4622,6 +4631,13 @@ class WebappInternal(Base):
 
         self.escape_to_main_menu()
 
+        # Se o restart() já navegou o menu lateral via emit, pula o restante.
+        # A flag é consumida (resetada) aqui para não interferir em chamadas futuras.
+        if getattr(self, '_lateral_menu_set_by_restart', False):
+            self._lateral_menu_set_by_restart = False
+            logger().debug(f"Lateral menu '{menu_itens}' already set by restart, skipping.")
+            return
+
         self.wait_element(term=menu_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body")
 
         soup = self.get_current_DOM()
@@ -5000,7 +5016,6 @@ class WebappInternal(Base):
             success = False
             endtime = time.time() + self.config.time_out
             starttime = time.time()
-            halftime = time.time() + (self.config.time_out / 2)
 
             if self.config.smart_test or self.config.debug_log:
                 logger().debug(f"***System Info*** Before Clicking on button:{button}")
@@ -5008,11 +5023,11 @@ class WebappInternal(Base):
 
             next_button = None
             while(time.time() < endtime and not soup_element):
-                # During the first half of the timeout, also require the element to be the
-                # topmost one at its center point (not intercepted by an overlay). After that,
-                # fall back to the legacy behavior (element_is_displayed only).
+                # Throughout the whole timeout, also require the element to be the topmost one
+                # at its center point (not intercepted by an overlay). The separate on_top
+                # filter is now enforced for the entire time_out instead of only the first half.
                 # The very first SetButton usage always skips this on_top check.
-                enforce_on_top = (not first_setbutton_use) and (time.time() < halftime)
+                enforce_on_top = (not first_setbutton_use) and (time.time() < endtime)
                 if self.webapp_shadowroot():
                     next_button = self.get_shadowroot_button(button, term_button, position, check_error)
 
@@ -6506,14 +6521,18 @@ class WebappInternal(Base):
         [Internal]
         """
         count = 0
+        click_type = 2
         df, grid = self.grid_dataframe(grid_number=grid_number)
         sel_grid  = self.soup_to_selenium(grid)
         success = lambda: 'focus' in sel_grid.get_attribute('class')
-        while count < 3 and not success():
+
+        while count < 4 and not success():
             self.wait_blocker()
-            self.click(sel_grid, click_type=enum.ClickType.SELENIUM)
+            self.click(sel_grid, click_type=enum.ClickType(click_type))  
             count += 1
 
+            if count == 3:
+                click_type = 3
 
     def grid_dataframe(self, grid_number=0, wait=True, check_error=True, current_container=False, throw_error=True):
         """
@@ -8447,6 +8466,7 @@ class WebappInternal(Base):
         logger().info(f"Clicking on grid cell: {column}")
 
         grid_cell, _ = self.get_grid_cell(column=column, row=row_number, grid_number=grid_number, field_to_label=field_to_label)
+        self.set_grid_focus(grid_number)
         self.select_grid_cell(grid_cell)
 
     def filter_non_obscured(self, elements, grid_number):
