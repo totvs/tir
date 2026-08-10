@@ -5022,6 +5022,12 @@ class WebappInternal(Base):
                 system_info()
 
             next_button = None
+            # Fallback para o caso do botão estar visível (element_is_displayed) porém
+            # nunca no topo (element_is_on_top). Enquanto houver tempo o laço ignora esse
+            # candidato, mas se o timeout for atingido ele é aproveitado fora do laço.
+            displayed_only_element = None
+            displayed_only_id_parent = None
+            displayed_only_restore_zoom = False
             while(time.time() < endtime and not soup_element):
                 # Throughout the whole timeout, also require the element to be the topmost one
                 # at its center point (not intercepted by an overlay). The separate on_top
@@ -5033,14 +5039,31 @@ class WebappInternal(Base):
 
                     if next_button:
                         id_parent_element = next_button['id'] if hasattr(next_button, 'id') and type(next_button) == Tag else None
-                        soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
-                        self.scroll_to_element(soup_element)
-                        soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
-                        if soup_element == None:
+                        candidate_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        self.scroll_to_element(candidate_element)
+
+                        # Só aceita de imediato quando o botão está visível E no topo.
+                        # Quando está visível mas não no topo, guarda como fallback e mantém
+                        # o laço rodando (soup_element continua vazio) até o timeout.
+                        if candidate_element and self.element_is_displayed(candidate_element):
+                            if not enforce_on_top or self.element_is_on_top(candidate_element):
+                                soup_element = candidate_element
+                            else:
+                                displayed_only_element = candidate_element
+                                displayed_only_id_parent = id_parent_element
+                                displayed_only_restore_zoom = restore_zoom
+                        else:
+                            # Não está visível: aplica zoom out para tentar trazê-lo à tela e reavalia.
                             bodySoup = self.get_current_DOM().select('body')
                             self.driver.execute_script("arguments[0].style.cssText+='transform: scale(0.8)';", self.soup_to_selenium(bodySoup[0]))
-                            soup_element = soup_element if self.element_is_displayed(soup_element) and (not enforce_on_top or self.element_is_on_top(soup_element)) else None
                             restore_zoom = True
+                            if candidate_element and self.element_is_displayed(candidate_element):
+                                if not enforce_on_top or self.element_is_on_top(candidate_element):
+                                    soup_element = candidate_element
+                                else:
+                                    displayed_only_element = candidate_element
+                                    displayed_only_id_parent = id_parent_element
+                                    displayed_only_restore_zoom = restore_zoom
 
                 else:
                     soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="button, .thbutton", main_container = self.containers_selectors["SetButton"], check_error=check_error)
@@ -5053,6 +5076,16 @@ class WebappInternal(Base):
                         soup_element = lambda : self.soup_to_selenium(soup_objects[position])
                         parent_element = self.soup_to_selenium(soup_objects[0].parent)
                         id_parent_element = parent_element.get_attribute('id')
+
+            # Verificação feita fora do laço para evitar falta de atribuição por timing errado:
+            # se o timeout foi atingido sem um elemento visível E no topo, mas existe um
+            # candidato apenas visível (reprovado somente no filtro element_is_on_top),
+            # mantém esse candidato para permitir que o método prossiga.
+            if not soup_element and displayed_only_element is not None:
+                soup_element = displayed_only_element
+                id_parent_element = displayed_only_id_parent
+                if displayed_only_restore_zoom:
+                    restore_zoom = True
 
             if self.config.smart_test:
                 logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
@@ -5123,6 +5156,10 @@ class WebappInternal(Base):
                 # verificado até aqui, recaptura o botão (container já atualizado após a
                 # transição) e usa a metade restante.
                 half_time = starttime + (self.config.time_out / 2)
+                if time.time() > endtime:
+                    endtime = time.time() + self.config.time_out
+                    half_time = time.time() + (self.config.time_out / 2)
+
                 while not click_verified and ( time.time() < endtime):
                     # Recaptura única, no meio do time_out, quando o clique ainda não foi
                     # verificado — evita reutilizar um soup_element obsoleto capturado da
