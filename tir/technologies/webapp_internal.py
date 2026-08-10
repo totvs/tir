@@ -9496,6 +9496,8 @@ class WebappInternal(Base):
             self.restart_counter = 0
 
         if proceed_action() or not self.check_release_newlog():
+            self._program_set_by_restart = False
+            self._lateral_menu_set_by_restart = False
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
