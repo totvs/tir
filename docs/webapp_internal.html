@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webapp Internal &mdash; TIR 2.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=51b770b3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -165,6 +165,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.driver_refresh"><code class="docutils literal notranslate"><span class="pre">WebappInternal.driver_refresh()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.element_exists"><code class="docutils literal notranslate"><span class="pre">WebappInternal.element_exists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.element_is_displayed"><code class="docutils literal notranslate"><span class="pre">WebappInternal.element_is_displayed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.element_is_on_top"><code class="docutils literal notranslate"><span class="pre">WebappInternal.element_is_on_top()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.environment_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.environment_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.escape_to_main_menu"><code class="docutils literal notranslate"><span class="pre">WebappInternal.escape_to_main_menu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.execute_js_selector"><code class="docutils literal notranslate"><span class="pre">WebappInternal.execute_js_selector()</span></code></a></li>
@@ -233,6 +234,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_selected_row"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_selected_row()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_selenium_column_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_selenium_column_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_shadow_roots_content"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_shadow_roots_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_shadowroot_button"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_shadowroot_button()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_text"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_text_position"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_text_position()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_web_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_web_value()</span></code></a></li>
@@ -265,6 +267,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.process_input_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.process_input_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.program_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.program_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.query_execute"><code class="docutils literal notranslate"><span class="pre">WebappInternal.query_execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.recapture_setbutton_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.recapture_setbutton_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.reload_user_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.reload_user_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.remove_mask"><code class="docutils literal notranslate"><span class="pre">WebappInternal.remove_mask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.report_comparison"><code class="docutils literal notranslate"><span class="pre">WebappInternal.report_comparison()</span></code></a></li>
@@ -323,7 +326,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_is_blocked"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_element_is_blocked()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_is_focused"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_element_is_focused()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_is_not_displayed"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_element_is_not_displayed()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_is_not_focused"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_element_is_not_focused()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_timeout"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_element_timeout()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_gridTree"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_gridTree()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.wait_selected_row"><code class="docutils literal notranslate"><span class="pre">WebappInternal.wait_selected_row()</span></code></a></li>
@@ -369,7 +371,7 @@
 <span id="webapp-internal"></span><h1>Webapp Internal<a class="headerlink" href="#module-tir" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tir.technologies.webapp_internal.</span></span><span class="sig-name descname"><span class="pre">WebappInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tir.technologies.webapp_internal.</span></span><span class="sig-name descname"><span class="pre">WebappInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autostart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal" title="Link to this definition"></a></dt>
 <dd><p>Internal implementation of Protheus Webapp class.</p>
 <p>This class contains all the methods defined to run Selenium Interface Tests on Protheus Webapp.</p>
 <p>Internal methods should have the <strong>[Internal]</strong> tag and should not be accessible to the user.</p>
@@ -2355,6 +2357,16 @@ Supports formats dd/mm/yyyy and dd/mm/yy.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.element_is_on_top">
+<span class="sig-name descname"><span class="pre">element_is_on_top</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twebview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.element_is_on_top" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Checks whether the element is actually the topmost element at its center
+point, i.e. it is not covered/intercepted by another element (which would
+cause an ElementClickInterceptedException). Uses document.elementFromPoint
+via JavaScript, since is_displayed() may return false positives.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.environment_screen">
 <span class="sig-name descname"><span class="pre">environment_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change_env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.environment_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -3530,6 +3542,30 @@ Cleans special characters like</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_shadowroot_button">
+<span class="sig-name descname"><span class="pre">get_shadowroot_button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term_button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_shadowroot_button" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Captures the button element inside a shadowroot container.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Button caption to be located.</p></li>
+<li><p><strong>term_button</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – CSS selector used to locate the button candidates.</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Index of the button among the filtered candidates.</p></li>
+<li><p><strong>check_error</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether errors should be checked while waiting. - <strong>Default:</strong> True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The located button element (Tag or Selenium element) or None if not found.</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">next_button</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shadowroot_button</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="n">term_button</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">check_error</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_text">
 <span class="sig-name descname"><span class="pre">get_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string_left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_text" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -4121,6 +4157,30 @@ Usage:
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.recapture_setbutton_element">
+<span class="sig-name descname"><span class="pre">recapture_setbutton_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term_button</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.recapture_setbutton_element" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Re-captures the SetButton target element using the same capture logic as the
+initial capture in <a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.SetButton" title="tir.technologies.webapp_internal.WebappInternal.SetButton"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SetButton()</span></code></a> (respecting <code class="docutils literal notranslate"><span class="pre">webapp_shadowroot()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">restore_zoom</span></code>, <code class="docutils literal notranslate"><span class="pre">position</span></code> and <code class="docutils literal notranslate"><span class="pre">element_is_displayed</span></code> filtering, with the
+fallback without <code class="docutils literal notranslate"><span class="pre">filter_blocked_containers</span></code>).</p>
+<p>This is used by <code class="docutils literal notranslate"><span class="pre">SetButton</span></code> when the initial single capture may have grabbed a
+stale element from the previous container during a screen transition. After the
+transition completes the container is already updated, so recapturing returns the
+correct element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(soup_element,</span> <span class="pre">restore_zoom)</span></code>. <code class="docutils literal notranslate"><span class="pre">soup_element</span></code> is a Selenium
+element (or <code class="docutils literal notranslate"><span class="pre">None</span></code> when not found) and <code class="docutils literal notranslate"><span class="pre">restore_zoom</span></code> indicates that a
+zoom-out was applied to make the element visible.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.reload_user_screen">
 <span class="sig-name descname"><span class="pre">reload_user_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.reload_user_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -4462,7 +4522,7 @@ Return selenium web element</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.send_action">
-<span class="sig-name descname"><span class="pre">send_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.send_action" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">send_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">click_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.send_action" title="Link to this definition"></a></dt>
 <dd><p>Sends an action to element and compare it object state change.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4472,6 +4532,11 @@ Return selenium web element</p>
 <li><p><strong>value</strong> – send keys value</p></li>
 <li><p><strong>right_click</strong> – True if you want a right click</p></li>
 <li><p><strong>click_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – ClickType enum. 1-3 types- <strong>Default:</strong> None</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Optional upper bound (in seconds) for the internal retry loop.
+When <code class="docutils literal notranslate"><span class="pre">None</span></code> (default) the full <code class="docutils literal notranslate"><span class="pre">self.config.time_out</span></code> is used,
+preserving the original behavior. Callers such as <code class="docutils literal notranslate"><span class="pre">SetButton</span></code> pass
+a bounded value so control returns to their own retry/recapture loop
+instead of blocking here for the entire <code class="docutils literal notranslate"><span class="pre">time_out</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -4875,22 +4940,6 @@ Update the password in the Protheus password change request screen</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">wait_element_is_not_displayed</span><span class="p">(</span><span class="n">soup_element</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.wait_element_is_not_focused">
-<span class="sig-name descname"><span class="pre">wait_element_is_not_focused</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_selenium</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_element_is_not_focused" title="Link to this definition"></a></dt>
-<dd><p>[Internal]</p>
-<p>Waits until the element loses focus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>element_selenium</strong> – Lambda or callable returning the Selenium element to check.</p></li>
-<li><p><strong>time_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Maximum time in seconds to wait. - <strong>Default:</strong> 5</p></li>
-<li><p><strong>step</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Time in seconds between each check. - <strong>Default:</strong> 0.1</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
