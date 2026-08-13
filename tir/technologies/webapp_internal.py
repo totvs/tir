@@ -1,43 +1,42 @@
-import re
-import os
-import sys
-import cv2
-import time
-import uuid
+import configparser
 import glob
+import inspect
+import os
+import pathlib
 import random
+import re
 import shutil
 import socket
-import inspect
-import pathlib
-import configparser
-import pandas as pd
-from io import StringIO
-from math import sqrt, pow
-from functools import reduce
+import sys
+import time
+import uuid
 from datetime import datetime
-from bs4 import BeautifulSoup, Tag
 from difflib import SequenceMatcher
+from functools import reduce
+from io import StringIO
+from math import pow, sqrt
 
+import cv2
+import pandas as pd
+import tir.technologies.core.enumerations as enum
+from bs4 import BeautifulSoup, Tag
 from selenium.common.exceptions import *
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-
-import tir.technologies.core.enumerations as enum
 from tir.technologies.core import base
-from tir.technologies.core.log import Log, nump
+from tir.technologies.core.base import Base
+from tir.technologies.core.base_database import BaseDatabase
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
-from tir.technologies.core.third_party.xpath_soup import xpath_soup
-from tir.technologies.core.psutil_info import system_info
-from tir.technologies.core.base import Base
-from tir.technologies.core.numexec import NumExec
+from tir.technologies.core.log import Log, nump
 from tir.technologies.core.logging_config import logger
-from tir.technologies.core.base_database import BaseDatabase
-
+from tir.technologies.core.numexec import NumExec
+from tir.technologies.core.psutil_info import system_info
+from tir.technologies.core.third_party.xpath_soup import xpath_soup
 
 def count_time(func):
     """
