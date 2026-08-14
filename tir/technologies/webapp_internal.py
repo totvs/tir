@@ -1,40 +1,42 @@
-import re
-import time
-import pandas as pd
-import inspect
 import os
-import random
-import uuid
-import glob
-import shutil
+import re
 import cv2
-import socket
-import pathlib
 import sys
-import tir.technologies.core.enumerations as enum
+import glob
+import time
+import uuid
+import random
+import shutil
+import socket
+import inspect
+import pathlib
 import configparser
+import pandas as pd
+from io import StringIO
+from math import pow, sqrt
 from functools import reduce
-from selenium.webdriver.common.keys import Keys
+from datetime import datetime
 from bs4 import BeautifulSoup, Tag
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import Select
+from difflib import SequenceMatcher
 from tir.technologies.core import base
+from selenium.common.exceptions import *
+from selenium.webdriver.common.by import By
+from tir.technologies.core.base import Base
+from selenium.webdriver.common.keys import Keys
 from tir.technologies.core.log import Log, nump
+from selenium.webdriver.support.ui import Select
+from tir.technologies.core.numexec import NumExec
+import tir.technologies.core.enumerations as enum
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
-from tir.technologies.core.third_party.xpath_soup import xpath_soup
-from tir.technologies.core.psutil_info import system_info
-from tir.technologies.core.base import Base
-from tir.technologies.core.numexec import NumExec
-from math import sqrt, pow
-from selenium.common.exceptions import *
-from datetime import datetime
 from tir.technologies.core.logging_config import logger
-from io import StringIO
+from tir.technologies.core.psutil_info import system_info
+from selenium.webdriver.remote.webelement import WebElement
 from tir.technologies.core.base_database import BaseDatabase
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from tir.technologies.core.third_party.xpath_soup import xpath_soup
+
 
 def count_time(func):
     """
