@@ -5871,7 +5871,8 @@ class PouiInternal(Base):
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
-        get_wtb = lambda: len(self.get_current_DOM().select('wa-tab-button'))
+        get_wtb = lambda: len(list(filter(lambda x: not 'hidden' in x.find_parent('wa-tab-view').attrs, 
+                                                    self.get_current_DOM().select('wa-tab-button'))))
         wtb_before = get_wtb()
 
         hide_element = next(iter(self.web_scrap(term=search_term, 
