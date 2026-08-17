@@ -2029,33 +2029,29 @@ class WebappInternal(Base):
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
-    def standard_search_field(self, term, name_attr=False,send_key=False):
+    def standard_search_field(self, term: str, name_attr: bool = False, send_key: bool = False) -> None:
         """
         [Internal]
 
-        Do the standard query(F3)
-        this method
-        1.Search the field
-        2.Search icon "lookup"
-        3.Click()
+        Internal implementation of the lookup (F3) action, called internally by the public F3 method.
 
-        :param term: The term that must be searched.
+        Locates the target field and retries, alternating between clicking the lookup icon and
+        sending the F3 key to the field, until a new container (the search/query modal) is detected
+        or the configured time_out is reached. Each attempt waits up to (self.config.time_out / 5)
+        seconds for the new container before switching strategy and trying again.
+
+        :param term: Label or internal name of the field to search.
         :type term: str
-        :param name_attr: If true searchs element by name.
+        :param name_attr: If True, searches the field by its name attribute instead of its label. - **Default:** False
         :type name_attr: bool
-        :param send_key: Try open standard search field send key F3 (no click).
+        :param send_key: If True, always opens the search window by sending the F3 key to the field, instead of clicking the lookup icon. - **Default:** False
         :type send_key: bool
 
-        Usage:
-
-        >>> # To search using a label name:
-        >>> self.standard_search_field(name_label)
-        >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input:
-        >>> self.standard_search_field(field='A1_EST',name_attr=True)
-        >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input and do action with a key:
-        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        .. note::
+            If the field itself cannot be found on the screen, this method fails the test case
+            through log_error. If the field is found but the new container doesn't open within
+            time_out, the method does **not** fail the test case; it only logs the failure for
+            debugging purposes.
         """
 
         success = False
@@ -2087,9 +2083,12 @@ class WebappInternal(Base):
             
             if (not send_key and attempt % 2 == 0):
                 logger().debug("Clicking on search icon")
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")),None)
-                icon_s = self.soup_to_selenium(icon)
-                self.click(icon_s)
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")), None)
+                if icon is not None:
+                    icon_s = self.soup_to_selenium(icon)
+                    self.click(icon_s)
+                else:
+                    logger().debug("Search icon not found on this attempt")
             else:
                 logger().debug("Sending F3 to input field")
                 input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
