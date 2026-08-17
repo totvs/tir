@@ -6545,7 +6545,13 @@ class PouiInternal(Base):
                 self.scroll_to_element(input_field_element())
                 self.set_element_focus(input_field_element())
                 self.click(input_field_element())
-                input_field_element().clear()
+
+                try:
+                    input_field_element().clear()
+                except Exception as clear_error:
+                    logger().debug(f"clear() failed, falling back to select-all + delete: {clear_error}")
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE).perform()
+
                 input_field_element().send_keys(value)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 ActionChains(self.driver).key_down(Keys.TAB).perform()
