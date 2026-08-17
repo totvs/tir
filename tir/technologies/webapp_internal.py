@@ -2057,49 +2057,67 @@ class WebappInternal(Base):
         >>> # To search using the name of input and do action with a key:
         >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
         """
-        endtime = self.config.time_out + time.time()
 
-        try:
-            #wait element
-            if name_attr:
-                self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
-            else:
-                self.wait_element(term)
-            # find element
-            element = self.get_field(term,name_attr).find_parent() if not self.webapp_shadowroot() else self.get_field(term,name_attr)
-            if not(element):
-                raise Exception("Couldn't find element")
+        success = False
+        attempt = 0
 
-            logger().debug("Field successfully found")
-            if(send_key):
-                input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-                self.set_element_focus(input_field())
-                container = self.get_current_container()
-                self.send_keys(input_field(), Keys.F3)
-            else:
+        logger().info(f"Looking for field {term} for F3 action...")
+
+        if name_attr:
+            self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            self.wait_element(term)
+        
+        element = self.get_field(term,name_attr)
+        
+        if not(element):
+            self.log_error(f"Couldn't find field {term} for F3 action")
+
+        logger().info("Field found successfully!")
+        logger().debug("Trying to open new container...")
+
+        container_id_before = self.get_current_container().get('id')
+        container_id_after = container_id_before
+        endtime = time.time() + self.config.time_out
+
+        while (time.time() < endtime and not success):
+
+            if attempt > 0:
+                logger().debug("Trying again...")
+            
+            if (not send_key and attempt % 2 == 0):
+                logger().debug("Clicking on search icon")
                 icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")),None)
                 icon_s = self.soup_to_selenium(icon)
-                container = self.get_current_container()
                 self.click(icon_s)
-
-            container_end = self.get_current_container()
-            if (container.get('id') == container_end.get('id')):
+            else:
+                logger().debug("Sending F3 to input field")
                 input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                 self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
 
-            while( time.time() < endtime and container.get('id') == container_end.get('id')):
-                container_end = self.get_current_container()
-                time.sleep(0.01)
+            logger().debug("Waiting for new container")
+            endtime_internal = time.time() + (self.config.time_out / 5)
 
-            if time.time() > endtime:
-                logger().debug("Timeout: new container not found.")
-            else:
-                logger().debug("Success")
+            while (time.time() < endtime_internal):
 
-        except Exception as e:
-            logger().exception(str(e))
+                container_id_after = self.get_current_container().get('id')
 
+                if container_id_after and container_id_before != container_id_after:
+                    success = True
+                    break
+
+                time.sleep(0.5)
+            
+            attempt += 1        
+
+        if success:
+            logger().debug(f"Success! New container opened after {attempt} attempt(s).")
+        else:
+            logger().debug(f"Failed! New container didn't open after {attempt} attempt(s).")
+
+        logger().debug(f"Container ID: before = {container_id_before} / after = {container_id_after}")
+        logger().info("Action F3 executed!")
 
     def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=None):
         """
