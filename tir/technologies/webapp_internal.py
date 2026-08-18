@@ -6856,9 +6856,13 @@ class WebappInternal(Base):
         success = None
         grids = None
         term = self.grid_selectors["new_web_app"]
+        try_containers_blocked = False
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not success):
+        while(not success):
+
+            if try_containers_blocked:
+                logger().debug("Looking for element without blocked-container filtering.")
 
             if not current_container:
                 grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6878,6 +6882,18 @@ class WebappInternal(Base):
 
             if not wait:
                 break
+
+            if time.time() > endtime and not try_containers_blocked:
+                self.filter_blocked_containers = False
+                try_containers_blocked = True
+            
+            elif time.time() > endtime and try_containers_blocked:
+                break
+
+        if success and try_containers_blocked:
+            logger().debug("Element found without blocked-container filtering.")
+
+        self.filter_blocked_containers = True
 
         if success:
             return success
