@@ -6829,22 +6829,30 @@ class WebappInternal(Base):
             success = td.text in text
 
     def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True, current_container=False):
-        """
+         """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
 
+        If the grid is not found within the configured time_out, this method performs one
+        additional attempt with `filter_blocked_containers` disabled, to handle cases where
+        a container is intermittently stuck in a "blocked" state and would otherwise never
+        be matched. The flag is always restored to True before returning.
+
         :param grid_number: The number of the grid on the screen.
-        :type: int
+        :type grid_number: int
         :param grid_element: Grid class name in HTML ex: ".tgrid".
-        :type: str
-        :return: Grid BeautifulSoup object
-        :rtype: BeautifulSoup object
+        :type grid_element: str
         :param grid_list: Return all grids.
         :type grid_list: bool
         :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
         :type wait: bool
-        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
-        :type wait: bool
+        :param check_error: If True, checks for error/warning screens while searching for the grid.
+        :type check_error: bool
+        :param current_container: If False, the grid is queried via web_scrap. If True, it is selected directly from the current container.
+        :type current_container: bool
+
+        :return: Grid BeautifulSoup object
+        :rtype: BeautifulSoup object
 
         Usage:
 
@@ -9475,6 +9483,8 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        self.filter_blocked_containers = True
 
         if self.blocker:
             message += f' Blocker: {self.blocker}'
