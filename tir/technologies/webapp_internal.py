@@ -4932,7 +4932,7 @@ class WebappInternal(Base):
 
         # Fallback: busca ampla via web_scrap
         if not filtered_buttons:
-            filtered_buttons = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container=self.containers_selectors["SetButton"])
+            filtered_buttons = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container=self.containers_selectors["SetButton"], check_error=check_error)
 
         if filtered_buttons and len(filtered_buttons) - 1 >= position:
             parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_buttons))
