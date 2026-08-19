@@ -6829,7 +6829,7 @@ class WebappInternal(Base):
             success = td.text in text
 
     def get_grid(self, grid_number=0, grid_element = None, grid_list=False, wait=True, check_error=True, current_container=False):
-         """
+        """
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
 
