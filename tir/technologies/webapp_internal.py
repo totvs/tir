@@ -6850,18 +6850,26 @@ class WebappInternal(Base):
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
 
+        If the grid is not found within the configured time_out, this method performs one
+        additional attempt with `filter_blocked_containers` disabled, to handle cases where
+        a container is intermittently stuck in a "blocked" state and would otherwise never
+        be matched. The flag is always restored to True before returning.
+
         :param grid_number: The number of the grid on the screen.
-        :type: int
+        :type grid_number: int
         :param grid_element: Grid class name in HTML ex: ".tgrid".
-        :type: str
-        :return: Grid BeautifulSoup object
-        :rtype: BeautifulSoup object
+        :type grid_element: str
         :param grid_list: Return all grids.
         :type grid_list: bool
         :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
         :type wait: bool
-        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
-        :type wait: bool
+        :param check_error: If True, checks for error/warning screens while searching for the grid.
+        :type check_error: bool
+        :param current_container: If False, the grid is queried via web_scrap. If True, it is selected directly from the current container.
+        :type current_container: bool
+
+        :return: Grid BeautifulSoup object
+        :rtype: BeautifulSoup object
 
         Usage:
 
@@ -6873,9 +6881,13 @@ class WebappInternal(Base):
         success = None
         grids = None
         term = self.grid_selectors["new_web_app"]
+        try_containers_blocked = False
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not success):
+        while(not success):
+
+            if try_containers_blocked:
+                logger().debug("Looking for element without blocked-container filtering.")
 
             if not current_container:
                 grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6895,6 +6907,18 @@ class WebappInternal(Base):
 
             if not wait:
                 break
+
+            if time.time() > endtime and not try_containers_blocked:
+                self.filter_blocked_containers = False
+                try_containers_blocked = True
+            
+            elif time.time() > endtime and try_containers_blocked:
+                break
+
+        if success and try_containers_blocked:
+            logger().debug("Element found without blocked-container filtering.")
+
+        self.filter_blocked_containers = True
 
         if success:
             return success
@@ -9476,6 +9500,8 @@ class WebappInternal(Base):
         >>> #Calling the method:
         >>> self.log_error("Element was not found")
         """
+
+        self.filter_blocked_containers = True
 
         if self.blocker:
             message += f' Blocker: {self.blocker}'
