@@ -4929,6 +4929,10 @@ class WebappInternal(Base):
         self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
         self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
         container = self.get_current_container()
+        logger().debug(
+            f"  [DEBUG] get_shadowroot_button container: tag={container.name if container else None} "
+            f"id={container.attrs.get('id') if container else None}"
+        )
         button_candidates = container.select(term_button)
 
         if button_candidates:
@@ -5148,6 +5152,8 @@ class WebappInternal(Base):
                 container_before_click = self.get_current_container()
                 if container_before_click and 'id' in container_before_click.attrs:
                     initial_container_id = container_before_click.attrs['id']
+                else:
+                    self.get_current_container_without_filter()
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
@@ -5209,6 +5215,8 @@ class WebappInternal(Base):
                         container_before_click = self.get_current_container()
                         if container_before_click and 'id' in container_before_click.attrs:
                             initial_container_id = container_before_click.attrs['id']
+                        else:
+                            self.get_current_container_without_filter()
                         initial_dom_hash = hash(str(self.get_current_DOM()))
                         skip_focus_retry = True
                         container_texts_before = self.get_current_container_texts()
@@ -5228,6 +5236,10 @@ class WebappInternal(Base):
                         f"Click attempt {click_attempt} (recaptured={recaptured}) "
                         f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
                     )
+
+                    logger().debug(f"  [DEBUG] GetCurrentContainer selector={self.containers_selectors['GetCurrentContainer']}")
+                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None} / id={initial_container_id} ")
+                    logger().debug(f"  [DEBUG] Container Before Text type={type(container_texts_before).__name__} / value={re.sub(r'[\n\t]', '', str(container_texts_before))[:10]}")
 
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
@@ -5266,15 +5278,20 @@ class WebappInternal(Base):
                         try:
                             # Check 1: Did the container change?
                             current_container = self.get_current_container()
+                            logger().debug(f"  [DEBUG] Current Container Infos: tag={current_container.name if current_container else None} / id={current_container.attrs.get('id') if current_container else None} ")
                             if current_container and 'id' in current_container.attrs:
                                 current_container_id = current_container.attrs['id']
                                 if initial_container_id and initial_container_id != current_container_id:
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
+                            else:
+                                self.get_current_container_without_filter()
 
                             # Check 2: Did the container texts changed?
-                            if container_texts_before != self.get_current_container_texts():
+                            current_container_texts = self.get_current_container_texts()
+                            logger().debug(f"  [DEBUG] Current Container Text type={type(current_container_texts).__name__} / value={re.sub(r'[\n\t]', '', str(current_container_texts))[:10]}")
+                            if container_texts_before != current_container_texts:
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
@@ -5372,7 +5389,9 @@ class WebappInternal(Base):
 
                 current_container = self.get_current_container()
                 current_container_id = current_container.attrs.get('id') if current_container and 'id' in current_container.attrs else 'unknown'
-                logger().debug(f"Container after click '{button}': {current_container_id}")
+                logger().debug(f"Container after click '{button}': {current_container_id} / tag={current_container.name if current_container else None} ")
+                if current_container_id == 'unknown':
+                    self.get_current_container_without_filter()
 
                 if not click_verified:
                     logger().warning(f"  [WARN] Click on '{button}' may not have been effective after {click_attempt} attempts (recaptured={recaptured}). Continuing execution...")
@@ -10412,6 +10431,35 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
+
+    def get_current_container_without_filter(self):
+        """
+        [Internal]
+
+        [DEBUG] Temporary method used to investigate SetButton false-positive/negative
+        click verification. Calls get_current_container() with filter_blocked_containers
+        disabled and logs whether a container with id is found this way.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+        """
+        container = None
+        try:
+            self.filter_blocked_containers = False
+            container = self.get_current_container()
+            if container:
+                container_id = container.attrs.get('id') if hasattr(container, 'attrs') else None
+                container_tag = container.name if hasattr(container, 'name') else None
+                container_blocked = 'blocked' in container.attrs if hasattr(container, 'attrs') else None
+                logger().debug(f"  [DEBUG] get_current_container_without_filter: id={container_id} / tag={container_tag} / blocked={container_blocked}")
+            else:
+                logger().debug("  [DEBUG] get_current_container_without_filter: container not found")
+        except Exception as e:
+            logger().debug(f"  [DEBUG] get_current_container_without_filter exception: {e}")
+        finally:
+            self.filter_blocked_containers = True
+
+        return container
 
     def get_current_shadow_root_container(self):
         """
