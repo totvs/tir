@@ -6259,8 +6259,6 @@ class PouiInternal(Base):
         >>> self._set_browse_filters(filters=[{'name': 'John'}])
         """
 
-        self._po_loading()
-
         self._remove_filters_from_browse()
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
@@ -6289,6 +6287,7 @@ class PouiInternal(Base):
 
                 if field_type in ('po-input', 'po-datepicker'):
                     self._fill_input(input_element, value, field)
+                    self._check_input_error_message(input_element)
 
                 elif field_type == 'po-select':
                     self.click_select(field, value)
@@ -6304,6 +6303,25 @@ class PouiInternal(Base):
 
         self._select_first_grid_row()
 
+    def _check_input_error_message(self, input_element):
+
+        element_parent = None
+        span_message = None
+        element_parent_sel = None
+        container_term = 'po-field-container'
+        span_term = 'span.po-field-error-message'
+
+        self.switch_to_iframe()
+
+        element_parent = input_element.find_parent(container_term)
+        if element_parent:
+            element_parent_sel = lambda: self.soup_to_selenium(element_parent)
+            span_message = element_parent_sel().find_elements(By.CSS_SELECTOR, span_term)
+            span_message = next(iter(span_message), None) if span_message else None
+
+        if span_message and self.element_is_displayed(span_message):
+            message = span_message.text
+            logger().warning(f"An error message was found while filling the field. Message: {message}")
 
     def _select_first_grid_row(self, table_number: int = 1) -> bool:
         """
