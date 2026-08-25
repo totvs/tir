@@ -3888,12 +3888,7 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
-            twebview = True if self.config.new_home else False
-
-            endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)):
-                self.close_warning_screen()
-                self.close_modal()
+            self.close_screen_before_menu()
 
             if self.config.log_info_config:
                 self.set_log_info_config() 
