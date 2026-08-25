@@ -5700,7 +5700,8 @@ class PouiInternal(Base):
             logger().debug(f'Check Menu Screen: {success}')
 
         if not success:
-            self.log_error('Home screen not found!')
+            self.restart_counter += 1
+            self.log_error('Home screen not found!', restart_counter_param=self.restart_counter)
 
 
     def check_tmenu_screen(self):
