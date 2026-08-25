@@ -6314,16 +6314,21 @@ class PouiInternal(Base):
 
         self.switch_to_iframe()
 
-        element_parent = input_element.find_parent(container_term)
-        if element_parent:
-            element_parent_sel = lambda: self.soup_to_selenium(element_parent)
-            span_message = element_parent_sel().find_elements(By.CSS_SELECTOR, span_term)
-            span_message = next(iter(span_message), None) if span_message else None
+        try:
+            element_parent = input_element.find_parent(container_term)
+            if element_parent:
+                element_parent_sel = lambda: self.soup_to_selenium(element_parent)
+                span_message = element_parent_sel().find_elements(By.CSS_SELECTOR, span_term)
+                span_message = next(iter(span_message), None) if span_message else None
 
-        if span_message and self.element_is_displayed(span_message):
-            message = span_message.text
-            value = self.get_web_value(input_element_sel()).strip()
-            logger().warning(f"An error message was found while filling the field. Message: {message} / Value: {value}")
+            if span_message and self.element_is_displayed(span_message):
+                message = span_message.text
+                value = self.get_web_value(input_element_sel()).strip()
+                logger().warning(f"An error message was found while filling the field. Message: {message} / Value: {value}")
+        
+        except Exception as e:
+            logger().debug(f"An error occurred while trying to find an error message: {e}")
+
 
     def _select_first_grid_row(self, table_number: int = 1) -> bool:
         """
@@ -6363,20 +6368,21 @@ class PouiInternal(Base):
         
         term_modal = '.po-user-guide-popover'
         term_button_close = '.po-user-guide-button-close'
+        timeout = self.config.time_out / 3
+        endtime = time.time() + timeout
 
-        logger().info("Looking for user guide.")
+        logger().info("Waiting for user guide...")
 
         wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
                                                                            scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                                            main_container='body', twebview=True,
                                                                            presence=presence)
 
-        success = not wait_element(True, 20)
+        success = not wait_element(True, timeout)
 
-        if not success:
-            logger().info("Closing user guide.")
-
-        endtime = time.time() + self.config.time_out / 3
+        log_message = "Closing user guide..." if not success else "User guide not found!"
+        logger().info(log_message)
+        
         while time.time() < endtime and not success:
 
             button_close = self.web_scrap(term=term_button_close, 
@@ -6396,6 +6402,9 @@ class PouiInternal(Base):
             self.poui_click(button_close)
 
             success = wait_element(False, 5)
+
+        log_message = "Couldn't close user guide." if not success else "User guide closed!"
+        logger().info(log_message)
 
         return success
 
