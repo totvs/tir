@@ -897,6 +897,11 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_coin_screen()
         """
+
+        from tir.technologies.core.events import emit
+        emit('webapp.close_coin_screen')
+        return
+
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
@@ -943,6 +948,11 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
+
+        from tir.technologies.core.events import emit
+        emit('webapp.close_warning_screen')
+        return
+
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".ui-dialog"), True)
         if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
@@ -5717,7 +5727,8 @@ class PouiInternal(Base):
             logger().debug(f'Check Menu Screen: {success}')
 
         if not success:
-            self.log_error('Home screen not found!')
+            self.restart_counter += 1
+            self.log_error('Home screen not found!', restart_counter_param=self.restart_counter)
 
     def click_close_button_to_menu(self):
         """[Internal]
