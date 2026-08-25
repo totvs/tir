@@ -3416,9 +3416,9 @@ class WebappInternal(Base):
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
                         if main_value == '':
-                           self.select_combo(element, main_value, index=True)
+                           self.select_combo(element, main_value, index=True, by_click=True)
                         else:
-                            self.select_combo(element, main_value)
+                            self.select_combo(element, main_value, by_click=True)
 
                         try:
                             self.set_element_focus(input_field())

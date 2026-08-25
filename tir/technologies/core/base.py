@@ -869,7 +869,7 @@ class Base(unittest.TestCase):
         if zindex_list:
             return next(iter(zindex_list), None)
 
-    def select_combo(self, element, option, index=False, shadow_root=True, locator=False):
+    def select_combo(self, element, option, index=False, shadow_root=True, locator=False, by_click: bool = False):
         """
         Selects the option on the combobox.
 
@@ -912,15 +912,26 @@ class Base(unittest.TestCase):
             index_number = self.return_combo_index(combo, option)
             if index_number:
                 time.sleep(1)
-                combo.select_by_index(str(index_number))
+                if not by_click:
+                    combo.select_by_index(str(index_number))
+                else:
+                    combo_options = list(filter(lambda x: not x.get_attribute('disabled'), combo.options))
+                    self.click(combo._el, click_type=enum.ClickType.SELENIUM)
+                    time.sleep(0.5)
+                    self.click(combo_options[index_number-1], click_type=enum.ClickType.SELENIUM)
         else:
             value = next(iter(filter(lambda x: x.text.lower().strip() == str(option).lower().strip() , combo.options)), None)
             if not value:
                 value = next(iter(filter(lambda x: x.text[0:len(str(option))].lower().strip()  == str(option).lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
-                text_value = value.text
-                combo.select_by_visible_text(text_value)
+                if not by_click:
+                    text_value = value.text
+                    combo.select_by_visible_text(text_value)
+                else:
+                    self.click(combo._el, click_type=enum.ClickType.SELENIUM)
+                    time.sleep(0.5)
+                    self.click(value, click_type=enum.ClickType.SELENIUM)
                 logger().info(f"Selected value for combo is: {text_value}")
                 return text_value
 
