@@ -5676,8 +5676,15 @@ class PouiInternal(Base):
     def escape_to_main_menu(self):
         """[Internal]
 
-        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
-        Waits until the menu is visible.
+        Tries to navigate back to the main menu screen and waits until the menu is visible.
+
+        Two strategies are combined on each attempt, both preserved for backward compatibility:
+
+        1. Sending the ESC key (legacy behavior).
+        2. Clicking the close (x) button of the current screen, needed since POUI
+           changed the behavior and some routines no longer close with ESC.
+
+        Any open dialog (warning, coin or news) found in between is closed.
 
         :return: None
         """
@@ -5697,10 +5704,61 @@ class PouiInternal(Base):
                 self.close_screen_before_menu()
 
             success = self.check_tmenu_screen()
+
+            if not success and self.click_close_button_to_menu():
+                logger().info('Close (x) button clicked to return to menu')
+
+                if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
+                    logger().info('Found layers after clicking close button')
+                    self.close_screen_before_menu()
+
+                success = self.check_tmenu_screen()
+
             logger().debug(f'Check Menu Screen: {success}')
 
         if not success:
             self.log_error('Home screen not found!')
+
+    def click_close_button_to_menu(self):
+        """[Internal]
+
+        Tries to find and click the close (x) button of the current screen used to
+        return to the main menu on POUI.
+
+        The button is rendered as a ``wa-button`` whose icon is the delete icon
+        (``fwskin_delete_ico.png``) and/or holds the ``dict-tbtnbmp`` class.
+
+        Acts as a fallback for :func:`escape_to_main_menu` when the ESC key does
+        not close the screen, without replacing the legacy ESC based navigation.
+
+        :return: Whether a close button was found and clicked.
+        :rtype: bool
+        """
+
+        term = ("wa-button[style*='fwskin_delete_ico'], "
+                "wa-button[class*='dict-tbtnbmp']")
+
+        try:
+            close_button = next(iter(self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    main_container="body", twebview=False,
+                                                    check_error=False)), None)
+
+            if not close_button or not self.element_is_displayed(close_button, twebview=False):
+                return False
+
+            close_button_element = self.soup_to_selenium(close_button)
+
+            if not close_button_element:
+                return False
+
+            logger().info('Clicking close (x) button to return to menu')
+            self.scroll_to_element(close_button_element)
+            self.set_element_focus(close_button_element)
+            self.click(close_button_element)
+            return True
+        except Exception as e:
+            logger().debug(f'Close button to menu not clicked: {str(e)}')
+            return False
 
 
     def check_tmenu_screen(self):
