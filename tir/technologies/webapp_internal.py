@@ -451,6 +451,8 @@ class WebappInternal(Base):
                                     main_container=self.containers_selectors["AllContainers"],
                                     check_help=False, check_error=False)
 
+            if not program_screen and self.close_webagent_dialog():
+                endtime = time.time() + 10
 
         if program_screen:
             self.filling_initial_program(initial_program)
@@ -465,6 +467,37 @@ class WebappInternal(Base):
                 button = self.driver.find_element(By.CSS_SELECTOR, ".button-ok")
 
             self.click(button)
+
+    def close_webagent_dialog(self):
+        """
+        [Internal]
+
+        Closes the "TOTVS WebAgent" installation dialog that sometimes appears
+        over the program/environment selection screen, blocking the comboboxes
+        from being selected. Since the dialog can't be safely removed from the
+        DOM, this checks the "Não mostrar novamente" option and reloads the
+        page so the dialog doesn't come back.
+
+        :return: True if the dialog was found and handled, False otherwise.
+        :rtype: bool
+        """
+
+        soup = self.get_current_DOM()
+        checkbox = next(iter(soup.select('#do-not-show-again')), None)
+
+        if not checkbox:
+            return False
+
+        logger().info('Closing WebAgent installation dialog')
+
+        try:
+            self.click(self.soup_to_selenium(checkbox))
+        except Exception as err:
+            logger().debug(f'close_webagent_dialog checkbox click exception: {err}')
+
+        self.driver_refresh()
+
+        return True
 
     def filling_initial_program(self, initial_program):
         """
