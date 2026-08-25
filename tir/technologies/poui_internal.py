@@ -6310,6 +6310,7 @@ class PouiInternal(Base):
         element_parent_sel = None
         container_term = 'po-field-container'
         span_term = 'span.po-field-error-message'
+        input_element_sel = lambda: self.soup_to_selenium(input_element)
 
         self.switch_to_iframe()
 
@@ -6321,7 +6322,8 @@ class PouiInternal(Base):
 
         if span_message and self.element_is_displayed(span_message):
             message = span_message.text
-            logger().warning(f"An error message was found while filling the field. Message: {message}")
+            value = self.get_web_value(input_element_sel()).strip()
+            logger().warning(f"An error message was found while filling the field. Message: {message} / Value: {value}")
 
     def _select_first_grid_row(self, table_number: int = 1) -> bool:
         """
@@ -6361,6 +6363,8 @@ class PouiInternal(Base):
         
         term_modal = '.po-user-guide-popover'
         term_button_close = '.po-user-guide-button-close'
+
+        logger().info("Looking for user guide.")
 
         wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
                                                                            scrap_type=enum.ScrapType.CSS_SELECTOR, 
