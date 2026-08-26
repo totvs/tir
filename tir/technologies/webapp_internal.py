@@ -3416,16 +3416,9 @@ class WebappInternal(Base):
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
                         if main_value == '':
-                           self.select_combo(element, main_value, index=True)
+                           self.select_combo(element, main_value, index=True, by_click=True)
                         else:
-                            self.select_combo(element, main_value)
-
-                        try:
-                            self.set_element_focus(input_field())
-                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
-
-                        except Exception as e:
-                            logger().debug(f"An error occurred when pressing the Enter key in the select field: {e}")
+                            self.select_combo(element, main_value, by_click=True)
 
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
