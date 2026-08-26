@@ -6330,9 +6330,14 @@ class PouiInternal(Base):
 
         self._po_loading()
 
-        self._remove_filters_from_browse()
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
+
+        self._remove_filters_from_browse()
+
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+
         self._clear_browse_input()
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -6446,6 +6451,7 @@ class PouiInternal(Base):
 
         return success
 
+    @count_time
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
         [Internal]
