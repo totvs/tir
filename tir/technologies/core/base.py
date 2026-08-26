@@ -883,6 +883,10 @@ class Base(unittest.TestCase):
         :type shadow_root: bool
         :param locator: bool value for locator True or False
         :type locator: bool
+        :param by_click: If True, selects the option by clicking on the combobox and then on the
+            desired option, simulating a real user interaction instead of using Selenium's
+            select_by_index/select_by_visible_text. - **Default:** False
+        :type by_click: bool
 
         Usage:
 
@@ -912,28 +916,50 @@ class Base(unittest.TestCase):
             index_number = self.return_combo_index(combo, option)
             if index_number:
                 time.sleep(1)
-                if not by_click:
+                if not by_click or not self.click_combo_option(combo, combo.options[index_number]):
                     combo.select_by_index(str(index_number))
-                else:
-                    combo_options = list(filter(lambda x: not x.get_attribute('disabled'), combo.options))
-                    self.click(combo._el, click_type=enum.ClickType.SELENIUM)
-                    time.sleep(0.5)
-                    self.click(combo_options[index_number-1], click_type=enum.ClickType.SELENIUM)
         else:
             value = next(iter(filter(lambda x: x.text.lower().strip() == str(option).lower().strip() , combo.options)), None)
             if not value:
                 value = next(iter(filter(lambda x: x.text[0:len(str(option))].lower().strip()  == str(option).lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
-                if not by_click:
-                    text_value = value.text
+                text_value = value.text
+                if not by_click or not self.click_combo_option(combo, value):
                     combo.select_by_visible_text(text_value)
-                else:
-                    self.click(combo._el, click_type=enum.ClickType.SELENIUM)
-                    time.sleep(0.5)
-                    self.click(value, click_type=enum.ClickType.SELENIUM)
                 logger().info(f"Selected value for combo is: {text_value}")
                 return text_value
+
+    def click_combo_option(self, combo, option_element):
+        """
+        [Internal]
+
+        Opens the combobox and clicks on the given option element, simulating a real user
+        interaction instead of using Selenium's select_by_index/select_by_visible_text.
+
+        Returns True if both clicks were performed successfully, False otherwise so callers
+        can fall back to the Selenium selection API.
+
+        :param combo: Selenium Select object
+        :type combo: selenium.webdriver.support.ui.Select
+        :param option_element: The option element to be clicked
+        :type option_element: Selenium WebElement
+        :return: True if the click sequence succeeded, False otherwise.
+        :rtype: bool
+        """
+        select_element = getattr(combo, "_el", None)
+
+        if select_element is None:
+            logger().warning("Could not resolve the select element for click-based selection, "
+                              "falling back to the default selection method")
+            return False
+
+        if not self.click(select_element, click_type=enum.ClickType.SELENIUM):
+            return False
+
+        time.sleep(0.5)
+
+        return self.click(option_element, click_type=enum.ClickType.SELENIUM)
 
     def return_combo_object(self, element, shadow_root=True, locator=False):
         """
