@@ -5227,7 +5227,8 @@ class WebappInternal(Base):
 
                     logger().debug(f"  [DEBUG] GetCurrentContainer selector={self.containers_selectors['GetCurrentContainer']}")
                     logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None} / id={initial_container_id} ")
-                    logger().debug(f"  [DEBUG] Container Before Text type={type(container_texts_before).__name__} / value={re.sub(r'[\n\t]', '', str(container_texts_before))[:10]}")
+                    container_texts_before_str = " ".join(str(x) for x in container_texts_before if x is not None) if container_texts_before else ""
+                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10]}")
 
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
@@ -5278,7 +5279,8 @@ class WebappInternal(Base):
 
                             # Check 2: Did the container texts changed?
                             current_container_texts = self.get_current_container_texts()
-                            logger().debug(f"  [DEBUG] Current Container Text type={type(current_container_texts).__name__} / value={re.sub(r'[\n\t]', '', str(current_container_texts))[:10]}")
+                            current_container_texts_str = " ".join(str(x) for x in current_container_texts if x is not None) if current_container_texts else ""
+                            logger().debug(f"  [DEBUG] Current Container Text value={re.sub(r'[\n\t]', '', current_container_texts_str)[:10]}")
                             if container_texts_before != current_container_texts:
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")

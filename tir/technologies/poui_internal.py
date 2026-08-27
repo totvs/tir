@@ -6330,9 +6330,14 @@ class PouiInternal(Base):
 
         self._po_loading()
 
-        self._remove_filters_from_browse()
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
+
+        self._remove_filters_from_browse()
+
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+
         self._clear_browse_input()
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -6358,6 +6363,7 @@ class PouiInternal(Base):
 
                 if field_type in ('po-input', 'po-datepicker'):
                     self._fill_input(input_element, value, field)
+                    self._check_input_error_message(input_element)
 
                 elif field_type == 'po-select':
                     self.click_select(field, value)
@@ -6372,6 +6378,32 @@ class PouiInternal(Base):
         self.click_button(self.language.apply_filters)
 
         self._select_first_grid_row()
+
+    def _check_input_error_message(self, input_element):
+
+        element_parent = None
+        span_message = None
+        element_parent_sel = None
+        container_term = 'po-field-container'
+        span_term = 'span.po-field-error-message'
+        input_element_sel = lambda: self.soup_to_selenium(input_element)
+
+        self.switch_to_iframe()
+
+        try:
+            element_parent = input_element.find_parent(container_term)
+            if element_parent:
+                element_parent_sel = lambda: self.soup_to_selenium(element_parent)
+                span_message = element_parent_sel().find_elements(By.CSS_SELECTOR, span_term)
+                span_message = next(iter(span_message), None) if span_message else None
+
+            if span_message and self.element_is_displayed(span_message):
+                message = span_message.text
+                value = self.get_web_value(input_element_sel()).strip()
+                logger().warning(f"An error message was found while filling the field. Message: {message} / Value: {value}")
+        
+        except Exception as e:
+            logger().debug(f"An error occurred while trying to find an error message: {e}")
 
 
     def _select_first_grid_row(self, table_number: int = 1) -> bool:
@@ -6412,18 +6444,21 @@ class PouiInternal(Base):
         
         term_modal = '.po-user-guide-popover'
         term_button_close = '.po-user-guide-button-close'
+        timeout = self.config.time_out / 3
+        endtime = time.time() + timeout
+
+        logger().info("Waiting for user guide...")
 
         wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
                                                                            scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                                            main_container='body', twebview=True,
                                                                            presence=presence)
 
-        success = not wait_element(True, 20)
+        success = not wait_element(True, timeout)
 
-        if not success:
-            logger().info("Closing user guide.")
-
-        endtime = time.time() + self.config.time_out / 3
+        log_message = "Closing user guide..." if not success else "User guide not found!"
+        logger().info(log_message)
+        
         while time.time() < endtime and not success:
 
             button_close = self.web_scrap(term=term_button_close, 
@@ -6444,8 +6479,12 @@ class PouiInternal(Base):
 
             success = wait_element(False, 5)
 
+        log_message = "Couldn't close user guide." if not success else "User guide closed!"
+        logger().info(log_message)
+
         return success
 
+    @count_time
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
         [Internal]
@@ -6576,8 +6615,8 @@ class PouiInternal(Base):
         :return: None
         """
         self._fill_input(input_element, value, field)
-
-        self._click_lookup_item(value)        
+        self._po_loading()
+        self._click_lookup_item(value)
 
     def _click_lookup_item(self, value):
         thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
