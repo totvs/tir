@@ -6328,9 +6328,16 @@ class PouiInternal(Base):
         >>> self._set_browse_filters(filters=[{'name': 'John'}])
         """
 
-        self._remove_filters_from_browse()
+        self._po_loading()
+
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
+
+        self._remove_filters_from_browse()
+
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+
         self._clear_browse_input()
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -6477,6 +6484,7 @@ class PouiInternal(Base):
 
         return success
 
+    @count_time
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
         [Internal]
@@ -6607,8 +6615,8 @@ class PouiInternal(Base):
         :return: None
         """
         self._fill_input(input_element, value, field)
-
-        self._click_lookup_item(value)        
+        self._po_loading()
+        self._click_lookup_item(value)
 
     def _click_lookup_item(self, value):
         thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
