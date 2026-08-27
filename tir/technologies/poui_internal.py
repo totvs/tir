@@ -6582,8 +6582,8 @@ class PouiInternal(Base):
         :return: None
         """
         self._fill_input(input_element, value, field)
-
-        self._click_lookup_item(value)        
+        self._po_loading()
+        self._click_lookup_item(value)
 
     def _click_lookup_item(self, value):
         thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
