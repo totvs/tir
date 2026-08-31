@@ -675,20 +675,14 @@ before using these methods in the script.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Webapp.F3">
-<span class="sig-name descname"><span class="pre">F3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Webapp.F3" title="Link to this definition"></a></dt>
-<dd><p>Do the standard query(F3)</p>
-<p>this method:</p>
-<blockquote>
-<div><p>1.Search the field
-2.Search icon “lookup”
-3.Click()</p>
-</div></blockquote>
+<span class="sig-name descname"><span class="pre">F3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#tir.main.Webapp.F3" title="Link to this definition"></a></dt>
+<dd><p>Opens the field’s lookup (query) search window, used to search and select a value for a field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The term that must be searched.</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – True: searchs element by name.</p></li>
-<li><p><strong>send_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – True: try open standard search field send key F3.</p></li>
+<li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The label or the internal name of the field to search.</p></li>
+<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Set to True to search the field by its internal name instead of its label. - <strong>Default:</strong> False</p></li>
+<li><p><strong>send_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Set to True to open the search window by sending the F3 key instead of clicking the lookup icon. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>
@@ -696,11 +690,11 @@ before using these methods in the script.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a label name:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="s2">&quot;Cód&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the internal name of a field:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span> <span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input and do action with a key:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">send_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the internal name and opening with the F3 key instead of a click:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span> <span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">send_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

@@ -208,6 +208,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_container_selector"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_container_selector()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container_texts"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_container_texts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container_without_filter"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_container_without_filter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_current_shadow_root_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_current_shadow_root_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_distance"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_distance()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_distance_x"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_distance_x()</span></code></a></li>
@@ -3031,6 +3032,23 @@ Returns the BeautifulSoup object that represents this container or NONE if nothi
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_current_container_without_filter">
+<span class="sig-name descname"><span class="pre">get_current_container_without_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_current_container_without_filter" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>[DEBUG] Temporary method used to investigate SetButton false-positive/negative
+click verification. Calls get_current_container() with filter_blocked_containers
+disabled and logs whether a container with id is found this way.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The container object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>BeautifulSoup object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.get_current_shadow_root_container">
 <span class="sig-name descname"><span class="pre">get_current_shadow_root_container</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_current_shadow_root_container" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -3191,21 +3209,20 @@ Internal method of input_value and CheckResult.</p>
 <span class="sig-name descname"><span class="pre">get_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_container</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.get_grid" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
 Gets a grid BeautifulSoup object from the screen.</p>
+<p>If the grid is not found within the configured time_out, this method performs one
+additional attempt with <cite>filter_blocked_containers</cite> disabled, to handle cases where
+a container is intermittently stuck in a “blocked” state and would otherwise never
+be matched. The flag is always restored to True before returning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid_number</strong> – The number of the grid on the screen.</p></li>
-<li><p><strong>grid_element</strong> – Grid class name in HTML ex: “.tgrid”.</p></li>
+<li><p><strong>grid_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The number of the grid on the screen.</p></li>
+<li><p><strong>grid_element</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Grid class name in HTML ex: “.tgrid”.</p></li>
 <li><p><strong>grid_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Return all grids.</p></li>
 <li><p><strong>wait</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If False, doesn’t wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.</p></li>
-<li><p><strong>current_container</strong> – If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.</p></li>
+<li><p><strong>check_error</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, checks for error/warning screens while searching for the grid.</p></li>
+<li><p><strong>current_container</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If False, the grid is queried via web_scrap. If True, it is selected directly from the current container.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
-</dd>
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Grid BeautifulSoup object</p>
@@ -4660,32 +4677,28 @@ Used as an alternative to set_log_info when log_info_config is enabled.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.standard_search_field">
-<span class="sig-name descname"><span class="pre">standard_search_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.standard_search_field" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">standard_search_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.standard_search_field" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
-<p>Do the standard query(F3)
-this method
-1.Search the field
-2.Search icon “lookup”
-3.Click()</p>
+<p>Internal implementation of the lookup (F3) action, called internally by the public F3 method.</p>
+<p>Locates the target field and retries, alternating between clicking the lookup icon and
+sending the F3 key to the field, until a new container (the search/query modal) is detected
+or the configured time_out is reached. Each attempt waits up to (self.config.time_out / 5)
+seconds for the new container before switching strategy and trying again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The term that must be searched.</p></li>
-<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If true searchs element by name.</p></li>
-<li><p><strong>send_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Try open standard search field send key F3 (no click).</p></li>
+<li><p><strong>term</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Label or internal name of the field to search.</p></li>
+<li><p><strong>name_attr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, searches the field by its name attribute instead of its label. - <strong>Default:</strong> False</p></li>
+<li><p><strong>send_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, always opens the search window by sending the F3 key to the field, instead of clicking the lookup icon. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>
-<p>Usage:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using a label name:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">standard_search_field</span><span class="p">(</span><span class="n">name_label</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">standard_search_field</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1">#------------------------------------------------------------------------</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To search using the name of input and do action with a key:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">F3</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s1">&#39;A1_EST&#39;</span><span class="p">,</span><span class="n">name_attr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">send_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the field itself cannot be found on the screen, this method fails the test case
+through log_error. If the field is found but the new container doesn’t open within
+time_out, the method does <strong>not</strong> fail the test case; it only logs the failure for
+debugging purposes.</p>
 </div>
 </dd></dl>
 
