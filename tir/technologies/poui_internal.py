@@ -897,6 +897,11 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_coin_screen()
         """
+
+        from tir.technologies.core.events import emit
+        emit('webapp.close_coin_screen')
+        return
+
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog"), True)
         if modals and self.element_exists(term=self.language.coins, scrap_type=enum.ScrapType.MIXED,
@@ -943,6 +948,11 @@ class PouiInternal(Base):
         >>> # Calling the method:
         >>> self.close_warning_screen()
         """
+
+        from tir.technologies.core.events import emit
+        emit('webapp.close_warning_screen')
+        return
+
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".ui-dialog"), True)
         if modals and self.element_exists(term=self.language.warning, scrap_type=enum.ScrapType.MIXED,
@@ -5676,8 +5686,15 @@ class PouiInternal(Base):
     def escape_to_main_menu(self):
         """[Internal]
 
-        Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
-        Waits until the menu is visible.
+        Tries to navigate back to the main menu screen and waits until the menu is visible.
+
+        Two strategies are combined on each attempt, both preserved for backward compatibility:
+
+        1. Sending the ESC key (legacy behavior).
+        2. Clicking the close (x) button of the current screen, needed since POUI
+           changed the behavior and some routines no longer close with ESC.
+
+        Any open dialog (warning, coin or news) found in between is closed.
 
         :return: None
         """
@@ -5697,10 +5714,62 @@ class PouiInternal(Base):
                 self.close_screen_before_menu()
 
             success = self.check_tmenu_screen()
+
+            if not success and self.click_close_button_to_menu():
+                logger().info('Close (x) button clicked to return to menu')
+
+                if any([self.check_warning_screen(), self.check_coin_screen(), self.check_news_screen()]):
+                    logger().info('Found layers after clicking close button')
+                    self.close_screen_before_menu()
+
+                success = self.check_tmenu_screen()
+
             logger().debug(f'Check Menu Screen: {success}')
 
         if not success:
-            self.log_error('Home screen not found!')
+            self.restart_counter += 1
+            self.log_error('Home screen not found!', restart_counter_param=self.restart_counter)
+
+    def click_close_button_to_menu(self):
+        """[Internal]
+
+        Tries to find and click the close (x) button of the current screen used to
+        return to the main menu on POUI.
+
+        The button is rendered as a ``wa-button`` whose icon is the delete icon
+        (``fwskin_delete_ico.png``) and/or holds the ``dict-tbtnbmp`` class.
+
+        Acts as a fallback for :func:`escape_to_main_menu` when the ESC key does
+        not close the screen, without replacing the legacy ESC based navigation.
+
+        :return: Whether a close button was found and clicked.
+        :rtype: bool
+        """
+
+        term = ("wa-button[style*='fwskin_delete_ico'], "
+                "wa-button[class*='dict-tbtnbmp']")
+
+        try:
+            close_button = next(iter(self.web_scrap(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                    main_container="body", twebview=False,
+                                                    check_error=False)), None)
+
+            if not close_button or not self.element_is_displayed(close_button, twebview=False):
+                return False
+
+            close_button_element = self.soup_to_selenium(close_button)
+
+            if not close_button_element:
+                return False
+
+            logger().info('Clicking close (x) button to return to menu')
+            self.scroll_to_element(close_button_element)
+            self.set_element_focus(close_button_element)
+            self.click(close_button_element)
+            return True
+        except Exception as e:
+            logger().debug(f'Close button to menu not clicked: {str(e)}')
+            return False
 
 
     def check_tmenu_screen(self):
@@ -5871,7 +5940,9 @@ class PouiInternal(Base):
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
-        get_wtb = lambda: len(self.get_current_DOM().select('wa-tab-button'))
+        get_wtb = lambda: len(list(filter(lambda x: x.find_parent('wa-tab-view') and 
+                                                    not 'hidden' in x.find_parent('wa-tab-view').attrs, 
+                                    self.get_current_DOM().select('wa-tab-button'))))
         wtb_before = get_wtb()
 
         hide_element = next(iter(self.web_scrap(term=search_term, 
@@ -6259,9 +6330,14 @@ class PouiInternal(Base):
 
         self._po_loading()
 
-        self._remove_filters_from_browse()
         if not self._is_po_button_inside_kendo_grid(self.language.filters):
             self._clear_table_selection(table_number=1, selection_type='all')
+
+        self._remove_filters_from_browse()
+
+        if not self._is_po_button_inside_kendo_grid(self.language.filters):
+            self._clear_table_selection(table_number=1, selection_type='all')
+
         self._clear_browse_input()
         self.wait_element(term=self.grid_selectors["grid_containers"], scrap_type=enum.ScrapType.CSS_SELECTOR)
 
@@ -6287,6 +6363,7 @@ class PouiInternal(Base):
 
                 if field_type in ('po-input', 'po-datepicker'):
                     self._fill_input(input_element, value, field)
+                    self._check_input_error_message(input_element)
 
                 elif field_type == 'po-select':
                     self.click_select(field, value)
@@ -6301,6 +6378,32 @@ class PouiInternal(Base):
         self.click_button(self.language.apply_filters)
 
         self._select_first_grid_row()
+
+    def _check_input_error_message(self, input_element):
+
+        element_parent = None
+        span_message = None
+        element_parent_sel = None
+        container_term = 'po-field-container'
+        span_term = 'span.po-field-error-message'
+        input_element_sel = lambda: self.soup_to_selenium(input_element)
+
+        self.switch_to_iframe()
+
+        try:
+            element_parent = input_element.find_parent(container_term)
+            if element_parent:
+                element_parent_sel = lambda: self.soup_to_selenium(element_parent)
+                span_message = element_parent_sel().find_elements(By.CSS_SELECTOR, span_term)
+                span_message = next(iter(span_message), None) if span_message else None
+
+            if span_message and self.element_is_displayed(span_message):
+                message = span_message.text
+                value = self.get_web_value(input_element_sel()).strip()
+                logger().warning(f"An error message was found while filling the field. Message: {message} / Value: {value}")
+        
+        except Exception as e:
+            logger().debug(f"An error occurred while trying to find an error message: {e}")
 
 
     def _select_first_grid_row(self, table_number: int = 1) -> bool:
@@ -6341,18 +6444,21 @@ class PouiInternal(Base):
         
         term_modal = '.po-user-guide-popover'
         term_button_close = '.po-user-guide-button-close'
+        timeout = self.config.time_out / 3
+        endtime = time.time() + timeout
+
+        logger().info("Waiting for user guide...")
 
         wait_element = lambda presence, timeout: self.wait_element_timeout(term=term_modal, timeout=timeout,
                                                                            scrap_type=enum.ScrapType.CSS_SELECTOR, 
                                                                            main_container='body', twebview=True,
                                                                            presence=presence)
 
-        success = not wait_element(True, 20)
+        success = not wait_element(True, timeout)
 
-        if not success:
-            logger().info("Closing user guide.")
-
-        endtime = time.time() + self.config.time_out / 3
+        log_message = "Closing user guide..." if not success else "User guide not found!"
+        logger().info(log_message)
+        
         while time.time() < endtime and not success:
 
             button_close = self.web_scrap(term=term_button_close, 
@@ -6373,8 +6479,12 @@ class PouiInternal(Base):
 
             success = wait_element(False, 5)
 
+        log_message = "Couldn't close user guide." if not success else "User guide closed!"
+        logger().info(log_message)
+
         return success
 
+    @count_time
     def _is_po_button_inside_kendo_grid(self, button_text: str) -> bool:
         """
         [Internal]
@@ -6505,8 +6615,8 @@ class PouiInternal(Base):
         :return: None
         """
         self._fill_input(input_element, value, field)
-
-        self._click_lookup_item(value)        
+        self._po_loading()
+        self._click_lookup_item(value)
 
     def _click_lookup_item(self, value):
         thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
@@ -6543,7 +6653,13 @@ class PouiInternal(Base):
                 self.scroll_to_element(input_field_element())
                 self.set_element_focus(input_field_element())
                 self.click(input_field_element())
-                input_field_element().clear()
+
+                try:
+                    input_field_element().clear()
+                except Exception as clear_error:
+                    logger().debug(f"clear() failed, falling back to select-all + delete: {clear_error}")
+                    ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE).perform()
+
                 input_field_element().send_keys(value)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 ActionChains(self.driver).key_down(Keys.TAB).perform()

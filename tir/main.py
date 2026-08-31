@@ -70,6 +70,9 @@ class Webapp():
         subscribe('webapp.check_news_screen', self.__webapp.check_news_screen)
         subscribe('webapp.close_screen_before_menu', self.__webapp.close_screen_before_menu)
 
+        subscribe('webapp.close_warning_screen', self.__webapp.close_warning_screen)
+        subscribe('webapp.close_coin_screen', self.__webapp.close_coin_screen)
+
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
         Adds a parameter to the queue of parameters to be set by SetParameters method.
@@ -546,21 +549,15 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def F3(self, field, name_attr=False,send_key=False):
+    def F3(self, field: str, name_attr: bool = False, send_key: bool = False) -> None:
         """
-        Do the standard query(F3)
-        
-        this method:
+        Opens the field's lookup (query) search window, used to search and select a value for a field.
 
-            1.Search the field
-            2.Search icon "lookup"
-            3.Click()
-
-        :param term: The term that must be searched.
-        :type  term: str
-        :param name_attr: True: searchs element by name.
-        :type  name_attr: bool
-        :param send_key: True: try open standard search field send key F3.
+        :param field: The label or the internal name of the field to search.
+        :type field: str
+        :param name_attr: Set to True to search the field by its internal name instead of its label. - **Default:** False
+        :type name_attr: bool
+        :param send_key: Set to True to open the search window by sending the F3 key instead of clicking the lookup icon. - **Default:** False
         :type send_key: bool
 
         Usage:
@@ -568,13 +565,13 @@ class Webapp():
         >>> # To search using a label name:
         >>> oHelper.F3("Cód")
         >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input:
-        >>> oHelper.F3(field='A1_EST',name_attr=True)
+        >>> # To search using the internal name of a field:
+        >>> oHelper.F3(field='A1_EST', name_attr=True)
         >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input and do action with a key:
-        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        >>> # To search using the internal name and opening with the F3 key instead of a click:
+        >>> oHelper.F3(field='A1_EST', name_attr=True, send_key=True)
         """
-        self.__webapp.standard_search_field( field, name_attr, send_key )
+        self.__webapp.standard_search_field(field, name_attr, send_key)
     
     def SetupTSS(self, initial_program="", environment=""):
         """
