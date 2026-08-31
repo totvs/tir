@@ -61,6 +61,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.TearDown"><code class="docutils literal notranslate"><span class="pre">Base.TearDown()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.assert_result"><code class="docutils literal notranslate"><span class="pre">Base.assert_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.click"><code class="docutils literal notranslate"><span class="pre">Base.click()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.click_combo_option"><code class="docutils literal notranslate"><span class="pre">Base.click_combo_option()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.collect_zindex"><code class="docutils literal notranslate"><span class="pre">Base.collect_zindex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.compare_field_values"><code class="docutils literal notranslate"><span class="pre">Base.compare_field_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.double_click"><code class="docutils literal notranslate"><span class="pre">Base.double_click()</span></code></a></li>
@@ -284,6 +285,30 @@ than the ones defined at <strong>config.json</strong></p>
 <span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">element</span><span class="p">(),</span> <span class="n">click_type</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">ClickType</span><span class="o">.</span><span class="n">JS</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.click_combo_option">
+<span class="sig-name descname"><span class="pre">click_combo_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.click_combo_option" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Opens the combobox and clicks on the given option element, simulating a real user
+interaction instead of using Selenium’s select_by_index/select_by_visible_text.</p>
+<p>Returns True if both clicks were performed successfully, False otherwise so callers
+can fall back to the Selenium selection API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>combo</strong> (<em>selenium.webdriver.support.ui.Select</em>) – Selenium Select object</p></li>
+<li><p><strong>option_element</strong> (<em>Selenium WebElement</em>) – The option element to be clicked</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the click sequence succeeded, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -830,7 +855,7 @@ naming convention.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.select_combo">
-<span class="sig-name descname"><span class="pre">select_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.select_combo" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">select_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_click</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.select_combo" title="Link to this definition"></a></dt>
 <dd><p>Selects the option on the combobox.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -840,6 +865,9 @@ naming convention.</p>
 <li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – True if option is an integer value</p></li>
 <li><p><strong>shadow_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Internal control for shadow root objects</p></li>
 <li><p><strong>locator</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – bool value for locator True or False</p></li>
+<li><p><strong>by_click</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, selects the option by clicking on the combobox and then on the
+desired option, simulating a real user interaction instead of using Selenium’s
+select_by_index/select_by_visible_text. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>

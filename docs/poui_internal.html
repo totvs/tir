@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_finish"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_finish()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_button_logoff"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_button_logoff()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_checkbox"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_checkbox()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_close_button_to_menu"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_close_button_to_menu()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_combo"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_combo()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_icon"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_icon()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.click_look_up"><code class="docutils literal notranslate"><span class="pre">PouiInternal.click_look_up()</span></code></a></li>
@@ -948,6 +949,26 @@ returns a boolean whether the tooltip has the expected text value or not.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_close_button_to_menu">
+<span class="sig-name descname"><span class="pre">click_close_button_to_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_close_button_to_menu" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Tries to find and click the close (x) button of the current screen used to
+return to the main menu on POUI.</p>
+<p>The button is rendered as a <code class="docutils literal notranslate"><span class="pre">wa-button</span></code> whose icon is the delete icon
+(<code class="docutils literal notranslate"><span class="pre">fwskin_delete_ico.png</span></code>) and/or holds the <code class="docutils literal notranslate"><span class="pre">dict-tbtnbmp</span></code> class.</p>
+<p>Acts as a fallback for <a class="reference internal" href="#tir.technologies.poui_internal.PouiInternal.escape_to_main_menu" title="tir.technologies.poui_internal.PouiInternal.escape_to_main_menu"><code class="xref py py-func docutils literal notranslate"><span class="pre">escape_to_main_menu()</span></code></a> when the ESC key does
+not close the screen, without replacing the legacy ESC based navigation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether a close button was found and clicked.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.click_combo">
 <span class="sig-name descname"><span class="pre">click_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.click_combo" title="Link to this definition"></a></dt>
 <dd><p>Select a value for list combo inputs.</p>
@@ -1323,8 +1344,14 @@ Used to fill the fields triggered by the ChangeEnvironment method as well.</p>
 <dt class="sig sig-object py" id="tir.technologies.poui_internal.PouiInternal.escape_to_main_menu">
 <span class="sig-name descname"><span class="pre">escape_to_main_menu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.poui_internal.PouiInternal.escape_to_main_menu" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
-<p>Tries to navigate back to the main menu screen by sending ESC keys and closing open dialogs.
-Waits until the menu is visible.</p>
+<p>Tries to navigate back to the main menu screen and waits until the menu is visible.</p>
+<p>Two strategies are combined on each attempt, both preserved for backward compatibility:</p>
+<ol class="arabic simple">
+<li><p>Sending the ESC key (legacy behavior).</p></li>
+<li><p>Clicking the close (x) button of the current screen, needed since POUI
+changed the behavior and some routines no longer close with ESC.</p></li>
+</ol>
+<p>Any open dialog (warning, coin or news) found in between is closed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
