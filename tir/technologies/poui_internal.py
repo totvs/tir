@@ -5928,6 +5928,14 @@ class PouiInternal(Base):
         
         self.escape_to_main_menu()
 
+        # If restart() (WebappInternal) already handled this routine via emit, skip the rest.
+        # Flags live on self.config (shared singleton) since restart() runs on WebappInternal, not here.
+        if getattr(self.config, '_program_set_by_restart', False) or getattr(self.config, '_lateral_menu_set_by_restart', False):
+            self.config._program_set_by_restart = False
+            self.config._lateral_menu_set_by_restart = False
+            logger().debug(f"Program '{program_name or program_desc}' already set by restart, skipping.")
+            return
+
         logger().info(f"Setting program on the New Home: {program_name or program_desc}")
 
         success = False
