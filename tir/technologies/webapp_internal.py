@@ -10532,14 +10532,9 @@ class WebappInternal(Base):
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
         initial_layers = self.check_layers('wa-dialog')
-        container_endtime = time.time() + 10
-        initial_container_id = None
-        while ((time.time() < container_endtime) and not initial_container_id):
-            initial_container_id = self.get_current_container().get("id") if self.get_current_container() else None
         wait_new_layer = lambda: self.wait_element_timeout( term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
                                                             position=initial_layers + 1, timeout=10,
                                                             presence=True, main_container='body', check_error=False)
-        check_container_changed = lambda: self.get_current_container().get("id") != initial_container_id if self.get_current_container() and initial_container_id else False
 
         for row, label in enumerate(labels):
             logger().debug("Clicking on tree label: " + label)
@@ -10633,7 +10628,7 @@ class WebappInternal(Base):
 
                                             # If dialog layers show up through last click
                                             if not success:
-                                                success = wait_new_layer() or check_container_changed()
+                                                success = wait_new_layer()
                                                 logger().debug(f'Result of success using layers / container id: {success}')
 
                                             if success and right_click:
@@ -10765,10 +10760,7 @@ class WebappInternal(Base):
         :rtype: list
         """
 
-        container_endtime = time.time() + 10
-        container = None
-        while ((time.time() < container_endtime) and not container):
-            container = self.get_current_container()
+        container = self.get_current_container()
 
         tr = []
 
