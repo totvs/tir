@@ -10531,7 +10531,10 @@ class WebappInternal(Base):
         # Split the treepath into label segments using '>' not preceded by '-'
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
-        dialog_layers = self.check_layers('wa-dialog')
+        initial_layers = self.check_layers('wa-dialog')
+        wait_new_layer = lambda: self.wait_element_timeout( term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                            position=initial_layers + 1, timeout=10,
+                                                            presence=True, main_container='body', check_error=False)
 
         for row, label in enumerate(labels):
             logger().debug("Clicking on tree label: " + label)
@@ -10619,12 +10622,14 @@ class WebappInternal(Base):
                                                     if click_type > 3:
                                                         click_type = 1
                                                 click_try += 1
-
+                                            
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
+                                            logger().debug(f'Result of success using hierarchy / element acessible: {success}')
 
                                             # If dialog layers show up through last click
-                                            if not success and dialog_layers < self.check_layers('wa-dialog'):
-                                                success = True
+                                            if not success:
+                                                success = wait_new_layer()
+                                                logger().debug(f'Result of success using layers / container id: {success}')
 
                                             if success and right_click:
                                                 last_zindex = self.return_last_zindex()
@@ -10655,10 +10660,11 @@ class WebappInternal(Base):
                                                 click_try += 1
                                             
                                             success = self.check_hierarchy(label_filtered)
+                                            logger().debug(f'Result of success using hierarchy: {success}')
 
                                         try_counter += 1
                                     except Exception as e:
-                                        pass
+                                        logger().debug(f"click_tree exception suppressed: {type(e).__name__}: {e}")
 
                                 if not success:
                                     try:
@@ -10755,11 +10761,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+
         tr = []
 
-        bs_tree_node = container.select('wa-tree')
-        if bs_tree_node and len(bs_tree_node) > tree_number:
-            tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+        if container:
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
         return tr
 
     def check_hierarchy(self, label, check_expanded=True):
