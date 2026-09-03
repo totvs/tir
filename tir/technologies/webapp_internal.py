@@ -4997,6 +4997,7 @@ class WebappInternal(Base):
         self._setbutton_used = True
 
         self.wait_blocker()
+        self.get_current_container_with_id(timeout=10)
 
         if self.webapp_shadowroot():
             term_button="wa-button"
@@ -5102,7 +5103,7 @@ class WebappInternal(Base):
                     restore_zoom = True
 
             if self.config.smart_test:
-                logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                logger().debug(f"SetButton: search for button '{button}' finished. Elapsed time: {time.time() - starttime:.2f} seconds")
 
             if not soup_element:
                 try:
@@ -5172,10 +5173,11 @@ class WebappInternal(Base):
                 click_attempt = 0
                 click_verified = False
                 recaptured = False
-                # Primeira metade do time_out para a captura inicial; se o clique não for
-                # verificado até aqui, recaptura o botão (container já atualizado após a
-                # transição) e usa a metade restante.
                 half_time = starttime + (self.config.time_out / 2)
+                # 'endtime' is shared with the element search phase. If that search used up the
+                # whole time_out, the click/verification loop below would never run and the
+                # button would be found but never clicked. Grant a fresh time_out for the click
+                # phase, recomputing 'half_time' since it was based on the original 'starttime'.
                 if time.time() > endtime:
                     endtime = time.time() + self.config.time_out
                     half_time = time.time() + (self.config.time_out / 2)
@@ -5230,10 +5232,9 @@ class WebappInternal(Base):
                         f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
                     )
 
-                    logger().debug(f"  [DEBUG] GetCurrentContainer selector={self.containers_selectors['GetCurrentContainer']}")
-                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None} / id={initial_container_id} ")
+                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None}")
                     container_texts_before_str = " ".join(str(x) for x in container_texts_before if x is not None) if container_texts_before else ""
-                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10]}")
+                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10].strip()}")
 
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
@@ -10426,6 +10427,55 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
+
+    def get_current_container_with_id(self, timeout=None):
+        """
+        [Internal]
+
+        An internal method designed to get the current container only after it exposes a
+        non-empty 'id' attribute. Useful when the container is already present in the DOM
+        but its id is set by the framework a few moments later, which would make an
+        immediate call to get_current_container() return a container without id.
+
+        :param timeout: The maximum time to wait, in seconds, for the container to have an id. - **Default:** self.config.time_out
+        :type timeout: int or float
+
+        :return: The container object that has an id or None if the timeout is reached.
+        :rtype: BeautifulSoup object or None
+
+        Usage:
+
+        >>> # Calling the method using the timeout from config.json:
+        >>> container = self.get_current_container_with_id()
+        >>> # Calling the method with a custom timeout:
+        >>> container = self.get_current_container_with_id(timeout=10)
+        """
+        time_out = timeout if timeout is not None else self.config.time_out
+        endtime = time.time() + time_out
+        container = None
+        container_id = None
+
+        while time.time() < endtime and not container_id:
+
+            try:
+                container = self.get_current_container()
+                container_id = container.attrs.get('id') if container and hasattr(container, 'attrs') else None
+            except Exception as e:
+                logger().debug(f"get_current_container_with_id: trying again after exception: {e}")
+                container = None
+                container_id = None
+
+            if not container_id:
+                time.sleep(0.1)
+
+        if not container_id:
+            logger().debug(f"get_current_container_with_id: container with id not found after {time_out} seconds. "
+                           f"Last container: tag={container.name if container else None}")
+            return None
+
+        logger().debug(f"get_current_container_with_id: container found. tag={container.name} / id={container_id}")
+
+        return container
 
     def get_current_container_without_filter(self):
         """
