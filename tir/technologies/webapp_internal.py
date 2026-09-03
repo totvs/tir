@@ -10531,7 +10531,11 @@ class WebappInternal(Base):
         # Split the treepath into label segments using '>' not preceded by '-'
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
-        dialog_layers = self.check_layers('wa-dialog')
+        initial_layers = self.check_layers('wa-dialog')
+        initial_container_id = self.get_current_container().get("id")
+        wait_new_layer = lambda: self.wait_element_timeout( term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                            position=initial_layers + 1, timeout=10,
+                                                            presence=True, main_container='body', check_error=False)
 
         for row, label in enumerate(labels):
             logger().debug("Clicking on tree label: " + label)
@@ -10623,8 +10627,8 @@ class WebappInternal(Base):
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
 
                                             # If dialog layers show up through last click
-                                            if not success and dialog_layers < self.check_layers('wa-dialog'):
-                                                success = True
+                                            if not success:
+                                                success = wait_new_layer() or self.get_current_container().get("id") != initial_container_id
 
                                             if success and right_click:
                                                 last_zindex = self.return_last_zindex()
