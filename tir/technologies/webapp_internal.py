@@ -4997,6 +4997,7 @@ class WebappInternal(Base):
         self._setbutton_used = True
 
         self.wait_blocker()
+        self.get_current_container_with_id(timeout=10)
 
         if self.webapp_shadowroot():
             term_button="wa-button"
@@ -5102,20 +5103,24 @@ class WebappInternal(Base):
                     restore_zoom = True
 
             if self.config.smart_test:
-                logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                logger().debug(f"SetButton: search for button '{button}' finished. Elapsed time: {time.time() - starttime:.2f} seconds")
 
             if not soup_element:
                 try:
                     logger().debug("Trying to find element without blocked-container filtering.")
-                    self.filter_blocked_containers = False
-                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
 
-                    if soup_objects and len(soup_objects) - 1 >= position:
-                        logger().debug(f"Element found without blocked-container filtering.")
-                        next_button = soup_objects[position]
+                    self.filter_blocked_containers = False                    
+                    next_button = self.get_shadowroot_button(button, term_button, position, check_error=False)
+                    if next_button:
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        logger().debug("Element found without blocked-container filtering.")
+                    
+                    else:
+                        logger().debug(f"Couldn't find button '{button}' even without blocked-container filtering.")
+                
                 except Exception as e:
                     logger().debug(f"Fallback search without blocked-container filtering failed: {e}")
+                
                 finally:
                     self.filter_blocked_containers = True
 
@@ -5168,10 +5173,11 @@ class WebappInternal(Base):
                 click_attempt = 0
                 click_verified = False
                 recaptured = False
-                # Primeira metade do time_out para a captura inicial; se o clique não for
-                # verificado até aqui, recaptura o botão (container já atualizado após a
-                # transição) e usa a metade restante.
                 half_time = starttime + (self.config.time_out / 2)
+                # 'endtime' is shared with the element search phase. If that search used up the
+                # whole time_out, the click/verification loop below would never run and the
+                # button would be found but never clicked. Grant a fresh time_out for the click
+                # phase, recomputing 'half_time' since it was based on the original 'starttime'.
                 if time.time() > endtime:
                     endtime = time.time() + self.config.time_out
                     half_time = time.time() + (self.config.time_out / 2)
@@ -5226,10 +5232,9 @@ class WebappInternal(Base):
                         f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
                     )
 
-                    logger().debug(f"  [DEBUG] GetCurrentContainer selector={self.containers_selectors['GetCurrentContainer']}")
-                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None} / id={initial_container_id} ")
+                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None}")
                     container_texts_before_str = " ".join(str(x) for x in container_texts_before if x is not None) if container_texts_before else ""
-                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10]}")
+                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10].strip()}")
 
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
@@ -10423,6 +10428,55 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
 
+    def get_current_container_with_id(self, timeout=None):
+        """
+        [Internal]
+
+        An internal method designed to get the current container only after it exposes a
+        non-empty 'id' attribute. Useful when the container is already present in the DOM
+        but its id is set by the framework a few moments later, which would make an
+        immediate call to get_current_container() return a container without id.
+
+        :param timeout: The maximum time to wait, in seconds, for the container to have an id. - **Default:** self.config.time_out
+        :type timeout: int or float
+
+        :return: The container object that has an id or None if the timeout is reached.
+        :rtype: BeautifulSoup object or None
+
+        Usage:
+
+        >>> # Calling the method using the timeout from config.json:
+        >>> container = self.get_current_container_with_id()
+        >>> # Calling the method with a custom timeout:
+        >>> container = self.get_current_container_with_id(timeout=10)
+        """
+        time_out = timeout if timeout is not None else self.config.time_out
+        endtime = time.time() + time_out
+        container = None
+        container_id = None
+
+        while time.time() < endtime and not container_id:
+
+            try:
+                container = self.get_current_container()
+                container_id = container.attrs.get('id') if container and hasattr(container, 'attrs') else None
+            except Exception as e:
+                logger().debug(f"get_current_container_with_id: trying again after exception: {e}")
+                container = None
+                container_id = None
+
+            if not container_id:
+                time.sleep(0.1)
+
+        if not container_id:
+            logger().debug(f"get_current_container_with_id: container with id not found after {time_out} seconds. "
+                           f"Last container: tag={container.name if container else None}")
+            return None
+
+        logger().debug(f"get_current_container_with_id: container found. tag={container.name} / id={container_id}")
+
+        return container
+
     def get_current_container_without_filter(self):
         """
         [Internal]
@@ -10531,7 +10585,10 @@ class WebappInternal(Base):
         # Split the treepath into label segments using '>' not preceded by '-'
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
-        dialog_layers = self.check_layers('wa-dialog')
+        initial_layers = self.check_layers('wa-dialog')
+        wait_new_layer = lambda: self.wait_element_timeout( term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                            position=initial_layers + 1, timeout=10,
+                                                            presence=True, main_container='body', check_error=False)
 
         for row, label in enumerate(labels):
             logger().debug("Clicking on tree label: " + label)
@@ -10619,12 +10676,14 @@ class WebappInternal(Base):
                                                     if click_type > 3:
                                                         click_type = 1
                                                 click_try += 1
-
+                                            
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
+                                            logger().debug(f'Result of success using hierarchy / element acessible: {success}')
 
                                             # If dialog layers show up through last click
-                                            if not success and dialog_layers < self.check_layers('wa-dialog'):
-                                                success = True
+                                            if not success:
+                                                success = wait_new_layer()
+                                                logger().debug(f'Result of success using layers / container id: {success}')
 
                                             if success and right_click:
                                                 last_zindex = self.return_last_zindex()
@@ -10655,10 +10714,11 @@ class WebappInternal(Base):
                                                 click_try += 1
                                             
                                             success = self.check_hierarchy(label_filtered)
+                                            logger().debug(f'Result of success using hierarchy: {success}')
 
                                         try_counter += 1
                                     except Exception as e:
-                                        pass
+                                        logger().debug(f"click_tree exception suppressed: {type(e).__name__}: {e}")
 
                                 if not success:
                                     try:
@@ -10755,11 +10815,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+
         tr = []
 
-        bs_tree_node = container.select('wa-tree')
-        if bs_tree_node and len(bs_tree_node) > tree_number:
-            tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+        if container:
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
         return tr
 
     def check_hierarchy(self, label, check_expanded=True):
