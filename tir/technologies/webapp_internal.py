@@ -557,6 +557,14 @@ class WebappInternal(Base):
 
         Fills the user login screen of Protheus with the user and password located on config.json.
 
+        :param admin_user: If True, uses ``user_cfg``/``password_cfg`` (or the smart_test
+            admin credentials) instead of the default user/password. - **Default:** False
+        :type admin_user: bool
+
+        :raises ValueError: If the user input element is not found/filled within the
+            timeout, or if a non-empty password is configured but its input element
+            is not found/filled within the timeout.
+
         Usage:
 
         >>> # Calling the method
@@ -617,6 +625,7 @@ class WebappInternal(Base):
                     user_element = next(iter(soup.select(get_user)), None)
 
                 if user_element is None:
+                    time.sleep(0.5)
                     continue
 
             except AttributeError as e:
@@ -677,6 +686,7 @@ class WebappInternal(Base):
                 password_element = next(iter(soup.select(get_password)), None)
 
             if password_element is None:
+                time.sleep(0.5)
                 continue
 
             if self.webapp_shadowroot():
@@ -709,7 +719,7 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if (not password_element) or (not password_value and self.config.password != ''):
+        if self.config.password != '' and ((not password_element) or not password_value):
             self.restart_counter += 1
             message = "Couldn't fill Password input element."
             self.log_error(message)
