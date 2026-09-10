@@ -595,17 +595,20 @@ class WebappInternal(Base):
 
         self.set_multilanguage()
 
+        logger().info("Filling User")
+
         try_counter = 0
         user_value = ''
+        user_element = None
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
+
+            logger().debug("Looking for user element...")
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
             else:
                 soup = self.get_current_DOM()
-
-            logger().info("Filling User")
 
             try:
                 if self.config.poui_login:
@@ -614,10 +617,7 @@ class WebappInternal(Base):
                     user_element = next(iter(soup.select(get_user)), None)
 
                 if user_element is None:
-                    self.restart_counter += 1
-                    message = "Couldn't find User input element."
-                    self.log_error(message)
-                    raise ValueError(message)
+                    continue
 
             except AttributeError as e:
                 self.log_error(str(e))
@@ -631,6 +631,8 @@ class WebappInternal(Base):
                 else:
                     user = lambda: self.soup_to_selenium(user_element.parent)
 
+            logger().debug("Filling user element...")
+            
             self.set_element_focus(user())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=user_element, locator=By.XPATH,
                                timeout=True)
@@ -649,33 +651,33 @@ class WebappInternal(Base):
 
             try_counter += 1 if (try_counter < 1) else -1
 
-        if (user_value.strip() != user_text.strip()):
+        if (not user_element) or (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
             raise ValueError(message)
 
+        logger().info("Filling Password")
+        
         try_counter = 0
         password_value = ''
+        password_element = None
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not password_value and self.config.password != ''):
+
+            logger().debug("Looking for password element...")
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
             else:
                 soup = self.get_current_DOM()
-
-            logger().info("Filling Password")
             if self.config.poui_login:
                 password_element = next(iter(soup.select(".po-input-icon-right")), None)
             else:
                 password_element = next(iter(soup.select(get_password)), None)
 
             if password_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find User input element."
-                self.log_error(message)
-                raise ValueError(message)
+                continue
 
             if self.webapp_shadowroot():
                 password = lambda: self.soup_to_selenium(password_element)
@@ -685,6 +687,8 @@ class WebappInternal(Base):
                 else:
                     password = lambda: self.soup_to_selenium(password_element.parent)
 
+            logger().debug("Filling password element...")
+            
             self.set_element_focus(password())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=password_element, locator=By.XPATH,
                                timeout=True)
@@ -705,9 +709,9 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if not password_value and self.config.password != '':
+        if (not password_element) or (not password_value and self.config.password != ''):
             self.restart_counter += 1
-            message = "Couldn't fill User input element."
+            message = "Couldn't fill Password input element."
             self.log_error(message)
             raise ValueError(message)
 
