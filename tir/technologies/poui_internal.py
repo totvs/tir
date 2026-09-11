@@ -6708,6 +6708,7 @@ class PouiInternal(Base):
             return None, None
 
         partial_match = None
+        partial_match_label = ''
 
         for component_type in SUPPORTED_COMPONENTS:
             for component in filter_container.select(component_type):
@@ -6720,14 +6721,17 @@ class PouiInternal(Base):
                 if label_text == field_label_normalized:
                     input_el = component.select_one('input, select')
                     if input_el:
+                        logger().debug(f"Field '{field_label}' found by exact match on component '{component_type}' (label: '{label_text}').")
                         return component_type, input_el
 
                 elif partial_match is None and field_label_normalized in label_text:
                     input_el = component.select_one('input, select')
                     if input_el:
                         partial_match = (component_type, input_el)
+                        partial_match_label = label_text
 
         if partial_match:
+            logger().debug(f"Field '{field_label}' found by partial match on component '{partial_match[0]}' (label: '{partial_match_label}').")
             return partial_match
 
         logger().warning(f"Field '{field_label}' not found in any supported component type.")
