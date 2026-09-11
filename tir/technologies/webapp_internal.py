@@ -608,7 +608,7 @@ class WebappInternal(Base):
         try_counter = 0
         user_value = ''
         user_element = None
-        reload_screen_interval = 120  # 2 minutes
+        reload_screen_interval = self.config.time_out / 3
         endtime = time.time() + self.config.time_out
         next_reload_time = time.time() + reload_screen_interval
 
