@@ -608,22 +608,8 @@ class WebappInternal(Base):
         try_counter = 0
         user_value = ''
         user_element = None
-        reload_screen_interval = self.config.time_out / 3
         endtime = time.time() + self.config.time_out
-        next_reload_time = time.time() + reload_screen_interval
-
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
-
-            if time.time() >= next_reload_time:
-                logger().debug("User element not found, reloading user screen...")
-
-                self.reload_user_screen()
-
-                next_reload_time = time.time() + reload_screen_interval
-                user_element = None
-                user_value = ''
-                try_counter = 0
-                continue
 
             logger().debug("Looking for user element...")
 
