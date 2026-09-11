@@ -625,7 +625,7 @@ class WebappInternal(Base):
                     user_element = next(iter(soup.select(get_user)), None)
 
                 if user_element is None:
-                    time.sleep(0.5)
+                    time.sleep(1)
                     continue
 
             except AttributeError as e:
@@ -768,10 +768,11 @@ class WebappInternal(Base):
             self.driver_get(url=f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program, environment=server_environment)
+            self.program_screen(self.config.initial_program, environment=server_environment, poui=self.config.poui_login)
 
-        self.wait_element_timeout(term="[name='cGetUser']",
-         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
+        self.wait_element_timeout(term="[name='cGetUser'], .po-page-login-info-field .po-input",
+         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body',
+         twebview = True if self.config.poui_login else False)
 
 
     def close_ballon_last_login(self):
