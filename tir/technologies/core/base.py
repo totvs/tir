@@ -990,6 +990,33 @@ class Base(unittest.TestCase):
         else:
             return ''
 
+    def clear_input(self, element):
+        """
+        [Internal]
+
+        Clears the content of an input element.
+
+        Selects the whole content with HOME + SHIFT + END and erases it with BACKSPACE,
+        avoiding the CTRL + A shortcut, that can be typed as a literal "a" in some inputs.
+
+        :param element: Selenium element
+        :type element: Selenium object
+
+        Usage:
+
+        >>> #Defining the element:
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
+        >>> #Calling the method:
+        >>> self.clear_input(element())
+        """
+        try:
+            element.send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            element.send_keys(Keys.BACK_SPACE)
+        except Exception:
+            ActionChains(self.driver).send_keys(Keys.HOME).key_down(Keys.SHIFT).send_keys(Keys.END) \
+                .key_up(Keys.SHIFT).send_keys(Keys.BACK_SPACE).perform()
+
     def send_keys(self, element, arg):
         """
         [Internal]
@@ -1015,11 +1042,10 @@ class Base(unittest.TestCase):
                 element.send_keys(Keys.CONTROL, 'a')
             element.send_keys(arg)
         except Exception:
-            actions = ActionChains(self.driver)
-            actions.move_to_element(element)
-            actions.click()
+            ActionChains(self.driver).move_to_element(element).click().perform()
             if arg.isprintable():
-                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
+                self.clear_input(element)
+            actions = ActionChains(self.driver)
             actions.send_keys(Keys.HOME)
             actions.send_keys(arg)
             actions.perform()
