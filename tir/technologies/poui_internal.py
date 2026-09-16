@@ -6810,9 +6810,9 @@ class PouiInternal(Base):
         row_has_content = lambda row: row.find(True) is not None
 
         contains_candidate_index = None
-        max_iterations = 60  # safety net against an infinite loop
+        endtime = time.time() + self.config.time_out
 
-        for _ in range(max_iterations):
+        while time.time() < endtime:
             container = self.get_current_container()
             if not container:
                 break
