@@ -6688,27 +6688,16 @@ class PouiInternal(Base):
         [Internal]
 
         Searches for a filter field by its label inside the filter panel (po-page-slide).
-        Returns a tuple with the component type and the matching BeautifulSoup element.
+        Supported types: 'po-input', 'po-datepicker', 'po-select', 'thf-lookup'.
 
-        Supported types: 'po-input', 'po-datepicker', 'po-select', 'thf-lookup'
+        Some filter panel versions render fields inside a virtualized viewport
+        (``div[t-filter-viewport-row]``), where only rows scrolled into view have
+        real content. When that's the case, the viewport is scrolled (see
+        ``_find_filter_field_virtualized``) until the field is found or the list ends.
 
-        Some versions of the filter panel render the fields inside a virtualized
-        viewport (``div[t-filter-viewport-row]``), where only the rows currently
-        scrolled into view actually contain their real content. In that scenario,
-        this method scrolls the viewport (using Selenium's ``scrollIntoView`` via
-        the existing ``scroll_to_element`` helper, no custom Javascript), re-scraping
-        the DOM after each scroll, until the field is found or the end of the list
-        is reached.
-
-        Matching priority (kept the same in both scenarios, with or without
-        virtualization):
-
-        1. Exact label match on what is currently rendered on screen (no scroll).
-        2. Exact label match found while scrolling the virtualized viewport
-           (only applicable when virtualization is present).
-        3. Partial (contains) label match. The first one found - whether while
-           reading the screen as-is (no virtualization) or while scrolling
-           (with virtualization) - is used.
+        Matching priority: 1) exact match already on screen, 2) exact match found
+        while scrolling (virtualized only), 3) first partial (contains) match found,
+        with or without scrolling.
 
         :param field_label: The field label text to search for.
         :type field_label: str
@@ -6716,7 +6705,6 @@ class PouiInternal(Base):
         :rtype: tuple
         """
 
-        supported_components = ['po-input', 'po-datepicker', 'po-select', 'thf-lookup']
         viewport_row_selector = 'div[t-filter-viewport-row]'
         field_label_normalized = field_label.strip().lower()
 
@@ -6727,17 +6715,17 @@ class PouiInternal(Base):
             return None, None
 
         # Priority 1: exact match on what is already rendered (legacy behavior).
-        result = self._find_filter_field_in_soup(filter_container, field_label_normalized, True, supported_components)
+        result = self._find_filter_field_in_soup(filter_container, field_label_normalized, True)
         if result:
             component_type, input_el = result
             self._scroll_field_into_view(input_el)
             return component_type, input_el
 
-        has_virtualized_viewport = bool(filter_container.select_one(viewport_row_selector))
+        rows = filter_container.select(viewport_row_selector)
 
-        if not has_virtualized_viewport:
+        if not rows:
             # Priority 3 (no virtualization available, so no scroll is possible/needed).
-            result = self._find_filter_field_in_soup(filter_container, field_label_normalized, False, supported_components)
+            result = self._find_filter_field_in_soup(filter_container, field_label_normalized, False)
             if result:
                 component_type, input_el = result
                 self._scroll_field_into_view(input_el)
@@ -6746,16 +6734,18 @@ class PouiInternal(Base):
             logger().warning(f"Field '{field_label}' not found in any supported component type.")
             return None, None
 
+        # Ensures the scroll starts at the first row before scanning (priorities 2 and 3).
+        self._scroll_field_into_view(rows[0])
+
         # Priorities 2 and 3, scrolling the virtualized viewport.
-        result = self._find_filter_field_virtualized(filter_container, field_label_normalized,
-                                                      viewport_row_selector, supported_components)
+        result = self._find_filter_field_virtualized(field_label_normalized, viewport_row_selector)
         if result:
             return result
 
         logger().warning(f"Field '{field_label}' not found in any supported component type.")
         return None, None
 
-    def _find_filter_field_in_soup(self, container, field_label_normalized: str, exact: bool, supported_components: list):
+    def _find_filter_field_in_soup(self, container, field_label_normalized: str, exact: bool):
         """
         [Internal]
 
@@ -6767,11 +6757,11 @@ class PouiInternal(Base):
         :type field_label_normalized: str
         :param exact: If True, requires an exact label match. If False, matches by "contains".
         :type exact: bool
-        :param supported_components: List of component selectors to search (e.g. 'po-input', 'po-select').
-        :type supported_components: list
         :return: Tuple (component_type: str, element: Tag) or None if not found.
         :rtype: tuple or None
         """
+        supported_components = ['po-input', 'po-datepicker', 'po-select', 'thf-lookup']
+
         for component_type in supported_components:
             for component in container.select(component_type):
                 label_el = component.select_one('label, span, .po-field-container-bottom-text')
@@ -6788,46 +6778,38 @@ class PouiInternal(Base):
 
         return None
 
-    def _find_filter_field_virtualized(self, filter_container, field_label_normalized: str,
-                                       viewport_row_selector: str, supported_components: list):
+    def _find_filter_field_virtualized(self, field_label_normalized: str, viewport_row_selector: str):
         """
         [Internal]
 
-        Scrolls the virtualized filter viewport (``div[t-filter-viewport-row]``)
-        looking for the field, following this priority:
+        Scrolls the virtualized filter viewport looking for the field. Assumes the
+        scroll is already positioned at the first row (see ``_identify_filter_field``).
 
-        1. Exact label match, found at any point while scrolling. Stops immediately.
-        2. Partial (contains) label match. Only the first occurrence found during
-           the scroll is kept ("reserved") by its row index (not by Tag reference,
-           since virtualization recycles the DOM content of rows as they scroll
-           out of the rendering window, making old Tag references stale). It's
-           only used if no exact match is found in the whole list.
+        Priority 2 (exact match) stops immediately when found. Priority 3 (first
+        "contains" match) is only reserved by row index - not by Tag reference,
+        since virtualization recycles a row's DOM content once it scrolls out of
+        view - and is re-resolved at the end if no exact match was found.
 
-        The end of the list is detected by DOM inspection: when the total amount
-        of rendered rows stops growing between two iterations and the last row
-        already has content, the list is considered fully scrolled.
+        All ``div[t-filter-viewport-row]`` placeholders exist from the start (fixed
+        count), but only rows near the rendering window have real content. A row is
+        only considered to have content when it has a child tag (``row.find(True)``);
+        an empty row's ``.contents`` can still report a truthy whitespace text node,
+        so a plain ``bool(row.contents)`` check would be unreliable.
 
-        Scrolling is performed exclusively through Selenium (``scroll_to_element``,
-        which relies on the native ``scrollIntoView``), never through custom
-        Javascript scroll offset manipulation.
+        The end of the list is reached when its last row has content. To advance,
+        the last currently-rendered row is scrolled into view (via Selenium's
+        ``scrollIntoView``, no custom Javascript offset manipulation).
 
-        :param filter_container: Current container BeautifulSoup element.
-        :type filter_container: bs4.element.Tag
         :param field_label_normalized: Already stripped/lowered label text to search for.
         :type field_label_normalized: str
         :param viewport_row_selector: CSS selector used to find each virtualized row.
         :type viewport_row_selector: str
-        :param supported_components: List of component selectors to search (e.g. 'po-input', 'po-select').
-        :type supported_components: list
         :return: Tuple (component_type: str, element: Tag) or None if not found.
         :rtype: tuple or None
         """
-        first_rows = filter_container.select(viewport_row_selector)
-        if first_rows:
-            self._scroll_field_into_view(first_rows[0])
+        row_has_content = lambda row: row.find(True) is not None
 
         contains_candidate_index = None
-        previous_row_count = -1
         max_iterations = 60  # safety net against an infinite loop
 
         for _ in range(max_iterations):
@@ -6836,9 +6818,11 @@ class PouiInternal(Base):
                 break
 
             rows = container.select(viewport_row_selector)
+            if not rows:
+                break
 
             # Priority 2: exact match while scrolling.
-            result = self._find_filter_field_in_soup(container, field_label_normalized, True, supported_components)
+            result = self._find_filter_field_in_soup(container, field_label_normalized, True)
             if result:
                 component_type, input_el = result
                 self._scroll_field_into_view(input_el)
@@ -6846,29 +6830,28 @@ class PouiInternal(Base):
 
             # Reserve the first "contains" match found (priority 3), by row index.
             if contains_candidate_index is None:
-                partial_result = self._find_filter_field_in_soup(container, field_label_normalized, False, supported_components)
+                partial_result = self._find_filter_field_in_soup(container, field_label_normalized, False)
                 if partial_result:
                     _, partial_input_el = partial_result
                     contains_candidate_index = self._get_row_index_of_element(rows, partial_input_el)
 
-            # End of list detection, based on DOM content instead of scroll pixels.
-            current_row_count = len(rows)
-            last_row_has_content = bool(rows) and bool(rows[-1].contents)
-            reached_end = (current_row_count == previous_row_count) and last_row_has_content
-
-            if reached_end or not rows:
+            if row_has_content(rows[-1]):
+                # The very last row of the fixed-size list already has content: end of list.
                 break
 
-            previous_row_count = current_row_count
+            rendered_indices = [index for index, row in enumerate(rows) if row_has_content(row)]
+            if not rendered_indices:
+                break  # nothing rendered, can't progress any further
 
-            # Advances the virtualized list by scrolling the last rendered row into view.
-            self._scroll_field_into_view(rows[-1])
+            # Advances the rendering window by scrolling its last rendered row into view.
+            self._scroll_field_into_view(rows[rendered_indices[-1]])
             time.sleep(0.3)
 
         if contains_candidate_index is None:
             return None
 
-        # Fall back to the reserved "contains" candidate (priority 3).
+        # Fall back to the reserved "contains" candidate (priority 3). Its row may have
+        # scrolled back out of the rendering window by now, so scroll back to it first.
         container = self.get_current_container()
         if not container:
             return None
@@ -6884,7 +6867,7 @@ class PouiInternal(Base):
         if not container:
             return None
 
-        result = self._find_filter_field_in_soup(container, field_label_normalized, False, supported_components)
+        result = self._find_filter_field_in_soup(container, field_label_normalized, False)
         if result:
             component_type, input_el = result
             self._scroll_field_into_view(input_el)
