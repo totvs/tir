@@ -592,6 +592,14 @@ class WebappInternal(Base):
 
         Fills the user login screen of Protheus with the user and password located on config.json.
 
+        :param admin_user: If True, uses ``user_cfg``/``password_cfg`` (or the smart_test
+            admin credentials) instead of the default user/password. - **Default:** False
+        :type admin_user: bool
+
+        :raises ValueError: If the user input element is not found/filled within the
+            timeout, or if a non-empty password is configured but its input element
+            is not found/filled within the timeout.
+
         Usage:
 
         >>> # Calling the method
@@ -630,17 +638,20 @@ class WebappInternal(Base):
 
         self.set_multilanguage()
 
+        logger().info("Filling User")
+
         try_counter = 0
         user_value = ''
+        user_element = None
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and (user_value.strip() != user_text.strip())):
+
+            logger().debug("Looking for user element...")
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
             else:
                 soup = self.get_current_DOM()
-
-            logger().info("Filling User")
 
             try:
                 if self.config.poui_login:
@@ -649,10 +660,8 @@ class WebappInternal(Base):
                     user_element = next(iter(soup.select(get_user)), None)
 
                 if user_element is None:
-                    self.restart_counter += 1
-                    message = "Couldn't find User input element."
-                    self.log_error(message)
-                    raise ValueError(message)
+                    time.sleep(1)
+                    continue
 
             except AttributeError as e:
                 self.log_error(str(e))
@@ -666,6 +675,8 @@ class WebappInternal(Base):
                 else:
                     user = lambda: self.soup_to_selenium(user_element.parent)
 
+            logger().debug("Filling user element...")
+            
             self.set_element_focus(user())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=user_element, locator=By.XPATH,
                                timeout=True)
@@ -684,33 +695,34 @@ class WebappInternal(Base):
 
             try_counter += 1 if (try_counter < 1) else -1
 
-        if (user_value.strip() != user_text.strip()):
+        if (not user_element) or (user_value.strip() != user_text.strip()):
             self.restart_counter += 1
             message = "Couldn't fill User input element."
             self.log_error(message)
             raise ValueError(message)
 
+        logger().info("Filling Password")
+        
         try_counter = 0
         password_value = ''
+        password_element = None
         endtime = time.time() + self.config.time_out
         while (time.time() < endtime and not password_value and self.config.password != ''):
+
+            logger().debug("Looking for password element...")
 
             if self.config.poui_login:
                 soup = self.get_current_DOM(twebview=True)
             else:
                 soup = self.get_current_DOM()
-
-            logger().info("Filling Password")
             if self.config.poui_login:
                 password_element = next(iter(soup.select(".po-input-icon-right")), None)
             else:
                 password_element = next(iter(soup.select(get_password)), None)
 
             if password_element is None:
-                self.restart_counter += 1
-                message = "Couldn't find User input element."
-                self.log_error(message)
-                raise ValueError(message)
+                time.sleep(0.5)
+                continue
 
             if self.webapp_shadowroot():
                 password = lambda: self.soup_to_selenium(password_element)
@@ -720,6 +732,8 @@ class WebappInternal(Base):
                 else:
                     password = lambda: self.soup_to_selenium(password_element.parent)
 
+            logger().debug("Filling password element...")
+            
             self.set_element_focus(password())
             self.wait_until_to(expected_condition="element_to_be_clickable", element=password_element, locator=By.XPATH,
                                timeout=True)
@@ -740,9 +754,9 @@ class WebappInternal(Base):
             self.wait_blocker()
             try_counter += 1 if (try_counter < 1) else -1
 
-        if not password_value and self.config.password != '':
+        if self.config.password != '' and ((not password_element) or not password_value):
             self.restart_counter += 1
-            message = "Couldn't fill User input element."
+            message = "Couldn't fill Password input element."
             self.log_error(message)
             raise ValueError(message)
 
@@ -789,10 +803,11 @@ class WebappInternal(Base):
             self.driver_get(url=f"{self.config.url}/?StartProg=CASIGAADV&A={self.config.initial_program}&Env={self.config.environment}")
 
         if not self.config.skip_environment and not self.config.coverage:
-            self.program_screen(self.config.initial_program, environment=server_environment)
+            self.program_screen(self.config.initial_program, environment=server_environment, poui=self.config.poui_login)
 
-        self.wait_element_timeout(term="[name='cGetUser']",
-         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body')
+        self.wait_element_timeout(term="[name='cGetUser'], .po-page-login-info-field .po-input",
+         scrap_type=enum.ScrapType.CSS_SELECTOR, timeout = self.config.time_out , main_container='body',
+         twebview = True if self.config.poui_login else False)
 
 
     def close_ballon_last_login(self):
@@ -1937,9 +1952,9 @@ class WebappInternal(Base):
             self.escape_to_main_menu()
 
             # If restart() already handled set_program via emit, skip the rest.
-            # The flag is consumed (reset) here so it only triggers once.
-            if getattr(self, '_program_set_by_restart', False):
-                self._program_set_by_restart = False
+            # Flag lives on self.config (shared singleton) since PouiInternal may set it.
+            if getattr(self.config, '_program_set_by_restart', False):
+                self.config._program_set_by_restart = False
                 logger().debug(f"Program '{program_name}' already set by restart, skipping.")
                 return
 
@@ -2064,77 +2079,94 @@ class WebappInternal(Base):
 
         return len(list(filter(lambda x: self.element_is_displayed(x), soup.select(term))))
 
-    def standard_search_field(self, term, name_attr=False,send_key=False):
+    def standard_search_field(self, term: str, name_attr: bool = False, send_key: bool = False) -> None:
         """
         [Internal]
 
-        Do the standard query(F3)
-        this method
-        1.Search the field
-        2.Search icon "lookup"
-        3.Click()
+        Internal implementation of the lookup (F3) action, called internally by the public F3 method.
 
-        :param term: The term that must be searched.
+        Locates the target field and retries, alternating between clicking the lookup icon and
+        sending the F3 key to the field, until a new container (the search/query modal) is detected
+        or the configured time_out is reached. Each attempt waits up to (self.config.time_out / 5)
+        seconds for the new container before switching strategy and trying again.
+
+        :param term: Label or internal name of the field to search.
         :type term: str
-        :param name_attr: If true searchs element by name.
+        :param name_attr: If True, searches the field by its name attribute instead of its label. - **Default:** False
         :type name_attr: bool
-        :param send_key: Try open standard search field send key F3 (no click).
+        :param send_key: If True, always opens the search window by sending the F3 key to the field, instead of clicking the lookup icon. - **Default:** False
         :type send_key: bool
 
-        Usage:
-
-        >>> # To search using a label name:
-        >>> self.standard_search_field(name_label)
-        >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input:
-        >>> self.standard_search_field(field='A1_EST',name_attr=True)
-        >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input and do action with a key:
-        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        .. note::
+            If the field itself cannot be found on the screen, this method fails the test case
+            through log_error. If the field is found but the new container doesn't open within
+            time_out, the method does **not** fail the test case; it only logs the failure for
+            debugging purposes.
         """
-        endtime = self.config.time_out + time.time()
 
-        try:
-            #wait element
-            if name_attr:
-                self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        success = False
+        attempt = 0
+
+        logger().info(f"Looking for field {term} for F3 action...")
+
+        if name_attr:
+            self.wait_element(term=f"[name$='{term}']", scrap_type=enum.ScrapType.CSS_SELECTOR)
+        else:
+            self.wait_element(term)
+        
+        element = self.get_field(term,name_attr)
+        
+        if not(element):
+            self.log_error(f"Couldn't find field {term} for F3 action")
+
+        logger().info("Field found successfully!")
+        logger().debug("Trying to open new container...")
+
+        container_id_before = self.get_current_container().get('id')
+        container_id_after = container_id_before
+        endtime = time.time() + self.config.time_out
+
+        while (time.time() < endtime and not success):
+
+            if attempt > 0:
+                logger().debug("Trying again...")
+            
+            if (not send_key and attempt % 2 == 0):
+                logger().debug("Clicking on search icon")
+                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")), None)
+                if icon is not None:
+                    icon_s = self.soup_to_selenium(icon)
+                    self.click(icon_s)
+                else:
+                    logger().debug("Search icon not found on this attempt")
             else:
-                self.wait_element(term)
-            # find element
-            element = self.get_field(term,name_attr).find_parent() if not self.webapp_shadowroot() else self.get_field(term,name_attr)
-            if not(element):
-                raise Exception("Couldn't find element")
-
-            logger().debug("Field successfully found")
-            if(send_key):
+                logger().debug("Sending F3 to input field")
                 input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
                 self.set_element_focus(input_field())
-                container = self.get_current_container()
-                self.send_keys(input_field(), Keys.F3)
-            else:
-                icon = next(iter(element.select("img[src*=fwskin_icon_lookup], img[src*=btpesq_mdi], [style*=fwskin_icon_lookup], [style*=btpesq_mdi]")),None)
-                icon_s = self.soup_to_selenium(icon)
-                container = self.get_current_container()
-                self.click(icon_s)
-
-            container_end = self.get_current_container()
-            if (container.get('id') == container_end.get('id')):
-                input_field = lambda: self.driver.find_element(By.XPATH, xpath_soup(element))
-                self.set_element_focus(input_field())
                 self.send_keys(input_field(), Keys.F3)
 
-            while( time.time() < endtime and container.get('id') == container_end.get('id')):
-                container_end = self.get_current_container()
-                time.sleep(0.01)
+            logger().debug("Waiting for new container")
+            endtime_internal = time.time() + (self.config.time_out / 5)
 
-            if time.time() > endtime:
-                logger().debug("Timeout: new container not found.")
-            else:
-                logger().debug("Success")
+            while (time.time() < endtime_internal):
 
-        except Exception as e:
-            logger().exception(str(e))
+                container_id_after = self.get_current_container().get('id')
 
+                if container_id_after and container_id_before != container_id_after:
+                    success = True
+                    break
+
+                time.sleep(0.5)
+            
+            attempt += 1        
+
+        if success:
+            logger().debug(f"Success! New container opened after {attempt} attempt(s).")
+        else:
+            logger().debug(f"Failed! New container didn't open after {attempt} attempt(s).")
+
+        logger().debug(f"Container ID: before = {container_id_before} / after = {container_id_after}")
+        logger().info("Action F3 executed!")
 
     def SearchBrowse(self, term=None, key=None, identifier=None, index=False, column=None, filters=None):
         """
@@ -3459,12 +3491,9 @@ class WebappInternal(Base):
                         main_element = element.parent
                         self.try_element_to_be_clickable(main_element)
                         if main_value == '':
-                           self.select_combo(element, main_value, index=True)
+                           self.select_combo(element, main_value, index=True, by_click=True)
                         else:
-                            self.select_combo(element, main_value)
-                        if self.config.browser.lower() == 'chrome':
-                            self.set_element_focus(input_field())
-                            ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                            self.select_combo(element, main_value, by_click=True)
 
                         current_value = self.return_selected_combo_value(element).strip()
                     #Action for Input elements
@@ -3927,12 +3956,7 @@ class WebappInternal(Base):
             self.user_screen()
             self.environment_screen()
 
-            twebview = True if self.config.new_home else False
-
-            endtime = time.time() + self.config.time_out
-            while(time.time() < endtime and not self.element_exists(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)):
-                self.close_warning_screen()
-                self.close_modal()
+            self.close_screen_before_menu()
 
             if self.config.log_info_config:
                 self.set_log_info_config()
@@ -3947,12 +3971,13 @@ class WebappInternal(Base):
 
             if self.config.routine:
                 from tir.technologies.core.events import emit
+                # Flags stored on self.config (shared singleton) so PouiInternal can see them too.
                 if self.config.routine_type == 'SetLateralMenu':
                     emit('route.set_lateral_menu', self.config.routine, save_input=False)
-                    self._lateral_menu_set_by_restart = True
+                    self.config._lateral_menu_set_by_restart = True
                 elif self.config.routine_type == 'Program':
                     emit('route.set_program', self.config.routine)
-                    self._program_set_by_restart = True
+                    self.config._program_set_by_restart = True
 
     def wait_user_screen(self):
 
@@ -4692,9 +4717,9 @@ class WebappInternal(Base):
         self.escape_to_main_menu()
 
         # Se o restart() já navegou o menu lateral via emit, pula o restante.
-        # A flag é consumida (resetada) aqui para não interferir em chamadas futuras.
-        if getattr(self, '_lateral_menu_set_by_restart', False):
-            self._lateral_menu_set_by_restart = False
+        # Flag fica em self.config (singleton compartilhado), pois pode ter sido setada pelo PouiInternal.
+        if getattr(self.config, '_lateral_menu_set_by_restart', False):
+            self.config._lateral_menu_set_by_restart = False
             logger().debug(f"Lateral menu '{menu_itens}' already set by restart, skipping.")
             return
 
@@ -4968,6 +4993,10 @@ class WebappInternal(Base):
         self.wait_element_timeout(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, timeout=10, step=0.1, check_error=check_error)
         self.containers_selectors["GetCurrentContainer"] = "wa-dialog, wa-message-box,.tmodaldialog, body"
         container = self.get_current_container()
+        logger().debug(
+            f"  [DEBUG] get_shadowroot_button container: tag={container.name if container else None} "
+            f"id={container.attrs.get('id') if container else None}"
+        )
         button_candidates = container.select(term_button)
 
         if button_candidates:
@@ -4992,7 +5021,7 @@ class WebappInternal(Base):
 
         # Fallback: busca ampla via web_scrap
         if not filtered_buttons:
-            filtered_buttons = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container=self.containers_selectors["SetButton"])
+            filtered_buttons = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term="wa-button", main_container=self.containers_selectors["SetButton"], check_error=check_error)
 
         if filtered_buttons and len(filtered_buttons) - 1 >= position:
             parents_actives = list(filter(lambda x: self.filter_active_tabs(x), filtered_buttons))
@@ -5043,6 +5072,7 @@ class WebappInternal(Base):
         self._setbutton_used = True
 
         self.wait_blocker()
+        self.get_current_container_with_id(timeout=10)
 
         if self.webapp_shadowroot():
             term_button="wa-button"
@@ -5148,20 +5178,24 @@ class WebappInternal(Base):
                     restore_zoom = True
 
             if self.config.smart_test:
-                logger().debug(f"Clicking on Button {button} Time Spent: {time.time() - starttime} seconds")
+                logger().debug(f"SetButton: search for button '{button}' finished. Elapsed time: {time.time() - starttime:.2f} seconds")
 
             if not soup_element:
                 try:
                     logger().debug("Trying to find element without blocked-container filtering.")
-                    self.filter_blocked_containers = False
-                    soup_objects = self.web_scrap(term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button, main_container=self.containers_selectors["SetButton"], check_error=False)
 
-                    if soup_objects and len(soup_objects) - 1 >= position:
-                        logger().debug(f"Element found without blocked-container filtering.")
-                        next_button = soup_objects[position]
+                    self.filter_blocked_containers = False                    
+                    next_button = self.get_shadowroot_button(button, term_button, position, check_error=False)
+                    if next_button:
                         soup_element = self.soup_to_selenium(next_button) if type(next_button) == Tag else next_button
+                        logger().debug("Element found without blocked-container filtering.")
+                    
+                    else:
+                        logger().debug(f"Couldn't find button '{button}' even without blocked-container filtering.")
+                
                 except Exception as e:
                     logger().debug(f"Fallback search without blocked-container filtering failed: {e}")
+                
                 finally:
                     self.filter_blocked_containers = True
 
@@ -5187,6 +5221,8 @@ class WebappInternal(Base):
                 container_before_click = self.get_current_container()
                 if container_before_click and 'id' in container_before_click.attrs:
                     initial_container_id = container_before_click.attrs['id']
+                else:
+                    self.get_current_container_without_filter()
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
@@ -5212,10 +5248,11 @@ class WebappInternal(Base):
                 click_attempt = 0
                 click_verified = False
                 recaptured = False
-                # Primeira metade do time_out para a captura inicial; se o clique não for
-                # verificado até aqui, recaptura o botão (container já atualizado após a
-                # transição) e usa a metade restante.
                 half_time = starttime + (self.config.time_out / 2)
+                # 'endtime' is shared with the element search phase. If that search used up the
+                # whole time_out, the click/verification loop below would never run and the
+                # button would be found but never clicked. Grant a fresh time_out for the click
+                # phase, recomputing 'half_time' since it was based on the original 'starttime'.
                 if time.time() > endtime:
                     endtime = time.time() + self.config.time_out
                     half_time = time.time() + (self.config.time_out / 2)
@@ -5248,6 +5285,8 @@ class WebappInternal(Base):
                         container_before_click = self.get_current_container()
                         if container_before_click and 'id' in container_before_click.attrs:
                             initial_container_id = container_before_click.attrs['id']
+                        else:
+                            self.get_current_container_without_filter()
                         initial_dom_hash = hash(str(self.get_current_DOM()))
                         skip_focus_retry = True
                         container_texts_before = self.get_current_container_texts()
@@ -5267,6 +5306,10 @@ class WebappInternal(Base):
                         f"Click attempt {click_attempt} (recaptured={recaptured}) "
                         f"on '{button}' (id: {button_element_id} in container: {initial_container_id})"
                     )
+
+                    logger().debug(f"  [DEBUG] Container Before Infos: tag={container_before_click.name if container_before_click else None}")
+                    container_texts_before_str = " ".join(str(x) for x in container_texts_before if x is not None) if container_texts_before else ""
+                    logger().debug(f"  [DEBUG] Container Before Text value={re.sub(r'[\n\t]', '', container_texts_before_str)[:10].strip()}")
 
                     self.scroll_to_element(soup_element)
                     self.set_element_focus(soup_element)
@@ -5305,15 +5348,21 @@ class WebappInternal(Base):
                         try:
                             # Check 1: Did the container change?
                             current_container = self.get_current_container()
+                            logger().debug(f"  [DEBUG] Current Container Infos: tag={current_container.name if current_container else None} / id={current_container.attrs.get('id') if current_container else None} ")
                             if current_container and 'id' in current_container.attrs:
                                 current_container_id = current_container.attrs['id']
                                 if initial_container_id and initial_container_id != current_container_id:
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: container changed")
                                     break
+                            else:
+                                self.get_current_container_without_filter()
 
                             # Check 2: Did the container texts changed?
-                            if container_texts_before != self.get_current_container_texts():
+                            current_container_texts = self.get_current_container_texts()
+                            current_container_texts_str = " ".join(str(x) for x in current_container_texts if x is not None) if current_container_texts else ""
+                            logger().debug(f"  [DEBUG] Current Container Text value={re.sub(r'[\n\t]', '', current_container_texts_str)[:10]}")
+                            if container_texts_before != current_container_texts:
                                 click_verified = True
                                 logger().debug("  [OK] Click verified: container text changed")
                                 break
@@ -5411,7 +5460,9 @@ class WebappInternal(Base):
 
                 current_container = self.get_current_container()
                 current_container_id = current_container.attrs.get('id') if current_container and 'id' in current_container.attrs else 'unknown'
-                logger().debug(f"Container after click '{button}': {current_container_id}")
+                logger().debug(f"Container after click '{button}': {current_container_id} / tag={current_container.name if current_container else None} ")
+                if current_container_id == 'unknown':
+                    self.get_current_container_without_filter()
 
                 if not click_verified:
                     logger().warning(f"  [WARN] Click on '{button}' may not have been effective after {click_attempt} attempts (recaptured={recaptured}). Continuing execution...")
@@ -6893,18 +6944,26 @@ class WebappInternal(Base):
         [Internal]
         Gets a grid BeautifulSoup object from the screen.
 
+        If the grid is not found within the configured time_out, this method performs one
+        additional attempt with `filter_blocked_containers` disabled, to handle cases where
+        a container is intermittently stuck in a "blocked" state and would otherwise never
+        be matched. The flag is always restored to True before returning.
+
         :param grid_number: The number of the grid on the screen.
-        :type: int
+        :type grid_number: int
         :param grid_element: Grid class name in HTML ex: ".tgrid".
-        :type: str
-        :return: Grid BeautifulSoup object
-        :rtype: BeautifulSoup object
+        :type grid_element: str
         :param grid_list: Return all grids.
         :type grid_list: bool
         :param wait: If False, doesn't wait/loop for the grid to appear, just checks once and returns whatever grids are found immediately.
         :type wait: bool
-        :param current_container: If it is false, it is queried by web_scrap. If it is true, it was selected from the current container.
-        :type wait: bool
+        :param check_error: If True, checks for error/warning screens while searching for the grid.
+        :type check_error: bool
+        :param current_container: If False, the grid is queried via web_scrap. If True, it is selected directly from the current container.
+        :type current_container: bool
+
+        :return: Grid BeautifulSoup object
+        :rtype: BeautifulSoup object
 
         Usage:
 
@@ -6916,9 +6975,13 @@ class WebappInternal(Base):
         success = None
         grids = None
         term = self.grid_selectors["new_web_app"]
+        try_containers_blocked = False
 
         endtime = time.time() + self.config.time_out
-        while(time.time() < endtime and not success):
+        while(not success):
+
+            if try_containers_blocked:
+                logger().debug("Looking for element without blocked-container filtering.")
 
             if not current_container:
                 grids = self.web_scrap(term= grid_element or term, scrap_type=enum.ScrapType.CSS_SELECTOR,
@@ -6938,6 +7001,18 @@ class WebappInternal(Base):
 
             if not wait:
                 break
+
+            if time.time() > endtime and not try_containers_blocked:
+                self.filter_blocked_containers = False
+                try_containers_blocked = True
+            
+            elif time.time() > endtime and try_containers_blocked:
+                break
+
+        if success and try_containers_blocked:
+            logger().debug("Element found without blocked-container filtering.")
+
+        self.filter_blocked_containers = True
 
         if success:
             return success
@@ -9520,6 +9595,8 @@ class WebappInternal(Base):
         >>> self.log_error("Element was not found")
         """
 
+        self.filter_blocked_containers = True
+
         if self.blocker:
             message += f' Blocker: {self.blocker}'
             self.blocker = None
@@ -9593,8 +9670,8 @@ class WebappInternal(Base):
             self.restart_counter = 0
 
         if proceed_action() or not self.check_release_newlog():
-            self._program_set_by_restart = False
-            self._lateral_menu_set_by_restart = False
+            self.config._program_set_by_restart = False
+            self.config._lateral_menu_set_by_restart = False
             if self.restart_counter >= 3:
                 self.restart_counter = 0
             self.assertTrue(False, log_message)
@@ -10426,6 +10503,84 @@ class WebappInternal(Base):
         containers = self.zindex_sort(soup.select(self.containers_selectors["GetCurrentContainer"]), True)
         return next(iter(containers), None)
 
+    def get_current_container_with_id(self, timeout=None):
+        """
+        [Internal]
+
+        An internal method designed to get the current container only after it exposes a
+        non-empty 'id' attribute. Useful when the container is already present in the DOM
+        but its id is set by the framework a few moments later, which would make an
+        immediate call to get_current_container() return a container without id.
+
+        :param timeout: The maximum time to wait, in seconds, for the container to have an id. - **Default:** self.config.time_out
+        :type timeout: int or float
+
+        :return: The container object that has an id or None if the timeout is reached.
+        :rtype: BeautifulSoup object or None
+
+        Usage:
+
+        >>> # Calling the method using the timeout from config.json:
+        >>> container = self.get_current_container_with_id()
+        >>> # Calling the method with a custom timeout:
+        >>> container = self.get_current_container_with_id(timeout=10)
+        """
+        time_out = timeout if timeout is not None else self.config.time_out
+        endtime = time.time() + time_out
+        container = None
+        container_id = None
+
+        while time.time() < endtime and not container_id:
+
+            try:
+                container = self.get_current_container()
+                container_id = container.attrs.get('id') if container and hasattr(container, 'attrs') else None
+            except Exception as e:
+                logger().debug(f"get_current_container_with_id: trying again after exception: {e}")
+                container = None
+                container_id = None
+
+            if not container_id:
+                time.sleep(0.1)
+
+        if not container_id:
+            logger().debug(f"get_current_container_with_id: container with id not found after {time_out} seconds. "
+                           f"Last container: tag={container.name if container else None}")
+            return None
+
+        logger().debug(f"get_current_container_with_id: container found. tag={container.name} / id={container_id}")
+
+        return container
+
+    def get_current_container_without_filter(self):
+        """
+        [Internal]
+
+        [DEBUG] Temporary method used to investigate SetButton false-positive/negative
+        click verification. Calls get_current_container() with filter_blocked_containers
+        disabled and logs whether a container with id is found this way.
+
+        :return: The container object
+        :rtype: BeautifulSoup object
+        """
+        container = None
+        try:
+            self.filter_blocked_containers = False
+            container = self.get_current_container()
+            if container:
+                container_id = container.attrs.get('id') if hasattr(container, 'attrs') else None
+                container_tag = container.name if hasattr(container, 'name') else None
+                container_blocked = 'blocked' in container.attrs if hasattr(container, 'attrs') else None
+                logger().debug(f"  [DEBUG] get_current_container_without_filter: id={container_id} / tag={container_tag} / blocked={container_blocked}")
+            else:
+                logger().debug("  [DEBUG] get_current_container_without_filter: container not found")
+        except Exception as e:
+            logger().debug(f"  [DEBUG] get_current_container_without_filter exception: {e}")
+        finally:
+            self.filter_blocked_containers = True
+
+        return container
+
     def get_current_shadow_root_container(self):
         """
         [Internal]
@@ -10505,7 +10660,10 @@ class WebappInternal(Base):
         # Split the treepath into label segments using '>' not preceded by '-'
         labels = list(map(str.strip, re.split(r'(?<!-)>', treepath)))
         labels = list(filter(None, labels))
-        dialog_layers = self.check_layers('wa-dialog')
+        initial_layers = self.check_layers('wa-dialog')
+        wait_new_layer = lambda: self.wait_element_timeout( term='wa-dialog', scrap_type=enum.ScrapType.CSS_SELECTOR,
+                                                            position=initial_layers + 1, timeout=10,
+                                                            presence=True, main_container='body', check_error=False)
 
         for row, label in enumerate(labels):
             logger().debug("Clicking on tree label: " + label)
@@ -10593,12 +10751,14 @@ class WebappInternal(Base):
                                                     if click_type > 3:
                                                         click_type = 1
                                                 click_try += 1
-
+                                            
                                             success = self.check_hierarchy(label_filtered, False) or is_element_acessible()
+                                            logger().debug(f'Result of success using hierarchy / element acessible: {success}')
 
                                             # If dialog layers show up through last click
-                                            if not success and dialog_layers < self.check_layers('wa-dialog'):
-                                                success = True
+                                            if not success:
+                                                success = wait_new_layer()
+                                                logger().debug(f'Result of success using layers / container id: {success}')
 
                                             if success and right_click:
                                                 last_zindex = self.return_last_zindex()
@@ -10629,10 +10789,11 @@ class WebappInternal(Base):
                                                 click_try += 1
 
                                             success = self.check_hierarchy(label_filtered)
+                                            logger().debug(f'Result of success using hierarchy: {success}')
 
                                         try_counter += 1
                                     except Exception as e:
-                                        pass
+                                        logger().debug(f"click_tree exception suppressed: {type(e).__name__}: {e}")
 
                                 if not success:
                                     try:
@@ -10729,11 +10890,13 @@ class WebappInternal(Base):
         """
 
         container = self.get_current_container()
+
         tr = []
 
-        bs_tree_node = container.select('wa-tree')
-        if bs_tree_node and len(bs_tree_node) > tree_number:
-            tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
+        if container:
+            bs_tree_node = container.select('wa-tree')
+            if bs_tree_node and len(bs_tree_node) > tree_number:
+                tr = self.driver.execute_script(f"return arguments[0].shadowRoot.querySelectorAll('wa-tree-node')", self.soup_to_selenium(bs_tree_node[tree_number]))
         return tr
 
     def check_hierarchy(self, label, check_expanded=True):
