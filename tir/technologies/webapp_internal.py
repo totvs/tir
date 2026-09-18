@@ -5158,11 +5158,14 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
+                container_id_without_filter = None
                 container_before_click = self.get_current_container()
                 if container_before_click and 'id' in container_before_click.attrs:
                     initial_container_id = container_before_click.attrs['id']
                 else:
-                    self.get_current_container_without_filter()
+                    initial_container_without_filter = self.get_current_container_without_filter()
+                    if initial_container_without_filter and 'id' in initial_container_without_filter.attrs:
+                        initial_container_id_without_filter = initial_container_without_filter.attrs['id']
 
                 button_element_id = None
                 button_element_id = soup_element.get_attribute('id') or 'unknow'
@@ -5281,6 +5284,8 @@ class WebappInternal(Base):
                         self.driver.execute_script("arguments[0].style.cssText+='transform: scale(1)';", self.soup_to_selenium(bodySoup[0]))
                         soup_element = soup_element if self.element_is_displayed(soup_element) else None
 
+                    current_container_id = None                    
+                    
                     # Verification: waits up to 3s to detect click effect
                     verification_timeout = time.time() + 3
                     while time.time() < verification_timeout and not click_verified:
@@ -5291,6 +5296,7 @@ class WebappInternal(Base):
                             logger().debug(f"  [DEBUG] Current Container Infos: tag={current_container.name if current_container else None} / id={current_container.attrs.get('id') if current_container else None} ")
                             if current_container and 'id' in current_container.attrs:
                                 current_container_id = current_container.attrs['id']
+                                logger().debug(f"current_container_id was found!")
                                 if initial_container_id and initial_container_id != current_container_id:
                                     click_verified = True
                                     logger().debug("  [OK] Click verified: container changed")
@@ -5299,13 +5305,14 @@ class WebappInternal(Base):
                                 self.get_current_container_without_filter()
 
                             # Check 2: Did the container texts changed?
-                            current_container_texts = self.get_current_container_texts()
-                            current_container_texts_str = " ".join(str(x) for x in current_container_texts if x is not None) if current_container_texts else ""
-                            logger().debug(f"  [DEBUG] Current Container Text value={re.sub(r'[\n\t]', '', current_container_texts_str)[:10]}")
-                            if container_texts_before != current_container_texts:
-                                click_verified = True
-                                logger().debug("  [OK] Click verified: container text changed")
-                                break
+                            if initial_container_id and current_container_id:
+                                current_container_texts = self.get_current_container_texts()
+                                current_container_texts_str = " ".join(str(x) for x in current_container_texts if x is not None) if current_container_texts else ""
+                                logger().debug(f"  [DEBUG] Current Container Text value={re.sub(r'[\n\t]', '', current_container_texts_str)[:10]}")
+                                if container_texts_before != current_container_texts:
+                                    click_verified = True
+                                    logger().debug("  [OK] Click verified: container text changed")
+                                    break
 
                             # Check exceptions
                             button_exception = button.strip().lower() == self.language.copy.lower()
@@ -5393,6 +5400,24 @@ class WebappInternal(Base):
                                         )
                         except Exception:
                             pass
+                    
+                    '''
+                    Check 6: para os casos que antes do clique o container estava bloqueado (o container era o body 
+                    sem id), e depois do clique "desbloqueou" (o container se tornou um wa-dialog com id), vai ser verificado
+                    se o id e o texto do container anterior sem o filto de bloqueado, é o mesmo do atual, e se o botão ainda está na tela.
+                    Se tiver, será clicado novamente.
+                    '''
+                    if click_verified and not initial_container_id and initial_container_id_without_filter and current_container_id:
+                        try:
+                            if  initial_container_id_without_filter == current_container_id and \
+                                self.element_exists(term=button, scrap_type=enum.ScrapType.MIXED, 
+                                                    optional_term=term_button, check_error=check_error):
+                                                    
+                                logger().debug("Mesmo container, falta verificar se o botão ainda está na tela")
+
+                        except Exception:
+                            pass
+
 
                     if not click_verified:
                         logger().warning(f"  [WARN] Click on '{button}' had no detectable effect on attempt {click_attempt}")
