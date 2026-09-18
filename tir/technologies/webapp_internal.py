@@ -5158,7 +5158,7 @@ class WebappInternal(Base):
             if soup_element:
                 # Captura estado antes do clique para verificação posterior
                 initial_container_id = None
-                container_id_without_filter = None
+                initial_container_id_without_filter = None
                 container_before_click = self.get_current_container()
                 if container_before_click and 'id' in container_before_click.attrs:
                     initial_container_id = container_before_click.attrs['id']
@@ -5175,7 +5175,7 @@ class WebappInternal(Base):
                 rows = []
                 initial_dom_hash = hash(str(self.get_current_DOM()))
                 button_text_before = soup_element.text.strip()
-                skip_focus_retry = True
+                skip_check_retry = True
                 container_texts_before = self.get_current_container_texts()
                 df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
                 if grids_on_screen_before:
@@ -5225,13 +5225,17 @@ class WebappInternal(Base):
 
                         # Rebaseline do estado pré-clique após a transição, para que os
                         # checks de verificação existentes comparem contra o estado correto.
+                        initial_container_id = None
+                        initial_container_id_without_filter = None
                         container_before_click = self.get_current_container()
                         if container_before_click and 'id' in container_before_click.attrs:
                             initial_container_id = container_before_click.attrs['id']
                         else:
-                            self.get_current_container_without_filter()
+                            initial_container_without_filter = self.get_current_container_without_filter()
+                            if initial_container_without_filter and 'id' in initial_container_without_filter.attrs:
+                                initial_container_id_without_filter = initial_container_without_filter.attrs['id']
                         initial_dom_hash = hash(str(self.get_current_DOM()))
-                        skip_focus_retry = True
+                        skip_check_retry = True
                         container_texts_before = self.get_current_container_texts()
                         df_before, grids_on_screen_before = self.grid_dataframe(grid_number=0, wait=False, check_error=False, current_container=True, throw_error=False)
                         rows = []
@@ -5351,19 +5355,32 @@ class WebappInternal(Base):
                                 logger().debug(f"  [OK] Click verified: popup appeared (popup changed from {popup_before} to {popup_after})")
                                 break
 
-                            # Check 6: Was the DOM modified?
+                            # Check 6: container que tinha id antes ficou sem id (bloqueou).
+                            # Não é necessariamente o mesmo container, pode ser outro. Sinal forte
+                            # de que o clique iniciou um processo, então não seta skip_check_retry
+                            # (permanece True), pulando os guards 9 e 10, assim como os checks 1-5.
+                            if initial_container_id and not current_container_id:
+                                click_verified = True
+                                logger().debug(
+                                    f"  [OK] Click verified: container with id '{initial_container_id}' is no "
+                                    f"longer found with an id after the click (it or another container may have "
+                                    f"become blocked), indicating a process was started"
+                                )
+                                break
+
+                            # Check 7: Was the DOM modified?
                             current_dom_hash = hash(str(self.get_current_DOM()))
                             if initial_dom_hash != current_dom_hash:
                                 click_verified = True
-                                skip_focus_retry = False
+                                skip_check_retry = False
                                 logger().debug("  [OK] Click verified: DOM modified")
                                 break
 
-                            # Check 7: Did the element lose focus?
+                            # Check 8: Did the element lose focus?
                             current_active = self.switch_to_active_element()
                             if current_clicked_element is not None and current_active and current_active != current_clicked_element:
                                 click_verified = True
-                                skip_focus_retry = False
+                                skip_check_retry = False
                                 logger().debug("  [OK] Click verified: element lost focus")
                                 break
 
@@ -5373,12 +5390,14 @@ class WebappInternal(Base):
                             click_verified = True
                             break
 
-                    # Check 5: False-positive guard — if a previous check "verified" the
-                    # click but the container ID is still the same as before AND the button
-                    # still carries the 'focus' CSS class (meaning it was only focused /
-                    # selected, not actually pressed), downgrade the verification so the
-                    # outer retry loop will attempt the click again.
-                    if click_verified and initial_container_id and not skip_focus_retry:
+                    # Check 9: False-positive guard — only applies when a "weak" check
+                    # (7/8, skip_check_retry == False) verified the click, not when a
+                    # "strong" check (1/2/3/4/5/6) already did. If the container ID is still
+                    # the same as before AND the button still carries the 'focus' CSS class
+                    # (meaning it was only focused / selected, not actually pressed),
+                    # downgrade the verification so the outer retry loop will attempt the
+                    # click again.
+                    if click_verified and initial_container_id and not skip_check_retry:
                         try:
                             current_container_guard = self.get_current_container()
                             current_id_guard = (
@@ -5402,21 +5421,30 @@ class WebappInternal(Base):
                             pass
                     
                     '''
-                    Check 6: para os casos que antes do clique o container estava bloqueado (o container era o body 
-                    sem id), e depois do clique "desbloqueou" (o container se tornou um wa-dialog com id), vai ser verificado
-                    se o id e o texto do container anterior sem o filto de bloqueado, é o mesmo do atual, e se o botão ainda está na tela.
-                    Se tiver, será clicado novamente.
+                    Check 10: antes do clique o container estava bloqueado (sem id, cai no body).
+                    Depois do clique passou a ter id - não necessariamente é o mesmo que desbloqueou,
+                    pode ser outro. Se o id (sem filtro) bate com o atual (filtrado) e o botão ainda
+                    está na tela, é sinal de falso positivo (algum check anterior confundiu o desbloqueio
+                    com o efeito do clique). Só roda quando skip_check_retry é False, ou seja, quando foi
+                    um critério fraco (7/8) que verificou o clique, não um critério forte (1/2/3/4/5/6).
                     '''
-                    if click_verified and not initial_container_id and initial_container_id_without_filter and current_container_id:
+                    if click_verified and not initial_container_id and initial_container_id_without_filter and current_container_id and not skip_check_retry:
                         try:
-                            if  initial_container_id_without_filter == current_container_id and \
-                                self.element_exists(term=button, scrap_type=enum.ScrapType.MIXED, 
-                                                    optional_term=term_button, check_error=check_error):
-                                                    
-                                logger().debug("Mesmo container, falta verificar se o botão ainda está na tela")
+                            same_container_unblocked = initial_container_id_without_filter == current_container_id
+                            button_still_on_screen = self.element_exists(
+                                term=button, scrap_type=enum.ScrapType.MIXED, optional_term=term_button,
+                                main_container=self.containers_selectors["SetButton"], check_error=check_error
+                            )
 
-                        except Exception:
-                            pass
+                            if same_container_unblocked and button_still_on_screen:
+                                # click_verified = False
+                                logger().debug(
+                                    f"  [Check 10] Possible false-positive on attempt {click_attempt}: "
+                                    f"container '{current_container_id}' may have only unblocked, button "
+                                    f"'{button}' still on screen"
+                                )
+                        except Exception as e:
+                            logger().debug(f"  [DEBUG] Check 6 (unblocked-container guard) exception: {e}")
 
 
                     if not click_verified:
