@@ -2810,30 +2810,45 @@ class WebappInternal(Base):
             if len(term.strip()) > input_lenght:
                 self.log_error(f"Browse term length exceeded input lenght: {input_lenght}")
 
-        current_value = self.get_element_value(sel_browse_input())
+        current_value = self.get_element_value(sel_browse_input()) or ''
 
+        # Column search may apply the column picture (uppercase, masks, padding) to the typed value,
+        # so the comparison must be normalized or the input is refilled until timeout.
+        normalize = lambda value: re.sub(r'\s', '', self.remove_mask(value.strip())).lower() if value else ''
+        is_filled = lambda: normalize(current_value) == normalize(term)
+
+        max_attempts = 3
+        attempt = 0
         endtime = time.time() + self.config.time_out
-        while (time.time() < endtime and current_value.rstrip() != term.strip()):
+        while (time.time() < endtime and attempt < max_attempts and not is_filled()):
+            attempt += 1
             try:
                 self.wait_blocker()
                 logger().info(f'Filling: {term}')
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[2], locator = By.XPATH, timeout=True)
                 self.click(sel_browse_input())
                 self.set_element_focus(sel_browse_input())
+                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
+                if self.webapp_shadowroot():
+                    self.find_child_element('input', sel_browse_input())[0].clear()
+                else:
+                    sel_browse_input().clear()
+                self.set_element_focus(sel_browse_input())
+                # Selects any remaining content so the new term replaces it instead of being appended
+                ActionChains(self.driver).key_down(Keys.CONTROL).send_keys(Keys.HOME).key_up(Keys.CONTROL).perform()
+                ActionChains(self.driver).key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(
+                    Keys.END).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
                 self.send_keys(sel_browse_input(), Keys.DELETE)
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
-                sel_browse_input().clear() if not self.webapp_shadowroot() else self.find_child_element('input', sel_browse_input())[0].clear
-                self.set_element_focus(sel_browse_input())
-                self.wait_until_to( expected_condition = "element_to_be_clickable", element = search_elements[1], locator = By.XPATH, timeout=True)
                 sel_browse_input().send_keys(term.strip())
-                current_value = self.get_element_value(sel_browse_input())
                 time.sleep(1)
+                current_value = self.get_element_value(sel_browse_input()) or ''
                 sel_browse_input_filled = True
             except StaleElementReferenceException:
                     self.get_search_browse_elements()
             except:
                 pass
-        if current_value.rstrip() != term.strip():
+        if not is_filled():
             self.log_error(
                 f"Couldn't fill browse search input. expected='{term.strip()}' current='{current_value.rstrip()}'"
             )
