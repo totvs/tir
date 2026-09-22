@@ -5631,12 +5631,10 @@ class WebappInternal(Base):
         :type check_error: bool
         """
 
-        container_before = None
-        id_container_before = None
-        container_after = None
-        id_container_after = None
-
         endtime = self.config.time_out/2
+        before_timeout = self.config.time_out/2
+        after_timeout = 10
+
         if self.webapp_shadowroot():
             term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
         else:
@@ -5672,7 +5670,7 @@ class WebappInternal(Base):
             if x_button:
                 element_selenium = x_button
 
-        container_before = self.get_current_container_with_id(self.config.time_out/2)
+        container_before = self.get_current_container_with_id(before_timeout)
         id_container_before = container_before.attrs.get('id') if container_before and hasattr(container_before, 'attrs') else None
 
         if not id_container_before:
@@ -5683,8 +5681,8 @@ class WebappInternal(Base):
 
         self.send_action(action=self.click, element=lambda : element_selenium)
 
-        container_after = self.get_current_container_with_id(10)
-        id_container_after = container_after.attrs.get('id') if container_after and hasattr(container_before, 'attrs') else None
+        container_after = self.get_current_container_with_id(after_timeout)
+        id_container_after = container_after.attrs.get('id') if container_after and hasattr(container_after, 'attrs') else None
 
         if not id_container_after:
             self.get_current_container_without_filter()
@@ -5692,21 +5690,25 @@ class WebappInternal(Base):
         if id_container_before and id_container_after:
             if id_container_before != id_container_after:
                 # Sucesso: container alterado
-                logger().debug(f"Container alterado!")
-            
+                logger().debug(f"container changed after click: before={id_container_before} / after={id_container_after}")
             else:
                 # Falha: container não alterado
-                logger().debug(f"Atenção! Container não alterado")
-        
+                logger().debug(f"WARNING container not changed after click. id={id_container_before}")
+
         elif not id_container_before and id_container_after:
-            # Possível Falha: processo antes ainda sendo executado e o clique não foi efetivo.
+            # Possível falha: processo anterior ainda em execução e o clique não foi efetivo.
             # Analisar o log do get_current_container_without_filter.
-            logger().debug(f"Atenção! ID do container antes não encontrado mesmo aguardando {self.config.time_out/2}s.")
+            logger().debug(f"WARNING container id not found before click after waiting {before_timeout} seconds. after={id_container_after}")
 
         elif id_container_before and not id_container_after:
-            # Possível Sucesso: processo iniciado depois do clique.
+            # Possível sucesso: processo iniciado depois do clique.
             # Analisar o log do get_current_container_without_filter.
-            logger().debug(f"Atenção! ID do container depois não encontrado mesmo aguardando 10s.")
+            logger().debug(f"WARNING container id not found after click after waiting {after_timeout} seconds. before={id_container_before}")
+
+        else:
+            # Indeterminado: nenhum container com id foi identificado antes ou depois do clique.
+            # Analisar o log do get_current_container_without_filter.
+            logger().debug("WARNING container id not found before and after click.")
 
     def click_sub_menu(self, filtered_sub_itens):
         """
@@ -10526,7 +10528,7 @@ class WebappInternal(Base):
             return None
 
         time_spent = time.time() - ini
-        logger().debug(f"get_current_container_with_id: container found in {time_spent}. tag={container.name} / id={container_id}")
+        logger().debug(f"get_current_container_with_id: container found in {time_spent:.2f} seconds. tag={container.name} / id={container_id}")
 
         return container
 
