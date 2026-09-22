@@ -2798,12 +2798,30 @@ class WebappInternal(Base):
         self.driver.switch_to.default_content()
         return input_value
 
-    def wait_blocker(self):
+    def wait_blocker(self, keep_blocked_containers=False, timeout=None):
         """
         [Internal]
 
         Wait blocker disappear
 
+        :param keep_blocked_containers: If True, disables the blocked container filtering
+         (``filter_blocked_containers``) while looking for the blocker container, so a container
+         flagged as ``blocked`` can actually be returned. The previous value is always restored
+         before leaving the method. - **Default:** False
+        :type keep_blocked_containers: bool
+        :param timeout: Maximum time in seconds to wait for the blocker to disappear. When None,
+         ``self.config.time_out / 2`` is used. - **Default:** None
+        :type timeout: int or float
+
+        :return: True if the blocker is still present when the time runs out, False otherwise.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_blocker()
+        >>> # Waiting a blocked container for 30 seconds:
+        >>> self.wait_blocker(keep_blocked_containers=True, timeout=30)
         """
 
         twebview = True if self.config.poui_login else False
@@ -2811,40 +2829,52 @@ class WebappInternal(Base):
         logger().debug("Waiting blocker to continue...")
         soup = None
         result = True
-        endtime = time.time() + self.config.time_out / 2
+        blocker_container_soup = None
+        endtime = time.time() + (timeout if timeout else self.config.time_out / 2)
 
-        while (time.time() < endtime and result):
-            blocker_container = None
-            blocker = None
-            soup = lambda: self.get_current_DOM(twebview=twebview)
-            blocker_container = lambda: self.blocker_containers(soup())
+        filter_blocked_containers = self.filter_blocked_containers
 
-            try:
-                if blocker_container():
-                    if self.webapp_shadowroot():
-                        blocker_container_soup = blocker_container()
-                        blocker_container = self.soup_to_selenium(blocker_container())
-                        blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
-                            blocker_container, 'get_property') else None
-                    else:
-                        blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
-                            'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
-                                blocker_container, 'attrs') else None
-            except:
-                pass
+        if keep_blocked_containers:
+            logger().debug("Waiting blocker without blocked-container filtering.")
+            self.filter_blocked_containers = False
 
-            logger().debug(f'Blocker status: {blocker}')
+        try:
+            while (time.time() < endtime and result):
+                blocker_container = None
+                blocker = None
+                soup = lambda: self.get_current_DOM(twebview=twebview)
+                blocker_container = lambda: self.blocker_containers(soup())
 
-            if blocker:
-                result = True
-            else:
-                self.blocker = None
-                return False
+                try:
+                    if blocker_container():
+                        if self.webapp_shadowroot():
+                            blocker_container_soup = blocker_container()
+                            blocker_container = self.soup_to_selenium(blocker_container())
+                            blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
+                                blocker_container, 'get_property') else None
+                        else:
+                            blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
+                                'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
+                                    blocker_container, 'attrs') else None
+                except:
+                    pass
 
-        if time.time() > endtime:
-            self.check_blocked_container(blocker_container_soup)
+                logger().debug(f'Blocker status: {blocker}')
 
-        return result
+                if blocker:
+                    result = True
+                    time.sleep(1)
+                else:
+                    self.blocker = None
+                    return False
+
+            if time.time() > endtime:
+                self.check_blocked_container(blocker_container_soup)
+
+            return result
+
+        finally:
+            self.filter_blocked_containers = filter_blocked_containers
 
     def blocker_containers(self, soup):
         """
@@ -5011,7 +5041,7 @@ class WebappInternal(Base):
         first_setbutton_use = not getattr(self, "_setbutton_used", False)
         self._setbutton_used = True
 
-        self.wait_blocker()
+        self.wait_blocker(keep_blocked_containers=True, timeout=1200)
         self.get_current_container_with_id(timeout=10)
 
         if self.webapp_shadowroot():
