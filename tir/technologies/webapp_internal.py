@@ -5326,17 +5326,20 @@ class WebappInternal(Base):
                                 break
 
                             # Check 3: Did the grids changed?
-                            df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False, 
-                                                                                  current_container=True, throw_error=False)
-                            if grids_on_screen_before or grids_on_screen_after:
-                                grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
-                                df_content_changed = not df_before.equals(df_after)
-                                rows_box_state_after = list(map(lambda x: self.get_row_divs_style(x), rows))
-                                rows_state_changed = rows_box_state_after != rows_box_state_before
-                                if grid_structure_changed or df_content_changed or rows_state_changed:
-                                    click_verified = True
-                                    logger().debug("  [OK] Click verified: Grids changed")
-                                    break
+                            # Só compara com container com id antes e depois, senão o escopo do
+                            # grid muda (body x dialog) e gera falso positivo.
+                            if initial_container_id and current_container_id:
+                                df_after, grids_on_screen_after = self.grid_dataframe(grid_number=0, wait=False, check_error=False,
+                                                                                      current_container=True, throw_error=False)
+                                if grids_on_screen_before or grids_on_screen_after:
+                                    grid_structure_changed = str(grids_on_screen_before) != str(grids_on_screen_after)
+                                    df_content_changed = not df_before.equals(df_after)
+                                    rows_box_state_after = list(map(lambda x: self.get_row_divs_style(x), rows))
+                                    rows_state_changed = rows_box_state_after != rows_box_state_before
+                                    if grid_structure_changed or df_content_changed or rows_state_changed:
+                                        click_verified = True
+                                        logger().debug("  [OK] Click verified: Grids changed")
+                                        break
 
                             # Check 4: Did a new modal/dialog appear?
                             current_layers = self.check_layers(".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog")
