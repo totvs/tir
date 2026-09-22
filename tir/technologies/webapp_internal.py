@@ -5630,6 +5630,12 @@ class WebappInternal(Base):
         :param check_error: Whether to check for errors after clicking. - **Default:** True
         :type check_error: bool
         """
+
+        container_before = None
+        id_container_before = None
+        container_after = None
+        id_container_after = None
+
         endtime = self.config.time_out/2
         if self.webapp_shadowroot():
             term_button = f"wa-dialog[title*={self.language.warning}], wa-button[icon*='fwskin_delete_ico'], wa-button[style*='fwskin_delete_ico'], wa-image[src*='fwskin_modal_close.png'], wa-dialog"
@@ -5666,11 +5672,41 @@ class WebappInternal(Base):
             if x_button:
                 element_selenium = x_button
 
+        container_before = self.get_current_container_with_id(self.config.time_out/2)
+        id_container_before = container_before.attrs.get('id') if container_before and hasattr(container_before, 'attrs') else None
+
+        if not id_container_before:
+            self.get_current_container_without_filter()
+
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
 
         self.send_action(action=self.click, element=lambda : element_selenium)
 
+        container_after = self.get_current_container_with_id(10)
+        id_container_after = container_after.attrs.get('id') if container_after and hasattr(container_before, 'attrs') else None
+
+        if not id_container_after:
+            self.get_current_container_without_filter()
+
+        if id_container_before and id_container_after:
+            if id_container_before != id_container_after:
+                # Sucesso: container alterado
+                logger().debug(f"Container alterado!")
+            
+            else:
+                # Falha: container não alterado
+                logger().debug(f"Atenção! Container não alterado")
+        
+        elif not id_container_before and id_container_after:
+            # Possível Falha: processo antes ainda sendo executado e o clique não foi efetivo.
+            # Analisar o log do get_current_container_without_filter.
+            logger().debug(f"Atenção! ID do container antes não encontrado mesmo aguardando {self.config.time_out/2}s.")
+
+        elif id_container_before and not id_container_after:
+            # Possível Sucesso: processo iniciado depois do clique.
+            # Analisar o log do get_current_container_without_filter.
+            logger().debug(f"Atenção! ID do container depois não encontrado mesmo aguardando 10s.")
 
     def click_sub_menu(self, filtered_sub_itens):
         """
@@ -10469,6 +10505,7 @@ class WebappInternal(Base):
         endtime = time.time() + time_out
         container = None
         container_id = None
+        ini = time.time()
 
         while time.time() < endtime and not container_id:
 
@@ -10488,7 +10525,8 @@ class WebappInternal(Base):
                            f"Last container: tag={container.name if container else None}")
             return None
 
-        logger().debug(f"get_current_container_with_id: container found. tag={container.name} / id={container_id}")
+        time_spent = time.time() - ini
+        logger().debug(f"get_current_container_with_id: container found in {time_spent}. tag={container.name} / id={container_id}")
 
         return container
 
