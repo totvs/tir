@@ -1975,7 +1975,33 @@ class WebappInternal(Base):
                     self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_input, locator = By.XPATH )
 
                 self.wait_until_to( expected_condition = "element_to_be_clickable", element = tget_img, locator = By.XPATH )
-                self.send_action(self.click, s_tget_img)
+
+                # Captura o estado do menu antes de acionar a lupa. A partir
+                # dele validamos se o clique realmente abriu a rotina, em vez
+                # de assumir sucesso apenas porque o clique foi disparado.
+                state_before = self.capture_screen_state()
+
+                # Regra específica do set_program: a rotina só é considerada
+                # aberta quando houve uma transição de tela E o campo/lupa de
+                # busca de programa deixou de estar visível. Enquanto a lupa
+                # permanecer visível, o menu ainda está na tela e a rotina não
+                # foi carregada.
+                program_opened = False
+                endtime = time.time() + self.config.time_out
+                while time.time() < endtime and not program_opened:
+                    self.send_action(self.click, s_tget_img)
+
+                    transition_reason = self.has_screen_transition(
+                        state_before=state_before,
+                        clicked_element=s_tget_img(),
+                    )
+
+                    program_opened = self.is_strong_transition(transition_reason)
+
+                    if program_opened:
+                        logger().debug(f"Program '{program_name}' opened")
+                        break
+
                 self.wait_element_is_not_displayed(tget_img)
                 self.close_news_screen()
 
@@ -5557,6 +5583,224 @@ class WebappInternal(Base):
         return soup_element, restore_zoom
 
 
+    def capture_screen_state(self):
+        """
+        [Internal]
+
+        Captura o estado atual da tela para permitir a validação de uma
+        transição após uma ação (por exemplo, um clique).
+
+        Este método é genérico e não contém regras específicas de Program,
+        SetButton ou qualquer outra ação. Ele apenas coleta os mesmos sinais
+        utilizados pela verificação de clique do SetButton, para que possam
+        ser comparados antes e depois da ação.
+
+        :return: Snapshot do estado atual da interface.
+        :rtype: dict
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> state_before = self.capture_screen_state()
+        """
+
+        state = {
+            "container_id": None,
+            "container_tag": None,
+            "container_texts": [],
+            "dataframe": None,
+            "grids": None,
+            "rows": [],
+            "rows_box_state": [],
+            "dialog_layers": 0,
+            "popup_layers": 0,
+            "dom_hash": None,
+            "active_element": None,
+        }
+
+        current_container = self.get_current_container()
+
+        # Mesma regra do SetButton: o container precisa possuir 'id'. Caso não
+        # possua, refaz a busca sem filtrar containers bloqueados e utiliza
+        # efetivamente o retorno dessa nova busca.
+        if not current_container:
+            current_container = self.get_current_container_without_filter()
+
+        if (hasattr(current_container, "attrs") and "id" in current_container.attrs):
+            state["container_id"] = current_container.attrs["id"]
+            state["container_tag"] = current_container.name
+
+        state["container_texts"] = self.get_current_container_texts()
+        state["dom_hash"] = hash(str(self.get_current_DOM()))
+
+        dataframe, grids = self.grid_dataframe(
+            grid_number=0,
+            wait=False,
+            check_error=False,
+            current_container=True,
+            throw_error=False,
+        )
+
+        state["dataframe"] = dataframe
+        state["grids"] = grids
+
+        if grids:
+            rows = self.execute_js_selector("tr", self.soup_to_selenium(grids))
+            state["rows"] = rows or []
+            if rows:
+                state["rows_box_state"] = list(
+                    map(lambda row: self.get_row_divs_style(row), rows)
+                )
+
+        state["dialog_layers"] = self.check_layers(
+            ".tmodaldialog, wa-dialog, wa-message-box, .ui-dialog"
+        )
+        state["popup_layers"] = self.check_layers(
+            ".tmenupopupitem, wa-menu-popup"
+        )
+        state["active_element"] = self.switch_to_active_element()
+
+        return state
+
+    def has_screen_transition(self, state_before, clicked_element):
+        """
+        [Internal]
+
+        Verifica se uma ação produziu uma transição de tela, comparando o
+        estado capturado antes da ação (``state_before``) com o estado atual
+        (capturado internamente por :meth:`capture_screen_state`).
+
+        A sequência das verificações reproduz a ordem já validada pela
+        verificação de clique do SetButton:
+
+        1. Container mudou;
+        2. Textos do container mudaram;
+        3. Grids mudaram (estrutura, conteúdo ou estado das linhas);
+        4. Dialogs/modais mudaram;
+        5. Popups mudaram;
+        6. DOM mudou;
+        7. Elemento clicado perdeu o foco.
+
+        :param state_before: Snapshot retornado por :meth:`capture_screen_state`
+                             antes da ação.
+        :type state_before: dict
+        :param clicked_element: Elemento Selenium que recebeu a ação.
+        :type clicked_element: selenium.webdriver.remote.webelement.WebElement
+
+        :return: Motivo da transição detectada; string vazia quando não houve
+                 transição; ou None quando não foi possível avaliar (exceção).
+        :rtype: str or None
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> reason = self.has_screen_transition(state_before, element())
+        """
+
+        state_after = self.capture_screen_state()
+
+        try:
+            # Check 1: container mudou?
+            if (
+                state_before["container_id"]
+                and state_after["container_id"]
+                and state_before["container_id"] != state_after["container_id"]
+            ):
+                logger().debug("  [OK] Click verified: container changed")
+                return "container changed"
+
+            # Check 2: textos do container mudaram?
+            if state_before["container_texts"] != state_after["container_texts"]:
+                logger().debug("  [OK] Click verified: container text changed")
+                return "container text changed"
+
+            # Check 3: grids mudaram?
+            if state_before["grids"] or state_after["grids"]:
+                grid_structure_changed = (
+                    str(state_before["grids"]) != str(state_after["grids"])
+                )
+                dataframe_changed = not state_before["dataframe"].equals(
+                    state_after["dataframe"]
+                )
+                rows_box_state_after = list(
+                    map(
+                        lambda row: self.get_row_divs_style(row),
+                        state_before["rows"],
+                    )
+                )
+                rows_state_changed = (
+                    state_before["rows_box_state"] != rows_box_state_after
+                )
+
+                if grid_structure_changed or dataframe_changed or rows_state_changed:
+                    logger().debug("  [OK] Click verified: Grids changed")
+                    return "grids changed"
+
+            # Check 4: dialogs/modais mudaram?
+            if state_before["dialog_layers"] != state_after["dialog_layers"]:
+                logger().debug(
+                    "  [OK] Click verified: dialog layers changed "
+                    f"(from {state_before['dialog_layers']} to {state_after['dialog_layers']})"
+                )
+                return "dialog layers changed"
+
+            # Check 5: popups mudaram?
+            if state_before["popup_layers"] != state_after["popup_layers"]:
+                logger().debug(
+                    "  [OK] Click verified: popup layers changed "
+                    f"(from {state_before['popup_layers']} to {state_after['popup_layers']})"
+                )
+                return "popup layers changed"
+
+            # Check 6: DOM mudou?
+            if state_before["dom_hash"] != state_after["dom_hash"]:
+                logger().debug("  [OK] Click verified: DOM modified")
+                return "DOM modified"
+
+            # Check 7: elemento clicado perdeu o foco?
+            if (
+                clicked_element is not None
+                and state_after["active_element"]
+                and state_after["active_element"] != clicked_element
+            ):
+                logger().debug("  [OK] Click verified: element lost focus")
+                return "element lost focus"
+
+        except Exception:
+            # Não foi possível avaliar a transição (ex.: elemento stale).
+            # Retorna None para sinalizar estado indeterminado, distinto de ""
+            # (sem transição) e de um motivo (transição confirmada).
+            logger().debug("  [WARN] Could not evaluate screen transition")
+            return None
+
+        return ""
+
+    def is_strong_transition(self, transition_reason):
+        """
+        [Internal]
+
+        Indica se o motivo retornado por :meth:`has_screen_transition`
+        representa uma transição forte (mudança estrutural de tela) e não um
+        sinal fraco (apenas DOM alterado ou perda de foco), ausência de
+        transição (``""``) ou estado indeterminado (``None``).
+
+        :param transition_reason: Valor retornado por :meth:`has_screen_transition`.
+        :type transition_reason: str or None
+
+        :return: True apenas quando o motivo for uma transição forte.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> reason = self.has_screen_transition(state_before, element())
+        >>> if self.is_strong_transition(reason):
+        ...     ...
+        """
+
+        weak_reasons = ("DOM modified", "element lost focus")
+        return bool(transition_reason) and transition_reason not in weak_reasons
+
     def get_current_container_texts(self):
         """This method returns a list of all texts from current container descendents
         """
@@ -6928,7 +7172,8 @@ class WebappInternal(Base):
                                        check_error=check_error)
             else:
                 container = self.get_current_container()
-                grids = container.select(grid_element or term)
+                if container:
+                    grids = container.select(grid_element or term)
             
             if grids:
                 grids = self.filter_active_tabs(grids)
