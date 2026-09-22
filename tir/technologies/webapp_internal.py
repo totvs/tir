@@ -5643,6 +5643,12 @@ class WebappInternal(Base):
         position -= 1
         wait_button = self.wait_element_timeout(term=term_button, scrap_type=enum.ScrapType.CSS_SELECTOR, timeout=endtime, position=position, check_error=check_error)
 
+        container_before = self.get_current_container_with_id(before_timeout)
+        id_container_before = container_before.attrs.get('id') if container_before and hasattr(container_before, 'attrs') else None
+
+        if not id_container_before:
+            self.get_current_container_without_filter()
+
         if wait_button:
             soup = self.get_current_container()
             if hasattr(soup, 'attrs') and 'title' in soup.attrs and f'{self.language.warning}' in soup.attrs['title']:
@@ -5668,13 +5674,7 @@ class WebappInternal(Base):
             header = self.execute_js_selector('wa-dialog-header', element_selenium, get_all=False)
             x_button = self.execute_js_selector("button[class~=button-close]", header, get_all=False)
             if x_button:
-                element_selenium = x_button
-
-        container_before = self.get_current_container_with_id(before_timeout)
-        id_container_before = container_before.attrs.get('id') if container_before and hasattr(container_before, 'attrs') else None
-
-        if not id_container_before:
-            self.get_current_container_without_filter()
+                element_selenium = x_button        
 
         self.scroll_to_element(element_selenium)
         self.wait_until_to(expected_condition="element_to_be_clickable", element=element_soup, locator=By.XPATH)
