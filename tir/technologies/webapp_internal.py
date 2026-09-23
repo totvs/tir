@@ -10392,7 +10392,7 @@ class WebappInternal(Base):
         filtered_labels = []
         try_containers_blocked = False
 
-        self.wait_blocker()
+        self.wait_blocker(keep_blocked_containers=True, timeout=1200)
         self.wait_element(label_name)
         
         endtime = time.time() + self.config.time_out
