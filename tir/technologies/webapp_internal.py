@@ -2798,20 +2798,16 @@ class WebappInternal(Base):
         self.driver.switch_to.default_content()
         return input_value
 
-    def wait_blocker(self, keep_blocked_containers=False, timeout=None):
+    def wait_blocker(self):
         """
         [Internal]
 
         Wait blocker disappear
 
-        :param keep_blocked_containers: If True, disables the blocked container filtering
-         (``filter_blocked_containers``) while looking for the blocker container, so a container
-         flagged as ``blocked`` can actually be returned. The previous value is always restored
-         before leaving the method. - **Default:** False
-        :type keep_blocked_containers: bool
-        :param timeout: Maximum time in seconds to wait for the blocker to disappear. When None,
-         ``self.config.time_out / 2`` is used. - **Default:** None
-        :type timeout: int or float
+        Waits up to ``self.config.time_out`` seconds. The blocked container filtering
+        (``filter_blocked_containers``) is always disabled while looking for the blocker
+        container, so a container flagged as ``blocked`` can actually be returned. The
+        previous value is always restored before leaving the method.
 
         :return: True if the blocker is still present when the time runs out, False otherwise.
         :rtype: bool
@@ -2820,8 +2816,6 @@ class WebappInternal(Base):
 
         >>> # Calling the method:
         >>> self.wait_blocker()
-        >>> # Waiting a blocked container for 30 seconds:
-        >>> self.wait_blocker(keep_blocked_containers=True, timeout=30)
         """
 
         twebview = True if self.config.poui_login else False
@@ -2830,14 +2824,11 @@ class WebappInternal(Base):
         soup = None
         result = True
         blocker_container_soup = None
-        endtime = time.time() + (timeout if timeout else self.config.time_out / 2)
+        endtime = time.time() + self.config.time_out
         start_time = time.time()
 
         filter_blocked_containers = self.filter_blocked_containers
-
-        if keep_blocked_containers:
-            logger().debug("Waiting blocker without blocked-container filtering.")
-            self.filter_blocked_containers = False
+        self.filter_blocked_containers = False
 
         blocker = None
 
@@ -5047,7 +5038,7 @@ class WebappInternal(Base):
         first_setbutton_use = not getattr(self, "_setbutton_used", False)
         self._setbutton_used = True
 
-        self.wait_blocker(keep_blocked_containers=True, timeout=1200)
+        self.wait_blocker()
         self.get_current_container_with_id(timeout=10)
 
         if self.webapp_shadowroot():
@@ -10398,7 +10389,7 @@ class WebappInternal(Base):
         filtered_labels = []
         try_containers_blocked = False
 
-        self.wait_blocker(keep_blocked_containers=True, timeout=1200)
+        self.wait_blocker()
         self.wait_element(label_name)
         
         endtime = time.time() + self.config.time_out
