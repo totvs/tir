@@ -2831,6 +2831,7 @@ class WebappInternal(Base):
         result = True
         blocker_container_soup = None
         endtime = time.time() + (timeout if timeout else self.config.time_out / 2)
+        ini_time = time.time()
 
         filter_blocked_containers = self.filter_blocked_containers
 
@@ -2857,17 +2858,20 @@ class WebappInternal(Base):
                                 'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
                                     blocker_container, 'attrs') else None
                 except:
-                    pass
-
-                logger().debug(f'Blocker status: {blocker}')
+                    pass                
 
                 if blocker:
                     result = True
                     time.sleep(1)
                 else:
                     self.blocker = None
+                    loop_time = time.time() - ini_time
+                    logger().debug(f'Blocker status: {blocker} after {loop_time}')
                     return False
 
+            loop_time = time.time() - ini_time
+            logger().debug(f'Blocker status: {blocker} after {loop_time}')
+            
             if time.time() > endtime:
                 self.check_blocked_container(blocker_container_soup)
 
