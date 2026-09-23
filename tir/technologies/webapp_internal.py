@@ -2802,14 +2802,16 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        Wait blocker disappear
+        Waits until the container on screen is unblocked.
 
         Waits up to ``self.config.time_out`` seconds. The blocked container filtering
         (``filter_blocked_containers``) is always disabled while looking for the blocker
         container, so a container flagged as ``blocked`` can actually be returned. The
         previous value is always restored before leaving the method.
 
-        :return: True if the blocker is still present when the time runs out, False otherwise.
+        :return: True when there is no container on screen or when the container is
+         unblocked. False when the container is still blocked after the timeout or when
+         an exception interrupts the wait.
         :rtype: bool
 
         Usage:
@@ -2818,7 +2820,7 @@ class WebappInternal(Base):
         >>> self.wait_blocker()
         """
 
-        logger().debug("Waiting for container to unblocked...")
+        logger().debug("Waiting for container to be unblocked...")
 
         twebview = True if self.config.poui_login else False
         success = False
@@ -2837,14 +2839,14 @@ class WebappInternal(Base):
 
         try:
             while (time.time() < endtime and not success):
-                blocker_container_soup = None
-                blocker_container_sel = None                
 
-                if not blocker_container():
+                blocker_container_soup = blocker_container()
+
+                if not blocker_container_soup:
+                    self.blocker = None
                     logger().debug('No container found!')
                     return True
 
-                blocker_container_soup = blocker_container()
                 blocker_container_sel = self.soup_to_selenium(blocker_container_soup)
 
                 if container_is_blocked(blocker_container_sel):
@@ -2868,6 +2870,7 @@ class WebappInternal(Base):
 
         except Exception as e:
             logger().debug(f"Error while waiting for the container to unlock: {e}")
+            return False
 
         finally:
             self.filter_blocked_containers = filter_blocked_containers
