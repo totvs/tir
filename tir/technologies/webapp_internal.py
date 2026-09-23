@@ -2831,13 +2831,15 @@ class WebappInternal(Base):
         result = True
         blocker_container_soup = None
         endtime = time.time() + (timeout if timeout else self.config.time_out / 2)
-        ini_time = time.time()
+        start_time = time.time()
 
         filter_blocked_containers = self.filter_blocked_containers
 
         if keep_blocked_containers:
             logger().debug("Waiting blocker without blocked-container filtering.")
             self.filter_blocked_containers = False
+
+        blocker = None
 
         try:
             while (time.time() < endtime and result):
@@ -2865,12 +2867,12 @@ class WebappInternal(Base):
                     time.sleep(1)
                 else:
                     self.blocker = None
-                    loop_time = time.time() - ini_time
-                    logger().debug(f'Blocker status: {blocker} after {loop_time}')
+                    elapsed_time = time.time() - start_time
+                    logger().debug(f'Blocker status: {blocker} after {elapsed_time:.2f}s')
                     return False
 
-            loop_time = time.time() - ini_time
-            logger().debug(f'Blocker status: {blocker} after {loop_time}')
+            elapsed_time = time.time() - start_time
+            logger().debug(f'Blocker status: {blocker} after {elapsed_time:.2f}s')
             
             if time.time() > endtime:
                 self.check_blocked_container(blocker_container_soup)
