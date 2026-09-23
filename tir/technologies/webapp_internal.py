@@ -2902,39 +2902,39 @@ class WebappInternal(Base):
 
     def check_blocked_container(self, blocker_container_soup):
         """
+        [Internal]
 
-        :return:
+        Identifies the container that was still blocked when ``wait_blocker`` gave up.
+
+        Logs the container identification and stores it in ``self.blocker``, so
+        ``log_error`` can append it to the failure message. Attributes that don't exist
+        are logged as empty.
+
+        :param blocker_container_soup: The last blocker container captured by wait_blocker.
+        :type blocker_container_soup: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_blocked_container(blocker_container_soup)
         """
 
         try:
+            attrs = getattr(blocker_container_soup, 'attrs', {}) or {}
 
-            if hasattr(blocker_container_soup, 'attrs'):
-                blocker_container_soup_info = str(blocker_container_soup.attrs)
+            container_id = attrs.get('id', '')
+            container_title = attrs.get('title', '')
+            container_tag_name = getattr(blocker_container_soup, 'name', '') or ''
 
-                if hasattr(blocker_container_soup, 'id'):
-                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
+            blocker_container_info = (f"id = '{container_id}' / title = '{container_title}' "
+                                      f"/ tag name = '{container_tag_name}'")
 
-                if hasattr(blocker_container_soup, 'title'):
-                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
+            logger().debug(f"Container blocked infos: {blocker_container_info}")
 
-            else:
-                blocker_container_soup_info = blocker_container_soup[:1000]
+            self.blocker = blocker_container_info
 
-            logger().debug(f'wait_blocker timeout | blocker container: {str(blocker_container_soup_info)}')
-
-            soup = lambda: self.get_current_DOM()
-
-            containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
-
-            for container in containers:
-                blocked = hasattr(container, 'attrs') and 'blocked' in container.attrs
-
-                logger().debug(
-                    f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
-                if blocked:
-                    self.blocker = blocked
-        except:
-            pass
+        except Exception as e:
+            logger().debug(f"Couldn't get the blocked container infos: {e}")
 
     def get_panel_name_index(self, panel_name):
         """
