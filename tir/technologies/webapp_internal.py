@@ -2828,49 +2828,78 @@ class WebappInternal(Base):
         """
         [Internal]
 
-        Wait blocker disappear
+        Waits until the container on screen is unblocked.
 
+        Waits up to ``self.config.time_out`` seconds. The blocked container filtering
+        (``filter_blocked_containers``) is always disabled while looking for the blocker
+        container, so a container flagged as ``blocked`` can actually be returned. The
+        previous value is always restored before leaving the method.
+
+        :return: True when there is no container on screen or when the container is
+         unblocked. False when the container is still blocked after the timeout or when
+         an exception interrupts the wait.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.wait_blocker()
         """
 
+        logger().debug("Waiting for container to be unblocked...")
+
         twebview = True if self.config.poui_login else False
+        success = False
 
-        logger().debug("Waiting blocker to continue...")
-        soup = None
-        result = True
-        endtime = time.time() + self.config.time_out / 2
+        # Real-time and timeout control
+        endtime = time.time() + self.config.time_out
+        start_time = time.time()
 
-        while (time.time() < endtime and result):
-            blocker_container = None
-            blocker = None
-            soup = lambda: self.get_current_DOM(twebview=twebview)
-            blocker_container = lambda: self.blocker_containers(soup())
+        # Variables to disable and enable the blocked containers filter
+        filter_blocked_containers = self.filter_blocked_containers
+        self.filter_blocked_containers = False
 
-            try:
-                if blocker_container():
-                    if self.webapp_shadowroot():
-                        blocker_container_soup = blocker_container()
-                        blocker_container = self.soup_to_selenium(blocker_container())
-                        blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
-                            blocker_container, 'get_property') else None
-                    else:
-                        blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
-                            'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
-                                blocker_container, 'attrs') else None
-            except:
-                pass
+        # Lambdas functions
+        container_is_blocked = lambda container: container.get_property('blocked') if container and hasattr(container, 'get_property') else None
+        blocker_container = lambda: self.blocker_containers(self.get_current_DOM(twebview=twebview))
 
-            logger().debug(f'Blocker status: {blocker}')
+        try:
+            while (time.time() < endtime and not success):
 
-            if blocker:
-                result = True
-            else:
+                blocker_container_soup = blocker_container()
+
+                if not blocker_container_soup:
+                    self.blocker = None
+                    logger().debug('No container found!')
+                    return True
+
+                blocker_container_sel = self.soup_to_selenium(blocker_container_soup)
+
+                if container_is_blocked(blocker_container_sel):
+                    time.sleep(1)
+                    continue
+
                 self.blocker = None
-                return False
+                success = True
 
-        if time.time() > endtime:
-            self.check_blocked_container(blocker_container_soup)
+            elapsed_time = time.time() - start_time
 
-        return result
+            if not success:
+                log_message = f"Container still blocked after {elapsed_time:.2f}s."
+                self.check_blocked_container(blocker_container_soup)
+            else:
+                log_message = f"Container unblocked after {elapsed_time:.2f}s."
+
+            logger().debug(log_message)
+
+            return success
+
+        except Exception as e:
+            logger().debug(f"Error while waiting for the container to unlock: {e}")
+            return False
+
+        finally:
+            self.filter_blocked_containers = filter_blocked_containers
 
     def blocker_containers(self, soup):
         """
@@ -2899,39 +2928,39 @@ class WebappInternal(Base):
 
     def check_blocked_container(self, blocker_container_soup):
         """
+        [Internal]
 
-        :return:
+        Identifies the container that was still blocked when ``wait_blocker`` gave up.
+
+        Logs the container identification and stores it in ``self.blocker``, so
+        ``log_error`` can append it to the failure message. Attributes that don't exist
+        are logged as empty.
+
+        :param blocker_container_soup: The last blocker container captured by wait_blocker.
+        :type blocker_container_soup: BeautifulSoup object
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_blocked_container(blocker_container_soup)
         """
 
         try:
+            attrs = getattr(blocker_container_soup, 'attrs', {}) or {}
 
-            if hasattr(blocker_container_soup, 'attrs'):
-                blocker_container_soup_info = str(blocker_container_soup.attrs)
+            container_id = attrs.get('id', '')
+            container_title = attrs.get('title', '')
+            container_tag_name = getattr(blocker_container_soup, 'name', '') or ''
 
-                if hasattr(blocker_container_soup, 'id'):
-                    blocker_container_soup_info += f" ID: {str(blocker_container_soup.attrs['id'])}"
+            blocker_container_info = (f"id = '{container_id}' / title = '{container_title}' "
+                                      f"/ tag name = '{container_tag_name}'")
 
-                if hasattr(blocker_container_soup, 'title'):
-                    blocker_container_soup_info += f" TITLE: {str(blocker_container_soup.attrs['title'])}"
+            logger().debug(f"Container blocked infos: {blocker_container_info}")
 
-            else:
-                blocker_container_soup_info = blocker_container_soup[:1000]
+            self.blocker = blocker_container_info
 
-            logger().debug(f'wait_blocker timeout | blocker container: {str(blocker_container_soup_info)}')
-
-            soup = lambda: self.get_current_DOM()
-
-            containers = soup().find_all(['.tmodaldialog','.ui-dialog', 'wa-dialog'])
-
-            for container in containers:
-                blocked = hasattr(container, 'attrs') and 'blocked' in container.attrs
-
-                logger().debug(
-                    f"Container ID: {container.attrs['id']} Container title:  {container.attrs['title']} Blocked: {blocked}")
-                if blocked:
-                    self.blocker = blocked
-        except:
-            pass
+        except Exception as e:
+            logger().debug(f"Couldn't get the blocked container infos: {e}")
 
     def get_panel_name_index(self, panel_name):
         """
