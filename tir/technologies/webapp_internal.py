@@ -2818,57 +2818,56 @@ class WebappInternal(Base):
         >>> self.wait_blocker()
         """
 
-        twebview = True if self.config.poui_login else False
+        logger().debug("Waiting for container to unblocked...")
 
-        logger().debug("Waiting blocker to continue...")
-        soup = None
-        result = True
-        blocker_container_soup = None
+        twebview = True if self.config.poui_login else False
+        success = False
+
+        # Real-time and timeout control
         endtime = time.time() + self.config.time_out
         start_time = time.time()
 
+        # Variables to disable and enable the blocked containers filter
         filter_blocked_containers = self.filter_blocked_containers
         self.filter_blocked_containers = False
 
-        blocker = None
+        # Lambdas functions
+        container_is_blocked = lambda container: container.get_property('blocked') if container and hasattr(container, 'get_property') else None
+        blocker_container = lambda: self.blocker_containers(self.get_current_DOM(twebview=twebview))
 
         try:
-            while (time.time() < endtime and result):
-                blocker_container = None
-                blocker = None
-                soup = lambda: self.get_current_DOM(twebview=twebview)
-                blocker_container = lambda: self.blocker_containers(soup())
+            while (time.time() < endtime and not success):
+                blocker_container_soup = None
+                blocker_container_sel = None                
 
-                try:
-                    if blocker_container():
-                        if self.webapp_shadowroot():
-                            blocker_container_soup = blocker_container()
-                            blocker_container = self.soup_to_selenium(blocker_container())
-                            blocker = blocker_container.get_property('blocked') if blocker_container and hasattr(
-                                blocker_container, 'get_property') else None
-                        else:
-                            blocker = soup().select('.ajax-blocker') if len(soup().select('.ajax-blocker')) > 0 else \
-                                'blocked' in blocker_container.attrs['class'] if blocker_container and hasattr(
-                                    blocker_container, 'attrs') else None
-                except:
-                    pass                
+                if not blocker_container():
+                    logger().debug('No container found!')
+                    return True
 
-                if blocker:
-                    result = True
+                blocker_container_soup = blocker_container()
+                blocker_container_sel = self.soup_to_selenium(blocker_container_soup)
+
+                if container_is_blocked(blocker_container_sel):
                     time.sleep(1)
-                else:
-                    self.blocker = None
-                    elapsed_time = time.time() - start_time
-                    logger().debug(f'Blocker status: {blocker} after {elapsed_time:.2f}s')
-                    return False
+                    continue
+
+                self.blocker = None
+                success = True
 
             elapsed_time = time.time() - start_time
-            logger().debug(f'Blocker status: {blocker} after {elapsed_time:.2f}s')
-            
-            if time.time() > endtime:
-                self.check_blocked_container(blocker_container_soup)
 
-            return result
+            if not success:
+                log_message = f"Container still blocked after {elapsed_time:.2f}s."
+                self.check_blocked_container(blocker_container_soup)
+            else:
+                log_message = f"Container unblocked after {elapsed_time:.2f}s."
+
+            logger().debug(log_message)
+
+            return success
+
+        except Exception as e:
+            logger().debug(f"Error while waiting for the container to unlock: {e}")
 
         finally:
             self.filter_blocked_containers = filter_blocked_containers
