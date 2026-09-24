@@ -1535,25 +1535,50 @@ class PouiInternal(Base):
 
         return web_value
 
-    def CheckResult(self, field, user_value, po_component, position):
+    def CheckResult(self, field, user_value, po_component='po-input', position=1,
+                    grid=False, line=1, grid_number=1):
         """
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         For a nameless column (e.g. colored status), leave it empty and select the column with ``position``
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
-        :param po_component:  POUI component name that you want to check content on screen
+        :param po_component:  POUI component name that you want to check content on screen. Ignored when ``grid`` is True. - **Default:** 'po-input'
         :type po_component: str
+        :param position: Which occurrence of the column to use when the grid has more than one column
+         with the same label (including nameless columns), 1-based. - **Default:** 1
+        :type position: int
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param line: Grid line that contains the column field to be checked, 1-based. - **Default:** 1
+        :type line: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen, 1-based. - **Default:** 1
+        :type grid_number: int
 
         Usage:
 
         >>> # Calling method to check a value of a field:
         >>> oHelper.CheckResult("Código", "000001", 'po-input')
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field that is on the first line of a grid:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field on the second line of the second grid of the screen:
+        >>> oHelper.CheckResult("Pedido", "000001", grid=True, line=2, grid_number=2)
+        >>> #-----------------------------------------
+        >>> # Calling method to check the 2nd column that shares the same label:
+        >>> oHelper.CheckResult("Valor", "100,00", grid=True, line=1, position=2)
 
         """
 
-        if po_component == 'po-input':
+        current_value = ''
+
+        if grid:
+            current_value = self.check_result_grid(field, line, grid_number, position)
+        elif po_component == 'po-input':
             po_component = "[class*='po-input']"
             input_field = self.return_input_element(field, position, term=po_component)
             input_field_element = lambda: self.soup_to_selenium(input_field, twebview=True)
@@ -1561,6 +1586,83 @@ class PouiInternal(Base):
                 current_value = self.get_web_value(input_field_element())
 
         self.log_result(field, user_value, current_value)
+
+    def check_result_grid(self, field, line=1, grid_number=1, position=1):
+        """
+        [Internal]
+
+        Reads a cell value from a POUI/Kendo grid (``po-table, kendo-grid``) using only
+        POUI helpers and BeautifulSoup, mirroring the concept of ``webapp_internal.check_grid``
+        (value captured via ``cell.text.strip()``) but without any dependency on webapp_internal.
+
+        :param field: Column label to be read. Empty string targets a nameless column (e.g. colored status).
+        :type field: str
+        :param line: Grid line to read, 1-based. - **Default:** 1
+        :type line: int
+        :param grid_number: Grid index when multiple grids exist on screen, 1-based. - **Default:** 1
+        :type grid_number: int
+        :param position: Which occurrence of the column to use when the grid has more than one column
+         with the same label (including nameless status columns), 1-based. Resolved by
+         ``get_headers_from_grids``. - **Default:** 1
+        :type position: int
+
+        :return: The captured cell text. Empty string is a legitimate value.
+        :rtype: str
+        """
+        logger().info(f"CheckResult grid: reading cell (column='{field}', line={line})")
+
+        if line < 1 or grid_number < 1 or position < 1:
+            self.log_error(f"CheckResult grid: invalid parameters "
+                           f"(line={line}, grid={grid_number}, position={position}). "
+                           f"'line', 'grid_number' and 'position' must be greater than or equal to 1.")
+
+        selector = self.grid_selectors["grid_containers"]
+        self.wait_element(term=selector, scrap_type=enum.ScrapType.CSS_SELECTOR)
+
+        normalized_field = field.strip().lower() if field else ""
+        endtime = time.time() + self.config.time_out
+        current_value = ""
+        available_columns = []
+        found = False
+
+        while time.time() < endtime and not found:
+            table = self.return_table(selector=selector, table_number=grid_number)
+            if not table:
+                continue
+
+            # 'column_name' + 'position' let get_headers_from_grids disambiguate duplicated
+            # (or nameless) column labels, returning the correct index for the chosen occurrence.
+            headers = self.get_headers_from_grids(table, column_name=field.strip(), position=position)
+            if not headers or not headers[0]:
+                continue
+            available_columns = list(headers[0].keys())
+
+            rows = table.select('tbody tr')
+            if len(rows) < line:
+                continue
+
+            cells = rows[line - 1].select('td')
+            column_index = headers[0].get(normalized_field)
+            if column_index is None or column_index < 0 or column_index >= len(cells):
+                continue
+
+            try:
+                current_value = cells[column_index].text.strip()
+            except (StaleElementReferenceException, AttributeError):
+                continue
+
+            found = True
+
+        if not found:
+            if normalized_field and normalized_field not in available_columns:
+                self.log_error(f"CheckResult grid: column '{field}' was not found in the grid. "
+                               f"Available columns: {available_columns}")
+            self.log_error(f"CheckResult grid: could not read the cell within the timeout "
+                           f"(column='{field}', line={line}, grid={grid_number}, position={position}).")
+
+        logger().info(f"CheckResult grid: collected value '{current_value}' "
+                       f"(column='{field}', line={line}, grid={grid_number}).")
+        return current_value
 
     def log_result(self, field, user_value, captured_value):
         """
@@ -4840,7 +4942,7 @@ class PouiInternal(Base):
 
     def return_table(self, selector, table_number):
 
-        table_number -= 1
+        table_number -= 1 if table_number > 0 else 0
 
         self._po_loading()
         tables = []
@@ -5975,9 +6077,8 @@ class PouiInternal(Base):
         confirm_button = lambda: self.get_current_DOM().select(confirm_term)
         endtime = time.time() + (120 if program_name != parameter_routine else 5)
         confirm_button_found = False
+        logger().debug(f'Waiting for the confirm button.')
         while time.time() < endtime:
-            logger().debug(f'Waiting for the confirm button.')
-
             if confirm_button():
                 confirm_button_sel = lambda: self.soup_to_selenium(next(iter(confirm_button())))
                 self.click(confirm_button_sel())

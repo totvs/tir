@@ -2047,26 +2047,45 @@ class Poui():
         return self.__poui._clear_table_selection(table_number=table_number, selection_type=selection_type)
 
 
-    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
+    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1,
+                    grid=False, line=1, grid_number=1):
         """
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         For a nameless column (e.g. colored status), leave it empty and select the column with ``position``
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
-        :param po_component:  POUI component name that you want to check content on screen
+        :param po_component:  POUI component name that you want to check content on screen. Ignored when ``grid`` is True. - **Default:** 'po-input'
         :type po_component: str
-        :param position: Position which element is located. - **Default:** 1
+        :param position: Which occurrence of the column to use when the grid has more than one column
+         with the same label (including nameless columns), 1-based. - **Default:** 1
         :type position: int
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param line: Grid line that contains the column field to be checked, 1-based. - **Default:** 1
+        :type line: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen, 1-based. - **Default:** 1
+        :type grid_number: int
 
         Usage:
 
         >>> # Calling method to check a value of a field:
         >>> oHelper.CheckResult("Código", "000001", 'po-input')
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field that is on the first line of a grid:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field on the second line of the second grid of the screen:
+        >>> oHelper.CheckResult("Pedido", "000001", grid=True, line=2, grid_number=2)
+        >>> #-----------------------------------------
+        >>> # Calling method to check the 2nd column that shares the same label:
+        >>> oHelper.CheckResult("Valor", "100,00", grid=True, line=1, position=2)
 
         """
-        self.__poui.CheckResult(field, user_value, po_component, position)
+        self.__poui.CheckResult(field, user_value, po_component, position, grid, line, grid_number)
 
     def GetUrl(self, url):
         """
