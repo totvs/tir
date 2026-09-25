@@ -105,6 +105,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.assert_result"><code class="docutils literal notranslate"><span class="pre">WebappInternal.assert_result()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.blocker_containers"><code class="docutils literal notranslate"><span class="pre">WebappInternal.blocker_containers()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.browse_screen_selectors"><code class="docutils literal notranslate"><span class="pre">WebappInternal.browse_screen_selectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.capture_screen_state"><code class="docutils literal notranslate"><span class="pre">WebappInternal.capture_screen_state()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.change_environment_element_home_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.change_environment_element_home_screen()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_blocked_container"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_blocked_container()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.check_browse_screen"><code class="docutils literal notranslate"><span class="pre">WebappInternal.check_browse_screen()</span></code></a></li>
@@ -243,12 +244,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.get_x3_dictionaries"><code class="docutils literal notranslate"><span class="pre">WebappInternal.get_x3_dictionaries()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.grid_dataframe"><code class="docutils literal notranslate"><span class="pre">WebappInternal.grid_dataframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.group_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.group_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.has_screen_transition"><code class="docutils literal notranslate"><span class="pre">WebappInternal.has_screen_transition()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.has_selected_cell"><code class="docutils literal notranslate"><span class="pre">WebappInternal.has_selected_cell()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.image_compare"><code class="docutils literal notranslate"><span class="pre">WebappInternal.image_compare()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.img_src_filtered"><code class="docutils literal notranslate"><span class="pre">WebappInternal.img_src_filtered()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.input_grid_appender"><code class="docutils literal notranslate"><span class="pre">WebappInternal.input_grid_appender()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.input_value"><code class="docutils literal notranslate"><span class="pre">WebappInternal.input_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.is_active_element"><code class="docutils literal notranslate"><span class="pre">WebappInternal.is_active_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.is_strong_transition"><code class="docutils literal notranslate"><span class="pre">WebappInternal.is_strong_transition()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.lenght_grid_lines"><code class="docutils literal notranslate"><span class="pre">WebappInternal.lenght_grid_lines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.log_error"><code class="docutils literal notranslate"><span class="pre">WebappInternal.log_error()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.log_result"><code class="docutils literal notranslate"><span class="pre">WebappInternal.log_result()</span></code></a></li>
@@ -1575,6 +1578,31 @@ Recommended for Trigger fields.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.capture_screen_state">
+<span class="sig-name descname"><span class="pre">capture_screen_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.capture_screen_state" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Captura o estado atual da tela para permitir a validação de uma
+transição após uma ação (por exemplo, um clique).</p>
+<p>Este método é genérico e não contém regras específicas de Program,
+SetButton ou qualquer outra ação. Ele apenas coleta os mesmos sinais
+utilizados pela verificação de clique do SetButton, para que possam
+ser comparados antes e depois da ação.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Snapshot do estado atual da interface.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state_before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capture_screen_state</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.change_environment_element_home_screen">
 <span class="sig-name descname"><span class="pre">change_environment_element_home_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.change_environment_element_home_screen" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -1589,11 +1617,21 @@ Recommended for Trigger fields.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.check_blocked_container">
 <span class="sig-name descname"><span class="pre">check_blocked_container</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blocker_container_soup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.check_blocked_container" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p></p>
+<dd><p>[Internal]</p>
+<p>Identifies the container that was still blocked when <code class="docutils literal notranslate"><span class="pre">wait_blocker</span></code> gave up.</p>
+<p>Logs the container identification and stores it in <code class="docutils literal notranslate"><span class="pre">self.blocker</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">log_error</span></code> can append it to the failure message. Attributes that don’t exist
+are logged as empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>blocker_container_soup</strong> (<em>BeautifulSoup object</em>) – The last blocker container captured by wait_blocker.</p>
 </dd>
 </dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">check_blocked_container</span><span class="p">(</span><span class="n">blocker_container_soup</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -3730,6 +3768,47 @@ a substring using left and/or right boundary strings.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.has_screen_transition">
+<span class="sig-name descname"><span class="pre">has_screen_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_before</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clicked_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.has_screen_transition" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Verifica se uma ação produziu uma transição de tela, comparando o
+estado capturado antes da ação (<code class="docutils literal notranslate"><span class="pre">state_before</span></code>) com o estado atual
+(capturado internamente por <a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.capture_screen_state" title="tir.technologies.webapp_internal.WebappInternal.capture_screen_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">capture_screen_state()</span></code></a>).</p>
+<p>A sequência das verificações reproduz a ordem já validada pela
+verificação de clique do SetButton:</p>
+<ol class="arabic simple">
+<li><p>Container mudou;</p></li>
+<li><p>Textos do container mudaram;</p></li>
+<li><p>Grids mudaram (estrutura, conteúdo ou estado das linhas);</p></li>
+<li><p>Dialogs/modais mudaram;</p></li>
+<li><p>Popups mudaram;</p></li>
+<li><p>DOM mudou;</p></li>
+<li><p>Elemento clicado perdeu o foco.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_before</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Snapshot retornado por <a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.capture_screen_state" title="tir.technologies.webapp_internal.WebappInternal.capture_screen_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">capture_screen_state()</span></code></a>
+antes da ação.</p></li>
+<li><p><strong>clicked_element</strong> (<a class="reference external" href="https://selenium-python.readthedocs.io/api.html#selenium.webdriver.remote.webelement.WebElement" title="(in Selenium Python Bindings v2)"><em>selenium.webdriver.remote.webelement.WebElement</em></a>) – Elemento Selenium que recebeu a ação.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Motivo da transição detectada; string vazia quando não houve
+transição; ou None quando não foi possível avaliar (exceção).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> or None</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reason</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_screen_transition</span><span class="p">(</span><span class="n">state_before</span><span class="p">,</span> <span class="n">element</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.has_selected_cell">
 <span class="sig-name descname"><span class="pre">has_selected_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.has_selected_cell" title="Link to this definition"></a></dt>
 <dd><p>[Internal]
@@ -3840,6 +3919,34 @@ Returns True if succeeded, False if it failed.</p>
 <dd class="field-odd"><p>List of BeautifulSoup objects</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.is_strong_transition">
+<span class="sig-name descname"><span class="pre">is_strong_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.is_strong_transition" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Indica se o motivo retornado por <a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.has_screen_transition" title="tir.technologies.webapp_internal.WebappInternal.has_screen_transition"><code class="xref py py-meth docutils literal notranslate"><span class="pre">has_screen_transition()</span></code></a>
+representa uma transição forte (mudança estrutural de tela) e não um
+sinal fraco (apenas DOM alterado ou perda de foco), ausência de
+transição (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>) ou estado indeterminado (<code class="docutils literal notranslate"><span class="pre">None</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transition_reason</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em>) – Valor retornado por <a class="reference internal" href="#tir.technologies.webapp_internal.WebappInternal.has_screen_transition" title="tir.technologies.webapp_internal.WebappInternal.has_screen_transition"><code class="xref py py-meth docutils literal notranslate"><span class="pre">has_screen_transition()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True apenas quando o motivo for uma transição forte.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reason</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_screen_transition</span><span class="p">(</span><span class="n">state_before</span><span class="p">,</span> <span class="n">element</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_strong_transition</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="o">...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -4916,7 +5023,26 @@ is not found/filled within the timeout.</p>
 <dt class="sig sig-object py" id="tir.technologies.webapp_internal.WebappInternal.wait_blocker">
 <span class="sig-name descname"><span class="pre">wait_blocker</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.webapp_internal.WebappInternal.wait_blocker" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
-<p>Wait blocker disappear</p>
+<p>Waits until the container on screen is unblocked.</p>
+<p>Waits up to <code class="docutils literal notranslate"><span class="pre">self.config.time_out</span></code> seconds. The blocked container filtering
+(<code class="docutils literal notranslate"><span class="pre">filter_blocked_containers</span></code>) is always disabled while looking for the blocker
+container, so a container flagged as <code class="docutils literal notranslate"><span class="pre">blocked</span></code> can actually be returned. The
+previous value is always restored before leaving the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True when there is no container on screen or when the container is
+unblocked. False when the container is still blocked after the timeout or when
+an exception interrupts the wait.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Calling the method:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">wait_blocker</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
