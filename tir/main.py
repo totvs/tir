@@ -2070,6 +2070,10 @@ class Poui():
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen, 1-based. - **Default:** 1
         :type grid_number: int
 
+        .. note::
+            When ``grid`` is True the check is **queued**, not evaluated immediately.
+            Call :func:`LoadGrid` afterwards to run the queued grid checks.
+
         Usage:
 
         >>> # Calling method to check a value of a field:
@@ -2077,15 +2081,32 @@ class Poui():
         >>> #-----------------------------------------
         >>> # Calling method to check a field that is on the first line of a grid:
         >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to check a field on the second line of the second grid of the screen:
         >>> oHelper.CheckResult("Pedido", "000001", grid=True, line=2, grid_number=2)
+        >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to check the 2nd column that shares the same label:
         >>> oHelper.CheckResult("Valor", "100,00", grid=True, line=1, position=2)
+        >>> oHelper.LoadGrid()
 
         """
         self.__poui.CheckResult(field, user_value, po_component, position, grid, line, grid_number)
+
+    def LoadGrid(self):
+        """
+        Runs all the queued grid actions (input and check) and empties the queues.
+
+        Must be called after ``CheckResult`` (and ``SetValue``) calls that set ``grid=True``.
+
+        Usage:
+
+        >>> # After CheckResult:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
+        """
+        self.__poui.LoadGrid()
 
     def GetUrl(self, url):
         """

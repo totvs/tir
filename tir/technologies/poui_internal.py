@@ -1558,6 +1558,10 @@ class PouiInternal(Base):
         :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen, 1-based. - **Default:** 1
         :type grid_number: int
 
+        .. note::
+            When ``grid`` is True the check is **queued**, not evaluated immediately.
+            You must call :func:`LoadGrid` afterwards to run the queued grid checks.
+
         Usage:
 
         >>> # Calling method to check a value of a field:
@@ -1565,19 +1569,26 @@ class PouiInternal(Base):
         >>> #-----------------------------------------
         >>> # Calling method to check a field that is on the first line of a grid:
         >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to check a field on the second line of the second grid of the screen:
         >>> oHelper.CheckResult("Pedido", "000001", grid=True, line=2, grid_number=2)
+        >>> oHelper.LoadGrid()
         >>> #-----------------------------------------
         >>> # Calling method to check the 2nd column that shares the same label:
         >>> oHelper.CheckResult("Valor", "100,00", grid=True, line=1, position=2)
+        >>> oHelper.LoadGrid()
 
         """
 
         current_value = ''
 
         if grid:
-            current_value = self.check_result_grid(field, line, grid_number, position)
+            # Deferred/queued model (mirrors webapp_internal): grid checks are not
+            # evaluated at call time. The field is queued in ``grid_check`` and the
+            # actual read/compare happens when ``LoadGrid`` is called.
+            self.check_grid_appender(line, field, user_value, grid_number, position)
+            return
         elif po_component == 'po-input':
             po_component = "[class*='po-input']"
             input_field = self.return_input_element(field, position, term=po_component)
@@ -1663,6 +1674,105 @@ class PouiInternal(Base):
         logger().info(f"CheckResult grid: collected value '{current_value}' "
                        f"(column='{field}', line={line}, grid={grid_number}).")
         return current_value
+
+    def check_grid_appender(self, line, column, value=None, grid_number=1, position=1, ignore_case=True):
+        """
+        [Internal]
+
+        Adds a value to the check queue of a grid, to be consumed later by ``LoadGrid``.
+
+        Mirrors the concept of ``webapp_internal.check_grid_appender``. Note that, unlike
+        the webapp (which stores 0-based indices), the POUI queue keeps ``line``,
+        ``grid_number`` and ``position`` as 1-based values, because they are handed
+        straight to ``check_result_grid``, which already works with 1-based indices.
+
+        :param line: The grid line to be checked, 1-based.
+        :type line: int
+        :param column: The column label to be checked.
+        :type column: str
+        :param value: The value that is expected.
+        :type value: str
+        :param grid_number: Which grid to use when multiple grids exist on the screen, 1-based. - **Default:** 1
+        :type grid_number: int
+        :param position: Occurrence of the column to use when the label repeats, 1-based. - **Default:** 1
+        :type position: int
+        :param ignore_case: Whether the comparison should ignore case. - **Default:** True
+        :type ignore_case: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.check_grid_appender(1, "Código", "000001", 1)
+        """
+        self.grid_check.append([line, column, value, grid_number, position, ignore_case])
+
+    def create_x3_tuple(self):
+        """
+        [Internal]
+
+        Extension point for SX3 metadata loading in POUI.
+
+        Mirrors the concept of ``webapp_internal.create_x3_tuple``: it collects the field
+        codes currently queued for input/check and would return the x3 dictionaries
+        (field -> type / size / title). SX3 loading is **not** performed in POUI yet, so
+        this currently returns an empty tuple. Keeping the call inside ``LoadGrid`` lets
+        the grid flow evolve to use field metadata (masks, types, titles) without changing
+        its callers.
+
+        :return: A tuple of x3 dictionaries. Empty while SX3 loading is not implemented.
+        :rtype: tuple
+        """
+        inputs = list(map(lambda x: x[0], self.grid_input))
+        checks = list(map(lambda x: x[1], self.grid_check))
+        fields = list(filter(lambda x: x and "_" in x, inputs + checks))
+
+        # TODO: load SX3 metadata for `fields` (e.g. from core/data/sx3.csv) and return
+        # (field_to_type, field_to_size, field_to_title), as webapp_internal does.
+        x3_dictionaries = ()
+
+        if fields:
+            logger().debug(f"LoadGrid: {len(fields)} field(s) look like x3 codes; "
+                           f"SX3 metadata loading is not implemented in POUI yet.")
+
+        return x3_dictionaries
+
+    def LoadGrid(self):
+        """
+        Runs all queued grid actions (input and check) and empties the queues afterwards.
+
+        Must be called after ``SetValue`` and ``CheckResult`` calls that set ``grid=True``.
+        This mirrors the webapp flow so scripts keep the same shape across technologies.
+
+        Usage:
+
+        >>> # After CheckResult:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
+        """
+        # SX3 metadata foundation (currently a no-op in POUI, see create_x3_tuple).
+        self.create_x3_tuple()
+
+        for field in self.grid_check:
+            line, column, value, grid_number, position, ignore_case = field
+            logger().info(f"Checking grid field value: {column}")
+            current_value = self.check_result_grid(column, line, grid_number, position)
+            self.log_result(column, value, current_value)
+
+        self.clear_grid()
+
+    def clear_grid(self):
+        """
+        [Internal]
+
+        Empties the grid input and check queues.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self.clear_grid()
+        """
+        self.grid_input = []
+        self.grid_check = []
 
     def log_result(self, field, user_value, captured_value):
         """
