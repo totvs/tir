@@ -6641,17 +6641,22 @@ class PouiInternal(Base):
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
 
-    def _fill_input(self, input_element, value: str, field: str = '') -> None:
+    def _fill_input(self, input_element, value: str, field: str = '') -> bool:
         """
         [Internal]
 
         Fills a standard text input field (po-input).
 
+        For masked date fields (po-datepicker), use :func:`_fill_date_input`.
+
         :param input_element: BeautifulSoup input element.
         :type input_element: bs4.element.Tag
         :param value: Value to type into the input.
         :type value: str
-        :return: None
+        :param field: Field label, used only for logging purposes. - **Default:** '' (empty string)
+        :type field: str
+        :return: True when the field content is identical to ``value``, otherwise False.
+        :rtype: bool
         """
         success = False
 
@@ -6695,7 +6700,7 @@ class PouiInternal(Base):
 
         :param input_element: BeautifulSoup input element of the po-datepicker.
         :type input_element: bs4.element.Tag
-        :param value: Date value to type into the input.
+        :param value: Date value to type into the input. Empty only clears the field.
         :type value: str
         :param field: Field label, used only for logging purposes. - **Default:** '' (empty string)
         :type field: str
@@ -6710,33 +6715,39 @@ class PouiInternal(Base):
 
         value = str(value).strip()
         success = False
+        last_value = ''
         max_char_attempts = 3
         # Ignores trailing separators, since the mask may render '15/' where '15' is expected.
         drop_last_separators = lambda text: re.sub(r'[^0-9A-Za-z]+$', '', text or '')
 
+        # Nothing to type: _fill_input already clears the field and validates it empty.
         if not value:
-            logger().debug(f"_fill_date_input: empty value for field '{field}', nothing to fill.")
-            return False
+            logger().debug(f"_fill_date_input: empty value for field '{field}', clearing the field.")
+            return self._fill_input(input_element, value, field)
 
+        # Bounds every retry below: the fill can't run past the configured timeout.
         endtime = time.time() + self.config.time_out
         while time.time() < endtime and not success:
             try:
                 self.switch_to_iframe()
 
-                input_field_element = lambda: self.soup_to_selenium(input_element)
-                current_value = lambda: (self.get_web_value(input_field_element()) or '').strip()
+                # Resolved once per attempt: the value is read live and a stale node falls into the except.
+                input_field_element = self.soup_to_selenium(input_element)
+                current_value = lambda: (self.get_web_value(input_field_element) or '').strip()
                 typed = lambda expected: (drop_last_separators(current_value())
                                           == drop_last_separators(expected))
 
-                self.scroll_to_element(input_field_element())
-                self.set_element_focus(input_field_element())
-                self.click(input_field_element())
+                self.scroll_to_element(input_field_element)
+                self.set_element_focus(input_field_element)
+                self.click(input_field_element)
 
                 try:
-                    input_field_element().clear()
+                    input_field_element.clear()
                 except Exception as clear_error:
                     logger().debug(f"clear() failed, falling back to select-all + delete: {clear_error}")
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE).perform()
+
+                typed_all = True
 
                 for index, char in enumerate(value):
                     expected = value[:index + 1]
@@ -6744,33 +6755,45 @@ class PouiInternal(Base):
                     if not char.isalnum():
                         # Sends the separator only when absent, avoiding a duplicated '//'.
                         if current_value() != expected:
-                            input_field_element().send_keys(char)
+                            input_field_element.send_keys(char)
                         continue
 
+                    # Attempts and timeout bound the retry: a rejected character can't hang the fill.
                     char_attempts = 0
                     while (char_attempts < max_char_attempts
                            and time.time() < endtime
                            and not typed(expected)):
-                        input_field_element().send_keys(char)
+                        input_field_element.send_keys(char)
                         char_attempts += 1
 
-                    # Aborts this attempt so the outer loop retypes from scratch.
                     if not typed(expected):
+                        last_value = current_value()
                         logger().debug(f"_fill_date_input: couldn't type character '{char}' "
                                        f"(position {index + 1}) of value '{value}'. "
-                                       f"Current value: '{current_value()}'")
+                                       f"Current value: '{last_value}'")
+                        typed_all = False
                         break
+
+                # Aborts this attempt without ENTER/TAB, which could submit a partial filter.
+                if not typed_all:
+                    time.sleep(1)
+                    continue
 
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 ActionChains(self.driver).key_down(Keys.TAB).perform()
 
-                success = current_value() == value
+                last_value = current_value()
+                success = last_value == value
             except Exception as e:
+                # A Selenium failure only fails this attempt, never breaks the execution.
                 logger().debug(f"Error filling date input field '{field}': {e}")
                 success = False
+                # Spaces out the retries, avoiding a busy loop until the timeout.
+                time.sleep(1)
 
         if not success:
-            self.log_error(f"Couldn't set date filter field '{field}' with value '{value}'.")
+            self.log_error(f"Couldn't set date filter field '{field}' with value '{value}'. "
+                           f"Last field content: '{last_value}'.")
 
         return success
 
