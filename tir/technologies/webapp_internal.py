@@ -2028,6 +2028,8 @@ class WebappInternal(Base):
         success = False
         container_term = 'wa-dialog'
 
+        self.wait_blocker()
+
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and not success:
             logger().info('Escape to menu')
