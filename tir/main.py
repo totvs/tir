@@ -2375,9 +2375,9 @@ class Poui():
 
         Usage:
         >>> # Call the method:
-        >>> oHelper.Switch(label='Codigo')
-        >>> oHelper.Switch(label='Ativo', position=2)
-        >>> oHelper.Switch(label='Ver Sld Alt', value=False)
+        >>> oHelper.ClickSwitch(label='Codigo')
+        >>> oHelper.ClickSwitch(label='Ativo', position=2)
+        >>> oHelper.ClickSwitch(label='Ver Sld Alt', value=False)
 
         """
 
