@@ -2028,6 +2028,8 @@ class WebappInternal(Base):
         success = False
         container_term = 'wa-dialog'
 
+        self.wait_blocker()
+
         endtime = time.time() + self.config.time_out /2
         while time.time() < endtime and not success:
             logger().info('Escape to menu')
@@ -10250,6 +10252,7 @@ class WebappInternal(Base):
         """
 
         try:
+            self.wait_blocker()
             twebview = True if self.config.new_home else False
             return self.element_is_displayed(
                 next(iter(self.web_scrap(term=".tmenu, .dict-tmenu, [class*='card-wrapper']", scrap_type=enum.ScrapType.CSS_SELECTOR, main_container="body", twebview=twebview)),
