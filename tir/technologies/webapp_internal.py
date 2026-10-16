@@ -9333,7 +9333,7 @@ class WebappInternal(Base):
 
             logger().debug("Element found! Waiting for element to be displayed.")
 
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term) or []), None)
 
             if element is not None:
 
