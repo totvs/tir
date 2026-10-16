@@ -114,6 +114,8 @@ class WebappInternal(Base):
         self.backup_parameters = []
         self.tree_base_element = ()
         self.tmenu_screen = None
+        self.parameter_added = False
+        self.parameters_set = False
         self.grid_memo_field = False
         self.range_multiplier = None
         self.test_suite = []
@@ -9333,7 +9335,7 @@ class WebappInternal(Base):
 
             logger().debug("Element found! Waiting for element to be displayed.")
 
-            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term)), None)
+            element = next(iter(self.web_scrap(term=term, scrap_type=scrap_type, optional_term=optional_term, main_container=main_container, check_error=check_error, twebview=twebview, second_term=second_term) or []), None)
 
             if element is not None:
 
@@ -9995,6 +9997,8 @@ class WebappInternal(Base):
 
         logger().info(f"AddParameter: {parameter}")
 
+        self.parameter_added = True
+
         if 'POUILogin' in self.config.json_data and self.config.json_data['POUILogin'] == True:
             twebview = True
         else:
@@ -10052,10 +10056,19 @@ class WebappInternal(Base):
         >>> oHelper.SetParameters()
         """
 
-        if(self.config.smart_test or self.config.parameter_url):
-            self.parameter_url(restore_backup=False)
-        else:
-            self.parameter_screen(restore_backup=False)
+        if not self.parameter_added:
+            logger().warning("SetParameters called without any AddParameter. "
+                             "Parameters must be added with AddParameter before SetParameters.")
+            return
+
+        try:
+            if(self.config.smart_test or self.config.parameter_url):
+                self.parameter_url(restore_backup=False)
+            else:
+                self.parameter_screen(restore_backup=False)
+            self.parameters_set = True
+        finally:
+            self.parameter_added = False
 
     def RestoreParameters(self):
         """
@@ -10068,11 +10081,19 @@ class WebappInternal(Base):
         >>> # Calling the method:
         >>> oHelper.SetParameters()
         """
-        if(self.config.smart_test or self.config.parameter_url):
-            self.tmenu_screen = self.check_tmenu_screen()
-            self.parameter_url(restore_backup=True)
-        else:
-            self.parameter_screen(restore_backup=True)
+        if not self.parameters_set:
+            logger().warning("RestoreParameters called without a previous AddParameter + SetParameters. "
+                             "Nothing to restore.")
+            return
+
+        try:
+            if(self.config.smart_test or self.config.parameter_url):
+                self.tmenu_screen = self.check_tmenu_screen()
+                self.parameter_url(restore_backup=True)
+            else:
+                self.parameter_screen(restore_backup=True)
+        finally:
+            self.parameters_set = False
 
     def parameter_url(self, restore_backup=False):
         """
