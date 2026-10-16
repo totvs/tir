@@ -3026,6 +3026,7 @@ class PouiInternal(Base):
         self.message = log_message
         self.expected = False
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.log.initial_time = datetime.today()
         self.log.testcase_seconds = self.log.set_seconds(self.log.testcase_initial_time)
         self.log.ct_method, self.log.ct_number = self.log.ident_test()
 
@@ -3169,6 +3170,7 @@ class PouiInternal(Base):
         self.expected = expected
         log_message = f"{self.log.ident_test()[1]} - "
         self.log.seconds = self.log.set_seconds(self.log.initial_time)
+        self.log.initial_time = datetime.today()
 
         if self.grid_input or self.grid_check:
             self.log_error("Grid fields were queued for input/check but weren't added/checked. Verify the necessity of a LoadGrid() call.")
