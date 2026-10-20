@@ -3043,7 +3043,7 @@ class PouiInternal(Base):
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
             self.log.generate_log()
-        self.errors.clear()
+        self.errors = []
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
