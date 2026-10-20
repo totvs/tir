@@ -25,7 +25,31 @@ class Log:
     >>> # Instanted inside base.py:
     >>> self.log = Log()
     """
+
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, *args, **kwargs):
+        """
+        [Internal]
+
+        Log is a singleton: the data it holds describes the execution as a whole, not
+        each object that writes to it, so every instantiation returns the same Log. The
+        instance belongs to the process, which is the boundary of an execution.
+        """
+        if cls._instance is None:
+            cls._instance = super(Log, cls).__new__(cls)
+
+        return cls._instance
+
     def __init__(self, suite_datetime="", user="", station="", program="", program_date=("19800101"), version="", release="", database="", issue="", execution_id="", country="", folder="", test_type="TIR", config_path=""):
+        # Python calls __init__ on every instantiation, including the ones where __new__
+        # returned the existing instance. Only the first one initializes the attributes.
+        if Log._initialized:
+            return
+
+        Log._initialized = True
+
         self.timestamp = time.strftime("%Y%m%d%H%M%S")
 
         today = datetime.today()
