@@ -11060,19 +11060,29 @@ class WebappInternal(Base):
 
         tree_node = ""
 
+        self.wait_blocker()
+
         self.wait_element(term=label, scrap_type=enum.ScrapType.MIXED, optional_term=".dict-ttree")
 
         endtime = time.time() + self.config.time_out
 
         while (time.time() < endtime and not tree_node):
 
-            container = self.get_current_container()
+            try:
+                container = self.get_current_container()
 
-            tree = container.select("wa-tree")
-            if len(tree) >= tree_number:
-                tree = tree[tree_number]
-                tree_node = self.execute_js_selector('wa-tree-node',
-                                            self.soup_to_selenium(tree), get_all=True)
+                if not container:
+                    continue
+
+                tree = container.select("wa-tree")
+                if len(tree) > tree_number:
+                    tree_selenium = self.soup_to_selenium(tree[tree_number])
+                    if not tree_selenium:
+                        continue
+                    tree_node = self.execute_js_selector('wa-tree-node',
+                                                tree_selenium, get_all=True)
+            except Exception as e:
+                logger().debug(f"find_tree_bs retry suppressed: {type(e).__name__}: {e}")
 
         if not tree_node:
             self.log_error("Couldn't find tree element.")
