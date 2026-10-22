@@ -6154,7 +6154,6 @@ class PouiInternal(Base):
 
         success = False
         search_term = "[class*='card-wrapper']"
-        confirm_term = f"wa-button[caption='{self.language.confirm}']"
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
@@ -6185,23 +6184,7 @@ class PouiInternal(Base):
         if program_name != parameter_routine:
             self._select_routine_module(module)
 
-        # -- Temporary code block --
-        confirm_button = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + (120 if program_name != parameter_routine else 5)
-        confirm_button_found = False
-        logger().debug(f'Waiting for the confirm button.')
-        while time.time() < endtime:
-            if confirm_button():
-                confirm_button_sel = lambda: self.soup_to_selenium(next(iter(confirm_button())))
-                self.click(confirm_button_sel())
-                logger().debug(f'Confirm button clicked.')
-                confirm_button_found = True
-                break
-            time.sleep(1)
-
-        if not confirm_button_found:
-            logger().debug(f'Confirm button not found within 30 seconds. Skipping.')
-        # -- --        
+        self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
@@ -6235,6 +6218,73 @@ class PouiInternal(Base):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
                 self.closed_user_guide_routines.append(program_name)
+
+    def _confirm_environment_modal(self, timeout: int = 120) -> bool:
+        """
+        [Internal]
+
+        Waits for the environment confirmation modal ("TOTVS Linha Protheus." with
+        Data base/Grupo/Filial/Ambiente fields) that may appear after selecting a
+        routine on the New Home, and clicks on its confirm button.
+
+        The wait only happens when the initial program is SIGAADV or SIGAMDI.
+        For any other initial program the method returns immediately, without waiting.
+        If the modal does not appear within ``timeout`` the flow continues normally.
+
+        :param timeout: Maximum time, in seconds, to wait for the modal. - **Default:** 120
+        :type timeout: int
+        :return: True if the modal was found and its confirm button clicked, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> self._confirm_environment_modal(timeout=120)
+        """
+
+        initial_program = (self.config.initial_program or '').strip().upper()
+        if initial_program not in ('SIGAADV', 'SIGAMDI'):
+            logger().debug(f"Initial program '{initial_program}' is not SIGAADV/SIGAMDI. "
+                           f"Skipping environment confirmation modal wait.")
+            return False
+
+        dialog_term = 'wa-dialog'
+        # Fields that identify the environment confirmation modal (same selectors used by
+        # filling_date/filling_group/filling_branch on webapp_internal).
+        required_fields = (
+            "[name='dDataBase'], [name='__dInfoData']",
+            "[name='cGroup'], [name='__cGroup']",
+            "[name='cFil'], [name='__cFil']",
+        )
+        confirm_term = f"wa-button[caption='{self.language.confirm}']"
+
+        # Elements whose nearest wa-dialog ancestor is the dialog itself
+        own_elements = lambda dialog, term: [el for el in dialog.select(term)
+                                             if el.find_parent(dialog_term) is dialog]
+        is_environment_modal = lambda dialog: all(own_elements(dialog, field) for field in required_fields)
+
+        logger().info(f"Waiting for the environment confirmation modal.")
+
+        start = time.time()
+        endtime = start + timeout
+        while time.time() < endtime:
+            dialogs = self.get_current_DOM().select(dialog_term)
+            modal = next(iter(filter(lambda d: is_environment_modal(d) and
+                                               self.element_is_displayed(d, twebview=False), dialogs)), None)
+            if modal:
+                confirm_button = next(iter(own_elements(modal, confirm_term)), None)
+                if confirm_button:
+                    elapsed = time.time() - start
+                    logger().info(f"Environment confirmation modal found after {elapsed:.1f}s "
+                                  f"Clicking on '{self.language.confirm}'.")
+                    self.click(self.soup_to_selenium(confirm_button))
+                    logger().debug("Environment confirmation modal: confirm button clicked.")
+                    return True
+            time.sleep(1)
+
+        elapsed = time.time() - start
+        logger().info(f"Environment confirmation modal not found after waiting {elapsed:.1f}s "
+                      f"(timeout: {timeout}s). Skipping.")
+        return False
 
     def _select_routine_module(self, module: str = None) -> None:
         """
