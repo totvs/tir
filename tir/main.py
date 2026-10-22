@@ -1891,7 +1891,7 @@ class Poui():
         """
         self.__poui.AssertTrue(expected, script_message)
 
-    def ClickWidget(self, title='', action='', position=1):
+    def ClickWidget(self, title='', action='', position=1, radio_input=False):
         """
         Clicks on the Widget or Widget action of POUI component.
         https://po-ui.io/documentation/po-widget
@@ -1899,14 +1899,20 @@ class Poui():
         :param tittle: Widget text title that you want to click.
         :param action: The name of action to be clicked
         :param position: Position which element is located. - **Default:** 1
+        :param radio_input: If True, after finding the Widget (or its action) element, searches for the radio input
+         (po-radio or input[type='radio']) inside it and clicks on it instead of the element itself.
+         If there is more than one radio, the first one is used. - **Default:** False
+        :type radio_input: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        >>> # Clicking on the radio input inside the Widget:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', radio_input=True)
         :return:
         """
-        self.__poui.ClickWidget(title, action, position)
+        self.__poui.ClickWidget(title, action, position, radio_input)
 
     def TearDown(self):
         """
