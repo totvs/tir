@@ -1285,6 +1285,27 @@ class Base(unittest.TestCase):
             normalized_config = self.normalize_config_name(config_name)
             setattr(self.config, normalized_config, value)
 
+    def get_browser_accept_languages(self, language):
+        """
+        Maps the config.json ``Language`` value to the browser's
+        ``intl.accept_languages`` preference string.
+
+        :param language: Language code from the config (e.g. "pt-br", "es-es", "en-us").
+        :type language: str
+        :return: The accept-languages string (e.g. "pt-BR, pt"). Falls back to
+            Brazilian Portuguese when the language is empty or unknown, matching
+            the LanguagePack default.
+        :rtype: str
+        """
+        language_map = {
+            "pt-br": "pt-BR, pt",
+            "es-es": "es-ES, es",
+            "en-us": "en-US, en",
+            "ru-ru": "ru-RU, ru",
+        }
+        key = language.lower().strip() if language else ""
+        return language_map.get(key, "pt-BR, pt")
+
     def Start(self):
         """
         Opens the browser maximized and goes to defined URL.
@@ -1314,6 +1335,10 @@ class Base(unittest.TestCase):
             log_path = os.devnull
 
             firefox_options = FirefoxOpt()
+            if self.config.language:
+                accept_languages = self.get_browser_accept_languages(self.config.language)
+                firefox_options.set_preference("intl.accept_languages", accept_languages)
+                logger().info(f"Firefox language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 firefox_options.add_argument('-headless')
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
@@ -1322,6 +1347,12 @@ class Base(unittest.TestCase):
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
             driver_path = None
+            if self.config.language:
+                accept_languages = self.get_browser_accept_languages(self.config.language)
+                short_locale = accept_languages.split(",")[0].strip()
+                chrome_options.add_argument(f'--lang={short_locale}')
+                chrome_options.add_experimental_option("prefs", {"intl.accept_languages": accept_languages})
+                logger().info(f"Chrome language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 chrome_options.add_argument('--headless=new')
             chrome_options.add_argument('--log-level=3')
