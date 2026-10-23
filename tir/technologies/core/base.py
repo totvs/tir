@@ -30,6 +30,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
@@ -1644,23 +1645,46 @@ class Base(unittest.TestCase):
         self.click(element, right_click=right_click)
 
     def find_by_locator(self, locator, selector, shadow_root):
+        """
+        [Internal]
 
+        Finds an element by locator. If the element is not found, finishes the test case with log_error.
+
+        :param locator: Selenium locator (By.ID, By.CSS_SELECTOR, By.XPATH...).
+        :param selector: Selector string used with the locator.
+        :param shadow_root: Whether the element should be searched inside shadow root (Webapp) or not (Poui).
+        :return: The Selenium element.
+        """
         element = None
+        wait_succeeded = True
 
-        self.wait.until(EC.element_to_be_clickable((locator, selector)))
+        try:
+            self.wait.until(EC.element_to_be_clickable((locator, selector)))
+        except TimeoutException:
+            logger().debug(f"Element '{selector}' ({locator}) was not clickable within the wait time")
+            wait_succeeded = False
 
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not element:
-            logger().info(f"Looking for element: '{selector}'")
+        if wait_succeeded:
+            use_shadow_root = self.webapp_shadowroot(shadow_root=shadow_root)
 
-            if self.webapp_shadowroot(shadow_root=shadow_root):
-                element = next(iter(
-                    self.find_shadow_element('input, select, button', self.driver.find_element(locator, selector))))
-            else:
-                element = self.driver.find_element(locator, selector)
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not element:
+                logger().info(f"Looking for element: '{selector}'")
+                try:
+                    found = self.driver.find_element(locator, selector)
+                    if use_shadow_root:
+                        shadow_elements = self.find_shadow_element('input, select, button', found)
+                        element = next(iter(shadow_elements), None) if shadow_elements else None
+                    else:
+                        element = found
+                except (NoSuchElementException, StaleElementReferenceException):
+                    element = None
+
+                if not element:
+                    time.sleep(0.5)
 
         if not element:
-            self.log_error(f"Element {element} doesn't found")
+            self.log_error(f"Element '{selector}' ({locator}) doesn't found!")
 
         return element
 
