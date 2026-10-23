@@ -4234,7 +4234,7 @@ class PouiInternal(Base):
 
         self.poui_click(button_element, clicktype)
 
-    def ClickWidget(self, title, action, position):
+    def ClickWidget(self, title, action, position, radio_input=False):
         """
         Clicks on the Widget or Widget action of POUI component.
         https://po-ui.io/documentation/po-widget
@@ -4242,15 +4242,22 @@ class PouiInternal(Base):
         :param tittle: Widget text title that you want to click.
         :param action: The name of action to be clicked
         :param position: Position which element is located. - **Default:** 1
+        :param radio_input: If True, after finding the Widget (or its action) element, searches for the radio input
+         (po-radio or input[type='radio']) inside it and clicks on it instead of the element itself.
+         If there is more than one radio, the first one is used. - **Default:** False
+        :type radio_input: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        >>> # Clicking on the radio input inside the Widget:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', radio_input=True)
         :return:
         """
         position -= 1
         element = None
+        widget_found = False
 
         if not self.config.poui:
             self.twebview_context = True
@@ -4271,17 +4278,30 @@ class PouiInternal(Base):
                     po_widget = list(filter(lambda x: action.lower() in x.text.lower(), po_widget))
 
                 if po_widget:
-                    if len(po_widget) >= position:
+                    if len(po_widget) > position:
                         element = po_widget[position]
 
                         if action:
                             element = next(iter(list(filter(lambda x: action.lower() in x.text.lower(),
                                                             element.select("[class*='po-widget-action']")))), None)
+
+                        if element and radio_input:
+                            if not widget_found:
+                                widget_found = True
+                                logger().info("Searching for the radio input inside the Widget element")
+
+                            element = next(iter(element.select("po-radio, input[type='radio']")), None)
+
+                            if not element:
+                                time.sleep(1)
                     else:
                         self.log_error("Couldn't find element")
 
         if not element:
-            self.log_error("Couldn't find element")
+            if radio_input and widget_found:
+                self.log_error("Couldn't find radio input element in widget")
+            else:
+                self.log_error("Couldn't find element")
 
         self.poui_click(element)
 
