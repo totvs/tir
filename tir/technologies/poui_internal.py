@@ -6208,6 +6208,9 @@ class PouiInternal(Base):
         self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
+        if (self.config.initial_program or '').lower().strip() == 'sigamdi':
+            time.sleep(1)
+            self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
         logger().debug(f'New home disappeared.')
 
@@ -6263,7 +6266,7 @@ class PouiInternal(Base):
         """
 
         initial_program = (self.config.initial_program or '').strip().upper()
-        if initial_program not in ('SIGAADV', 'SIGAMDI'):
+        if (self.config.initial_program or '').lower().strip() not in ['sigaadv', 'sigamdi']:
             logger().debug(f"Initial program '{initial_program}' is not SIGAADV/SIGAMDI. "
                            f"Skipping environment confirmation modal wait.")
             return False
@@ -6370,9 +6373,9 @@ class PouiInternal(Base):
         emit('webapp.close_modal')
 
     def close_after_routine(self, program_name):
-        # Should close all 3 only for SIGAADV, but on new home they appear regardless of initial program
+        # Should close all 3 only for SIGAADV and SIGAMDI, but on new home they appear regardless of initial program
         self.close_warning_screen_after_routine()
-        if self.config.initial_program.lower() == 'sigaadv':
+        if (self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']:
             self.close_coin_screen_after_routine()
             self.close_news_screen_after_routine()
 
