@@ -6327,7 +6327,13 @@ class PouiInternal(Base):
         endtime = time.time() + 30
         while time.time() < endtime:
 
-            if self.language.change_module in self.get_current_container().text:
+            container = self.get_current_container()
+
+            if not container:
+                time.sleep(1)
+                continue
+
+            if self.language.change_module in container.text:
                 logger().info(f'Changing module. Module: {module}')
 
                 if not module:
