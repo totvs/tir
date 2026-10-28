@@ -6205,7 +6205,10 @@ class PouiInternal(Base):
         
         # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
         # Once a user has made a selection, it does not need to be selected again for that same user.
-        user_and_program = (self.config.user, program_name)
+        user_and_program = (
+            self.config.user.strip(),
+            (program_name or self.config.routine or "").strip().upper()
+        )
         if (user_and_program not in self.selected_routines_module) and \
            ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
