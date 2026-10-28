@@ -73,10 +73,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.execution_flow"><code class="docutils literal notranslate"><span class="pre">Base.execution_flow()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.filter_active_iframe"><code class="docutils literal notranslate"><span class="pre">Base.filter_active_iframe()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.filter_displayed_elements"><code class="docutils literal notranslate"><span class="pre">Base.filter_displayed_elements()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_by_locator"><code class="docutils literal notranslate"><span class="pre">Base.find_by_locator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_div_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_div_parent()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_first_wa_panel_parent"><code class="docutils literal notranslate"><span class="pre">Base.find_first_wa_panel_parent()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.find_label_element"><code class="docutils literal notranslate"><span class="pre">Base.find_label_element()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.finish_testcase"><code class="docutils literal notranslate"><span class="pre">Base.finish_testcase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_browser_accept_languages"><code class="docutils literal notranslate"><span class="pre">Base.get_browser_accept_languages()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_current_DOM"><code class="docutils literal notranslate"><span class="pre">Base.get_current_DOM()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_text"><code class="docutils literal notranslate"><span class="pre">Base.get_element_text()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tir.technologies.core.base.Base.get_element_value"><code class="docutils literal notranslate"><span class="pre">Base.get_element_value()</span></code></a></li>
@@ -487,6 +489,25 @@ aborts immediately and logs the error.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.find_by_locator">
+<span class="sig-name descname"><span class="pre">find_by_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.find_by_locator" title="Link to this definition"></a></dt>
+<dd><p>[Internal]</p>
+<p>Finds an element by locator. If the element is not found, finishes the test case with log_error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locator</strong> – Selenium locator (By.ID, By.CSS_SELECTOR, By.XPATH…).</p></li>
+<li><p><strong>selector</strong> – Selector string used with the locator.</p></li>
+<li><p><strong>shadow_root</strong> – Whether the element should be searched inside shadow root (Webapp) or not (Poui).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Selenium element.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tir.technologies.core.base.Base.find_first_div_parent">
 <span class="sig-name descname"><span class="pre">find_first_div_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.find_first_div_parent" title="Link to this definition"></a></dt>
 <dd><p>[Internal]</p>
@@ -564,6 +585,26 @@ aborts immediately and logs the error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tir.technologies.core.base.Base.get_browser_accept_languages">
+<span class="sig-name descname"><span class="pre">get_browser_accept_languages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.technologies.core.base.Base.get_browser_accept_languages" title="Link to this definition"></a></dt>
+<dd><p>Maps the config.json <code class="docutils literal notranslate"><span class="pre">Language</span></code> value to the browser’s
+<code class="docutils literal notranslate"><span class="pre">intl.accept_languages</span></code> preference string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>language</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Language code from the config (e.g. “pt-br”, “es-es”, “en-us”).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The accept-languages string (e.g. “pt-BR, pt”). Falls back to
+Brazilian Portuguese when the language is empty or unknown, matching
+the LanguagePack default.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
