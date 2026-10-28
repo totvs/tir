@@ -6329,6 +6329,8 @@ class PouiInternal(Base):
         """
 
         logger().info(f'Waiting for change module modal...')
+        
+        modal_found = False
 
         endtime = time.time() + (self.config.time_out / 10)
         while time.time() < endtime:
@@ -6362,12 +6364,16 @@ class PouiInternal(Base):
                 self.click_select(self.language.module, value, 1)
                 self.click_button(self.language.confirm)
 
+                modal_found = True
+
                 logger().info(f'Module selected!')
 
                 break
             
             time.sleep(1)
 
+        if not modal_found:
+            logger().info(f'Change module modal not found! Continuing execution...')
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
