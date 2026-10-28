@@ -3043,6 +3043,7 @@ class PouiInternal(Base):
             self.log.new_line(False, log_message)
         if proceed_action() and self.log.has_csv_condition():
             self.log.generate_log()
+        self.errors = []
         if not self.config.skip_restart and len(self.log.list_of_testcases()) > 1 and self.config.initial_program != '':
             self.restart()
         elif self.config.coverage and self.config.initial_program != '':
@@ -4233,7 +4234,7 @@ class PouiInternal(Base):
 
         self.poui_click(button_element, clicktype)
 
-    def ClickWidget(self, title, action, position):
+    def ClickWidget(self, title, action, position, radio_input=False):
         """
         Clicks on the Widget or Widget action of POUI component.
         https://po-ui.io/documentation/po-widget
@@ -4241,15 +4242,22 @@ class PouiInternal(Base):
         :param tittle: Widget text title that you want to click.
         :param action: The name of action to be clicked
         :param position: Position which element is located. - **Default:** 1
+        :param radio_input: If True, after finding the Widget (or its action) element, searches for the radio input
+         (po-radio or input[type='radio']) inside it and clicks on it instead of the element itself.
+         If there is more than one radio, the first one is used. - **Default:** False
+        :type radio_input: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        >>> # Clicking on the radio input inside the Widget:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', radio_input=True)
         :return:
         """
         position -= 1
         element = None
+        widget_found = False
 
         if not self.config.poui:
             self.twebview_context = True
@@ -4270,17 +4278,30 @@ class PouiInternal(Base):
                     po_widget = list(filter(lambda x: action.lower() in x.text.lower(), po_widget))
 
                 if po_widget:
-                    if len(po_widget) >= position:
+                    if len(po_widget) > position:
                         element = po_widget[position]
 
                         if action:
                             element = next(iter(list(filter(lambda x: action.lower() in x.text.lower(),
                                                             element.select("[class*='po-widget-action']")))), None)
+
+                        if element and radio_input:
+                            if not widget_found:
+                                widget_found = True
+                                logger().info("Searching for the radio input inside the Widget element")
+
+                            element = next(iter(element.select("po-radio, input[type='radio']")), None)
+
+                            if not element:
+                                time.sleep(1)
                     else:
                         self.log_error("Couldn't find element")
 
         if not element:
-            self.log_error("Couldn't find element")
+            if radio_input and widget_found:
+                self.log_error("Couldn't find radio input element in widget")
+            else:
+                self.log_error("Couldn't find element")
 
         self.poui_click(element)
 
@@ -6154,7 +6175,6 @@ class PouiInternal(Base):
 
         success = False
         search_term = "[class*='card-wrapper']"
-        confirm_term = f"wa-button[caption='{self.language.confirm}']"
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
@@ -6185,23 +6205,7 @@ class PouiInternal(Base):
         if program_name != parameter_routine:
             self._select_routine_module(module)
 
-        # -- Temporary code block --
-        confirm_button = lambda: self.get_current_DOM().select(confirm_term)
-        endtime = time.time() + (120 if program_name != parameter_routine else 5)
-        confirm_button_found = False
-        logger().debug(f'Waiting for the confirm button.')
-        while time.time() < endtime:
-            if confirm_button():
-                confirm_button_sel = lambda: self.soup_to_selenium(next(iter(confirm_button())))
-                self.click(confirm_button_sel())
-                logger().debug(f'Confirm button clicked.')
-                confirm_button_found = True
-                break
-            time.sleep(1)
-
-        if not confirm_button_found:
-            logger().debug(f'Confirm button not found within 30 seconds. Skipping.')
-        # -- --        
+        self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
@@ -6235,6 +6239,73 @@ class PouiInternal(Base):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
                 self.closed_user_guide_routines.append(program_name)
+
+    def _confirm_environment_modal(self, timeout: int = 120) -> bool:
+        """
+        [Internal]
+
+        Waits for the environment confirmation modal ("TOTVS Linha Protheus." with
+        Data base/Grupo/Filial/Ambiente fields) that may appear after selecting a
+        routine on the New Home, and clicks on its confirm button.
+
+        The wait only happens when the initial program is SIGAADV or SIGAMDI.
+        For any other initial program the method returns immediately, without waiting.
+        If the modal does not appear within ``timeout`` the flow continues normally.
+
+        :param timeout: Maximum time, in seconds, to wait for the modal. - **Default:** 120
+        :type timeout: int
+        :return: True if the modal was found and its confirm button clicked, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> self._confirm_environment_modal(timeout=120)
+        """
+
+        initial_program = (self.config.initial_program or '').strip().upper()
+        if initial_program not in ('SIGAADV', 'SIGAMDI'):
+            logger().debug(f"Initial program '{initial_program}' is not SIGAADV/SIGAMDI. "
+                           f"Skipping environment confirmation modal wait.")
+            return False
+
+        dialog_term = 'wa-dialog'
+        # Fields that identify the environment confirmation modal (same selectors used by
+        # filling_date/filling_group/filling_branch on webapp_internal).
+        required_fields = (
+            "[name='dDataBase'], [name='__dInfoData']",
+            "[name='cGroup'], [name='__cGroup']",
+            "[name='cFil'], [name='__cFil']",
+        )
+        confirm_term = f"wa-button[caption='{self.language.confirm}']"
+
+        # Elements whose nearest wa-dialog ancestor is the dialog itself
+        own_elements = lambda dialog, term: [el for el in dialog.select(term)
+                                             if el.find_parent(dialog_term) is dialog]
+        is_environment_modal = lambda dialog: all(own_elements(dialog, field) for field in required_fields)
+
+        logger().info(f"Waiting for the environment confirmation modal.")
+
+        start = time.time()
+        endtime = start + timeout
+        while time.time() < endtime:
+            dialogs = self.get_current_DOM().select(dialog_term)
+            modal = next(iter(filter(lambda d: is_environment_modal(d) and
+                                               self.element_is_displayed(d, twebview=False), dialogs)), None)
+            if modal:
+                confirm_button = next(iter(own_elements(modal, confirm_term)), None)
+                if confirm_button:
+                    elapsed = time.time() - start
+                    logger().info(f"Environment confirmation modal found after {elapsed:.1f}s "
+                                  f"Clicking on '{self.language.confirm}'.")
+                    self.click(self.soup_to_selenium(confirm_button))
+                    logger().debug("Environment confirmation modal: confirm button clicked.")
+                    return True
+            time.sleep(1)
+
+        elapsed = time.time() - start
+        logger().info(f"Environment confirmation modal not found after waiting {elapsed:.1f}s "
+                      f"(timeout: {timeout}s). Skipping.")
+        return False
 
     def _select_routine_module(self, module: str = None) -> None:
         """
