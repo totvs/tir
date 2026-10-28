@@ -709,7 +709,7 @@ Legacy parameters will be removed in a future release.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tir.main.Poui.ClickWidget">
-<span class="sig-name descname"><span class="pre">ClickWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickWidget" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ClickWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radio_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tir.main.Poui.ClickWidget" title="Link to this definition"></a></dt>
 <dd><p>Clicks on the Widget or Widget action of POUI component.
 <a class="reference external" href="https://po-ui.io/documentation/po-widget">https://po-ui.io/documentation/po-widget</a></p>
 <dl class="field-list simple">
@@ -718,12 +718,17 @@ Legacy parameters will be removed in a future release.</p>
 <li><p><strong>tittle</strong> – Widget text title that you want to click.</p></li>
 <li><p><strong>action</strong> – The name of action to be clicked</p></li>
 <li><p><strong>position</strong> – Position which element is located. - <strong>Default:</strong> 1</p></li>
+<li><p><strong>radio_input</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – If True, after finding the Widget (or its action) element, searches for the radio input
+(po-radio or input[type=’radio’]) inside it and clicks on it instead of the element itself.
+If there is more than one radio, the first one is used. - <strong>Default:</strong> False</p></li>
 </ul>
 </dd>
 </dl>
 <p>Usage:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Call the method:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickWidget</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;LEad Time SC x PC&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Detalhes&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Clicking on the radio input inside the Widget:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oHelper</span><span class="o">.</span><span class="n">ClickWidget</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;LEad Time SC x PC&#39;</span><span class="p">,</span> <span class="n">radio_input</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="go">:return:</span>
 </pre></div>
 </div>
