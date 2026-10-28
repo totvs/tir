@@ -6330,7 +6330,7 @@ class PouiInternal(Base):
 
         logger().info(f'Waiting for change module modal...')
 
-        endtime = time.time() + (self.config.time_out / 4)
+        endtime = time.time() + (self.config.time_out / 10)
         while time.time() < endtime:
 
             container = self.get_current_container()
