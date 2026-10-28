@@ -113,6 +113,7 @@ class PouiInternal(Base):
             "input":"[class*='po-input'], thf-lookup, .po-search-input"
         }
         self.closed_user_guide_routines = []
+        self.selected_routines_module = []
         
         if not Base.driver:
             Base.driver = self.driver
@@ -6202,8 +6203,13 @@ class PouiInternal(Base):
         self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
         
-        if program_name != parameter_routine:
+        # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
+        # Once a user has made a selection, it does not need to be selected again for that same user.
+        user_and_program = (self.config.user, program_name)
+        if (user_and_program not in self.selected_routines_module) and \
+           ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
+            self.selected_routines_module.append(user_and_program)
 
         self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
@@ -6322,9 +6328,9 @@ class PouiInternal(Base):
         :return: None
         """
 
-        logger().info(f'Waiting for change module modal')
+        logger().info(f'Waiting for change module modal...')
 
-        endtime = time.time() + 30
+        endtime = time.time() + (self.config.time_out / 4)
         while time.time() < endtime:
 
             container = self.get_current_container()
@@ -6334,7 +6340,7 @@ class PouiInternal(Base):
                 continue
 
             if self.language.change_module in container.text:
-                logger().info(f'Changing module. Module: {module}')
+                logger().info(f'Change module modal found!')
 
                 if not module:
                     po_select = self.get_container_elements("po-select")
@@ -6350,9 +6356,13 @@ class PouiInternal(Base):
 
                 else:
                     value = module
+
+                logger().info(f'Selecting module {module}...')
                 
                 self.click_select(self.language.module, value, 1)
                 self.click_button(self.language.confirm)
+
+                logger().info(f'Module selected!')
 
                 break
             
