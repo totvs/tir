@@ -4069,7 +4069,7 @@ class PouiInternal(Base):
         if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
             return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
-    def _po_loading(self, selector: str = '') -> None:
+    def _po_loading(self, selector: str = '', timeout_appear: int = 15) -> None:
         """
         [Internal]
         
@@ -4100,27 +4100,31 @@ class PouiInternal(Base):
         logger().info("Waiting loading...")
 
         main_container = selector or 'body'
+        term_loading = 'po-loading'
         
         # Wait up to 15 seconds for po-loading to appear
         loading_found = self.wait_element_timeout(
-            term='po-loading',
+            term=term_loading,
             scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout=15,
+            timeout=timeout_appear,
             main_container=main_container,
+            twebview=True
         )
         
         # If po-loading was found, wait for it to disappear
         if loading_found:
             logger().info("Po-loading found. Waiting for it to disappear...")
             self.wait_element(
-                term='po-loading',
+                term=term_loading,
                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                 presence=False,
                 main_container=main_container,
-                check_error=False
+                check_error=False,
+                twebview=True
             )
         else:
             logger().info("Po-loading not found, continuing without waiting...")
+            return
 
         logger().info("Loading finished!")
         
@@ -6179,7 +6183,7 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
-        parameter_routine = 'CFGX017'
+        parameter_routine = 'CFGX017'        
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -6193,10 +6197,15 @@ class PouiInternal(Base):
                                                 main_container='body')), None)
         
         self.input_value(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-        self._po_loading()
+        self._po_loading(timeout_appear=3)
 
         if not program_name and program_desc:
             self.config.routine = self._get_program_by_desc(program_desc)
+
+        user_and_program = (
+            self.config.user.strip(),
+            (program_name or self.config.routine or "").strip().upper()
+        )
         
         logger().debug(f'Selecting the routine')
 
@@ -6205,10 +6214,6 @@ class PouiInternal(Base):
         
         # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
         # Once a user has made a selection, it does not need to be selected again for that same user.
-        user_and_program = (
-            self.config.user.strip(),
-            (program_name or self.config.routine or "").strip().upper()
-        )
         if (user_and_program not in self.selected_routines_module) and \
            ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
@@ -6247,10 +6252,10 @@ class PouiInternal(Base):
         
         self.ensure_load_after_program()
 
-        if not program_name in self.closed_user_guide_routines:
+        if (user_and_program not in self.closed_user_guide_routines):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
-                self.closed_user_guide_routines.append(program_name)
+                self.closed_user_guide_routines.append(user_and_program)
 
     def _confirm_environment_modal(self, timeout: int = 120) -> bool:
         """
@@ -6778,6 +6783,9 @@ class PouiInternal(Base):
 
         log_message = "Closing user guide..." if not success else "User guide not found!"
         logger().info(log_message)
+
+        if success:
+            return success
         
         while time.time() < endtime and not success:
 
