@@ -6179,7 +6179,7 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
-        parameter_routine = 'CFGX017'        
+        parameter_routine = 'CFGX017'
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
