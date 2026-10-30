@@ -6197,6 +6197,11 @@ class PouiInternal(Base):
 
         if not program_name and program_desc:
             self.config.routine = self._get_program_by_desc(program_desc)
+
+        user_and_program = (
+            self.config.user.strip(),
+            (program_name or self.config.routine or "").strip().upper()
+        )
         
         logger().debug(f'Selecting the routine')
 
@@ -6205,10 +6210,6 @@ class PouiInternal(Base):
         
         # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
         # Once a user has made a selection, it does not need to be selected again for that same user.
-        user_and_program = (
-            self.config.user.strip(),
-            (program_name or self.config.routine or "").strip().upper()
-        )
         if (user_and_program not in self.selected_routines_module) and \
            ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
@@ -6247,10 +6248,10 @@ class PouiInternal(Base):
         
         self.ensure_load_after_program()
 
-        if not program_name in self.closed_user_guide_routines:
+        if (user_and_program not in self.closed_user_guide_routines):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
-                self.closed_user_guide_routines.append(program_name)
+                self.closed_user_guide_routines.append(user_and_program)
 
     def _confirm_environment_modal(self, timeout: int = 120) -> bool:
         """
@@ -6778,6 +6779,9 @@ class PouiInternal(Base):
 
         log_message = "Closing user guide..." if not success else "User guide not found!"
         logger().info(log_message)
+
+        if success:
+            return success
         
         while time.time() < endtime and not success:
 
