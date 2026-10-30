@@ -6145,7 +6145,7 @@ class PouiInternal(Base):
             time.sleep(0.5)
             
             if loaded_screen == 'new_browser':
-                self._po_loading(timeout_appear=10)
+                self._po_loading(timeout_appear=5)
 
             # Ready only when an expected screen is rendered and nothing is
             # loading on top of it. While po-loading is present (even if it shows
