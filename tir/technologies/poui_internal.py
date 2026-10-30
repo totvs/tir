@@ -113,6 +113,7 @@ class PouiInternal(Base):
             "input":"[class*='po-input'], thf-lookup, .po-search-input"
         }
         self.closed_user_guide_routines = []
+        self.selected_routines_module = []
         
         if not Base.driver:
             Base.driver = self.driver
@@ -4068,7 +4069,7 @@ class PouiInternal(Base):
         if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
             return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
-    def _po_loading(self, selector: str = '') -> None:
+    def _po_loading(self, selector: str = '', timeout_appear: int = 15) -> None:
         """
         [Internal]
         
@@ -4099,27 +4100,31 @@ class PouiInternal(Base):
         logger().info("Waiting loading...")
 
         main_container = selector or 'body'
+        term_loading = 'po-loading'
         
         # Wait up to 15 seconds for po-loading to appear
         loading_found = self.wait_element_timeout(
-            term='po-loading',
+            term=term_loading,
             scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout=15,
+            timeout=timeout_appear,
             main_container=main_container,
+            twebview=True
         )
         
         # If po-loading was found, wait for it to disappear
         if loading_found:
             logger().info("Po-loading found. Waiting for it to disappear...")
             self.wait_element(
-                term='po-loading',
+                term=term_loading,
                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                 presence=False,
                 main_container=main_container,
-                check_error=False
+                check_error=False,
+                twebview=True
             )
         else:
             logger().info("Po-loading not found, continuing without waiting...")
+            return
 
         logger().info("Loading finished!")
         
@@ -6072,7 +6077,7 @@ class PouiInternal(Base):
 
         self.set_program(program_name, program_desc, module)
 
-    def ensure_load_after_program(self, timeout: int = None) -> None:
+    def _ensure_load_after_program(self, timeout: int = None) -> None:
         """
         [Internal]
 
@@ -6097,8 +6102,8 @@ class PouiInternal(Base):
 
         Usage:
 
-        >>> self.ensure_load_after_program()
-        >>> self.ensure_load_after_program(timeout=90)
+        >>> self._ensure_load_after_program()
+        >>> self._ensure_load_after_program(timeout=90)
         """
 
         if timeout is None:
@@ -6106,13 +6111,14 @@ class PouiInternal(Base):
 
         # CSS selectors that identify each expected landing screen after opening
         # a routine. Adjust here if a new landing screen needs to be supported.
-        expected_screens = {
-            "browse": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
-                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
-                       ".dict-brgetddb, .dict-msselbr, thf-grid"),
+        expected_screens = {            
+            "new_browser": "po-table, kendo-grid, thf-grid",
+            "old_browser": "[style*='fwskin_seekbar_ico']",
             "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard, .dict-msdialog",
-            "parameters": ("wa-dialog wa-text-input, wa-dialog .dict-tget, "
-                           ".tmodaldialog .tget"),
+            "parameters": "wa-dialog wa-text-input, wa-dialog .dict-tget, .tmodaldialog .tget",
+            "others": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
+                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
+                       ".dict-brgetddb, .dict-msselbr"),
         }
 
         logger().info("Ensuring the routine screen finished loading...")
@@ -6137,16 +6143,14 @@ class PouiInternal(Base):
             # Small delay so a late po-loading has time to appear on top of the
             # screen before we check for it, avoiding a false "ready" result.
             time.sleep(0.5)
-
-            loading = self.element_exists(term='po-loading',
-                                          scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                          main_container='body',
-                                          check_error=False)
+            
+            if loaded_screen == 'new_browser':
+                self._po_loading(timeout_appear=5)
 
             # Ready only when an expected screen is rendered and nothing is
             # loading on top of it. While po-loading is present (even if it shows
             # up late) we keep waiting for the transition to finish.
-            if loaded_screen and not loading:
+            if loaded_screen:
                 break
 
             loaded_screen = None
@@ -6158,6 +6162,8 @@ class PouiInternal(Base):
             logger().warning("None of the expected screens (browse, wizard, "
                              "parameters) finished loading within the timeout of "
                              f"{timeout}s.")
+
+        return loaded_screen
 
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         
@@ -6178,7 +6184,8 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
-        parameter_routine = 'CFGX017'
+        parameter_routine = 'CFGX017'  
+        loaded_screen = None      
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -6192,38 +6199,56 @@ class PouiInternal(Base):
                                                 main_container='body')), None)
         
         self.input_value(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-        self._po_loading()
+        self._po_loading(timeout_appear=5)
 
         if not program_name and program_desc:
             self.config.routine = self._get_program_by_desc(program_desc)
+
+        user_and_program = (
+            self.config.user.strip(),
+            (program_name or self.config.routine or "").strip().upper()
+        )
         
-        logger().debug(f'Selecting the routine')
+        logger().debug(f'Selecting the routine...')
 
         self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
+
+        logger().debug(f'Routine selected!')
         
-        if program_name != parameter_routine:
+        # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
+        # Once a user has made a selection, it does not need to be selected again for that same user.
+        if (user_and_program not in self.selected_routines_module) and \
+           ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
+            self.selected_routines_module.append(user_and_program)
 
         self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
+        if (self.config.initial_program or '').lower().strip() == 'sigamdi':
+            time.sleep(1)
+            self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
-        logger().debug(f'New home disappeared.')
+        logger().debug(f'New home disappeared!') if ele_hidden else logger().debug(f'New home did not disappear!')
 
-        endtime = time.time() + self.config.time_out
+        logger().debug(f'Waiting for a new tab to open...')
+        endtime = time.time() + self.config.time_out        
         while time.time() < endtime:
-            logger().debug(f'Waiting for a new tab to open.')
 
             wtb_after = get_wtb()
             if wtb_before != wtb_after:
                 break
             time.sleep(1)
 
+        logger().debug(f'New tab opened!') if wtb_before != wtb_after else logger().debug(f'New tab did not open!')
+
         success = (ele_hidden) and (wtb_before != wtb_after)
 
         if program_name != parameter_routine:
+            logger().debug(f'Closing modals after accessing the routine...') 
             self.close_after_routine(program_name)
+            logger().debug(f'Modals closed!') 
 
         if not success:
             message = "Couldn't set the program."
@@ -6233,12 +6258,13 @@ class PouiInternal(Base):
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
         
-        self.ensure_load_after_program()
+        loaded_screen = self._ensure_load_after_program()
 
-        if not program_name in self.closed_user_guide_routines:
+        if (user_and_program not in self.closed_user_guide_routines) and \
+           (loaded_screen == 'new_browser'):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
-                self.closed_user_guide_routines.append(program_name)
+                self.closed_user_guide_routines.append(user_and_program)
 
     def _confirm_environment_modal(self, timeout: int = 120) -> bool:
         """
@@ -6263,9 +6289,7 @@ class PouiInternal(Base):
         """
 
         initial_program = (self.config.initial_program or '').strip().upper()
-        if initial_program not in ('SIGAADV', 'SIGAMDI'):
-            logger().debug(f"Initial program '{initial_program}' is not SIGAADV/SIGAMDI. "
-                           f"Skipping environment confirmation modal wait.")
+        if (self.config.initial_program or '').lower().strip() not in ['sigaadv', 'sigamdi']:
             return False
 
         dialog_term = 'wa-dialog'
@@ -6322,13 +6346,21 @@ class PouiInternal(Base):
         :return: None
         """
 
-        logger().info(f'Waiting for change module modal')
+        logger().info(f'Waiting for change module modal...')
+        
+        modal_found = False
 
-        endtime = time.time() + 30
+        endtime = time.time() + (self.config.time_out / 10)
         while time.time() < endtime:
 
-            if self.language.change_module in self.get_current_container().text:
-                logger().info(f'Changing module. Module: {module}')
+            container = self.get_current_container()
+
+            if not container:
+                time.sleep(1)
+                continue
+
+            if self.language.change_module in container.text:
+                logger().info(f'Change module modal found!')
 
                 if not module:
                     po_select = self.get_container_elements("po-select")
@@ -6344,14 +6376,22 @@ class PouiInternal(Base):
 
                 else:
                     value = module
+
+                logger().info(f'Selecting module {module}...')
                 
                 self.click_select(self.language.module, value, 1)
                 self.click_button(self.language.confirm)
+
+                modal_found = True
+
+                logger().info(f'Module selected!')
 
                 break
             
             time.sleep(1)
 
+        if not modal_found:
+            logger().info(f'Change module modal not found! Continuing execution...')
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6370,9 +6410,9 @@ class PouiInternal(Base):
         emit('webapp.close_modal')
 
     def close_after_routine(self, program_name):
-        # Should close all 3 only for SIGAADV, but on new home they appear regardless of initial program
+        # Should close all 3 only for SIGAADV and SIGAMDI, but on new home they appear regardless of initial program
         self.close_warning_screen_after_routine()
-        if self.config.initial_program.lower() == 'sigaadv':
+        if (self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']:
             self.close_coin_screen_after_routine()
             self.close_news_screen_after_routine()
 
@@ -6750,6 +6790,9 @@ class PouiInternal(Base):
 
         log_message = "Closing user guide..." if not success else "User guide not found!"
         logger().info(log_message)
+
+        if success:
+            return success
         
         while time.time() < endtime and not success:
 

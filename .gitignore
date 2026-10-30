@@ -92,3 +92,4 @@ ENV/
 .ropeproject
 
 .vscode/ 
+.kiro/
