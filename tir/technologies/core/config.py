@@ -203,7 +203,7 @@ class ConfigLoader:
         "APIJSONPATH",
         "ServerMock",
         "SSOLogin",
-        "IgnoreCertificateErrors"
+        "IgnoreCertificateErrors",
         "NewHome"
     ]
         keys_json = set(json_data.keys())
