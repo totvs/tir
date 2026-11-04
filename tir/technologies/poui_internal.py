@@ -6950,23 +6950,100 @@ class PouiInternal(Base):
         :param value: Value to search and select in the lookup.
         :type value: str
         :return: None
-        """
-        self._fill_input(input_element, value, field)
-        self._po_loading()
-        self._click_lookup_item(value)
 
-    def _click_lookup_item(self, value):
-        thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
+        The whole process (fill -> wait loading -> select item) is retried until
+        ``config.time_out``. Each attempt has a slice of ``time_out / 3`` (at least 3 attempts),
+        and the inner steps run without ``log_error`` so a single failure doesn't end the test.
+        """
+        loading_appear_timeout = 5
+        list_timeout = 10
+
+        total_timeout = self.config.time_out
+        endtime = time.time() + total_timeout
+        attempt_budget = total_timeout / 3
+        attempt = 0
+        filled = False
+        success = False
+
+        while not success and time.time() < endtime:
+            attempt += 1
+            attempt_end = min(time.time() + attempt_budget, endtime)
+            logger().info(f"Filling lookup '{field}' with '{value}'. Attempt {attempt}.")
+
+            if attempt > 1:
+                self._erase_input_with_backspace(input_element)
+
+            fill_timeout = max(attempt_end - time.time() - loading_appear_timeout - list_timeout, 1)
+            filled = self._fill_input(input_element, value, field, timeout=fill_timeout, check_error=False)
+            if not filled:
+                logger().debug(f"Lookup '{field}' couldn't be filled on attempt {attempt}.")
+                continue
+
+            self._po_loading(timeout_appear=min(loading_appear_timeout, max(endtime - time.time(), 1)))
+
+            item_timeout = min(list_timeout, max(attempt_end - time.time(), 1))
+            success = self._click_lookup_item(value, timeout=item_timeout, check_error=False)
+            if not success:
+                logger().debug(f"Lookup item '{value}' not selected on attempt {attempt}.")
+
+        if not success:
+            if not filled:
+                self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+            else:
+                self.log_error(f"Lookup item '{value}' not found in suggestion list.")
+
+    def _erase_input_with_backspace(self, input_element) -> None:
+        """
+        [Internal]
+
+        Erases the content of an input by selecting everything (CTRL+A) and pressing BACKSPACE once.
+        Used before refilling a field, so the field emits the same events as a user deleting the text.
+
+        :param input_element: BeautifulSoup input element.
+        :type input_element: bs4.element.Tag
+        :return: None
+        """
+        try:
+            self.switch_to_iframe()
+            input_field_element = lambda: self.soup_to_selenium(input_element)
+
+            self.scroll_to_element(input_field_element())
+            self.set_element_focus(input_field_element())
+            self.click(input_field_element())
+
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
+        except Exception as e:
+            logger().debug(f"Error erasing input with backspace: {e}")
+
+    def _click_lookup_item(self, value, timeout: int = 10, check_error: bool = True) -> bool:
+        """
+        [Internal]
+
+        Clicks on the lookup list item that matches the value.
+
+        :param value: Text to search in the suggestion list.
+        :type value: str
+        :param timeout: Seconds to wait for the suggestion list. - **Default:** 10
+        :type timeout: int
+        :param check_error: If True, calls log_error when the item isn't found. - **Default:** True
+        :type check_error: bool
+        :return: True if the item was found and clicked, otherwise False.
+        :rtype: bool
+        """
+        thf_item_list = self._get_lookup_list_item(value=value.strip().lower(), timeout=timeout)
 
         if thf_item_list:
             item_div = thf_item_list.find_next('div')
-            self.click(self.soup_to_selenium(item_div))
+            return bool(self.click(self.soup_to_selenium(item_div)))
             # ActionChains(self.driver).key_down(Keys.TAB).perform()
-        else:
+
+        if check_error:
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
+        return False
 
-    def _fill_input(self, input_element, value: str, field: str = '') -> None:
+
+    def _fill_input(self, input_element, value: str, field: str = '', timeout=None, check_error: bool = True) -> bool:
         """
         [Internal]
 
@@ -6976,11 +7053,16 @@ class PouiInternal(Base):
         :type input_element: bs4.element.Tag
         :param value: Value to type into the input.
         :type value: str
-        :return: None
+        :param timeout: Seconds to keep trying. If None, uses config.time_out. - **Default:** None
+        :type timeout: float
+        :param check_error: If True, calls log_error when the field can't be filled. - **Default:** True
+        :type check_error: bool
+        :return: True if the field holds the value, otherwise False.
+        :rtype: bool
         """
         success = False
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + (self.config.time_out if timeout is None else timeout)
         while time.time() < endtime and not success:
             try:
                 self.switch_to_iframe()
@@ -7006,7 +7088,7 @@ class PouiInternal(Base):
                 logger().debug(f"Error filling input field: {e}")
                 success = False
 
-        if not success:
+        if not success and check_error:
             self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
 
         return success
@@ -7243,7 +7325,7 @@ class PouiInternal(Base):
             logger().debug(f"_scroll_field_into_view: couldn't scroll element into view - {str(e)}")
 
 
-    def _get_lookup_list_item(self, value: str):
+    def _get_lookup_list_item(self, value: str, timeout: int = 10):
         """
         [Internal]
 
@@ -7251,6 +7333,8 @@ class PouiInternal(Base):
 
         :param value: The text value to search for in the list items.
         :type value: str
+        :param timeout: Seconds to wait for the thf-lookup-list. - **Default:** 10
+        :type timeout: int
         :return: The matching BeautifulSoup <li> element or None if not found.
         :rtype: bs4.element.Tag or None
         """
@@ -7258,7 +7342,7 @@ class PouiInternal(Base):
         term = 'thf-lookup-list'
 
         self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                  timeout=10, twebview=True)
+                                  timeout=timeout, twebview=True)
 
         lookup_list = self.get_container_elements(term, select_all=False, filter_displayeds=True)
 
