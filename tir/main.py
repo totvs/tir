@@ -53,10 +53,12 @@ class Webapp():
         subscribe('route.program', self.__router.Program)
         subscribe('route.set_program', self.__router.set_program)
         subscribe('route.set_log_info', self.__router.set_log_info)
+        subscribe('route.set_lateral_menu', self.__router.SetLateralMenu)
         
         subscribe('webapp.setup', self.__webapp.Setup)
         subscribe('webapp.log_error', self.__webapp.log_error)
         subscribe('webapp.set_button', self.__webapp.SetButton)
+        subscribe('webapp.set_button_x', self.__webapp.set_button_x)
 
         subscribe('webapp.close_warning_screen_after_routine', self.__webapp.close_warning_screen_after_routine)
         subscribe('webapp.close_coin_screen_after_routine', self.__webapp.close_coin_screen_after_routine)
@@ -67,6 +69,9 @@ class Webapp():
         subscribe('webapp.check_coin_screen', self.__webapp.check_coin_screen)
         subscribe('webapp.check_news_screen', self.__webapp.check_news_screen)
         subscribe('webapp.close_screen_before_menu', self.__webapp.close_screen_before_menu)
+
+        subscribe('webapp.close_warning_screen', self.__webapp.close_warning_screen)
+        subscribe('webapp.close_coin_screen', self.__webapp.close_coin_screen)
 
     def AddParameter(self, parameter, branch, portuguese_value="", english_value="", spanish_value=""):
         """
@@ -476,7 +481,7 @@ class Webapp():
         """
         self.__webapp.MessageBoxClick(button_text)
 
-    def Program(self, program_name):
+    def Program(self, program_name: str, module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -485,13 +490,16 @@ class Webapp():
 
         :param program_name: The program name
         :type program_name: str
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. Only applies to New Home (POUI). - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
+        >>> oHelper.Program("FINA410", module="Controle de Lojas")
         """
-        self.__router.Program(program_name)
+        self.__router.Program(program_name=program_name, module=module)
 
     def RestoreParameters(self):
         """
@@ -541,21 +549,15 @@ class Webapp():
         """
         self.__webapp.take_screenshot(filename)
 
-    def F3(self, field, name_attr=False,send_key=False):
+    def F3(self, field: str, name_attr: bool = False, send_key: bool = False) -> None:
         """
-        Do the standard query(F3)
-        
-        this method:
+        Opens the field's lookup (query) search window, used to search and select a value for a field.
 
-            1.Search the field
-            2.Search icon "lookup"
-            3.Click()
-
-        :param term: The term that must be searched.
-        :type  term: str
-        :param name_attr: True: searchs element by name.
-        :type  name_attr: bool
-        :param send_key: True: try open standard search field send key F3.
+        :param field: The label or the internal name of the field to search.
+        :type field: str
+        :param name_attr: Set to True to search the field by its internal name instead of its label. - **Default:** False
+        :type name_attr: bool
+        :param send_key: Set to True to open the search window by sending the F3 key instead of clicking the lookup icon. - **Default:** False
         :type send_key: bool
 
         Usage:
@@ -563,13 +565,13 @@ class Webapp():
         >>> # To search using a label name:
         >>> oHelper.F3("Cód")
         >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input:
-        >>> oHelper.F3(field='A1_EST',name_attr=True)
+        >>> # To search using the internal name of a field:
+        >>> oHelper.F3(field='A1_EST', name_attr=True)
         >>> #------------------------------------------------------------------------
-        >>> # To search using the name of input and do action with a key:
-        >>> oHelper.F3(field='A1_EST',name_attr=True,send_key=True)
+        >>> # To search using the internal name and opening with the F3 key instead of a click:
+        >>> oHelper.F3(field='A1_EST', name_attr=True, send_key=True)
         """
-        self.__webapp.standard_search_field( field, name_attr, send_key )
+        self.__webapp.standard_search_field(field, name_attr, send_key)
     
     def SetupTSS(self, initial_program="", environment=""):
         """
@@ -610,6 +612,15 @@ class Webapp():
         :type index: bool
         :param column: The search column to be chosen on the search dropdown. - **Default:** None
         :type column: str
+        :param filters: List of dictionaries to apply browse filters before searching.
+         Each dictionary key must be the field label and its value must be the filter value.
+         - **Default:** []
+        :type filters: list[dict[str, str]]
+
+        .. note::
+            When used with the **New Browse** (kendo-grid), this method automatically removes all
+            active filters before performing the search, ensuring the results are not affected by
+            previously applied filter conditions.
 
         Usage:
 
@@ -635,6 +646,15 @@ class Webapp():
         >>> #------------------------------------------------------------------------
         >>> # To search using the first search box and a chosen columns:
         >>> oHelper.SearchBrowse("D MG 001", column="Nome, Filial*, ColumnX, AnotherColumnY")
+        >>> #------------------------------------------------------------------------
+        >>> # To search using browse filters:
+        >>> filters = [
+        ...     {
+        ...         'Filial': 'D MG 01',
+        ...         'Cod Grupo': 'SQA2'
+        ...     }
+        ... ]
+        >>> oHelper.SearchBrowse("D MG 001", key="Branch+id", filters=filters)
         >>> #------------------------------------------------------------------------
         """
         self.__router.SearchBrowse(term, key, identifier, index, column, filters)
@@ -775,20 +795,31 @@ class Webapp():
         """
         self.__webapp.SetKey(key, grid, grid_number,additional_key, wait_show, step, wait_change)
 
-    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False):
+    def SetLateralMenu(self, menuitens, save_input=True, click_menu_functional=False, 
+                       program_name:str = '', module: str = ''):
         """
         Navigates through the lateral menu using provided menu path.
         e.g. "MenuItem1 > MenuItem2 > MenuItem3"
 
-        :param menu_itens: String with the path to the menu.
-        :type menu_itens: str
+        :param menuitens: String with the path to the menu.
+        :type menuitens: str
+        :param save_input: Keeps compatibility with WebApp lateral menu behavior. - **Default:** True
+        :type save_input: bool
+        :param click_menu_functional: Uses functional menu click strategy in WebApp. - **Default:** False
+        :type click_menu_functional: bool
+        :param program_name: Program name to be used in New Home (POUI) when routine descriptions are duplicated. - **Default:** "" (empty string)
+        :type program_name: str
+        :param module: Module abbreviation used to differentiate routines with the same name in New Home (POUI). - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups")
+        >>> oHelper.SetLateralMenu("Updates > Registers > Products > Groups", program_name="CRDA200", module="CRD")
         """
-        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional)
+        self.__router.SetLateralMenu(menuitens, save_input, click_menu_functional, 
+                                     program_name=program_name, module=module)
 
     def SetParameters(self):
         """
@@ -1632,9 +1663,22 @@ class Webapp():
 
 
     def IsNewBrowse(self):
-        """This method checks if the current browse is the new version with poui or the old one,
-         returning a boolean value.
-         """
+        """
+        This method checks if the current browse is the new version with poui or the old one,
+        returning a boolean value.
+
+        >>> # Example using Browse
+        >>> if not self.oHelper.IsNewBrowse():
+        >>>     self.oHelper.SearchBrowse("D MG 01")
+        >>> else:
+        >>>     self.oHelperPoui.FilterBrowse(filters=[{"Filial": "D MG 01"}])
+        >>> 
+        >>> # Example using Button
+        >>> if not self.oHelper.IsNewBrowse():
+        >>>     self.oHelper.SetButton("Incluir")
+        >>> else:
+        >>>     self.oHelperPoui.ClickButton("Adicionar")
+        """
         return self.__webapp._is_new_browse()
 
 class Apw():
@@ -1751,8 +1795,9 @@ class Poui():
 
         :param field: Input text title that you want to fill
         :type field: str
-        :param value: Value that fill in input
-        :type value: str
+        :param value: Value that fill in input. If a **bool** is passed, the method
+            delegates to :meth:`ClickRadio` using the boolean as the desired state.
+        :type value: str or bool
         :param position: Position which element is located. - **Default:** 1
         :type position: int
 
@@ -1760,11 +1805,15 @@ class Poui():
 
         >>> # Call the method:
         >>> oHelper.InputValue('Name', 'Test')
+        >>> # Select a radio button (delegates to click_radio):
+        >>> oHelper.InputValue('Status', True)
+        >>> # Deselect a radio button:
+        >>> oHelper.InputValue('Status', False)
         :return: None
         """
-        self.__poui.InputValue(field, value, position)
+        self.__poui.input_value(field, value, position)
 
-    def ClickCombo(self, field='', value='', position=1, second_value=''):
+    def ClickCombo(self, field='', value='', position=1, second_value='', match_case=True):
         """
         Clicks on the Combo of POUI component.
         https://po-ui.io/documentation/po-combo
@@ -1772,6 +1821,10 @@ class Poui():
         :param field: Combo text title that you want to click.
         :param value: Value that you want to select in Combo.
         :param position: Position which element is located. - **Default:** 1
+        :param second_value: Secondary value displayed below the main value. - **Default:** "" (empty string)
+        :type second_value: str
+        :param match_case: If True, requires exact normalized match; if False, allows partial normalized match. - **Default:** True
+        :type match_case: bool
 
         Usage:
 
@@ -1779,7 +1832,7 @@ class Poui():
         >>> oHelper.ClickCombo('Visão', 'Compras')
         :return:
         """
-        self.__poui.click_combo(field, value, position, second_value)
+        self.__poui.click_combo(field, value, position, second_value, match_case)
 
     def ClickSelect(self, field='', value='', position=1):
         """
@@ -1838,7 +1891,7 @@ class Poui():
         """
         self.__poui.AssertTrue(expected, script_message)
 
-    def ClickWidget(self, title='', action='', position=1):
+    def ClickWidget(self, title='', action='', position=1, radio_input=False):
         """
         Clicks on the Widget or Widget action of POUI component.
         https://po-ui.io/documentation/po-widget
@@ -1846,14 +1899,20 @@ class Poui():
         :param tittle: Widget text title that you want to click.
         :param action: The name of action to be clicked
         :param position: Position which element is located. - **Default:** 1
+        :param radio_input: If True, after finding the Widget (or its action) element, searches for the radio input
+         (po-radio or input[type='radio']) inside it and clicks on it instead of the element itself.
+         If there is more than one radio, the first one is used. - **Default:** False
+        :type radio_input: bool
 
         Usage:
 
         >>> # Call the method:
         >>> oHelper.ClickWidget(title='LEad Time SC x PC', action='Detalhes', position=1)
+        >>> # Clicking on the radio input inside the Widget:
+        >>> oHelper.ClickWidget(title='LEad Time SC x PC', radio_input=True)
         :return:
         """
-        self.__poui.ClickWidget(title, action, position)
+        self.__poui.ClickWidget(title, action, position, radio_input)
 
     def TearDown(self):
         """
@@ -1919,7 +1978,7 @@ class Poui():
             :type click_cell: str
             :param checkbox: If True/False, toggles checkbox to that state - **Default:** None
             :type checkbox: bool
-            :param radio_input: Click radio button - **Default:** False
+            :param radio_input: Desired radio button state (True/False). The method clicks until this state is reached - **Default:** None
             :type radio_input: bool
             :param columns: Column name(s) to filter. Can be a string, or list
             :type columns: str or list
@@ -1944,6 +2003,10 @@ class Poui():
             >>> oHelper.ClickTable(columns=['Code', 'Name'], values=['000001', 'John'], click_cell='Actions')
             >>> # New syntax - Toggle checkbox:
             >>> oHelper.ClickTable(columns='Code', values='000001', checkbox=True)
+            >>> # New syntax - Toggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=True)
+            >>> # New syntax - Untoggle radio button:
+            >>> self.oHelper_Poui.ClickTable(columns='Filial', values='D MG 01', radio_input=False)
             >>> # New syntax - Click all matching rows:
             >>> oHelper.ClickTable(columns='Status', values='Active', match_all=True)
             >>> # New syntax - Click icon in row:
@@ -1968,27 +2031,88 @@ class Poui():
         self.__poui.ClickTable(first_column, second_column, first_content, second_content, table_number, itens,
                                click_cell, checkbox, radio_input, columns, values, match_all, icon_class)
 
+    def ClearTableSelection(self, table_number=1, selection_type='all'):
+        """
+        Removes selected rows from THF/Kendo table selection.
 
-    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1):
+        :param table_number: Table position when multiple tables exist on screen. - **Default:** 1
+        :type table_number: int
+        :param selection_type: Selection type to clear. Available values: 'checkbox', 'radio', 'all'. - **Default:** 'all'
+        :type selection_type: str
+
+        :return: True if selection was cleared before timeout, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> oHelper.ClearTableSelection()
+        >>> oHelper.ClearTableSelection(table_number=2)
+        >>> oHelper.ClearTableSelection(selection_type='radio')
+        >>> oHelper.ClearTableSelection(selection_type='checkbox')
+        """
+        return self.__poui._clear_table_selection(table_number=table_number, selection_type=selection_type)
+
+
+    def CheckResult(self, field=None, user_value=None, po_component='po-input', position=1,
+                    grid=False, line=1, grid_number=1):
         """
         Checks if a field has the value the user expects.
 
         :param field: The field or label of a field that must be checked.
+         For a nameless column (e.g. colored status), leave it empty and select the column with ``position``
+         ex: CheckResult(field="", user_value="Red", grid=True, position=1)
         :type field: str
         :param user_value: The value that the field is expected to contain.
         :type user_value: str
-        :param po_component:  POUI component name that you want to check content on screen
+        :param po_component:  POUI component name that you want to check content on screen. Ignored when ``grid`` is True. - **Default:** 'po-input'
         :type po_component: str
-        :param position: Position which element is located. - **Default:** 1
+        :param position: Which occurrence of the column to use when the grid has more than one column
+         with the same label (including nameless columns), 1-based. - **Default:** 1
         :type position: int
+        :param grid: Boolean if this is a grid field or not. - **Default:** False
+        :type grid: bool
+        :param line: Grid line that contains the column field to be checked, 1-based. - **Default:** 1
+        :type line: int
+        :param grid_number: Grid number of which grid should be checked when there are multiple grids on the same screen, 1-based. - **Default:** 1
+        :type grid_number: int
+
+        .. note::
+            When ``grid`` is True the check is **queued**, not evaluated immediately.
+            Call :func:`LoadGrid` afterwards to run the queued grid checks.
 
         Usage:
 
         >>> # Calling method to check a value of a field:
         >>> oHelper.CheckResult("Código", "000001", 'po-input')
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field that is on the first line of a grid:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to check a field on the second line of the second grid of the screen:
+        >>> oHelper.CheckResult("Pedido", "000001", grid=True, line=2, grid_number=2)
+        >>> oHelper.LoadGrid()
+        >>> #-----------------------------------------
+        >>> # Calling method to check the 2nd column that shares the same label:
+        >>> oHelper.CheckResult("Valor", "100,00", grid=True, line=1, position=2)
+        >>> oHelper.LoadGrid()
 
         """
-        self.__poui.CheckResult(field, user_value, po_component, position)
+        self.__poui.CheckResult(field, user_value, po_component, position, grid, line, grid_number)
+
+    def LoadGrid(self):
+        """
+        Runs all the queued grid actions (input and check) and empties the queues.
+
+        Must be called after ``CheckResult`` (and ``SetValue``) calls that set ``grid=True``.
+
+        Usage:
+
+        >>> # After CheckResult:
+        >>> oHelper.CheckResult("Código", "000001", grid=True, line=1)
+        >>> oHelper.LoadGrid()
+        """
+        self.__poui.LoadGrid()
 
     def GetUrl(self, url):
         """
@@ -2257,15 +2381,15 @@ class Poui():
 
         Usage:
         >>> # Call the method:
-        >>> oHelper.Switch(label='Codigo')
-        >>> oHelper.Switch(label='Ativo', position=2)
-        >>> oHelper.Switch(label='Ver Sld Alt', value=False)
+        >>> oHelper.ClickSwitch(label='Codigo')
+        >>> oHelper.ClickSwitch(label='Ativo', position=2)
+        >>> oHelper.ClickSwitch(label='Ver Sld Alt', value=False)
 
         """
 
         self.__poui.click_switch(label=label, value=value, position=position)
 
-    def Program(self, program_name):
+    def Program(self, program_name: str = '', module: str = ''):
         """
         Method that sets the program in the initial menu search field.
 
@@ -2274,13 +2398,16 @@ class Poui():
 
         :param program_name: The program name
         :type program_name: str
+        :param module: Module name that will be selected in the "Change module" dialog after choosing the routine. If not provided and the dialog appears, the first available module will be selected. - **Default:** "" (empty string)
+        :type module: str
 
         Usage:
 
         >>> # Calling the method:
         >>> oHelper.Program("MATA020")
+        >>> oHelper.Program("CRDA200", module="CRD")
         """
-        self.__poui.Program(program_name)
+        self.__poui.Program(program_name=program_name, module=module)
     
 
     def ClickDropdown(self, label='', subitems='', position=1):
@@ -2308,17 +2435,106 @@ class Poui():
         """
         Fills out the POUI filter kendo-grid/browse component with the provided filters.
 
-        :param filters: A list of dictionaries, each containing 'field', 'value', and optional 'position' keys.
-        :type filters: list of dict
+        :param filters: List containing a dictionary with field labels as keys and filter values as values.
+        :type filters: list[dict[str, str]]
 
         Usage:
 
         >>> # Call the method:
         >>> filters = [
-        ...     {'field': 'Código', 'value': '000001'},
-        ...     {'field': 'Descrição', 'value': 'Produto Teste', 'position': 2}
+        ...     {
+        ...         'Filial': 'D MG 01',
+        ...         'Cod Grupo': 'SQA2'
+        ...     }
         ... ]
         >>> oHelper.FilterBrowse(filters)
         """
         self.config._flag_is_new_browse = True
         self.__poui._set_browse_filters(filters)
+
+    def RemoveBrowseFilters(self):
+        """
+        Removes all active filters from the THF Browse (kendo-grid) component.
+
+        Usage:
+
+        >>> # Call the method:
+        >>> oHelper.RemoveBrowseFilters()
+        """
+        self.__poui._remove_filters_from_browse()
+
+    def ClickLookUpThf(self, label: str, search_value: str, search_column: str = '', position: int = 1) -> None:
+        """
+        Click on THF (Totvs Lookup Field) advanced lookup to search and select a value.
+        
+        This method automates the complete THF lookup workflow: opening the advanced search dialog,
+        optionally filtering by column, entering search criteria, executing the search, and selecting
+        the desired record from the results.
+        
+        Workflow:
+        1. Clicks on the lookup input field
+        2. Triggers the advanced search dialog
+        3. Optionally filters by column (if search_column is provided)
+        4. Fills the search input with search_value
+        5. Clicks the search icon
+        6. Selects the first matching row from results
+        7. Confirms the selection by clicking the Select button
+        
+        :param label: The label or name of the lookup field to interact with. Must match the field label visible on the screen.
+        :type label: str
+        :param search_value: The value to search for in the advanced search dialog. Will be entered in the search input field.
+        :type search_value: str
+        :param search_column: Optional column name to apply filter before searching. If empty, no column filter is applied. Use when you need to restrict search to a specific column. - **Default:** '' (empty string)
+        :type search_column: str
+        :param position: Position of the field when multiple fields with the same label exist on the same screen. 1-based indexing. - **Default:** 1
+        :type position: int
+        
+        :return: None
+        :rtype: None
+        
+        Usage:
+        
+        >>> # Simple lookup - search by value only
+        >>> oHelper.ClickLookUpThf(label='Supplier', search_value='ABC123')
+        
+        >>> # Lookup with column filter - search in specific column
+        >>> oHelper.ClickLookUpThf(label='Product', search_value='Widget', search_column='Code')
+        
+        >>> # Lookup at specific position - when multiple fields have same label
+        >>> oHelper.ClickLookUpThf(label='Item', search_value='Item1', position=2)
+        
+        >>> # Complex example - filtered search at specific position
+        >>> oHelper.ClickLookUpThf(label='Customer', search_value='Acme Corp', search_column='Name', position=1)
+        
+        :raises Exception: If the lookup field is not found or interaction fails. Error details will be logged.
+        """
+        self.__poui.click_look_up_thf(label, search_value, search_column, position)
+
+    def ClickRadio(self, label: str, active: bool = True, position: int = 1):
+        """
+        Clicks on a POUI radio button (po-radio) until it reaches the desired state.
+
+        The method locates the radio element by its visible label text and interacts
+        with it until the element matches the expected active/inactive state.
+
+        :param label: The visible label text of the radio button to interact with.
+        :type label: str
+        :param active: Desired state of the radio button.
+                       ``True`` succeeds when the radio is selected.
+                       ``False`` succeeds when the radio is not selected. - **Default:** True
+        :type active: bool
+        :param position: 1-based position when multiple radio buttons share the same label. - **Default:** 1
+        :type position: int
+
+        Usage:
+
+        >>> # Select a radio button by label:
+        >>> oHelper.ClickRadio("Ativo")
+        >>> #-----------------------------------------
+        >>> # Deselect a radio button:
+        >>> oHelper.ClickRadio("Ativo", active=False)
+        >>> #-----------------------------------------
+        >>> # Select the second radio button with the same label:
+        >>> oHelper.ClickRadio("Tipo", position=2)
+        """
+        self.__poui.click_radio(label=label, active=active, position=position)

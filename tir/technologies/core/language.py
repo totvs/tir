@@ -94,6 +94,7 @@ class LanguagePack:
         self.filters = languagepack["Filters"]
         self.apply_filters = languagepack["Apply Filters"]
         self.remove_filters = languagepack["Remove Filters"]
+        self.remove_all_filters = languagepack["Remove All Filters"]
         self.old_browse_edit = languagepack["Old Browse Edit"]
         self.old_browse_delete = languagepack["Old Browse Delete"]
         self.old_browse_insert = languagepack["Old Browse Insert"]
@@ -104,6 +105,11 @@ class LanguagePack:
         self.new_browse_insert = languagepack["New Browse Insert"]
         self.new_browse_other_actions = languagepack["New Browse Other Actions"]
 
+        self.perform_advanced_search = languagepack["Perform Advanced Search"]
+        self.select = languagepack["Select"]
+
+        self.module = languagepack["Module"]
+        self.change_module = languagepack["Change Module"]
         
         self.messages = Messages(languagepack)
 
@@ -206,6 +212,7 @@ class LanguagePack:
             "Filters": "Filters",
             "Apply Filters": "Apply filters",
             "Remove Filters": "Remove filters",
+            "Remove All Filters": "Remove all",
 
             "Old Browse Edit":"Edit",
             "Old Browse Delete":"Delete",
@@ -215,7 +222,12 @@ class LanguagePack:
             "New Browse Edit":"Edit",
             "New Browse Delete":"Delete",
             "New Browse Insert":"Add",
-            "New Browse Other Actions":"Line actions"
+            "New Browse Other Actions":"Line actions",
+
+            "Perform Advanced Search":"Perform Advanced Search.",
+            "Select":"Select",
+            "Module":"Module",
+            "Change Module":"Change module"
         }
 
         brazilian_portuguese = {
@@ -315,6 +327,7 @@ class LanguagePack:
             "Filters": "Filtros",
             "Apply Filters": "Aplicar Filtros",
             "Remove Filters": "Remover filtros",
+            "Remove All Filters": "Remover todos",
 
             "Old Browse Edit":"Alterar",
             "Old Browse Delete":"Excluir",
@@ -324,7 +337,12 @@ class LanguagePack:
             "New Browse Edit":"Editar",
             "New Browse Delete":"Excluir",
             "New Browse Insert":"Incluir",
-            "New Browse Other Actions":"Ações de registro"         
+            "New Browse Other Actions":"Ações de registro",
+
+            "Perform Advanced Search":"Fazer busca avançada.",
+            "Select":"Selecionar",
+            "Module":"Módulo",
+            "Change Module":"Alterar módulo"
         }
         spanish = {
             "User": "Usuário",
@@ -423,6 +441,7 @@ class LanguagePack:
             "Filters": "Filtros",
             "Apply Filters": "Aplicar Filtros",
             "Remove Filters": "Eliminar filtros",
+            "Remove All Filters": "Eliminar todos",
             "Old Browse Edit":"Modificar",
             "Old Browse Delete":"Borrar",
             "Old Browse Insert":"Incluir",
@@ -431,7 +450,12 @@ class LanguagePack:
             "New Browse Edit":"Edit",
             "New Browse Delete":"Eliminar",
             "New Browse Insert":"Incluir",
-            "New Browse Other Actions":"Acciones de registro"
+            "New Browse Other Actions":"Acciones de registro",
+
+            "Perform Advanced Search":"Realizar búsqueda avanzada.",
+            "Select":"Seleccionar",
+            "Module":"Módulo",
+            "Change Module":"Cambiar módulo"
         }
         russian = {
             "User": "Пользователь",
@@ -532,6 +556,7 @@ class LanguagePack:
             "Filters": "Фильтры",
             "Apply Filters": "Применить фильтры",
             "Remove Filters": "Удалить фильтры",
+            "Remove All Filters": "Удалить все",
 
             "Old Browse Edit":"Редактировать",
             "Old Browse Delete":"Удалить",
@@ -541,7 +566,12 @@ class LanguagePack:
             "New Browse Edit":"Редактировать",            
             "New Browse Delete":"Удалить",
             "New Browse Insert":"Включать",
-            "New Browse Other Actions":"Линейные действия"
+            "New Browse Other Actions":"Линейные действия",
+
+            "Perform Advanced Search":"Выполните расширенный поиск.",
+            "Select":"Выбирать",
+            "Module":"Модуль",
+            "Change Module":"Модуль изменений"
         }
 
         if language.lower() == "en-us":

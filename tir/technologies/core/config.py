@@ -131,6 +131,7 @@ class ConfigLoader:
             self.sso_login = ("SSOLogin" in data and bool(data["SSOLogin"]))
             self.new_home = ("NewHome" in data and bool(data["NewHome"]))
             self._flag_is_new_browse = None
+            self.routine_module = ""
 
 
     def check_keys(self, json_data):

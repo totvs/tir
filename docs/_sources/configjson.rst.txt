@@ -89,6 +89,10 @@ POUI Interface
      - bool
      - Enable when login by SSO has been configured in the environment. Skips login screen.
      - true
+   * - NewHome
+     - bool
+     - Required parameter to interact with the new home interface. **Default:** false. *This parameter will be mandatory starting from version 12.1.2610.*
+     - false
 
 
 ********************************
