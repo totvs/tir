@@ -129,6 +129,7 @@ class ConfigLoader:
             self.api_json_path = str(data["APIJSONPATH"]) if "APIJSONPATH" in data else os.path.join(os.getcwd())
             self.server_mock  = str(data["ServerMock"]) if "ServerMock" in data else ""
             self.sso_login = ("SSOLogin" in data and bool(data["SSOLogin"]))
+            self.ignore_certificate_errors = ("IgnoreCertificateErrors" in data and bool(data["IgnoreCertificateErrors"]))
             self.new_home = ("NewHome" in data and bool(data["NewHome"]))
             self._flag_is_new_browse = None
             self.routine_module = ""
@@ -202,6 +203,7 @@ class ConfigLoader:
         "APIJSONPATH",
         "ServerMock",
         "SSOLogin",
+        "IgnoreCertificateErrors",
         "NewHome"
     ]
         keys_json = set(json_data.keys())

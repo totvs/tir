@@ -1341,6 +1341,12 @@ class Base(unittest.TestCase):
                 logger().info(f"Firefox language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 firefox_options.add_argument('-headless')
+            if self.config.ignore_certificate_errors:
+                try:
+                    firefox_options.set_capability("acceptInsecureCerts", True)
+                    firefox_options.set_preference("webdriver_accept_untrusted_certs", True)
+                except Exception:
+                    pass
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
             self.driver.set_page_load_timeout(120)
@@ -1358,6 +1364,8 @@ class Base(unittest.TestCase):
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
+            if self.config.ignore_certificate_errors:
+                chrome_options.add_argument('--ignore-certificate-errors')
 
             if self.config.chromedriver_auto_install:
 
@@ -1395,6 +1403,8 @@ class Base(unittest.TestCase):
             chrome_options.add_argument(f'--url="{self.config.url}"')
             chrome_options.add_argument(f'--program="{self.config.start_program}"')
             chrome_options.add_argument('--quiet')
+            if self.config.ignore_certificate_errors:
+                chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.binary_location = self.config.electron_binary_path
             self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
 
