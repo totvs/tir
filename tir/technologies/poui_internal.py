@@ -2296,7 +2296,7 @@ class PouiInternal(Base):
             self.click(self.driver.find_element(By.XPATH, xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
-        self.log_error(message)
+        self.log_error(message, restart_counter_param=self.restart_counter)
 
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
@@ -2698,9 +2698,9 @@ class PouiInternal(Base):
                     return False
                 self.restart_counter += 1
                 if presence:
-                    self.log_error(f"Element '{term}' not found!")
+                    self.log_error(f"Element '{term}' not found!", restart_counter_param=self.restart_counter)
                 else:
-                    self.log_error(f"Unexpected element '{term}' found!")
+                    self.log_error(f"Element '{term}' remained on screen until timeout (expected it to disappear)!", restart_counter_param=self.restart_counter)
 
         presence_endtime = time.time() + 10
         if presence:
