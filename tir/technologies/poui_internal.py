@@ -4727,8 +4727,8 @@ class PouiInternal(Base):
             columns_numbers = list(map(lambda x: headers[grid_number][x], expected_columns))
 
             if difference:
-                logger.warning(f"Columns '{difference}' not found in table")
-                return
+                logger().warning(f"Columns '{difference}' not found in table")
+                return []
 
         grid_rows = grid.select('tbody tr')
 
@@ -4737,7 +4737,7 @@ class PouiInternal(Base):
 
             if len(row_columns) < len(columns) or not row_columns:
                 self.log_error(f"There are not number of columns present in the grid")
-                return
+                return []
 
             filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
             if filtered_columns:
@@ -4748,6 +4748,8 @@ class PouiInternal(Base):
                     matching_row_indices.append(grid_rows.index(row))
                     if not match_all:
                         return matching_row_indices
+
+        return matching_row_indices
 
 
     def _find_matching_column(self, grid_headers, column_name):
